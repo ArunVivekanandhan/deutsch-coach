@@ -272,6 +272,13 @@
     padding:8px 18px 4px;
     text-align:center;
   }
+  .wordicon{
+    display:flex;
+    justify-content:center;
+    margin-bottom:6px;
+    color:var(--gold);
+  }
+  .wordicon svg{width:46px; height:46px;}
   .prompt .artikel-tag{
     font-family:'IBM Plex Mono', monospace;
     font-size:13px;
@@ -588,7 +595,7 @@
     </div>
     <div class="maincol">
       <div class="stage" id="stage"></div>
-      <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Echter Wortschatz für B1.1/B1.2 stammt aus „Auf jeden Fall!"; A1/A2 haben noch keine eigene Wortliste (kommt bald, es wird nichts erfunden). Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
+      <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Wortschatz stammt aus echten telc-Quellen: B1.1/B1.2 aus „Auf jeden Fall!" B1.1/B1.2, A2 (Thema Arbeit) aus dem „Auf jeden Fall! A2.1"-Probekapitel (Lektion 5, Lernwortschatz). A1 hat bisher nur ein Beispielwort; weitere Niveaus/Themen lassen sich jederzeit ergänzen, es wird nichts erfunden. Wort-Icons sind selbst gezeichnete, einfache Symbole (keine Fotos) — copyright-frei und offline nutzbar. Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
     </div>
   </div>
 
@@ -617,11 +624,10 @@ const TOPIC_BY_KEY = {}; TOPICS.forEach(t=>TOPIC_BY_KEY[t.key]=t);
 
 const LEVELS = ["A1","A2","B1.1","B1.2"];
 const LEVEL_LABEL = {A1:"A1", A2:"A2", "B1.1":"B1.1", "B1.2":"B1.2"};
-/* A1/A2 have no real source vocabulary yet — we do not invent a curriculum.
-   The one A1 card that exists (the bonus "brauchen") was a word the learner
-   gave us themselves as a worked example, not a generated wordlist. Real
-   A1/A2 lists can be dropped into LEGACY_DATA or a future *_DATA array and
-   will show up automatically — nothing else needs to change. */
+/* A1 still has no real source vocabulary beyond one example word.
+   A2 now uses the real "Auf jeden Fall! A2.1" Probekapitel Lernwortschatz
+   (Lektion 5, topic Arbeit) — see A2_DATA below. We still do not invent
+   a curriculum for anything not backed by a real source. */
 function levelHasRealContent(level){
   if(level==="alle") return true;
   return ALL_CARDS.filter(c=>c.level===level).length >= 5;
@@ -1584,7 +1590,117 @@ const LEGACY_DATA = [
 </script>
 <script>
 /* =========================================================
-   FLATTEN LEGACY_DATA (B1.1/B1.2/Bonus) + SEED_DATA -> ALL_CARDS
+   A2.1 DATA — real vocabulary from telc "Auf jeden Fall!"
+   A2.1 Lernwortschatz, Lektion 5 "Neue Ziele" (Probekapitel,
+   1. Auflage 2024). English translations, mnemonics, icons
+   and verb forms added here; the German words/articles/
+   plurals themselves are taken directly from the book's own
+   end-of-lesson vocabulary list, not invented.
+========================================================= */
+const A2_DATA = [
+{lesson:101, title:"Neue Ziele", sections:[
+  {name:"Ich suche einen neuen Job.", items:[
+    {a:"der",w:"Arbeitstag",p:"Arbeitstage",en:"working day",ex:"",cat:"n",icon:"calendar",mn:"Arbeit (work) + Tag (day) → a day of work."},
+    {a:"die",w:"Aufgabe",p:"Aufgaben",en:"task",ex:"",cat:"n",icon:"document",mn:"auf + geben (give) → something 'given' to you to do."},
+    {a:"der",w:"Bachelor",p:"",en:"bachelor's degree",ex:"",cat:"n",icon:"graduation",mn:"Identical to English 'bachelor' (degree)."},
+    {a:"",w:"beruflich",p:"",en:"professional/career-related",ex:"",cat:"adj",icon:"briefcase",mn:"Beruf (profession) + -lich → related to one's profession."},
+    {a:"",w:"sich bewerben",p:"",en:"to apply (for a job)",ex:"",cat:"v",icon:"handshake",mn:"be + werben (to woo/advertise) → to 'woo' an employer with your application.",pr:"bewarb sich",pp:"hat sich beworben"},
+    {a:"",w:"entwickeln",p:"",en:"to develop",ex:"",cat:"v",icon:"chart-up",mn:"ent + wickeln (to wind/wrap) → to 'unwrap' something new, step by step.",pr:"entwickelte",pp:"hat entwickelt"},
+    {a:"die",w:"Fremdsprache",p:"Fremdsprachen",en:"foreign language",ex:"",cat:"n",icon:"graduation",mn:"fremd (foreign) + Sprache (language)."},
+    {a:"der",w:"Ingenieur",p:"Ingenieure",en:"engineer",ex:"",cat:"n",icon:"briefcase",mn:"Identical root to English 'engineer'."},
+    {a:"die",w:"Ingenieurin",p:"Ingenieurinnen",en:"engineer",ex:"",cat:"n",icon:"briefcase",mn:"Feminine form of Ingenieur."},
+    {a:"der",w:"Job",p:"Jobs",en:"job",ex:"",cat:"n",icon:"briefcase",mn:"Identical to English 'job'."},
+    {a:"der",w:"Journalist",p:"Journalisten",en:"journalist",ex:"",cat:"n",icon:"megaphone",mn:"Identical root to English 'journalist'."},
+    {a:"die",w:"Journalistin",p:"Journalistinnen",en:"journalist",ex:"",cat:"n",icon:"megaphone",mn:"Feminine form of Journalist."},
+    {a:"die",w:"Karriere",p:"Karrieren",en:"career",ex:"",cat:"n",icon:"chart-up",mn:"Identical to English 'career'."},
+    {a:"der",w:"Lebenslauf",p:"Lebensläufe",en:"CV/résumé",ex:"",cat:"n",icon:"document",mn:"Leben (life) + Lauf (run/course) → the 'course of your life' on paper."},
+    {a:"die",w:"Note",p:"Noten",en:"grade/mark",ex:"",cat:"n",icon:"graduation",mn:"Sounds like a musical 'note' — but here it's a school grade."},
+    {a:"die",w:"Stellenanzeige",p:"Stellenanzeigen",en:"job advertisement",ex:"",cat:"n",icon:"search",mn:"Stelle (position) + Anzeige (advertisement)."},
+    {a:"",w:"eine Bewerbungsmappe mit Anschreiben und Lebenslauf",p:"",en:"an application folder with cover letter and CV",ex:"",cat:"p",icon:"document",mn:"Bewerbung (application) + Mappe (folder) — everything you send when applying."},
+    {a:"",w:"die Kontaktdaten angeben",p:"",en:"to provide contact details",ex:"",cat:"p",icon:"email",mn:"Kontaktdaten (contact data) + angeben (state/provide)."}
+  ]},
+  {name:"Sind Sie neu hier? Willkommen!", items:[
+    {a:"die",w:"Abteilung",p:"Abteilungen",en:"department",ex:"",cat:"n",icon:"building",mn:"ab + teilen (divide) → a company 'divided' into sections."},
+    {a:"",w:"arbeitslos",p:"",en:"unemployed",ex:"",cat:"adj",icon:"briefcase",mn:"Arbeit (work) + los (without/-less) → without work."},
+    {a:"",w:"empfehlen",p:"",en:"to recommend",ex:"",cat:"v",icon:"megaphone",mn:"emp + fehlen (relates to 'befehlen'=command) → to put a suggestion forward.",pr:"empfahl",pp:"hat empfohlen"},
+    {a:"",w:"kündigen",p:"",en:"to give notice/quit",ex:"",cat:"v",icon:"megaphone",mn:"Kunde (relates historically to announcing) → to formally announce you're leaving.",pr:"kündigte",pp:"hat gekündigt"},
+    {a:"",w:"meinen",p:"",en:"to think/mean (an opinion)",ex:"",cat:"v",icon:"megaphone",mn:"Meinung (opinion) → to voice what you think.",pr:"meinte",pp:"hat gemeint"},
+    {a:"",w:"passend",p:"",en:"suitable/fitting",ex:"",cat:"adj",icon:"target",mn:"passen (to fit) + -d → fitting."},
+    {a:"",w:"reden",p:"",en:"to talk/speak",ex:"",cat:"v",icon:"megaphone",mn:"Sounds like 'redden' — your face reddens the more you reden (talk)!",pr:"redete",pp:"hat geredet"},
+    {a:"das",w:"Video",p:"Videos",en:"video",ex:"",cat:"n",icon:"video",mn:"Identical to English 'video'."},
+    {a:"das",w:"Ziel",p:"Ziele",en:"goal",ex:"",cat:"n",icon:"target",mn:"Sounds like 'steal' a glance at your Ziel (goal) ahead."},
+    {a:"",w:"zusammenarbeiten",p:"",en:"to work together/collaborate",ex:"",cat:"v",icon:"team",mn:"zusammen (together) + arbeiten (work).",pr:"arbeitete zusammen",pp:"hat zusammengearbeitet"},
+    {a:"",w:"sich duzen ↔ sich siezen",p:"",en:"to use 'du' (informal you) ↔ to use 'Sie' (formal you)",ex:"",cat:"p",icon:"megaphone",mn:"Named after the pronouns themselves: duzen from 'du', siezen from 'Sie'."},
+    {a:"",w:"vorher ↔ nachher",p:"",en:"before ↔ after(wards)",ex:"",cat:"adj",icon:"clock",mn:"vor (before) vs. nach (after) + her/hin (direction)."},
+    {a:"",w:"per Post/E-Mail",p:"",en:"by post/email",ex:"",cat:"p",icon:"email",mn:"per (by/via) + Post/E-Mail — literal."}
+  ]},
+  {name:"Wo bin ich in fünf Jahren?", items:[
+    {a:"der",w:"Angestellte",p:"Angestellten",en:"employee",ex:"",cat:"n",icon:"id-card",mn:"an + stellen (to place/employ) → one 'placed' in a job."},
+    {a:"die",w:"Angestellte",p:"Angestellten",en:"employee",ex:"",cat:"n",icon:"id-card",mn:"Feminine/generic form of der Angestellte."},
+    {a:"die",w:"Arbeitszeit",p:"Arbeitszeiten",en:"working hours",ex:"",cat:"n",icon:"clock",mn:"Arbeit (work) + Zeit (time)."},
+    {a:"",w:"bedeuten",p:"",en:"to mean",ex:"",cat:"v",icon:"megaphone",mn:"be + deuten (to point/interpret) → to point at what something means.",pr:"bedeutete",pp:"hat bedeutet"},
+    {a:"die",w:"Bewerbung",p:"Bewerbungen",en:"job application",ex:"",cat:"n",icon:"handshake",mn:"sich bewerben (apply) + -ung."},
+    {a:"",w:"einladen",p:"",en:"to invite",ex:"",cat:"v",icon:"email",mn:"ein (in) + laden (load/summon) → to summon someone in.",pr:"lud ein",pp:"hat eingeladen"},
+    {a:"der",w:"Erfolg",p:"Erfolge",en:"success",ex:"",cat:"n",icon:"chart-up",mn:"er + folgen (follow) → what follows from hard work."},
+    {a:"die",w:"Fortbildung",p:"Fortbildungen",en:"further training",ex:"",cat:"n",icon:"graduation",mn:"fort (onward) + Bildung (education) → education that continues onward."},
+    {a:"das",w:"Gehalt",p:"Gehälter",en:"salary",ex:"",cat:"n",icon:"money",mn:"Sounds like 'gehalten' (held) — what you're 'held' to, i.e. paid, each month."},
+    {a:"das",w:"Gespräch",p:"Gespräche",en:"conversation/talk",ex:"",cat:"n",icon:"megaphone",mn:"ge + sprechen (speak) → a spoken exchange."},
+    {a:"das",w:"Homeoffice",p:"",en:"home office/working from home",ex:"",cat:"n",icon:"house",mn:"Identical to English 'home office'."},
+    {a:"die",w:"Kommunikation",p:"",en:"communication",ex:"",cat:"n",icon:"megaphone",mn:"Identical to English 'communication'."},
+    {a:"der",w:"Manager",p:"Manager",en:"manager",ex:"",cat:"n",icon:"team",mn:"Identical to English 'manager'."},
+    {a:"die",w:"Managerin",p:"Managerinnen",en:"manager",ex:"",cat:"n",icon:"team",mn:"Feminine form of Manager."},
+    {a:"",w:"motivieren",p:"",en:"to motivate",ex:"",cat:"v",icon:"target",mn:"Identical to English 'motivate'.",pr:"motivierte",pp:"hat motiviert"},
+    {a:"",w:"organisieren",p:"",en:"to organize",ex:"",cat:"v",icon:"calendar",mn:"Identical to English 'organize'.",pr:"organisierte",pp:"hat organisiert"},
+    {a:"der",w:"Selbstständige",p:"Selbstständigen",en:"self-employed person",ex:"",cat:"n",icon:"briefcase",mn:"selbst (self) + ständig (standing) → standing on your own."},
+    {a:"die",w:"Selbstständige",p:"Selbstständigen",en:"self-employed person",ex:"",cat:"n",icon:"briefcase",mn:"Feminine/generic form of der Selbstständige."},
+    {a:"der",w:"Teamleiter",p:"Teamleiter",en:"team leader",ex:"",cat:"n",icon:"team",mn:"Team + Leiter (leader)."},
+    {a:"die",w:"Teamleiterin",p:"Teamleiterinnen",en:"team leader",ex:"",cat:"n",icon:"team",mn:"Feminine form of Teamleiter."},
+    {a:"",w:"telefonieren",p:"",en:"to make a phone call",ex:"",cat:"v",icon:"phone",mn:"Telefon (telephone) → to use the telephone.",pr:"telefonierte",pp:"hat telefoniert"},
+    {a:"die",w:"Überstunde",p:"Überstunden",en:"overtime",ex:"",cat:"n",icon:"clock",mn:"über (over/beyond) + Stunde (hour) → hours beyond the normal."},
+    {a:"die",w:"Umschulung",p:"Umschulungen",en:"retraining",ex:"",cat:"n",icon:"graduation",mn:"um (change) + Schulung (training) → changing to new training."},
+    {a:"die",w:"Weiterbildung",p:"Weiterbildungen",en:"further education",ex:"",cat:"n",icon:"graduation",mn:"weiter (further) + Bildung (education)."},
+    {a:"",w:"abhängig ↔ unabhängig",p:"",en:"dependent ↔ independent",ex:"",cat:"adj",icon:"balance",mn:"ab + hängen (hang off) → 'hanging off' something = dependent; un- reverses it."},
+    {a:"",w:"sympathisch ↔ unsympathisch",p:"",en:"likeable ↔ unlikeable",ex:"",cat:"adj",icon:"smile",mn:"Identical root to English 'sympathetic'."},
+    {a:"",w:"zufrieden ↔ unzufrieden",p:"",en:"satisfied ↔ dissatisfied",ex:"",cat:"adj",icon:"smile",mn:"zu + Frieden (peace) → 'at peace' with something = satisfied."},
+    {a:"",w:"sich selbstständig machen",p:"",en:"to become self-employed",ex:"",cat:"p",icon:"briefcase",mn:"selbstständig (self-employed) + machen (make) → to make yourself independent."},
+    {a:"",w:"sein eigener Chef sein",p:"",en:"to be one's own boss",ex:"",cat:"p",icon:"briefcase",mn:"eigen (own) + Chef (boss) — literal."},
+    {a:"",w:"Teilzeit/Vollzeit arbeiten",p:"",en:"to work part-time/full-time",ex:"",cat:"p",icon:"clock",mn:"Teil (part) vs. voll (full) + Zeit (time)."}
+  ]}
+]}
+];
+
+/* Simple original line-icon set (no external images / no copyright risk,
+   works fully offline) shown on cards where a fitting icon exists. */
+const ICON_SVGS = {
+  briefcase:'<svg viewBox="0 0 48 48"><rect x="8" y="16" width="32" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M18 16v-4a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v4" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="8" y1="26" x2="40" y2="26" stroke="currentColor" stroke-width="2.5"/></svg>',
+  document:'<svg viewBox="0 0 48 48"><path d="M14 6h14l8 8v28a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M28 6v8h8" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="2"/><line x1="16" y1="30" x2="32" y2="30" stroke="currentColor" stroke-width="2"/><line x1="16" y1="36" x2="26" y2="36" stroke="currentColor" stroke-width="2"/></svg>',
+  graduation:'<svg viewBox="0 0 48 48"><polygon points="24,10 44,18 24,26 4,18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M14 22v9c0 3 5 5 10 5s10-2 10-5v-9" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="44" y1="18" x2="44" y2="30" stroke="currentColor" stroke-width="2.5"/></svg>',
+  handshake:'<svg viewBox="0 0 48 48"><path d="M4 22l9-8 7 5 4-3 8 6-6 8-4-3-4 4-9-6z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M22 26l6 6" stroke="currentColor" stroke-width="2.5"/></svg>',
+  "chart-up":'<svg viewBox="0 0 48 48"><line x1="6" y1="42" x2="42" y2="42" stroke="currentColor" stroke-width="2.5"/><rect x="10" y="30" width="6" height="12" fill="currentColor"/><rect x="20" y="22" width="6" height="20" fill="currentColor"/><rect x="30" y="12" width="6" height="30" fill="currentColor"/><path d="M10 20l8-8 6 5 12-12" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
+  building:'<svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="34" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="16" x2="20" y2="16" stroke="currentColor" stroke-width="2"/><line x1="24" y1="16" x2="28" y2="16" stroke="currentColor" stroke-width="2"/><line x1="32" y1="16" x2="36" y2="16" stroke="currentColor" stroke-width="2"/><line x1="16" y1="24" x2="20" y2="24" stroke="currentColor" stroke-width="2"/><line x1="24" y1="24" x2="28" y2="24" stroke="currentColor" stroke-width="2"/><line x1="32" y1="24" x2="36" y2="24" stroke="currentColor" stroke-width="2"/><rect x="20" y="32" width="8" height="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  search:'<svg viewBox="0 0 48 48"><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="29" y1="29" x2="42" y2="42" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  email:'<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M6 12l18 14L42 12" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
+  megaphone:'<svg viewBox="0 0 48 48"><path d="M6 20v8h6l14 8V12l-14 8Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M26 16a8 8 0 0 1 0 16" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="10" y1="28" x2="12" y2="38" stroke="currentColor" stroke-width="2.5"/></svg>',
+  video:'<svg viewBox="0 0 48 48"><rect x="4" y="12" width="26" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M30 20l14-8v24l-14-8Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  target:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="2.5" fill="currentColor"/></svg>',
+  team:'<svg viewBox="0 0 48 48"><circle cx="16" cy="14" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="32" cy="14" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M6 40v-4c0-6 5-9 10-9s10 3 10 9v4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M22 40v-4c0-6 5-9 10-9s10 3 10 9v4" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
+  clock:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="24" y1="24" x2="24" y2="13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="24" y1="24" x2="32" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  house:'<svg viewBox="0 0 48 48"><path d="M6 22 24 8l18 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M10 20v18h28V20" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="20" y="28" width="8" height="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  money:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><text x="24" y="31" font-size="18" text-anchor="middle" fill="currentColor" font-family="sans-serif">€</text></svg>',
+  "id-card":'<svg viewBox="0 0 48 48"><rect x="5" y="10" width="38" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="22" r="5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="25" y1="19" x2="37" y2="19" stroke="currentColor" stroke-width="2"/><line x1="25" y1="25" x2="37" y2="25" stroke="currentColor" stroke-width="2"/><line x1="10" y1="32" x2="22" y2="32" stroke="currentColor" stroke-width="2"/></svg>',
+  balance:'<svg viewBox="0 0 48 48"><line x1="24" y1="6" x2="24" y2="38" stroke="currentColor" stroke-width="2.5"/><line x1="10" y1="14" x2="38" y2="14" stroke="currentColor" stroke-width="2.5"/><path d="M4 14l6 12h-12z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M44 14l-6 12h12z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16" y1="40" x2="32" y2="40" stroke="currentColor" stroke-width="2.5"/></svg>',
+  smile:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="18" cy="20" r="2" fill="currentColor"/><circle cx="30" cy="20" r="2" fill="currentColor"/><path d="M16 29c3 4 13 4 16 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
+  calendar:'<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="30" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="6" y1="18" x2="42" y2="18" stroke="currentColor" stroke-width="2.5"/><line x1="14" y1="6" x2="14" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="34" y1="6" x2="34" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><rect x="13" y="24" width="6" height="6" fill="currentColor"/><rect x="21" y="24" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="29" y="24" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  phone:'<svg viewBox="0 0 48 48"><path d="M12 6h6l3 8-4 3c2 5 6 9 11 11l3-4 8 3v6c0 2-2 4-4 4C20 37 11 28 8 13c0-2 2-6 4-7Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>'
+};
+function promptIconHTML(card){
+  if(!card.icon || !ICON_SVGS[card.icon]) return "";
+  return `<div class="wordicon">${ICON_SVGS[card.icon]}</div>`;
+}
+</script>
+<script>
+/* =========================================================
+   FLATTEN LEGACY_DATA (B1.1/B1.2/Bonus) + A2_DATA -> ALL_CARDS
 ========================================================= */
 let ALL_CARDS = [];
 
@@ -1597,17 +1713,29 @@ LEGACY_DATA.forEach(lek=>{
         topic: topicKey,
         lesson: lek.lesson, lessonTitle: lek.title, section: sec.name,
         a: it.a||"", w: it.w, p: it.p||"", en: it.en, ex: it.ex||"",
-        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||""
+        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", icon: it.icon||""
       });
     });
   });
 });
 
-/* Future A1/A2 (or any additional) word lists plug in here the same way
-   LEGACY_DATA does — e.g. define an A1_DATA array in the same {lesson,
-   sections:[{name, items:[...]}]} shape, add its lesson numbers to
-   LESSON_LEVEL, and merge it into ALL_CARDS with a loop like the one above.
-   No real A1/A2 vocabulary is invented in this build. */
+A2_DATA.forEach(lek=>{
+  lek.sections.forEach(sec=>{
+    sec.items.forEach(it=>{
+      ALL_CARDS.push({
+        level: "A2",
+        topic: "arbeit",
+        lesson: lek.lesson, lessonTitle: lek.title, section: sec.name,
+        a: it.a||"", w: it.w, p: it.p||"", en: it.en, ex: it.ex||"",
+        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", icon: it.icon||""
+      });
+    });
+  });
+});
+
+/* Future A1 (or further A2) word lists plug in here the same way —
+   define a *_DATA array in the same {lesson, sections:[{name, items:[...]}]}
+   shape and merge it into ALL_CARDS with a loop like the ones above. */
 
 /* Stable unique id per card */
 const seenUid = {};
@@ -1915,6 +2043,7 @@ function renderRecallMeaning(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Deutsch → Englisch &nbsp;·&nbsp; 📦 ${box}</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
         <div class="word">${card.w}</div>
         <div class="subq">Was bedeutet das? (Erst überlegen …)</div>
@@ -1944,6 +2073,7 @@ function renderMcDe2En(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Multiple Choice · Deutsch → Englisch</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
         <div class="word">${card.w}</div>
       </div>
@@ -1984,6 +2114,7 @@ function renderMcEn2De(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Multiple Choice · Englisch → Deutsch</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         <div class="word" style="font-size:20px;">"${card.en}"</div>
         <div class="subq">Wie heißt das auf Deutsch?</div>
       </div>
@@ -2023,6 +2154,7 @@ function renderArticle(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Artikel</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         <div class="word">___ ${card.w}</div>
         <div class="subq">Welcher Artikel?</div>
       </div>
@@ -2061,6 +2193,7 @@ function renderPlural(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Plural</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
         <div class="word">${card.w}</div>
         <div class="subq">Wie lautet der Plural?</div>
@@ -2090,6 +2223,7 @@ function renderVerbTense(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Verbformen</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         <div class="word">${card.w}</div>
         <div class="subq">Präteritum? Perfekt?</div>
       </div>
@@ -2124,6 +2258,7 @@ function renderFillGap(card, advanceFn){
       ${metaHTML(card)}
       <div class="qlabel">Lücke füllen</div>
       <div class="prompt">
+        ${promptIconHTML(card)}
         <div class="subq" style="font-size:15px; line-height:1.5;">„${gapped}"</div>
         <div class="subq">Welches Wort fehlt — und was bedeutet es?</div>
       </div>
