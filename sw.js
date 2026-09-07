@@ -5,7 +5,7 @@
 const CACHE_NAME = "deutsch-coach-v1";
 const APP_SHELL = [
   "./",
-  "./deutsch-coach.html",
+  "./index.html",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png"

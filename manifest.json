@@ -2,7 +2,7 @@
   "name": "Dein Deutsch-Coach",
   "short_name": "DeutschCoach",
   "description": "Level- und themenbasierter deutscher Wortschatz-Trainer (A1-A2 folgen, B1.1/B1.2 aus \"Auf jeden Fall!\") mit Smart Learn, Spaced Repetition, Sprechen und Schreiben.",
-  "start_url": "./deutsch-coach.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
