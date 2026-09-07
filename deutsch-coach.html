@@ -1,0 +1,2709 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dein Deutsch-Coach — A1 bis B1.2</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B2A4A">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EDEAE1;
+    --paper-dark: #E1DDCF;
+    --card: #F7F5EE;
+    --ink: #1B2A4A;
+    --ink-soft: #4A5878;
+    --stamp-red: #AE3327;
+    --stamp-red-dark: #8A281F;
+    --gold: #B98A2E;
+    --green: #3F6B4A;
+    --blue: #2F5C8A;
+    --purple: #6B4A8A;
+    --line: #cdc7b2;
+    --shadow: rgba(27,42,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--paper), var(--paper)),
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(27,42,74,0.035) 28px);
+    background-color:var(--paper);
+    font-family:'IBM Plex Sans', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:14px 12px 80px;
+  }
+  .letterhead{
+    width:100%;
+    max-width:600px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:8px;
+    margin-bottom:10px;
+  }
+  .letterhead h1{
+    font-family:'Fjalla One', sans-serif;
+    font-size:22px;
+    letter-spacing:0.3px;
+    margin:0;
+    line-height:1.05;
+  }
+  .letterhead .sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--ink-soft);
+    margin-top:3px;
+  }
+  .streakbox{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-align:right;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .streakbox b{color:var(--stamp-red); font-size:14px;}
+
+  /* ---- Level selector ---- */
+  .levelbar{
+    width:100%;
+    max-width:600px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:6px;
+    margin-bottom:10px;
+  }
+  .levelchip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    font-weight:600;
+    text-align:center;
+    padding:10px 2px;
+    border:2px solid var(--ink);
+    border-radius:6px;
+    background:var(--paper);
+    color:var(--ink);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .levelchip.active{background:var(--ink); color:var(--paper);}
+  .levelchip small{display:block; font-size:8px; font-weight:400; opacity:0.75; margin-top:1px;}
+
+  /* ---- Nav tabs ---- */
+  .navbar{
+    width:100%;
+    max-width:600px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:5px;
+    margin-bottom:14px;
+  }
+  .navbtn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    text-transform:uppercase;
+    letter-spacing:0.2px;
+    padding:10px 2px;
+    border:1.5px solid var(--ink);
+    background:var(--card);
+    color:var(--ink);
+    border-radius:6px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .navbtn.active{background:var(--gold); border-color:var(--gold); color:#fff; font-weight:700;}
+
+  .stage{
+    width:100%;
+    max-width:600px;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  /* ---- Topic grid ---- */
+  .topicgrid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .topictile{
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:10px 4px;
+    text-align:center;
+    cursor:pointer;
+  }
+  .topictile.active{border-color:var(--stamp-red); box-shadow:0 0 0 2px var(--stamp-red) inset;}
+  .topictile .icon{font-size:22px; display:block;}
+  .topictile .label{font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); margin-top:3px; line-height:1.25; display:block;}
+
+  /* ---- Buttons ---- */
+  .bigbtn{
+    width:100%;
+    font-family:'Fjalla One', sans-serif;
+    font-size:19px;
+    letter-spacing:0.3px;
+    padding:18px 10px;
+    border:none;
+    border-radius:8px;
+    background:var(--stamp-red);
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 6px 0 var(--stamp-red-dark);
+    margin-bottom:10px;
+  }
+  .bigbtn:active{transform:translateY(3px); box-shadow:0 3px 0 var(--stamp-red-dark);}
+  .bigbtn.secondary{background:var(--ink); box-shadow:0 6px 0 #0e1830;}
+  .bigbtn.secondary:active{box-shadow:0 3px 0 #0e1830;}
+  .bigbtn .subtext{display:block; font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:400; opacity:0.85; margin-top:3px; letter-spacing:0;}
+
+  .coach-line{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--ink);
+    background:#fbf3d8;
+    border-left:3px solid var(--gold);
+    padding:10px 12px;
+    border-radius:0 6px 6px 0;
+    margin-bottom:14px;
+  }
+
+  /* ---- Dashboard ---- */
+  .dashgrid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .dashcard{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px;
+    text-align:center;
+  }
+  .dashcard .num{font-family:'Fjalla One',sans-serif; font-size:24px; color:var(--stamp-red);}
+  .dashcard .lbl{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); margin-top:2px;}
+
+  .levelrow{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+  }
+  .levelrow .llabel{width:52px; font-weight:700; flex-shrink:0;}
+  .barouter{flex:1; height:14px; background:var(--paper-dark); border-radius:7px; overflow:hidden;}
+  .barinner{height:100%; background:linear-gradient(90deg,var(--gold),var(--stamp-red)); border-radius:7px;}
+  .levelrow .lpct{width:38px; text-align:right; flex-shrink:0; color:var(--ink-soft);}
+
+  .topicrow{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .topicrow .trhead{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    margin-bottom:6px;
+  }
+  .topicrow .trhead .tname{font-weight:600;}
+  .topicrow .next{font-size:11px; color:var(--gold); font-family:'IBM Plex Mono',monospace; margin-top:6px;}
+
+  /* ---- Study card (SEE/THINK/REVEAL) ---- */
+  .studycard{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    box-shadow:0 10px 24px var(--shadow);
+    overflow:hidden;
+    margin-bottom:14px;
+  }
+  .studycard .stripe{height:6px;}
+  .stripe.n{background:var(--blue);} .stripe.v{background:var(--stamp-red);}
+  .stripe.adj{background:var(--green);} .stripe.p{background:var(--gold);}
+  .studycard .meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 16px 0;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:var(--ink-soft);
+  }
+  .pill{
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    padding:2px 8px;
+    border-radius:10px;
+    color:#fff;
+  }
+  .pill.n{background:var(--blue);} .pill.v{background:var(--stamp-red);}
+  .pill.adj{background:var(--green);} .pill.p{background:var(--gold);}
+  .pill.level{background:var(--purple);}
+  .studycard .qlabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    padding:14px 18px 0;
+  }
+  .studycard .prompt{
+    padding:8px 18px 4px;
+    text-align:center;
+  }
+  .prompt .artikel-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--stamp-red);
+    text-transform:lowercase;
+    letter-spacing:1px;
+  }
+  .prompt .word{
+    font-family:'Fjalla One', sans-serif;
+    font-size:28px;
+    line-height:1.2;
+    color:var(--ink);
+  }
+  .prompt .subq{
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  .thinkbtn{
+    display:block;
+    width:calc(100% - 36px);
+    margin:14px 18px 18px;
+    font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    padding:13px;
+    border:1.5px dashed var(--ink);
+    background:transparent;
+    color:var(--ink);
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .revealbox{
+    padding:4px 18px 16px;
+  }
+  .revealbox .en-word{
+    font-family:'Fjalla One', sans-serif;
+    font-size:22px;
+    text-align:center;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .infoline{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--ink);
+    background:var(--paper-dark);
+    border-radius:5px;
+    padding:6px 10px;
+    margin-bottom:8px;
+    line-height:1.55;
+  }
+  .infoline b{color:var(--stamp-red);}
+  .mnemonic{
+    font-size:12.5px;
+    line-height:1.5;
+    color:var(--ink);
+    background:#fbf3d8;
+    border-left:3px solid var(--gold);
+    padding:8px 10px;
+    border-radius:0 5px 5px 0;
+    margin-bottom:8px;
+  }
+  .mnemonic b{color:var(--stamp-red-dark);}
+  .familybox, .colloc{
+    font-size:12px;
+    line-height:1.55;
+    color:var(--ink);
+    background:#eaf0ea;
+    border-left:3px solid var(--green);
+    padding:8px 10px;
+    border-radius:0 5px 5px 0;
+    margin-bottom:8px;
+  }
+  .colloc{background:#eaeef6; border-left-color:var(--blue);}
+  .example-line{
+    font-size:12.5px;
+    font-style:italic;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-bottom:8px;
+  }
+  .answerbtns{
+    display:flex;
+    gap:10px;
+    padding:0 18px 18px;
+  }
+  .actbtn{
+    flex:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    padding:14px 4px;
+    border-radius:6px;
+    cursor:pointer;
+    border:1.5px solid var(--ink);
+    background:var(--paper);
+  }
+  .actbtn.nochmal{border-color:var(--stamp-red); color:var(--stamp-red);}
+  .actbtn.gewusst{border-color:var(--green); color:var(--green);}
+  .actbtn.easy{border-color:var(--blue); color:var(--blue);}
+  .actbtn:active{transform:translateY(1px);}
+
+  .mcopt{
+    display:block;
+    width:100%;
+    text-align:left;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:14.5px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    border:1.5px solid var(--line);
+    border-radius:5px;
+    background:var(--paper);
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .mcopt.correct{border-color:var(--green); background:#e8f0e9; color:var(--green); font-weight:600;}
+  .mcopt.wrong{border-color:var(--stamp-red); background:#f6e9e7; color:var(--stamp-red); font-weight:600;}
+  .mcopt:disabled{cursor:default;}
+
+  .fillinput{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:5px;
+    background:var(--paper);
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  .checkbtn{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    padding:12px;
+    border:1.5px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:5px;
+    cursor:pointer;
+    margin-bottom:8px;
+  }
+  .fillresult{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    padding:8px 10px;
+    border-radius:5px;
+    margin-bottom:8px;
+    display:none;
+  }
+  .fillresult.ok{background:#e8f0e9; color:var(--green); display:block;}
+  .fillresult.bad{background:#f6e9e7; color:var(--stamp-red); display:block;}
+
+  .sessionbar{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-bottom:10px;
+  }
+
+  .progtag{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    padding:3px 8px;
+    border-radius:10px;
+    background:var(--paper-dark);
+    color:var(--ink-soft);
+  }
+
+  .empty{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--ink-soft);
+    font-size:13px;
+    line-height:1.7;
+    padding:30px 10px;
+  }
+  .empty b{color:var(--ink);}
+
+  .sectionlabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--ink-soft);
+    margin:6px 2px 8px;
+  }
+
+  .togglebar{
+    display:flex;
+    gap:6px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+  .togglebtn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    padding:6px 12px;
+    border:1.5px solid var(--line);
+    background:var(--card);
+    border-radius:16px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .togglebtn.active{border-color:var(--ink); color:var(--ink); font-weight:600;}
+
+  .practicebox{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px;
+    margin-bottom:12px;
+    font-size:13px;
+    line-height:1.6;
+  }
+  .practicebox h4{margin:0 0 6px; font-family:'Fjalla One',sans-serif; font-size:15px; font-weight:400;}
+  .wordbank{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:8px;
+  }
+  .wordchip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    padding:4px 9px;
+    background:var(--paper-dark);
+    border-radius:12px;
+  }
+
+  footer{
+    margin-top:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    max-width:500px;
+    line-height:1.6;
+  }
+
+  @media (max-width:380px){
+    .prompt .word{font-size:23px;}
+    .revealbox .en-word{font-size:19px;}
+    .topictile .icon{font-size:19px;}
+  }
+
+  /* ---- Tablet / desktop: widen layout, sidebar nav ---- */
+  @media (min-width:820px){
+    body{
+      flex-direction:row;
+      align-items:flex-start;
+      justify-content:center;
+      gap:24px;
+      padding:24px;
+    }
+    .appshell{
+      display:flex;
+      gap:24px;
+      width:100%;
+      max-width:1100px;
+      align-items:flex-start;
+    }
+    .sidebar{
+      width:190px;
+      flex-shrink:0;
+      position:sticky;
+      top:24px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .maincol{
+      flex:1;
+      min-width:0;
+    }
+    .letterhead, .levelbar, .stage, footer{max-width:none; width:100%;}
+    .navbar{
+      grid-template-columns:1fr;
+      max-width:none;
+      width:100%;
+    }
+    .levelbar{grid-template-columns:1fr; max-width:none;}
+    .topicgrid{grid-template-columns:repeat(5,1fr);}
+    .dashgrid{grid-template-columns:repeat(4,1fr);}
+    .stage{max-width:640px;}
+  }
+  @media (min-width:1100px){
+    .topicgrid{grid-template-columns:repeat(5,1fr);}
+  }
+</style>
+</head>
+<body>
+  <div class="appshell">
+    <div class="sidebar">
+      <div class="letterhead">
+        <div>
+          <h1>Dein Deutsch-Coach</h1>
+          <div class="sub" id="subtitleLine">A1 · A2 · B1.1 · B1.2</div>
+        </div>
+      </div>
+      <div class="streakbox" style="text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig</div>
+      <div class="levelbar" id="levelBar"></div>
+      <div class="navbar" id="navBar"></div>
+    </div>
+    <div class="maincol">
+      <div class="stage" id="stage"></div>
+      <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Echter Wortschatz für B1.1/B1.2 stammt aus „Auf jeden Fall!"; A1/A2 haben noch keine eigene Wortliste (kommt bald, es wird nichts erfunden). Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   TOPICS & LEVELS
+========================================================= */
+const TOPICS = [
+  {key:"familie", label:"Familie & Beziehungen", icon:"👨‍👩‍👧"},
+  {key:"wohnen", label:"Wohnen", icon:"🏠"},
+  {key:"arbeit", label:"Arbeit & Beruf", icon:"💼"},
+  {key:"einkaufen", label:"Einkaufen", icon:"🛒"},
+  {key:"essen", label:"Essen & Trinken", icon:"🍽️"},
+  {key:"reisen", label:"Reisen & Verkehr", icon:"🚆"},
+  {key:"gesundheit", label:"Gesundheit", icon:"🏥"},
+  {key:"behoerden", label:"Behörden & Alltag", icon:"🏛️"},
+  {key:"schule", label:"Schule & Lernen", icon:"🎓"},
+  {key:"kommunikation", label:"Kommunikation", icon:"💬"},
+  {key:"umwelt", label:"Umwelt", icon:"🌍"},
+  {key:"geld", label:"Geld & Finanzen", icon:"💰"},
+  {key:"technik", label:"Technik & Medien", icon:"📱"},
+  {key:"gefuehle", label:"Gefühle & Meinungen", icon:"🧠"},
+  {key:"gesellschaft", label:"Gesellschaft", icon:"🏙️"}
+];
+const TOPIC_BY_KEY = {}; TOPICS.forEach(t=>TOPIC_BY_KEY[t.key]=t);
+
+const LEVELS = ["A1","A2","B1.1","B1.2"];
+const LEVEL_LABEL = {A1:"A1", A2:"A2", "B1.1":"B1.1", "B1.2":"B1.2"};
+/* A1/A2 have no real source vocabulary yet — we do not invent a curriculum.
+   The one A1 card that exists (the bonus "brauchen") was a word the learner
+   gave us themselves as a worked example, not a generated wordlist. Real
+   A1/A2 lists can be dropped into LEGACY_DATA or a future *_DATA array and
+   will show up automatically — nothing else needs to change. */
+function levelHasRealContent(level){
+  if(level==="alle") return true;
+  return ALL_CARDS.filter(c=>c.level===level).length >= 5;
+}
+
+/* Legacy lesson number -> level */
+const LESSON_LEVEL = {0:"A1", 1:"B1.1",2:"B1.1",3:"B1.1",4:"B1.1",5:"B1.1",6:"B1.1",
+                       7:"B1.2",8:"B1.2",9:"B1.2",10:"B1.2",11:"B1.2",12:"B1.2"};
+
+/* Legacy lesson+section -> topic (approximate; sections were designed around
+   real-life themes so most map cleanly onto one of the 15 topics) */
+const SECTION_TOPIC = {
+  "0::Dein Beispielwort": "kommunikation",
+  "1::Je häufiger ich umziehe, desto …": "behoerden",
+  "1::Mein Nachbar ist mein Freund.": "gesellschaft",
+  "1::Ich engagiere mich für …": "gesellschaft",
+  "2::Ich bewerbe mich auf die Stelle als …": "arbeit",
+  "2::Alle gleichberechtigt?": "arbeit",
+  "2::Wir streiken!": "arbeit",
+  "3::Ich liebe dieses Blau!": "wohnen",
+  "3::Ich arbeite im Homeoffice.": "wohnen",
+  "3::Mein Gemüse wächst in der Stadt.": "umwelt",
+  "4::Deutschland ist ein Einwanderungsland.": "gesellschaft",
+  "4::Das war mir nicht bewusst.": "kommunikation",
+  "4::Ich bin mehrsprachig aufgewachsen.": "schule",
+  "5::Ich habe meine Ernährung umgestellt.": "gesundheit",
+  "5::Deutschland diskutiert über die Zuckersteuer.": "gesundheit",
+  "5::Bin ich gut genug?": "gefuehle",
+  "6::Überall ist Werbung": "technik",
+  "6::Ich denke darüber nach, was ich kaufe.": "einkaufen",
+  "6::Ich konsumiere nachhaltig für die Zukunft.": "umwelt",
+  "7::Wie lernt der Mensch?": "schule",
+  "7::Kopf oder Herz?": "gefuehle",
+  "7::Mein Opa lernt Englisch.": "schule",
+  "8::So unterschiedlich sind wir!": "gesellschaft",
+  "8::Manchmal fühle ich mich fremd.": "gefuehle",
+  "8::Ein Leben ohne Sport kann ich mir nicht vorstellen!": "gesundheit",
+  "9::Ich wohne nachhaltig.": "wohnen",
+  "9::Fahrradfahren in der Stadt – aber sicher!": "reisen",
+  "9::Da bleibt nichts übrig.": "umwelt",
+  "10::Seit wann ist Deutschland wiedervereinigt?": "gesellschaft",
+  "10::Das Grundgesetz ist Deutschlands Verfassung.": "gesellschaft",
+  "10::Die BRD ist Teil der EU.": "gesellschaft",
+  "11::Wir können alle gewinnen.": "gesellschaft",
+  "11::Hätte ich das gewusst, …": "gesellschaft",
+  "11::Mein Geschlecht entscheidet nicht über meine Verantwortung.": "gesellschaft",
+  "12::Wenn es das alles nicht gegeben hätte …": "technik",
+  "12::Wird uns die KI überholen?": "technik",
+  "12::KI und Kunst – Partner oder Konkurrenz?": "technik"
+};
+
+
+/* =========================================================
+   WORD FAMILIES (🌳) — shown when the current word matches
+========================================================= */
+const FAMILIES = {
+  "entscheiden": ["die Entscheidung (the decision)", "entscheidend (decisive)", "sich entscheiden (to decide)"],
+  "wohnen": ["die Wohnung (apartment)", "der Bewohner (resident)", "wohnhaft (residing)"],
+  "arbeiten": ["die Arbeit (work)", "der Arbeiter (worker)", "die Zusammenarbeit (cooperation)"],
+  "sprechen": ["die Sprache (language)", "das Gespräch (conversation)", "versprechen (to promise)"],
+  "fühlen": ["das Gefühl (feeling)", "sich wohlfühlen (to feel comfortable)", "fühlbar (perceptible)"],
+  "brauchen": ["der Verbraucher (consumer)", "gebrauchen (to use)", "der Gebrauch (use)"],
+  "lernen": ["das Lernen (learning)", "der/die Lernende (learner)", "erlernen (to acquire/learn)"],
+  "bewerben": ["die Bewerbung (application)", "der Bewerber (applicant)", "beworben (past participle: applied)"]
+};
+function getFamilyFor(word){
+  const w = word.toLowerCase().replace(/^sich\s+/,"").replace(/[()., ].*$/,"");
+  for(const key in FAMILIES){
+    if(w.includes(key) || key.includes(w)) return {root:key, members:FAMILIES[key]};
+  }
+  return null;
+}
+
+/* =========================================================
+   COLLOCATIONS (💬 common combinations)
+========================================================= */
+const COLLOCATIONS = {
+  "Verantwortung": ["Verantwortung übernehmen — to take responsibility", "Verantwortung tragen — to bear responsibility"],
+  "Erfahrung": ["Erfahrung sammeln — to gain experience", "Erfahrung haben mit — to have experience with"],
+  "Meinung": ["meiner Meinung nach — in my opinion", "die Meinung sagen — to speak one's mind"],
+  "Termin": ["einen Termin vereinbaren — to arrange an appointment", "einen Termin absagen — to cancel an appointment"],
+  "Antrag": ["einen Antrag stellen — to submit an application", "einen Antrag genehmigen — to approve an application"],
+  "Rechnung": ["eine Rechnung bezahlen — to pay an invoice", "eine Rechnung ausstellen — to issue an invoice"],
+  "Entscheidung": ["eine Entscheidung treffen — to make a decision"],
+  "Kündigung": ["die Kündigung einreichen — to submit one's resignation/notice"],
+  "Verantwortliche": ["der/die Verantwortliche für etw. — the person in charge of sth."]
+};
+function getCollocFor(word){
+  const w = word.replace(/^sich\s+/,"").replace(/[()., ].*$/,"");
+  return COLLOCATIONS[w] || null;
+}
+</script>
+<script>
+const LEGACY_DATA = [
+{lesson:0, title:"Bonus", sections:[
+  {name:"Dein Beispielwort", items:[
+    {a:"",w:"brauchen",p:"",en:"to need",ex:"Ich brauche Hilfe. / Ich brauche Kaffee. / Ich brauche Zeit. / Was brauchst du?",cat:"v",mn:"<b>Sound-alike:</b> brauchen sounds like 'brow' + 'chin'. Picture pointing at your brow and your chin, saying: 'I need a new brow and chin!' <b>Food trick:</b> Brau- sounds like 'broth' — starving, staring into an empty soup pot, you cry 'Ich brauche Brühe!' (I need broth!) <b>Practice:</b> say short phrases aloud — Ich brauche Hilfe/Kaffee/Zeit, Was brauchst du?",pr:"brauchte",pp:"hat gebraucht"}
+  ]}
+]},
+{lesson:1, title:"Ankommen", sections:[
+  {name:"Je häufiger ich umziehe, desto …", items:[
+    {a:"der",w:"(Telefon-/Strom-)Anbieter",p:"",en:"provider",ex:"",cat:"n",mn:"<b>an|bieten</b> = to offer. The Anbieter is the company that 'offers' you a service."},
+    {a:"",w:"angenehm",p:"",en:"pleasant",ex:"",cat:"adj",mn:"Sounds like 'on a name' — a pleasant host who kindly greets you by name."},
+    {a:"die",w:"Anmeldung",p:"Anmeldungen",en:"registration",ex:"",cat:"n",mn:"<b>an + melden</b> (to report) → the paperwork where you 'announce yourself' to the city."},
+    {a:"der",w:"(Auslands-)Aufenthalt",p:"Aufenthalte",en:"stay (abroad)",ex:"",cat:"n",mn:"auf + <b>halten</b> (hold) — the time you're 'held' somewhere abroad."},
+    {a:"der",w:"Behördengang",p:"Behördengänge",en:"visit to the authorities",ex:"",cat:"n",mn:"Behörde (authority) + Gang (a walk) → literally a walk/errand to the authorities."},
+    {a:"der",w:"Deutsche",p:"Deutschen",en:"German",ex:"",cat:"n",mn:"Same word doubles as nationality noun and adjective."},
+    {a:"die",w:"Deutsche",p:"Deutschen",en:"German",ex:"",cat:"n",mn:"Feminine form of der Deutsche."},
+    {a:"der",w:"Durchschnitt",p:"",en:"average",ex:"",cat:"n",mn:"durch (through) + Schnitt (a cut) → cutting straight through all the values."},
+    {a:"das",w:"Ehrenamt",p:"Ehrenämter",en:"voluntary work",ex:"",cat:"n",mn:"Ehre (honour) + Amt (office/post) → an honorary, unpaid post."},
+    {a:"",w:"ehrenamtlich",p:"",en:"voluntary",ex:"",cat:"adj",mn:"Adjective of Ehrenamt: done 'in honour', unpaid."},
+    {a:"",w:"sich einleben",p:"",en:"to settle in",ex:"",cat:"v",mn:"ein (into) + leben (live) → to 'live yourself into' a new place.",pr:"lebte sich ein",pp:"hat sich eingelebt"},
+    {a:"",w:"einsam",p:"",en:"lonely",ex:"",cat:"adj",mn:"ein (one) + -sam (like '-some') → being 'one-some', all alone."},
+    {a:"das",w:"Einwohnermeldeamt",p:"Einwohnermeldeämter",en:"Registration Office",ex:"",cat:"n",mn:"Einwohner (resident) + melden (report) + Amt (office) → office where residents report themselves."},
+    {a:"das",w:"Elternhaus",p:"Elternhäuser",en:"parents' house",ex:"",cat:"n",mn:"Eltern (parents) + Haus (house) → simply 'parents' house'."},
+    {a:"",w:"erleben",p:"",en:"to experience",ex:"",cat:"v",mn:"er- + leben (live) → to live through something.",pr:"erlebte",pp:"hat erlebt"},
+    {a:"der",w:"Erwachsene",p:"Erwachsenen",en:"adult",ex:"",cat:"n",mn:"er + wachsen (grow) → one who has 'grown up'."},
+    {a:"die",w:"Erwachsene",p:"Erwachsenen",en:"adult",ex:"",cat:"n",mn:"Feminine form of der Erwachsene."},
+    {a:"die",w:"Gegend",p:"Gegenden",en:"district",ex:"",cat:"n",mn:"Sounds like 'gegen' (toward) — the area/region around a point."},
+    {a:"die",w:"Handarbeit",p:"Handarbeiten",en:"handicraft",ex:"",cat:"n",mn:"Hand + Arbeit (work) → work done by hand."},
+    {a:"das",w:"Heimweh",p:"",en:"homesickness",ex:"",cat:"n",mn:"Heim (home) + Weh (ache) → the ache for home."},
+    {a:"das",w:"Jahrhundert",p:"Jahrhunderte",en:"century",ex:"",cat:"n",mn:"Jahr (year) + hundert (hundred) → a hundred years."},
+    {a:"das",w:"Jahrzehnt",p:"Jahrzehnte",en:"decade",ex:"",cat:"n",mn:"Jahr (year) + zehn (ten) → ten years."},
+    {a:"das",w:"Jogging",p:"",en:"jogging",ex:"",cat:"n",mn:"Identical to English 'jogging'."},
+    {a:"das",w:"Jugendzentrum",p:"Jugendzentren",en:"youth centre",ex:"",cat:"n",mn:"Jugend (youth) + Zentrum (centre)."},
+    {a:"die",w:"Mannschaft",p:"Mannschaften",en:"team",ex:"",cat:"n",mn:"Mann (person) + -schaft (-ship, group suffix) → a group of people."},
+    {a:"die",w:"Million",p:"Millionen",en:"million",ex:"",cat:"n",mn:"Identical to English 'million'."},
+    {a:"",w:"pendeln",p:"",en:"to commute",ex:"Er pendelt zwischen der Arbeit und Zuhause.",cat:"v",mn:"Sounds like 'pendulum' — swinging back and forth between home and work.",pr:"pendelte",pp:"ist gependelt"},
+    {a:"",w:"schwer",p:"",en:"difficult",ex:"",cat:"adj",mn:"Sounds like 'chore' — a heavy chore feels schwer."},
+    {a:"die",w:"Schwierigkeit",p:"Schwierigkeiten",en:"difficulty",ex:"",cat:"n",mn:"schwer (difficult) + -igkeit (-ness) → 'difficult-ness'."},
+    {a:"",w:"sportlich",p:"",en:"athletic",ex:"",cat:"adj",mn:"Sport + -lich (-y) → sporty."},
+    {a:"der",w:"Tanz",p:"Tänze",en:"dance",ex:"",cat:"n",mn:"Sounds just like English 'dance'."},
+    {a:"",w:"sich ummelden",p:"",en:"to re-register",ex:"",cat:"v",mn:"um (change) + melden (report) → re-report yourself when you move.",pr:"meldete sich um",pp:"hat sich umgemeldet"},
+    {a:"",w:"unterstützen",p:"",en:"to support",ex:"",cat:"v",mn:"unter (under) + stützen (prop up) → to prop someone up from below.",pr:"unterstützte",pp:"hat unterstützt"},
+    {a:"der",w:"Verein",p:"Vereine",en:"association",ex:"",cat:"n",mn:"ver + ein(s) (one) → people bound into 'one' body."},
+    {a:"der",w:"Wohnsitz",p:"Wohnsitze",en:"residence",ex:"",cat:"n",mn:"wohnen (live) + Sitz (seat) → your living-seat."},
+    {a:"",w:"einwandern",p:"",en:"to immigrate",ex:"",cat:"v",mn:"ein (in) + wandern (hike) → to wander into a country.",pr:"wanderte ein",pp:"ist eingewandert"},
+    {a:"",w:"auswandern",p:"",en:"to emigrate",ex:"",cat:"v",mn:"aus (out) + wandern (hike) → to wander out of a country.",pr:"wanderte aus",pp:"ist ausgewandert"},
+    {a:"die",w:"Einwanderung",p:"",en:"immigration",ex:"",cat:"n",mn:"Noun of einwandern."},
+    {a:"die",w:"Auswanderung",p:"",en:"emigration",ex:"",cat:"n",mn:"Noun of auswandern."},
+    {a:"",w:"einen Vertrag abschließen",p:"",en:"to conclude a contract",ex:"Sie muss einen Vertrag mit dem Stromanbieter abschließen.",cat:"p",mn:"ab|schließen (lock/close) → to 'lock in' a contract.",pr:"schloss ab",pp:"hat abgeschlossen"},
+    {a:"",w:"Kartons/Koffer/… packen",p:"",en:"to pack boxes, suitcases, etc.",ex:"",cat:"p",mn:"packen sounds like English 'pack'.",pr:"packte",pp:"hat gepackt"},
+    {a:"",w:"Möbel aufbauen",p:"",en:"to assemble furniture",ex:"",cat:"p",mn:"Möbel (furniture) + auf|bauen (build up).",pr:"baute auf",pp:"hat aufgebaut"},
+    {a:"",w:"Sport treiben",p:"",en:"to exercise",ex:"",cat:"p",mn:"treiben = to drive/propel — 'driving yourself' into sport.",pr:"trieb",pp:"hat getrieben"},
+    {a:"",w:"Es hat … gedauert.",p:"",en:"It took weeks/months/years/decades, etc.",ex:"",cat:"p",mn:"dauern sounds like 'endure' — it endured for weeks/months.",pr:"dauerte",pp:"hat gedauert"}
+  ]},
+  {name:"Mein Nachbar ist mein Freund.", items:[
+    {a:"",w:"ansprechen",p:"",en:"to address",ex:"",cat:"v",mn:"an (at) + sprechen (speak) → to speak 'at' someone.",pr:"sprach an",pp:"hat angesprochen"},
+    {a:"",w:"ausleihen",p:"",en:"to borrow",ex:"",cat:"v",mn:"aus (out) + leihen (lend) → to lend something out to yourself.",pr:"lieh aus",pp:"hat ausgeliehen"},
+    {a:"",w:"begegnen",p:"",en:"to meet",ex:"",cat:"v",mn:"You unexpectedly 'run into' someone — think 'be-gone-in' a crowd, then suddenly face to face.",pr:"begegnete",pp:"ist begegnet"},
+    {a:"die",w:"Disko = der Club",p:"Diskos = Clubs",en:"disco (club)",ex:"",cat:"n",mn:"Same as English disco/club."},
+    {a:"die",w:"Gesellschaft",p:"Gesellschaften",en:"society",ex:"",cat:"n",mn:"Geselle (companion) + -schaft → companionship at large scale."},
+    {a:"",w:"leicht",p:"",en:"easy",ex:"",cat:"adj",mn:"Sounds like 'light' (not heavy) → leicht = easy/light."},
+    {a:"die",w:"Stimmung",p:"Stimmungen",en:"mood",ex:"",cat:"n",mn:"Stimme (voice) + -ung → the 'voice' of the room."},
+    {a:"",w:"teilen",p:"",en:"to share",ex:"",cat:"v",mn:"Sounds like 'tile' — splitting tiles evenly between friends.",pr:"teilte",pp:"hat geteilt"},
+    {a:"die",w:"Unterstützung (meistens Sg.)",p:"",en:"support (mostly singular)",ex:"",cat:"n",mn:"Noun of unterstützen (to support)."},
+    {a:"das",w:"Vergnügen",p:"",en:"enjoyment",ex:"",cat:"n",mn:"ver + gnügen (enough) → having 'enough' fun and more."},
+    {a:"",w:"zufällig",p:"",en:"random",ex:"",cat:"adj",mn:"Zufall (chance, lit. 'falling to you') + -ig."},
+    {a:"",w:"befreundet sein (mit)",p:"",en:"to be friends (with)",ex:"",cat:"p",mn:"Freund (friend) + be- → 'be-friended' with someone."},
+    {a:"",w:"Ich leihe mir ein Fahrrad aus.",p:"",en:"I'm borrowing a bicycle.",ex:"",cat:"p",mn:"Literal use of ausleihen: I lend myself a bike."}
+  ]},
+  {name:"Ich engagiere mich für …", items:[
+    {a:"der",w:"Bereich",p:"Bereiche",en:"area",ex:"",cat:"n",mn:"Sounds like 'bear-reach' — the reach/area a topic covers."},
+    {a:"die",w:"Bürgerinitiative",p:"Bürgerinitiativen",en:"citizens' initiative",ex:"",cat:"n",mn:"Bürger (citizen) + Initiative → citizens taking initiative."},
+    {a:"das",w:"Engagement",p:"",en:"commitment",ex:"",cat:"n",mn:"French loanword, same spelling as English 'engagement'."},
+    {a:"",w:"sich engagieren für",p:"",en:"to get involved with sth.",ex:"",cat:"v",mn:"To 'engage yourself' for a cause.",pr:"engagierte sich",pp:"hat sich engagiert"},
+    {a:"die",w:"Kultur",p:"Kulturen",en:"culture",ex:"",cat:"n",mn:"Identical to English 'culture'."},
+    {a:"der",w:"Kulturschock",p:"Kulturschocks",en:"culture shock",ex:"",cat:"n",mn:"Kultur + Schock → literally 'culture shock'."},
+    {a:"die",w:"Phase",p:"Phasen",en:"phase",ex:"",cat:"n",mn:"Identical to English 'phase'."},
+    {a:"das",w:"Vorurteil",p:"Vorurteile",en:"prejudice",ex:"",cat:"n",mn:"vor (before) + Urteil (judgement) → judging before knowing."}
+  ]}
+]},
+{lesson:2, title:"Arbeiten, um zu leben", sections:[
+  {name:"Ich bewerbe mich auf die Stelle als …", items:[
+    {a:"",w:"sich beschäftigen mit",p:"",en:"to deal with",ex:"",cat:"v",mn:"To occupy yourself with something.",pr:"beschäftigte sich",pp:"hat sich beschäftigt"},
+    {a:"der",w:"Betrieb",p:"Betriebe",en:"operation",ex:"",cat:"n",mn:"betreiben (run/operate) → what is being run."},
+    {a:"das",w:"Bewerbungsanschreiben",p:"",en:"cover letter",ex:"",cat:"n",mn:"Bewerbung (application) + an|schreiben (write to) → the letter you write to apply."},
+    {a:"die",w:"Bezahlung",p:"Bezahlungen",en:"payment",ex:"",cat:"n",mn:"bezahlen (to pay) + -ung."},
+    {a:"die",w:"Chance",p:"Chancen",en:"opportunity",ex:"",cat:"n",mn:"Identical to English 'chance'."},
+    {a:"die",w:"Digitalisierung",p:"Digitalisierungen",en:"digitisation",ex:"",cat:"n",mn:"Same root as English 'digitalisation'."},
+    {a:"die",w:"Festanstellung",p:"Festanstellungen",en:"permanent position",ex:"",cat:"n",mn:"fest (firm) + Anstellung (employment) → a 'firm' job."},
+    {a:"",w:"formulieren",p:"",en:"to formulate",ex:"",cat:"v",mn:"Sounds just like 'formulate'.",pr:"formulierte",pp:"hat formuliert"},
+    {a:"die",w:"Informatik",p:"",en:"informatics",ex:"",cat:"n",mn:"Sounds like 'informatics' = computer science."},
+    {a:"der",w:"Informatiker",p:"Informatiker",en:"computer scientist",ex:"",cat:"n",mn:"Person who does Informatik."},
+    {a:"die",w:"Informatikerin",p:"Informatikerinnen",en:"computer scientist",ex:"",cat:"n",mn:"Feminine form of Informatiker."},
+    {a:"die",w:"IT (= Informationstechnik)",p:"",en:"IT (information technology)",ex:"",cat:"n",mn:"Same abbreviation as English IT."},
+    {a:"die",w:"Kenntnis",p:"Kenntnisse",en:"knowledge",ex:"",cat:"n",mn:"kennen (to know) + -nis → what you know."},
+    {a:"",w:"leisten",p:"",en:"to achieve",ex:"",cat:"v",mn:"Sounds like 'least' — even the least effort still achieves something.",pr:"leistete",pp:"hat geleistet"},
+    {a:"",w:"letzter/letzte/letztes",p:"",en:"last",ex:"",cat:"adj",mn:"Sounds like 'last, ter!' → letzt- = last."},
+    {a:"",w:"nämlich",p:"",en:"namely",ex:"",cat:"p",mn:"You name the precise reason: nämlich = namely."},
+    {a:"die",w:"Schichtarbeit",p:"Schichtarbeiten",en:"shift work",ex:"",cat:"n",mn:"Schicht (shift/layer) + Arbeit (work)."},
+    {a:"das",w:"Stellenangebot = die Stellenanzeige",p:"",en:"job advertisement",ex:"",cat:"n",mn:"Stelle (position) + an|bieten (offer) → an offered position."},
+    {a:"der",w:"Tarif",p:"Tarife",en:"rate",ex:"",cat:"n",mn:"Sounds like English 'tariff' → a fixed rate."},
+    {a:"die",w:"Tätigkeit",p:"Tätigkeiten",en:"activity",ex:"",cat:"n",mn:"tätig (active) + -keit → being active at something."},
+    {a:"",w:"tun",p:"",en:"to do",ex:"",cat:"v",mn:"Sounds like 'toon' — 'what did you DO in that cartoon?'",pr:"tat",pp:"hat getan"},
+    {a:"",w:"unbefristet",p:"",en:"permanent",ex:"Er hat eine unbefristete Aufenthaltserlaubnis.",cat:"adj",mn:"un + befristet (from Frist=deadline) → without a deadline."},
+    {a:"",w:"befristet",p:"",en:"limited",ex:"Die Festeinstellung ist auf ein Jahr befristet.",cat:"adj",mn:"Frist (deadline) + be- → given a deadline."},
+    {a:"",w:"einstellen",p:"",en:"to hire",ex:"Warum wollen Unternehmen keine Menschen mit Behinderung einstellen?",cat:"v",mn:"ein (in) + stellen (place) → to place someone 'in' a job.",pr:"stellte ein",pp:"hat eingestellt"},
+    {a:"",w:"entlassen",p:"",en:"to dismiss",ex:"Sie wurde schon mehrmals entlassen.",cat:"v",mn:"ent (away) + lassen (let) → to 'let someone go away'.",pr:"entließ",pp:"hat entlassen"},
+    {a:"",w:"sicher",p:"",en:"secure",ex:"Ein sicheres Einkommen ist wichtig.",cat:"adj",mn:"Feeling like a 'seeker' who's finally found safety."},
+    {a:"",w:"unsicher",p:"",en:"insecure",ex:"Er ist unsicher, was das korrekte Verhalten ist.",cat:"adj",mn:"un + sicher → not safe."},
+    {a:"",w:"einen Beitrag leisten zu",p:"",en:"to make a contribution to",ex:"",cat:"p",mn:"Beitrag (contribution) + leisten (achieve).",pr:"leistete einen Beitrag",pp:"hat einen Beitrag geleistet"},
+    {a:"",w:"Es fällt mir leicht/schwer, zu …",p:"",en:"I find it easy/difficult to …",ex:"",cat:"p",mn:"fallen (fall) → something 'falls easy/heavy' on me."}
+  ]},
+  {name:"Alle gleichberechtigt?", items:[
+    {a:"",w:"also",p:"",en:"thus",ex:"",cat:"p",mn:"Looks like English 'also' but means 'thus/so' — a false friend!"},
+    {a:"das",w:"Argument",p:"Argumente",en:"argument",ex:"",cat:"n",mn:"Identical to English 'argument'."},
+    {a:"die",w:"Behinderung",p:"Behinderungen",en:"disability",ex:"",cat:"n",mn:"hindern (to hinder) + be- → being hindered."},
+    {a:"die",w:"Branche",p:"Branchen",en:"industry",ex:"",cat:"n",mn:"Sounds like English 'branch' (of industry)."},
+    {a:"",w:"doch",p:"",en:"yet",ex:"",cat:"p",mn:"A punchy contradiction — snapping back 'doch!' when told 'no'."},
+    {a:"",w:"(sich) durchsetzen",p:"",en:"to assert oneself",ex:"",cat:"v",mn:"durch (through) + setzen (set) → to push your position through.",pr:"setzte durch",pp:"hat durchgesetzt"},
+    {a:"",w:"ebenfalls",p:"",en:"also",ex:"",cat:"p",mn:"eben (just) + falls (case) → 'in the same case too'."},
+    {a:"der",w:"Erzieher",p:"Erzieher",en:"educator",ex:"",cat:"n",mn:"erziehen (raise/educate) + -er → one who educates."},
+    {a:"die",w:"Erzieherin",p:"Erzieherinnen",en:"educator",ex:"",cat:"n",mn:"Feminine form of Erzieher."},
+    {a:"",w:"führen zu",p:"",en:"to lead to",ex:"",cat:"v",mn:"führen (lead) + zu (to) → to lead to something.",pr:"führte zu",pp:"hat geführt zu"},
+    {a:"",w:"gleichberechtigt",p:"",en:"equal",ex:"",cat:"adj",mn:"gleich (equal) + Recht (right) + -igt → given equal rights."},
+    {a:"die",w:"Gleichberechtigung",p:"Gleichberechtigungen",en:"equality",ex:"",cat:"n",mn:"Noun of gleichberechtigt."},
+    {a:"die",w:"Inklusion",p:"",en:"inclusion",ex:"",cat:"n",mn:"Identical to English 'inclusion'."},
+    {a:"",w:"irgendwann",p:"",en:"at some point",ex:"",cat:"p",mn:"irgend (some) + wann (when) → 'somewhen'."},
+    {a:"",w:"jedenfalls",p:"",en:"in any case",ex:"",cat:"p",mn:"jeden (every) + falls (case) → in every case."},
+    {a:"die",w:"KI (= künstliche Intelligenz)",p:"",en:"AI (artificial intelligence)",ex:"",cat:"n",mn:"Same abbreviation logic as English 'AI', just German order."},
+    {a:"die",w:"Ungleichheit",p:"Ungleichheiten",en:"inequality",ex:"",cat:"n",mn:"un + gleich (equal) + -heit → not-equal-ness."},
+    {a:"die",w:"Verantwortung",p:"Verantwortungen",en:"responsibility",ex:"",cat:"n",mn:"ver + Antwort (answer) → being 'answerable' for something."},
+    {a:"",w:"zustimmen",p:"",en:"to agree",ex:"",cat:"v",mn:"zu (to) + Stimme (voice) → to add your voice to a decision.",pr:"stimmte zu",pp:"hat zugestimmt"},
+    {a:"",w:"fair",p:"",en:"fair",ex:"",cat:"adj",mn:"Identical to English 'fair'."},
+    {a:"",w:"unfair",p:"",en:"unfair",ex:"",cat:"adj",mn:"Identical to English 'unfair'."},
+    {a:"",w:"gleich",p:"",en:"equal",ex:"Männer und Frauen werden nicht gleich behandelt.",cat:"adj",mn:"Sounds like 'g-like' — things a-glike are gleich."},
+    {a:"",w:"ungleich",p:"",en:"unequal",ex:"Männer und Frauen werden ungleich behandelt.",cat:"adj",mn:"un + gleich → not equal."}
+  ]},
+  {name:"Wir streiken!", items:[
+    {a:"",w:"allerdings",p:"",en:"however",ex:"",cat:"p",mn:"aller (of all) + dings (things) → adds a 'however' twist."},
+    {a:"der",w:"Arbeitnehmer",p:"Arbeitnehmer",en:"employee",ex:"",cat:"n",mn:"Arbeit (work) + nehmen (take) → one who 'takes on' work."},
+    {a:"die",w:"Arbeitnehmerin",p:"Arbeitnehmerinnen",en:"employee",ex:"",cat:"n",mn:"Feminine form of Arbeitnehmer."},
+    {a:"die",w:"(Arbeits-)Bedingung",p:"(Arbeits-)Bedingungen",en:"(working) condition",ex:"",cat:"n",mn:"bedingen (to condition) → the conditions of work."},
+    {a:"der",w:"Beschäftigte",p:"Beschäftigten",en:"employee",ex:"",cat:"n",mn:"beschäftigen (employ) → one who is employed."},
+    {a:"die",w:"Beschäftigte",p:"Beschäftigten",en:"employee",ex:"",cat:"n",mn:"Feminine/generic form of der Beschäftigte."},
+    {a:"",w:"belastend",p:"",en:"onerous",ex:"",cat:"adj",mn:"Last (load) + be- → putting a load on you."},
+    {a:"",w:"betreffen",p:"",en:"to concern",ex:"",cat:"v",mn:"be + treffen (hit/meet) → something that 'hits' or touches you.",pr:"betraf",pp:"hat betroffen"},
+    {a:"das",w:"Einkommen",p:"",en:"income",ex:"",cat:"n",mn:"ein (in) + kommen (come) → what 'comes in'."},
+    {a:"",w:"finanziell",p:"",en:"financial",ex:"",cat:"adj",mn:"Identical root to English 'financial'."},
+    {a:"die",w:"Gewerkschaft",p:"Gewerkschaften",en:"union",ex:"",cat:"n",mn:"Gewerk (trade/craft) + -schaft → a fellowship of tradespeople."},
+    {a:"",w:"insgesamt",p:"",en:"total",ex:"",cat:"p",mn:"in + gesamt (whole) → 'in whole'."},
+    {a:"der",w:"Lohn",p:"Löhne",en:"wage",ex:"",cat:"n",mn:"Sounds like 'loan' — but it's what you earn, not borrow."},
+    {a:"",w:"merken",p:"",en:"to note",ex:"",cat:"v",mn:"Sounds like 'marking' something down mentally.",pr:"merkte",pp:"hat gemerkt"},
+    {a:"",w:"scheitern",p:"",en:"to fail",ex:"",cat:"v",mn:"Sounds like 'shatter' — a plan that shatters.",pr:"scheiterte",pp:"ist gescheitert"},
+    {a:"der",w:"Streik",p:"Streiks",en:"strike",ex:"",cat:"n",mn:"Sounds identical to English 'strike'."},
+    {a:"",w:"streiken",p:"",en:"to strike",ex:"",cat:"v",mn:"Verb form of Streik.",pr:"streikte",pp:"hat gestreikt"},
+    {a:"der",w:"Tarifvertrag",p:"Tarifverträge",en:"collective agreement",ex:"",cat:"n",mn:"Tarif (rate) + Vertrag (contract) → a rate-contract."},
+    {a:"",w:"(sich) verbessern",p:"",en:"to improve (oneself)",ex:"",cat:"v",mn:"ver + besser (better) → to make better.",pr:"verbesserte (sich)",pp:"hat (sich) verbessert"},
+    {a:"",w:"verhandeln",p:"",en:"to negotiate",ex:"",cat:"v",mn:"ver + handeln (act/trade) → to trade positions back and forth.",pr:"verhandelte",pp:"hat verhandelt"},
+    {a:"das",w:"Verständnis",p:"Verständnisse",en:"understanding",ex:"",cat:"n",mn:"verstehen (understand) + -nis."},
+    {a:"",w:"wertvoll",p:"",en:"valuable",ex:"",cat:"adj",mn:"Wert (value) + voll (full) → full of value."},
+    {a:"",w:"steigen",p:"",en:"to increase",ex:"Die Zahlen steigen nur langsam.",cat:"v",mn:"Sounds like 'stair' — climbing stairs upward.",pr:"stieg",pp:"ist gestiegen"},
+    {a:"",w:"sinken",p:"",en:"to decrease",ex:"",cat:"v",mn:"Sounds identical to English 'sink'.",pr:"sank",pp:"ist gesunken"},
+    {a:"",w:"für höhere Löhne und bessere Arbeitsbedingungen kämpfen",p:"",en:"to fight for higher wages and better working conditions",ex:"",cat:"p",mn:"kämpfen sounds like 'campaign' — to campaign/fight for a cause.",pr:"kämpfte",pp:"hat gekämpft"},
+    {a:"",w:"Ich führe ein Team/Unternehmen/...",p:"",en:"I lead a team/company/etc.",ex:"",cat:"p",mn:"führen = to lead."}
+  ]}
+]},
+{lesson:3, title:"Lebensräume", sections:[
+  {name:"Ich liebe dieses Blau!", items:[
+    {a:"",w:"achten auf",p:"",en:"to pay attention to",ex:"",cat:"v",mn:"Sounds like 'attend to' — to pay attention to.",pr:"achtete auf",pp:"hat geachtet auf"},
+    {a:"",w:"anfassen",p:"",en:"to touch",ex:"",cat:"v",mn:"an (at) + fassen (grasp) → to grasp at something.",pr:"fasste an",pp:"hat angefasst"},
+    {a:"die",w:"Art",p:"Arten",en:"type",ex:"",cat:"n",mn:"Looks like English 'art' but means 'type/kind' — a false friend!"},
+    {a:"die",w:"Atmosphäre",p:"",en:"atmosphere",ex:"",cat:"n",mn:"Identical to English 'atmosphere'."},
+    {a:"die",w:"(Farb-)Auswahl",p:"",en:"(colour) selection",ex:"",cat:"n",mn:"Farbe (colour) + aus|wählen (select) → colours to choose from."},
+    {a:"",w:"beeinflussen",p:"",en:"to influence",ex:"",cat:"v",mn:"be + Einfluss (influence) → to exert influence.",pr:"beeinflusste",pp:"hat beeinflusst"},
+    {a:"der",w:"Blick",p:"Blicke",en:"view",ex:"",cat:"n",mn:"Sounds like 'blink' — a quick glance."},
+    {a:"die",w:"Couch = Sofa",p:"Couchs = Sofas",en:"couch/sofa",ex:"",cat:"n",mn:"Identical to English 'couch/sofa'."},
+    {a:"",w:"farbig",p:"",en:"colourful",ex:"",cat:"adj",mn:"Farbe (colour) + -ig → colour-y."},
+    {a:"der",w:"Fußboden",p:"Fußböden",en:"floor",ex:"",cat:"n",mn:"Fuß (foot) + Boden (ground) → where your foot meets the ground."},
+    {a:"",w:"gebraucht",p:"",en:"used",ex:"",cat:"adj",mn:"gebrauchen (to use) → already used, second-hand."},
+    {a:"der",w:"Himmel",p:"",en:"sky",ex:"",cat:"n",mn:"Picture a heavenly choir singing up in der Himmel."},
+    {a:"der",w:"Hof",p:"Höfe",en:"courtyard",ex:"",cat:"n",mn:"Sounds like 'hoof' — farm animals clicking hooves in der Hof."},
+    {a:"",w:"individuell",p:"",en:"individual",ex:"",cat:"adj",mn:"Identical root to English 'individual'."},
+    {a:"die",w:"Innenstadt",p:"Innenstädte",en:"inner city",ex:"",cat:"n",mn:"innen (inside) + Stadt (city)."},
+    {a:"das",w:"Kissen",p:"Kissen",en:"cushion",ex:"",cat:"n",mn:"Sounds like 'kiss on' the cushion — a soft place to rest your head."},
+    {a:"die",w:"Lage",p:"Lagen",en:"location",ex:"",cat:"n",mn:"Sounds like 'lay' — where something is laid."},
+    {a:"das",w:"Licht",p:"",en:"light",ex:"",cat:"n",mn:"Sounds like 'light' → das Licht."},
+    {a:"",w:"mitten in, auf, …",p:"",en:"in the middle of",ex:"",cat:"p",mn:"Mitte (middle) → right in the middle of."},
+    {a:"die",w:"Position",p:"Positionen",en:"position",ex:"",cat:"n",mn:"Identical to English 'position'."},
+    {a:"",w:"schick",p:"",en:"chic",ex:"",cat:"adj",mn:"Looks/sounds like English 'chic'."},
+    {a:"der",w:"Spiegel",p:"",en:"mirror",ex:"",cat:"n",mn:"Sounds like 'spy-gull' — a bird spying on its reflection."},
+    {a:"die",w:"Toilette = Klo = WC",p:"Toiletten = Klos = WCs",en:"toilet/loo/WC",ex:"",cat:"n",mn:"Same as English toilet/loo/WC."},
+    {a:"der",w:"Vogel",p:"Vögel",en:"bird",ex:"",cat:"n",mn:"Think of a bird (Vogel) singing through the fog — sounds foghorn-ish with a V."},
+    {a:"die",w:"Wohnungseinrichtung",p:"Wohnungseinrichtungen",en:"furnishing",ex:"",cat:"n",mn:"Wohnung (flat) + Einrichtung (fitting) → how a flat is set up."},
+    {a:"das",w:"Zuhause",p:"",en:"home",ex:"",cat:"n",mn:"zu (to) + Hause (house) → 'to-house' = home."},
+    {a:"",w:"weich",p:"",en:"soft",ex:"Weiche Textilien laden zum Entspannen ein.",cat:"adj",mn:"Sounds like 'wich' — 'which pillow is softer?'"},
+    {a:"",w:"hart",p:"",en:"hard",ex:"Der harte Fußboden ist sehr praktisch.",cat:"adj",mn:"Identical to English 'hard'."},
+    {a:"die",w:"Ordnung",p:"",en:"order",ex:"",cat:"n",mn:"ordnen (arrange) → arrangement."},
+    {a:"die",w:"Unordnung",p:"",en:"disorder",ex:"",cat:"n",mn:"un + Ordnung → the opposite of order."}
+  ]},
+  {name:"Ich arbeite im Homeoffice.", items:[
+    {a:"",w:"ablenken",p:"",en:"to distract",ex:"",cat:"v",mn:"ab (away) + lenken (steer) → to steer attention away.",pr:"lenkte ab",pp:"hat abgelenkt"},
+    {a:"die",w:"Ablenkung",p:"Ablenkungen",en:"distraction",ex:"",cat:"n",mn:"Noun of ablenken."},
+    {a:"das",w:"Arbeitszimmer",p:"",en:"study",ex:"",cat:"n",mn:"Arbeit (work) + Zimmer (room)."},
+    {a:"die",w:"Badewanne",p:"Badewannen",en:"bathtub",ex:"",cat:"n",mn:"Bad (bath) + Wanne (tub)."},
+    {a:"das",w:"Dachgeschoss",p:"Dachgeschosse",en:"attic",ex:"",cat:"n",mn:"Dach (roof) + Geschoss (storey) → the storey under the roof."},
+    {a:"",w:"gehören",p:"",en:"to belong",ex:"",cat:"v",mn:"Picture: 'this belongs here' → gehören.",pr:"gehörte",pp:"hat gehört"},
+    {a:"",w:"sich hinsetzen",p:"",en:"to sit down",ex:"",cat:"v",mn:"hin (there) + setzen (set) → to place yourself down there.",pr:"setzte sich hin",pp:"hat sich hingesetzt"},
+    {a:"der",w:"Lieblingsort",p:"Lieblingsorte",en:"favourite place",ex:"",cat:"n",mn:"Liebling (darling/favourite) + Ort (place)."},
+    {a:"der",w:"Schreibtisch",p:"Schreibtische",en:"desk",ex:"",cat:"n",mn:"schreiben (write) + Tisch (table) → writing table."},
+    {a:"das",w:"Spielzeug",p:"Spielzeuge",en:"toy",ex:"",cat:"n",mn:"spielen (play) + Zeug (stuff) → play-stuff."},
+    {a:"",w:"ständig",p:"",en:"constant",ex:"",cat:"adj",mn:"Stand (state) + -ig → always in the same state."},
+    {a:"das",w:"Zeug",p:"",en:"thing",ex:"",cat:"n",mn:"Random 'stuff' lying around."}
+  ]},
+  {name:"Mein Gemüse wächst in der Stadt.", items:[
+    {a:"der",w:"(Gemüse-)Anbau",p:"",en:"(vegetable) cultivation",ex:"",cat:"n",mn:"Gemüse (vegetable) + an|bauen (build up/cultivate)."},
+    {a:"",w:"anbauen",p:"",en:"to cultivate",ex:"",cat:"v",mn:"an (on) + bauen (build) → to build/grow crops on land.",pr:"baute an",pp:"hat angebaut"},
+    {a:"das",w:"Beet",p:"Beete",en:"bed",ex:"",cat:"n",mn:"Sounds like English 'beet' — but means the whole garden bed."},
+    {a:"",w:"beobachten",p:"",en:"to observe",ex:"",cat:"v",mn:"be + achten (watch/attend) → to keep watching.",pr:"beobachtete",pp:"hat beobachtet"},
+    {a:"",w:"blühen",p:"",en:"to bloom",ex:"",cat:"v",mn:"Sounds like 'bloom'.",pr:"blühte",pp:"hat geblüht"},
+    {a:"die",w:"Erde",p:"",en:"Earth",ex:"",cat:"n",mn:"Sounds like the planet 'Earth'."},
+    {a:"die",w:"Ernte",p:"Ernten",en:"harvest",ex:"",cat:"n",mn:"Sounds like 'earn-te' — you 'earn' the reward of farming."},
+    {a:"",w:"ernten",p:"",en:"to harvest",ex:"",cat:"v",mn:"Verb form of Ernte.",pr:"erntete",pp:"hat geerntet"},
+    {a:"die",w:"Fläche",p:"Flächen",en:"area",ex:"",cat:"n",mn:"Sounds like 'flat-che' — a flat stretch of land."},
+    {a:"",w:"gärtnern",p:"",en:"to garden",ex:"",cat:"v",mn:"Garten (garden) → to do garden-work.",pr:"gärtnerte",pp:"hat gegärtnert"},
+    {a:"die",w:"Kirche",p:"Kirchen",en:"church",ex:"",cat:"n",mn:"Sounds like English 'church'."},
+    {a:"",w:"lebenswert",p:"",en:"liveable",ex:"",cat:"adj",mn:"leben (live) + wert (worth) → worth living in."},
+    {a:"",w:"mitmachen",p:"",en:"to participate",ex:"",cat:"v",mn:"mit (with) + machen (do) → to do along with others.",pr:"machte mit",pp:"hat mitgemacht"},
+    {a:"der",w:"Schatten",p:"",en:"shadow",ex:"",cat:"n",mn:"Sounds like 'shadow' with a 'sch'."},
+    {a:"",w:"städtisch",p:"",en:"urban",ex:"",cat:"adj",mn:"Stadt (city) + -isch → city-like."},
+    {a:"der",w:"Standort",p:"Standorte",en:"location",ex:"",cat:"n",mn:"Stand (position) + Ort (place) → where something stands."},
+    {a:"",w:"wachsen",p:"",en:"to grow",ex:"Die Pflanzen wachsen schnell.",cat:"v",mn:"Sounds like 'wax' dripping and growing on a candle.",pr:"wuchs",pp:"ist gewachsen"},
+    {a:"",w:"die Möglichkeit bieten",p:"",en:"to offer the opportunity",ex:"",cat:"p",mn:"möglich (possible) + bieten (offer)."},
+    {a:"",w:"Rücksicht nehmen auf",p:"",en:"to take into consideration",ex:"",cat:"p",mn:"Rück (back) + Sicht (view) → looking back to check on others."}
+  ]}
+]},
+{lesson:4, title:"Migration", sections:[
+  {name:"Deutschland ist ein Einwanderungsland.", items:[
+    {a:"",w:"aktuell",p:"",en:"current",ex:"",cat:"adj",mn:"Close to English 'actual' — but means 'current' in German."},
+    {a:"die",w:"Arbeitskraft",p:"Arbeitskräfte",en:"worker",ex:"",cat:"n",mn:"Arbeit (work) + Kraft (power) → the power/person behind the work."},
+    {a:"der",w:"Ausländer",p:"Ausländer",en:"foreigner",ex:"",cat:"n",mn:"aus (out of) + Land (country) → someone from outside the country."},
+    {a:"die",w:"Ausländerin",p:"Ausländerinnen",en:"foreigner",ex:"",cat:"n",mn:"Feminine form of Ausländer."},
+    {a:"",w:"ausländisch",p:"",en:"foreign",ex:"",cat:"adj",mn:"Adjective of Ausland (foreign country)."},
+    {a:"die",w:"Bevölkerung",p:"Bevölkerungen",en:"population",ex:"",cat:"n",mn:"Volk (folk/people) + be- → the 'folked' mass."},
+    {a:"der",w:"Bundeskanzler",p:"Bundeskanzler",en:"Federal Chancellor",ex:"",cat:"n",mn:"Bund (federation) + Kanzler (chancellor)."},
+    {a:"die",w:"Bundeskanzlerin",p:"Bundeskanzlerinnen",en:"Federal Chancellor",ex:"",cat:"n",mn:"Feminine form of Bundeskanzler."},
+    {a:"die",w:"Bundesrepublik Deutschland (= die BRD)",p:"",en:"Federal Republic of Germany (FRG)",ex:"",cat:"n",mn:"Bundes (federal) + Republik → Federal Republic of Germany."},
+    {a:"die",w:"Deutsche Demokratische Republik (= die DDR)",p:"",en:"German Democratic Republic (GDR)",ex:"",cat:"n",mn:"Former East Germany's official name."},
+    {a:"die",w:"Diskriminierung",p:"Diskriminierungen",en:"discrimination",ex:"",cat:"n",mn:"Identical root to English 'discrimination'."},
+    {a:"das",w:"Einwanderungsland",p:"Einwanderungsländer",en:"country of immigration",ex:"",cat:"n",mn:"Einwanderung (immigration) + Land (country)."},
+    {a:"",w:"erlauben",p:"",en:"to allow",ex:"",cat:"v",mn:"er + laub (leave/permission, like 'Urlaub'=vacation) → to grant leave.",pr:"erlaubte",pp:"hat erlaubt"},
+    {a:"",w:"fliehen",p:"",en:"to flee",ex:"",cat:"v",mn:"Sounds like 'flee'.",pr:"floh",pp:"ist geflohen"},
+    {a:"die",w:"Flucht",p:"",en:"flight",ex:"",cat:"n",mn:"Noun of fliehen."},
+    {a:"der",w:"Gastarbeiter",p:"Gastarbeiter",en:"guest worker",ex:"",cat:"n",mn:"Gast (guest) + Arbeiter (worker)."},
+    {a:"die",w:"Gastarbeiterin",p:"Gastarbeiterinnen",en:"guest worker",ex:"",cat:"n",mn:"Feminine form of Gastarbeiter."},
+    {a:"der",w:"Geflüchtete",p:"Geflüchteten",en:"refugee",ex:"",cat:"n",mn:"Past participle of fliehen used as noun: one who has fled."},
+    {a:"die",w:"Geflüchtete",p:"Geflüchteten",en:"refugee",ex:"",cat:"n",mn:"Feminine/generic form of der Geflüchtete."},
+    {a:"die",w:"Generation",p:"Generationen",en:"generation",ex:"",cat:"n",mn:"Identical to English 'generation'."},
+    {a:"das",w:"Heimatland",p:"Heimatländer",en:"homeland",ex:"",cat:"n",mn:"Heimat (home region) + Land (country)."},
+    {a:"die",w:"Integration",p:"",en:"integration",ex:"",cat:"n",mn:"Identical to English 'integration'."},
+    {a:"der",w:"Migrant",p:"Migranten",en:"migrant",ex:"",cat:"n",mn:"Identical root to English 'migrant'."},
+    {a:"die",w:"Migrantin",p:"Migrantinnen",en:"migrant",ex:"",cat:"n",mn:"Feminine form of Migrant."},
+    {a:"die",w:"Migration",p:"Migrationen",en:"migration",ex:"",cat:"n",mn:"Identical to English 'migration'."},
+    {a:"die",w:"Migrationserfahrung",p:"Migrationserfahrungen",en:"migration experience",ex:"",cat:"n",mn:"Migration + Erfahrung (experience)."},
+    {a:"der",w:"Migrationshintergrund",p:"Migrationshintergründe",en:"migration background",ex:"",cat:"n",mn:"Migration + Hintergrund (background)."},
+    {a:"die",w:"Offenheit",p:"",en:"openness",ex:"",cat:"n",mn:"offen (open) + -heit."},
+    {a:"der",w:"Rassismus",p:"",en:"racism",ex:"",cat:"n",mn:"Identical root to English 'racism'."},
+    {a:"die",w:"Regierung",p:"Regierungen",en:"government",ex:"",cat:"n",mn:"regieren (govern) + -ung."},
+    {a:"",w:"selbstverständlich",p:"",en:"of course",ex:"",cat:"adj",mn:"selbst (self) + verständlich (understandable) → understandable by itself."},
+    {a:"die",w:"Toleranz",p:"",en:"tolerance",ex:"",cat:"n",mn:"Identical to English 'tolerance'."},
+    {a:"die",w:"Wirtschaft",p:"",en:"the economy",ex:"",cat:"n",mn:"wirt(schaften) (to manage/host) → managing resources."},
+    {a:"der",w:"Frieden",p:"",en:"peace",ex:"",cat:"n",mn:"Sounds like 'freedom' — peace often brings freedom."},
+    {a:"der",w:"Krieg",p:"Kriege",en:"war",ex:"",cat:"n",mn:"Short and sharp-sounding, like conflict itself."},
+    {a:"der",w:"Zweite Weltkrieg",p:"",en:"Second World War",ex:"",cat:"n",mn:"zweite (second) + Weltkrieg (world war)."},
+    {a:"",w:"Es herrscht Frieden/Krieg.",p:"",en:"There is peace/war.",ex:"",cat:"p",mn:"herrschen (to rule) → peace or war 'reigns'."}
+  ]},
+  {name:"Das war mir nicht bewusst.", items:[
+    {a:"der",w:"Bleistift",p:"Bleistifte",en:"pencil",ex:"",cat:"n",mn:"Blei (lead) + Stift (stick/pen) → lead-stick."},
+    {a:"",w:"ernsthaft = ernst",p:"",en:"serious",ex:"",cat:"adj",mn:"Sounds like the serious name 'Ernest'."},
+    {a:"die",w:"Gewohnheit",p:"Gewohnheiten",en:"habit",ex:"",cat:"n",mn:"gewohnt (used to) + -heit → what you're accustomed to."},
+    {a:"die",w:"Hälfte",p:"Hälften",en:"half",ex:"",cat:"n",mn:"halb (half) + -te."},
+    {a:"",w:"kulturell",p:"",en:"cultural",ex:"",cat:"adj",mn:"Identical root to English 'cultural'."},
+    {a:"das",w:"Missverständnis",p:"Missverständnisse",en:"misunderstanding",ex:"",cat:"n",mn:"miss (wrongly) + Verständnis (understanding)."},
+    {a:"der",w:"Scherz",p:"Scherze",en:"joke",ex:"",cat:"n",mn:"Sounds like 'shirts' — imagine joking about mismatched shirts."},
+    {a:"die",w:"Situation",p:"Situationen",en:"situation",ex:"",cat:"n",mn:"Identical to English 'situation'."},
+    {a:"",w:"spinnen",p:"",en:"to be crazy",ex:"Der Typ spinnt wohl! -> Der Typ ist verrückt.",cat:"v",mn:"Literally 'to spin thread' — picture thoughts spinning out of control.",pr:"spann",pp:"hat gesponnen"},
+    {a:"das",w:"Trinkgeld",p:"Trinkgelder",en:"tip",ex:"",cat:"n",mn:"trinken (drink) + Geld (money) → 'drinking money' left for the waiter."},
+    {a:"",w:"scherzhaft",p:"",en:"joking",ex:"Ich wusste nicht, ob sie ihre Wut scherzhaft übertrieb.",cat:"adj",mn:"Scherz (joke) + -haft (-like)."},
+    {a:"",w:"ernsthaft",p:"",en:"serious",ex:"",cat:"adj",mn:"Ernst (serious) + -haft."},
+    {a:"",w:"den Eindruck haben",p:"",en:"to have the impression",ex:"",cat:"p",mn:"ein (in) + Druck (pressure/print) → something 'imprinted' on you."},
+    {a:"",w:"in Eile sein",p:"",en:"to be in a hurry",ex:"",cat:"p",mn:"Eile sounds like 'ail' — rushed as if you 'ail' from hurry."},
+    {a:"",w:"Mir war nicht bewusst, dass …",p:"",en:"I wasn't aware that …",ex:"",cat:"p",mn:"bewusst (aware, from wissen=to know)."}
+  ]},
+  {name:"Ich bin mehrsprachig aufgewachsen.", items:[
+    {a:"",w:"aufwachsen",p:"",en:"to grow up",ex:"",cat:"v",mn:"auf (up) + wachsen (grow).",pr:"wuchs auf",pp:"ist aufgewachsen"},
+    {a:"die",w:"Chancengleichheit",p:"",en:"equal opportunities",ex:"",cat:"n",mn:"Chance + Gleichheit (equality) → equal chances."},
+    {a:"",w:"fördern",p:"",en:"support financially",ex:"",cat:"v",mn:"Sounds like 'ford' a river — helping someone across.",pr:"förderte",pp:"hat gefördert"},
+    {a:"die",w:"Förderung",p:"Förderungen",en:"financial support",ex:"",cat:"n",mn:"Noun of fördern."},
+    {a:"die",w:"Initiative",p:"Initiativen",en:"initiative",ex:"",cat:"n",mn:"Identical to English 'initiative'."},
+    {a:"die",w:"Staatsangehörigkeit",p:"Staatsangehörigkeiten",en:"citizenship",ex:"",cat:"n",mn:"Staat (state) + angehören (belong to) + -keit."},
+    {a:"",w:"eine ausländische/die deutsche Staatsangehörigkeit haben",p:"",en:"to have foreign/German citizenship",ex:"",cat:"p",mn:"Literal: to have foreign/German citizenship."},
+    {a:"",w:"Ich bin in … aufgewachsen.",p:"",en:"I grew up in …",ex:"",cat:"p",mn:"Using aufwachsen: 'I grew up in…'"},
+    {a:"",w:"Das hängt von der Person/der Sprache/… ab.",p:"",en:"It depends on the person/language/etc.",ex:"",cat:"p",mn:"ab|hängen (depend, lit. 'hang off') → it 'hangs off' something."}
+  ]}
+]},
+{lesson:5, title:"Auf die Gesundheit", sections:[
+  {name:"Ich habe meine Ernährung umgestellt.", items:[
+    {a:"der",w:"Appetit",p:"",en:"appetite",ex:"",cat:"n",mn:"Identical to English 'appetite'."},
+    {a:"die",w:"Bewegung",p:"Bewegungen",en:"movement",ex:"",cat:"n",mn:"bewegen (to move) + -ung."},
+    {a:"die",w:"Diät",p:"Diäten",en:"diet",ex:"",cat:"n",mn:"Identical to English 'diet'."},
+    {a:"die",w:"Droge",p:"Drogen",en:"drug",ex:"",cat:"n",mn:"Sounds identical to English 'drug'."},
+    {a:"der",w:"Druck",p:"",en:"pressure",ex:"",cat:"n",mn:"Think of a truck pressing down on the road."},
+    {a:"",w:"enthalten",p:"",en:"to contain",ex:"",cat:"v",mn:"ent + halten (hold) → to hold something within.",pr:"enthielt",pp:"hat enthalten"},
+    {a:"die",w:"Entspannung",p:"",en:"relaxation",ex:"",cat:"n",mn:"ent + Spannung (tension) → releasing tension."},
+    {a:"die",w:"Ernährung",p:"",en:"nutrition",ex:"",cat:"n",mn:"nähren (nourish) + er-."},
+    {a:"die",w:"Gaststätte",p:"Gaststätten",en:"restaurant",ex:"",cat:"n",mn:"Gast (guest) + Stätte (place) → a place for guests."},
+    {a:"die",w:"Kalorie",p:"Kalorien",en:"calorie",ex:"",cat:"n",mn:"Identical to English 'calorie'."},
+    {a:"die",w:"Kneipe",p:"Kneipen",en:"bar",ex:"",cat:"n",mn:"A cosy little corner pub you slip/'nip' into."},
+    {a:"der",w:"(Zucker-)Konsum",p:"",en:"(sugar) consumption",ex:"",cat:"n",mn:"Zucker (sugar) + Konsum (like 'consume')."},
+    {a:"die",w:"Limonade",p:"Limonaden",en:"lemonade",ex:"",cat:"n",mn:"Identical to English 'lemonade'."},
+    {a:"die",w:"Mahlzeit",p:"Mahlzeiten",en:"meal",ex:"",cat:"n",mn:"mahl- + Zeit (time) → 'meal time'."},
+    {a:"",w:"meditieren",p:"",en:"to meditate",ex:"",cat:"v",mn:"Identical to English 'meditate'.",pr:"meditierte",pp:"hat meditiert"},
+    {a:"der",w:"Nachtisch",p:"Nachtische",en:"dessert",ex:"",cat:"n",mn:"nach (after) + Tisch (table) → what comes after the table/meal."},
+    {a:"das",w:"Nahrungsmittel",p:"",en:"food",ex:"",cat:"n",mn:"Nahrung (nourishment) + Mittel (means)."},
+    {a:"die",w:"Pflaume",p:"Pflaumen",en:"plum",ex:"",cat:"n",mn:"Sounds like 'plum' with a Pf."},
+    {a:"die",w:"Pille = Tablette",p:"Pillen = Tabletten",en:"pill/tablet",ex:"",cat:"n",mn:"Identical to English 'pill/tablet'."},
+    {a:"der",w:"Quark",p:"",en:"quark",ex:"",cat:"n",mn:"Same word as the physics particle — but here a soft curd cheese."},
+    {a:"",w:"rauchen",p:"",en:"to smoke",ex:"",cat:"v",mn:"Rauch (smoke) → to make smoke.",pr:"rauchte",pp:"hat geraucht"},
+    {a:"der",w:"(Nicht-)Raucher",p:"(Nicht-)Raucher",en:"(non-)smoker",ex:"",cat:"n",mn:"One who rauch(t)s, with 'nicht' (not) for non-smoker."},
+    {a:"die",w:"(Nicht-)Raucherin",p:"(Nicht-)Raucherinnen",en:"(non-)smoker",ex:"",cat:"n",mn:"Feminine form of Raucher."},
+    {a:"das",w:"Risiko",p:"Risiken",en:"risk",ex:"",cat:"n",mn:"Identical to English 'risk(o)'."},
+    {a:"die",w:"Sahne",p:"",en:"cream",ex:"",cat:"n",mn:"Picture pouring Sahne into your coffee each morning."},
+    {a:"",w:"schmecken",p:"",en:"to taste",ex:"",cat:"v",mn:"Sounds like 'smack' your lips — good taste.",pr:"schmeckte",pp:"hat geschmeckt"},
+    {a:"das",w:"Schnitzel",p:"",en:"schnitzel",ex:"",cat:"n",mn:"Identical to English 'schnitzel'."},
+    {a:"der",w:"Schritt",p:"Schritte",en:"step",ex:"",cat:"n",mn:"Sounds like the crunch of a footstep."},
+    {a:"das",w:"Steak",p:"Steaks",en:"steak",ex:"",cat:"n",mn:"Identical to English 'steak'."},
+    {a:"",w:"umstellen",p:"",en:"to adjust",ex:"Ich möchte meine Ernährung umstellen.",cat:"v",mn:"um (change) + stellen (place) → to re-arrange your habits.",pr:"stellte um",pp:"hat umgestellt"},
+    {a:"die",w:"Umstellung",p:"Umstellungen",en:"adjustment",ex:"",cat:"n",mn:"Noun of umstellen."},
+    {a:"die",w:"Zigarette",p:"Zigaretten",en:"cigarette",ex:"",cat:"n",mn:"Identical to English 'cigarette'."},
+    {a:"die",w:"Zitrone",p:"Zitronen",en:"lemon",ex:"",cat:"n",mn:"Sounds like 'citron'."},
+    {a:"",w:"abnehmen",p:"",en:"to lose weight",ex:"Ich will kein Gramm abnehmen.",cat:"v",mn:"ab (off) + nehmen (take) → to take weight off.",pr:"nahm ab",pp:"hat abgenommen"},
+    {a:"",w:"zunehmen",p:"",en:"to gain weight",ex:"Sie möchte gerne etwas zunehmen.",cat:"v",mn:"zu (on) + nehmen (take) → to take weight on.",pr:"nahm zu",pp:"hat zugenommen"},
+    {a:"",w:"satt",p:"",en:"full",ex:"Gerichte die satt machen, sind gesünder.",cat:"adj",mn:"Sounds like 'sat' back after a big meal, fully satisfied."},
+    {a:"",w:"hungrig",p:"",en:"hungry",ex:"Tipp: Nicht hungrig einkaufen gehen!",cat:"adj",mn:"Hunger + -ig."},
+    {a:"",w:"tierische Produkte",p:"",en:"animal products",ex:"",cat:"p",mn:"Tier (animal) + -isch."},
+    {a:"",w:"(stark) verarbeitete Lebensmittel",p:"",en:"(highly) processed foods",ex:"",cat:"p",mn:"ver|arbeiten (process) + Lebensmittel (food)."},
+    {a:"",w:"sich vollwertig/vegetarisch/vegan/… ernähren",p:"",en:"to eat a wholesome/vegetarian/vegan/… diet",ex:"",cat:"p",mn:"ernähren (nourish) → to nourish yourself in a certain way."},
+    {a:"",w:"Eine Studie zeigt, dass …",p:"",en:"A study shows that …",ex:"",cat:"p",mn:"zeigen (show) → a study 'shows' that…"}
+  ]},
+  {name:"Deutschland diskutiert über die Zuckersteuer.", items:[
+    {a:"",w:"(sich) entscheiden (für)",p:"",en:"to decide (on sth.)",ex:"",cat:"v",mn:"ent + scheiden (cut/separate, like scissors) → to cut off other options.",pr:"entschied (sich)",pp:"hat (sich) entschieden"},
+    {a:"das",w:"Eis",p:"",en:"ice cream",ex:"",cat:"n",mn:"Sounds like 'ice'."},
+    {a:"der",w:"Geschmack",p:"Geschmäcker",en:"flavour",ex:"",cat:"n",mn:"schmecken (taste) + Ge- → the result of tasting."},
+    {a:"der",w:"Hersteller",p:"Hersteller",en:"manufacturer",ex:"",cat:"n",mn:"her (here) + stellen (make/place) → one who makes things."},
+    {a:"die",w:"Marmelade",p:"Marmeladen",en:"jam",ex:"",cat:"n",mn:"Sounds like 'marmalade'."},
+    {a:"der",w:"Pudding",p:"Puddings",en:"pudding",ex:"",cat:"n",mn:"Identical to English 'pudding'."},
+    {a:"die",w:"(Zucker-)Steuer",p:"(Zucker-)Steuern",en:"(sugar) tax",ex:"",cat:"n",mn:"Steuer sounds like 'steer' — government 'steers' behaviour via tax."},
+    {a:"der",w:"Würfel",p:"Würfel",en:"dice",ex:"",cat:"n",mn:"Picture a die 'falling' as you roll it."},
+    {a:"",w:"Ich bereite meine Mahlzeiten zu Hause zu.",p:"",en:"I prepare my meals at home.",ex:"",cat:"p",mn:"vor|bereiten (prepare) → I prepare my meals at home."}
+  ]},
+  {name:"Bin ich gut genug?", items:[
+    {a:"",w:"aufhören",p:"",en:"to stop",ex:"",cat:"v",mn:"auf (up) + hören (hear) → 'stop, listen up!'",pr:"hörte auf",pp:"hat aufgehört"},
+    {a:"der",w:"Fortschritt",p:"Fortschritte",en:"progress",ex:"",cat:"n",mn:"fort (forward) + Schritt (step) → a step forward."},
+    {a:"die",w:"Maßnahme",p:"Maßnahmen",en:"measure",ex:"",cat:"n",mn:"Maß (measure) + nehmen (take) → a measure taken."},
+    {a:"",w:"optimieren",p:"",en:"to optimise",ex:"",cat:"v",mn:"Identical to English 'optimise'.",pr:"optimierte",pp:"hat optimiert"},
+    {a:"",w:"übertreiben",p:"",en:"to exaggerate",ex:"",cat:"v",mn:"über (over) + treiben (drive) → to drive something over the top.",pr:"übertrieb",pp:"hat übertrieben"},
+    {a:"",w:"versuchen",p:"",en:"to try",ex:"",cat:"v",mn:"ver + suchen (search) → to search for a way.",pr:"versuchte",pp:"hat versucht"},
+    {a:"die",w:"Stärke",p:"Stärken",en:"strength",ex:"",cat:"n",mn:"stark (strong) + -e."},
+    {a:"die",w:"Schwäche",p:"Schwächen",en:"weakness",ex:"",cat:"n",mn:"schwach (weak) + -e."},
+    {a:"",w:"sich unter Druck setzen",p:"",en:"to put yourself under pressure",ex:"",cat:"p",mn:"unter Druck (under pressure) + setzen (put).",pr:"setzte sich unter Druck",pp:"hat sich unter Druck gesetzt"}
+  ]}
+]},
+{lesson:6, title:"Kaufen, kaufen, kaufen", sections:[
+  {name:"Überall ist Werbung", items:[
+    {a:"die",w:"Alternative",p:"Alternativen",en:"alternative",ex:"",cat:"n",mn:"Identical to English 'alternative'."},
+    {a:"die",w:"Dienstleistung",p:"Dienstleistungen",en:"service",ex:"",cat:"n",mn:"Dienst (service/duty) + leisten (perform)."},
+    {a:"der",w:"Einfluss",p:"Einflüsse",en:"influence",ex:"",cat:"n",mn:"ein (in) + Fluss (river) → something 'flowing in' and shaping you."},
+    {a:"der",w:"Follower",p:"Follower",en:"follower",ex:"",cat:"n",mn:"Identical to English 'follower'."},
+    {a:"die",w:"Followerin",p:"Followerinnen",en:"follower",ex:"",cat:"n",mn:"Feminine form of Follower."},
+    {a:"das",w:"Gesetz",p:"Gesetze",en:"law",ex:"",cat:"n",mn:"setzen (set/put) + Ge- → something 'set down' officially."},
+    {a:"der",w:"Influencer",p:"Influencer",en:"influencer",ex:"",cat:"n",mn:"Identical to English 'influencer'."},
+    {a:"die",w:"Influencerin",p:"Influencerinnen",en:"influencer",ex:"",cat:"n",mn:"Feminine form of Influencer."},
+    {a:"der",w:"Konsument",p:"Konsumenten",en:"consumer",ex:"",cat:"n",mn:"Identical root to English 'consumer'."},
+    {a:"die",w:"Konsumentin",p:"Konsumentinnen",en:"consumer",ex:"",cat:"n",mn:"Feminine form of Konsument."},
+    {a:"",w:"konsumieren",p:"",en:"to consume",ex:"",cat:"v",mn:"Identical to English 'consume'.",pr:"konsumierte",pp:"hat konsumiert"},
+    {a:"das",w:"Plakat",p:"Plakate",en:"poster",ex:"",cat:"n",mn:"Sounds like 'placard'."},
+    {a:"der",w:"Prospekt",p:"Prospekte",en:"brochure",ex:"",cat:"n",mn:"Identical to English 'prospectus'."},
+    {a:"der",w:"Rundfunk",p:"",en:"radio",ex:"",cat:"n",mn:"rund (around) + Funk (spark/signal) → signals sent around."},
+    {a:"das",w:"Schaufenster",p:"Schaufenster",en:"shop window",ex:"",cat:"n",mn:"schauen (look) + Fenster (window)."},
+    {a:"der",w:"Skandal",p:"Skandale",en:"scandal",ex:"",cat:"n",mn:"Identical to English 'scandal'."},
+    {a:"",w:"überzeugen von",p:"",en:"to convince of",ex:"",cat:"v",mn:"über (over) + zeugen (testify) → to testify over someone's doubts.",pr:"überzeugte von",pp:"hat überzeugt von"},
+    {a:"",w:"warnen (vor)",p:"",en:"to warn (against)",ex:"",cat:"v",mn:"Identical to English 'warn'.",pr:"warnte (vor)",pp:"hat gewarnt (vor)"},
+    {a:"der",w:"Werbeslogan",p:"Werbeslogans",en:"advertising slogan",ex:"",cat:"n",mn:"Werbung (advertising) + Slogan."},
+    {a:"die",w:"Werbung",p:"Werbungen",en:"advertisement",ex:"",cat:"n",mn:"werben (woo/advertise) + -ung → the act of wooing customers."},
+    {a:"die",w:"Zielgruppe",p:"Zielgruppen",en:"target group",ex:"",cat:"n",mn:"Ziel (target) + Gruppe (group)."},
+    {a:"",w:"Formen der Werbung = Arten von Werbung",p:"",en:"forms/types of advertising",ex:"",cat:"p",mn:"Literal: forms/types of advertising."}
+  ]},
+  {name:"Ich denke darüber nach, was ich kaufe.", items:[
+    {a:"",w:"defekt = kaputt",p:"",en:"defective/broken",ex:"",cat:"adj",mn:"Identical root to English 'defect'."},
+    {a:"der",w:"Empfänger",p:"Empfänger",en:"recipient",ex:"",cat:"n",mn:"empfangen (receive) + -er → one who receives."},
+    {a:"die",w:"Empfängerin",p:"Empfängerinnen",en:"recipient",ex:"",cat:"n",mn:"Feminine form of Empfänger."},
+    {a:"",w:"erkennen (an)",p:"",en:"to recognise",ex:"",cat:"v",mn:"er + kennen (know) → to fully 'know' something.",pr:"erkannte",pp:"hat erkannt"},
+    {a:"",w:"fordern",p:"",en:"to demand",ex:"",cat:"v",mn:"Sounds like 'force' a demand.",pr:"forderte",pp:"hat gefordert"},
+    {a:"",w:"hübsch",p:"",en:"pretty",ex:"",cat:"adj",mn:"Quick and neat-sounding, like a tidy little hub of style."},
+    {a:"das",w:"Kleid",p:"Kleider",en:"dress",ex:"",cat:"n",mn:"Sounds like English 'clad' (clothed)."},
+    {a:"die",w:"Konsumgewohnheiten (Pl.)",p:"",en:"consumption habits",ex:"",cat:"n",mn:"Konsum (consumption) + Gewohnheiten (habits)."},
+    {a:"der",w:"Kundenservice",p:"Kundenservices",en:"customer service",ex:"",cat:"n",mn:"Kunde (customer) + Service."},
+    {a:"das",w:"Material",p:"Materialien",en:"material",ex:"",cat:"n",mn:"Identical to English 'material'."},
+    {a:"",w:"nachdenken über",p:"",en:"to think about",ex:"",cat:"v",mn:"nach (after) + denken (think) → to think it over.",pr:"dachte nach",pp:"hat nachgedacht"},
+    {a:"das",w:"Onlineshopping",p:"",en:"online shopping",ex:"",cat:"n",mn:"Identical to English 'online shopping'."},
+    {a:"das",w:"Outfit",p:"Outfits",en:"outfit",ex:"",cat:"n",mn:"Identical to English 'outfit'."},
+    {a:"das",w:"Paket",p:"Pakete",en:"package",ex:"",cat:"n",mn:"Identical to English 'packet/package'."},
+    {a:"der",w:"Schmuck",p:"",en:"jewellery",ex:"",cat:"n",mn:"Sounds like 'shmuck' — but here it's the sparkly stuff people wear."},
+    {a:"die",w:"Tasche",p:"Taschen",en:"bag",ex:"",cat:"n",mn:"Picture tucking your wallet into your Tasche."},
+    {a:"",w:"umtauschen",p:"",en:"to exchange",ex:"",cat:"v",mn:"um (around) + tauschen (swap) → to swap something around.",pr:"tauschte um",pp:"hat umgetauscht"},
+    {a:"das",w:"(Kauf-, Konsum-)Verhalten",p:"",en:"(buying, consumption) behaviour",ex:"",cat:"n",mn:"Kauf (purchase) + Verhalten (behaviour)."},
+    {a:"der",w:"Verkäufer",p:"Verkäufer",en:"seller",ex:"",cat:"n",mn:"verkaufen (sell) + -er."},
+    {a:"die",w:"Verkäuferin",p:"Verkäuferinnen",en:"seller",ex:"",cat:"n",mn:"Feminine form of Verkäufer."},
+    {a:"der",w:"(Paket-)Versand",p:"",en:"(parcel) shipping",ex:"",cat:"n",mn:"Paket (package) + versenden (send)."},
+    {a:"die",w:"Ware",p:"Waren",en:"goods",ex:"",cat:"n",mn:"Sounds like 'ware' in 'hardware/software'."},
+    {a:"",w:"einen Artikel zurückgeben/zurückschicken",p:"",en:"to return/send back an item",ex:"",cat:"p",mn:"zurück (back) + geben/schicken (give/send)."},
+    {a:"",w:"etwas online bestellen = etwas online kaufen",p:"",en:"to order/buy something online",ex:"",cat:"p",mn:"bestellen — placing an order, like at a market stall, but online."},
+    {a:"",w:"Ich mache mir darüber keine Gedanken.",p:"",en:"I'm not worried about it.",ex:"",cat:"p",mn:"Gedanken (thoughts) → I don't make myself any thoughts about it."},
+    {a:"",w:"Das Geld wird zurückerstattet.",p:"",en:"The money will be refunded.",ex:"",cat:"p",mn:"zurück (back) + erstatten (reimburse)."},
+    {a:"",w:"Die Kleidung ist zu eng/groß.",p:"",en:"The clothes are too tight/too big.",ex:"",cat:"p",mn:"eng (narrow) vs groß (big)."},
+    {a:"",w:"Ich möchte einen Artikel reklamieren.",p:"",en:"I'd like to complain about an item.",ex:"",cat:"p",mn:"reklamieren sounds like English 'reclaim'."},
+    {a:"",w:"Meine Bestellnummer ist die …",p:"",en:"My order number is …",ex:"",cat:"p",mn:"Bestellung (order) + Nummer (number)."}
+  ]},
+  {name:"Ich konsumiere nachhaltig für die Zukunft.", items:[
+    {a:"",w:"sich einsetzen für",p:"",en:"to stand up for",ex:"",cat:"v",mn:"ein (in) + setzen (put) → to put yourself in for a cause.",pr:"setzte sich ein",pp:"hat sich eingesetzt"},
+    {a:"die",w:"Frist",p:"Fristen",en:"term",ex:"",cat:"n",mn:"Sounds like 'first' — act by the 'first' deadline."},
+    {a:"die",w:"Organisation",p:"Organisationen",en:"organisation",ex:"",cat:"n",mn:"Identical to English 'organisation'."},
+    {a:"der",w:"(Umwelt-, Verbraucher-)Schutz",p:"",en:"(environmental, consumer) protection",ex:"",cat:"n",mn:"schützen (protect) → protection."},
+    {a:"der",w:"Verbraucher",p:"Verbraucher",en:"consumer",ex:"",cat:"n",mn:"ver + brauchen (use/need, like the classic verb!) → one who 'uses up' goods."},
+    {a:"die",w:"Verbraucherin",p:"Verbraucherinnen",en:"consumer",ex:"",cat:"n",mn:"Feminine form of Verbraucher."},
+    {a:"",w:"widerrufen",p:"",en:"to withdraw",ex:"",cat:"v",mn:"wider (against/back) + rufen (call) → to 'call back' a decision.",pr:"widerrief",pp:"hat widerrufen"},
+    {a:"das",w:"Widerrufsrecht",p:"Widerrufsrechte",en:"right of withdrawal",ex:"",cat:"n",mn:"widerrufen + Recht (right)."},
+    {a:"",w:"verpackt",p:"",en:"packed",ex:"Unverpackte Lebensmittel sind umweltfreundlich.",cat:"adj",mn:"ver + packen (pack)."},
+    {a:"",w:"unverpackt",p:"",en:"unpacked",ex:"",cat:"adj",mn:"un + verpackt → not packed."},
+    {a:"",w:"Ich unterstütze regionale Produzenten.",p:"",en:"I support regional producers.",ex:"",cat:"p",mn:"unterstützen (support) + regional + Produzenten (producers)."}
+  ]}
+]},
+{lesson:7, title:"Man lernt nie aus", sections:[
+  {name:"Wie lernt der Mensch?", items:[
+    {a:"",w:"abstrakt",p:"",en:"abstract",ex:"",cat:"adj",mn:"Identical to English 'abstract'."},
+    {a:"",w:"bereits",p:"",en:"already",ex:"",cat:"p",mn:"Sounds like 'bear-eyes' — imagine a bear already opened its eyes before you arrived."},
+    {a:"",w:"beschreiben",p:"",en:"to describe",ex:"",cat:"v",mn:"be + schreiben (write) → to write about something.",pr:"beschrieb",pp:"hat beschrieben"},
+    {a:"",w:"effektiv",p:"",en:"effective",ex:"",cat:"adj",mn:"Identical to English 'effective'."},
+    {a:"das",w:"Gehirn",p:"Gehirne",en:"brain",ex:"",cat:"n",mn:"Hums like 'brain' with a G in front — das Gehirn."},
+    {a:"",w:"intensiv",p:"",en:"intensive",ex:"",cat:"adj",mn:"Identical to English 'intensive'."},
+    {a:"die",w:"Kapazität",p:"Kapazitäten",en:"capacity",ex:"",cat:"n",mn:"Identical to English 'capacity'."},
+    {a:"die",w:"Kompetenz",p:"Kompetenzen",en:"expertise",ex:"",cat:"n",mn:"Identical root to English 'competence'."},
+    {a:"",w:"komplex",p:"",en:"complex",ex:"",cat:"adj",mn:"Identical to English 'complex'."},
+    {a:"das",w:"Kurzzeitgedächtnis",p:"",en:"short-term memory",ex:"",cat:"n",mn:"kurz (short) + Zeit (time) + Gedächtnis (memory)."},
+    {a:"das",w:"Langzeitgedächtnis",p:"",en:"long-term memory",ex:"",cat:"n",mn:"lang (long) + Zeit (time) + Gedächtnis (memory)."},
+    {a:"der",w:"Lernerfolg",p:"Lernerfolge",en:"learning achievement",ex:"",cat:"n",mn:"lernen (learn) + Erfolg (success)."},
+    {a:"",w:"lösen",p:"",en:"to solve",ex:"",cat:"v",mn:"Sounds like 'loosen' a knot — to untangle a problem.",pr:"löste",pp:"hat gelöst"},
+    {a:"",w:"motorisch",p:"",en:"motor",ex:"",cat:"adj",mn:"Identical root to English 'motor'."},
+    {a:"der",w:"Podcast",p:"Podcasts",en:"podcast",ex:"",cat:"n",mn:"Identical to English 'podcast'."},
+    {a:"",w:"relevant",p:"",en:"relevant",ex:"",cat:"adj",mn:"Identical to English 'relevant'."},
+    {a:"der",w:"Schlaf",p:"",en:"sleep",ex:"",cat:"n",mn:"Rhymes with 'half' — half your life is der Schlaf."},
+    {a:"der",w:"Soft Skill",p:"Soft Skills",en:"soft skill",ex:"",cat:"n",mn:"Identical to English 'soft skill'."},
+    {a:"die",w:"Teamfähigkeit",p:"",en:"teamwork",ex:"",cat:"n",mn:"Team + Fähigkeit (ability) → team-ability."},
+    {a:"der",w:"Test",p:"Tests",en:"test",ex:"",cat:"n",mn:"Identical to English 'test'."},
+    {a:"",w:"verarbeiten",p:"",en:"to process",ex:"",cat:"v",mn:"ver + arbeiten (work) → to work something through.",pr:"verarbeitete",pp:"hat verarbeitet"},
+    {a:"",w:"vermitteln",p:"",en:"to convey",ex:"",cat:"v",mn:"ver + Mitte (middle) → to stand in the middle and pass something on.",pr:"vermittelte",pp:"hat vermittelt"},
+    {a:"",w:"vorstellen",p:"",en:"to imagine",ex:"",cat:"v",mn:"vor (before) + stellen (place) → to place a picture before your mind.",pr:"stellte vor",pp:"hat vorgestellt"},
+    {a:"das",w:"Vorwissen",p:"",en:"prior knowledge",ex:"",cat:"n",mn:"vor (before) + Wissen (knowledge)."},
+    {a:"die",w:"Wiederholung",p:"Wiederholungen",en:"repetition",ex:"",cat:"n",mn:"wieder (again) + holen (fetch) → fetching it again."},
+    {a:"",w:"Stell dir mal vor, …",p:"",en:"Just imagine …",ex:"",cat:"p",mn:"Literal use of vorstellen: 'picture this…'"}
+  ]},
+  {name:"Kopf oder Herz?", items:[
+    {a:"",w:"analysieren",p:"",en:"to analyse",ex:"",cat:"v",mn:"Identical to English 'analyse'.",pr:"analysierte",pp:"hat analysiert"},
+    {a:"die",w:"Eigenschaft",p:"Eigenschaften",en:"feature",ex:"",cat:"n",mn:"eigen (own) + -schaft → what's 'your own' trait."},
+    {a:"die",w:"Emotion",p:"Emotionen",en:"emotion",ex:"",cat:"n",mn:"Identical to English 'emotion'."},
+    {a:"",w:"emotional",p:"",en:"emotional",ex:"",cat:"adj",mn:"Identical to English 'emotional'."},
+    {a:"das",w:"Ergebnis",p:"Ergebnisse",en:"result",ex:"",cat:"n",mn:"er + geben (give) → what a process 'gives out'."},
+    {a:"der",w:"Experte",p:"Experten",en:"expert",ex:"",cat:"n",mn:"Identical root to English 'expert'."},
+    {a:"die",w:"Expertin",p:"Expertinnen",en:"expert",ex:"",cat:"n",mn:"Feminine form of Experte."},
+    {a:"die",w:"Fähigkeit",p:"Fähigkeiten",en:"ability",ex:"",cat:"n",mn:"fähig (capable) + -keit."},
+    {a:"",w:"hilfreich",p:"",en:"helpful",ex:"",cat:"adj",mn:"Hilfe (help) + reich (rich) → 'rich in help'."},
+    {a:"der",w:"Hörer",p:"Hörer",en:"listener",ex:"",cat:"n",mn:"hören (hear) + -er → one who hears."},
+    {a:"die",w:"Hörerin",p:"Hörerinnen",en:"listener",ex:"",cat:"n",mn:"Feminine form of Hörer."},
+    {a:"die",w:"Intelligenz",p:"Intelligenzen",en:"intelligence",ex:"",cat:"n",mn:"Identical to English 'intelligence'."},
+    {a:"der",w:"Intelligenzquotient",p:"Intelligenzquotienten",en:"intelligence quotient",ex:"",cat:"n",mn:"Intelligenz + Quotient → IQ, same logic as English."},
+    {a:"der",w:"Lernprozess",p:"Lernprozesse",en:"learning process",ex:"",cat:"n",mn:"lernen (learn) + Prozess (process)."},
+    {a:"",w:"motivieren",p:"",en:"motivate",ex:"",cat:"v",mn:"Identical to English 'motivate'.",pr:"motivierte",pp:"hat motiviert"},
+    {a:"die",w:"Persönlichkeitsentwicklung",p:"Persönlichkeitsentwicklungen",en:"personal development",ex:"",cat:"n",mn:"Persönlichkeit (personality) + Entwicklung (development)."},
+    {a:"die",w:"Sendung",p:"Sendungen",en:"programme",ex:"",cat:"n",mn:"senden (broadcast) + -ung → what's broadcast."},
+    {a:"die",w:"Studie",p:"Studien",en:"study",ex:"",cat:"n",mn:"Identical to English 'study'."},
+    {a:"",w:"theoretisch",p:"",en:"theoretical",ex:"",cat:"adj",mn:"Identical to English 'theoretical'."},
+    {a:"",w:"verlernen",p:"",en:"to unlearn",ex:"",cat:"v",mn:"ver + lernen (learn) → to 'un-learn'.",pr:"verlernte",pp:"hat verlernt"},
+    {a:"",w:"zeigen",p:"",en:"to show",ex:"",cat:"v",mn:"Pointing something out dramatically = to show.",pr:"zeigte",pp:"hat gezeigt"},
+    {a:"",w:"eine Rolle spielen",p:"",en:"to play a role",ex:"",cat:"p",mn:"Rolle (role) + spielen (play)."}
+  ]},
+  {name:"Mein Opa lernt Englisch.", items:[
+    {a:"",w:"damals",p:"",en:"back then",ex:"",cat:"p",mn:"da (then) + mal (time/once) → back then."},
+    {a:"",w:"deutlich",p:"",en:"clear",ex:"",cat:"adj",mn:"deuten (point/indicate) + -lich → clearly pointed-out."},
+    {a:"der",w:"Elternteil",p:"Elternteile",en:"parent",ex:"",cat:"n",mn:"Eltern (parents) + Teil (part) → one part of the parent-pair."},
+    {a:"",w:"extrem",p:"",en:"extreme",ex:"",cat:"adj",mn:"Identical to English 'extreme'."},
+    {a:"der",w:"Faktor",p:"Faktoren",en:"factor",ex:"",cat:"n",mn:"Identical to English 'factor'."},
+    {a:"die",w:"Finanzen (Pl.)",p:"",en:"finances",ex:"",cat:"n",mn:"Identical root to English 'finances'."},
+    {a:"die",w:"Motivation",p:"Motivationen",en:"motivation",ex:"",cat:"n",mn:"Identical to English 'motivation'."},
+    {a:"",w:"nah",p:"",en:"near",ex:"",cat:"adj",mn:"'Nah, it's not far, it's nah (near)!'"},
+    {a:"das",w:"Schulfach",p:"Schulfächer",en:"school subject",ex:"",cat:"n",mn:"Schule (school) + Fach (subject/compartment)."},
+    {a:"",w:"Herzlich willkommen!",p:"",en:"Welcome!",ex:"",cat:"p",mn:"Herz (heart) + -lich → 'heartily welcome'."}
+  ]}
+]},
+{lesson:8, title:"Gemeinsam in Vielfalt", sections:[
+  {name:"So unterschiedlich sind wir!", items:[
+    {a:"der",w:"Anhänger",p:"Anhänger",en:"supporter",ex:"Die Anhänger von Judentum, Christentum und Islam haben auch Gemeinsamkeiten.",cat:"n",mn:"an + hängen (hang onto) → one who 'hangs onto' a belief."},
+    {a:"die",w:"Anhängerin",p:"Anhängerinnen",en:"supporter",ex:"",cat:"n",mn:"Feminine form of Anhänger."},
+    {a:"der",w:"Anteil",p:"Anteile",en:"share",ex:"",cat:"n",mn:"an + Teil (part) → the part 'attached' to you."},
+    {a:"",w:"beten",p:"",en:"to pray",ex:"",cat:"v",mn:"Sounds like 'bay-ten' — kneeling calmly by the bay to pray.",pr:"betete",pp:"hat gebetet"},
+    {a:"der",w:"Buddhismus",p:"",en:"Buddhism",ex:"",cat:"n",mn:"Identical to English 'Buddhism'."},
+    {a:"der",w:"Christ",p:"Christen",en:"Christian",ex:"",cat:"n",mn:"Identical to English 'Christ(ian)'."},
+    {a:"die",w:"Christin",p:"Christinnen",en:"Christian",ex:"",cat:"n",mn:"Feminine form of Christ."},
+    {a:"das",w:"Christentum",p:"",en:"Christianity",ex:"",cat:"n",mn:"Christ + -tum (-dom) → Christianity."},
+    {a:"",w:"ehren",p:"",en:"to honour",ex:"",cat:"v",mn:"Ehre (honour) → to honour.",pr:"ehrte",pp:"hat geehrt"},
+    {a:"die",w:"Entwicklung",p:"",en:"development",ex:"",cat:"n",mn:"entwickeln (develop) + -ung."},
+    {a:"",w:"etwa",p:"",en:"approximately",ex:"",cat:"p",mn:"Sounds like 'et-vah' — roughly, approximately."},
+    {a:"das",w:"Geschlecht",p:"Geschlechter",en:"gender",ex:"",cat:"n",mn:"Think of a family tree 'lecht'-branching into genders."},
+    {a:"der",w:"Glaube",p:"",en:"faith",ex:"",cat:"n",mn:"glauben (to believe) → faith."},
+    {a:"der",w:"Gläubige",p:"Gläubigen",en:"believer",ex:"",cat:"n",mn:"One who glaubt (believes)."},
+    {a:"die",w:"Gläubige",p:"Gläubigen",en:"believer",ex:"",cat:"n",mn:"Feminine/generic form of der Gläubige."},
+    {a:"der",w:"Gott",p:"Götter",en:"God",ex:"",cat:"n",mn:"Sounds identical to English 'God'."},
+    {a:"das",w:"Grundgesetz",p:"",en:"constitution",ex:"",cat:"n",mn:"Grund (basic/ground) + Gesetz (law) → the basic law."},
+    {a:"",w:"heilig",p:"",en:"holy",ex:"",cat:"adj",mn:"Heil (salvation/wholeness) + -ig → holy."},
+    {a:"die",w:"Herkunft",p:"Herkünfte",en:"origin",ex:"",cat:"n",mn:"her (from) + Kunft (coming) → where one comes from."},
+    {a:"der",w:"Hinduismus",p:"",en:"Hinduism",ex:"",cat:"n",mn:"Identical to English 'Hinduism'."},
+    {a:"der",w:"Islam",p:"",en:"Islam",ex:"",cat:"n",mn:"Identical to English 'Islam'."},
+    {a:"der",w:"Jude",p:"Juden",en:"Jew",ex:"",cat:"n",mn:"Sounds like 'you-de' → der Jude."},
+    {a:"die",w:"Jüdin",p:"Jüdinnen",en:"Jew",ex:"",cat:"n",mn:"Feminine form of Jude."},
+    {a:"das",w:"Judentum",p:"",en:"Judaism",ex:"",cat:"n",mn:"Jude + -tum → Judaism."},
+    {a:"die",w:"Milliarde",p:"Milliarden",en:"billion",ex:"",cat:"n",mn:"Sounds like 'milliard' (British word for billion)."},
+    {a:"der",w:"Muslim",p:"Muslime",en:"Muslim",ex:"",cat:"n",mn:"Identical to English 'Muslim'."},
+    {a:"die",w:"Muslimin",p:"Musliminnen",en:"Muslim",ex:"",cat:"n",mn:"Feminine form of Muslim."},
+    {a:"",w:"n. Chr. (nach Christus)",p:"",en:"AD (after Christ)",ex:"",cat:"p",mn:"Abbreviation like AD: 'nach Christus' = after Christ."},
+    {a:"",w:"regional",p:"",en:"regional",ex:"",cat:"adj",mn:"Identical to English 'regional'."},
+    {a:"die",w:"Religion",p:"Religionen",en:"religion",ex:"",cat:"n",mn:"Identical to English 'religion'."},
+    {a:"der",w:"Teilnehmende",p:"Teilnehmenden",en:"participant",ex:"",cat:"n",mn:"teil|nehmen (take part) → one taking part."},
+    {a:"die",w:"Teilnehmende",p:"Teilnehmenden",en:"participant",ex:"",cat:"n",mn:"Feminine/generic form of der Teilnehmende."},
+    {a:"",w:"unterscheiden",p:"",en:"to differentiate",ex:"",cat:"v",mn:"unter (among) + scheiden (separate) → to separate among options.",pr:"unterschied",pp:"hat unterschieden"},
+    {a:"",w:"unterschiedlich",p:"",en:"different",ex:"",cat:"adj",mn:"Adjective of unterscheiden: differing."},
+    {a:"die",w:"Vielfalt",p:"",en:"diversity",ex:"",cat:"n",mn:"viel (many) + Falt(en) (folds) → many folds/forms."},
+    {a:"",w:"weltweit",p:"",en:"worldwide",ex:"",cat:"adj",mn:"Welt (world) + weit (wide)."},
+    {a:"die",w:"Zuwanderung",p:"",en:"immigration",ex:"",cat:"n",mn:"zu + wandern (wander) → wandering into a country."},
+    {a:"",w:"zwar",p:"",en:"namely",ex:"",cat:"p",mn:"Sounds like 'zvar' — used to concede a point precisely."}
+  ]},
+  {name:"Manchmal fühle ich mich fremd.", items:[
+    {a:"",w:"dazugehören",p:"",en:"to belong",ex:"",cat:"v",mn:"dazu (to it) + gehören (belong).",pr:"gehörte dazu",pp:"hat dazugehört"},
+    {a:"",w:"jemanden annehmen",p:"",en:"to accept someone",ex:"",cat:"p",mn:"an + nehmen (take) → to take someone in.",pr:"nahm an",pp:"hat angenommen"},
+    {a:"",w:"jemanden ablehnen",p:"",en:"to reject someone",ex:"",cat:"p",mn:"ab + lehnen (lean/decline) → to lean away from someone.",pr:"lehnte ab",pp:"hat abgelehnt"},
+    {a:"",w:"sich fremd fühlen",p:"",en:"to feel alienated",ex:"",cat:"p",mn:"fremd (foreign) + fühlen (feel) → to feel foreign.",pr:"fühlte sich fremd",pp:"hat sich fremd gefühlt"},
+    {a:"",w:"sich etw. leisten können",p:"",en:"to be able to afford something",ex:"",cat:"p",mn:"leisten (afford/achieve) + können (can)."},
+    {a:"",w:"Kontakte knüpfen",p:"",en:"to establish contacts",ex:"",cat:"p",mn:"knüpfen sounds like 'knot' — to tie contacts together.",pr:"knüpfte",pp:"hat geknüpft"}
+  ]},
+  {name:"Ein Leben ohne Sport kann ich mir nicht vorstellen!", items:[
+    {a:"die",w:"Einschränkung",p:"Einschränkungen",en:"restriction",ex:"",cat:"n",mn:"ein + Schrank (cupboard, related to 'confine') + -ung → boxing something in."},
+    {a:"",w:"jedoch",p:"",en:"however",ex:"",cat:"p",mn:"je (ever) + doch (yet) → 'however'."},
+    {a:"die",w:"Leichtathletik",p:"",en:"track and field",ex:"",cat:"n",mn:"leicht (light) + Athletik → track and field."},
+    {a:"die",w:"Meisterschaft",p:"Meisterschaften",en:"championship",ex:"",cat:"n",mn:"Meister (master/champion) + -schaft."},
+    {a:"die",w:"Religionsfreiheit",p:"",en:"religious freedom",ex:"",cat:"n",mn:"Religion + Freiheit (freedom)."},
+    {a:"",w:"sich etw. zutrauen",p:"",en:"to have the confidence to do sth.",ex:"",cat:"p",mn:"zu + trauen (trust) → to trust yourself to do it."},
+    {a:"der",w:"Sieger",p:"Sieger",en:"winner",ex:"",cat:"n",mn:"Sieg (victory) + -er."},
+    {a:"die",w:"Siegerin",p:"Siegerinnen",en:"winner",ex:"",cat:"n",mn:"Feminine form of Sieger."},
+    {a:"der",w:"Sportler",p:"Sportler",en:"athlete",ex:"",cat:"n",mn:"Sport + -ler → one who does sport."},
+    {a:"die",w:"Sportlerin",p:"Sportlerinnen",en:"athlete",ex:"",cat:"n",mn:"Feminine form of Sportler."},
+    {a:"die",w:"Sportveranstaltung",p:"Sportveranstaltungen",en:"sporting event",ex:"",cat:"n",mn:"Sport + Veranstaltung (event)."},
+    {a:"der",w:"Sportverein",p:"Sportvereine",en:"sports club",ex:"",cat:"n",mn:"Sport + Verein (club)."},
+    {a:"der",w:"Standpunkt",p:"Standpunkte",en:"point of view",ex:"",cat:"n",mn:"Stand (stand) + Punkt (point) → the point where you stand."},
+    {a:"der",w:"Wettkampf",p:"Wettkämpfe",en:"competition",ex:"",cat:"n",mn:"Wett(e) (bet/contest) + Kampf (fight)."},
+    {a:"der",w:"Zuschauer",p:"Zuschauer",en:"spectator",ex:"",cat:"n",mn:"zu + schauen (look) → one who looks on."},
+    {a:"die",w:"Zuschauerin",p:"Zuschauerinnen",en:"spectator",ex:"",cat:"n",mn:"Feminine form of Zuschauer."}
+  ]}
+]},
+{lesson:9, title:"Für eine nachhaltigere Zukunft", sections:[
+  {name:"Ich wohne nachhaltig.", items:[
+    {a:"",w:"absolut",p:"",en:"absolutely",ex:"",cat:"adj",mn:"Identical to English 'absolute(ly)'."},
+    {a:"der",w:"Architekt",p:"Architekten",en:"architect",ex:"",cat:"n",mn:"Identical to English 'architect'."},
+    {a:"die",w:"Architektin",p:"Architektinnen",en:"architect",ex:"",cat:"n",mn:"Feminine form of Architekt."},
+    {a:"der",w:"Aspekt",p:"Aspekte",en:"aspect",ex:"",cat:"n",mn:"Identical to English 'aspect'."},
+    {a:"",w:"autofrei",p:"",en:"car-free",ex:"",cat:"adj",mn:"Auto + frei (free) → car-free."},
+    {a:"",w:"automatisch",p:"",en:"automatic",ex:"",cat:"adj",mn:"Identical to English 'automatic'."},
+    {a:"der",w:"Bau",p:"Bauten",en:"construction",ex:"",cat:"n",mn:"bauen (to build) → a construction."},
+    {a:"",w:"billig",p:"",en:"cheap",ex:"",cat:"adj",mn:"Sounds like 'bill-ig' — a cheap bill."},
+    {a:"der",w:"Bürgersteig",p:"Bürgersteige",en:"pavement",ex:"",cat:"n",mn:"Bürger (citizen) + Steig (path) → citizens' path."},
+    {a:"",w:"durch",p:"",en:"through",ex:"",cat:"p",mn:"Rhythmically close to English 'through' — durch."},
+    {a:"die",w:"Emission",p:"Emissionen",en:"emission",ex:"",cat:"n",mn:"Identical to English 'emission'."},
+    {a:"die",w:"Energie",p:"Energien",en:"energy",ex:"",cat:"n",mn:"Identical to English 'energy'."},
+    {a:"",w:"energieeffizient",p:"",en:"energy-efficient",ex:"",cat:"adj",mn:"Energie + effizient (efficient)."},
+    {a:"",w:"erfüllen",p:"",en:"to fulfil",ex:"",cat:"v",mn:"er + füllen (fill) → to fill something up completely.",pr:"erfüllte",pp:"hat erfüllt"},
+    {a:"die",w:"Forschung",p:"Forschungen",en:"research",ex:"",cat:"n",mn:"forschen (to research) + -ung."},
+    {a:"der",w:"Fußgänger",p:"Fußgänger",en:"pedestrian",ex:"",cat:"n",mn:"Fuß (foot) + Gänger (goer, from gehen) → one who goes on foot."},
+    {a:"die",w:"Fußgängerin",p:"Fußgängerinnen",en:"pedestrian",ex:"",cat:"n",mn:"Feminine form of Fußgänger."},
+    {a:"die",w:"Fußgängerzone",p:"Fußgängerzonen",en:"pedestrian zone",ex:"",cat:"n",mn:"Fußgänger + Zone."},
+    {a:"das",w:"Gebäude",p:"Gebäude",en:"building",ex:"",cat:"n",mn:"bauen (to build) hides inside Gebäude."},
+    {a:"die",w:"Grünfläche",p:"Grünflächen",en:"green area",ex:"",cat:"n",mn:"grün (green) + Fläche (area)."},
+    {a:"die",w:"Infrastruktur",p:"Infrastrukturen",en:"infrastructure",ex:"",cat:"n",mn:"Identical to English 'infrastructure'."},
+    {a:"das",w:"Kraftwerk",p:"Kraftwerke",en:"power plant",ex:"",cat:"n",mn:"Kraft (power) + Werk (works/plant)."},
+    {a:"",w:"sich lohnen",p:"",en:"to be worthwhile",ex:"",cat:"v",mn:"Lohn (wage/reward) → to yield a reward.",pr:"lohnte sich",pp:"hat sich gelohnt"},
+    {a:"die",w:"Mobilität",p:"",en:"mobility",ex:"",cat:"n",mn:"Identical to English 'mobility'."},
+    {a:"die",w:"Nachhaltigkeit",p:"",en:"sustainability",ex:"",cat:"n",mn:"nachhalten (sustain, lit. 'hold after') + -igkeit."},
+    {a:"der",w:"Planet",p:"Planeten",en:"planet",ex:"",cat:"n",mn:"Identical to English 'planet'."},
+    {a:"die",w:"Politik",p:"",en:"politics",ex:"",cat:"n",mn:"Identical root to English 'politics'."},
+    {a:"die",w:"Ressource",p:"Ressourcen",en:"resource",ex:"",cat:"n",mn:"Identical to English 'resource'."},
+    {a:"",w:"retten",p:"",en:"to rescue",ex:"",cat:"v",mn:"Picture firefighters in red retten (rescuing) someone.",pr:"rettete",pp:"hat gerettet"},
+    {a:"",w:"schädlich",p:"",en:"harmful",ex:"",cat:"adj",mn:"Schaden (damage) + -lich → damage-causing."},
+    {a:"die",w:"Solaranlage",p:"Solaranlagen",en:"solar system",ex:"",cat:"n",mn:"Solar + Anlage (installation)."},
+    {a:"die",w:"Sonnenenergie",p:"Sonnenenergien",en:"solar energy",ex:"",cat:"n",mn:"Sonne (sun) + Energie."},
+    {a:"der",w:"Spezialist",p:"Spezialisten",en:"specialist",ex:"",cat:"n",mn:"Identical to English 'specialist'."},
+    {a:"die",w:"Spezialistin",p:"Spezialistinnen",en:"specialist",ex:"",cat:"n",mn:"Feminine form of Spezialist."},
+    {a:"",w:"sich spezialisieren (auf)",p:"",en:"to specialise (in)",ex:"",cat:"v",mn:"Identical to English 'specialise'.",pr:"spezialisierte sich",pp:"hat sich spezialisiert"},
+    {a:"der",w:"Strom",p:"",en:"power",ex:"",cat:"n",mn:"Sounds like 'stream' — electricity flows like a stream."},
+    {a:"die",w:"Subvention",p:"Subventionen",en:"subsidy",ex:"",cat:"n",mn:"Identical to English 'subvention/subsidy'."},
+    {a:"die",w:"Technik",p:"Techniken",en:"technology",ex:"",cat:"n",mn:"Identical root to English 'technique'."},
+    {a:"",w:"umwandeln",p:"",en:"to convert",ex:"",cat:"v",mn:"um (change) + wandeln (transform) → to transform.",pr:"wandelte um",pp:"hat umgewandelt"},
+    {a:"der",w:"Verbrauch",p:"",en:"consumption",ex:"",cat:"n",mn:"verbrauchen (consume) → consumption."},
+    {a:"die",w:"Wärme",p:"",en:"heat",ex:"",cat:"n",mn:"Sounds like 'warm' + -e → die Wärme."},
+    {a:"die",w:"Zone",p:"Zonen",en:"zone",ex:"",cat:"n",mn:"Identical to English 'zone'."},
+    {a:"der",w:"Zweifel",p:"Zweifel",en:"doubt",ex:"",cat:"n",mn:"zwei (two) + -fel → torn between two options."}
+  ]},
+  {name:"Fahrradfahren in der Stadt – aber sicher!", items:[
+    {a:"der",w:"Bewohner",p:"Bewohner",en:"resident",ex:"",cat:"n",mn:"be + wohnen (live) + -er → one who lives there."},
+    {a:"die",w:"Bewohnerin",p:"Bewohnerinnen",en:"resident",ex:"",cat:"n",mn:"Feminine form of Bewohner."},
+    {a:"",w:"bezahlbar",p:"",en:"affordable",ex:"",cat:"adj",mn:"bezahlen (pay) + -bar → payable."},
+    {a:"",w:"erhalten",p:"",en:"to receive",ex:"",cat:"v",mn:"er + halten (hold) → to be handed and hold something.",pr:"erhielt",pp:"hat erhalten"},
+    {a:"der",w:"Fahrradfahrer",p:"Fahrradfahrer",en:"cyclist",ex:"",cat:"n",mn:"Fahrrad (bicycle) + fahren (ride) + -er."},
+    {a:"die",w:"Fahrradfahrerin",p:"Fahrradfahrerinnen",en:"cyclist",ex:"",cat:"n",mn:"Feminine form of Fahrradfahrer."},
+    {a:"das",w:"Motto",p:"Mottos",en:"motto",ex:"",cat:"n",mn:"Identical to English 'motto'."},
+    {a:"das",w:"Naturmaterial",p:"Naturmaterialien",en:"natural material",ex:"",cat:"n",mn:"Natur (nature) + Material."},
+    {a:"der",w:"Parkplatz",p:"Parkplätze",en:"car park",ex:"",cat:"n",mn:"parken (park) + Platz (place) → car park."}
+  ]},
+  {name:"Da bleibt nichts übrig.", items:[
+    {a:"",w:"essbar",p:"",en:"edible",ex:"",cat:"adj",mn:"essen (eat) + -bar → eatable."},
+    {a:"",w:"genießbar",p:"",en:"enjoyable",ex:"",cat:"adj",mn:"genießen (enjoy) + -bar."},
+    {a:"der",w:"Gewinn",p:"Gewinne",en:"profit",ex:"",cat:"n",mn:"gewinnen (win) → what you win."},
+    {a:"die",w:"Landwirtschaft",p:"Landwirtschaften",en:"agriculture",ex:"",cat:"n",mn:"Land + Wirtschaft (economy/management) → managing the land."},
+    {a:"die",w:"Lebensmittelverschwendung",p:"",en:"food waste",ex:"",cat:"n",mn:"Lebensmittel (food) + Verschwendung (waste)."},
+    {a:"",w:"liefern",p:"",en:"deliver",ex:"",cat:"v",mn:"Sounds like 'deliver' minus the 'de-'.",pr:"lieferte",pp:"hat geliefert"},
+    {a:"",w:"lokal",p:"",en:"local",ex:"",cat:"adj",mn:"Identical to English 'local'."},
+    {a:"",w:"national",p:"",en:"national",ex:"",cat:"adj",mn:"Identical to English 'national'."},
+    {a:"das",w:"Start-up",p:"Start-ups",en:"start-up",ex:"",cat:"n",mn:"Identical to English 'start-up'."},
+    {a:"",w:"stoppen",p:"",en:"to stop",ex:"",cat:"v",mn:"Identical to English 'stop'.",pr:"stoppte",pp:"hat gestoppt"},
+    {a:"der",w:"Teil",p:"Teile",en:"part",ex:"",cat:"n",mn:"Sounds like 'tile' — one tile is one part of the floor."},
+    {a:"",w:"verschwenden",p:"",en:"to waste",ex:"",cat:"v",mn:"ver + Schwendung (relating to waste) → to fritter away.",pr:"verschwendete",pp:"hat verschwendet"},
+    {a:"",w:"wegwerfen",p:"",en:"to throw away",ex:"",cat:"v",mn:"weg (away) + werfen (throw).",pr:"warf weg",pp:"hat weggeworfen"},
+    {a:"der",w:"Export",p:"Exporte",en:"export",ex:"",cat:"n",mn:"Identical to English 'export'."},
+    {a:"der",w:"Import",p:"Importe",en:"import",ex:"",cat:"n",mn:"Identical to English 'import'."},
+    {a:"",w:"exportieren",p:"",en:"to export",ex:"",cat:"v",mn:"Identical to English 'export'.",pr:"exportierte",pp:"hat exportiert"},
+    {a:"",w:"importieren",p:"",en:"to import",ex:"",cat:"v",mn:"Identical to English 'import'.",pr:"importierte",pp:"hat importiert"}
+  ]}
+]},
+{lesson:10, title:"Im Laufe der Zeit", sections:[
+  {name:"Seit wann ist Deutschland wiedervereinigt?", items:[
+    {a:"die",w:"Besatzungszone",p:"Besatzungszonen",en:"occupation zone",ex:"",cat:"n",mn:"besetzen (occupy) + Zone."},
+    {a:"der",w:"Besucher",p:"Besucher",en:"visitor",ex:"",cat:"n",mn:"besuchen (visit) + -er."},
+    {a:"die",w:"Besucherin",p:"Besucherinnen",en:"visitor",ex:"",cat:"n",mn:"Feminine form of Besucher."},
+    {a:"das",w:"Bundesland",p:"Bundesländer",en:"Federal State",ex:"",cat:"n",mn:"Bund (federation) + Land (state)."},
+    {a:"der",w:"Bundesminister",p:"Bundesminister",en:"Federal Minister",ex:"",cat:"n",mn:"Bund + Minister."},
+    {a:"die",w:"Bundesministerin",p:"Bundesministerinnen",en:"Federal Minister",ex:"",cat:"n",mn:"Feminine form of Bundesminister."},
+    {a:"der",w:"Bundespräsident",p:"Bundespräsidenten",en:"Federal President",ex:"",cat:"n",mn:"Bund + Präsident."},
+    {a:"die",w:"Bundespräsidentin",p:"Bundespräsidentinnen",en:"Federal President",ex:"",cat:"n",mn:"Feminine form of Bundespräsident."},
+    {a:"die",w:"Bundesregierung",p:"Bundesregierungen",en:"Federal Government",ex:"",cat:"n",mn:"Bund + Regierung (government)."},
+    {a:"der",w:"Bundestag",p:"",en:"Bundestag",ex:"",cat:"n",mn:"Bund + Tag (historically 'assembly-day') → the federal parliament."},
+    {a:"die",w:"Demokratie",p:"Demokratien",en:"democracy",ex:"",cat:"n",mn:"Identical to English 'democracy'."},
+    {a:"",w:"demokratisch",p:"",en:"democratic",ex:"",cat:"adj",mn:"Identical to English 'democratic'."},
+    {a:"die",w:"Demonstration",p:"Demonstrationen",en:"demonstration",ex:"",cat:"n",mn:"Identical to English 'demonstration'."},
+    {a:"die",w:"Diktatur",p:"Diktaturen",en:"dictatorship",ex:"",cat:"n",mn:"Identical root to English 'dictatorship'."},
+    {a:"die",w:"Europäische Union (EU)",p:"",en:"European Union (EU)",ex:"",cat:"n",mn:"Literal: European Union."},
+    {a:"die",w:"Freiheit",p:"",en:"freedom",ex:"",cat:"n",mn:"frei (free) + -heit."},
+    {a:"",w:"friedlich",p:"",en:"peaceful",ex:"",cat:"adj",mn:"Friede(n) (peace) + -lich."},
+    {a:"die",w:"Grenze",p:"Grenzen",en:"border",ex:"",cat:"n",mn:"The line that 'grants' where one country ends."},
+    {a:"das",w:"Grundrecht",p:"Grundrechte",en:"fundamental right",ex:"",cat:"n",mn:"Grund (basic) + Recht (right)."},
+    {a:"die",w:"Gründung",p:"Gründungen",en:"foundation",ex:"",cat:"n",mn:"gründen (to found) + -ung."},
+    {a:"der",w:"Kaiser",p:"Kaiser",en:"emperor",ex:"",cat:"n",mn:"Same root as 'Caesar' → der Kaiser."},
+    {a:"die",w:"Kaiserin",p:"Kaiserinnen",en:"empress",ex:"",cat:"n",mn:"Feminine form of Kaiser."},
+    {a:"das",w:"Kaiserreich",p:"Kaiserreiche",en:"empire",ex:"",cat:"n",mn:"Kaiser + Reich (realm) → empire."},
+    {a:"der",w:"König",p:"Könige",en:"king",ex:"",cat:"n",mn:"Sounds like 'ker-nig' — der König."},
+    {a:"die",w:"Königin",p:"Königinnen",en:"queen",ex:"",cat:"n",mn:"Feminine form of König."},
+    {a:"die",w:"Macht",p:"",en:"power",ex:"",cat:"n",mn:"Sounds like 'might' → die Macht = power."},
+    {a:"die",w:"Mauer",p:"Mauern",en:"wall",ex:"",cat:"n",mn:"Related to 'mortar' — a wall built of mortar."},
+    {a:"der",w:"Mauerfall",p:"",en:"fall of the Berlin Wall",ex:"",cat:"n",mn:"Mauer (wall) + Fall (fall)."},
+    {a:"der",w:"Nationalsozialismus",p:"",en:"National Socialism",ex:"",cat:"n",mn:"Identical to English 'National Socialism'."},
+    {a:"das",w:"Parlament",p:"Parlamente",en:"parliament",ex:"",cat:"n",mn:"Identical to English 'parliament'."},
+    {a:"der",w:"Politiker",p:"Politiker",en:"politician",ex:"",cat:"n",mn:"Politik + -er."},
+    {a:"die",w:"Politikerin",p:"Politikerinnen",en:"politician",ex:"",cat:"n",mn:"Feminine form of Politiker."},
+    {a:"die",w:"Presse",p:"",en:"press",ex:"",cat:"n",mn:"Identical to English 'press'."},
+    {a:"die",w:"Revolution",p:"Revolutionen",en:"revolution",ex:"",cat:"n",mn:"Identical to English 'revolution'."},
+    {a:"der",w:"Staat",p:"Staaten",en:"state",ex:"",cat:"n",mn:"Sounds like English 'state'."},
+    {a:"das",w:"System",p:"Systeme",en:"system",ex:"",cat:"n",mn:"Identical to English 'system'."},
+    {a:"die",w:"Überzeugung",p:"Überzeugungen",en:"conviction",ex:"",cat:"n",mn:"überzeugen (convince) + -ung."},
+    {a:"die",w:"Vergangenheit",p:"",en:"past",ex:"",cat:"n",mn:"vergangen (past, from vergehen=pass by) + -heit."},
+    {a:"",w:"virtuell",p:"",en:"virtual",ex:"",cat:"adj",mn:"Identical to English 'virtual'."},
+    {a:"",w:"wiedervereinigen",p:"",en:"reunite",ex:"",cat:"v",mn:"wieder (again) + vereinigen (unite) → to unite again.",pr:"wiedervereinigte",pp:"hat wiedervereinigt"},
+    {a:"der",w:"Zeitpunkt",p:"Zeitpunkte",en:"point in time",ex:"",cat:"n",mn:"Zeit (time) + Punkt (point)."},
+    {a:"der",w:"Zusammenschluss",p:"Zusammenschlüsse",en:"association",ex:"",cat:"n",mn:"zusammen (together) + Schluss (joining) → joining together."}
+  ]},
+  {name:"Das Grundgesetz ist Deutschlands Verfassung.", items:[
+    {a:"",w:"abstimmen (über)",p:"",en:"to vote (on)",ex:"",cat:"v",mn:"ab + stimmen (vote/tune) → to vote on.",pr:"stimmte ab",pp:"hat abgestimmt"},
+    {a:"die",w:"Abstimmung",p:"Abstimmungen",en:"vote",ex:"",cat:"n",mn:"Noun of abstimmen."},
+    {a:"der",w:"Bund",p:"",en:"federal government",ex:"",cat:"n",mn:"Sounds like 'bond' — a bond/federation of states."},
+    {a:"der",w:"Bundesstaat",p:"Bundesstaaten",en:"federal state",ex:"",cat:"n",mn:"Bund + Staat."},
+    {a:"die",w:"Funktion",p:"Funktionen",en:"function",ex:"",cat:"n",mn:"Identical to English 'function'."},
+    {a:"der",w:"Grundwert",p:"Grundwerte",en:"fundamental value",ex:"",cat:"n",mn:"Grund (basic) + Wert (value)."},
+    {a:"",w:"politisch",p:"",en:"political",ex:"",cat:"adj",mn:"Identical to English 'political'."},
+    {a:"",w:"regeln",p:"",en:"to regulate",ex:"",cat:"v",mn:"Regel (rule) → to make rules for.",pr:"regelte",pp:"hat geregelt"},
+    {a:"das",w:"Volk",p:"Völker",en:"people",ex:"",cat:"n",mn:"Sounds like 'folk' → das Volk."},
+    {a:"die",w:"Wahl",p:"Wahlen",en:"election",ex:"",cat:"n",mn:"wählen (choose/vote) → an election."},
+    {a:"der",w:"Wert",p:"Werte",en:"value",ex:"",cat:"n",mn:"Sounds like English 'worth' → der Wert."},
+    {a:"die",w:"Wissenschaft",p:"Wissenschaften",en:"science",ex:"",cat:"n",mn:"Wissen (knowledge) + -schaft."}
+  ]},
+  {name:"Die BRD ist Teil der EU.", items:[
+    {a:"die",w:"Diskussion",p:"Diskussionen",en:"discussion",ex:"",cat:"n",mn:"Identical to English 'discussion'."},
+    {a:"die",w:"Ebene",p:"Ebenen",en:"level",ex:"",cat:"n",mn:"Flat and even, like a level."},
+    {a:"",w:"endlich",p:"",en:"finally",ex:"",cat:"p",mn:"Ende (end) + -lich → 'at the end'."},
+    {a:"die",w:"Gemeinde",p:"Gemeinden",en:"municipality",ex:"",cat:"n",mn:"gemein (common/shared) + -de → a shared local body."},
+    {a:"die",w:"Gemeinschaft",p:"Gemeinschaften",en:"community",ex:"",cat:"n",mn:"gemein (common) + -schaft."},
+    {a:"",w:"gesamt",p:"",en:"total",ex:"",cat:"adj",mn:"ge + samt (together, like 'sammeln'=collect) → all together."},
+    {a:"der",w:"Kanton",p:"Kantone",en:"canton",ex:"",cat:"n",mn:"Identical to English 'canton' (Swiss)."},
+    {a:"die",w:"Volksabstimmung",p:"Volksabstimmungen",en:"referendum",ex:"",cat:"n",mn:"Volk (people) + Abstimmung (vote) → a vote by the people."},
+    {a:"die",w:"Währung",p:"Währungen",en:"currency",ex:"",cat:"n",mn:"währen (last/endure) + -ung → something that holds value over time."},
+    {a:"",w:"Es geht los!",p:"",en:"Here we go!",ex:"",cat:"p",mn:"los|gehen (start off) → 'Here we go!'"}
+  ]}
+]},
+{lesson:11, title:"Im Namen der Gerechtigkeit", sections:[
+  {name:"Wir können alle gewinnen.", items:[
+    {a:"",w:"allgemein",p:"",en:"general",ex:"",cat:"adj",mn:"all (all) + gemein (common) → common to all."},
+    {a:"die",w:"Aussage",p:"Aussagen",en:"statement",ex:"",cat:"n",mn:"aus + sagen (say) → what is 'said out'."},
+    {a:"",w:"bekannt",p:"",en:"known",ex:"",cat:"adj",mn:"be + kennen (know) → known."},
+    {a:"",w:"egoistisch",p:"",en:"selfish",ex:"",cat:"adj",mn:"Identical root to English 'egoistic'."},
+    {a:"der",w:"Fakt",p:"Fakten",en:"fact",ex:"",cat:"n",mn:"Identical to English 'fact'."},
+    {a:"die",w:"Gerechtigkeit",p:"",en:"justice",ex:"",cat:"n",mn:"gerecht (fair/just) + -igkeit."},
+    {a:"das",w:"Gewissen",p:"",en:"conscience",ex:"",cat:"n",mn:"ge + wissen (know) → your inner 'knowing'."},
+    {a:"",w:"handeln",p:"",en:"to act",ex:"",cat:"v",mn:"Hand (hand) → to put your hand to something.",pr:"handelte",pp:"hat gehandelt"},
+    {a:"die",w:"Moral",p:"",en:"morale",ex:"",cat:"n",mn:"Identical to English 'moral(e)'."},
+    {a:"",w:"moralisch",p:"",en:"morally",ex:"",cat:"adj",mn:"Identical to English 'moral(ly)'."},
+    {a:"der",w:"Spielende",p:"Spielenden",en:"player",ex:"",cat:"n",mn:"spielen (play) + -de → one who plays."},
+    {a:"die",w:"Spielende",p:"Spielenden",en:"player",ex:"",cat:"n",mn:"Feminine/generic form of der Spielende."},
+    {a:"die",w:"Stimme",p:"Stimmen",en:"vote",ex:"",cat:"n",mn:"Your voice, also your 'vote'."},
+    {a:"das",w:"Strafrecht",p:"",en:"criminal law",ex:"",cat:"n",mn:"Strafe (punishment) + Recht (law)."},
+    {a:"die",w:"Tragödie",p:"Tragödien",en:"tragedy",ex:"",cat:"n",mn:"Identical to English 'tragedy'."},
+    {a:"der",w:"Umschlag",p:"Umschläge",en:"envelope",ex:"",cat:"n",mn:"um + schlagen (fold/wrap) → something folded around a letter."},
+    {a:"das",w:"Verbrechen",p:"",en:"crime",ex:"",cat:"n",mn:"ver + brechen (break) → breaking the law."},
+    {a:"",w:"zerstören",p:"",en:"to destroy",ex:"",cat:"v",mn:"zer + stören (disturb) → to disturb something completely apart.",pr:"zerstörte",pp:"hat zerstört"},
+    {a:"",w:"ein Verbrechen/eine Straftat begehen",p:"",en:"to commit a crime/offence",ex:"",cat:"p",mn:"begehen (commit, lit. 'go through with') → to commit a crime.",pr:"beging",pp:"hat begangen"}
+  ]},
+  {name:"Hätte ich das gewusst, …", items:[
+    {a:"der",w:"Angeklagte",p:"Angeklagten",en:"defendant",ex:"",cat:"n",mn:"an + klagen (accuse/sue) → one who is accused."},
+    {a:"die",w:"Angeklagte",p:"Angeklagten",en:"defendant",ex:"",cat:"n",mn:"Feminine/generic form of der Angeklagte."},
+    {a:"der",w:"Beschuldigte",p:"Beschuldigten",en:"accused",ex:"",cat:"n",mn:"be + Schuld (guilt) → one burdened with guilt-claims."},
+    {a:"die",w:"Beschuldigte",p:"Beschuldigten",en:"accused",ex:"",cat:"n",mn:"Feminine/generic form of der Beschuldigte."},
+    {a:"",w:"bestrafen",p:"",en:"to punish",ex:"",cat:"v",mn:"be + Strafe (punishment) → to punish.",pr:"bestrafte",pp:"hat bestraft"},
+    {a:"die",w:"Bombe",p:"Bomben",en:"bomb",ex:"",cat:"n",mn:"Identical to English 'bomb'."},
+    {a:"der",w:"Diebstahl",p:"Diebstähle",en:"theft",ex:"",cat:"n",mn:"Dieb (thief) + Stahl (sounds like 'stole')."},
+    {a:"",w:"einbrechen",p:"",en:"to break in",ex:"",cat:"v",mn:"ein + brechen (break) → to break in.",pr:"brach ein",pp:"ist eingebrochen"},
+    {a:"",w:"folgen",p:"",en:"to follow",ex:"",cat:"v",mn:"Sounds identical to English 'follow'.",pr:"folgte",pp:"ist gefolgt"},
+    {a:"das",w:"Gefängnis",p:"Gefängnisse",en:"jail",ex:"",cat:"n",mn:"gefangen (caught/captured) + -nis → the place for the captured."},
+    {a:"",w:"gelten",p:"",en:"to apply",ex:"",cat:"v",mn:"A rule that still 'counts' like valid currency.",pr:"galt",pp:"hat gegolten"},
+    {a:"die",w:"Justiz",p:"",en:"justice",ex:"",cat:"n",mn:"Identical to English 'justice'."},
+    {a:"der",w:"Schuldige",p:"Schuldigen",en:"offender",ex:"",cat:"n",mn:"Schuld (guilt) + -ige → the guilty one."},
+    {a:"die",w:"Schuldige",p:"Schuldigen",en:"offender",ex:"",cat:"n",mn:"Feminine/generic form of der Schuldige."},
+    {a:"",w:"sogar",p:"",en:"even",ex:"",cat:"p",mn:"so (so) + gar (even/entirely) → 'even'."},
+    {a:"die",w:"Strafe",p:"Strafen",en:"punishment",ex:"",cat:"n",mn:"Picture drawing the short straw as your Strafe."},
+    {a:"die",w:"Tat",p:"Taten",en:"crime",ex:"",cat:"n",mn:"A deed/act, sometimes a criminal one."},
+    {a:"der",w:"Täter",p:"Täter",en:"perpetrator",ex:"",cat:"n",mn:"Tat (deed) + -er → doer of the deed."},
+    {a:"die",w:"Täterin",p:"Täterinnen",en:"perpetrator",ex:"",cat:"n",mn:"Feminine form of Täter."},
+    {a:"der",w:"Verantwortliche",p:"Verantwortlichen",en:"person responsible",ex:"",cat:"n",mn:"verantwortlich (responsible) → the person responsible."},
+    {a:"die",w:"Verantwortliche",p:"Verantwortlichen",en:"person responsible",ex:"",cat:"n",mn:"Feminine/generic form of der Verantwortliche."},
+    {a:"der",w:"Verurteilte",p:"Verurteilten",en:"convicted",ex:"",cat:"n",mn:"ver + Urteil (verdict) → one given a verdict."},
+    {a:"die",w:"Verurteilte",p:"Verurteilten",en:"convicted",ex:"",cat:"n",mn:"Feminine/generic form of der Verurteilte."},
+    {a:"der",w:"Zeuge",p:"Zeugen",en:"witness",ex:"",cat:"n",mn:"A witness who 'shows' (zeigen) what happened."},
+    {a:"die",w:"Zeugin",p:"Zeuginnen",en:"witness",ex:"",cat:"n",mn:"Feminine form of Zeuge."},
+    {a:"",w:"auf der Flucht sein vor etw./jdm.",p:"",en:"to be on the run from sth./sb.",ex:"",cat:"p",mn:"Flucht (flight) → to be in flight from someone."},
+    {a:"",w:"beteiligt sein an",p:"",en:"to be involved in",ex:"",cat:"p",mn:"Teil (part) → to be 'parted-in' something."},
+    {a:"",w:"aussagen gegen",p:"",en:"to testify against",ex:"",cat:"p",mn:"aus + sagen (say out) → to state against someone.",pr:"sagte aus",pp:"hat ausgesagt"},
+    {a:"",w:"gerecht",p:"",en:"fair",ex:"",cat:"adj",mn:"Related to Recht (right/law) → in line with the law."},
+    {a:"",w:"ungerecht",p:"",en:"unfair",ex:"",cat:"adj",mn:"un + gerecht → not fair."},
+    {a:"",w:"jdm. auf die Spur kommen",p:"",en:"to track someone down",ex:"",cat:"p",mn:"Spur (trace/track) → to come upon someone's trace."},
+    {a:"",w:"zwingen zu etw.",p:"",en:"to force sb. to do sth.",ex:"",cat:"v",mn:"Sounds like 'twinge' of pain forcing you to act.",pr:"zwang",pp:"hat gezwungen"}
+  ]},
+  {name:"Mein Geschlecht entscheidet nicht über meine Verantwortung.", items:[
+    {a:"der",w:"Angehörige",p:"Angehörigen",en:"member",ex:"",cat:"n",mn:"an + gehören (belong to) → one belonging to a group."},
+    {a:"die",w:"Angehörige",p:"Angehörigen",en:"member",ex:"",cat:"n",mn:"Feminine/generic form of der Angehörige."},
+    {a:"die",w:"Betreuung",p:"",en:"support",ex:"",cat:"n",mn:"betreuen (look after) + -ung."},
+    {a:"der",w:"Gender-Care-Gap",p:"Gender-Care-Gaps",en:"gender care gap",ex:"",cat:"n",mn:"Identical loan phrase to English."},
+    {a:"die",w:"Gleichstellung",p:"",en:"equal opportunity",ex:"",cat:"n",mn:"gleich (equal) + stellen (place) → placing equally."},
+    {a:"die",w:"Konsequenz",p:"Konsequenzen",en:"consequence",ex:"",cat:"n",mn:"Identical to English 'consequence'."},
+    {a:"die",w:"Lücke",p:"Lücken",en:"gap",ex:"",cat:"n",mn:"Sounds like a 'leak' — a leak/gap in the wall."},
+    {a:"die",w:"Pflege",p:"",en:"care",ex:"",cat:"n",mn:"The careful, attentive act of caring for someone."},
+    {a:"die",w:"Sorgearbeit",p:"",en:"care work",ex:"",cat:"n",mn:"Sorge (worry/care) + Arbeit (work)."},
+    {a:"",w:"wirtschaftlich",p:"",en:"economically",ex:"",cat:"adj",mn:"Wirtschaft (economy) + -lich."},
+    {a:"",w:"abhängig sein von",p:"",en:"to depend on",ex:"",cat:"p",mn:"ab + hängen (hang) → to 'hang off' something."},
+    {a:"",w:"bezahlt",p:"",en:"paid",ex:"",cat:"adj",mn:"bezahlen (pay) → paid."},
+    {a:"",w:"unbezahlt",p:"",en:"unpaid",ex:"Frauen verbringen viel Zeit mit unbezahlter Sorgearbeit.",cat:"adj",mn:"un + bezahlt → unpaid."}
+  ]}
+]},
+{lesson:12, title:"Zukunftsvisionen", sections:[
+  {name:"Wenn es das alles nicht gegeben hätte …", items:[
+    {a:"der",w:"Apparat",p:"Apparate",en:"device",ex:"",cat:"n",mn:"Identical to English 'apparatus'."},
+    {a:"",w:"(voll)autonom",p:"",en:"(fully) autonomous",ex:"",cat:"adj",mn:"voll (fully) + autonom (autonomous)."},
+    {a:"der",w:"Buchdruck",p:"",en:"letterpress",ex:"",cat:"n",mn:"Buch (book) + Druck (print) → letterpress printing."},
+    {a:"",w:"elektrisch",p:"",en:"electrical",ex:"",cat:"adj",mn:"Identical to English 'electrical'."},
+    {a:"",w:"erfinden",p:"",en:"to invent",ex:"",cat:"v",mn:"er + finden (find) → to 'find out' something new.",pr:"erfand",pp:"hat erfunden"},
+    {a:"die",w:"Erfindung",p:"Erfindungen",en:"invention",ex:"",cat:"n",mn:"Noun of erfinden."},
+    {a:"",w:"erwarten",p:"",en:"to expect",ex:"",cat:"v",mn:"er + warten (wait) → to wait expectantly.",pr:"erwartete",pp:"hat erwartet"},
+    {a:"der",w:"Fahrer",p:"Fahrer",en:"driver",ex:"",cat:"n",mn:"fahren (drive) + -er."},
+    {a:"die",w:"Fahrerin",p:"Fahrerinnen",en:"driver",ex:"",cat:"n",mn:"Feminine form of Fahrer."},
+    {a:"die",w:"Glühbirne",p:"Glühbirnen",en:"light bulb",ex:"",cat:"n",mn:"glühen (glow) + Birne (pear) → a glowing pear-shape."},
+    {a:"das",w:"Grammophon",p:"Grammophone",en:"gramophone",ex:"",cat:"n",mn:"Identical to English 'gramophone'."},
+    {a:"",w:"kopieren",p:"",en:"to copy",ex:"",cat:"v",mn:"Identical to English 'copy'.",pr:"kopierte",pp:"hat kopiert"},
+    {a:"das",w:"Publikum",p:"",en:"public",ex:"",cat:"n",mn:"Identical root to English 'public'."},
+    {a:"",w:"sicherlich",p:"",en:"certainly",ex:"",cat:"p",mn:"sicher (sure) + -lich → surely."},
+    {a:"die",w:"(Kommunikations-)Technologie",p:"(Kommunikations-)Technologien",en:"(communication) technology",ex:"",cat:"n",mn:"Identical to English 'technology'."},
+    {a:"",w:"(sich) verändern",p:"",en:"to change (oneself)",ex:"",cat:"v",mn:"ver + ändern (change) → to change.",pr:"veränderte (sich)",pp:"hat (sich) verändert"},
+    {a:"das",w:"Videotelefon",p:"Videotelefone",en:"videophone",ex:"",cat:"n",mn:"Identical to English 'video phone'."},
+    {a:"",w:"weiterhin",p:"",en:"still",ex:"",cat:"p",mn:"weiter (further) + hin (onward) → 'still going on'."},
+    {a:"",w:"wohl",p:"",en:"probably",ex:"",cat:"p",mn:"Sounds like 'vohl' ~ 'well' — 'well, probably...'"},
+    {a:"die",w:"Zeitreise",p:"Zeitreisen",en:"time travel",ex:"",cat:"n",mn:"Zeit (time) + Reise (journey)."}
+  ]},
+  {name:"Wird uns die KI überholen?", items:[
+    {a:"der",w:"(Gesundheits-)Avatar",p:"(Gesundheits-)Avatare",en:"(health) avatar",ex:"",cat:"n",mn:"Identical loanword: (health) avatar."},
+    {a:"die",w:"Auswirkung",p:"Auswirkungen",en:"effect",ex:"",cat:"n",mn:"aus + wirken (have effect) → what 'works out'."},
+    {a:"",w:"begrüßen",p:"",en:"to greet",ex:"",cat:"v",mn:"be + grüßen (greet) → to greet.",pr:"begrüßte",pp:"hat begrüßt"},
+    {a:"die",w:"Daten (Pl.)",p:"",en:"data",ex:"",cat:"n",mn:"Identical to English 'data'."},
+    {a:"die",w:"Diagnose",p:"Diagnosen",en:"diagnosis",ex:"",cat:"n",mn:"Identical to English 'diagnosis'."},
+    {a:"",w:"ersetzen",p:"",en:"to replace",ex:"",cat:"v",mn:"er + setzen (set/place) → to place something in another's spot.",pr:"ersetzte",pp:"hat ersetzt"},
+    {a:"die",w:"künstliche Intelligenz (KI)",p:"",en:"artificial intelligence (AI)",ex:"",cat:"n",mn:"künstlich (artificial) + Intelligenz."},
+    {a:"",w:"lebensecht",p:"",en:"lifelike",ex:"",cat:"adj",mn:"Leben (life) + echt (real) → life-real."},
+    {a:"",w:"maschinell",p:"",en:"automatic",ex:"",cat:"adj",mn:"Maschine (machine) + -ell → machine-like."},
+    {a:"",w:"menschlich",p:"",en:"human",ex:"",cat:"adj",mn:"Mensch (human) + -lich."},
+    {a:"der",w:"Psychologe",p:"Psychologen",en:"psychologist",ex:"",cat:"n",mn:"Identical to English 'psychologist'."},
+    {a:"die",w:"Psychologin",p:"Psychologinnen",en:"psychologist",ex:"",cat:"n",mn:"Feminine form of Psychologe."},
+    {a:"",w:"scannen",p:"",en:"to scan",ex:"",cat:"v",mn:"Identical to English 'scan'.",pr:"scannte",pp:"hat gescannt"},
+    {a:"die",w:"Therapie",p:"Therapien",en:"therapy",ex:"",cat:"n",mn:"Identical to English 'therapy'."},
+    {a:"",w:"überflüssig",p:"",en:"superfluous",ex:"",cat:"adj",mn:"über (over) + fließen/Fluss (flow) → overflowing, more than needed."},
+    {a:"der",w:"Übersetzer",p:"Übersetzer",en:"translator",ex:"",cat:"n",mn:"über + setzen (set across) → one who 'sets' meaning across languages."},
+    {a:"die",w:"Übersetzerin",p:"Übersetzerinnen",en:"translator",ex:"",cat:"n",mn:"Feminine form of Übersetzer."},
+    {a:"die",w:"Übersetzung",p:"Übersetzungen",en:"translation",ex:"",cat:"n",mn:"Noun of übersetzen."},
+    {a:"die",w:"Veränderung",p:"Veränderungen",en:"change",ex:"",cat:"n",mn:"Noun of verändern."},
+    {a:"",w:"(sich) weiterentwickeln",p:"",en:"to evolve",ex:"",cat:"v",mn:"weiter (further) + entwickeln (develop) → to develop further.",pr:"entwickelte sich weiter",pp:"hat sich weiterentwickelt"},
+    {a:"",w:"zwischenmenschlich",p:"",en:"interpersonal",ex:"",cat:"adj",mn:"zwischen (between) + menschlich (human)."},
+    {a:"",w:"sich zugehörig fühlen",p:"",en:"to feel a sense of belonging",ex:"",cat:"p",mn:"zu + gehören (belong) + fühlen (feel)."}
+  ]},
+  {name:"KI und Kunst – Partner oder Konkurrenz?", items:[
+    {a:"der",w:"Autor",p:"Autoren",en:"author",ex:"",cat:"n",mn:"Identical to English 'author'."},
+    {a:"die",w:"Autorin",p:"Autorinnen",en:"author",ex:"",cat:"n",mn:"Feminine form of Autor."},
+    {a:"der",w:"Beweis",p:"Beweise",en:"evidence",ex:"",cat:"n",mn:"be + weisen (point/show) → what is 'pointed to' as proof."},
+    {a:"",w:"beweisen",p:"",en:"to prove",ex:"",cat:"v",mn:"Verb form of Beweis.",pr:"bewies",pp:"hat bewiesen"},
+    {a:"der",w:"Dichter",p:"Dichter",en:"poet",ex:"",cat:"n",mn:"dichten (write poetry) + -er."},
+    {a:"die",w:"Dichterin",p:"Dichterinnen",en:"poet",ex:"",cat:"n",mn:"Feminine form of Dichter."},
+    {a:"",w:"erstellen",p:"",en:"to create",ex:"",cat:"v",mn:"er + stellen (place/put) → to put something together.",pr:"erstellte",pp:"hat erstellt"},
+    {a:"die",w:"Existenz",p:"",en:"existence",ex:"",cat:"n",mn:"Identical to English 'existence'."},
+    {a:"",w:"existieren",p:"",en:"to exist",ex:"",cat:"v",mn:"Identical to English 'exist'.",pr:"existierte",pp:"hat existiert"},
+    {a:"die",w:"Gefahr",p:"Gefahren",en:"danger",ex:"",cat:"n",mn:"Sounds like 'geh-far' — don't go too far, there's Gefahr ahead!"},
+    {a:"die",w:"Hausarbeit",p:"Hausarbeiten",en:"housework",ex:"",cat:"n",mn:"Haus (house) + Arbeit (work)."},
+    {a:"",w:"KI-generiert",p:"",en:"AI-generated",ex:"",cat:"adj",mn:"KI (AI) + generiert (generated)."},
+    {a:"die",w:"Kunst",p:"",en:"art",ex:"",cat:"n",mn:"die Kunst = art — think of skillful 'construction'."},
+    {a:"der",w:"Künstler",p:"Künstler",en:"artist",ex:"",cat:"n",mn:"Kunst (art) + -ler → one who makes art."},
+    {a:"die",w:"Künstlerin",p:"Künstlerinnen",en:"artist",ex:"",cat:"n",mn:"Feminine form of Künstler."},
+    {a:"der",w:"Poetry-Slam",p:"Poetry-Slams",en:"poetry slam",ex:"",cat:"n",mn:"Identical loanword to English 'poetry slam'."},
+    {a:"",w:"unheimlich",p:"",en:"sinister",ex:"",cat:"adj",mn:"un + heimlich (secretive/homely) → not cosy/familiar."},
+    {a:"das",w:"Werk",p:"Werke",en:"work",ex:"",cat:"n",mn:"Sounds like English 'work' → das Werk = a (creative) work."},
+    {a:"",w:"zurzeit",p:"",en:"currently",ex:"",cat:"p",mn:"zur (at the) + Zeit (time) → 'at this time'."}
+  ]}
+]}
+
+];
+</script>
+<script>
+/* =========================================================
+   FLATTEN LEGACY_DATA (B1.1/B1.2/Bonus) + SEED_DATA -> ALL_CARDS
+========================================================= */
+let ALL_CARDS = [];
+
+LEGACY_DATA.forEach(lek=>{
+  lek.sections.forEach(sec=>{
+    const topicKey = SECTION_TOPIC[lek.lesson+"::"+sec.name] || "gesellschaft";
+    sec.items.forEach(it=>{
+      ALL_CARDS.push({
+        level: LESSON_LEVEL[lek.lesson] || "B1.1",
+        topic: topicKey,
+        lesson: lek.lesson, lessonTitle: lek.title, section: sec.name,
+        a: it.a||"", w: it.w, p: it.p||"", en: it.en, ex: it.ex||"",
+        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||""
+      });
+    });
+  });
+});
+
+/* Future A1/A2 (or any additional) word lists plug in here the same way
+   LEGACY_DATA does — e.g. define an A1_DATA array in the same {lesson,
+   sections:[{name, items:[...]}]} shape, add its lesson numbers to
+   LESSON_LEVEL, and merge it into ALL_CARDS with a loop like the one above.
+   No real A1/A2 vocabulary is invented in this build. */
+
+/* Stable unique id per card */
+const seenUid = {};
+ALL_CARDS.forEach(c=>{
+  let base = (c.level+"|"+c.topic+"|"+c.w).replace(/\s+/g,"_");
+  let uid = base, n=1;
+  while(seenUid[uid]){ uid = base+"__"+(++n); }
+  seenUid[uid] = true;
+  c.uid = uid;
+});
+
+const CAT_LABEL = {n:"Nomen", v:"Verb", adj:"Adjektiv", p:"Ausdruck"};
+
+/* =========================================================
+   PERSISTENCE (localStorage)
+========================================================= */
+const LS_PROGRESS_KEY = "dc_progress_v1";
+const LS_META_KEY = "dc_meta_v1";
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(LS_PROGRESS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveProgress(p){
+  try{ localStorage.setItem(LS_PROGRESS_KEY, JSON.stringify(p)); }catch(e){}
+}
+function loadMeta(){
+  try{
+    const raw = localStorage.getItem(LS_META_KEY);
+    return raw ? JSON.parse(raw) : {streak:0, lastStudyDate:null, totalReviewed:0};
+  }catch(e){ return {streak:0, lastStudyDate:null, totalReviewed:0}; }
+}
+function saveMeta(m){
+  try{ localStorage.setItem(LS_META_KEY, JSON.stringify(m)); }catch(e){}
+}
+
+let PROGRESS = loadProgress();
+let META = loadMeta();
+
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function addDaysISO(days){
+  const d = new Date();
+  d.setDate(d.getDate()+days);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+/* Box -> days-until-next-review schedule (Leitner + spaced repetition) */
+const BOX_SCHEDULE = {1:0, 2:1, 3:3, 4:7, 5:14};
+const BOX_NAME = {1:"Neu", 2:"Lernt", 3:"Vertraut", 4:"Stark", 5:"Gemeistert"};
+
+function getProgress(uid){
+  if(!PROGRESS[uid]){
+    PROGRESS[uid] = {box:1, nextDue: todayISO(), timesSeen:0, timesCorrect:0, timesWrong:0,
+                      lastResult:null, firstSeen:null, lastReviewed:null, lastQType:null};
+  }
+  return PROGRESS[uid];
+}
+
+function recordAnswer(uid, correct, qType){
+  const p = getProgress(uid);
+  p.timesSeen++;
+  if(!p.firstSeen) p.firstSeen = todayISO();
+  p.lastReviewed = todayISO();
+  if(qType) p.lastQType = qType;
+  if(correct){
+    p.box = Math.min(5, p.box+1);
+    p.timesCorrect = (p.timesCorrect||0)+1;
+    p.lastResult = "correct";
+  }else{
+    p.box = 1;
+    p.timesWrong++;
+    p.lastResult = "wrong";
+  }
+  const days = BOX_SCHEDULE[p.box] !== undefined ? BOX_SCHEDULE[p.box] : 30;
+  p.nextDue = addDaysISO(days === 0 ? 0 : days);
+  PROGRESS[uid] = p;
+  saveProgress(PROGRESS);
+  bumpStreak();
+  META.totalReviewed = (META.totalReviewed||0)+1;
+  saveMeta(META);
+}
+
+function bumpStreak(){
+  const today = todayISO();
+  if(META.lastStudyDate === today) return;
+  const yesterday = addDaysISO(-1);
+  if(META.lastStudyDate === yesterday){
+    META.streak = (META.streak||0)+1;
+  } else {
+    META.streak = 1;
+  }
+  META.lastStudyDate = today;
+  saveMeta(META);
+}
+
+function isDue(uid){
+  const p = PROGRESS[uid];
+  if(!p) return true; // never seen = due (new)
+  return p.nextDue <= todayISO();
+}
+function isNew(uid){
+  return !PROGRESS[uid] || PROGRESS[uid].timesSeen===0;
+}
+function isDifficult(uid){
+  const p = PROGRESS[uid];
+  return p && p.timesWrong >= 2;
+}
+function isMastered(uid){
+  const p = PROGRESS[uid];
+  return p && p.box >= 4;
+}
+</script>
+<script>
+/* =========================================================
+   STATE
+========================================================= */
+let currentLevel = "alle";     // "alle" | "A1" | "A2" | "B1.1" | "B1.2"
+let currentView = "dashboard"; // "dashboard" | "lernen" | "pruefung"
+let currentTopic = null;       // topic key or null (none selected yet in Lernen)
+
+let session = [];   // array of cards for current study session
+let sessionIdx = 0;
+let sessionStats = {reviewed:0, remembered:0, practice:0};
+let currentQType = null;
+let revealed = false;
+
+function poolForLevel(level){
+  if(level==="alle") return ALL_CARDS;
+  return ALL_CARDS.filter(c=>c.level===level);
+}
+function poolForLevelTopic(level, topic){
+  let pool = poolForLevel(level);
+  if(topic) pool = pool.filter(c=>c.topic===topic);
+  return pool;
+}
+
+/* =========================================================
+   SMART LEARN — priority queue
+========================================================= */
+function buildSmartQueue(pool, limit){
+  limit = limit || 20;
+  const used = {};
+  const out = [];
+  function addFrom(list, cap){
+    let n=0;
+    for(const c of list){
+      if(used[c.uid]) continue;
+      if(cap!==undefined && n>=cap) break;
+      out.push(c); used[c.uid]=true; n++;
+      if(out.length>=limit) return;
+    }
+  }
+  const overdue = pool.filter(c=>!isNew(c.uid) && isDue(c.uid))
+                       .sort((a,b)=> (PROGRESS[a.uid].nextDue).localeCompare(PROGRESS[b.uid].nextDue));
+  addFrom(overdue);
+  if(out.length<limit){
+    const difficult = pool.filter(c=>isDifficult(c.uid)).sort((a,b)=>PROGRESS[b.uid].timesWrong-PROGRESS[a.uid].timesWrong);
+    addFrom(difficult);
+  }
+  if(out.length<limit){
+    const recent = pool.filter(c=>!isNew(c.uid) && PROGRESS[c.uid].box<=2);
+    addFrom(recent);
+  }
+  if(out.length<limit){
+    const fresh = shuffleArr(pool.filter(c=>isNew(c.uid)));
+    addFrom(fresh, Math.max(4, Math.floor(limit*0.4)));
+  }
+  if(out.length<limit){
+    const easy = shuffleArr(pool.filter(c=>isMastered(c.uid)));
+    addFrom(easy, 3);
+  }
+  if(out.length<limit){
+    addFrom(shuffleArr(pool));
+  }
+  return shuffleArr(out);
+}
+function shuffleArr(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function dueCountForPool(pool){
+  return pool.filter(c=>isDue(c.uid)).length;
+}
+function newCountForPool(pool){
+  return pool.filter(c=>isNew(c.uid)).length;
+}
+function difficultCountForPool(pool){
+  return pool.filter(c=>isDifficult(c.uid)).length;
+}
+function masteredCountForPool(pool){
+  return pool.filter(c=>isMastered(c.uid)).length;
+}
+
+/* =========================================================
+   QUESTION TYPES
+========================================================= */
+function pickDistractors(card, n, field){
+  let poolSrc = ALL_CARDS.filter(c=>c.topic===card.topic && c.uid!==card.uid && c[field] && c[field]!==card[field]);
+  if(poolSrc.length<n) poolSrc = ALL_CARDS.filter(c=>c.level===card.level && c.uid!==card.uid && c[field] && c[field]!==card[field]);
+  if(poolSrc.length<n) poolSrc = ALL_CARDS.filter(c=>c.uid!==card.uid && c[field] && c[field]!==card[field]);
+  return shuffleArr(poolSrc).slice(0,n).map(c=>c[field]);
+}
+
+function validTypesFor(card){
+  // Nouns -> meaning + article + plural + context. Verbs -> meaning + tenses + context.
+  // Adjectives -> meaning + context. Every word always allows plain meaning recall + MC.
+  const types = ["recall_meaning","mc_de2en","mc_en2de"];
+  if(card.cat==="n" && card.a) types.push("article","article");
+  if(card.cat==="n" && card.p) types.push("plural","plural");
+  if(card.cat==="v" && card.pr) types.push("verbtense","verbtense","verbtense");
+  if(card.ex && card.ex.length>4) types.push("fillgap");
+  return types;
+}
+
+function pickQType(card){
+  const types = validTypesFor(card);
+  const last = PROGRESS[card.uid] ? PROGRESS[card.uid].lastQType : null;
+  const filtered = types.filter(t=>t!==last);
+  const pool = filtered.length ? filtered : types;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function renderInfoPanel(card){
+  const verbBlock = (card.cat==="v" && card.pr)
+    ? `<div class="infoline"><b>Präteritum:</b> ${card.pr} &nbsp;·&nbsp; <b>Perfekt:</b> ${card.pp}</div>` : "";
+  const family = getFamilyFor(card.w);
+  const familyBlock = family ? `<div class="familybox">🌳 <b>Wortfamilie:</b> ${family.members.join(" · ")}</div>` : "";
+  const colloc = getCollocFor(card.w);
+  const collocBlock = colloc ? `<div class="colloc">💬 <b>Kollokationen:</b> ${colloc.join(" · ")}</div>` : "";
+  const exBlock = card.ex ? `<div class="example-line">„${card.ex}"</div>` : "";
+  const pluralLine = card.p ? `<div class="infoline"><b>Plural:</b> ${card.p}</div>` : "";
+  return `
+    <div class="revealbox">
+      <div class="en-word">${card.en}</div>
+      ${card.a ? `<div class="infoline"><b>Artikel:</b> ${card.a}</div>` : ""}
+      ${pluralLine}
+      ${verbBlock}
+      ${exBlock}
+      ${card.mn ? `<div class="mnemonic">💡 ${card.mn}</div>` : ""}
+      ${familyBlock}
+      ${collocBlock}
+    </div>`;
+}
+
+function metaHTML(card){
+  return `
+    <div class="meta">
+      <span>${TOPIC_BY_KEY[card.topic] ? TOPIC_BY_KEY[card.topic].icon+" "+TOPIC_BY_KEY[card.topic].label : ""}</span>
+      <span style="display:flex; gap:4px;">
+        <span class="pill level">${card.level}</span>
+        <span class="pill ${card.cat}">${CAT_LABEL[card.cat]}</span>
+      </span>
+    </div>`;
+}
+
+function renderAnswerButtons(uid, onDone){
+  return `
+    <div class="answerbtns">
+      <button class="actbtn nochmal" id="btnNochmal">Nochmal</button>
+      <button class="actbtn gewusst" id="btnGewusst">Gewusst</button>
+      <button class="actbtn easy" id="btnEasy">🎯 Kenn ich gut</button>
+    </div>`;
+}
+
+function wireAnswerButtons(card, advanceFn, qType){
+  document.getElementById("btnNochmal").onclick = ()=>{ recordAnswer(card.uid, false, qType); sessionStats.practice++; advanceFn(); };
+  document.getElementById("btnGewusst").onclick = ()=>{ recordAnswer(card.uid, true, qType); sessionStats.remembered++; advanceFn(); };
+  document.getElementById("btnEasy").onclick = ()=>{
+    const p = getProgress(card.uid); p.box=5; p.nextDue=addDaysISO(30); p.lastQType=qType; PROGRESS[card.uid]=p; saveProgress(PROGRESS);
+    bumpStreak(); sessionStats.remembered++; advanceFn();
+  };
+}
+
+function difficultBanner(card){
+  return isDifficult(card.uid)
+    ? `<div class="coach-line" style="margin:0 18px 10px;">🔥 <b>Schwieriges Wort</b> — das hast du schon ${PROGRESS[card.uid].timesWrong}× vergessen. Extra Kontext und Eselsbrücke stehen unten bereit.</div>`
+    : "";
+}
+
+function renderRecallMeaning(card, advanceFn){
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  const box = PROGRESS[card.uid] ? BOX_NAME[PROGRESS[card.uid].box] : "Neu";
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Deutsch → Englisch &nbsp;·&nbsp; 📦 ${box}</div>
+      <div class="prompt">
+        ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
+        <div class="word">${card.w}</div>
+        <div class="subq">Was bedeutet das? (Erst überlegen …)</div>
+      </div>
+      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.getElementById("revealBtn").onclick = ()=>{
+        document.getElementById("revealArea").innerHTML = renderInfoPanel(card) + renderAnswerButtons(card.uid);
+        document.getElementById("revealBtn").style.display="none";
+        wireAnswerButtons(card, advanceFn, "recall_meaning");
+      };
+    }
+  };
+}
+
+function renderMcDe2En(card, advanceFn){
+  const distractors = pickDistractors(card, 3, "en");
+  const opts = shuffleArr([card.en, ...distractors]);
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Multiple Choice · Deutsch → Englisch</div>
+      <div class="prompt">
+        ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
+        <div class="word">${card.w}</div>
+      </div>
+      <div style="padding:8px 18px 4px;">
+        ${opts.map(o=>`<button class="mcopt" data-val="${o.replace(/"/g,'&quot;')}">${o}</button>`).join("")}
+      </div>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.querySelectorAll(".mcopt").forEach(btn=>{
+        btn.onclick = ()=>{
+          const correct = btn.dataset.val === card.en;
+          document.querySelectorAll(".mcopt").forEach(b=>{
+            b.disabled=true;
+            if(b.dataset.val===card.en) b.classList.add("correct");
+            else if(b===btn) b.classList.add("wrong");
+          });
+          recordAnswer(card.uid, correct, "mc_de2en");
+          if(correct) sessionStats.remembered++; else sessionStats.practice++;
+          document.getElementById("revealArea").innerHTML = renderInfoPanel(card) +
+            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter</button></div>`;
+          document.getElementById("nextAfterMc").onclick = advanceFn;
+        };
+      });
+    }
+  };
+}
+
+function renderMcEn2De(card, advanceFn){
+  const distractors = pickDistractors(card, 3, "w");
+  const opts = shuffleArr([card.w, ...distractors]);
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Multiple Choice · Englisch → Deutsch</div>
+      <div class="prompt">
+        <div class="word" style="font-size:20px;">"${card.en}"</div>
+        <div class="subq">Wie heißt das auf Deutsch?</div>
+      </div>
+      <div style="padding:8px 18px 4px;">
+        ${opts.map(o=>`<button class="mcopt" data-val="${o.replace(/"/g,'&quot;')}">${o}</button>`).join("")}
+      </div>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.querySelectorAll(".mcopt").forEach(btn=>{
+        btn.onclick = ()=>{
+          const correct = btn.dataset.val === card.w;
+          document.querySelectorAll(".mcopt").forEach(b=>{
+            b.disabled=true;
+            if(b.dataset.val===card.w) b.classList.add("correct");
+            else if(b===btn) b.classList.add("wrong");
+          });
+          recordAnswer(card.uid, correct, "mc_en2de");
+          if(correct) sessionStats.remembered++; else sessionStats.practice++;
+          document.getElementById("revealArea").innerHTML = renderInfoPanel(card) +
+            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter</button></div>`;
+          document.getElementById("nextAfterMc").onclick = advanceFn;
+        };
+      });
+    }
+  };
+}
+
+function renderArticle(card, advanceFn){
+  const arts = shuffleArr(["der","die","das"]);
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Artikel</div>
+      <div class="prompt">
+        <div class="word">___ ${card.w}</div>
+        <div class="subq">Welcher Artikel?</div>
+      </div>
+      <div style="padding:8px 18px 4px; display:flex; gap:8px;">
+        ${arts.map(a=>`<button class="mcopt" style="flex:1; text-align:center;" data-val="${a}">${a}</button>`).join("")}
+      </div>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.querySelectorAll(".mcopt").forEach(btn=>{
+        btn.onclick = ()=>{
+          const correct = btn.dataset.val === card.a;
+          document.querySelectorAll(".mcopt").forEach(b=>{
+            b.disabled=true;
+            if(b.dataset.val===card.a) b.classList.add("correct");
+            else if(b===btn) b.classList.add("wrong");
+          });
+          recordAnswer(card.uid, correct, "article");
+          if(correct) sessionStats.remembered++; else sessionStats.practice++;
+          document.getElementById("revealArea").innerHTML = renderInfoPanel(card) +
+            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter</button></div>`;
+          document.getElementById("nextAfterMc").onclick = advanceFn;
+        };
+      });
+    }
+  };
+}
+
+function renderPlural(card, advanceFn){
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Plural</div>
+      <div class="prompt">
+        ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
+        <div class="word">${card.w}</div>
+        <div class="subq">Wie lautet der Plural?</div>
+      </div>
+      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.getElementById("revealBtn").onclick = ()=>{
+        document.getElementById("revealArea").innerHTML =
+          `<div class="revealbox"><div class="en-word">${card.p || "(kein Plural / nur Singular üblich)"}</div></div>` +
+          renderInfoPanel(card) + renderAnswerButtons(card.uid);
+        document.getElementById("revealBtn").style.display="none";
+        wireAnswerButtons(card, advanceFn, "plural");
+      };
+    }
+  };
+}
+
+function renderVerbTense(card, advanceFn){
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Verbformen</div>
+      <div class="prompt">
+        <div class="word">${card.w}</div>
+        <div class="subq">Präteritum? Perfekt?</div>
+      </div>
+      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.getElementById("revealBtn").onclick = ()=>{
+        document.getElementById("revealArea").innerHTML =
+          `<div class="revealbox"><div class="infoline"><b>Präteritum:</b> ${card.pr} &nbsp;·&nbsp; <b>Perfekt:</b> ${card.pp}</div></div>` +
+          renderInfoPanel(card) + renderAnswerButtons(card.uid);
+        document.getElementById("revealBtn").style.display="none";
+        wireAnswerButtons(card, advanceFn, "verbtense");
+      };
+    }
+  };
+}
+
+function renderFillGap(card, advanceFn){
+  const stripe = `<div class="stripe ${card.cat}"></div>`;
+  const bareWord = card.w.replace(/^sich\s+/,"").split(/[/=(]/)[0].trim();
+  let gapped = card.ex;
+  try{
+    const re = new RegExp(bareWord.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"), "i");
+    gapped = card.ex.replace(re, "_______");
+  }catch(e){}
+  return {
+    html: `
+    ${difficultBanner(card)}
+    <div class="studycard">
+      ${stripe}
+      ${metaHTML(card)}
+      <div class="qlabel">Lücke füllen</div>
+      <div class="prompt">
+        <div class="subq" style="font-size:15px; line-height:1.5;">„${gapped}"</div>
+        <div class="subq">Welches Wort fehlt — und was bedeutet es?</div>
+      </div>
+      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="revealArea"></div>
+    </div>`,
+    afterRender(){
+      document.getElementById("revealBtn").onclick = ()=>{
+        document.getElementById("revealArea").innerHTML =
+          `<div class="revealbox"><div class="en-word">${card.w}</div></div>` +
+          renderInfoPanel(card) + renderAnswerButtons(card.uid);
+        document.getElementById("revealBtn").style.display="none";
+        wireAnswerButtons(card, advanceFn, "fillgap");
+      };
+    }
+  };
+}
+
+const TYPE_RENDERERS = {
+  recall_meaning: renderRecallMeaning,
+  mc_de2en: renderMcDe2En,
+  mc_en2de: renderMcEn2De,
+  article: renderArticle,
+  plural: renderPlural,
+  verbtense: renderVerbTense,
+  fillgap: renderFillGap
+};
+
+/* =========================================================
+   SESSION RUNNER
+========================================================= */
+function startSession(cards, label){
+  session = cards;
+  sessionIdx = 0;
+  sessionStats = {reviewed:0, remembered:0, practice:0};
+  renderSessionCard(label);
+}
+
+function renderSessionCard(label){
+  const stage = document.getElementById("stage");
+  if(sessionIdx >= session.length){
+    stage.innerHTML = `
+      <div class="coach-line">🎉 <b>Sitzung abgeschlossen!</b><br>
+      ${sessionStats.reviewed+0} Karten · ${sessionStats.remembered} gewusst · ${sessionStats.practice} brauchen noch Übung.</div>
+      <button class="bigbtn secondary" id="backToLernen">Zurück</button>
+    `;
+    document.getElementById("backToLernen").onclick = ()=>{ currentTopic=null; renderView(); };
+    return;
+  }
+  const card = session[sessionIdx];
+  const type = pickQType(card);
+  const renderer = TYPE_RENDERERS[type];
+  const result = renderer(card, advanceSession);
+  stage.innerHTML = `
+    <div class="sessionbar">${label||"Sitzung"} — Karte ${sessionIdx+1} / ${session.length}</div>
+    ${result.html}
+  `;
+  if(result.afterRender) result.afterRender();
+}
+
+function advanceSession(){
+  sessionStats.reviewed++;
+  sessionIdx++;
+  renderSessionCard();
+}
+</script>
+<script>
+/* =========================================================
+   MASTERY / PROGRESS CALCULATIONS
+========================================================= */
+function levelMasteryPct(level){
+  const pool = poolForLevel(level);
+  if(pool.length===0) return null;
+  const mastered = masteredCountForPool(pool);
+  return Math.round((mastered/pool.length)*100);
+}
+function topicMasteryPct(topic, level){
+  let pool = level==="alle" ? ALL_CARDS.filter(c=>c.topic===topic) : ALL_CARDS.filter(c=>c.topic===topic && c.level===level);
+  if(pool.length===0) return null;
+  return Math.round((masteredCountForPool(pool)/pool.length)*100);
+}
+function topicCardCount(topic, level){
+  if(level==="alle") return ALL_CARDS.filter(c=>c.topic===topic).length;
+  return ALL_CARDS.filter(c=>c.topic===topic && c.level===level).length;
+}
+function bar(pct){
+  const blocks = Math.round((pct||0)/10);
+  return "█".repeat(blocks) + "░".repeat(10-blocks);
+}
+function nextStepForTopic(topic){
+  for(const lvl of LEVELS){
+    const cnt = topicCardCount(topic, lvl);
+    if(cnt===0) continue;
+    const pct = topicMasteryPct(topic, lvl);
+    if(pct!==null && pct<80) return {level:lvl, pct};
+  }
+  return null;
+}
+
+/* =========================================================
+   DASHBOARD VIEW
+========================================================= */
+function renderDashboard(){
+  const stage = document.getElementById("stage");
+  const pool = poolForLevel(currentLevel);
+  const due = dueCountForPool(pool);
+  const diff = difficultCountForPool(pool);
+  const fresh = newCountForPool(pool);
+  const mastered = masteredCountForPool(pool);
+
+  let coachLine = "";
+  if(diff>0) coachLine = `🔥 Du vergisst gerade ${diff} Wörter öfter. Lass uns die heute mit besseren Beispielen üben.`;
+  else if(due>10) coachLine = `🎯 ${due} Wörter sind heute fällig — ein guter Moment für eine Runde Smart Learn.`;
+  else if(fresh>0) coachLine = `🧠 ${fresh} neue Wörter warten auf dich in diesem Level.`;
+  else coachLine = `⭐ Alles im grünen Bereich — Zeit für ein bisschen Wiederholung zur Festigung.`;
+
+  const levelRows = LEVELS.map(lvl=>{
+    const pct = levelMasteryPct(lvl);
+    if(pct===null){
+      return `<div class="levelrow"><span class="llabel">${lvl}</span><span style="color:var(--ink-soft); font-style:italic;">Vokabular folgt bald</span></div>`;
+    }
+    return `<div class="levelrow"><span class="llabel">${lvl}</span><div class="barouter"><div class="barinner" style="width:${pct}%;"></div></div><span class="lpct">${pct}%</span></div>`;
+  }).join("");
+
+  const topicRows = TOPICS.map(t=>{
+    const cnt = topicCardCount(t.key, currentLevel);
+    if(cnt===0) return "";
+    const pct = topicMasteryPct(t.key, currentLevel);
+    const next = nextStepForTopic(t.key);
+    return `
+      <div class="topicrow">
+        <div class="trhead"><span class="tname">${t.icon} ${t.label}</span><span>${cnt} Wörter</span></div>
+        <div class="barouter"><div class="barinner" style="width:${pct||0}%;"></div></div>
+        ${next ? `<div class="next">🎯 Weiter mit ${next.level} (${next.pct}%)</div>` : `<div class="next">✅ Gut gemeistert</div>`}
+      </div>`;
+  }).join("");
+
+  stage.innerHTML = `
+    <div class="coach-line">${coachLine}</div>
+
+    <div class="dashgrid">
+      <div class="dashcard"><div class="num">${due}</div><div class="lbl">HEUTE FÄLLIG</div></div>
+      <div class="dashcard"><div class="num">${diff}</div><div class="lbl">SCHWIERIG</div></div>
+      <div class="dashcard"><div class="num">${fresh}</div><div class="lbl">NEU</div></div>
+      <div class="dashcard"><div class="num">${mastered}</div><div class="lbl">GEMEISTERT</div></div>
+    </div>
+
+    <button class="bigbtn" id="smartLearnBtn">🧠 Was soll ich heute lernen?<span class="subtext">Smart Learn entscheidet automatisch</span></button>
+
+    <div class="sectionlabel">Fortschritt nach Niveau</div>
+    ${levelRows}
+
+    <div class="sectionlabel" style="margin-top:16px;">Themen-Fortschritt${currentLevel!=="alle"?" · "+currentLevel:""}</div>
+    ${topicRows || `<div class="empty">Für diese Auswahl sind noch keine Themen mit Vokabeln vorhanden.</div>`}
+  `;
+
+  document.getElementById("smartLearnBtn").onclick = ()=>{
+    const smartPool = poolForLevel(currentLevel);
+    if(smartPool.length===0){
+      alert("Für dieses Niveau gibt es noch keine Vokabeln.");
+      return;
+    }
+    const queue = buildSmartQueue(smartPool, 20);
+    startSession(queue, "🧠 Smart Learn");
+  };
+}
+</script>
+<script>
+let practiceTopic = null; // shared with Speaking/Writing views
+
+function renderLernen(){
+  const stage = document.getElementById("stage");
+
+  if(currentLevel!=="alle" && !levelHasRealContent(currentLevel)){
+    stage.innerHTML = `
+      <div class="empty">
+        <b>📚 Vokabular für ${currentLevel} folgt bald.</b><br><br>
+        Aktuell enthält die App echten Wortschatz für <b>B1.1</b> und <b>B1.2</b>
+        (aus „Auf jeden Fall!") plus ein Beispielwort auf A1-Niveau.<br><br>
+        Sobald A1/A2-Listen vorliegen, tauchen sie hier automatisch auf —
+        es wird kein Wortschatz erfunden.
+      </div>
+      <button class="bigbtn secondary" id="goAlle">Alle Niveaus anzeigen</button>
+    `;
+    document.getElementById("goAlle").onclick = ()=>{ setLevel("alle"); };
+    return;
+  }
+
+  if(!practiceTopic){
+    const tiles = TOPICS.map(t=>{
+      const cnt = topicCardCount(t.key, currentLevel);
+      return `<div class="topictile ${cnt===0?'':''}" data-topic="${t.key}" style="${cnt===0?'opacity:0.4;':''}">
+        <span class="icon">${t.icon}</span>
+        <span class="label">${t.label}</span>
+        <span class="label" style="color:var(--stamp-red);">${cnt} Wörter</span>
+      </div>`;
+    }).join("");
+
+    stage.innerHTML = `
+      <button class="bigbtn" id="smartLearnBtn2">🧠 Was soll ich heute lernen?<span class="subtext">Smart Learn über alle Themen</span></button>
+      <div class="sectionlabel">…oder wähle ein Thema</div>
+      <div class="topicgrid">${tiles}</div>
+    `;
+    document.getElementById("smartLearnBtn2").onclick = ()=>{
+      const smartPool = poolForLevel(currentLevel);
+      if(smartPool.length===0){ alert("Für dieses Niveau gibt es noch keine Vokabeln."); return; }
+      startSession(buildSmartQueue(smartPool,20), "🧠 Smart Learn");
+    };
+    document.querySelectorAll(".topictile").forEach(el=>{
+      el.onclick = ()=>{
+        if(topicCardCount(el.dataset.topic, currentLevel)===0){
+          alert("Für dieses Thema gibt es in diesem Niveau noch keine Wörter.");
+          return;
+        }
+        practiceTopic = el.dataset.topic;
+        renderLernen();
+      };
+    });
+    return;
+  }
+
+  /* A topic is selected: show progression across levels + start buttons */
+  const t = TOPIC_BY_KEY[practiceTopic];
+  const levelBlocks = LEVELS.map(lvl=>{
+    const words = ALL_CARDS.filter(c=>c.topic===practiceTopic && c.level===lvl);
+    if(words.length===0){
+      return `<div class="topicrow"><div class="trhead"><span class="tname">${lvl}</span><span style="color:var(--ink-soft); font-style:italic;">folgt bald</span></div></div>`;
+    }
+    const pct = topicMasteryPct(practiceTopic, lvl);
+    const chips = words.slice(0,10).map(c=>`<span class="wordchip">${c.w}</span>`).join("");
+    return `
+      <div class="topicrow">
+        <div class="trhead"><span class="tname">${lvl}</span><span>${words.length} Wörter · ${pct}%</span></div>
+        <div class="barouter"><div class="barinner" style="width:${pct}%;"></div></div>
+        <div class="wordbank">${chips}${words.length>10?`<span class="wordchip">+${words.length-10} weitere</span>`:""}</div>
+      </div>`;
+  }).join("");
+
+  const studyPool = currentLevel==="alle"
+    ? ALL_CARDS.filter(c=>c.topic===practiceTopic)
+    : ALL_CARDS.filter(c=>c.topic===practiceTopic && c.level===currentLevel);
+
+  stage.innerHTML = `
+    <button class="togglebtn" id="backToTopics">← Andere Themen</button>
+    <div class="sectionlabel" style="margin-top:12px;">${t.icon} ${t.label} — von A1 bis B1.2</div>
+    ${levelBlocks}
+    <button class="bigbtn" id="startTopicSession" style="margin-top:14px;">Thema lernen (${studyPool.length} Wörter)</button>
+    <div style="display:flex; gap:8px;">
+      <button class="bigbtn secondary" id="goSpeak" style="flex:1; font-size:14px; padding:14px 6px;">🗣️ Sprechen</button>
+      <button class="bigbtn secondary" id="goWrite" style="flex:1; font-size:14px; padding:14px 6px;">✍️ Schreiben</button>
+    </div>
+  `;
+  document.getElementById("backToTopics").onclick = ()=>{ practiceTopic=null; renderLernen(); };
+  document.getElementById("startTopicSession").onclick = ()=>{
+    if(studyPool.length===0){ alert("Keine Wörter für diese Auswahl."); return; }
+    const queue = buildSmartQueue(studyPool, Math.min(20, studyPool.length));
+    startSession(queue, `${t.icon} ${t.label}`);
+  };
+  document.getElementById("goSpeak").onclick = ()=>{ setView("sprechen"); };
+  document.getElementById("goWrite").onclick = ()=>{ setView("schreiben"); };
+}
+</script>
+<script>
+function getDefaultLevelForTopic(topic){
+  const prefOrder = ["B1.1","B1.2","A2","A1"];
+  for(const lvl of prefOrder){
+    if(ALL_CARDS.some(c=>c.topic===topic && c.level===lvl)) return lvl;
+  }
+  return "B1.1";
+}
+function topicsWithContent(level){
+  return TOPICS.filter(t=> level==="alle"
+    ? ALL_CARDS.some(c=>c.topic===t.key)
+    : ALL_CARDS.some(c=>c.topic===t.key && c.level===level));
+}
+function topicPickerHTML(){
+  const opts = topicsWithContent(currentLevel);
+  if(opts.length===0) return `<div class="empty">Noch keine Themen mit Wörtern für dieses Niveau.</div>`;
+  return `<div class="togglebar">${opts.map(t=>`<button class="togglebtn" data-t="${t.key}">${t.icon} ${t.label}</button>`).join("")}</div>`;
+}
+
+function speakingPrompt(level, label){
+  if(level==="A1") return `Sag 2–3 einfache Sätze über: <b>${label}</b>.`;
+  if(level==="A2") return `Sprich kurz (ca. 20–30 Sekunden) über: <b>${label}</b>.`;
+  return `Sprich 30–60 Sekunden über: <b>${label}</b>. Nutze eine Meinung, einen Grund und ein Beispiel.`;
+}
+function writingPrompt(level, label){
+  if(level==="A1") return `Schreibe 3 einfache Sätze über: <b>${label}</b>.`;
+  if(level==="A2") return `Beschreibe in 4–6 Sätzen: <b>${label}</b>.`;
+  return `Schreibe einen kurzen Text (60–100 Wörter) über: <b>${label}</b>. Nenne deine Meinung und einen Grund.`;
+}
+function wordBankFor(topic, level){
+  const pool = level==="alle" ? ALL_CARDS.filter(c=>c.topic===topic) : ALL_CARDS.filter(c=>c.topic===topic && c.level===level);
+  return shuffleArr(pool).slice(0,10);
+}
+
+/* ---------------- SPRECHEN ---------------- */
+let recognitionObj = null;
+let recognizing = false;
+
+function renderSprechen(){
+  const stage = document.getElementById("stage");
+  if(!practiceTopic){
+    stage.innerHTML = `
+      <div class="sectionlabel">🗣️ Sprechen — wähle ein Thema</div>
+      ${topicPickerHTML()}
+    `;
+    wireTopicPicker(()=>renderSprechen());
+    return;
+  }
+  const t = TOPIC_BY_KEY[practiceTopic];
+  const level = currentLevel==="alle" ? getDefaultLevelForTopic(practiceTopic) : currentLevel;
+  const bank = wordBankFor(practiceTopic, level);
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  stage.innerHTML = `
+    <button class="togglebtn" id="backTopics">← Anderes Thema</button>
+    <div class="practicebox" style="margin-top:12px;">
+      <h4>${t.icon} ${t.label} · ${level}</h4>
+      <div>${speakingPrompt(level, t.label)}</div>
+      <div class="wordbank">${bank.map(c=>`<span class="wordchip">${c.w}</span>`).join("")}</div>
+    </div>
+    ${SR ? `
+      <button class="bigbtn" id="micBtn">🎤 Aufnahme starten</button>
+      <div class="practicebox" id="transcriptBox" style="display:none;">
+        <h4>Transkript</h4>
+        <div id="transcriptText" style="min-height:40px;"></div>
+        <div id="usedWords" style="margin-top:8px;"></div>
+      </div>
+    ` : `
+      <div class="coach-line">Dein Browser unterstützt keine Spracherkennung (funktioniert am besten in Chrome). Sprich trotzdem laut, und schreib danach 1–2 Sätze zur Selbstkontrolle:</div>
+      <textarea class="fillinput" id="manualSpeak" rows="3" placeholder="Kurze Zusammenfassung, was du gesagt hast…"></textarea>
+    `}
+  `;
+  document.getElementById("backTopics").onclick = ()=>{ practiceTopic=null; renderSprechen(); };
+
+  if(SR){
+    let finalTranscript = "";
+    document.getElementById("micBtn").onclick = ()=>{
+      if(recognizing){
+        recognitionObj && recognitionObj.stop();
+        return;
+      }
+      finalTranscript = "";
+      recognitionObj = new SR();
+      recognitionObj.lang = "de-DE";
+      recognitionObj.continuous = true;
+      recognitionObj.interimResults = true;
+      document.getElementById("transcriptBox").style.display = "block";
+      document.getElementById("micBtn").textContent = "⏹️ Aufnahme stoppen";
+      recognizing = true;
+      recognitionObj.onresult = (ev)=>{
+        let interim = "";
+        for(let i=ev.resultIndex;i<ev.results.length;i++){
+          if(ev.results[i].isFinal) finalTranscript += ev.results[i][0].transcript + " ";
+          else interim += ev.results[i][0].transcript;
+        }
+        document.getElementById("transcriptText").textContent = finalTranscript + interim;
+        const lower = (finalTranscript+interim).toLowerCase();
+        const used = bank.filter(c=>lower.includes(c.w.toLowerCase().replace(/^sich\s+/,"")));
+        document.getElementById("usedWords").innerHTML = used.length
+          ? "✅ Benutzt: " + used.map(c=>`<span class="wordchip">${c.w}</span>`).join(" ")
+          : "";
+      };
+      recognitionObj.onerror = ()=>{ recognizing=false; document.getElementById("micBtn").textContent="🎤 Aufnahme starten"; };
+      recognitionObj.onend = ()=>{ recognizing=false; document.getElementById("micBtn").textContent="🎤 Aufnahme starten"; };
+      recognitionObj.start();
+    };
+  }
+}
+
+/* ---------------- SCHREIBEN ---------------- */
+function renderSchreiben(){
+  const stage = document.getElementById("stage");
+  if(!practiceTopic){
+    stage.innerHTML = `
+      <div class="sectionlabel">✍️ Schreiben — wähle ein Thema</div>
+      ${topicPickerHTML()}
+    `;
+    wireTopicPicker(()=>renderSchreiben());
+    return;
+  }
+  const t = TOPIC_BY_KEY[practiceTopic];
+  const level = currentLevel==="alle" ? getDefaultLevelForTopic(practiceTopic) : currentLevel;
+  const bank = wordBankFor(practiceTopic, level);
+
+  stage.innerHTML = `
+    <button class="togglebtn" id="backTopics">← Anderes Thema</button>
+    <div class="practicebox" style="margin-top:12px;">
+      <h4>${t.icon} ${t.label} · ${level}</h4>
+      <div>${writingPrompt(level, t.label)}</div>
+      <div class="wordbank">${bank.map(c=>`<span class="wordchip">${c.w}</span>`).join("")}</div>
+    </div>
+    <textarea class="fillinput" id="writeArea" rows="6" placeholder="Schreib hier deinen Text…"></textarea>
+    <div class="sessionbar" id="wordCount">0 Wörter · 0 Zeichen</div>
+    <button class="checkbtn" id="showRef">Zum Vergleich: Beispieltext anzeigen</button>
+    <div class="coach-line" id="refBox" style="display:none;">Beispieltext (kein automatisches Feedback — nur zum Vergleich): „${sampleWritingText(level, t, bank)}"</div>
+  `;
+  document.getElementById("backTopics").onclick = ()=>{ practiceTopic=null; renderSchreiben(); };
+  document.getElementById("writeArea").addEventListener("input", (e)=>{
+    const txt = e.target.value;
+    const words = txt.trim().length ? txt.trim().split(/\s+/).length : 0;
+    document.getElementById("wordCount").textContent = `${words} Wörter · ${txt.length} Zeichen`;
+  });
+  document.getElementById("showRef").onclick = ()=>{
+    document.getElementById("refBox").style.display = "block";
+  };
+}
+function sampleWritingText(level, topic, bank){
+  const w = bank.slice(0,3).map(c=>c.w.replace(/^sich\s+/,""));
+  if(level==="A1") return `Ich mag ${topic.label}. ${w[0]||""} ist wichtig für mich. Das ist gut.`;
+  if(level==="A2") return `Für mich ist ${topic.label} interessant. Ich denke oft an ${w[0]||"..."} und ${w[1]||"..."}. Das ist nicht immer einfach, aber ich lerne viel dabei.`;
+  return `Meiner Meinung nach spielt ${topic.label} eine wichtige Rolle in meinem Alltag. Besonders ${w[0]||"..."} und ${w[1]||"..."} beschäftigen mich, weil sie mit vielen Entscheidungen zusammenhängen. Ich versuche, verantwortungsbewusst damit umzugehen, auch wenn es manchmal schwierig ist.`;
+}
+
+function wireTopicPicker(cb){
+  document.querySelectorAll(".togglebtn[data-t]").forEach(el=>{
+    el.onclick = ()=>{ practiceTopic = el.dataset.t; cb(); };
+  });
+}
+</script>
+<script>
+const READING_PASSAGES = [
+  {topic:"wohnen", text:"Seit einem Jahr wohne ich in einer kleinen Wohnung in der Innenstadt. Die Miete ist nicht billig, aber die Lage ist perfekt: Ich kann zu Fuß zur Arbeit gehen. Mein Vermieter ist freundlich, aber die Nebenkosten sind in letzter Zeit stark gestiegen.",
+   question:"Warum ist die Wohnung praktisch?",
+   options:["Die Miete ist sehr niedrig.","Man kann zu Fuß zur Arbeit gehen.","Der Vermieter zahlt die Nebenkosten.","Die Wohnung ist sehr groß."],
+   correct:1},
+  {topic:"arbeit", text:"Nach der Kündigung meiner letzten Stelle habe ich mich bei drei Firmen beworben. Meine Erfahrung im Kundenservice war hilfreich, aber die Arbeitsbedingungen bei meinem neuen Arbeitgeber sind viel besser: flexible Arbeitszeiten und ein freundliches Team.",
+   question:"Was hat sich bei der neuen Stelle verbessert?",
+   options:["Der Lohn ist niedriger.","Die Arbeitsbedingungen sind besser.","Es gibt keine Kollegen mehr.","Man arbeitet nur nachts."],
+   correct:1},
+  {topic:"umwelt", text:"Immer mehr Städte fördern den Ausbau von Radwegen und Fußgängerzonen, um den Verkehr umweltfreundlicher zu gestalten. Kritiker sagen jedoch, dass es an genügend Parkplätzen fehlt und viele Autofahrer benachteiligt werden.",
+   question:"Was kritisieren manche Menschen an der neuen Verkehrspolitik?",
+   options:["Es werden zu viele Radwege gebaut.","Es fehlen Parkplätze für Autos.","Die Fußgängerzonen sind zu klein.","Die Städte bauen keine neuen Straßen."],
+   correct:1}
+];
+
+function readinessPct(){
+  const b1 = levelMasteryPct("B1.1");
+  const b2 = levelMasteryPct("B1.2");
+  const vals = [b1,b2].filter(v=>v!==null);
+  if(vals.length===0) return 0;
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+
+function renderPruefung(){
+  const stage = document.getElementById("stage");
+  const readiness = readinessPct();
+  stage.innerHTML = `
+    <div class="dashcard" style="margin-bottom:14px;">
+      <div class="num">${readiness}%</div>
+      <div class="lbl">B1-WORTSCHATZ-BEREITSCHAFT (interner Schätzwert, kein offizielles telc-Ergebnis)</div>
+    </div>
+
+    <button class="bigbtn" id="mixedDrill">📝 Gemischte Prüfungsrunde<span class="subtext">Zufällige Fragetypen aus B1.1 + B1.2</span></button>
+
+    <div class="sectionlabel">Lesen</div>
+    <div id="readingArea"></div>
+
+    <div class="sectionlabel">Hören</div>
+    <div class="coach-line">🎧 Hörverstehen benötigt Audiodateien, die in dieser Version nicht enthalten sind. Diese Funktion kann später ergänzt werden.</div>
+
+    <div class="sectionlabel">Schreiben &amp; Sprechen</div>
+    <div style="display:flex; gap:8px;">
+      <button class="bigbtn secondary" id="goWrite2" style="flex:1; font-size:14px; padding:14px 6px;">✍️ Schreiben üben</button>
+      <button class="bigbtn secondary" id="goSpeak2" style="flex:1; font-size:14px; padding:14px 6px;">🗣️ Sprechen üben</button>
+    </div>
+  `;
+
+  document.getElementById("mixedDrill").onclick = ()=>{
+    const pool = ALL_CARDS.filter(c=>c.level==="B1.1"||c.level==="B1.2");
+    startSession(buildSmartQueue(pool,15), "📝 Prüfungsmodus");
+  };
+  document.getElementById("goWrite2").onclick = ()=>{ setView("schreiben"); };
+  document.getElementById("goSpeak2").onclick = ()=>{ setView("sprechen"); };
+
+  renderReadingPassages();
+}
+
+let readingIdx = 0;
+function renderReadingPassages(){
+  const area = document.getElementById("readingArea");
+  const p = READING_PASSAGES[readingIdx % READING_PASSAGES.length];
+  area.innerHTML = `
+    <div class="practicebox">
+      <div style="margin-bottom:10px;">„${p.text}"</div>
+      <div class="subq" style="margin-bottom:8px;"><b>${p.question}</b></div>
+      ${p.options.map((o,i)=>`<button class="mcopt" data-i="${i}">${o}</button>`).join("")}
+      <div id="readResult" style="display:none;" class="fillresult"></div>
+      <button class="checkbtn" id="nextReading" style="display:none; margin-top:8px;">Nächster Text</button>
+    </div>
+  `;
+  area.querySelectorAll(".mcopt").forEach(btn=>{
+    btn.onclick = ()=>{
+      const correct = parseInt(btn.dataset.i)===p.correct;
+      area.querySelectorAll(".mcopt").forEach(b=>{
+        b.disabled=true;
+        if(parseInt(b.dataset.i)===p.correct) b.classList.add("correct");
+        else if(b===btn) b.classList.add("wrong");
+      });
+      const rb = document.getElementById("readResult");
+      rb.className = "fillresult " + (correct?"ok":"bad");
+      rb.textContent = correct ? "Richtig!" : "Nicht ganz — die richtige Antwort ist markiert.";
+      document.getElementById("nextReading").style.display="block";
+    };
+  });
+  document.getElementById("nextReading").onclick = ()=>{ readingIdx++; renderReadingPassages(); };
+}
+</script>
+<script>
+const NAV_ITEMS = [
+  {key:"dashboard", label:"📊 Start"},
+  {key:"lernen", label:"🧠 Lernen"},
+  {key:"sprechen", label:"🗣️ Sprechen"},
+  {key:"schreiben", label:"✍️ Schreiben"},
+  {key:"pruefung", label:"📝 Prüfung"}
+];
+
+function renderLevelBar(){
+  const bar = document.getElementById("levelBar");
+  const opts = [...LEVELS, "alle"];
+  bar.innerHTML = opts.map(lvl=>{
+    const label = lvl==="alle" ? "Alle" : lvl;
+    const cnt = poolForLevel(lvl).length;
+    const sub = lvl==="alle" ? cnt+" Wörter" : (cnt>0 ? cnt+" Wörter" : "bald");
+    return `<div class="levelchip ${currentLevel===lvl?'active':''}" data-lvl="${lvl}">${label}<small>${sub}</small></div>`;
+  }).join("");
+  bar.querySelectorAll(".levelchip").forEach(el=>{
+    el.onclick = ()=> setLevel(el.dataset.lvl);
+  });
+}
+
+function renderNavBar(){
+  const bar = document.getElementById("navBar");
+  bar.innerHTML = NAV_ITEMS.map(n=>
+    `<div class="navbtn ${currentView===n.key?'active':''}" data-v="${n.key}">${n.label}</div>`
+  ).join("");
+  bar.querySelectorAll(".navbtn").forEach(el=>{
+    el.onclick = ()=> setView(el.dataset.v);
+  });
+}
+
+function updateHeaderStats(){
+  document.getElementById("streakNum").textContent = META.streak || 0;
+  document.getElementById("dueTodayNum").textContent = dueCountForPool(poolForLevel(currentLevel));
+}
+
+function setLevel(level){
+  currentLevel = level;
+  practiceTopic = null;
+  renderLevelBar();
+  updateHeaderStats();
+  renderView();
+}
+function setView(view){
+  currentView = view;
+  if(view!=="lernen" && view!=="sprechen" && view!=="schreiben") practiceTopic = null;
+  renderNavBar();
+  renderView();
+}
+
+function renderView(){
+  updateHeaderStats();
+  switch(currentView){
+    case "dashboard": renderDashboard(); break;
+    case "lernen": renderLernen(); break;
+    case "sprechen": renderSprechen(); break;
+    case "schreiben": renderSchreiben(); break;
+    case "pruefung": renderPruefung(); break;
+    default: renderDashboard();
+  }
+}
+
+/* =========================================================
+   PWA — service worker (only works when served over http(s),
+   not when opened as a local file:// or inside a chat preview
+   sandbox; requires manifest.json/sw.js/icons alongside this
+   HTML file on a real web server for install prompts to appear)
+========================================================= */
+if("serviceWorker" in navigator && (location.protocol==="https:" || location.hostname==="localhost")){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+renderLevelBar();
+renderNavBar();
+renderView();
+</script>
+</body>
+</html>
