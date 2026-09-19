@@ -1005,7 +1005,13 @@ function renderCard(){
   }
 
   stage.innerHTML = `
-    <div class="sessionbar">Practice — Card ${sessionIdx+1} / ${session.length}</div>
+    <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
+      <div style="display:flex; gap:6px;">
+        ${sessionIdx > 0 ? `<button class="pill" onclick="prevCard()" style="cursor:pointer; background:#fff; border:1px solid var(--line); font-size:11px; padding:2px 8px;">← Prev</button>` : ''}
+        <button class="pill" onclick="nextCardWithoutAnswer()" style="cursor:pointer; background:#fff; border:1px solid var(--line); font-size:11px; padding:2px 8px;">Next Card ➔</button>
+      </div>
+    </div>
     <div class="studycard">
       <div class="stripe ${v.typ}"></div>
       <div class="meta">
@@ -1016,7 +1022,10 @@ function renderCard(){
         </span>
       </div>
       ${promptHTML}
-      <button class="thinkbtn" id="revealBtn">Show answer 🔎</button>
+      <div class="front-actions" id="frontActions" style="display:flex; gap:8px; padding:14px 18px 18px;">
+        <button class="thinkbtn" id="revealBtn" style="margin:0; flex:2;">Show answer 🔎</button>
+        <button class="actbtn" id="skipBtn" style="flex:1; background:var(--paper-dark); color:var(--ink);" onclick="advance()">Skip / Next ➔</button>
+      </div>
       <div id="revealArea"></div>
     </div>
   `;
@@ -1024,17 +1033,35 @@ function renderCard(){
   document.getElementById('revealBtn').onclick = ()=>{
     document.getElementById('revealArea').innerHTML = revealHTML + `
       <div class="answerbtns">
-        <button class="actbtn nochmal" id="btnNochmal">Again</button>
-        <button class="actbtn gewusst" id="btnGewusst">Knew it</button>
-        <button class="actbtn easy" id="btnEasy">🎯 Know it well</button>
+        <button class="actbtn nochmal" id="btnNochmal">↺ Again</button>
+        <button class="actbtn gewusst" id="btnGewusst">✓ Knew it</button>
+        <button class="actbtn easy" id="btnEasy">🎯 Master</button>
+        <button class="actbtn" id="btnNextAfterReveal" style="background:var(--paper-dark); border-color:var(--line);" onclick="advance()">Next ➔</button>
       </div>`;
-    document.getElementById('revealBtn').style.display = 'none';
+    document.getElementById('frontActions').style.display = 'none';
     document.getElementById('btnNochmal').onclick = ()=>{ recordAnswer(v.uid,false); advance(); };
     document.getElementById('btnGewusst').onclick = ()=>{ recordAnswer(v.uid,true); advance(); };
     document.getElementById('btnEasy').onclick = ()=>{
       triggerProductionChallenge(v);
     };
   };
+}
+
+function advance(){
+  sessionIdx++;
+  renderCard();
+}
+
+function nextCardWithoutAnswer(){
+  sessionIdx++;
+  renderCard();
+}
+
+function prevCard(){
+  if(sessionIdx > 0){
+    sessionIdx--;
+    renderCard();
+  }
 }
 
 function formatPerfekt(pp){
