@@ -306,7 +306,7 @@ function setActiveRow(i){
 
 function updateProgress(i){
   document.getElementById('progressLabel').textContent =
-    i>=0 ? `Wort ${i+1} / ${VERBS.length}: ${VERBS[i].w}` : `Bereit — ${VERBS.length} Verben geladen`;
+    i>=0 ? `Wort ${i+1} / ${VERBS.length}: ${VERBS[i].inf}` : `Bereit — ${VERBS.length} Verben geladen`;
 }
 
 async function playOne(i){

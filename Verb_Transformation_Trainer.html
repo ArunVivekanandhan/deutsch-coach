@@ -280,6 +280,18 @@
   </div>
 
   <div class="voicewarn" id="voiceWarn">🔎 Looking for a German voice…</div>
+  <div class="voice-control-bar" id="voiceControlBar" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:8px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12px;">
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <span style="font-weight:700; color:#1e293b;">🎙️ German Voice:</span>
+      <select id="voiceSelect" onchange="onVoiceChanged(this.value)" style="padding:4px 8px; border-radius:4px; border:1px solid #94a3b8; font-size:12px; max-width:280px; background:#fff; font-family:inherit;"></select>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <span style="font-size:11px; color:#64748b;">Test Audio:</span>
+      <button onclick="testPronunciation('gefallen')" style="background:#fff; border:1px solid #94a3b8; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">🔊 "gefallen"</button>
+      <button onclick="testPronunciation('gefiel')" style="background:#fff; border:1px solid #94a3b8; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">🔊 "gefiel"</button>
+      <button onclick="testPronunciation('hat gefallen')" style="background:#fff; border:1px solid #94a3b8; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">🔊 "hat gefallen"</button>
+    </div>
+  </div>
 
   <div class="countline" id="poolCount"></div>
   <div class="dashgrid" id="dashGrid"></div>
@@ -349,50 +361,137 @@ function isMastered(uid){ const p = PROGRESS[uid]; return p && p.box>=4; }
 
 VERBS.forEach(v=> v.uid = v.level+'|'+v.inf);
 
-/* ---- Voice (browser's own TTS — natural voice, no generated audio file) ---- */
+/* ---- Voice (browser's own TTS — natural voice, guaranteed German pronunciation) ---- */
 let deVoices = [];
 let voicePollAttempts = 0;
+let selectedVoiceURI = localStorage.getItem('dc_preferred_voice_uri') || '';
+
 function matchesDe(voice){
-  const lang = (voice.lang||'').toLowerCase().replace('_','-');
-  const name = (voice.name||'').toLowerCase();
+  if(!voice) return false;
+  const lang = (voice.lang || '').toLowerCase().replace('_','-');
+  const name = (voice.name || '').toLowerCase();
   return lang.startsWith('de') || name.includes('german') || name.includes('deutsch');
 }
+
 function populateVoices(){
-  deVoices = speechSynthesis.getVoices().filter(matchesDe);
+  if(!('speechSynthesis' in window)) return false;
+  const allVoices = speechSynthesis.getVoices() || [];
+  deVoices = allVoices.filter(matchesDe);
+  
   const warn = document.getElementById('voiceWarn');
-  if(deVoices.length){ warn.style.display = 'none'; return true; }
+  const select = document.getElementById('voiceSelect');
+
+  if(deVoices.length > 0){
+    if(warn) warn.style.display = 'none';
+    if(select){
+      select.innerHTML = deVoices.map(v => {
+        const isSelected = selectedVoiceURI ? (v.voiceURI === selectedVoiceURI) : false;
+        return `<option value="${v.voiceURI}" ${isSelected ? 'selected' : ''}>${v.name} (${v.lang})</option>`;
+      }).join('');
+      
+      if(!selectedVoiceURI && deVoices.length > 0){
+        const best = getBestGermanVoice();
+        if(best && select) select.value = best.voiceURI;
+      }
+    }
+    return true;
+  }
+
   if(voicePollAttempts >= 8){
-    warn.innerHTML = '⚠️ No German voice found on this device. Android: Settings → Languages → Text-to-speech. iPhone: Settings → Accessibility → Spoken Content → Voices.';
-    warn.style.display = 'block';
+    if(warn){
+      warn.innerHTML = '⚠️ No German voice found on this device. For crystal-clear native pronunciation:<br>• <b>Windows</b>: Settings → Time &amp; Language → Speech → Add "German (Germany)"<br>• <b>Android</b>: Settings → System → Languages → Text-to-speech → Install German<br>• <b>iPhone/iPad</b>: Settings → Accessibility → Spoken Content → Voices → German';
+      warn.style.display = 'block';
+    }
   }
   return false;
 }
+
 function pollForVoices(){
   voicePollAttempts++;
-  if(!populateVoices() && voicePollAttempts < 8) setTimeout(pollForVoices, 500);
+  if(!populateVoices() && voicePollAttempts < 10) setTimeout(pollForVoices, 400);
 }
+
 if('speechSynthesis' in window){
   speechSynthesis.onvoiceschanged = populateVoices;
   pollForVoices();
 } else {
-  document.getElementById('voiceWarn').style.display = 'none';
+  const warn = document.getElementById('voiceWarn');
+  if(warn) warn.style.display = 'none';
 }
+
+function onVoiceChanged(uri){
+  selectedVoiceURI = uri;
+  localStorage.setItem('dc_preferred_voice_uri', uri);
+  speak('gefallen');
+}
+
+function getBestGermanVoice(){
+  if(!deVoices || deVoices.length === 0){
+    if('speechSynthesis' in window){
+      deVoices = (speechSynthesis.getVoices() || []).filter(matchesDe);
+    }
+  }
+  if(!deVoices || deVoices.length === 0) return null;
+
+  if(selectedVoiceURI){
+    const userChoice = deVoices.find(v => v.voiceURI === selectedVoiceURI);
+    if(userChoice) return userChoice;
+  }
+
+  // Priority ranking:
+  // 1. Natural / Neural / Online voices (e.g. Edge Natural Katja, Conrad, Killian, Louisa)
+  const natural = deVoices.find(v => {
+    const n = v.name.toLowerCase();
+    return n.includes('natural') || n.includes('neural') || n.includes('online');
+  });
+  if(natural) return natural;
+
+  // 2. Google Deutsch
+  const google = deVoices.find(v => v.name.toLowerCase().includes('google'));
+  if(google) return google;
+
+  // 3. Desktop German voices (Microsoft Hedda, Katja, Stefan)
+  const deDE = deVoices.find(v => (v.lang||'').toLowerCase().startsWith('de-de') || (v.lang||'').toLowerCase() === 'de');
+  if(deDE) return deDE;
+
+  return deVoices[0];
+}
+
+function cleanGermanText(text){
+  if(!text) return '';
+  return text
+    .replace(/<[^>]*>/g, '') // strip HTML
+    .replace(/\(.*?\)/g, '') // strip parentheses
+    .replace(/\bhat\/ist\b/gi, 'hat')
+    .replace(/\bist\/hat\b/gi, 'ist')
+    .replace(/\b(jdm\.|etw\.|sb\.|sth\.)/gi, '')
+    .trim();
+}
+
 function speak(text){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text.replace(/\(.*?\)/g,'').trim());
-  u.lang = 'de-DE';
-  u.rate = 0.85; // Slightly slower for more natural, human-like cadence
-  u.pitch = 1.0; // Neutral natural pitch
+  
+  const clean = cleanGermanText(text);
+  if(!clean) return;
 
-  // Priority: Premium/Natural voices > Google voices > First available German voice
-  if(deVoices.length){
-    const premium = deVoices.find(v => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('premium'));
-    const google = deVoices.find(v => v.name.toLowerCase().includes('google'));
-    u.voice = premium || google || deVoices[0];
+  const u = new SpeechSynthesisUtterance(clean);
+  u.lang = 'de-DE';
+  u.rate = 0.95; // 0.95 gives clean native tempo without distorting "-en" into "-st"
+  u.pitch = 1.0;
+
+  const voice = getBestGermanVoice();
+  if(voice){
+    u.voice = voice;
   }
+
   speechSynthesis.speak(u);
 }
+
+function testPronunciation(word){
+  speak(word);
+}
+
 function speakBtn(text, label){
   const safe = text.replace(/'/g, "\\'");
   return `<button class="speakbtn" title="${label||'anhören'}" onclick="event.stopPropagation(); speak('${safe}')">🔊</button>`;

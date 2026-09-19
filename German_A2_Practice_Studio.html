@@ -2007,25 +2007,73 @@ function checkDrillAnswer(ans) {
 }
 
 /* =========================================================================
-   UTILITIES
+   UTILITIES & TTS VOICE ENGINE
    ========================================================================= */
+function getBestGermanVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const voices = window.speechSynthesis.getVoices() || [];
+  const deVoices = voices.filter(v => {
+    const l = (v.lang || '').toLowerCase().replace('_', '-');
+    const n = (v.name || '').toLowerCase();
+    return l.startsWith('de') || n.includes('german') || n.includes('deutsch');
+  });
+  if (deVoices.length === 0) return null;
+
+  const natural = deVoices.find(v => {
+    const n = v.name.toLowerCase();
+    return n.includes('natural') || n.includes('neural') || n.includes('online');
+  });
+  if (natural) return natural;
+
+  const google = deVoices.find(v => v.name.toLowerCase().includes('google'));
+  if (google) return google;
+
+  const deDE = deVoices.find(v => (v.lang || '').toLowerCase().startsWith('de-de') || (v.lang || '').toLowerCase() === 'de');
+  if (deDE) return deDE;
+
+  return deVoices[0];
+}
+
 function setupVoice() {
   if ('speechSynthesis' in window) {
-    const voices = window.speechSynthesis.getVoices();
-    currentVoice = voices.find(v => v.lang.startsWith('de')) || voices[0];
+    currentVoice = getBestGermanVoice();
+    window.speechSynthesis.onvoiceschanged = () => {
+      currentVoice = getBestGermanVoice();
+    };
   }
+}
+
+function cleanGermanText(text) {
+  if (!text) return '';
+  return text
+    .replace(/<[^>]*>/g, '')
+    .replace(/\(.*?\)/g, '')
+    .replace(/\bhat\/ist\b/gi, 'hat')
+    .replace(/\bist\/hat\b/gi, 'ist')
+    .replace(/\b(jdm\.|etw\.|sb\.|sth\.)/gi, '')
+    .trim();
 }
 
 function speak(text) {
   if (!window.speechSynthesis) return;
-  const utter = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.cancel();
+
+  const clean = cleanGermanText(text);
+  if (!clean) return;
+
+  const utter = new SpeechSynthesisUtterance(clean);
   utter.lang = 'de-DE';
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+
+  if (!currentVoice) currentVoice = getBestGermanVoice();
   if (currentVoice) utter.voice = currentVoice;
+
   window.speechSynthesis.speak(utter);
 }
 
 function testVoice() {
-  speak("Hallo! Ich bin dein Deutsch-Coach. Willkommen im A2 Praxis-Studio!");
+  speak("Hallo! Ich bin dein Deutsch-Coach. gefallen, gefiel, hat gefallen.");
 }
 
 </script>
