@@ -194,6 +194,53 @@
     font-family:'Fjalla One',sans-serif; cursor:pointer; font-size:14px;
   }
   @keyframes slideUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  /* Morphological Decomposition & Verb Family Explorer */
+  .morph-box {
+    background: #fff; border: 1.5px solid var(--gold); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(185,138,46,0.1);
+    text-align: left;
+  }
+  .morph-header {
+    font-family: 'Fjalla One', sans-serif; font-size: 14px; color: var(--gold);
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .morph-formula {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    background: var(--paper); padding: 8px 10px; border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-bottom: 8px;
+  }
+  .morph-part {
+    padding: 3px 8px; border-radius: 4px; font-weight: 700;
+  }
+  .morph-part.prefix { background: #e8e0f0; color: var(--purple); }
+  .morph-part.root { background: #dce7f2; color: var(--blue); }
+  .morph-part small { font-weight: normal; font-size: 11px; opacity: 0.85; font-family: 'IBM Plex Sans', sans-serif; }
+  .morph-mnemonic {
+    font-size: 12.5px; line-height: 1.5; color: var(--ink);
+    background: #fffdf5; border-left: 3px solid var(--gold); padding: 6px 10px;
+    border-radius: 0 4px 4px 0; margin-bottom: 10px;
+  }
+  .family-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;
+  }
+  @media (max-width: 500px) { .family-grid { grid-template-columns: 1fr; } }
+  .family-col {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 10px; font-size: 11.5px;
+  }
+  .family-title {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 10.5px;
+    color: var(--ink-soft); text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid var(--line);
+    padding-bottom: 3px;
+  }
+  .family-list {
+    margin: 0; padding-left: 14px; line-height: 1.5;
+  }
+  .family-list li { margin-bottom: 2px; }
+  .family-list b { color: var(--ink); }
+
 </style>
 </head>
 <body>
@@ -538,7 +585,198 @@ function meaningHTML(v){
   return `<div class="meaningbox"><div class="en">${v.en}</div></div>`;
 }
 
+
+/* =========================================================================
+   MORPHOLOGY & VERB FAMILY EXPLORATION ENGINE
+   ========================================================================= */
+const PREFIX_DB = {
+  "unter": { en: "under / beneath / below", ta: "கீழ் / அடியில்", hint: "Positioned underneath or subordinate to" },
+  "über": { en: "over / above / across", ta: "மேலே / கடந்து", hint: "Positioned above or transferring across" },
+  "auf": { en: "up / open / upon", ta: "மேலே / திறந்து", hint: "Upward motion or opening" },
+  "aus": { en: "out / from / completely", ta: "வெளியே / முற்றிலும்", hint: "Outward movement or finishing" },
+  "an": { en: "at / on / start", ta: "அருகில் / தொடங்கு", hint: "Approaching, turning on or initiating" },
+  "ab": { en: "off / away / down", ta: "விலகி / கீழே", hint: "Departing, detaching or reducing" },
+  "ein": { en: "in / into / inside", ta: "உள்ளே", hint: "Inward movement or joining" },
+  "mit": { en: "with / along / together", ta: "உடன் / சேர்ந்து", hint: "Participating or accompanying" },
+  "vor": { en: "before / forward / in front", ta: "முன்னால்", hint: "Ahead, preparing or demonstrating" },
+  "nach": { en: "after / follow / re-", ta: "பின்னால் / தொடர்ந்து", hint: "Following or checking later" },
+  "zu": { en: "to / closed / towards", ta: "நோக்கி / மூடி", hint: "Direction towards or closing" },
+  "weg": { en: "away / off", ta: "தொலைவில் / விலகி", hint: "Removing or moving far away" },
+  "zurück": { en: "back / return", ta: "திரும்பி", hint: "Returning to previous state/place" },
+  "ver": { en: "completely / transform / away", ta: "முற்றிலும் / உருமாற்றம்", hint: "Transformation, completion or mistake" },
+  "be": { en: "make into / apply to / direct", ta: "முழுமையாக மாற்று", hint: "Directing action onto an object" },
+  "ent": { en: "away / remove / origin", ta: "அகற்று / தோற்றம்", hint: "Originating or escaping from" },
+  "er": { en: "achieve / attain / start", ta: "அடை / பெறு", hint: "Reaching a result or acquiring" },
+  "zer": { en: "apart / destroy / pieces", ta: "உடை / சிதைவு", hint: "Breaking into pieces or destroying" },
+  "miss": { en: "mis- / wrong / bad", ta: "தவறாக", hint: "Incorrect, ill or failing" },
+  "wider": { en: "against / counter", ta: "எதிராக", hint: "Standing in resistance or opposing" },
+  "wieder": { en: "again / re-", ta: "மீண்டும்", hint: "Repeating the action" },
+  "durch": { en: "through / across", ta: "வழியாக / ஊடாக", hint: "Passing through from start to end" },
+  "um": { en: "around / change / over", ta: "சுற்றி / மாற்றம்", hint: "Surrounding or altering state" }
+};
+
+const ROOT_DB = {
+  "stehen": { en: "to stand", ta: "நிற்பது", base_sense: "stationary upright posture" },
+  "gehen": { en: "to go / walk", ta: "செல்வது / போவது", base_sense: "movement on foot" },
+  "kommen": { en: "to come", ta: "வருவது", base_sense: "arrival or origin" },
+  "nehmen": { en: "to take", ta: "எடுப்பது", base_sense: "grasping or receiving" },
+  "geben": { en: "to give", ta: "கொடுப்பது", base_sense: "transferring to others" },
+  "sehen": { en: "to see / look", ta: "பார்ப்பது", base_sense: "visual perception" },
+  "hören": { en: "to hear / listen", ta: "கேட்பது", base_sense: "auditory perception" },
+  "sprechen": { en: "to speak", ta: "பேசுவது", base_sense: "oral communication" },
+  "schreiben": { en: "to write", ta: "எழுதுவது", base_sense: "inscribing text" },
+  "lesen": { en: "to read", ta: "வாசிப்பது", base_sense: "reading text" },
+  "fahren": { en: "to drive / travel", ta: "பயணிப்பது", base_sense: "vehicular motion" },
+  "tragen": { en: "to carry / wear", ta: "சுமப்பது / அணிவது", base_sense: "bearing weight or clothing" },
+  "bringen": { en: "to bring", ta: "கொண்டுவருவது", base_sense: "transporting toward" },
+  "stellen": { en: "to place upright", ta: "நிறுத்தி வைப்பது", base_sense: "putting in standing position" },
+  "legen": { en: "to lay / put flat", ta: "கிடைமட்டமாக வைப்பது", base_sense: "putting in horizontal position" },
+  "setzen": { en: "to sit / place", ta: "அமர வைப்பது", base_sense: "placing in sitting position" },
+  "halten": { en: "to hold / stop", ta: "பிடிப்பது / நிறுத்துவது", base_sense: "gripping or pausing" },
+  "machen": { en: "to make / do", ta: "செய்வது", base_sense: "performing an action" },
+  "lassen": { en: "to let / allow / leave", ta: "விடுவது", base_sense: "permitting or abandoning" },
+  "finden": { en: "to find", ta: "கண்டுபிடிப்பது", base_sense: "discovering" },
+  "ziehen": { en: "to pull / move", ta: "இழுப்பது / நகர்வது", base_sense: "pulling or migrating" },
+  "brechen": { en: "to break", ta: "உடைப்பது", base_sense: "fracturing into pieces" },
+  "fallen": { en: "to fall", ta: "விழுவது", base_sense: "dropping downward" },
+  "arbeiten": { en: "to work", ta: "வேலை செய்வது", base_sense: "labor or task" },
+  "kaufen": { en: "to buy", ta: "வாங்குவது", base_sense: "purchasing" },
+  "passen": { en: "to fit / suit", ta: "பொருந்துவது", base_sense: "compatibility" },
+  "schließen": { en: "to close", ta: "மூடுவது", base_sense: "shutting" },
+  "öffnen": { en: "to open", ta: "திறப்பது", base_sense: "uncovering" },
+  "rufen": { en: "to call", ta: "அழைப்பது", base_sense: "vocal summoning" },
+  "zahlen": { en: "to pay / count", ta: "செலுத்துவது", base_sense: "financial exchange" },
+  "reisen": { en: "to travel", ta: "பயணிப்பது", base_sense: "journey" }
+};
+
+function analyzeVerb(verbStr) {
+  let vClean = verbStr.toLowerCase().replace(/^sich\s+/, '').replace(/\s+sein$/, '').trim();
+  
+  // Try longest matching prefix
+  const prefixKeys = Object.keys(PREFIX_DB).sort((a,b)=>b.length - a.length);
+  let matchedPrefix = null;
+  let remainingStem = vClean;
+
+  for (const p of prefixKeys) {
+    if (vClean.startsWith(p) && vClean.length > p.length + 2) {
+      matchedPrefix = p;
+      remainingStem = vClean.substring(p.length);
+      break;
+    }
+  }
+
+  // Try matching root in database
+  const rootKeys = Object.keys(ROOT_DB).sort((a,b)=>b.length - a.length);
+  let matchedRoot = null;
+  for (const r of rootKeys) {
+    if (remainingStem === r || remainingStem.endsWith(r)) {
+      matchedRoot = r;
+      break;
+    }
+    if (vClean === r) {
+      matchedRoot = r;
+      break;
+    }
+  }
+
+  return {
+    prefix: matchedPrefix,
+    prefixInfo: matchedPrefix ? PREFIX_DB[matchedPrefix] : null,
+    root: matchedRoot,
+    rootInfo: matchedRoot ? ROOT_DB[matchedRoot] : null,
+    stem: remainingStem
+  };
+}
+
+function renderVerbMorphology(v) {
+  const ana = analyzeVerb(v.inf);
+  if (!ana.prefix && !ana.root) return '';
+
+  let formulaHTML = '';
+  let mnemonicHTML = '';
+
+  if (ana.prefix && ana.root) {
+    formulaHTML = `
+      <div class="morph-formula">
+        <span class="morph-part prefix">${ana.prefix}- <small>(${ana.prefixInfo.en} · ${ana.prefixInfo.ta})</small></span>
+        <span>+</span>
+        <span class="morph-part root">${ana.root} <small>(${ana.rootInfo.en} · ${ana.rootInfo.ta})</small></span>
+        <span>=</span>
+        <span style="font-weight:700; color:var(--red);">${v.inf}</span>
+      </div>
+    `;
+    mnemonicHTML = `
+      <div class="morph-mnemonic">
+        💡 <b>Memory Trick:</b> Think of <i>${ana.prefixInfo.en.split('/')[0].trim()}</i> + <i>${ana.rootInfo.en}</i>. 
+        In German, combining <b>${ana.prefix}-</b> with <b>${ana.root}</b> literally means "${ana.prefixInfo.en.split('/')[0].trim()} ${ana.rootInfo.en.replace('to ','')}", giving it the meaning: <b>„${v.en}”</b> (${v.ta ? v.ta : ''}).
+      </div>
+    `;
+  } else if (ana.root) {
+    formulaHTML = `
+      <div class="morph-formula">
+        <span class="morph-part root">🌱 Root Verb: ${ana.root} <small>(${ana.rootInfo.en} · ${ana.rootInfo.ta})</small></span>
+      </div>
+    `;
+    mnemonicHTML = `
+      <div class="morph-mnemonic">
+        💡 <b>Core German Verb:</b> <b>${ana.root}</b> means <b>${ana.rootInfo.en}</b> (${ana.rootInfo.ta}). Many compound verbs are built by adding prefixes to this root!
+      </div>
+    `;
+  }
+
+  // Find prefix family in current VERBS database
+  let prefixFamilyVerbs = [];
+  if (ana.prefix) {
+    prefixFamilyVerbs = VERBS.filter(item => item.inf !== v.inf && item.inf.toLowerCase().startsWith(ana.prefix)).slice(0, 5);
+  }
+
+  // Find root family in current VERBS database
+  let rootFamilyVerbs = [];
+  if (ana.root) {
+    rootFamilyVerbs = VERBS.filter(item => item.inf !== v.inf && item.inf.toLowerCase().endsWith(ana.root)).slice(0, 5);
+  }
+
+  let familyHTML = '';
+  if (prefixFamilyVerbs.length > 0 || rootFamilyVerbs.length > 0) {
+    familyHTML = `
+      <div class="family-grid">
+        ${prefixFamilyVerbs.length > 0 ? `
+          <div class="family-col">
+            <div class="family-title">🌱 "${ana.prefix}-" Prefix Family:</div>
+            <ul class="family-list">
+              ${prefixFamilyVerbs.map(pv => `<li><b>${pv.inf}</b> → ${pv.en} ${pv.ta ? `<span style="color:var(--purple); font-size:10.5px;">(${pv.ta})</span>` : ''}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        ${rootFamilyVerbs.length > 0 ? `
+          <div class="family-col">
+            <div class="family-title">🌲 "-${ana.root}" Root Verb Family:</div>
+            <ul class="family-list">
+              ${rootFamilyVerbs.map(rv => `<li><b>${rv.inf}</b> → ${rv.en} ${rv.ta ? `<span style="color:var(--purple); font-size:10.5px;">(${rv.ta})</span>` : ''}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="morph-box">
+      <div class="morph-header">
+        <span>🧩 Verb Breakdown &amp; Memory Trick</span>
+        <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; opacity:0.8;">Word Anatomy</span>
+      </div>
+      ${formulaHTML}
+      ${mnemonicHTML}
+      ${familyHTML}
+    </div>
+  `;
+}
+
 function renderMnemonic(v){
+  let morph = renderVerbMorphology(v);
+  if(morph) return morph;
   if(!v.mnemonic && !v.split && !v.story) return '';
   let html = '';
   if(v.story){
