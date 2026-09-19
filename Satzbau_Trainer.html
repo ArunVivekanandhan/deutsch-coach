@@ -320,32 +320,113 @@ document.getElementById('resetBtn').onclick = ()=>{
   renderBuild();
 };
 
+function diagnoseMistake(userTokens, correctTokens, topicId) {
+  if (userTokens.length < correctTokens.length) {
+    return `⚠️ <b>Incomplete sentence:</b> You placed ${userTokens.length} of ${correctTokens.length} words. Please click all words into the build box above.`;
+  }
+
+  // Check specific grammar topic patterns
+  if (topicId === 'v2') {
+    return `💡 <b>Verb Position 2 Rule:</b> In a German main clause, the conjugated verb MUST be at Position 2. If a time expression (e.g. 'Heute', 'Morgen') is placed first, the subject must move behind the verb to Position 3.`;
+  } else if (topicId === 'nebensatz') {
+    return `💡 <b>Subordinate Clause Rule:</b> After subordinating connectors (weil, dass, wenn, ob, obwohl), the conjugated verb MUST be placed at the very end of the clause!`;
+  } else if (topicId === 'konnektoren') {
+    return `💡 <b>Connector Rule:</b> Position 0 connectors (aber, denn, und, sondern, oder) maintain normal Subject-Verb order. Position 1 adverbs (deshalb, trotzdem) cause inversion (Verb at Pos 2, Subject at Pos 3).`;
+  } else if (topicId === 'perfekt') {
+    return `💡 <b>Perfekt Sentence Bracket (Satzklammer):</b> The auxiliary verb (haben/sein) stays at Position 2, and the Partizip II (ge- form) MUST go to the very end of the sentence.`;
+  } else if (topicId === 'modalverben') {
+    return `💡 <b>Modal Verb Rule:</b> The conjugated modal verb (kann, muss, will, möchte) stays at Position 2, and the infinitive verb MUST go to the very end.`;
+  } else if (topicId === 'trennbar') {
+    return `💡 <b>Separable Prefix Rule:</b> The main verb stem is conjugated at Position 2, and the separable prefix (auf, an, ein, aus, mit, zu) MUST detach and move to the very end.`;
+  } else {
+    return `💡 <b>Word Order Guide:</b> Compare your word order with the target German sentence below to see which word was placed too early or too late.`;
+  }
+}
+
+function autoFixOrder() {
+  buildSlots = correctOrder.map((w, i) => ({ word: w, id: i }));
+  bankWords = [];
+  renderBuild();
+  const correctSentenceStr = correctOrder.join(' ');
+  speakText(correctSentenceStr);
+  const fb = document.getElementById('feedbackArea');
+  fb.innerHTML = `
+    <div class="feedback correct" style="border-left-color:var(--blue);">
+      <div style="font-weight:700; color:var(--blue); margin-bottom:4px;">✨ Auto-Corrected to the exact German structure:</div>
+      <div class="correctsent" style="color:var(--ink); font-size:15px;">${correctSentenceStr}</div>
+      <div style="font-size:11.5px; color:var(--ink-soft); margin-top:4px;">Now tap "Try This Sentence Again" to practice building it yourself!</div>
+    </div>
+  `;
+}
+
+function retrySameSentence() {
+  bankWords = shuffleArr(correctOrder.map((w,i)=>({word:w, id:i})));
+  buildSlots = [];
+  document.getElementById('feedbackArea').innerHTML = '';
+  document.getElementById('checkBtn').style.display = '';
+  document.getElementById('nextBtn').style.display = 'none';
+  renderBuild();
+}
+
 document.getElementById('checkBtn').onclick = ()=>{
   const userOrder = buildSlots.map(w=>w.word);
   const isCorrect = userOrder.length === correctOrder.length && userOrder.every((w,i)=>w===correctOrder[i]);
   const fb = document.getElementById('feedbackArea');
   const correctSentenceStr = correctOrder.join(' ');
+
   if(isCorrect){
     markSentenceDone(curTopic ? curTopic.id : '', correctSentenceStr);
-    fb.innerHTML = `<div class="feedback correct">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span>✓ Richtig! Ausgezeichnet!</span>
-        <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${correctSentenceStr.replace(/'/g, "\\'")}')">🔊 Vorlesen</button>
+    fb.innerHTML = `
+      <div class="feedback correct">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:700; color:var(--green); font-size:14px;">✓ Perfect! Richtig! Ausgezeichnet!</span>
+          <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${correctSentenceStr.replace(/'/g, "\\'")}')">🔊 Listen (Hören)</button>
+        </div>
+        <div class="correctsent" style="color:var(--green); font-size:16px; margin:6px 0;">${correctSentenceStr}</div>
+        <div style="font-size:11.5px; color:var(--ink-soft);">Sentence added to your mastered list ⭐</div>
       </div>
-      <div class="correctsent" style="color:var(--green);">${correctSentenceStr}</div>
-    </div>`;
+    `;
     speakText(correctSentenceStr);
+    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = '';
   } else {
-    fb.innerHTML = `<div class="feedback wrong">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span>✗ Noch nicht ganz:</span>
-        <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${correctSentenceStr.replace(/'/g, "\\'")}')">🔊 Richtigen Satz hören</button>
+    // Build token-by-token comparison chips
+    const userChipsHtml = buildSlots.map((w, idx)=>{
+      const isWordRight = idx < correctOrder.length && w.word === correctOrder[idx];
+      return `<span style="display:inline-block; padding:3px 8px; border-radius:12px; margin:2px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; background:${isWordRight ? '#e2eed8; color:#214427; border:1px solid #3F6B4A;' : '#f8e4e3; color:#8A281F; border:1px solid #AE3327;'}">${w.word} ${isWordRight ? '✓' : '✗'}</span>`;
+    }).join(' ');
+
+    const explanationText = diagnoseMistake(userOrder, correctOrder, curTopic ? curTopic.id : '');
+
+    fb.innerHTML = `
+      <div class="feedback wrong">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:700; color:var(--red); font-size:14px;">✗ Not quite right / Noch nicht ganz richtig</span>
+          <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${correctSentenceStr.replace(/'/g, "\\'")}')">🔊 Hear Correct German</button>
+        </div>
+
+        <div style="font-size:12px; margin-bottom:6px;"><b>Your Word Order:</b></div>
+        <div style="margin-bottom:10px;">${userChipsHtml || '<span style="color:var(--red); font-style:italic;">(No words placed)</span>'}</div>
+
+        <div style="background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px; margin-bottom:10px; font-size:12.5px; line-height:1.5;">
+          ${explanationText}
+        </div>
+
+        <div style="font-size:12px; margin-bottom:4px;"><b>Correct German Sentence:</b></div>
+        <div class="correctsent" style="font-size:15px; color:var(--ink); background:#eaf2ea; padding:8px 12px; border-radius:6px; border:1px solid var(--green); margin-bottom:10px;">
+          ${correctSentenceStr}
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="actbtn" style="background:var(--blue); color:#fff; border-color:var(--blue); padding:8px 12px; font-size:11.5px;" onclick="autoFixOrder()">✨ Auto-Fix Chips for Me</button>
+          <button class="actbtn" style="background:#fff; color:var(--ink); padding:8px 12px; font-size:11.5px;" onclick="retrySameSentence()">↺ Try This Sentence Again</button>
+        </div>
       </div>
-      <div class="correctsent">${correctSentenceStr}</div>
-    </div>`;
+    `;
+
+    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = '';
   }
-  document.getElementById('checkBtn').style.display = 'none';
-  document.getElementById('nextBtn').style.display = '';
 };
 
 document.getElementById('nextBtn').onclick = newSentence;

@@ -1977,15 +1977,18 @@ function checkBuildAnswer(){
 
   fbText.innerHTML = `
     <div style="margin-bottom:8px;">
-      <b>Correct German Sentence:</b><br>
+      <b>Target German Sentence:</b><br>
       <span style="font-size:15px; color:var(--green); font-weight:700;">„${escapeQuotes(correctSentence)}”</span>
     </div>
-    <div style="font-size:13px; line-height:1.5; margin-bottom:8px;">
-      <b>Grammar Rule:</b> ${cur.explain}
+    <div style="font-size:13px; line-height:1.5; margin-bottom:10px; background:#fff; padding:8px 10px; border-radius:6px; border:1px solid var(--line);">
+      💡 <b>Grammar Explanation:</b> ${cur.explain}
     </div>
-    <button class="speak-btn" style="width:auto; border-radius:18px; padding:6px 12px; gap:6px;" onclick="speakText('${escapeQuotes(correctSentence)}')">
-      🔊 Satz auf Deutsch anhören
-    </button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="speak-btn" style="width:auto; border-radius:18px; padding:6px 12px; gap:6px;" onclick="speakText('${escapeQuotes(correctSentence)}')">
+        🔊 Listen in German
+      </button>
+      ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
+    </div>
   `;
 
   document.getElementById("nextDrillBtn").style.display = "block";
@@ -2026,10 +2029,24 @@ function checkAnswer(chosenIdx){
     fbTitle.textContent = "❌ Nicht ganz!";
     recordRuleResult(cur.ruleId || selectedRuleId, false);
   }
-  fbText.innerHTML = cur.explain + `<div style="margin-top:8px;"><button class="speak-btn" onclick="speakText('${escapeQuotes(cur.prompt.replace('___', cur.options[cur.correct]))}')">🔊 Listen to full sentence</button></div>`;
+  fbText.innerHTML = `
+    <div style="background:#fff; padding:8px 10px; border-radius:6px; border:1px solid var(--line); margin-bottom:8px;">
+      💡 <b>Why this is the rule:</b> ${cur.explain}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="speak-btn" onclick="speakText('${escapeQuotes(cur.prompt.replace('___', cur.options[cur.correct]))}')">🔊 Listen to full sentence</button>
+      ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
+    </div>
+  `;
 
   document.getElementById("nextDrillBtn").style.display = "block";
   document.getElementById("finishDrillBtn").style.display = "block";
+}
+
+function retryCurrentQuestion(){
+  drillAnswered = false;
+  buildOrder = [];
+  renderContent();
 }
 
 function advanceDrill(){
