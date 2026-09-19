@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dein Deutsch-Coach — A2 Praxis-Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EDEAE1;
+    --paper-dark: #E2DDD0;
+    --card: #F7F5EE;
+    --card-accent: #FFFFFF;
+    --ink: #1B2A4A;
+    --ink-soft: #4A5878;
+    --ink-light: #707F9E;
+    --red: #AE3327;
+    --red-soft: #EBDAD8;
+    --gold: #B98A2E;
+    --gold-soft: #F4ECCF;
+    --green: #3F6B4A;
+    --green-soft: #DAE8DC;
+    --blue: #2F5C8A;
+    --blue-soft: #D5E3F0;
+    --purple: #6A3D73;
+    --purple-soft: #ECDDF0;
+    --line: #CDC7B2;
+    --line-light: #E0DBCA;
+    --shadow: rgba(27, 42, 74, 0.12);
+    --shadow-deep: rgba(27, 42, 74, 0.22);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header Bar */
+  header {
+    background: var(--ink);
+    color: #FFFFFF;
+    padding: 14px 20px;
+    border-bottom: 4px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-badge {
+    background: var(--gold);
+    color: var(--ink);
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 14px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+  .brand-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  .brand-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-soft);
+    opacity: 0.85;
+  }
+
+  /* Audio Voice Bar */
+  .voice-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+  .voice-btn {
+    background: rgba(255,255,255,0.15);
+    color: #FFF;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-sm);
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+  }
+  .voice-btn:hover { background: rgba(255,255,255,0.25); }
+
+  /* Navigation Hub (Sheets Tabs) */
+  nav.module-nav {
+    background: var(--card);
+    border-bottom: 2px solid var(--line);
+    padding: 8px 14px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .nav-tab {
+    background: var(--paper);
+    color: var(--ink-soft);
+    border: 1.5px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .nav-tab:hover:not(.locked) {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: #FFFFFF;
+  }
+  .nav-tab.active {
+    background: var(--ink);
+    color: #FFFFFF;
+    border-color: var(--ink);
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+  .nav-tab.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    border-style: dashed;
+  }
+  .nav-tab .lock-icon {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  .nav-tab .check-icon {
+    color: var(--green);
+    font-weight: bold;
+  }
+  .completion-zone {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 12px;
+  }
+  .complete-btn {
+    background: var(--green);
+    color: #FFF;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px var(--shadow);
+    transition: all 0.2s;
+  }
+  .complete-btn:hover {
+    background: #345a3d;
+    transform: translateY(-2px);
+  }
+  .next-btn {
+    background: var(--blue);
+    color: #FFF;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px var(--shadow);
+    transition: all 0.2s;
+  }
+  .next-btn:hover {
+    background: #244a6e;
+    transform: translateY(-2px);
+  }
+  .nav-tab .tab-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 1px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .nav-tab.active .tab-badge {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  /* Main Container */
+  main {
+    max-width: 1040px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+    flex: 1;
+  }
+
+  /* View Header & Meta */
+  .view-header {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-left: 6px solid var(--blue);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px var(--shadow);
+  }
+  .view-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .view-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 24px;
+    margin: 0;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .view-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 6px 0 0;
+    line-height: 1.5;
+  }
+  .source-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: var(--paper-dark);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+
+  /* Filter / Control Bars */
+  .control-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    background: #FFF;
+    border: 1.5px solid var(--line);
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .search-input:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+  .pill-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .pill-btn {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    color: var(--ink-soft);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pill-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .pill-btn.active {
+    background: var(--ink);
+    color: #FFF;
+    border-color: var(--ink);
+  }
+
+  /* Cards Grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 16px;
+  }
+
+  /* Verb & Item Card */
+  .v-card {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: 0 4px 10px var(--shadow);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .v-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px var(--shadow-deep);
+  }
+  .v-card-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .stripe-weak { background: var(--blue); }
+  .stripe-strong { background: var(--red); }
+  .stripe-mixed { background: var(--purple); }
+  .stripe-refl { background: var(--green); }
+  .stripe-trenn { background: var(--gold); }
+
+  .v-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .v-german {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 21px;
+    color: var(--ink);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .v-english {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 2px 0 10px;
+  }
+  .audio-mini-btn {
+    background: none;
+    border: none;
+    color: var(--red);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .audio-mini-btn:hover { background: var(--paper-dark); }
+
+  /* Conjugation Matrix View */
+  .conj-matrix {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin: 8px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+    font-size: 12.5px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .conj-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 3px;
+  }
+  .conj-pron {
+    color: var(--ink-light);
+    font-weight: 500;
+  }
+  .conj-form {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .highlight-ending {
+    color: var(--red);
+    font-weight: bold;
+  }
+
+  /* Tenses & Forms Pills */
+  .tense-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .tense-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1px solid var(--line-light);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .tense-label {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tense-val {
+    font-weight: 600;
+    color: var(--blue);
+  }
+
+  /* Related Noun Badge */
+  .noun-bridge {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .noun-pill {
+    background: var(--paper-dark);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+
+  /* Separable Visual Detacher */
+  .detacher-box {
+    background: #FFF;
+    border: 1.5px solid var(--gold);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  .prefix-chip {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+  }
+  .verb-root-chip {
+    background: var(--blue-soft);
+    color: var(--blue);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 2px;
+  }
+  .split-arrow {
+    margin: 6px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .split-sentence {
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--paper);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    border-left: 3px solid var(--gold);
+  }
+
+  /* Reflexive Mirror Box */
+  .refl-box {
+    background: #FFF;
+    border: 1.5px solid var(--green);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .refl-icon { font-size: 20px; }
+  .refl-details { flex: 1; font-size: 12px; }
+  .refl-pill {
+    background: var(--green-soft);
+    color: var(--green);
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Der Das Die Grid Layout */
+  .gender-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .gender-col {
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .gender-col-head {
+    padding: 14px 16px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 20px;
+    color: #FFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .col-der .gender-col-head { background: var(--blue); }
+  .col-das .gender-col-head { background: var(--gold); }
+  .col-die .gender-col-head { background: var(--red); }
+
+  .gender-list {
+    list-style: none;
+    margin: 0; padding: 10px;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+  .gender-item {
+    background: #FFF;
+    border: 1px solid var(--line-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .gender-item:hover { background: var(--paper); }
+  .gender-german {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  .gender-english {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* Adjektiv-Endungen Interactive Compass */
+  .compass-card {
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: 0 6px 16px var(--shadow);
+    margin-bottom: 24px;
+  }
+  .compass-selectors {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .sel-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .sel-box label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+  .sel-box select {
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--line);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .compass-result {
+    background: #FFF;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 12px;
+  }
+  .ending-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-width: 120px;
+  }
+  .ending-bubble {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 42px;
+    color: var(--red);
+    font-weight: bold;
+    line-height: 1;
+    margin-top: 4px;
+  }
+  .ending-explain {
+    flex: 1;
+  }
+  .ending-rule {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .ending-sentence {
+    font-size: 15px;
+    color: var(--ink-soft);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gram-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+    background: #FFF;
+    border: 1px solid var(--line);
+  }
+  .gram-table th, .gram-table td {
+    border: 1px solid var(--line);
+    padding: 8px;
+    text-align: center;
+  }
+  .gram-table th {
+    background: var(--paper-dark);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .ending-cell {
+    font-weight: 600;
+    color: var(--red);
+  }
+
+  /* Imperative Forge */
+  .imper-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .imper-card {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: 0 4px 10px var(--shadow);
+  }
+  .imper-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .imper-verb {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .imper-triad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .imper-form {
+    background: #FFF;
+    border: 1px solid var(--line);
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+  .imper-form b { color: var(--red); }
+  .imper-example {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+    border-left: 3px solid var(--red);
+    padding-left: 10px;
+    margin: 10px 0;
+  }
+
+  /* Vocab Categories View */
+  .category-cluster {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .cluster-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 6px;
+    margin: 0 0 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .vocab-chip {
+    background: #FFF;
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px var(--shadow);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .vocab-chip:hover {
+    transform: scale(1.03);
+    border-color: var(--blue);
+  }
+  .chip-de { font-weight: 600; color: var(--ink); }
+  .chip-en { color: var(--ink-soft); font-size: 11px; font-style: italic; }
+
+  /* Interactive Quiz & Drill Mode */
+  .drill-box {
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: 0 8px 24px var(--shadow-deep);
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .drill-scorebar {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .drill-prompt-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--ink);
+    padding: 3px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .drill-prompt-main {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 32px;
+    color: var(--ink);
+    margin: 8px 0;
+  }
+  .drill-prompt-sub {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+  .drill-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .drill-btn {
+    background: #FFF;
+    border: 2px solid var(--line);
+    padding: 14px 10px;
+    border-radius: var(--radius-md);
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--line);
+    transition: all 0.15s;
+  }
+  .drill-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .drill-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--line); }
+  .drill-btn.correct {
+    background: var(--green-soft);
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 4px 0 var(--green);
+  }
+  .drill-btn.wrong {
+    background: var(--red-soft);
+    border-color: var(--red);
+    color: var(--red);
+    box-shadow: 0 4px 0 var(--red);
+  }
+  .drill-feedback {
+    min-height: 48px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Footer */
+  footer {
+    background: var(--card);
+    border-top: 1.5px solid var(--line);
+    padding: 16px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 600px) {
+    .drill-options { grid-template-columns: 1fr; }
+    .imper-triad { grid-template-columns: 1fr; }
+    .conj-matrix { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body onload="initApp()">
+
+<div style="background:var(--paper-dark); border-bottom:1.5px solid var(--line); padding:6px 14px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+  <span style="font-weight:700; color:var(--ink); margin-right:4px;">🧭 SUITE:</span>
+  <a href="./index.html" style="text-decoration:none; color:var(--ink); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🏠 Main Coach</a>
+  <a href="./Grammatik_Regel_Trainer.html" style="text-decoration:none; color:var(--ink); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid var(--line); font-weight:600;">📚 Grammatik-Regeln</a>
+  <a href="./Sprech_Pruefungs_Simulator.html" style="text-decoration:none; color:var(--ink); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🗣️ Sprechen &amp; Prüfung</a>
+  <a href="./Verb_Transformation_Trainer.html" style="text-decoration:none; color:var(--ink); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid var(--line); font-weight:600;">⚡ Verben</a>
+  <a href="./Nomen_Adjektiv_Trainer.html" style="text-decoration:none; color:var(--ink); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid var(--line); font-weight:600;">📦 Nomen &amp; Adjektive</a>
+  <a href="./Satzbau_Trainer.html" style="text-decoration:none; color:var(--ink); background:#fff; padding:3px 8px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🧩 Satzbau</a>
+</div>
+
+<header>
+  <div class="brand">
+    <span class="brand-badge">A2 PRAXIS-STUDIO</span>
+    <div>
+      <h1 class="brand-title">Dein Deutsch-Coach</h1>
+      <div class="brand-sub">Basierend auf der A2-Übungsvorlage · 7 Module · Interaktiv &amp; Vertont</div>
+    </div>
+  </div>
+
+  <div class="voice-controls">
+    <span>🔊 Stimme:</span>
+    <button class="voice-btn" id="voiceToggleBtn" onclick="testVoice()">Aussprache testen</button>
+  </div>
+</header>
+
+<nav class="module-nav" id="moduleNav">
+  <!-- Generated dynamically -->
+</nav>
+
+<main id="mainContainer">
+  <!-- Content loaded dynamically -->
+</main>
+
+<footer>
+  Dein Deutsch-Coach · Basierend auf <code style="color:var(--ink);">German_A2_Practice_Template.xlsx</code> · Lokale Offline-Speicherung (<code style="color:var(--ink);">a2_studio_progress_v2</code>)
+</footer>
+
+<script>
+/* =========================================================================
+   A2 DATA REPOSITORY
+   ========================================================================= */
+const A2_VERBS = [{"inf": "lernen", "en": "learn", "perfekt": "hat gelernt", "praeteritum": "lernte", "noun": "das Lernen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "money", "ta": "கற்றுக்கொள்", "ta_translit": "kaṟṟukkoḷ", "ich": "lerne", "du": "lernst", "er": "lernt", "wir": "lernen", "ihr": "lernt", "sie": "lernen", "kii": "würde lernen"}, {"inf": "starten", "en": "start", "perfekt": "hat gestartet", "praeteritum": "startete", "noun": "der Start", "level": "A2", "source": "your own list", "typ": "weak", "icon": "clock", "ta": "தொடங்கு", "ta_translit": "toṭaṅku", "ich": "starte", "du": "startest", "er": "startet", "wir": "starten", "ihr": "startet", "sie": "starten", "kii": "würde starten"}, {"inf": "beginnen", "en": "begin", "perfekt": "hat begonnen", "praeteritum": "begann", "noun": "der Beginn", "level": "A2", "source": "your own list", "typ": "strong", "icon": "clock", "ta": "தொடங்கு", "ta_translit": "toṭaṅku", "ich": "beginne", "du": "beginnst", "er": "beginnt", "wir": "beginnen", "ihr": "beginnt", "sie": "beginnen", "kii": "würde beginnen"}, {"inf": "antworten", "en": "answer", "perfekt": "hat geantwortet", "praeteritum": "antwortete", "noun": "die Antwort", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "பதில் சொல்", "ta_translit": "patil sol", "ich": "antworte", "du": "antwortest", "er": "antwortet", "wir": "antworten", "ihr": "antwortet", "sie": "antworten", "kii": "würde antworten"}, {"inf": "arbeiten", "en": "work", "perfekt": "hat gearbeitet", "praeteritum": "arbeitete", "noun": "die Arbeit", "level": "A2", "source": "your own list", "typ": "weak", "icon": "briefcase", "ta": "வேலை செய்", "ta_translit": "vēlai sey", "ich": "arbeite", "du": "arbeitest", "er": "arbeitet", "wir": "arbeiten", "ihr": "arbeitet", "sie": "arbeiten", "kii": "würde arbeiten"}, {"inf": "putzen", "en": "clean up", "perfekt": "hat geputzt", "praeteritum": "putzte", "noun": "die Reinigung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "broom", "ta": "சுத்தம் செய்", "ta_translit": "cuttam sey", "ich": "putze", "du": "putzst", "er": "putzt", "wir": "putzen", "ihr": "putzt", "sie": "putzen", "kii": "würde putzen"}, {"inf": "reinigen", "en": "mobbing/cleaning", "perfekt": "hat gereinigt", "praeteritum": "reinigte", "noun": "die Reinigung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "broom", "ta": "சுத்தம் செய்", "ta_translit": "cuttam sey", "ich": "reinige", "du": "reinigst", "er": "reinigt", "wir": "reinigen", "ihr": "reinigt", "sie": "reinigen", "kii": "würde reinigen"}, {"inf": "husten", "en": "cough", "perfekt": "hat gehustet", "praeteritum": "hustete", "noun": "das Husten", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "இரும", "ta_translit": "iruma", "ich": "huste", "du": "hustest", "er": "hustet", "wir": "husten", "ihr": "hustet", "sie": "husten", "kii": "würde husten"}, {"inf": "verbringen", "en": "spend (time)", "perfekt": "hat verbracht", "praeteritum": "verbrachte", "noun": "die Zeitverbringung", "level": "A2", "source": "your own list", "typ": "mixed", "icon": "clock", "ta": "செலவிடு", "ta_translit": "celaviṭu", "ich": "verbringe", "du": "verbringst", "er": "verbringt", "wir": "verbringen", "ihr": "verbringt", "sie": "verbringen", "kii": "würde verbringen"}, {"inf": "planen", "en": "plan", "perfekt": "hat geplant", "praeteritum": "plante", "noun": "der Plan", "level": "A2", "source": "your own list", "typ": "weak", "icon": "calendar", "ta": "திட்டமிடு", "ta_translit": "tiṭṭamiṭu", "ich": "plane", "du": "planst", "er": "plant", "wir": "planen", "ihr": "plant", "sie": "planen", "kii": "würde planen"}, {"inf": "backen", "en": "bake", "perfekt": "hat gebacken", "praeteritum": "buk", "noun": "das Backen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "eat", "ta": "சுடு", "ta_translit": "cuṭu", "ich": "backe", "du": "backst", "er": "backt", "wir": "backen", "ihr": "backt", "sie": "backen", "kii": "würde backen"}, {"inf": "baden", "en": "bath", "perfekt": "hat gebadet", "praeteritum": "badete", "noun": "das Baden", "level": "A2", "source": "your own list", "typ": "weak", "icon": "shower", "ta": "குளி", "ta_translit": "kuḷi", "ich": "bade", "du": "badst", "er": "badt", "wir": "baden", "ihr": "badt", "sie": "baden", "kii": "würde baden"}, {"inf": "basteln", "en": "craft/make (something)", "perfekt": "hat gebastelt", "praeteritum": "bastelte", "noun": "die Herstellung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "செய்", "ta_translit": "sey", "ich": "bastele", "du": "bastelst", "er": "bastelt", "wir": "basteln", "ihr": "bastelt", "sie": "basteln", "kii": "würde basteln"}, {"inf": "bauen", "en": "build", "perfekt": "hat gebaut", "praeteritum": "baute", "noun": "das Bauen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "கட்டு", "ta_translit": "kaṭṭu", "ich": "baue", "du": "baust", "er": "baut", "wir": "bauen", "ihr": "baut", "sie": "bauen", "kii": "würde bauen"}, {"inf": "bedeuten", "en": "mean (subject always ES)", "perfekt": "hat bedeutet", "praeteritum": "bedeutete", "noun": "die Bedeutung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "think", "ta": "அர்த்தப்படு", "ta_translit": "arttappaṭu", "ich": "bedeute", "du": "bedeutest", "er": "bedeutet", "wir": "bedeuten", "ihr": "bedeutet", "sie": "bedeuten", "kii": "würde bedeuten"}, {"inf": "beenden", "en": "finish", "perfekt": "hat beendet", "praeteritum": "beendete", "noun": "das Beenden", "level": "A2", "source": "your own list", "typ": "weak", "icon": "clock", "ta": "முடி", "ta_translit": "muṭi", "ich": "beende", "du": "beendst", "er": "beendt", "wir": "beenden", "ihr": "beendt", "sie": "beenden", "kii": "würde beenden"}, {"inf": "begründen", "en": "justify/setup company", "perfekt": "hat begründet", "praeteritum": "begründete", "noun": "die Begründung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "நியாயப்படுத்து", "ta_translit": "niyāyappaṭuttu", "ich": "begründe", "du": "begründst", "er": "begründt", "wir": "begründen", "ihr": "begründt", "sie": "begründen", "kii": "würde begründen"}, {"inf": "bekommen", "en": "get", "perfekt": "hat bekommen", "praeteritum": "bekam", "noun": "der Erhalt", "level": "A2", "source": "your own list", "typ": "strong", "icon": "cart", "ta": "பெறு", "ta_translit": "peṟu", "ich": "bekomme", "du": "bekommst", "er": "bekommt", "wir": "bekommen", "ihr": "bekommt", "sie": "bekommen", "kii": "würde bekommen"}, {"inf": "erhalten", "en": "get (objects) - mostly in past tense", "perfekt": "hat erhalten", "praeteritum": "erhielt", "noun": "der Erhalt", "level": "A2", "source": "your own list", "typ": "strong", "icon": "cart", "ta": "பெறு", "ta_translit": "peṟu", "ich": "erhalte", "du": "erhaltest", "er": "erhaltet", "wir": "erhalten", "ihr": "erhaltet", "sie": "erhalten", "kii": "würde erhalten"}, {"inf": "benutzen", "en": "use", "perfekt": "hat benutzt", "praeteritum": "benutzte", "noun": "die Benutzung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "briefcase", "ta": "பயன்படுத்து", "ta_translit": "payanpaṭuttu", "ich": "benutze", "du": "benutzst", "er": "benutzt", "wir": "benutzen", "ihr": "benutzt", "sie": "benutzen", "kii": "würde benutzen"}, {"inf": "beraten", "en": "consult", "perfekt": "hat beraten", "praeteritum": "beriet", "noun": "die Beratung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "handshake", "ta": "ஆலோசனை கேள்", "ta_translit": "ālōcanai kēḷ", "ich": "berate", "du": "beratest", "er": "beratet", "wir": "beraten", "ihr": "beratet", "sie": "beraten", "kii": "würde beraten"}, {"inf": "berichten", "en": "report", "perfekt": "hat berichtet", "praeteritum": "berichtete", "noun": "der Bericht", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "தெரிவி", "ta_translit": "terivi", "ich": "berichte", "du": "berichtest", "er": "berichtet", "wir": "berichten", "ihr": "berichtet", "sie": "berichten", "kii": "würde berichten"}, {"inf": "beschreiben", "en": "describe", "perfekt": "hat beschrieben", "praeteritum": "beschrieb", "noun": "die Beschreibung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "speak", "ta": "விவரி", "ta_translit": "vivari", "ich": "beschreibe", "du": "beschreibst", "er": "beschreibt", "wir": "beschreiben", "ihr": "beschreibt", "sie": "beschreiben", "kii": "würde beschreiben"}, {"inf": "besichtigen", "en": "visit (place)", "perfekt": "hat besichtigt", "praeteritum": "besichtigte", "noun": "die Besichtigung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eye", "ta": "பார்வையிடு", "ta_translit": "pārvaiyiṭu", "ich": "besichtige", "du": "besichtigst", "er": "besichtigt", "wir": "besichtigen", "ihr": "besichtigt", "sie": "besichtigen", "kii": "würde besichtigen"}, {"inf": "besuchen", "en": "visit (person)", "perfekt": "hat besucht", "praeteritum": "besuchte", "noun": "der Besuch", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "சந்தி", "ta_translit": "canti", "ich": "besuche", "du": "besuchst", "er": "besucht", "wir": "besuchen", "ihr": "besucht", "sie": "besuchen", "kii": "würde besuchen"}, {"inf": "bestätigen", "en": "confirm", "perfekt": "hat bestätigt", "praeteritum": "bestätigte", "noun": "die Bestätigung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "handshake", "ta": "உறுதிப்படுத்து", "ta_translit": "uṟutippaṭuttu", "ich": "bestätige", "du": "bestätigst", "er": "bestätigt", "wir": "bestätigen", "ihr": "bestätigt", "sie": "bestätigen", "kii": "würde bestätigen"}, {"inf": "bestehen", "en": "insist / pass (exam)", "perfekt": "hat bestanden", "praeteritum": "bestand", "noun": "das Bestehen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "check", "ta": "தேர்ச்சி பெறு", "ta_translit": "tērcci peṟu", "ich": "bestehe", "du": "bestehst", "er": "besteht", "wir": "bestehen", "ihr": "besteht", "sie": "bestehen", "kii": "würde bestehen"}, {"inf": "bestellen", "en": "order", "perfekt": "hat bestellt", "praeteritum": "bestellte", "noun": "die Bestellung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "ஆர்டர் செய்", "ta_translit": "āraṭar sey", "ich": "bestelle", "du": "bestellst", "er": "bestellt", "wir": "bestellen", "ihr": "bestellt", "sie": "bestellen", "kii": "würde bestellen"}, {"inf": "bezahlen", "en": "pay", "perfekt": "hat bezahlt", "praeteritum": "bezahlte", "noun": "die Bezahlung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "பணம் செலுத்து", "ta_translit": "paṇam celuttu", "ich": "bezahle", "du": "bezahlst", "er": "bezahlt", "wir": "bezahlen", "ihr": "bezahlt", "sie": "bezahlen", "kii": "würde bezahlen"}, {"inf": "bitten", "en": "request/beg", "perfekt": "hat gebeten", "praeteritum": "bat", "noun": "die Bitte", "level": "A2", "source": "your own list", "typ": "strong", "icon": "abstract", "ta": "கேள்", "ta_translit": "kēḷ", "ich": "bitte", "du": "bittest", "er": "bittet", "wir": "bitten", "ihr": "bittet", "sie": "bitten", "kii": "würde bitten"}, {"inf": "bleiben", "en": "stay", "perfekt": "ist geblieben", "praeteritum": "blieb", "noun": "das Bleiben", "level": "A2", "source": "your own list", "typ": "strong", "icon": "house", "ta": "தங்கு", "ta_translit": "taṅku", "ich": "bleibe", "du": "bleibst", "er": "bleibt", "wir": "bleiben", "ihr": "bleibt", "sie": "bleiben", "kii": "würde bleiben"}, {"inf": "braten", "en": "fry / roast", "perfekt": "hat gebraten", "praeteritum": "briet", "noun": "das Braten", "level": "A2", "source": "your own list", "typ": "strong", "icon": "eat", "ta": "வறு", "ta_translit": "vaṟu", "ich": "brate", "du": "bratest", "er": "bratet", "wir": "braten", "ihr": "bratet", "sie": "braten", "kii": "würde braten"}, {"inf": "brauchen", "en": "need", "perfekt": "hat gebraucht", "praeteritum": "brauchte", "noun": "der Bedarf", "level": "A2", "source": "your own list", "typ": "weak", "icon": "briefcase", "ta": "தேவை", "ta_translit": "tēvai", "ich": "brauche", "du": "brauchst", "er": "braucht", "wir": "brauchen", "ihr": "braucht", "sie": "brauchen", "kii": "würde brauchen"}, {"inf": "bringen", "en": "bring", "perfekt": "hat gebracht", "praeteritum": "brachte", "noun": "die Bringung", "level": "A2", "source": "your own list", "typ": "mixed", "icon": "cart", "ta": "கொண்டுவா", "ta_translit": "koṇṭuvā", "ich": "bringe", "du": "bringst", "er": "bringt", "wir": "bringen", "ihr": "bringt", "sie": "bringen", "kii": "würde bringen"}, {"inf": "buchen", "en": "book", "perfekt": "hat gebucht", "praeteritum": "buchte", "noun": "die Buchung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "calendar", "ta": "முன்பதிவு செய்", "ta_translit": "muṉpativu sey", "ich": "buche", "du": "buchst", "er": "bucht", "wir": "buchen", "ihr": "bucht", "sie": "buchen", "kii": "würde buchen"}, {"inf": "buchstabieren", "en": "spell", "perfekt": "hat buchstabiert", "praeteritum": "buchstabierte", "noun": "das Buchstabieren", "level": "A2", "source": "your own list", "typ": "weak", "icon": "write", "ta": "எழுத்துக்கூட்டு", "ta_translit": "eḻuttukkūṭṭu", "ich": "buchstabiere", "du": "buchstabierst", "er": "buchstabiert", "wir": "buchstabieren", "ihr": "buchstabiert", "sie": "buchstabieren", "kii": "würde buchstabieren"}, {"inf": "chatten", "en": "chat", "perfekt": "hat gechattet", "praeteritum": "chattete", "noun": "das Chatten", "level": "A2", "source": "your own list", "typ": "weak", "icon": "video", "ta": "அரட்டை அடி", "ta_translit": "araṭṭai aṭi", "ich": "chatte", "du": "chattest", "er": "chattet", "wir": "chatten", "ihr": "chattet", "sie": "chatten", "kii": "würde chatten"}, {"inf": "dauern", "en": "last/take (time)/duration", "perfekt": "hat gedauert", "praeteritum": "dauerte", "noun": "die Dauer", "level": "A2", "source": "your own list", "typ": "weak", "icon": "chart-up", "ta": "நீடி", "ta_translit": "nīṭi", "ich": "dauere", "du": "dauerst", "er": "dauert", "wir": "dauern", "ihr": "dauert", "sie": "dauern", "kii": "würde dauern"}, {"inf": "denken", "en": "think", "perfekt": "hat gedacht", "praeteritum": "dachte", "noun": "das Denken", "level": "A2", "source": "your own list", "typ": "mixed", "icon": "think", "ta": "நினை", "ta_translit": "ninai", "ich": "denke", "du": "denkst", "er": "denkt", "wir": "denken", "ihr": "denkt", "sie": "denken", "kii": "würde denken"}, {"inf": "danken", "en": "thank", "perfekt": "hat gedankt", "praeteritum": "dankte", "noun": "der Dank", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "நன்றி சொல்", "ta_translit": "naṉṟi sol", "ich": "danke", "du": "dankst", "er": "dankt", "wir": "danken", "ihr": "dankt", "sie": "danken", "kii": "würde danken"}, {"inf": "diskutieren", "en": "discuss", "perfekt": "hat diskutiert", "praeteritum": "diskutierte", "noun": "die Diskussion", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "விவாதி", "ta_translit": "vivāti", "ich": "diskutiere", "du": "diskutierst", "er": "diskutiert", "wir": "diskutieren", "ihr": "diskutiert", "sie": "diskutieren", "kii": "würde diskutieren"}, {"inf": "drücken", "en": "push/press", "perfekt": "hat gedrückt", "praeteritum": "drückte", "noun": "das Drücken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "email", "ta": "தள்ளு", "ta_translit": "taḷḷu", "ich": "drücke", "du": "drückst", "er": "drückt", "wir": "drücken", "ihr": "drückt", "sie": "drücken", "kii": "würde drücken"}, {"inf": "drucken", "en": "print", "perfekt": "hat gedruckt", "praeteritum": "druckte", "noun": "das Drucken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "email", "ta": "அச்சிடு", "ta_translit": "acciṭu", "ich": "drucke", "du": "druckst", "er": "druckt", "wir": "drucken", "ihr": "druckt", "sie": "drucken", "kii": "würde drucken"}, {"inf": "empfehlen", "en": "recommend", "perfekt": "hat empfohlen", "praeteritum": "empfahl", "noun": "die Empfehlung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "clock", "ta": "பரிந்துரை செய்", "ta_translit": "parinturai sey", "ich": "empfehle", "du": "empfehlst", "er": "empfehlt", "wir": "empfehlen", "ihr": "empfehlt", "sie": "empfehlen", "kii": "würde empfehlen"}, {"inf": "enden", "en": "end", "perfekt": "hat geendet", "praeteritum": "endete", "noun": "das Ende", "level": "A2", "source": "your own list", "typ": "weak", "icon": "clock", "ta": "முடி", "ta_translit": "muṭi", "ich": "ende", "du": "endst", "er": "endt", "wir": "enden", "ihr": "endt", "sie": "enden", "kii": "würde enden"}, {"inf": "erklären", "en": "explain", "perfekt": "hat erklärt", "praeteritum": "erklärte", "noun": "die Erklärung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "விளக்கு", "ta_translit": "viḷakku", "ich": "erkläre", "du": "erklärst", "er": "erklärt", "wir": "erklären", "ihr": "erklärt", "sie": "erklären", "kii": "würde erklären"}, {"inf": "erlauben", "en": "allow", "perfekt": "hat erlaubt", "praeteritum": "erlaubte", "noun": "die Erlaubnis", "level": "A2", "source": "your own list", "typ": "weak", "icon": "handshake", "ta": "அனுமதி", "ta_translit": "aṉumati", "ich": "erlaube", "du": "erlaubst", "er": "erlaubt", "wir": "erlauben", "ihr": "erlaubt", "sie": "erlauben", "kii": "würde erlauben"}, {"inf": "erreichen", "en": "reach", "perfekt": "hat erreicht", "praeteritum": "erreichte", "noun": "die Erreichung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "target", "ta": "அடை", "ta_translit": "aṭai", "ich": "erreiche", "du": "erreichst", "er": "erreicht", "wir": "erreichen", "ihr": "erreicht", "sie": "erreichen", "kii": "würde erreichen"}, {"inf": "fallen", "en": "fall", "perfekt": "ist gefallen", "praeteritum": "fiel", "noun": "der Fall", "level": "A2", "source": "your own list", "typ": "strong", "icon": "walk", "ta": "விழு", "ta_translit": "viḻu", "ich": "falle", "du": "fallst", "er": "fallt", "wir": "fallen", "ihr": "fallt", "sie": "fallen", "kii": "würde fallen"}, {"inf": "erzählen", "en": "to tell (a story)", "perfekt": "hat erzählt", "praeteritum": "erzählte", "noun": "die Erzählung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "சொல்", "ta_translit": "sol", "ich": "erzähle", "du": "erzählst", "er": "erzählt", "wir": "erzählen", "ihr": "erzählt", "sie": "erzählen", "kii": "würde erzählen"}, {"inf": "essen", "en": "eat", "perfekt": "hat gegessen", "praeteritum": "aß", "noun": "das Essen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "eat", "ta": "சாப்பிடு", "ta_translit": "cāppiṭu", "ich": "esse", "du": "essst", "er": "esst", "wir": "essen", "ihr": "esst", "sie": "essen", "kii": "würde essen"}, {"inf": "fehlen", "en": "missing", "perfekt": "hat gefehlt", "praeteritum": "fehlte", "noun": "das Fehlen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "music", "ta": "இல்லாமல் இரு", "ta_translit": "illāmal iru", "ich": "fehle", "du": "fehlst", "er": "fehlt", "wir": "fehlen", "ihr": "fehlt", "sie": "fehlen", "kii": "würde fehlen"}, {"inf": "feiern", "en": "celebrate", "perfekt": "hat gefeiert", "praeteritum": "feierte", "noun": "die Feier", "level": "A2", "source": "your own list", "typ": "weak", "icon": "smile", "ta": "கொண்டாடு", "ta_translit": "koṇṭāṭu", "ich": "feiere", "du": "feierst", "er": "feiert", "wir": "feiern", "ihr": "feiert", "sie": "feiern", "kii": "würde feiern"}, {"inf": "finden", "en": "find", "perfekt": "hat gefunden", "praeteritum": "fand", "noun": "das Finden", "level": "A2", "source": "your own list", "typ": "strong", "icon": "search", "ta": "கண்டுபிடி", "ta_translit": "kaṇṭupiṭi", "ich": "finde", "du": "findst", "er": "findt", "wir": "finden", "ihr": "findt", "sie": "finden", "kii": "würde finden"}, {"inf": "fotografieren", "en": "to photograph", "perfekt": "hat fotografiert", "praeteritum": "fotografierte", "noun": "die Fotografie", "level": "A2", "source": "your own list", "typ": "weak", "icon": "camera", "ta": "படம் எடு", "ta_translit": "paṭam eṭu", "ich": "fotografiere", "du": "fotografierst", "er": "fotografiert", "wir": "fotografieren", "ihr": "fotografiert", "sie": "fotografieren", "kii": "würde fotografieren"}, {"inf": "fragen", "en": "ask", "perfekt": "hat gefragt", "praeteritum": "fragte", "noun": "die Frage", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "கேள்", "ta_translit": "kēḷ", "ich": "frage", "du": "fragst", "er": "fragt", "wir": "fragen", "ihr": "fragt", "sie": "fragen", "kii": "würde fragen"}, {"inf": "frühstücken", "en": "have breakfast", "perfekt": "hat gefrühstückt", "praeteritum": "frühstückte", "noun": "das Frühstück", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eat", "ta": "காலை உணவு சாப்பிடு", "ta_translit": "kālai uṇavu cāppiṭu", "ich": "frühstücke", "du": "frühstückst", "er": "frühstückt", "wir": "frühstücken", "ihr": "frühstückt", "sie": "frühstücken", "kii": "würde frühstücken"}, {"inf": "geben", "en": "give", "perfekt": "hat gegeben", "praeteritum": "gab", "noun": "die Gabe", "level": "A2", "source": "your own list", "typ": "strong", "icon": "cart", "ta": "கொடு", "ta_translit": "koṭu", "ich": "gebe", "du": "gebst", "er": "gebt", "wir": "geben", "ihr": "gebt", "sie": "geben", "kii": "würde geben"}, {"inf": "gefallen", "en": "to be liked", "perfekt": "hat gefallen", "praeteritum": "gefiel", "noun": "die Gefälligkeit", "level": "A2", "source": "your own list", "typ": "strong", "icon": "smile", "ta": "பிடி", "ta_translit": "piṭi", "ich": "gefalle", "du": "gefallst", "er": "gefallt", "wir": "gefallen", "ihr": "gefallt", "sie": "gefallen", "kii": "würde gefallen"}, {"inf": "gehen", "en": "go", "perfekt": "ist gegangen", "praeteritum": "ging", "noun": "der Gang", "level": "A2", "source": "your own list", "typ": "strong", "icon": "walk", "ta": "போ", "ta_translit": "pō", "ich": "gehe", "du": "gehst", "er": "geht", "wir": "gehen", "ihr": "geht", "sie": "gehen", "kii": "würde gehen"}, {"inf": "gehören", "en": "belong", "perfekt": "hat gehört", "praeteritum": "gehörte", "noun": "die Zugehörigkeit", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "சொந்தமாக இரு", "ta_translit": "contamāka iru", "ich": "gehöre", "du": "gehörst", "er": "gehört", "wir": "gehören", "ihr": "gehört", "sie": "gehören", "kii": "würde gehören"}, {"inf": "gewinnen", "en": "win", "perfekt": "hat gewonnen", "praeteritum": "gewann", "noun": "der Gewinn", "level": "A2", "source": "your own list", "typ": "strong", "icon": "chart-up", "ta": "வெல்", "ta_translit": "vel", "ich": "gewinne", "du": "gewinnst", "er": "gewinnt", "wir": "gewinnen", "ihr": "gewinnt", "sie": "gewinnen", "kii": "würde gewinnen"}, {"inf": "glauben", "en": "believe", "perfekt": "hat geglaubt", "praeteritum": "glaubte", "noun": "der Glaube", "level": "A2", "source": "your own list", "typ": "weak", "icon": "think", "ta": "நம்பு", "ta_translit": "nampu", "ich": "glaube", "du": "glaubst", "er": "glaubt", "wir": "glauben", "ihr": "glaubt", "sie": "glauben", "kii": "würde glauben"}, {"inf": "gratulieren", "en": "congratulate", "perfekt": "hat gratuliert", "praeteritum": "gratulierte", "noun": "die Gratulation", "level": "A2", "source": "your own list", "typ": "weak", "icon": "gift", "ta": "வாழ்த்து", "ta_translit": "vāḻttu", "ich": "gratuliere", "du": "gratulierst", "er": "gratuliert", "wir": "gratulieren", "ihr": "gratuliert", "sie": "gratulieren", "kii": "würde gratulieren"}, {"inf": "grillen", "en": "barbecue", "perfekt": "hat gegrillt", "praeteritum": "grillte", "noun": "das Grillen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eat", "ta": "வறு", "ta_translit": "vaṟu", "ich": "grille", "du": "grillst", "er": "grillt", "wir": "grillen", "ihr": "grillt", "sie": "grillen", "kii": "würde grillen"}, {"inf": "haben", "en": "have", "perfekt": "hat gehabt", "praeteritum": "hatte", "noun": "der Besitz", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "வை", "ta_translit": "vai", "ich": "habe", "du": "habst", "er": "habt", "wir": "haben", "ihr": "habt", "sie": "haben", "kii": "würde haben"}, {"inf": "halten", "en": "hold", "perfekt": "hat gehalten", "praeteritum": "hielt", "noun": "der Halt", "level": "A2", "source": "your own list", "typ": "strong", "icon": "briefcase", "ta": "பிடி", "ta_translit": "piṭi", "ich": "halte", "du": "haltest", "er": "haltet", "wir": "halten", "ihr": "haltet", "sie": "halten", "kii": "würde halten"}, {"inf": "hängen", "en": "hang", "perfekt": "hat gehangen/gehängt", "praeteritum": "hing", "noun": "das Hängen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "house", "ta": "தொங்கு", "ta_translit": "toṅku", "ich": "hänge", "du": "hängst", "er": "hängt", "wir": "hängen", "ihr": "hängt", "sie": "hängen", "kii": "würde hängen"}, {"inf": "heiraten", "en": "marry", "perfekt": "hat geheiratet", "praeteritum": "heiratete", "noun": "die Hochzeit", "level": "A2", "source": "your own list", "typ": "weak", "icon": "gift", "ta": "திருமணம் செய்", "ta_translit": "tirumaṇam sey", "ich": "heirate", "du": "heiratest", "er": "heiratet", "wir": "heiraten", "ihr": "heiratet", "sie": "heiraten", "kii": "würde heiraten"}, {"inf": "heißen", "en": "to be called", "perfekt": "hat geheißen", "praeteritum": "hieß", "noun": "der Name", "level": "A2", "source": "your own list", "typ": "strong", "icon": "phone", "ta": "என்று அழைக்கப்படு", "ta_translit": "eṉṟu aḻaikkappaṭu", "ich": "heiße", "du": "heißst", "er": "heißt", "wir": "heißen", "ihr": "heißt", "sie": "heißen", "kii": "würde heißen"}, {"inf": "helfen", "en": "help", "perfekt": "hat geholfen", "praeteritum": "half", "noun": "die Hilfe", "level": "A2", "source": "your own list", "typ": "strong", "icon": "abstract", "ta": "உதவு", "ta_translit": "utavu", "ich": "helfe", "du": "helfst", "er": "helft", "wir": "helfen", "ihr": "helft", "sie": "helfen", "kii": "würde helfen"}, {"inf": "verbindung herstellen", "en": "make/establish a connection", "perfekt": "hat eine Verbindung hergestellt", "praeteritum": "stellte eine Verbindung her", "noun": "die Verbindung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "இணை", "ta_translit": "iṇai", "ich": "verbindung herstelle", "du": "verbindung herstellst", "er": "verbindung herstellt", "wir": "verbindung herstellen", "ihr": "verbindung herstellt", "sie": "verbindung herstellen", "kii": "würde verbindung herstellen"}, {"inf": "herstellen", "en": "produce", "perfekt": "hat hergestellt", "praeteritum": "stellte her", "noun": "die Herstellung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "உற்பத்தி செய்", "ta_translit": "uṟpatti sey", "ich": "herstelle", "du": "herstellst", "er": "herstellt", "wir": "herstellen", "ihr": "herstellt", "sie": "herstellen", "kii": "würde herstellen"}, {"inf": "herunterladen", "en": "download", "perfekt": "hat heruntergeladen", "praeteritum": "lud herunter", "noun": "der Download", "level": "A2", "source": "your own list", "typ": "strong", "icon": "email", "ta": "பதிவிறக்கு", "ta_translit": "pativiṟakku", "ich": "herunterlade", "du": "herunterladst", "er": "herunterladt", "wir": "herunterladen", "ihr": "herunterladt", "sie": "herunterladen", "kii": "würde herunterladen"}, {"inf": "hoffen", "en": "hope", "perfekt": "hat gehofft", "praeteritum": "hoffte", "noun": "die Hoffnung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "நம்பிக்கை வை", "ta_translit": "nampikkai vai", "ich": "hoffe", "du": "hoffst", "er": "hofft", "wir": "hoffen", "ihr": "hofft", "sie": "hoffen", "kii": "würde hoffen"}, {"inf": "holen", "en": "fetch", "perfekt": "hat geholt", "praeteritum": "holte", "noun": "die Holung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "search", "ta": "கொண்டுவா", "ta_translit": "koṇṭuvā", "ich": "hole", "du": "holst", "er": "holt", "wir": "holen", "ihr": "holt", "sie": "holen", "kii": "würde holen"}, {"inf": "hören", "en": "hear / listen", "perfekt": "hat gehört", "praeteritum": "hörte", "noun": "das Hören", "level": "A2", "source": "your own list", "typ": "weak", "icon": "ear", "ta": "கேள்", "ta_translit": "kēḷ", "ich": "höre", "du": "hörst", "er": "hört", "wir": "hören", "ihr": "hört", "sie": "hören", "kii": "würde hören"}, {"inf": "kaufen", "en": "buy", "perfekt": "hat gekauft", "praeteritum": "kaufte", "noun": "der Kauf", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "வாங்கு", "ta_translit": "vāṅku", "ich": "kaufe", "du": "kaufst", "er": "kauft", "wir": "kaufen", "ihr": "kauft", "sie": "kaufen", "kii": "würde kaufen"}, {"inf": "kennen", "en": "know", "perfekt": "hat gekannt", "praeteritum": "kannte", "noun": "das Kennen", "level": "A2", "source": "your own list", "typ": "mixed", "icon": "think", "ta": "தெரி", "ta_translit": "teri", "ich": "kenne", "du": "kennst", "er": "kennt", "wir": "kennen", "ihr": "kennt", "sie": "kennen", "kii": "würde kennen"}, {"inf": "kennenlernen", "en": "get to know", "perfekt": "hat kennengelernt", "praeteritum": "lernte kennen", "noun": "das Kennenlernen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "think", "ta": "பெறு", "ta_translit": "peṟu", "ich": "kennenlerne", "du": "kennenlernst", "er": "kennenlernt", "wir": "kennenlernen", "ihr": "kennenlernt", "sie": "kennenlernen", "kii": "würde kennenlernen"}, {"inf": "klappen", "en": "fold / work out", "perfekt": "hat geklappt", "praeteritum": "klappte", "noun": "das Gelingen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "key", "ta": "வேலை செய்", "ta_translit": "vēlai sey", "ich": "klappe", "du": "klappst", "er": "klappt", "wir": "klappen", "ihr": "klappt", "sie": "klappen", "kii": "würde klappen"}, {"inf": "kochen", "en": "cook", "perfekt": "hat gekocht", "praeteritum": "kochte", "noun": "das Kochen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eat", "ta": "சமை", "ta_translit": "camai", "ich": "koche", "du": "kochst", "er": "kocht", "wir": "kochen", "ihr": "kocht", "sie": "kochen", "kii": "würde kochen"}, {"inf": "kommen", "en": "come", "perfekt": "ist gekommen", "praeteritum": "kam", "noun": "die Ankunft", "level": "A2", "source": "your own list", "typ": "strong", "icon": "walk", "ta": "வா", "ta_translit": "vā", "ich": "komme", "du": "kommst", "er": "kommt", "wir": "kommen", "ihr": "kommt", "sie": "kommen", "kii": "würde kommen"}, {"inf": "kontrollieren", "en": "control/check", "perfekt": "hat kontrolliert", "praeteritum": "kontrollierte", "noun": "die Kontrolle", "level": "A2", "source": "your own list", "typ": "weak", "icon": "building", "ta": "கட்டுப்படுத்து", "ta_translit": "kaṭṭuppaṭuttu", "ich": "kontrolliere", "du": "kontrollierst", "er": "kontrolliert", "wir": "kontrollieren", "ihr": "kontrolliert", "sie": "kontrollieren", "kii": "würde kontrollieren"}, {"inf": "kriegen", "en": "get", "perfekt": "hat gekriegt", "praeteritum": "kriegte", "noun": "der Erhalt", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "பெறு", "ta_translit": "peṟu", "ich": "kriege", "du": "kriegst", "er": "kriegt", "wir": "kriegen", "ihr": "kriegt", "sie": "kriegen", "kii": "würde kriegen"}, {"inf": "kosten", "en": "cost", "perfekt": "hat gekostet", "praeteritum": "kostete", "noun": "die Kosten", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "விலை", "ta_translit": "vilai", "ich": "koste", "du": "kostest", "er": "kostet", "wir": "kosten", "ihr": "kostet", "sie": "kosten", "kii": "würde kosten"}, {"inf": "kündigen", "en": "cancel", "perfekt": "hat gekündigt", "praeteritum": "kündigte", "noun": "die Kündigung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "key", "ta": "ரத்து செய்", "ta_translit": "rattu sey", "ich": "kündige", "du": "kündigst", "er": "kündigt", "wir": "kündigen", "ihr": "kündigt", "sie": "kündigen", "kii": "würde kündigen"}, {"inf": "lassen", "en": "let", "perfekt": "hat gelassen", "praeteritum": "ließ", "noun": "das Lassen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "balance", "ta": "விடு", "ta_translit": "viṭu", "ich": "lasse", "du": "lassst", "er": "lasst", "wir": "lassen", "ihr": "lasst", "sie": "lassen", "kii": "würde lassen"}, {"inf": "laufen", "en": "run", "perfekt": "ist gelaufen", "praeteritum": "lief", "noun": "der Lauf", "level": "A2", "source": "your own list", "typ": "strong", "icon": "walk", "ta": "ஓடு", "ta_translit": "ōṭu", "ich": "laufe", "du": "laufst", "er": "lauft", "wir": "laufen", "ihr": "lauft", "sie": "laufen", "kii": "würde laufen"}, {"inf": "leben", "en": "live", "perfekt": "hat gelebt", "praeteritum": "lebte", "noun": "das Leben", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "வாழ்", "ta_translit": "vāḻ", "ich": "lebe", "du": "lebst", "er": "lebt", "wir": "leben", "ihr": "lebt", "sie": "leben", "kii": "würde leben"}, {"inf": "legen", "en": "lay", "perfekt": "hat gelegt", "praeteritum": "legte", "noun": "das Legen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "வை", "ta_translit": "vai", "ich": "lege", "du": "legst", "er": "legt", "wir": "legen", "ihr": "legt", "sie": "legen", "kii": "würde legen"}, {"inf": "leid tun", "en": "be sorry", "perfekt": "hat leidgetan", "praeteritum": "tat leid", "noun": "das Bedauern", "level": "A2", "source": "your own list", "typ": "strong", "icon": "cry", "ta": "வருந்து", "ta_translit": "varuntu", "ich": "leid tue", "du": "leid tust", "er": "leid tut", "wir": "leid tun", "ihr": "leid tut", "sie": "leid tun", "kii": "würde leid tun"}, {"inf": "leihen", "en": "borrow / lend", "perfekt": "hat geliehen", "praeteritum": "lieh", "noun": "das Leihen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "clock", "ta": "முடி", "ta_translit": "muṭi", "ich": "leihe", "du": "leihst", "er": "leiht", "wir": "leihen", "ihr": "leiht", "sie": "leihen", "kii": "würde leihen"}, {"inf": "lesen", "en": "read", "perfekt": "hat gelesen", "praeteritum": "las", "noun": "das Lesen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "book", "ta": "படி", "ta_translit": "paṭi", "ich": "lese", "du": "lesst", "er": "lest", "wir": "lesen", "ihr": "lest", "sie": "lesen", "kii": "würde lesen"}, {"inf": "lieben", "en": "love", "perfekt": "hat geliebt", "praeteritum": "liebte", "noun": "die Liebe", "level": "A2", "source": "your own list", "typ": "weak", "icon": "heart", "ta": "காதலி", "ta_translit": "kātali", "ich": "liebe", "du": "liebst", "er": "liebt", "wir": "lieben", "ihr": "liebt", "sie": "lieben", "kii": "würde lieben"}, {"inf": "liefern", "en": "deliver", "perfekt": "hat geliefert", "praeteritum": "lieferte", "noun": "die Lieferung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "வாழ்", "ta_translit": "vāḻ", "ich": "liefere", "du": "lieferst", "er": "liefert", "wir": "liefern", "ihr": "liefert", "sie": "liefern", "kii": "würde liefern"}, {"inf": "liegen", "en": "lie", "perfekt": "hat/ist gelegen", "praeteritum": "lag", "noun": "die Lage", "level": "A2", "source": "your own list", "typ": "strong", "icon": "house", "ta": "படு", "ta_translit": "paṭu", "ich": "liege", "du": "liegst", "er": "liegt", "wir": "liegen", "ihr": "liegt", "sie": "liegen", "kii": "würde liegen"}, {"inf": "lügen", "en": "telling lie", "perfekt": "hat gelogen", "praeteritum": "log", "noun": "die Lüge", "level": "A2", "source": "your own list", "typ": "strong", "icon": "speak", "ta": "படு", "ta_translit": "paṭu", "ich": "lüge", "du": "lügst", "er": "lügt", "wir": "lügen", "ihr": "lügt", "sie": "lügen", "kii": "würde lügen"}, {"inf": "machen", "en": "make", "perfekt": "hat gemacht", "praeteritum": "machte", "noun": "das Machen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "செய்", "ta_translit": "sey", "ich": "mache", "du": "machst", "er": "macht", "wir": "machen", "ihr": "macht", "sie": "machen", "kii": "würde machen"}, {"inf": "malen", "en": "paint", "perfekt": "hat gemalt", "praeteritum": "malte", "noun": "das Malen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "write", "ta": "வர்ணம் தீட்டு", "ta_translit": "varṇam tīṭṭu", "ich": "male", "du": "malst", "er": "malt", "wir": "malen", "ihr": "malt", "sie": "malen", "kii": "würde malen"}, {"inf": "meinen", "en": "mean (subject I you he she they)", "perfekt": "hat gemeint", "praeteritum": "meinte", "noun": "die Meinung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "think", "ta": "அர்த்தப்படு", "ta_translit": "arttappaṭu", "ich": "meine", "du": "meinst", "er": "meint", "wir": "meinen", "ihr": "meint", "sie": "meinen", "kii": "würde meinen"}, {"inf": "merken", "en": "realise / notice / remember", "perfekt": "hat gemerkt", "praeteritum": "merkte", "noun": "das Merken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "think", "ta": "உணர்", "ta_translit": "uṇar", "ich": "merke", "du": "merkst", "er": "merkt", "wir": "merken", "ihr": "merkt", "sie": "merken", "kii": "würde merken"}, {"inf": "mieten", "en": "rent (as a tenant)", "perfekt": "hat gemietet", "praeteritum": "mietete", "noun": "die Miete", "level": "A2", "source": "your own list", "typ": "weak", "icon": "money", "ta": "வாடகைக்கு எடு", "ta_translit": "vāṭakaikku eṭu", "ich": "miete", "du": "mietest", "er": "mietet", "wir": "mieten", "ihr": "mietet", "sie": "mieten", "kii": "würde mieten"}, {"inf": "nehmen", "en": "take", "perfekt": "hat genommen", "praeteritum": "nahm", "noun": "der Erhalt", "level": "A2", "source": "your own list", "typ": "strong", "icon": "cart", "ta": "எடு", "ta_translit": "eṭu", "ich": "nehme", "du": "nehmst", "er": "nehmt", "wir": "nehmen", "ihr": "nehmt", "sie": "nehmen", "kii": "würde nehmen"}, {"inf": "nennen", "en": "name", "perfekt": "hat genannt", "praeteritum": "nannte", "noun": "die Nennung", "level": "A2", "source": "your own list", "typ": "mixed", "icon": "speak", "ta": "பெயரிடு", "ta_translit": "peyariṭu", "ich": "nenne", "du": "nennst", "er": "nennt", "wir": "nennen", "ihr": "nennt", "sie": "nennen", "kii": "würde nennen"}, {"inf": "notieren", "en": "note", "perfekt": "hat notiert", "praeteritum": "notierte", "noun": "die Notiz", "level": "A2", "source": "your own list", "typ": "weak", "icon": "write", "ta": "குறிப்பு எடு", "ta_translit": "kuṟippu eṭu", "ich": "notiere", "du": "notierst", "er": "notiert", "wir": "notieren", "ihr": "notiert", "sie": "notieren", "kii": "würde notieren"}, {"inf": "öffnen", "en": "open", "perfekt": "hat geöffnet", "praeteritum": "öffnete", "noun": "die Öffnung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "key", "ta": "திற", "ta_translit": "tiṟa", "ich": "öffne", "du": "öffnst", "er": "öffnt", "wir": "öffnen", "ihr": "öffnt", "sie": "öffnen", "kii": "würde öffnen"}, {"inf": "organisieren", "en": "organize", "perfekt": "hat organisiert", "praeteritum": "organisierte", "noun": "die Organisation", "level": "A2", "source": "your own list", "typ": "weak", "icon": "building", "ta": "ஏற்பாடு செய்", "ta_translit": "ēṟpāṭu sey", "ich": "organisiere", "du": "organisierst", "er": "organisiert", "wir": "organisieren", "ihr": "organisiert", "sie": "organisieren", "kii": "würde organisieren"}, {"inf": "packen", "en": "pack", "perfekt": "hat gepackt", "praeteritum": "packte", "noun": "das Packen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "பொதி", "ta_translit": "poti", "ich": "packe", "du": "packst", "er": "packt", "wir": "packen", "ihr": "packt", "sie": "packen", "kii": "würde packen"}, {"inf": "parken", "en": "park", "perfekt": "hat geparkt", "praeteritum": "parkte", "noun": "das Parken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "car", "ta": "நிறுத்து", "ta_translit": "niṟuttu", "ich": "parke", "du": "parkst", "er": "parkt", "wir": "parken", "ihr": "parkt", "sie": "parken", "kii": "würde parken"}, {"inf": "passen", "en": "fit/suit", "perfekt": "hat gepasst", "praeteritum": "passte", "noun": "die Passung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "பொருந்து", "ta_translit": "poruntu", "ich": "passe", "du": "passst", "er": "passt", "wir": "passen", "ihr": "passt", "sie": "passen", "kii": "würde passen"}, {"inf": "probieren", "en": "try", "perfekt": "hat probiert", "praeteritum": "probierte", "noun": "der Versuch", "level": "A2", "source": "your own list", "typ": "weak", "icon": "target", "ta": "முயற்சி செய்", "ta_translit": "muyaṟci sey", "ich": "probiere", "du": "probierst", "er": "probiert", "wir": "probieren", "ihr": "probiert", "sie": "probieren", "kii": "würde probieren"}, {"inf": "prüfen", "en": "examine/check", "perfekt": "hat geprüft", "praeteritum": "prüfte", "noun": "die Prüfung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eye", "ta": "சரிபார்", "ta_translit": "caripār", "ich": "prüfe", "du": "prüfst", "er": "prüft", "wir": "prüfen", "ihr": "prüft", "sie": "prüfen", "kii": "würde prüfen"}, {"inf": "raten", "en": "guess / advise", "perfekt": "hat geraten", "praeteritum": "riet", "noun": "der Rat", "level": "A2", "source": "your own list", "typ": "strong", "icon": "think", "ta": "யூகி", "ta_translit": "yūki", "ich": "rate", "du": "ratest", "er": "ratet", "wir": "raten", "ihr": "ratet", "sie": "raten", "kii": "würde raten"}, {"inf": "rauchen", "en": "smoke", "perfekt": "hat geraucht", "praeteritum": "rauchte", "noun": "das Rauchen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "email", "ta": "புகைபிடி", "ta_translit": "pukaipiṭi", "ich": "rauche", "du": "rauchst", "er": "raucht", "wir": "rauchen", "ihr": "raucht", "sie": "rauchen", "kii": "würde rauchen"}, {"inf": "rechnen", "en": "calculate", "perfekt": "hat gerechnet", "praeteritum": "rechnete", "noun": "die Rechnung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "email", "ta": "கணக்கிடு", "ta_translit": "kaṇakkiṭu", "ich": "rechne", "du": "rechnst", "er": "rechnt", "wir": "rechnen", "ihr": "rechnt", "sie": "rechnen", "kii": "würde rechnen"}, {"inf": "recht haben", "en": "be right", "perfekt": "hatte recht - hat recht gehabt", "praeteritum": "hatte recht", "noun": "das Recht", "level": "A2", "source": "your own list", "typ": "weak", "icon": "check", "ta": "சரியாக இரு", "ta_translit": "cariyāka iru", "ich": "recht habe", "du": "recht habst", "er": "recht habt", "wir": "recht haben", "ihr": "recht habt", "sie": "recht haben", "kii": "würde recht haben"}, {"inf": "reden", "en": "talk", "perfekt": "hat geredet", "praeteritum": "redete", "noun": "das Reden", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "பேசு", "ta_translit": "pēcu", "ich": "rede", "du": "redst", "er": "redt", "wir": "reden", "ihr": "redt", "sie": "reden", "kii": "würde reden"}, {"inf": "regnen", "en": "rain", "perfekt": "hat geregnet", "praeteritum": "regnete", "noun": "der Regen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "weather", "ta": "மழை பெய்", "ta_translit": "maḻai pey", "ich": "regne", "du": "regnst", "er": "regnt", "wir": "regnen", "ihr": "regnt", "sie": "regnen", "kii": "würde regnen"}, {"inf": "reisen", "en": "travel", "perfekt": "ist gereist", "praeteritum": "reiste", "noun": "die Reise", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "பயணம் செய்", "ta_translit": "payaṇam sey", "ich": "reise", "du": "reisst", "er": "reist", "wir": "reisen", "ihr": "reist", "sie": "reisen", "kii": "würde reisen"}, {"inf": "reiten", "en": "ride", "perfekt": "ist geritten", "praeteritum": "ritt", "noun": "das Reiten", "level": "A2", "source": "your own list", "typ": "strong", "icon": "walk", "ta": "ஏறு", "ta_translit": "ēṟu", "ich": "reite", "du": "reitest", "er": "reitet", "wir": "reiten", "ihr": "reitet", "sie": "reiten", "kii": "würde reiten"}, {"inf": "renovieren", "en": "renovate", "perfekt": "hat renoviert", "praeteritum": "renovierte", "noun": "die Renovierung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "புதுப்பி", "ta_translit": "putuppi", "ich": "renoviere", "du": "renovierst", "er": "renoviert", "wir": "renovieren", "ihr": "renoviert", "sie": "renovieren", "kii": "würde renovieren"}, {"inf": "reparieren", "en": "repair", "perfekt": "hat repariert", "praeteritum": "reparierte", "noun": "die Reparatur", "level": "A2", "source": "your own list", "typ": "weak", "icon": "wrench", "ta": "பழுது பார்", "ta_translit": "paḻutu pār", "ich": "repariere", "du": "reparierst", "er": "repariert", "wir": "reparieren", "ihr": "repariert", "sie": "reparieren", "kii": "würde reparieren"}, {"inf": "reservieren", "en": "reserve", "perfekt": "reservierte-hat reserviert", "praeteritum": "reservierte", "noun": "die Reservierung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "முன்பதிவு செய்", "ta_translit": "muṉpativu sey", "ich": "reserviere", "du": "reservierst", "er": "reserviert", "wir": "reservieren", "ihr": "reserviert", "sie": "reservieren", "kii": "würde reservieren"}, {"inf": "riechen", "en": "smell", "perfekt": "hat gerochen", "praeteritum": "roch", "noun": "der Geruch", "level": "A2", "source": "your own list", "typ": "strong", "icon": "smell", "ta": "மணம்", "ta_translit": "maṇam", "ich": "rieche", "du": "riechst", "er": "riecht", "wir": "riechen", "ihr": "riecht", "sie": "riechen", "kii": "würde riechen"}, {"inf": "rufen", "en": "call", "perfekt": "hat gerufen", "praeteritum": "rief", "noun": "der Ruf", "level": "A2", "source": "your own list", "typ": "strong", "icon": "phone", "ta": "அழை", "ta_translit": "aḻai", "ich": "rufe", "du": "rufst", "er": "ruft", "wir": "rufen", "ihr": "ruft", "sie": "rufen", "kii": "würde rufen"}, {"inf": "sagen", "en": "say", "perfekt": "hat gesagt", "praeteritum": "sagte", "noun": "die Aussage", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "சொல்", "ta_translit": "sol", "ich": "sage", "du": "sagst", "er": "sagt", "wir": "sagen", "ihr": "sagt", "sie": "sagen", "kii": "würde sagen"}, {"inf": "sammeln", "en": "collect", "perfekt": "hat gesammelt", "praeteritum": "sammelte", "noun": "das Sammeln", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "சேகரி", "ta_translit": "cēkari", "ich": "sammele", "du": "sammelst", "er": "sammelt", "wir": "sammeln", "ihr": "sammelt", "sie": "sammeln", "kii": "würde sammeln"}, {"inf": "schaffen", "en": "create/manage/establish", "perfekt": "hat geschafft", "praeteritum": "schuf", "noun": "das Schaffen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "eat", "ta": "சாப்பிடு", "ta_translit": "cāppiṭu", "ich": "schaffe", "du": "schaffst", "er": "schafft", "wir": "schaffen", "ihr": "schafft", "sie": "schaffen", "kii": "würde schaffen"}, {"inf": "scheinen", "en": "seem", "perfekt": "hat geschienen", "praeteritum": "schien", "noun": "der Schein", "level": "A2", "source": "your own list", "typ": "strong", "icon": "eye", "ta": "தோன்று", "ta_translit": "tōṉṟu", "ich": "scheine", "du": "scheinst", "er": "scheint", "wir": "scheinen", "ihr": "scheint", "sie": "scheinen", "kii": "würde scheinen"}, {"inf": "schenken", "en": "give/gifting", "perfekt": "hat geschenkt", "praeteritum": "schenkte", "noun": "das Schenken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "gift", "ta": "கொடு", "ta_translit": "koṭu", "ich": "schenke", "du": "schenkst", "er": "schenkt", "wir": "schenken", "ihr": "schenkt", "sie": "schenken", "kii": "würde schenken"}, {"inf": "schicken", "en": "send", "perfekt": "hat geschickt", "praeteritum": "schickte", "noun": "das Schicken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "email", "ta": "முடி", "ta_translit": "muṭi", "ich": "schicke", "du": "schickst", "er": "schickt", "wir": "schicken", "ihr": "schickt", "sie": "schicken", "kii": "würde schicken"}, {"inf": "schimpfen", "en": "scold", "perfekt": "hat geschimpft", "praeteritum": "schimpfte", "noun": "das Schimpfen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "speak", "ta": "திட்டு", "ta_translit": "tiṭṭu", "ich": "schimpfe", "du": "schimpfst", "er": "schimpft", "wir": "schimpfen", "ihr": "schimpft", "sie": "schimpfen", "kii": "würde schimpfen"}, {"inf": "schlafen", "en": "sleep", "perfekt": "hat geschlafen", "praeteritum": "schlief", "noun": "der Schlaf", "level": "A2", "source": "your own list", "typ": "strong", "icon": "bed", "ta": "தூங்கு", "ta_translit": "tūṅku", "ich": "schlafe", "du": "schlafst", "er": "schlaft", "wir": "schlafen", "ihr": "schlaft", "sie": "schlafen", "kii": "würde schlafen"}, {"inf": "treiben", "en": "do (engaging in sports)/chase", "perfekt": "hat getrieben", "praeteritum": "trieb", "noun": "die Treibende", "level": "A2", "source": "your own list", "typ": "strong", "icon": "ball", "ta": "துரத்து", "ta_translit": "turattu", "ich": "treibe", "du": "treibst", "er": "treibt", "wir": "treiben", "ihr": "treibt", "sie": "treiben", "kii": "würde treiben"}, {"inf": "schließen", "en": "close", "perfekt": "hat geschlossen", "praeteritum": "schloss", "noun": "der Verschluss", "level": "A2", "source": "your own list", "typ": "strong", "icon": "key", "ta": "மூடு", "ta_translit": "mūṭu", "ich": "schließe", "du": "schließst", "er": "schließt", "wir": "schließen", "ihr": "schließt", "sie": "schließen", "kii": "würde schließen"}, {"inf": "schmecken", "en": "taste", "perfekt": "hat geschmeckt", "praeteritum": "schmeckte", "noun": "der Geschmack", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eat", "ta": "சுவை பார்", "ta_translit": "cuvai pār", "ich": "schmecke", "du": "schmeckst", "er": "schmeckt", "wir": "schmecken", "ihr": "schmeckt", "sie": "schmecken", "kii": "würde schmecken"}, {"inf": "schneien", "en": "snow", "perfekt": "hat geschneit", "praeteritum": "schneite", "noun": "der Schnee", "level": "A2", "source": "your own list", "typ": "weak", "icon": "weather", "ta": "பனி பெய்", "ta_translit": "paṉi pey", "ich": "schneie", "du": "schneist", "er": "schneit", "wir": "schneien", "ihr": "schneit", "sie": "schneien", "kii": "würde schneien"}, {"inf": "schreiben", "en": "write", "perfekt": "hat geschrieben", "praeteritum": "schrieb", "noun": "die Schrift", "level": "A2", "source": "your own list", "typ": "strong", "icon": "write", "ta": "எழுது", "ta_translit": "eḻutu", "ich": "schreibe", "du": "schreibst", "er": "schreibt", "wir": "schreiben", "ihr": "schreibt", "sie": "schreiben", "kii": "würde schreiben"}, {"inf": "schwimmen", "en": "swim", "perfekt": "ist geschwommen", "praeteritum": "schwamm", "noun": "das Schwimmen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "swim", "ta": "நீந்து", "ta_translit": "nīntu", "ich": "schwimme", "du": "schwimmst", "er": "schwimmt", "wir": "schwimmen", "ihr": "schwimmt", "sie": "schwimmen", "kii": "würde schwimmen"}, {"inf": "sehen", "en": "see", "perfekt": "hat gesehen", "praeteritum": "sah", "noun": "das Sehen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "eye", "ta": "பார்", "ta_translit": "pār", "ich": "sehe", "du": "sehst", "er": "seht", "wir": "sehen", "ihr": "seht", "sie": "sehen", "kii": "würde sehen"}, {"inf": "singen", "en": "sing", "perfekt": "hat gesungen", "praeteritum": "sang", "noun": "der Gesang", "level": "A2", "source": "your own list", "typ": "strong", "icon": "music", "ta": "பாடு", "ta_translit": "pāṭu", "ich": "singe", "du": "singst", "er": "singt", "wir": "singen", "ihr": "singt", "sie": "singen", "kii": "würde singen"}, {"inf": "sollen", "en": "shall", "perfekt": "hat gesollt", "praeteritum": "sollte", "noun": "die Pflicht", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "வேண்டும்", "ta_translit": "vēṇṭum", "ich": "solle", "du": "sollst", "er": "sollt", "wir": "sollen", "ihr": "sollt", "sie": "sollen", "kii": "würde sollen"}, {"inf": "sparen", "en": "save - money", "perfekt": "hat gespart", "praeteritum": "sparte", "noun": "das Sparen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "money", "ta": "சேமி", "ta_translit": "cēmi", "ich": "spare", "du": "sparst", "er": "spart", "wir": "sparen", "ihr": "spart", "sie": "sparen", "kii": "würde sparen"}, {"inf": "speichern", "en": "save - files", "perfekt": "hat gespeichert", "praeteritum": "speicherte", "noun": "die Speicherung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "சேமி", "ta_translit": "cēmi", "ich": "speichere", "du": "speicherst", "er": "speichert", "wir": "speichern", "ihr": "speichert", "sie": "speichern", "kii": "würde speichern"}, {"inf": "spielen", "en": "play", "perfekt": "hat gespielt", "praeteritum": "spielte", "noun": "das Spielen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "ball", "ta": "வை", "ta_translit": "vai", "ich": "spiele", "du": "spielst", "er": "spielt", "wir": "spielen", "ihr": "spielt", "sie": "spielen", "kii": "würde spielen"}, {"inf": "stehen", "en": "stand", "perfekt": "hat/ist gestanden", "praeteritum": "stand", "noun": "der Stand", "level": "A2", "source": "your own list", "typ": "strong", "icon": "house", "ta": "நில்", "ta_translit": "nil", "ich": "stehe", "du": "stehst", "er": "steht", "wir": "stehen", "ihr": "steht", "sie": "stehen", "kii": "würde stehen"}, {"inf": "stellen", "en": "place", "perfekt": "hat gestellt", "praeteritum": "stellte", "noun": "die Stellung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "வை", "ta_translit": "vai", "ich": "stelle", "du": "stellst", "er": "stellt", "wir": "stellen", "ihr": "stellt", "sie": "stellen", "kii": "würde stellen"}, {"inf": "sterben", "en": "die", "perfekt": "ist gestorben", "praeteritum": "starb", "noun": "der Tod", "level": "A2", "source": "your own list", "typ": "strong", "icon": "house", "ta": "இற", "ta_translit": "iṟa", "ich": "sterbe", "du": "sterbst", "er": "sterbt", "wir": "sterben", "ihr": "sterbt", "sie": "sterben", "kii": "würde sterben"}, {"inf": "stören", "en": "disturb", "perfekt": "hat gestört", "praeteritum": "störte", "noun": "die Störung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "தொந்தரவு செய்", "ta_translit": "tontaravu sey", "ich": "störe", "du": "störst", "er": "stört", "wir": "stören", "ihr": "stört", "sie": "stören", "kii": "würde stören"}, {"inf": "studieren", "en": "study", "perfekt": "hat studiert", "praeteritum": "studierte", "noun": "das Studium", "level": "A2", "source": "your own list", "typ": "weak", "icon": "graduation", "ta": "படி", "ta_translit": "paṭi", "ich": "studiere", "du": "studierst", "er": "studiert", "wir": "studieren", "ihr": "studiert", "sie": "studieren", "kii": "würde studieren"}, {"inf": "suchen", "en": "search", "perfekt": "hat gesucht", "praeteritum": "suchte", "noun": "die Suche", "level": "A2", "source": "your own list", "typ": "weak", "icon": "search", "ta": "தேடு", "ta_translit": "tēṭu", "ich": "suche", "du": "suchst", "er": "sucht", "wir": "suchen", "ihr": "sucht", "sie": "suchen", "kii": "würde suchen"}, {"inf": "surfen", "en": "surf", "perfekt": "hat/ist gesurft", "praeteritum": "surfte", "noun": "das Surfen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "video", "ta": "மேலோட்டமாகப் பார்", "ta_translit": "mēlōṭṭamākap pār", "ich": "surfe", "du": "surfst", "er": "surft", "wir": "surfen", "ihr": "surft", "sie": "surfen", "kii": "würde surfen"}, {"inf": "tanzen", "en": "dance", "perfekt": "hat getanzt", "praeteritum": "tanzte", "noun": "der Tanz", "level": "A2", "source": "your own list", "typ": "weak", "icon": "ball", "ta": "நடனமாடு", "ta_translit": "naṭaṉamāṭu", "ich": "tanze", "du": "tanzst", "er": "tanzt", "wir": "tanzen", "ihr": "tanzt", "sie": "tanzen", "kii": "würde tanzen"}, {"inf": "widerstehen", "en": "resist", "perfekt": "hat widerstanden", "praeteritum": "widerstand", "noun": "der Widerstand", "level": "A2", "source": "your own list", "typ": "strong", "icon": "abstract", "ta": "எதிர்", "ta_translit": "etir", "ich": "widerstehe", "du": "widerstehst", "er": "widersteht", "wir": "widerstehen", "ihr": "widersteht", "sie": "widerstehen", "kii": "würde widerstehen"}, {"inf": "teilen", "en": "share", "perfekt": "hat geteilt", "praeteritum": "teilte", "noun": "die Teilung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "balance", "ta": "பகிர்", "ta_translit": "pakir", "ich": "teile", "du": "teilst", "er": "teilt", "wir": "teilen", "ihr": "teilt", "sie": "teilen", "kii": "würde teilen"}, {"inf": "telefonieren", "en": "phone", "perfekt": "hat telefoniert", "praeteritum": "telefonierte", "noun": "das Telefonieren", "level": "A2", "source": "your own list", "typ": "weak", "icon": "phone", "ta": "தொலைபேசியில் பேசு", "ta_translit": "tolaipēciyil pēcu", "ich": "telefoniere", "du": "telefonierst", "er": "telefoniert", "wir": "telefonieren", "ihr": "telefoniert", "sie": "telefonieren", "kii": "würde telefonieren"}, {"inf": "tragen", "en": "wear / carry", "perfekt": "hat getragen", "praeteritum": "trug", "noun": "das Tragen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "abstract", "ta": "அணி", "ta_translit": "aṇi", "ich": "trage", "du": "tragst", "er": "tragt", "wir": "tragen", "ihr": "tragt", "sie": "tragen", "kii": "würde tragen"}, {"inf": "trainieren", "en": "train", "perfekt": "hat trainiert", "praeteritum": "trainierte", "noun": "das Training", "level": "A2", "source": "your own list", "typ": "weak", "icon": "weather", "ta": "மழை பெய்", "ta_translit": "maḻai pey", "ich": "trainiere", "du": "trainierst", "er": "trainiert", "wir": "trainieren", "ihr": "trainiert", "sie": "trainieren", "kii": "würde trainieren"}, {"inf": "träumen", "en": "dream", "perfekt": "hat geträumt", "praeteritum": "träumte", "noun": "der Traum", "level": "A2", "source": "your own list", "typ": "weak", "icon": "bed", "ta": "கனவு காண்", "ta_translit": "kaṉavu kāṇ", "ich": "träume", "du": "träumst", "er": "träumt", "wir": "träumen", "ihr": "träumt", "sie": "träumen", "kii": "würde träumen"}, {"inf": "treffen", "en": "meeting/meets", "perfekt": "hat getroffen", "praeteritum": "traf", "noun": "das Treffen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "team", "ta": "சந்தி", "ta_translit": "canti", "ich": "treffe", "du": "treffst", "er": "trefft", "wir": "treffen", "ihr": "trefft", "sie": "treffen", "kii": "würde treffen"}, {"inf": "trinken", "en": "drink", "perfekt": "hat getrunken", "praeteritum": "trank", "noun": "der Trank", "level": "A2", "source": "your own list", "typ": "strong", "icon": "drink", "ta": "குடி", "ta_translit": "kuṭi", "ich": "trinke", "du": "trinkst", "er": "trinkt", "wir": "trinken", "ihr": "trinkt", "sie": "trinken", "kii": "würde trinken"}, {"inf": "tun", "en": "do", "perfekt": "hat getan", "praeteritum": "tat", "noun": "der Tat", "level": "A2", "source": "your own list", "typ": "strong", "icon": "wrench", "ta": "செய்", "ta_translit": "sey", "ich": "tue", "du": "tust", "er": "tut", "wir": "tun", "ihr": "tut", "sie": "tun", "kii": "würde tun"}, {"inf": "übernachten", "en": "stay overnight", "perfekt": "hat übernachtet", "praeteritum": "übernachtete", "noun": "die Übernachtung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "தங்கு", "ta_translit": "taṅku", "ich": "übernachte", "du": "übernachtest", "er": "übernachtet", "wir": "übernachten", "ihr": "übernachtet", "sie": "übernachten", "kii": "würde übernachten"}, {"inf": "übersetzen", "en": "translate", "perfekt": "hat übersetzt", "praeteritum": "übersetzte", "noun": "die Übersetzung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "மொழிபெயர்", "ta_translit": "moḻipeyar", "ich": "übersetze", "du": "übersetzst", "er": "übersetzt", "wir": "übersetzen", "ihr": "übersetzt", "sie": "übersetzen", "kii": "würde übersetzen"}, {"inf": "überweisen", "en": "transfer", "perfekt": "hat überwiesen", "praeteritum": "überwies", "noun": "die Überweisung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "money", "ta": "மாற்று", "ta_translit": "māṟṟu", "ich": "überweise", "du": "überweisst", "er": "überweist", "wir": "überweisen", "ihr": "überweist", "sie": "überweisen", "kii": "würde überweisen"}, {"inf": "umsteigen", "en": "change trains", "perfekt": "ist umgestiegen", "praeteritum": "stieg um", "noun": "der Umstieg", "level": "A2", "source": "your own list", "typ": "strong", "icon": "weather", "ta": "தொங்கு", "ta_translit": "toṅku", "ich": "umsteige", "du": "umsteigst", "er": "umsteigt", "wir": "umsteigen", "ihr": "umsteigt", "sie": "umsteigen", "kii": "würde umsteigen"}, {"inf": "umziehen", "en": "move", "perfekt": "ist umgezogen", "praeteritum": "zog um", "noun": "das Umziehen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "car", "ta": "இடம் மாறு", "ta_translit": "iṭam māṟu", "ich": "umziehe", "du": "umziehst", "er": "umzieht", "wir": "umziehen", "ihr": "umzieht", "sie": "umziehen", "kii": "würde umziehen"}, {"inf": "unternehmen", "en": "to do (something), to undertake", "perfekt": "hat unternommen", "praeteritum": "unternahm", "noun": "das Unternehmen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "target", "ta": "எடு", "ta_translit": "eṭu", "ich": "unternehme", "du": "unternehmst", "er": "unternehmt", "wir": "unternehmen", "ihr": "unternehmt", "sie": "unternehmen", "kii": "würde unternehmen"}, {"inf": "unterschreiben", "en": "sign", "perfekt": "hat unterschrieben", "praeteritum": "unterschrieb", "noun": "die Unterschrift", "level": "A2", "source": "your own list", "typ": "strong", "icon": "write", "ta": "கையெழுத்திடு", "ta_translit": "kaiyeḻuttiṭu", "ich": "unterschreibe", "du": "unterschreibst", "er": "unterschreibt", "wir": "unterschreiben", "ihr": "unterschreibt", "sie": "unterschreiben", "kii": "würde unterschreiben"}, {"inf": "untersuchen", "en": "investigate", "perfekt": "hat untersucht", "praeteritum": "untersuchte", "noun": "die Untersuchung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "building", "ta": "விசாரி", "ta_translit": "vicāri", "ich": "untersuche", "du": "untersuchst", "er": "untersucht", "wir": "untersuchen", "ihr": "untersucht", "sie": "untersuchen", "kii": "würde untersuchen"}, {"inf": "verdienen", "en": "earn", "perfekt": "hat verdient", "praeteritum": "verdiente", "noun": "der Verdienst", "level": "A2", "source": "your own list", "typ": "weak", "icon": "money", "ta": "சம்பாதி", "ta_translit": "campāti", "ich": "verdiene", "du": "verdienst", "er": "verdient", "wir": "verdienen", "ihr": "verdient", "sie": "verdienen", "kii": "würde verdienen"}, {"inf": "vereinbaren", "en": "schedule/arrange/agree", "perfekt": "hat vereinbart", "praeteritum": "vereinbarte", "noun": "die Vereinbarung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "handshake", "ta": "நேரம் நிர்ணயி", "ta_translit": "nēram nirṇayi", "ich": "vereinbare", "du": "vereinbarst", "er": "vereinbart", "wir": "vereinbaren", "ihr": "vereinbart", "sie": "vereinbaren", "kii": "würde vereinbaren"}, {"inf": "verlassen", "en": "abandon / leave", "perfekt": "hat verlassen", "praeteritum": "verließ", "noun": "die Verlassenheit", "level": "A2", "source": "your own list", "typ": "strong", "icon": "wrench", "ta": "செய்", "ta_translit": "sey", "ich": "verlasse", "du": "verlassst", "er": "verlasst", "wir": "verlassen", "ihr": "verlasst", "sie": "verlassen", "kii": "würde verlassen"}, {"inf": "vergessen", "en": "forget", "perfekt": "hat vergessen", "praeteritum": "vergaß", "noun": "das Vergessen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "cart", "ta": "பெறு", "ta_translit": "peṟu", "ich": "vergesse", "du": "vergessst", "er": "vergesst", "wir": "vergessen", "ihr": "vergesst", "sie": "vergessen", "kii": "würde vergessen"}, {"inf": "vergleichen", "en": "compare", "perfekt": "hat verglichen", "praeteritum": "verglich", "noun": "der Vergleich", "level": "A2", "source": "your own list", "typ": "strong", "icon": "balance", "ta": "ஒப்பிடு", "ta_translit": "oppiṭu", "ich": "vergleiche", "du": "vergleichst", "er": "vergleicht", "wir": "vergleichen", "ihr": "vergleicht", "sie": "vergleichen", "kii": "würde vergleichen"}, {"inf": "verkaufen", "en": "sell", "perfekt": "hat verkauft", "praeteritum": "verkaufte", "noun": "der Verkauf", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cart", "ta": "விற்று", "ta_translit": "viṟṟu", "ich": "verkaufe", "du": "verkaufst", "er": "verkauft", "wir": "verkaufen", "ihr": "verkauft", "sie": "verkaufen", "kii": "würde verkaufen"}, {"inf": "verlieren", "en": "lose", "perfekt": "hat verloren", "praeteritum": "verlor", "noun": "der Verlust", "level": "A2", "source": "your own list", "typ": "strong", "icon": "abstract", "ta": "இழ", "ta_translit": "iḻa", "ich": "verliere", "du": "verlierst", "er": "verliert", "wir": "verlieren", "ihr": "verliert", "sie": "verlieren", "kii": "würde verlieren"}, {"inf": "vermieten", "en": "rent (as a landlord/owner)", "perfekt": "hat vermietet", "praeteritum": "vermietete", "noun": "die Vermietung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "money", "ta": "இறங்கு", "ta_translit": "iṟaṅku", "ich": "vermiete", "du": "vermietest", "er": "vermietet", "wir": "vermieten", "ihr": "vermietet", "sie": "vermieten", "kii": "würde vermieten"}, {"inf": "verpassen", "en": "miss (chance/bus etc)", "perfekt": "hat verpasst", "praeteritum": "verpasste", "noun": "das Verpassen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "தவற விடு", "ta_translit": "tavaṟa viṭu", "ich": "verpasse", "du": "verpassst", "er": "verpasst", "wir": "verpassen", "ihr": "verpasst", "sie": "verpassen", "kii": "würde verpassen"}, {"inf": "vermissen", "en": "miss (person)", "perfekt": "hat vermisst", "praeteritum": "vermisste", "noun": "das Vermissen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "நினைத்து ஏங்கு", "ta_translit": "niṉaittu ēṅku", "ich": "vermisse", "du": "vermissst", "er": "vermisst", "wir": "vermissen", "ihr": "vermisst", "sie": "vermissen", "kii": "würde vermissen"}, {"inf": "verreisen", "en": "travel", "perfekt": "ist verreist", "praeteritum": "verreiste", "noun": "die Verreise", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "பயணம் செய்", "ta_translit": "payaṇam sey", "ich": "verreise", "du": "verreisst", "er": "verreist", "wir": "verreisen", "ihr": "verreist", "sie": "verreisen", "kii": "würde verreisen"}, {"inf": "drehen", "en": "turn (left/right)", "perfekt": "hat gedreht", "praeteritum": "drehte", "noun": "die Drehung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "திரும்பு", "ta_translit": "tirumpu", "ich": "drehe", "du": "drehst", "er": "dreht", "wir": "drehen", "ihr": "dreht", "sie": "drehen", "kii": "würde drehen"}, {"inf": "verschieben", "en": "postpone", "perfekt": "hat verschoben", "praeteritum": "verschob", "noun": "die Verschiebung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "clock", "ta": "தள்ளிப்போடு", "ta_translit": "taḷḷippōṭu", "ich": "verschiebe", "du": "verschiebst", "er": "verschiebt", "wir": "verschieben", "ihr": "verschiebt", "sie": "verschieben", "kii": "würde verschieben"}, {"inf": "verstehen", "en": "understand", "perfekt": "hat verstanden", "praeteritum": "verstand", "noun": "das Verstehen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "think", "ta": "நில்", "ta_translit": "nil", "ich": "verstehe", "du": "verstehst", "er": "versteht", "wir": "verstehen", "ihr": "versteht", "sie": "verstehen", "kii": "würde verstehen"}, {"inf": "versuchen", "en": "try", "perfekt": "hat versucht", "praeteritum": "versuchte", "noun": "der Versuch", "level": "A2", "source": "your own list", "typ": "weak", "icon": "target", "ta": "முயற்சி செய்", "ta_translit": "muyaṟci sey", "ich": "versuche", "du": "versuchst", "er": "versucht", "wir": "versuchen", "ihr": "versucht", "sie": "versuchen", "kii": "würde versuchen"}, {"inf": "wandern", "en": "wander / hike", "perfekt": "ist gewandert", "praeteritum": "wanderte", "noun": "das Wandern", "level": "A2", "source": "your own list", "typ": "weak", "icon": "walk", "ta": "சுற்றித் திரி", "ta_translit": "cuṟṟit tiri", "ich": "wandere", "du": "wanderst", "er": "wandert", "wir": "wandern", "ihr": "wandert", "sie": "wandern", "kii": "würde wandern"}, {"inf": "wählen", "en": "choose", "perfekt": "hat gewählt", "praeteritum": "wählte", "noun": "die Wahl", "level": "A2", "source": "your own list", "typ": "weak", "icon": "balance", "ta": "தேர்ந்தெடு", "ta_translit": "tērnteṭu", "ich": "wähle", "du": "wählst", "er": "wählt", "wir": "wählen", "ihr": "wählt", "sie": "wählen", "kii": "würde wählen"}, {"inf": "warten", "en": "wait", "perfekt": "hat gewartet", "praeteritum": "wartete", "noun": "das Warten", "level": "A2", "source": "your own list", "typ": "weak", "icon": "clock", "ta": "காத்திரு", "ta_translit": "kāttiru", "ich": "warte", "du": "wartest", "er": "wartet", "wir": "warten", "ihr": "wartet", "sie": "warten", "kii": "würde warten"}, {"inf": "üben", "en": "practising", "perfekt": "hat geübt", "praeteritum": "übte", "noun": "das Üben", "level": "A2", "source": "your own list", "typ": "weak", "icon": "music", "ta": "பாடு", "ta_translit": "pāṭu", "ich": "übe", "du": "übst", "er": "übt", "wir": "üben", "ihr": "übt", "sie": "üben", "kii": "würde üben"}, {"inf": "wechseln", "en": "change", "perfekt": "hat gewechselt", "praeteritum": "wechselte", "noun": "das Wechseln", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "தொங்கு", "ta_translit": "toṅku", "ich": "wechsele", "du": "wechselst", "er": "wechselt", "wir": "wechseln", "ihr": "wechselt", "sie": "wechseln", "kii": "würde wechseln"}, {"inf": "wecken", "en": "wake (others)", "perfekt": "hat geweckt", "praeteritum": "weckte", "noun": "das Wecken", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "எழுப்பு", "ta_translit": "eḻuppu", "ich": "wecke", "du": "weckst", "er": "weckt", "wir": "wecken", "ihr": "weckt", "sie": "wecken", "kii": "würde wecken"}, {"inf": "wiederholen", "en": "repeat", "perfekt": "hat wiederholt", "praeteritum": "wiederholte", "noun": "die Wiederholung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "eat", "ta": "சாப்பிடு", "ta_translit": "cāppiṭu", "ich": "wiederhole", "du": "wiederholst", "er": "wiederholt", "wir": "wiederholen", "ihr": "wiederholt", "sie": "wiederholen", "kii": "würde wiederholen"}, {"inf": "wollen", "en": "want", "perfekt": "hat gewollt", "praeteritum": "wollte", "noun": "der Wille", "level": "A2", "source": "your own list", "typ": "weak", "icon": "abstract", "ta": "வேண்டும்", "ta_translit": "vēṇṭum", "ich": "wolle", "du": "wollst", "er": "wollt", "wir": "wollen", "ihr": "wollt", "sie": "wollen", "kii": "würde wollen"}, {"inf": "zahlen", "en": "numbers", "perfekt": "hat gezahlt", "praeteritum": "zahlte", "noun": "die Zahlung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "email", "ta": "எண்ணு", "ta_translit": "eṇṇu", "ich": "zahle", "du": "zahlst", "er": "zahlt", "wir": "zahlen", "ihr": "zahlt", "sie": "zahlen", "kii": "würde zahlen"}, {"inf": "zeichnen", "en": "draw", "perfekt": "hat gezeichnet", "praeteritum": "zeichnete", "noun": "die Zeichnung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "write", "ta": "வரை", "ta_translit": "varai", "ich": "zeichne", "du": "zeichnst", "er": "zeichnt", "wir": "zeichnen", "ihr": "zeichnt", "sie": "zeichnen", "kii": "würde zeichnen"}, {"inf": "zeigen", "en": "show", "perfekt": "hat gezeigt", "praeteritum": "zeigte", "noun": "die Zeigung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "balance", "ta": "காட்டு", "ta_translit": "kāṭṭu", "ich": "zeige", "du": "zeigst", "er": "zeigt", "wir": "zeigen", "ihr": "zeigt", "sie": "zeigen", "kii": "würde zeigen"}, {"inf": "lachen", "en": "laugh", "perfekt": "hat gelacht", "praeteritum": "lachte", "noun": "das Lachen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "laugh", "ta": "சிரி", "ta_translit": "ciri", "ich": "lache", "du": "lachst", "er": "lacht", "wir": "lachen", "ihr": "lacht", "sie": "lachen", "kii": "würde lachen"}, {"inf": "joggen", "en": "jogging", "perfekt": "ist/hat gejoggt", "praeteritum": "joggte", "noun": "das Joggen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "walk", "ta": "ஓடு", "ta_translit": "ōṭu", "ich": "jogge", "du": "joggst", "er": "joggt", "wir": "joggen", "ihr": "joggt", "sie": "joggen", "kii": "würde joggen"}, {"inf": "sprechen", "en": "speak", "perfekt": "hat gesprochen", "praeteritum": "sprach", "noun": "das Sprechen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "speak", "ta": "பேசு", "ta_translit": "pēcu", "ich": "spreche", "du": "sprechst", "er": "sprecht", "wir": "sprechen", "ihr": "sprecht", "sie": "sprechen", "kii": "würde sprechen"}, {"inf": "duschen", "en": "shower", "perfekt": "hat geduscht", "praeteritum": "duschte", "noun": "das Duschen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "shower", "ta": "காட்டு", "ta_translit": "kāṭṭu", "ich": "dusche", "du": "duschst", "er": "duscht", "wir": "duschen", "ihr": "duscht", "sie": "duschen", "kii": "würde duschen"}, {"inf": "weinen", "en": "cry", "perfekt": "hat geweint", "praeteritum": "weinte", "noun": "das Weinen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "cry", "ta": "அழு", "ta_translit": "aḻu", "ich": "weine", "du": "weinst", "er": "weint", "wir": "weinen", "ihr": "weint", "sie": "weinen", "kii": "würde weinen"}, {"inf": "wohnen", "en": "live", "perfekt": "hat gewohnt", "praeteritum": "wohnte", "noun": "das Wohnen", "level": "A2", "source": "your own list", "typ": "weak", "icon": "house", "ta": "வாழ்", "ta_translit": "vāḻ", "ich": "wohne", "du": "wohnst", "er": "wohnt", "wir": "wohnen", "ihr": "wohnt", "sie": "wohnen", "kii": "würde wohnen"}, {"inf": "wissen", "en": "know", "perfekt": "hat gewusst", "praeteritum": "wusste", "noun": "das Wissen", "level": "A2", "source": "your own list", "typ": "mixed", "icon": "think", "ta": "தெரி", "ta_translit": "teri", "ich": "wisse", "du": "wissst", "er": "wisst", "wir": "wissen", "ihr": "wisst", "sie": "wissen", "kii": "würde wissen"}, {"inf": "verzeihen", "en": "forgive (a person)", "perfekt": "hat verziehen", "praeteritum": "verzieh", "noun": "die Vergebung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "gift", "ta": "கொடு", "ta_translit": "koṭu", "ich": "verzeihe", "du": "verzeihst", "er": "verzeiht", "wir": "verzeihen", "ihr": "verzeiht", "sie": "verzeihen", "kii": "würde verzeihen"}, {"inf": "vergeben", "en": "forgive (a mistake/guilt/sin)", "perfekt": "hat vergeben", "praeteritum": "vergab", "noun": "die Vergebung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "gift", "ta": "கொடு", "ta_translit": "koṭu", "ich": "vergebe", "du": "vergebst", "er": "vergebt", "wir": "vergeben", "ihr": "vergebt", "sie": "vergeben", "kii": "würde vergeben"}, {"inf": "betreten", "en": "enter", "perfekt": "hat betreten", "praeteritum": "betrat", "noun": "das Betreten", "level": "A2", "source": "your own list", "typ": "strong", "icon": "walk", "ta": "நுழை", "ta_translit": "nuḻai", "ich": "betrete", "du": "betretest", "er": "betretet", "wir": "betreten", "ihr": "betretet", "sie": "betreten", "kii": "würde betreten"}, {"inf": "versprechen", "en": "promise", "perfekt": "hat versprochen", "praeteritum": "versprach", "noun": "das Versprechen", "level": "A2", "source": "your own list", "typ": "strong", "icon": "handshake", "ta": "வாக்குறுதி அளி", "ta_translit": "vākkuṟuti aḷi", "ich": "verspreche", "du": "versprechst", "er": "versprecht", "wir": "versprechen", "ihr": "versprecht", "sie": "versprechen", "kii": "würde versprechen"}, {"inf": "dabei sein", "en": "be there", "perfekt": "ist dabei gewesen", "praeteritum": "war dabei", "noun": "die Anwesenheit", "level": "A2", "source": "your own list", "typ": "strong", "icon": "smile", "ta": "இரு", "ta_translit": "iru", "ich": "dabei seie", "du": "dabei seist", "er": "dabei seit", "wir": "dabei sein", "ihr": "dabei seit", "sie": "dabei sein", "kii": "würde dabei sein"}, {"inf": "erkältet sein", "en": "catch a cold", "perfekt": "ist erkältet gewesen", "praeteritum": "war erkältet", "noun": "die Erkältung", "level": "A2", "source": "your own list", "typ": "strong", "icon": "gift", "ta": "சளி பிடி", "ta_translit": "caḷi piṭi", "ich": "erkältet seie", "du": "erkältet seist", "er": "erkältet seit", "wir": "erkältet sein", "ihr": "erkältet seit", "sie": "erkältet sein", "kii": "würde erkältet sein"}, {"inf": "gültig sein", "en": "be valid", "perfekt": "ist gültig gewesen", "praeteritum": "war gültig", "noun": "die Gültigkeit", "level": "A2", "source": "your own list", "typ": "strong", "icon": "check", "ta": "செல்லுபடியாக இரு", "ta_translit": "cellupaṭiyāka iru", "ich": "gültig seie", "du": "gültig seist", "er": "gültig seit", "wir": "gültig sein", "ihr": "gültig seit", "sie": "gültig sein", "kii": "würde gültig sein"}, {"inf": "fit sein", "en": "be fit", "perfekt": "ist fit gewesen", "praeteritum": "war fit", "noun": "die Fitness", "level": "A2", "source": "your own list", "typ": "strong", "icon": "smile", "ta": "ஆரோக்கியமாக இரு", "ta_translit": "ārōkkiyamāka iru", "ich": "fit seie", "du": "fit seist", "er": "fit seit", "wir": "fit sein", "ihr": "fit seit", "sie": "fit sein", "kii": "würde fit sein"}, {"inf": "fertig sein", "en": "be ready", "perfekt": "ist fertig gewesen", "praeteritum": "war fertig", "noun": "die Fertigkeit", "level": "A2", "source": "your own list", "typ": "strong", "icon": "smile", "ta": "படி", "ta_translit": "paṭi", "ich": "fertig seie", "du": "fertig seist", "er": "fertig seit", "wir": "fertig sein", "ihr": "fertig seit", "sie": "fertig sein", "kii": "würde fertig sein"}, {"inf": "bereit sein", "en": "be ready", "perfekt": "ist bereit gewesen", "praeteritum": "war bereit", "noun": "die Bereitschaft", "level": "A2", "source": "your own list", "typ": "strong", "icon": "smile", "ta": "படி", "ta_translit": "paṭi", "ich": "bereit seie", "du": "bereit seist", "er": "bereit seit", "wir": "bereit sein", "ihr": "bereit seit", "sie": "bereit sein", "kii": "würde bereit sein"}, {"inf": "einverstanden sein", "en": "agree", "perfekt": "ist einverstanden gewesen", "praeteritum": "war einverstanden", "noun": "das Einverständnis", "level": "A2", "source": "your own list", "typ": "strong", "icon": "handshake", "ta": "ஒப்புக்கொள்", "ta_translit": "oppukkoḷ", "ich": "einverstanden seie", "du": "einverstanden seist", "er": "einverstanden seit", "wir": "einverstanden sein", "ihr": "einverstanden seit", "sie": "einverstanden sein", "kii": "würde einverstanden sein"}, {"inf": "erlaubt sein", "en": "be allowed", "perfekt": "ist erlaubt gewesen", "praeteritum": "war erlaubt", "noun": "die Erlaubtheit", "level": "A2", "source": "your own list", "typ": "strong", "icon": "handshake", "ta": "அனுமதி", "ta_translit": "aṉumati", "ich": "erlaubt seie", "du": "erlaubt seist", "er": "erlaubt seit", "wir": "erlaubt sein", "ihr": "erlaubt seit", "sie": "erlaubt sein", "kii": "würde erlaubt sein"}, {"inf": "unterwegs sein", "en": "be travelling", "perfekt": "ist unterwegs gewesen", "praeteritum": "war unterwegs", "noun": "der Weg", "level": "A2", "source": "your own list", "typ": "strong", "icon": "abstract", "ta": "பயணம் செய்", "ta_translit": "payaṇam sey", "ich": "unterwegs seie", "du": "unterwegs seist", "er": "unterwegs seit", "wir": "unterwegs sein", "ihr": "unterwegs seit", "sie": "unterwegs sein", "kii": "würde unterwegs sein"}, {"inf": "wachsen", "en": "to grow", "perfekt": "ist gewachsen", "praeteritum": "wuchs", "noun": "das Wachstum", "level": "A2", "source": "your own list", "typ": "strong", "icon": "grow", "ta": "வளர்", "ta_translit": "vaḷar", "ich": "wachse", "du": "wachsst", "er": "wachst", "wir": "wachsen", "ihr": "wachst", "sie": "wachsen", "kii": "würde wachsen"}, {"inf": "überraschen", "en": "to surprise", "perfekt": "hat überrascht", "praeteritum": "überraschte", "noun": "die Überraschung", "level": "A2", "source": "your own list", "typ": "weak", "icon": "surprise", "ta": "ஆச்சரியப்படுத்து", "ta_translit": "āccariyappaṭuttu", "ich": "überrasche", "du": "überraschst", "er": "überrascht", "wir": "überraschen", "ihr": "überrascht", "sie": "überraschen", "kii": "würde überraschen"}];
+
+const A2_REFLEXIVE = [
+  { v: "sich freuen", en: "to be happy / look forward to", prep: "auf / über", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich gefreut" },
+  { v: "sich erinnern", en: "to remember", prep: "an (+ Akk)", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich erinnert" },
+  { v: "sich interessieren", en: "to be interested in", prep: "für", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich interessiert" },
+  { v: "sich konzentrieren", en: "to concentrate", prep: "auf", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich konzentriert" },
+  { v: "sich fühlen", en: "to feel", prep: "-", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich gefühlt" },
+  { v: "sich waschen", en: "to wash oneself", prep: "-", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich gewaschen" },
+  { v: "sich anziehen", en: "to get dressed", prep: "-", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich angezogen" },
+  { v: "sich ausruhen", en: "to rest", prep: "von", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich ausgeruht" },
+  { v: "sich beeilen", en: "to hurry", prep: "-", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich beeilt" },
+  { v: "sich unterhalten", en: "to converse / chat", prep: "mit / über", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich unterhalten" },
+  { v: "sich beschweren", en: "to complain", prep: "über", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich beschwert" },
+  { v: "sich entscheiden", en: "to decide", prep: "für", refl: "mich/dich/sich/uns/euch/sich", perfekt: "hat sich entschieden" }
+];
+
+const A2_TRENNBAR = [
+  { v: "aufstehen", en: "to get up", root: "stehen", prefix: "auf", perfekt: "ist aufgestanden", ex: "Ich stehe um 7 Uhr auf." },
+  { v: "aufräumen", en: "to clean up", root: "räumen", prefix: "auf", perfekt: "hat aufgeräumt", ex: "Du räumst dein Zimmer auf." },
+  { v: "einkaufen", en: "to shop", root: "kaufen", prefix: "ein", perfekt: "hat eingekauft", ex: "Wir kaufen im Supermarkt ein." },
+  { v: "anrufen", en: "to call", root: "rufen", prefix: "an", perfekt: "hat angerufen", ex: "Er ruft seine Mutter an." },
+  { v: "ausgehen", en: "to go out", root: "gehen", prefix: "aus", perfekt: "ist ausgegangen", ex: "Gehst du heute Abend aus?" },
+  { v: "vorbereiten", en: "to prepare", root: "bereiten", prefix: "vor", perfekt: "hat vorbereitet", ex: "Sie bereitet das Essen vor." },
+  { v: "zumachen", en: "to close", root: "machen", prefix: "zu", perfekt: "hat zugemacht", ex: "Mach bitte die Tür zu!" },
+  { v: "aufmachen", en: "to open", root: "machen", prefix: "auf", perfekt: "hat aufgemacht", ex: "Ich mache das Fenster auf." },
+  { v: "mitkommen", en: "to come along", root: "kommen", prefix: "mit", perfekt: "ist mitgekommen", ex: "Kommst du mit?" },
+  { v: "fernsehen", en: "to watch TV", root: "sehen", prefix: "fern", perfekt: "hat ferngesehen", ex: "Wir sehen abends fern." },
+  { v: "vorstellen", en: "to introduce", root: "stellen", prefix: "vor", perfekt: "hat vorgestellt", ex: "Stell dich bitte vor." },
+  { v: "ankommen", en: "to arrive", root: "kommen", prefix: "an", perfekt: "ist angekommen", ex: "Der Zug kommt pünktlich an." }
+];
+
+const A2_GENDER = {
+  der: [
+    { w: "Tisch", en: "table", rule: "Masculine" },
+    { w: "Stuhl", en: "chair", rule: "Masculine" },
+    { w: "Apfel", en: "apple", rule: "Masculine" },
+    { w: "Hund", en: "dog", rule: "Masculine" },
+    { w: "Computer", en: "computer", rule: "Masculine" },
+    { w: "Schlüssel", en: "key", rule: "Masculine" },
+    { w: "Kühlschrank", en: "fridge", rule: "Masculine" },
+    { w: "Garten", en: "garden", rule: "Masculine" },
+    { w: "Wald", en: "forest", rule: "Masculine" },
+    { w: "Berg", en: "mountain", rule: "Masculine" },
+    { w: "Fluss", en: "river", rule: "Masculine" },
+    { w: "See", en: "lake", rule: "Masculine" },
+    { w: "Wind", en: "wind", rule: "Masculine" },
+    { w: "Regen", en: "rain", rule: "Masculine" }
+  ],
+  das: [
+    { w: "Buch", en: "book", rule: "Neuter" },
+    { w: "Haus", en: "house", rule: "Neuter" },
+    { w: "Auto", en: "car", rule: "Neuter" },
+    { w: "Kind", en: "child", rule: "Neuter" },
+    { w: "Bild", en: "picture", rule: "Neuter" },
+    { w: "Fenster", en: "window", rule: "Neuter" },
+    { w: "Wasser", en: "water", rule: "Neuter" },
+    { w: "Brot", en: "bread", rule: "Neuter" },
+    { w: "Ei", en: "egg", rule: "Neuter" },
+    { w: "Handy", en: "mobile phone", rule: "Neuter" },
+    { w: "Gesicht", en: "face", rule: "Neuter" },
+    { w: "Herz", en: "heart", rule: "Neuter" },
+    { w: "Licht", en: "light", rule: "Neuter" },
+    { w: "Zimmer", en: "room", rule: "Neuter" }
+  ],
+  die: [
+    { w: "Tür", en: "door", rule: "Feminine" },
+    { w: "Tasche", en: "bag", rule: "Feminine" },
+    { w: "Uhr", en: "clock/watch", rule: "Feminine" },
+    { w: "Lampe", en: "lamp", rule: "Feminine" },
+    { w: "Stadt", en: "city", rule: "Feminine" },
+    { w: "Straße", en: "street", rule: "Feminine" },
+    { w: "Zeitung", en: "newspaper", rule: "Feminine" },
+    { w: "Schule", en: "school", rule: "Feminine" },
+    { w: "Küche", en: "kitchen", rule: "Feminine" },
+    { w: "Blume", en: "flower", rule: "Feminine" },
+    { w: "Sonne", en: "sun", rule: "Feminine" },
+    { w: "Mond", en: "moon", rule: "Feminine" },
+    { w: "Welt", en: "world", rule: "Feminine" },
+    { w: "Nacht", en: "night", rule: "Feminine" }
+  ]
+};
+
+const A2_IMPERATIVE = [
+  { v: "machen", du: "Mach!", ihr: "Macht!", sie: "Machen Sie!", ex: "Mach das Fenster zu!" },
+  { v: "gehen", du: "Geh!", ihr: "Geht!", sie: "Gehen Sie!", ex: "Gehen Sie bitte geradeaus." },
+  { v: "kommen", du: "Komm!", ihr: "Kommt!", sie: "Kommen Sie!", ex: "Komm schnell her!" },
+  { v: "essen", du: "Iss!", ihr: "Esst!", sie: "Essen Sie!", ex: "Iss dein Gemüse!" },
+  { v: "lesen", du: "Lies!", ihr: "Lesst!", sie: "Lesen Sie!", ex: "Lies den Text laut." },
+  { v: "sehen", du: "Sieh!", ihr: "Seht!", sie: "Sehen Sie!", ex: "Sieh mal dort drüben!" },
+  { v: "fahren", du: "Fahr!", ihr: "Fahrt!", sie: "Fahren Sie!", ex: "Fahr vorsichtig!" },
+  { v: "helfen", du: "Hilf!", ihr: "Helft!", sie: "Helfen Sie!", ex: "Hilf mir bitte!" },
+  { v: "nehmen", du: "Nimm!", ihr: "Nehmt!", sie: "Nehmen Sie!", ex: "Nimm dir einen Keks." },
+  { v: "geben", du: "Gib!", ihr: "Gebt!", sie: "Geben Sie!", ex: "Gib mir das Buch." }
+];
+
+const A2_CATEGORIES = {
+  personality: [
+    { de: "freundlich", en: "friendly" },
+    { de: "lustig", en: "funny" },
+    { de: "ruhig", en: "quiet" },
+    { de: "intelligent", en: "intelligent" },
+    { de: "geduldig", en: "patient" },
+    { de: "streng", en: "strict" },
+    { de: "höflich", en: "polite" },
+    { de: " ehrlich", en: "honest" },
+    { de: "mutig", en: "brave" },
+    { de: "schüchtern", en: "shy" }
+  ],
+  emotions: [
+    { de: "glücklich", en: "happy" },
+    { de: "traurig", en: "sad" },
+    { de: "wütend", en: "angry" },
+    { de: "nervös", en: "nervous" },
+    { de: "überrascht", en: "surprised" },
+    { de: "müde", en: "tired" },
+    { de: "gestresst", en: "stressed" },
+    { de: "zufrieden", en: "satisfied" },
+    { de: "ängstlich", en: "fearful" },
+    { de: "begeistert", en: "enthusiastic" }
+  ],
+  time_freq: [
+    { de: "immer", en: "always" },
+    { de: "oft", en: "often" },
+    { de: "manchmal", en: "sometimes" },
+    { de: "selten", en: "rarely" },
+    { de: "nie", en: "never" },
+    { de: "täglich", en: "daily" },
+    { de: "wöchentlich", en: "weekly" },
+    { de: "monatlich", en: "monthly" },
+    { de: "jährlich", en: "yearly" },
+    { de: "sofort", en: "immediately" }
+  ],
+  particles: [
+    { de: "doch", en: "on the contrary / indeed" },
+    { de: "mal", en: "just / once" },
+    { de: "halt", en: "just / that's how it is" },
+    { de: "eben", en: "precisely / just" },
+    { de: "ja", en: "indeed (filler)" },
+    { de: "denn", en: "really? (question particle)" },
+    { de: "eigentlich", en: "actually" },
+    { de: "vielleicht", en: "perhaps" },
+    { de: "wahrscheinlich", en: "probably" },
+    { de: "sicher", en: "surely" }
+  ],
+  connectors: [
+    { de: "weil", en: "because (verb end)" },
+    { de: "wenn", en: "if / when (verb end)" },
+    { de: "dass", en: "that (verb end)" },
+    { de: "obwohl", en: "although (verb end)" },
+    { de: "daher", en: "therefore" },
+    { de: "trotzdem", en: "nevertheless" },
+    { de: "deshalb", en: "that's why" },
+    { de: "außerdem", en: "furthermore" },
+    { de: "zuerst", en: "firstly" },
+    { de: "schließlich", en: "finally" }
+  ]
+};
+
+/* =========================================================================
+   APP STATE & ENGINE
+   ========================================================================= */
+const LS_STUDIO_KEY = 'a2_studio_progress_v2';
+const LEARNING_PATH = ['verbs', 'reflexive', 'trennbar', 'gender', 'endungen', 'imperative', 'categories', 'drill'];
+
+let PROGRESS = {
+  completed: {},
+  lastModule: 'verbs'
+};
+
+let currentModule = 'verbs';
+let currentFilter = 'All';
+let currentSearch = '';
+let currentVoice = null;
+
+function initApp() {
+  loadProgress();
+  setupVoice();
+  renderNav();
+  renderCurrentView();
+}
+
+function loadProgress() {
+  const saved = localStorage.getItem(LS_STUDIO_KEY);
+  if (saved) {
+    try {
+      PROGRESS = JSON.parse(saved);
+    } catch(e) { console.error("Progress load error", e); }
+  }
+}
+
+function saveProgress() {
+  localStorage.setItem(LS_STUDIO_KEY, JSON.stringify(PROGRESS));
+}
+
+function isModuleUnlocked(mod) {
+  const index = LEARNING_PATH.indexOf(mod);
+  if (index <= 0) return true;
+  const prevModule = LEARNING_PATH[index - 1];
+  return !!PROGRESS.completed[prevModule];
+}
+
+function markModuleComplete(mod) {
+  PROGRESS.completed[mod] = true;
+  saveProgress();
+  alert(`Glückwunsch! Das Kapitel ${mod} ist abgeschlossen. Das nächste Kapitel ist nun freigeschaltet!`);
+  renderNav();
+  renderCurrentView();
+}
+
+function switchModule(mod, event) {
+  if (!isModuleUnlocked(mod)) {
+    alert("🔒 Bitte schließe zuerst das vorherige Kapitel ab!");
+    return;
+  }
+  currentModule = mod;
+  currentFilter = 'All';
+  currentSearch = '';
+  renderNav();
+  renderCurrentView();
+}
+
+function renderNav() {
+  const nav = document.getElementById('moduleNav');
+    const navData = {
+    verbs: { label: "⚡ Verben (Verb Lab)", badge: A2_VERBS.length },
+    reflexive: { label: "🔄 Reflexiv (Reflexive)", badge: A2_REFLEXIVE.length },
+    trennbar: { label: "✂️ Trennbar (Separable)", badge: A2_TRENNBAR.length },
+    gender: { label: "🎨 der·das·die (Articles)", badge: 42 },
+    endungen: { label: "🧭 Adjektive (Endings)", badge: "A2-Formen" },
+    imperative: { label: "📢 Imperativ (Commands)", badge: A2_IMPERATIVE.length },
+    categories: { label: "🗂️ Wortschatz (Vocab)", badge: 60 },
+    drill: { label: "🎯 Smart-Drill (Quiz)", badge: "Sprint" }
+  };
+
+  let html = '';
+  LEARNING_PATH.forEach(mod => {
+    const data = navData[mod];
+    const unlocked = isModuleUnlocked(mod);
+    const completed = PROGRESS.completed[mod];
+    const active = currentModule === mod ? 'active' : '';
+    const locked = !unlocked ? 'locked' : '';
+
+    html += `
+      <button class="nav-tab ${active} ${locked}" onclick="switchModule('${mod}', event)">
+        ${!unlocked ? '🔒' : ''}
+        ${completed ? '<span class="check-icon">✅</span>' : ''}
+        ${data.label}
+        <span class="tab-badge">${data.badge}</span>
+      </button>`;
+  });
+  nav.innerHTML = html;
+}
+
+function renderCurrentView() {
+  const container = document.getElementById('mainContainer');
+  if (!container) return;
+
+  switch(currentModule) {
+    case 'verbs': renderVerbenView(container); break;
+    case 'reflexive': renderReflexivView(container); break;
+    case 'trennbar': renderTrennbarView(container); break;
+    case 'gender': renderGenderView(container); break;
+    case 'endungen': renderEndungenView(container); break;
+    case 'imperative': renderImperativView(container); break;
+    case 'categories': renderCategoriesView(container); break;
+    case 'drill': renderDrillView(container); break;
+  }
+}
+
+/* =========================================================================
+   MODULE RENDERING LOGIC
+   ========================================================================= */
+
+function renderVerbenView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">⚡ Verben-Labor</h2>
+        <span class="source-tag">Syllabus: A2 / B1</span>
+      </div>
+      <p class="view-desc"><b>Verb Conjugation Lab:</b> Master all A2 verbs with complete present, past & subjunctive conjugations. Click 🔊 to hear native pronunciation.</p>
+    </div>
+
+    <div class="control-bar">
+      <input type="text" class="search-input" placeholder="Verb suchen / Search verb in German or English..." oninput="updateVerbSearch(this.value)" value="${currentSearch}">
+      <div class="pill-group">
+        <button class="pill-btn ${currentFilter === 'All' ? 'active' : ''}" onclick="setVerbFilter('All')">All (Alle)</button>
+        <button class="pill-btn ${currentFilter === 'weak' ? 'active' : ''}" onclick="setVerbFilter('weak')">Weak (Schwach)</button>
+        <button class="pill-btn ${currentFilter === 'strong' ? 'active' : ''}" onclick="setVerbFilter('strong')">Strong (Stark)</button>
+        <button class="pill-btn ${currentFilter === 'mixed' ? 'active' : ''}" onclick="setVerbFilter('mixed')">Mixed (Gemischt)</button>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="verbsGrid"></div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('verbs')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('reflexive', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+  renderVerbenGrid();
+}
+
+function renderVerbenGrid() {
+  const grid = document.getElementById('verbsGrid');
+  if (!grid) return;
+  const filtered = A2_VERBS.filter(v => {
+    const matchFilter = currentFilter === 'All' || v.typ === currentFilter;
+    const matchSearch = v.inf.toLowerCase().includes(currentSearch.toLowerCase()) || v.en.toLowerCase().includes(currentSearch.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+
+  let html = '';
+  filtered.forEach(v => {
+    html += `
+      <div class="v-card">
+        <div class="v-card-stripe stripe-${v.typ}"></div>
+        <div class="v-card-head">
+          <h3 class="v-german">${v.inf} <button class="audio-mini-btn" onclick="speak('${v.inf}')">🔊</button></h3>
+          <span class="pill-btn" style="font-size:10px">${v.typ}</span>
+        </div>
+        <p class="v-english">${v.en}</p>
+
+        <div class="conj-matrix">
+          <div class="conj-row"><span class="conj-pron">ich</span><span class="conj-form">${v.ich}</span></div>
+          <div class="conj-row"><span class="conj-pron">du</span><span class="conj-form">${v.du}</span></div>
+          <div class="conj-row"><span class="conj-pron">er/sie/es</span><span class="conj-form">${v.er}</span></div>
+          <div class="conj-row"><span class="conj-pron">wir</span><span class="conj-form">${v.wir}</span></div>
+          <div class="conj-row"><span class="conj-pron">ihr</span><span class="conj-form">${v.ihr}</span></div>
+          <div class="conj-row"><span class="conj-pron">sie/Sie</span><span class="conj-form">${v.sie}</span></div>
+        </div>
+
+        <div class="tense-pills">
+          <div class="tense-row"><span class="tense-label">Perfekt</span><span class="tense-val">${v.perfekt}</span></div>
+          <div class="tense-row"><span class="tense-label">Präteritum</span><span class="tense-val">${v.praeteritum}</span></div>
+          <div class="tense-row"><span class="tense-label">Konjunktiv II</span><span class="tense-val">${v.kii}</span></div>
+        </div>
+
+        <div class="noun-bridge">
+          <span>Verwandtes Nomen:</span>
+          <span class="noun-pill">${v.noun}</span>
+        </div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function updateVerbSearch(val) {
+  currentSearch = val;
+  renderVerbenGrid();
+}
+
+function setVerbFilter(filt) {
+  currentFilter = filt;
+  renderCurrentView();
+}
+
+function renderReflexivView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">🔄 Reflexiv-Spiegel</h2>
+        <span class="source-tag">Grammatik: Reflexivverben</span>
+      </div>
+      <p class="view-desc">Übersicht über reflexive Pronomen und wichtige reflexive Verben mit Präpositionen.</p>
+    </div>
+
+    <div class="cards-grid" id="reflGrid"></div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('reflexive')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('trennbar', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+  const grid = document.getElementById('reflGrid');
+  if (!grid) return;
+  let html = '';
+  A2_REFLEXIVE.forEach(r => {
+    html += `
+      <div class="v-card">
+        <div class="v-card-stripe stripe-refl"></div>
+        <div class="v-card-head">
+          <h3 class="v-german">${r.v} <button class="audio-mini-btn" onclick="speak('${r.v}')">🔊</button></h3>
+        </div>
+        <p class="v-english">${r.en}</p>
+        <div class="refl-box">
+          <span class="refl-icon">🪞</span>
+          <div class="refl-details">
+            Pronomen: <span class="refl-pill">${r.refl}</span>
+          </div>
+        </div>
+        <div class="tense-row" style="margin-top:10px">
+          <span class="tense-label">Präposition:</span>
+          <span class="tense-val">${r.prep}</span>
+        </div>
+        <div class="tense-row" style="margin-top:5px">
+          <span class="tense-label">Perfekt:</span>
+          <span class="tense-val">${r.perfekt}</span>
+        </div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function renderTrennbarView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">✂️ Trennbar-Detacher</h2>
+        <span class="source-tag">Satzbau: Trennbare Verben</span>
+      </div>
+      <p class="view-desc">Visuelle Trennung von Präfix und Stamm im Hauptsatz.</p>
+    </div>
+
+    <div class="cards-grid" id="trennGrid"></div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('trennbar')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('gender', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+  const grid = document.getElementById('trennGrid');
+  if (!grid) return;
+  let html = '';
+  A2_TRENNBAR.forEach(t => {
+    html += `
+      <div class="v-card">
+        <div class="v-card-stripe stripe-trenn"></div>
+        <div class="v-card-head">
+          <h3 class="v-german">${t.v} <button class="audio-mini-btn" onclick="speak('${t.v}')">🔊</button></h3>
+        </div>
+        <p class="v-english">${t.en}</p>
+        <div class="detacher-box">
+          <span class="prefix-chip">${t.prefix}</span>
+          <span class="verb-root-chip">${t.root}</span>
+          <div class="split-arrow">➔ Satzklammer ➔</div>
+          <div class="split-sentence">${t.ex}</div>
+        </div>
+        <div class="tense-row" style="margin-top:10px">
+          <span class="tense-label">Perfekt:</span>
+          <span class="tense-val">${t.perfekt}</span>
+        </div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function renderGenderView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">🎨 der · das · die</h2>
+        <span class="source-tag">Nomen: Genus</span>
+      </div>
+      <p class="view-desc">Farblich sortierte Genus-Listen zur besseren Merkfähigkeit.</p>
+    </div>
+
+    <div class="gender-columns">
+      <div class="gender-col col-der">
+        <div class="gender-col-head"><span>der (Maskulin)</span> ♂️</div>
+        <ul class="gender-list" id="list-der"></ul>
+      </div>
+      <div class="gender-col col-das">
+        <div class="gender-col-head"><span>das (Neutrum)</span> ⚪</div>
+        <ul class="gender-list" id="list-das"></ul>
+      </div>
+      <div class="gender-col col-die">
+        <div class="gender-col-head"><span>die (Feminin)</span> ♀️</div>
+        <ul class="gender-list" id="list-die"></ul>
+      </div>
+    </div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('gender')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('endungen', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+
+  const fillList = (id, data) => {
+    const list = document.getElementById(id);
+    if (!list) return;
+    list.innerHTML = data.map(i => `
+      <li class="gender-item" onclick="speak('${i.w}')">
+        <span class="gender-german">${i.w}</span>
+        <span class="gender-english">${i.en}</span>
+      </li>
+    `).join('');
+  };
+
+  fillList('list-der', A2_GENDER.der);
+  fillList('list-das', A2_GENDER.das);
+  fillList('list-die', A2_GENDER.die);
+}
+
+function renderEndungenView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">🧭 Adjektiv-Kompass</h2>
+        <span class="source-tag">Interaktive Grammatik</span>
+      </div>
+      <p class="view-desc">Berechne die korrekte Adjektivendung basierend auf Artikel, Genus und Kasus.</p>
+    </div>
+
+    <div class="compass-card">
+      <div class="compass-selectors">
+        <div class="sel-box">
+          <label>Artikel</label>
+          <select id="adjArt" onchange="calcEnding()">
+            <option value="bestimmt">Bestimmt (der, die, das)</option>
+            <option value="unbestimmt">Unbestimmt (ein, eine, ein)</option>
+            <option value="null">Kein Artikel</option>
+          </select>
+        </div>
+        <div class="sel-box">
+          <label>Genus</label>
+          <select id="adjGen" onchange="calcEnding()">
+            <option value="m">Maskulin (m)</option>
+            <option value="f">Feminin (f)</option>
+            <option value="n">Neutrum (n)</option>
+            <option value="pl">Plural (pl)</option>
+          </select>
+        </div>
+        <div class="sel-box">
+          <label>Kasus</label>
+          <select id="adjKas" onchange="calcEnding()">
+            <option value="nom">Nominativ</option>
+            <option value="akk">Akkusativ</option>
+            <option value="dat">Dativ</option>
+            <option value="gen">Genitiv</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="compass-result">
+        <div class="ending-display">
+          <span style="font-size:12px; color:var(--ink-soft)">Endung:</span>
+          <div class="ending-bubble" id="adjResult">-</div>
+        </div>
+        <div class="ending-explain">
+          <div class="ending-rule" id="adjRule">Wähle Optionen aus...</div>
+          <div class="ending-sentence" id="adjEx">Beispiel folgt...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('endungen')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('imperative', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+  calcEnding();
+}
+
+function calcEnding() {
+  const artEl = document.getElementById('adjArt');
+  const genEl = document.getElementById('adjGen');
+  const kasEl = document.getElementById('adjKas');
+  if (!artEl || !genEl || !kasEl) return;
+
+  const art = artEl.value;
+  const gen = genEl.value;
+  const kas = kasEl.value;
+
+  const res = document.getElementById('adjResult');
+  const rule = document.getElementById('adjRule');
+  const ex = document.getElementById('adjEx');
+  if (!res || !rule || !ex) return;
+
+  let ending = "-e";
+  let rText = "Schwache Deklination";
+  let example = "Der gute Mann";
+
+  if (art === 'null') {
+    ending = "-er"; rText = "Starke Deklination"; example = "Guter Mann";
+  } else if (art === 'unbestimmt') {
+    ending = "-e"; rText = "Gemischte Deklination"; example = "Ein guter Mann";
+  }
+
+  if (kas === 'dat') { ending = "-en"; rText = "Dativ-Endung ist fast immer -en"; example = "Mit dem guten Mann"; }
+  if (kas === 'akk' && gen === 'm') { ending = "-en"; rText = "Akkusativ Maskulin"; example = "Ich sehe den guten Mann"; }
+  if (gen === 'pl') { ending = "-en"; rText = "Plural-Endungen"; example = "Die guten Männer"; }
+
+  res.textContent = ending;
+  rule.textContent = rText;
+  ex.textContent = example;
+}
+
+function renderImperativView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">📢 Imperativ-Schmiede</h2>
+        <span class="source-tag">Satzbau: Befehlsform</span>
+      </div>
+      <p class="view-desc">Die drei Formen des Imperativs: du, ihr und Sie.</p>
+    </div>
+
+    <div class="imper-grid" id="imperGrid"></div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('imperative')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('categories', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+  const grid = document.getElementById('imperGrid');
+  if (!grid) return;
+  let html = '';
+  A2_IMPERATIVE.forEach(i => {
+    html += `
+      <div class="imper-card">
+        <div class="imper-head">
+          <span class="imper-verb">${i.v} <button class="audio-mini-btn" onclick="speak('${i.v}')">🔊</button></span>
+        </div>
+        <div class="imper-triad">
+          <div class="imper-form"><b>du:</b> ${i.du}</div>
+          <div class="imper-form"><b>ihr:</b> ${i.ihr}</div>
+          <div class="imper-form"><b>Sie:</b> ${i.sie}</div>
+        </div>
+        <div class="imper-example">${i.ex}</div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+function renderCategoriesView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">🗂️ Wortschatz & Partikeln</h2>
+        <span class="source-tag">Lexikon: A2 Themen</span>
+      </div>
+      <p class="view-desc">Thematisch sortierter Wortschatz für Alltag und Kommunikation.</p>
+    </div>
+
+    <div id="catContainer"></div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('categories')">✅ Mark Chapter as Complete (Abschließen)</button>
+      <button class="next-btn" onclick="switchModule('drill', event)">Next Chapter (Weiter) ➔</button>
+    </div>
+  `;
+
+  const wrap = document.getElementById('catContainer');
+  if (!wrap) return;
+  let html = '';
+  for (const [cat, items] of Object.entries(A2_CATEGORIES)) {
+    html += `
+      <div class="category-cluster">
+        <h3 class="cluster-title">${cat.replace('_', ' ').toUpperCase()}</h3>
+        <div class="chips-wrap">
+          ${items.map(it => `
+            <div class="vocab-chip" onclick="speak('${it.de || it.dgn}')">
+              <span class="chip-de">${it.de || it.dgn}</span>
+              <span class="chip-en">${it.en}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  wrap.innerHTML = html;
+}
+
+function renderDrillView(container) {
+  container.innerHTML = `
+    <div class="view-header">
+      <div class="view-title-row">
+        <h2 class="view-title">🎯 Smart-Drill (Quiz)</h2>
+        <span class="source-tag">Finale Prüfung</span>
+      </div>
+      <p class="view-desc">Testen Sie Ihr Wissen über alle A2-Module hinweg.</p>
+    </div>
+
+    <div class="drill-box">
+      <div class="drill-scorebar">
+        <span>Score: <b id="drillScore">0</b></span>
+        <span>Streak: <b id="drillStreak">0</b></span>
+      </div>
+      <div id="drillContent">
+        <p>Bereit für den A2-Sprint?</p>
+        <button class="complete-btn" onclick="startDrill()">Start Drill!</button>
+      </div>
+    </div>
+
+    <div class="completion-zone">
+      <button class="complete-btn" onclick="markModuleComplete('drill')">✅ Gesamtes Studio abgeschlossen!</button>
+    </div>
+  `;
+}
+
+let drillState = {
+  score: 0,
+  streak: 0,
+  currentQuestion: null
+};
+
+function startDrill() {
+  drillState = { score: 0, streak: 0, currentQuestion: null };
+  updateDrillHUD();
+  nextDrillQuestion();
+}
+
+function updateDrillHUD() {
+  const scoreEl = document.getElementById('drillScore');
+  const streakEl = document.getElementById('drillStreak');
+  if (scoreEl) scoreEl.textContent = drillState.score;
+  if (streakEl) streakEl.textContent = drillState.streak;
+}
+
+function nextDrillQuestion() {
+  const types = ['verb', 'gender', 'imperative'];
+  const type = types[Math.floor(Math.random() * types.length)];
+
+  let q = { type: type };
+
+  if (type === 'verb') {
+    const v = A2_VERBS[Math.floor(Math.random() * A2_VERBS.length)];
+    q.prompt = `Konjugiere "${v.inf}" für 'du':`;
+    q.correct = v.du;
+    q.options = [v.du, v.er, v.wir, v.sie].sort(() => Math.random() - 0.5);
+  } else if (type === 'gender') {
+    const genders = ['der', 'das', 'die'];
+    const g = genders[Math.floor(Math.random() * 3)];
+    const word = A2_GENDER[g][Math.floor(Math.random() * A2_GENDER[g].length)];
+    q.prompt = `Welcher Artikel gehört zu "${word.w}"?`;
+    q.correct = g;
+    q.options = ['der', 'das', 'die'].sort(() => Math.random() - 0.5);
+  } else {
+    const i = A2_IMPERATIVE[Math.floor(Math.random() * A2_IMPERATIVE.length)];
+    q.prompt = `Imperativ (du) von "${i.v}":`;
+    q.correct = i.du;
+    q.options = [i.du, i.ihr, i.sie, "gehen"].sort(() => Math.random() - 0.5);
+  }
+
+  drillState.currentQuestion = q;
+  renderDrillQuestion(q);
+}
+
+function renderDrillQuestion(q) {
+  const content = document.getElementById('drillContent');
+  if (!content) return;
+  content.innerHTML = `
+    <div class="drill-prompt-type">${q.type}</div>
+    <div class="drill-prompt-main">${q.prompt}</div>
+    <div class="drill-options">
+      ${q.options.map(opt => `<button class="drill-btn" onclick="checkDrillAnswer('${opt}')">${opt}</button>`).join('')}
+    </div>
+    <div class="drill-feedback" id="drillFeedback"></div>
+  `;
+}
+
+function checkDrillAnswer(ans) {
+  const q = drillState.currentQuestion;
+  const feedback = document.getElementById('drillFeedback');
+  const btns = document.querySelectorAll('.drill-btn');
+
+  btns.forEach(b => b.disabled = true);
+
+  if (ans === q.correct) {
+    drillState.score += 10;
+    drillState.streak++;
+    if (feedback) feedback.innerHTML = `<span style="color:var(--green)">✅ Richtig! (+10)</span>`;
+    btns.forEach(b => { if(b.textContent === ans) b.classList.add('correct'); });
+  } else {
+    drillState.streak = 0;
+    if (feedback) feedback.innerHTML = `<span style="color:var(--red)">❌ Falsch. Korrekt: ${q.correct}</span>`;
+    btns.forEach(b => {
+      if(b.textContent === ans) b.classList.add('wrong');
+      if(b.textContent === q.correct) b.classList.add('correct');
+    });
+  }
+
+  updateDrillHUD();
+  setTimeout(nextDrillQuestion, 2000);
+}
+
+/* =========================================================================
+   UTILITIES
+   ========================================================================= */
+function setupVoice() {
+  if ('speechSynthesis' in window) {
+    const voices = window.speechSynthesis.getVoices();
+    currentVoice = voices.find(v => v.lang.startsWith('de')) || voices[0];
+  }
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'de-DE';
+  if (currentVoice) utter.voice = currentVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+function testVoice() {
+  speak("Hallo! Ich bin dein Deutsch-Coach. Willkommen im A2 Praxis-Studio!");
+}
+
+</script>
+</body>
+</html>

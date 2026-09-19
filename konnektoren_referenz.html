@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Konnektoren & Satzstruktur — Interaktive Referenz & Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A; --purple:#6B4A8A;
+    --line:#cdc7b2; --shadow:rgba(27,42,74,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
+    margin:0; padding:16px 12px 60px; max-width:860px; margin:0 auto;
+  }
+  h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:8px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
+  
+  .nav-tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .nav-tab{
+    flex:1; padding:10px; font-family:'Fjalla One',sans-serif; font-size:14px; text-align:center;
+    background:var(--paper); border:1.5px solid var(--ink); border-radius:6px; cursor:pointer;
+  }
+  .nav-tab.active{background:var(--ink); color:#fff;}
+  
+  .legend{
+    display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 20px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px;
+  }
+  .legend span{padding:4px 9px; border-radius:12px; color:#fff; font-weight:600;}
+  
+  .grp{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:16px 18px; margin-bottom:18px; box-shadow:0 4px 12px var(--shadow);
+  }
+  .grp h2{font-family:'Fjalla One',sans-serif; font-weight:400; font-size:18px; margin:0 0 6px; display:flex; justify-content:space-between; align-items:center;}
+  .rule{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin-bottom:12px; line-height:1.5; background:var(--paper-dark); padding:8px 10px; border-radius:6px;}
+  .conn-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+  .conn-chip{background:#fff; border:1px solid var(--line); padding:3px 8px; border-radius:12px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700;}
+  
+  .ex{margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed var(--line);}
+  .ex:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .ex-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .en{font-size:13px; color:var(--ink-soft); font-style:italic; margin-bottom:3px;}
+  .ta{font-size:11.5px; color:var(--purple); font-style:italic; margin-bottom:4px;}
+  .de{font-size:15.5px; line-height:1.6; font-weight:500;}
+  
+  .verb{color:var(--blue); font-weight:700;}
+  .conn{color:var(--red); font-weight:700;}
+  .conn-adv{color:var(--gold); font-weight:700;}
+  .conn-coord{color:var(--purple); font-weight:700;}
+  .subj{color:var(--green); font-weight:700;}
+  .pos{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#777; display:block; margin-top:4px;}
+  
+  .audio-btn{
+    background:#fff; border:1px solid var(--line); border-radius:4px; cursor:pointer;
+    padding:3px 8px; font-size:14px; flex-shrink:0;
+  }
+  .audio-btn:hover{background:var(--paper);}
+  
+  /* Quiz Mode */
+  .quiz-card{
+    background:var(--card); border:2px solid var(--ink); border-radius:10px;
+    padding:20px 18px; box-shadow:0 8px 20px var(--shadow); margin-bottom:16px; text-align:center;
+  }
+  .quiz-q{font-size:17px; font-weight:700; margin-bottom:8px;}
+  .quiz-hint{font-size:13px; color:var(--ink-soft); font-style:italic; margin-bottom:16px;}
+  .opt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;}
+  .opt-btn{
+    background:#fff; border:1.5px solid var(--ink); padding:12px 10px; border-radius:8px;
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; text-align:left;
+  }
+  .opt-btn:hover{background:var(--paper);}
+  .opt-btn.correct{background:#eaf2ea; border-color:var(--green); color:var(--green);}
+  .opt-btn.wrong{background:#f6e9e7; border-color:var(--red); color:var(--red);}
+</style>
+</head>
+<body>
+
+<div style="background:var(--card); border:1.5px solid var(--ink); border-radius:8px; padding:8px 12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; box-shadow:0 4px 10px rgba(27,42,74,0.1);">
+  <div style="font-family:'Fjalla One',sans-serif; font-size:13px;">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+  <div style="display:flex; gap:6px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+      <a href="./index.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🏠 Main Coach</a>
+      <a href="./Grammatik_Regel_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📚 Grammar</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🗣️ Speaking</a>
+      <a href="./German_A2_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">⚡ Verben</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📦 Nouns/Adj</a>
+      <a href="./Satzbau_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🧩 Satzbau</a>
+      <a href="./Verben_Hoeren_EN_DE.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🎧 Audio Coach</a>
+      <a href="./konnektoren_referenz.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📋 Konnektoren</a>
+    </div>
+</div>
+
+<h1>Konnektoren — Satzstruktur-Referenz &amp; Trainer</h1>
+<div class="sub">3 fundamentale Satzmechaniken · Interaktiv mit Audio &amp; Drill-Modus</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" id="tabRef" onclick="setTab('ref')">📖 Referenz &amp; Regeln</div>
+  <div class="nav-tab" id="tabDrill" onclick="setTab('drill')">🎯 Schnell-Quiz &amp; Drill</div>
+</div>
+
+<div id="viewRef">
+  <div class="legend">
+    <span style="background:var(--red)">rot = Subordinierend (Verb am Ende)</span>
+    <span style="background:var(--gold)">gold = Position 1 (Inversion: Verb Pos 2)</span>
+    <span style="background:var(--purple)">lila = Position 0 (ADUSO: normal S-V-O)</span>
+    <span style="background:var(--blue)">blau = konjugiertes Verb</span>
+    <span style="background:var(--green)">grün = Subjekt</span>
+  </div>
+
+  <!-- Gruppe 1 -->
+  <div class="grp">
+    <h2><span>Gruppe 1: Subordinierend (Nebensatz)</span> <span style="font-size:12px; color:var(--red); font-family:'IBM Plex Mono',monospace;">Verb ganz ans ENDE</span></h2>
+    <div class="rule">💡 <b>REGEL:</b> Nach subordinierenden Konnektoren wandert das konjugierte Verb an die allerletzte Stelle des Nebensatzes. Steht der Nebensatz voran, folgt das Hauptsatzverb direkt nach dem Komma!</div>
+    <div class="conn-chips">
+      <span class="conn-chip" style="color:var(--red)">weil (because)</span>
+      <span class="conn-chip" style="color:var(--red)">da (since/as)</span>
+      <span class="conn-chip" style="color:var(--red)">dass (that)</span>
+      <span class="conn-chip" style="color:var(--red)">wenn (if / when)</span>
+      <span class="conn-chip" style="color:var(--red)">als (when - past once)</span>
+      <span class="conn-chip" style="color:var(--red)">obwohl (although)</span>
+      <span class="conn-chip" style="color:var(--red)">während (while)</span>
+      <span class="conn-chip" style="color:var(--red)">nachdem (after)</span>
+      <span class="conn-chip" style="color:var(--red)">bevor (before)</span>
+      <span class="conn-chip" style="color:var(--red)">damit (so that)</span>
+      <span class="conn-chip" style="color:var(--red)">ob (whether / if)</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">He often has back pain because he sits almost the whole day.</div>
+          <div class="ta">அவன் நாள் முழுவதும் அமர்வதால் அவனுக்கு முதுகு வலி உள்ளது.</div>
+          <div class="de">Er hat oft Rückenschmerzen, <span class="conn">weil</span> er fast den ganzen Tag <span class="verb">sitzt</span>.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Er hat oft Rückenschmerzen, weil er fast den ganzen Tag sitzt.')">🔊</button>
+      </div>
+      <span class="pos">Hauptsatz: V2 normal | weil-Satz: Verb am Satzende</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">Although he is tired, he continues studying for the exam.</div>
+          <div class="ta">அவன் சோர்வாக இருந்தாலும், தேர்வுக்கு தொடர்ந்து படிக்கிறான்.</div>
+          <div class="de"><span class="conn">Obwohl</span> er müde <span class="verb">ist</span>, <span class="verb">lernt</span> <span class="subj">er</span> für die Prüfung weiter.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Obwohl er müde ist, lernt er für die Prüfung weiter.')">🔊</button>
+      </div>
+      <span class="pos">Nebensatz zuerst (Pos 1) → Hauptsatz-Verb direkt nach dem Komma (Pos 2), Subjekt dahinter (Pos 3)</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">I think that his experience fits this job well.</div>
+          <div class="ta">அவருடைய அனுபவம் இந்த வேலைக்கு சரியாக பொருந்தும் என நினைக்கிறேன்.</div>
+          <div class="de">Ich denke, <span class="conn">dass</span> seine Erfahrung gut zum Job <span class="verb">passt</span>.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Ich denke, dass seine Erfahrung gut zum Job passt.')">🔊</button>
+      </div>
+      <span class="pos">dass-Satz: Verb 'passt' am Satzende</span>
+    </div>
+  </div>
+
+  <!-- Gruppe 2 -->
+  <div class="grp">
+    <h2><span>Gruppe 2: Position-1-Adverbien</span> <span style="font-size:12px; color:var(--gold); font-family:'IBM Plex Mono',monospace;">Inversion: Verb auf Position 2</span></h2>
+    <div class="rule">💡 <b>REGEL:</b> Das Konnektor-Adverb besetzt Position 1. Das konjugierte Verb bleibt strikt auf Position 2. Das Subjekt rutscht auf Position 3!</div>
+    <div class="conn-chips">
+      <span class="conn-chip" style="color:var(--gold)">deshalb (therefore)</span>
+      <span class="conn-chip" style="color:var(--gold)">deswegen (for that reason)</span>
+      <span class="conn-chip" style="color:var(--gold)">daher (hence)</span>
+      <span class="conn-chip" style="color:var(--gold)">trotzdem (nevertheless)</span>
+      <span class="conn-chip" style="color:var(--gold)">außerdem (furthermore)</span>
+      <span class="conn-chip" style="color:var(--gold)">sonst (otherwise)</span>
+      <span class="conn-chip" style="color:var(--gold)">dann (then)</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">The working hours were terrible, therefore I quit.</div>
+          <div class="ta">வேலை நேரம் மோசமாக இருந்தது, அதனால் நான் வேலையை விட்டுவிட்டேன்.</div>
+          <div class="de">Die Arbeitszeiten waren furchtbar, <span class="conn-adv">deshalb</span> <span class="verb">habe</span> <span class="subj">ich</span> gekündigt.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Die Arbeitszeiten waren furchtbar, deshalb habe ich gekündigt.')">🔊</button>
+      </div>
+      <span class="pos">deshalb = Pos 1 | habe = Pos 2 | ich = Pos 3 (verdrängt)</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">He was very nervous, nevertheless he had a great interview.</div>
+          <div class="ta">அவன் பதற்றமாக இருந்தான், இருப்பினும் அவனுக்கு நல்ல நேர்காணல் அமைந்தது.</div>
+          <div class="de">Er war sehr nervös, <span class="conn-adv">trotzdem</span> <span class="verb">hatte</span> <span class="subj">er</span> ein tolles Gespräch.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Er war sehr nervös, trotzdem hatte er ein tolles Gespräch.')">🔊</button>
+      </div>
+      <span class="pos">trotzdem = Pos 1 | hatte = Pos 2 | er = Pos 3</span>
+    </div>
+  </div>
+
+  <!-- Gruppe 3 -->
+  <div class="grp">
+    <h2><span>Gruppe 3: Koordinierend (Position 0 — ADUSO)</span> <span style="font-size:12px; color:var(--purple); font-family:'IBM Plex Mono',monospace;">Kein Einfluss auf Wortstellung</span></h2>
+    <div class="rule">💡 <b>REGEL:</b> <b>ADUSO</b> (aber, denn, und, sondern, oder) zählen als Position 0. Danach folgt ganz normale Hauptsatz-Wortstellung (Subjekt Pos 1, Verb Pos 2)!</div>
+    <div class="conn-chips">
+      <span class="conn-chip" style="color:var(--purple)">Aber (but)</span>
+      <span class="conn-chip" style="color:var(--purple)">Denn (because)</span>
+      <span class="conn-chip" style="color:var(--purple)">Und (and)</span>
+      <span class="conn-chip" style="color:var(--purple)">Sondern (but rather)</span>
+      <span class="conn-chip" style="color:var(--purple)">Oder (or)</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">He is not unemployed, but rather has a new job.</div>
+          <div class="ta">அவன் வேலையில்லாமல் இல்லை, மாறாக ஒரு புதிய வேலை பெற்றுள்ளான்.</div>
+          <div class="de">Er ist nicht arbeitslos, <span class="conn-coord">sondern</span> <span class="subj">(er)</span> <span class="verb">hat</span> einen neuen Job.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Er ist nicht arbeitslos, sondern hat einen neuen Job.')">🔊</button>
+      </div>
+      <span class="pos">sondern = Pos 0 | hat = Pos 2 normal</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">I learn German every day, for I want to pass B1.</div>
+          <div class="ta">நான் தினமும் ஜெர்மன் கற்கிறேன், ஏனென்றால் நான் B1 தேர்வில் தேர்ச்சி பெற விரும்புகிறேன்.</div>
+          <div class="de">Ich lerne jeden Tag Deutsch, <span class="conn-coord">denn</span> <span class="subj">ich</span> <span class="verb">möchte</span> die B1-Prüfung bestehen.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Ich lerne jeden Tag Deutsch, denn ich möchte die B1-Prüfung bestehen.')">🔊</button>
+      </div>
+      <span class="pos">denn = Pos 0 | ich = Pos 1 | möchte = Pos 2</span>
+    </div>
+  </div>
+
+  <!-- Gruppe 4 -->
+  <div class="grp">
+    <h2><span>Gruppe 4: Zweiteilige Konnektoren (Doppelkonnektoren)</span> <span style="font-size:12px; color:var(--blue); font-family:'IBM Plex Mono',monospace;">Strukturpaare</span></h2>
+    <div class="rule">💡 <b>REGEL:</b> Verbinden zwei Satzteile mit einer logischen Beziehung (sowohl-als auch = +, weder-noch = -, nicht nur-sondern auch = ++).</div>
+    
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">Arun speaks not only English, but also German and Tamil.</div>
+          <div class="de">Arun spricht <span class="conn">nicht nur</span> Englisch, <span class="conn">sondern auch</span> Deutsch und Tamil.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Arun spricht nicht nur Englisch, sondern auch Deutsch und Tamil.')">🔊</button>
+      </div>
+    </div>
+    <div class="ex">
+      <div class="ex-top">
+        <div>
+          <div class="en">The more you speak, the faster you learn.</div>
+          <div class="de"><span class="conn">Je</span> mehr du sprichst, <span class="conn">desto</span> schneller lernst du.</div>
+        </div>
+        <button class="audio-btn" onclick="speak('Je mehr du sprichst, desto schneller lernst du.')">🔊</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="viewDrill" style="display:none;">
+  <div class="quiz-card">
+    <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--gold); font-weight:700; margin-bottom:8px;" id="quizBadge">FRAGE 1 / 10</div>
+    <div class="quiz-q" id="quizQuestion"></div>
+    <div class="quiz-hint" id="quizHint"></div>
+    <div class="opt-grid" id="optGrid"></div>
+    <div id="quizFeedback" style="margin-top:12px; font-weight:700; font-size:14px;"></div>
+    <button id="quizNextBtn" style="display:none; margin-top:14px; background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:6px; font-family:'Fjalla One',sans-serif; font-size:15px; cursor:pointer;" onclick="nextQuestion()">Nächste Frage ➡️</button>
+  </div>
+</div>
+
+<script>
+function speak(txt){
+  if(!('speechSynthesis' in window) || !txt) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = 'de-DE';
+  u.rate = 0.92;
+  window.speechSynthesis.speak(u);
+}
+
+function setTab(t){
+  document.getElementById('tabRef').classList.toggle('active', t==='ref');
+  document.getElementById('tabDrill').classList.toggle('active', t==='drill');
+  document.getElementById('viewRef').style.display = t==='ref' ? 'block' : 'none';
+  document.getElementById('viewDrill').style.display = t==='drill' ? 'block' : 'none';
+  if(t==='drill') initQuiz();
+}
+
+const DRILL_ITEMS = [
+  {q: "Welcher Konnektor schickt das Verb ans SATZENDE?", opts: ["weil", "deshalb", "denn", "trotzdem"], c: 0, hint: "Subordinierender Konnektor (Gruppe 1)"},
+  {q: "Was bewirkt 'deshalb' auf die Satzstellung?", opts: ["Verb wandert ans Ende", "Inversion: Verb auf Pos 2, Subjekt dahinter", "Subjekt bleibt Pos 1", "Keine Veränderung"], c: 1, hint: "Position-1-Adverb (Gruppe 2)"},
+  {q: "Welcher Konnektor zählt als Position 0 (ADUSO)?", opts: ["obwohl", "während", "sondern", "deswegen"], c: 2, hint: "Koordinierender Konnektor (Gruppe 3)"},
+  {q: "Er bleibt zu Hause, ___ er krank ist.", opts: ["weil", "denn", "deshalb", "trotzdem"], c: 0, hint: "Achte auf die Verbposition am Satzende ('ist')"},
+  {q: "Er ist krank, ___ bleibt er zu Hause.", opts: ["weil", "denn", "deshalb", "dass"], c: 2, hint: "Verb 'bleibt' steht direkt auf Position 2 nach dem Konnektor"},
+  {q: "Er bleibt zu Hause, ___ er ist krank.", opts: ["weil", "denn", "deshalb", "obwohl"], c: 1, hint: "Subjekt 'er' steht direkt auf Position 1, Verb 'ist' auf Position 2"},
+  {q: "___ es regnete, ging er spazieren.", opts: ["Weil", "Obwohl", "Deshalb", "Trotzdem"], c: 1, hint: "Gegensatz / Einräumung mit Verb am Satzende"},
+  {q: "Ich weiß nicht, ___ er heute kommt.", opts: ["dass", "ob", "deshalb", "sondern"], c: 1, hint: "Indirekte Ja/Nein-Frage (whether)"},
+  {q: "Arun lernt Deutsch, ___ eine gute Arbeit zu finden.", opts: ["um", "damit", "weil", "denn"], c: 0, hint: "Infinitivsatz mit 'um ... zu' (gleiches Subjekt)"},
+  {q: "Je fleißiger du übst, ___ schneller bestehst du B1.", opts: ["desto", "sondern", "weil", "obwohl"], c: 0, hint: "Zweiteiliger Konnektor: je ... desto / umso"}
+];
+
+let qIdx = 0;
+let score = 0;
+
+function initQuiz(){
+  qIdx = 0;
+  score = 0;
+  showQuestion();
+}
+
+function showQuestion(){
+  if(qIdx >= DRILL_ITEMS.length){
+    document.getElementById('quizBadge').textContent = "FERTIG! 🎉";
+    document.getElementById('quizQuestion').textContent = `Ergebnis: ${score} von ${DRILL_ITEMS.length} Punkten richtig!`;
+    document.getElementById('quizHint').textContent = score >= 8 ? "Hervorragend! Du beherrschst die Konnektoren-Regeln!" : "Übe die Referenz noch einmal durch!";
+    document.getElementById('optGrid').innerHTML = '';
+    document.getElementById('quizFeedback').innerHTML = '';
+    document.getElementById('quizNextBtn').style.display = 'inline-block';
+    document.getElementById('quizNextBtn').textContent = 'Quiz wiederholen ↺';
+    document.getElementById('quizNextBtn').onclick = initQuiz;
+    return;
+  }
+  const item = DRILL_ITEMS[qIdx];
+  document.getElementById('quizBadge').textContent = `FRAGE ${qIdx+1} / ${DRILL_ITEMS.length}`;
+  document.getElementById('quizQuestion').textContent = item.q;
+  document.getElementById('quizHint').textContent = item.hint || '';
+  document.getElementById('quizFeedback').innerHTML = '';
+  document.getElementById('quizNextBtn').style.display = 'none';
+
+  const grid = document.getElementById('optGrid');
+  grid.innerHTML = item.opts.map((opt, i)=>`
+    <button class="opt-btn" onclick="checkAnswer(${i})">${opt}</button>
+  `).join('');
+}
+
+function checkAnswer(chosenIdx){
+  const item = DRILL_ITEMS[qIdx];
+  const buttons = document.querySelectorAll('.opt-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if(chosenIdx === item.c){
+    score++;
+    buttons[chosenIdx].classList.add('correct');
+    document.getElementById('quizFeedback').innerHTML = `<span style="color:var(--green)">✓ Richtig! Ausgezeichnet!</span>`;
+  } else {
+    buttons[chosenIdx].classList.add('wrong');
+    buttons[item.c].classList.add('correct');
+    document.getElementById('quizFeedback').innerHTML = `<span style="color:var(--red)">✗ Falsch. Richtig ist: <b>${item.opts[item.c]}</b></span>`;
+  }
+  document.getElementById('quizNextBtn').style.display = 'inline-block';
+  document.getElementById('quizNextBtn').textContent = 'Nächste Frage ➡️';
+  document.getElementById('quizNextBtn').onclick = nextQuestion;
+}
+
+function nextQuestion(){
+  qIdx++;
+  showQuestion();
+}
+</script>
+</body>
+</html>

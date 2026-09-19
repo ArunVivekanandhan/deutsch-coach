@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Speaking Coach &amp; Exam Simulator — Dein Deutsch-Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
+    --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
+    padding:12px 10px 60px; display:flex; flex-direction:column; align-items:center;
+  }
+  .wrap{width:100%; max-width:800px;}
+
+  /* Suite Navigation Hub */
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 4px 10px var(--shadow);
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:14px; display:flex; align-items:center; gap:6px;}
+  .hub-links{display:flex; gap:6px; flex-wrap:wrap;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
+
+  /* Mode Navigation */
+  .modetabs{display:flex; gap:6px; margin-bottom:14px;}
+  .modetab{
+    flex:1; font-family:'Fjalla One',sans-serif; font-size:14px; padding:10px 4px; text-align:center;
+    border:1.5px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink);
+    cursor:pointer; transition:all .15s;
+  }
+  .modetab.active{background:var(--ink); color:#fff;}
+
+  /* Sub-tabs */
+  .subtabs{display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px;}
+  .subtab{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:6px 12px; border:1.5px solid var(--line);
+    background:var(--card); border-radius:16px; cursor:pointer; color:var(--ink-soft); white-space:nowrap;
+    font-weight:600;
+  }
+  .subtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  /* Content Cards */
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 10px 24px var(--shadow); padding:18px; margin-bottom:16px;
+  }
+  .card-title{font-family:'Fjalla One',sans-serif; font-size:20px; color:var(--ink); margin:0 0 6px;}
+  .card-desc{font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:14px;}
+
+  /* Partner / Examiner Simulation Box */
+  .dialog-stream{display:flex; flex-direction:column; gap:12px; margin-bottom:16px;}
+  .speech-bubble{
+    padding:12px 14px; border-radius:8px; max-width:85%; font-size:14px; line-height:1.5;
+    position:relative;
+  }
+  .speech-bubble.examiner{
+    background:#E2E8F0; border-left:4px solid var(--blue); align-self:flex-start;
+  }
+  .speech-bubble.user{
+    background:#E2EED8; border-right:4px solid var(--green); align-self:flex-end;
+  }
+  .speaker-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase;
+    margin-bottom:4px; font-weight:700; color:var(--ink-soft);
+  }
+  .speaker-audio-btn{
+    background:none; border:none; cursor:pointer; font-size:14px; margin-left:6px;
+  }
+
+  /* Redemittel Grid & Soundboard */
+  .phrase-grid{display:grid; grid-template-columns:1fr; gap:8px;}
+  @media(min-width:600px){ .phrase-grid{grid-template-columns:1fr 1fr;} }
+  .phrase-card{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .phrase-de{font-size:13.5px; font-weight:600; color:var(--ink);}
+  .phrase-en{font-size:11px; color:var(--ink-soft); margin-top:2px; font-style:italic;}
+
+  .audio-btn{
+    background:none; border:1.5px solid var(--line); border-radius:50%; width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .audio-btn:hover{background:var(--paper); border-color:var(--ink);}
+
+  /* Action Buttons */
+  .bigbtn{
+    width:100%; font-family:'Fjalla One',sans-serif; font-size:16px; padding:14px; border:none;
+    border-radius:6px; background:var(--ink); color:#fff; cursor:pointer; text-align:center;
+    box-shadow:0 4px 0 #0d1525; margin-top:10px;
+  }
+  .bigbtn:active{transform:translateY(2px); box-shadow:0 2px 0 #0d1525;}
+  .bigbtn.secondary{background:var(--red); box-shadow:0 4px 0 var(--red-dark);}
+  .bigbtn.green{background:var(--green); box-shadow:0 4px 0 #28442e;}
+
+  /* Scenario Styles */
+  .scenario-card{
+    background:#fff; border:2px solid var(--blue); border-radius:8px; padding:18px;
+    margin-bottom:16px; animation: slideIn 0.3s ease-out;
+  }
+  .scenario-title{
+    font-family:'Fjalla One',sans-serif; font-size:18px; color:var(--blue); margin-bottom:8px;
+  }
+  .scenario-conflict{
+    background: #fdeaea; border-left: 3px solid var(--red); padding: 8px 12px;
+    font-size: 13px; margin-bottom: 12px; color: var(--red-dark);
+  }
+  .scenario-goal{
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 15px; font-style: italic;
+  }
+  @keyframes slideIn { from{opacity:0; transform:translateX(-10px);} to{opacity:1; transform:translateX(0);} }
+
+  .diffchar{background:#fff3a0; padding:0 2px; border-radius:3px; font-weight:700; color:var(--red-dark);}
+  .user-transcript{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px;
+    margin-top:10px; font-size:14px; line-height:1.6; display:none;
+    animation: slideIn 0.3s ease-out;
+  }
+  .user-transcript.visible{display:block;}
+  .transcript-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft);
+    text-transform:uppercase; margin-bottom:5px; display:block; font-weight:700;
+  }
+  .rec-btn{
+    background:none; border:1.5px solid var(--line); border-radius:50%; width:32px; height:32px;
+    display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .rec-btn:hover{background:var(--paper); border-color:var(--ink);}
+  .rec-btn.recording{background:var(--red); color:#fff; border-color:var(--red); animation: pulse 1.5s infinite;}
+  @keyframes pulse { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
+
+  /* Letter Builder & Cloze Styles */
+  .cloze-text{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:16px;
+    font-size:14.5px; line-height:2.0; margin-bottom:14px;
+  }
+  .cloze-gap{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-weight:700;
+    padding:2px 8px; border-bottom:2px solid var(--red); color:var(--red);
+  }
+  .cloze-select{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:4px 6px;
+    border:1.5px solid var(--ink); border-radius:4px; background:var(--paper); font-weight:600;
+  }
+  .checklist-item{
+    display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line);
+    font-size:13px;
+  }
+  .checklist-item input{margin-top:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Suite Navigation Hub -->
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main Coach</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar &amp; Rules</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link active">🗣️ Speaking &amp; Exam</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns &amp; Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+    </div>
+  </div>
+
+  <h1>Speaking Coach &amp; B1 Exam Simulator</h1>
+  <div class="sub">Authentic Goethe / telc / DTZ Oral &amp; Written Exam Preparation</div>
+
+  <!-- Mode Navigation -->
+  <div class="modetabs">
+    <div class="modetab active" id="tabOral" onclick="setMode('oral')">🗣️ Oral Exam Simulator</div>
+    <div class="modetab" id="tabVault" onclick="setMode('vault')">🎙️ Spoken Redemittel Vault</div>
+    <div class="modetab" id="tabWritten" onclick="setMode('written')">✍️ Sprachbausteine &amp; Letter Builder</div>
+  </div>
+
+  <!-- Subtabs -->
+  <div class="subtabs" id="subTabs"></div>
+
+  <!-- Main Container -->
+  <div id="mainView"></div>
+
+</div>
+
+<script>
+/* =========================================================================
+   SPEAKING COACH & EXAM DATA
+   ========================================================================= */
+let currentMode = 'oral'; // 'oral', 'vault', 'written'
+let currentSub = 'teil1';
+
+const ORAL_MODULES = {
+  teil1: {
+    title: "Teil 1: Sich vorstellen & Prüfer-Fragen (Introduction & Spontaneous Questions)",
+    desc: "In Teil 1 of Goethe A2/B1 or telc DTZ, you introduce yourself using 6–7 biographical points. Then the examiner asks 2 spontaneous follow-up questions (e.g. spelling your name, phone number, work routine).",
+    prompts: [
+      {
+        topic: "Name & Herkunft",
+        de: "Guten Tag, mein Name ist Arun. Ich komme ursprünglich aus Indien und lebe seit einiger Zeit in Deutschland.",
+        en: "Hello, my name is Arun. I come originally from India and have been living in Germany for some time."
+      },
+      {
+        topic: "Wohnort & Alltag",
+        de: "Zurzeit wohne ich in Frankfurt. Die Stadt gefällt mir sehr gut, weil es hier viele Parks und gute Arbeitsmöglichkeiten gibt.",
+        en: "Currently I live in Frankfurt. I like the city very much because there are many parks and good job opportunities."
+      },
+      {
+        topic: "Beruf & Ausbildung",
+        de: "Von Beruf bin ich Software-Entwickler. In meinem Beruf arbeite ich täglich mit internationalen Kollegen zusammen.",
+        en: "By profession I am a software engineer. In my job I work daily with international colleagues."
+      },
+      {
+        topic: "Sprachen & Hobbys",
+        de: "Ich spreche fließend Englisch und Tamil und lerne jetzt intensiv Deutsch für das B1-Zertifikat. In meiner Freizeit spiele ich gern Fußball und koche gern mit Freunden.",
+        en: "I speak fluent English and Tamil, and I am now learning German intensively for the B1 certificate. In my free time I like playing football and cooking with friends."
+      }
+    ],
+    examinerQuestions: [
+      {
+        q: "Könnten Sie bitte Ihren Nachnamen buchstabieren?",
+        en: "Could you please spell your last name?",
+        modelAns: "Ja, natürlich: V-I-V-E-K-A-N-A-N-D-H-A-N.",
+        hint: "Say each letter clearly: A, B, C, D, E..."
+      },
+      {
+        q: "Seit wann lernen Sie schon Deutsch und wie lernen Sie am liebsten?",
+        en: "Since when have you been learning German and how do you prefer to learn?",
+        modelAns: "Ich lerne seit etwa sechs Monaten Deutsch. Am liebsten lerne ich mit interaktiven Apps und indem ich mit deutschen Kollegen spreche.",
+        hint: "Use 'seit + Dativ' and 'indem...' (by doing sth)."
+      },
+      {
+        q: "Wie sieht ein typischer Arbeitstag bei Ihnen aus?",
+        en: "What does a typical workday look like for you?",
+        modelAns: "Ich stehe um 7 Uhr auf. Gegen 8:30 Uhr beginne ich mit der Arbeit. Meistens habe ich vormittags Team-Meetings, und nachmittags konzentriere ich mich auf meine Projekte.",
+        hint: "Use time adverbs: morgens, gegen 8 Uhr, danach, am Nachmittag."
+      }
+    ]
+  },
+
+  teil2: {
+    title: "Teil 2: Ein Thema präsentieren (B1 5-Step Presentation)",
+    desc: "In B1 exams, you speak for 2–3 minutes on a chosen everyday topic following a clear 5-step structure: 1. Introduction, 2. Personal Experience, 3. Home Country, 4. Pros & Cons, 5. Conclusion & Questions.",
+    topics: [
+      {
+        name: "Einkaufen im Internet oder im Geschäft?",
+        steps: [
+          {step:"1. Folien-Titel & Einleitung", de:"Ich möchte heute über das Thema „Einkaufen im Internet oder im Geschäft“ sprechen. Dieses Thema ist heutzutage für fast jeden Menschen relevant.", en:"I would like to speak about..."},
+          {step:"2. Eigene Erfahrung", de:"In meinem persönlichen Alltag kaufe ich Bücher und Elektronik meistens online, weil es schnell und bequem ist. Kleidung probiere ich aber lieber direkt im Geschäft an.", en:"In my personal daily life..."},
+          {step:"3. Situation im Heimatland", de:"In meinem Heimatland kaufen viele Menschen noch traditionell auf lokalen Märkten ein, aber Online-Shopping wird bei der jüngeren Generation immer beliebter.", en:"In my home country..."},
+          {step:"4. Vor- und Nachteile", de:"Ein großer Vorteil des Online-Handels ist die riesige Auswahl rund um die Uhr. Ein Nachteil ist jedoch, dass man oft lange auf Pakete warten muss und viele Rücksendungen die Umwelt belasten.", en:"A big advantage is... on the other hand..."},
+          {step:"5. Eigene Meinung & Abschluss", de:"Meiner Meinung nach ist eine Kombination aus beidem am besten. Das war meine Präsentation. Vielen Dank für Ihre Aufmerksamkeit! Haben Sie noch Fragen?", en:"In my opinion... Thank you for your attention!"}
+        ]
+      },
+      {
+        name: "Öffentliche Verkehrsmittel oder das eigene Auto?",
+        steps: [
+          {step:"1. Einleitung", de:"Das Thema meiner Präsentation lautet „Öffentliche Verkehrsmittel oder das eigene Auto“. Es ist besonders wichtig für den Umweltschutz.", en:"The topic of my presentation is..."},
+          {step:"2. Eigene Erfahrung", de:"Ich persönlich fahre meistens mit der U-Bahn zur Arbeit, weil ich dadurch den täglichen Stau vermeiden kann.", en:"I personally travel by subway..."},
+          {step:"3. Situation im Heimatland", de:"In meiner Heimat sind öffentliche Verkehrsmittel oft sehr voll, daher benutzen viele Leute Motorräder oder Autos.", en:"In my home country..."},
+          {step:"4. Vor- und Nachteile", de:"Busse und Züge sind umweltfreundlich und billiger. Andererseits ist man mit dem eigenen Auto flexibler, besonders auf dem Land.", en:"Buses are eco-friendly... on the other hand..."},
+          {step:"5. Meinung & Abschluss", de:"Ich bin davon überzeugt, dass man in Großstädten kein Auto braucht. Vielen Dank fürs Zuhören!", en:"I am convinced that..."}
+        ]
+      },
+      {
+        name: "Urlaub am Strand oder in den Bergen?",
+        steps: [
+          {step:"1. Einleitung", de:"Ich möchte heute über das Thema „Urlaub am Strand oder in den Bergen“ sprechen. Viele Menschen reisen gerne, aber die Vorlieben sind unterschiedlich.", en:"I would like to talk about..."},
+          {step:"2. Eigene Erfahrung", de:"Ich persönlich fahre im Sommer am liebsten ans Meer, weil ich schwimmen und mich am Strand entspannen kann.", en:"I personally prefer going to the sea..."},
+          {step:"3. Situation im Heimatland", de:"In meiner Heimat reisen viele Familien während der Ferien zu berühmten Tempelstädten oder Bergstationen wie Ooty.", en:"In my home country..."},
+          {step:"4. Vor- und Nachteile", de:"Ein Strandurlaub ist sehr entspannend für die ganze Familie. Ein Bergurlaub bietet dagegen frische Luft, Ruhe und tolle Wandermöglichkeiten.", en:"A beach holiday is relaxing... on the other hand..."},
+          {step:"5. Meinung & Abschluss", de:"Meiner Meinung nach hängt die Wahl von der Jahreszeit ab. Vielen Dank für Ihre Aufmerksamkeit! Haben Sie Fragen?", en:"In my opinion... Thank you for your attention!"}
+        ]
+      },
+      {
+        name: "Haustiere — Ja oder Nein?",
+        steps: [
+          {step:"1. Einleitung", de:"Mein heutiges Thema lautet „Haustiere — Ja oder Nein?“. Fast jede Familie überlegt irgendwann, ein Haustier anzuschaffen.", en:"My topic today is..."},
+          {step:"2. Eigene Erfahrung", de:"Als Kind hatten wir einen Hund. Es war eine schöne Erfahrung, aber es hat auch viel Zeit und Verantwortung gekostet.", en:"As a child we had a dog..."},
+          {step:"3. Situation im Heimatland", de:"In Indien halten viele Menschen Hunde als Wachhunde oder Kühe und Vögel auf dem Land.", en:"In India many people keep..."},
+          {step:"4. Vor- und Nachteile", de:"Tiere bringen viel Freude und lehren Kinder Verantwortung. Allerdings sind Tierarztkosten teuer und man braucht viel Zeit für die Pflege.", en:"Animals bring joy... however costs are high..."},
+          {step:"5. Meinung & Abschluss", de:"Ich denke, man sollte nur ein Tier halten, wenn man genügend Platz und Zeit hat. Danke fürs Zuhören!", en:"I think one should only keep a pet if..."}
+        ]
+      },
+      {
+        name: "Sollten Kinder früh Fremdsprachen lernen?",
+        steps: [
+          {step:"1. Einleitung", de:"Ich präsentiere heute das Thema „Fremdsprachen im frühen Kindesalter“. In unserer globalen Welt ist dieses Thema besonders aktuell.", en:"I present the topic..."},
+          {step:"2. Eigene Erfahrung", de:"Ich habe in der Schule schon früh Englisch gelernt, und das hat mir später im Beruf enorm geholfen.", en:"I learned English early in school..."},
+          {step:"3. Situation im Heimatland", de:"In Indien wachsen fast alle Kinder zweisprachig oder dreisprachig auf — mit ihrer Muttersprache, Englisch und Hindi.", en:"In India almost all children grow up multilingual..."},
+          {step:"4. Vor- und Nachteile", de:"Kinder lernen Sprachen spielerisch und ohne Akzent. Ein Nachteil kann sein, dass zu viel Druck die Kinder überfordert.", en:"Children learn playfully... but too much pressure can overwhelm..."},
+          {step:"5. Meinung & Abschluss", de:"Zusammenfassend bin ich überzeugt, dass frühes Sprachenlernen große Vorteile bringt. Haben Sie noch Fragen dazu?", en:"In conclusion I am convinced that..."}
+        ]
+      }
+    ]
+  },
+
+  teil3: {
+    title: "Teil 3: Gemeinsam etwas planen (Interactive Dialogue Simulator)",
+    desc: "In Teil 3, you and your partner must organize an event together (e.g. a farewell party, a weekend trip, buying a gift). You must make proposals, react politely, disagree with reasons, and agree on a date and place.",
+    scenarios: [
+      {
+        name: "Abschiedsparty für Thomas organisieren",
+        dialogue: [
+          {
+            speaker: "Examiner / Partner",
+            de: "Hallo Arun! Thomas verlässt nächsten Monat unsere Firma. Wollen wir eine kleine Abschiedsparty für ihn organisieren?",
+            en: "Hello Arun! Thomas is leaving our company next month. Shall we organize a small farewell party for him?"
+          },
+          {
+            speaker: "You (Suggestion 1)",
+            de: "Hallo! Das ist eine wunderbare Idee. Ich schlage vor, dass wir die Party nächsten Freitag nach der Arbeit machen. Passt dir das?",
+            en: "Hello! That's a wonderful idea. I suggest that we do the party next Friday after work. Does that suit you?"
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Am Freitag habe ich leider bis 19 Uhr einen Arzttermin. Wie wäre es stattdessen mit Samstagabend?",
+            en: "On Friday I unfortunately have a doctor's appointment until 7pm. How about Saturday evening instead?"
+          },
+          {
+            speaker: "You (Agreement & Location)",
+            de: "Samstagabend passt mir ausgezeichnet! Wir könnten einen Tisch in dem italienischen Restaurant reservieren oder bei mir im Garten grillen, wenn das Wetter schön ist.",
+            en: "Saturday evening suits me excellently! We could reserve a table at the Italian restaurant or barbecue in my garden if the weather is nice."
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Grillen im Garten klingt super! Ich kann mich um die Getränke und die Musik kümmern. Kannst du den Kuchen und das Fleisch besorgen?",
+            en: "Barbecue in the garden sounds great! I can take care of drinks and music. Can you get the cake and meat?"
+          },
+          {
+            speaker: "You (Conclusion & Meeting)",
+            de: "Ja, sehr gerne, das übernehme ich. Dann treffen wir uns am Samstag um 17 Uhr bei mir, um alles vorzubereiten. Einverstanden?",
+            en: "Yes, with pleasure, I'll take that. Then let's meet at my place on Saturday at 5pm to prepare everything. Agreed?"
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Perfekt, so machen wir es! Bis Samstag!",
+            en: "Perfect, let's do it like that! See you Saturday!"
+          }
+        ]
+      },
+      {
+        name: "Einen Wochenendausflug in die Berge planen",
+        dialogue: [
+          {
+            speaker: "Examiner / Partner",
+            de: "Hallo Arun! Das Wetter soll am Wochenende fantastisch werden. Wollen wir zusammen einen Ausflug in die Berge machen?",
+            en: "Hello Arun! The weather is supposed to be fantastic this weekend. Shall we make a trip to the mountains together?"
+          },
+          {
+            speaker: "You (Suggestion & Date)",
+            de: "Das ist eine hervorragende Idee! Ich schlage vor, dass wir am Samstag früh um 8 Uhr mit dem Zug nach Garmisch fahren. Was hältst du davon?",
+            en: "That's an excellent idea! I suggest we take the train to Garmisch on Saturday morning at 8am. What do you think?"
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Um 8 Uhr ist es mir etwas zu früh. Könnten wir nicht erst um 9 Uhr am Hauptbahnhof starten?",
+            en: "At 8am is a bit too early for me. Couldn't we start at 9am at the central station instead?"
+          },
+          {
+            speaker: "You (Compromise & Ticket)",
+            de: "9 Uhr passt mir auch sehr gut. Ich kann online ein Bayernticket für uns beide kaufen, das ist viel günstiger.",
+            en: "9am suits me very well too. I can buy a Bayern-Ticket online for both of us, that's much cheaper."
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Super! Und was machen wir mit dem Essen? Wollen wir etwas mitnehmen oder auf einer Berghütte essen?",
+            en: "Great! And what about food? Shall we bring something or eat at a mountain hut?"
+          },
+          {
+            speaker: "You (Food & Closing)",
+            de: "Ich packe ein paar Sandwiches und Obst ein, und oben trinken wir einen Kaffee auf der Hütte. Dann treffen wir uns Samstag um 8:45 Uhr am Gleis 12!",
+            en: "I'll pack some sandwiches and fruit, and at the top we'll have a coffee at the hut. Then let's meet Saturday at 8:45am at platform 12!"
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Abgemacht! Ich freue mich schon sehr darauf. Bis Samstag!",
+            en: "Agreed! I'm really looking forward to it. See you Saturday!"
+          }
+        ]
+      },
+      {
+        name: "Geschenk für eine kranke Kollegin organisieren",
+        dialogue: [
+          {
+            speaker: "Examiner / Partner",
+            de: "Hallo! Hast du gehört, dass unsere Kollegin Sarah im Krankenhaus liegt? Wollen wir ihr ein kleines Geschenk besorgen?",
+            en: "Hello! Did you hear that our colleague Sarah is in the hospital? Shall we get her a small gift?"
+          },
+          {
+            speaker: "You (Suggestion)",
+            de: "Oh, das tut mir leid! Ja, unbedingt. Ich schlage vor, dass wir einen schönen Blumenstrauß und ein spannendes Buch für sie kaufen.",
+            en: "Oh, I'm sorry to hear that! Yes, absolutely. I suggest that we buy a nice bouquet of flowers and an exciting book for her."
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Blumen sind im Krankenhaus manchmal nicht erlaubt. Wie wäre es stattdessen mit einem Gutschein und einem bunten Obstkorb?",
+            en: "Flowers are sometimes not allowed in hospitals. How about a voucher and a colorful fruit basket instead?"
+          },
+          {
+            speaker: "You (Agreement & Money)",
+            de: "Das ist ein sehr guter Einwand! Wir können im Team Geld sammeln, etwa 5 Euro pro Person. Ich erstelle dazu eine Grußkarte.",
+            en: "That's a very good point! We can collect money from the team, about 5 euros per person. I'll make a greeting card."
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Perfekt! Wann wollen wir sie denn besuchen?",
+            en: "Perfect! When do we want to visit her?"
+          },
+          {
+            speaker: "You (Visit Plan)",
+            de: "Ich denke, Donnerstag nach Feierabend um 17:30 Uhr wäre ideal. Ich rufe vorher kurz auf der Station an.",
+            en: "I think Thursday after work at 5:30pm would be ideal. I'll call the ward briefly beforehand."
+          },
+          {
+            speaker: "Examiner / Partner",
+            de: "Klasse Idee! Dann machen wir das so. Bis Donnerstag!",
+            en: "Great idea! Let's do it like that. See you Thursday!"
+          }
+        ]
+      }
+    ]
+  }
+};
+
+const VAULT_CATEGORIES = [
+  {
+    category: "1. Giving Opinions (Meinung äußern)",
+    items: [
+      {de:"Meiner Meinung nach...", en:"In my opinion..."},
+      {de:"Ich bin der Ansicht, dass...", en:"I am of the view that..."},
+      {de:"Ich bin davon überzeugt, dass...", en:"I am convinced that..."},
+      {de:"Für mich persönlich ist das besonders wichtig, weil...", en:"For me personally that is especially important because..."}
+    ]
+  },
+  {
+    category: "2. Agreeing & Approving (Zustimmen)",
+    items: [
+      {de:"Da stimme ich dir vollkommen zu.", en:"I completely agree with you there."},
+      {de:"Das ist eine hervorragende Idee!", en:"That is an outstanding idea!"},
+      {de:"Genau so sehe ich das auch.", en:"That is exactly how I see it too."},
+      {de:"Das passt mir sehr gut.", en:"That suits me very well."}
+    ]
+  },
+  {
+    category: "3. Politely Disagreeing & Alternatives (Ablehnen & Gegenvorschlag)",
+    items: [
+      {de:"Das geht bei mir leider nicht, weil...", en:"Unfortunately that doesn't work for me because..."},
+      {de:"Da bin ich anderer Meinung.", en:"I have a different opinion on that."},
+      {de:"Könnten wir stattdessen vielleicht...", en:"Could we perhaps instead..."},
+      {de:"Was hältst du davon, wenn wir...?", en:"What do you think if we...?"}
+    ]
+  },
+  {
+    category: "4. Clarifying & Buying Time (Zeit gewinnen / Nachfragen)",
+    items: [
+      {de:"Könnten Sie das bitte noch einmal wiederholen?", en:"Could you please repeat that once more?"},
+      {de:"Entschuldigung, wie heißt dieses Wort auf Deutsch?", en:"Excuse me, what is this word called in German?"},
+      {de:"Ehrlich gesagt habe ich darüber noch nicht nachgedacht, aber...", en:"Honestly I haven't thought about that yet, but..."},
+      {de:"Was meinen Sie genau damit?", en:"What do you mean exactly by that?"}
+    ]
+  }
+];
+
+const WRITTEN_DATA = {
+  cloze: {
+    title: "Sprachbausteine Teil 1 (Exam Cloze Test: Official Letter)",
+    desc: "Fill in the 6 missing grammatical words (prepositions, endings, connectors) in this typical B1 exam letter to a landlord.",
+    text: [
+      "Sehr geehrte Frau Sommer,",
+      "ich schreibe Ihnen, ",
+      "(1: weil/denn/deshalb) ",
+      "die Heizung in meiner Wohnung seit zwei Tagen nicht mehr funktioniert. Es ist ",
+      "(2: sehr/zu/viel) ",
+      "kalt in allen Zimmern. Ich habe schon versucht, ",
+      "(3: den/dem/des) ",
+      "Hausmeister telefonisch zu erreichen, aber leider ohne Erfolg. ",
+      "(4: Könnten/Können/Hätten) ",
+      "Sie bitte so schnell wie möglich einen Techniker schicken? ",
+      "(5: Über/Auf/Für) ",
+      "eine baldige Antwort würde ich ",
+      "(6: mich/mir/sich) ",
+      "sehr freuen.\n\nMit freundlichen Grüßen,\nArun Vivekanandhan"
+    ],
+    questions: [
+      {num:1, options:["weil", "denn", "deshalb"], correct:0, exp:"'weil' introduces subordinate clause with verb 'funktioniert' at the end."},
+      {num:2, options:["sehr", "zu", "viel"], correct:0, exp:"'sehr kalt' expresses intensity."},
+      {num:3, options:["den", "dem", "des"], correct:0, exp:"'erreichen' takes direct object Akkusativ masculine → 'den Hausmeister'."},
+      {num:4, options:["Könnten", "Können", "Hätten"], correct:0, exp:"'Könnten Sie...' is standard polite Konjunktiv II request."},
+      {num:5, options:["Über", "Auf", "Für"], correct:0, exp:"'sich freuen über + Akkusativ' for an answer to be received."},
+      {num:6, options:["mich", "mir", "sich"], correct:0, exp:"'ich freue mich' (Akkusativ reflexiv)."}
+    ]
+  },
+
+  letters: [
+    {
+      title: "1. Formelle Krankmeldung & Entschuldigung (Work / School)",
+      scenario: "You have fallen sick and cannot come to work/course for 3 days. Inform your supervisor/teacher.",
+      points: [
+        "1. Grund des Schreibens & Art der Krankheit (fieber, Erkältung)",
+        "2. Voraussichtliche Dauer (3 Tage) & Krankmeldung vom Arzt",
+        "3. Dringende Aufgaben: Wer übernimmt die Vertretung?"
+      ],
+      template: `Sehr geehrte/r Frau/Herr [Nachname],
+
+ich schreibe Ihnen, um Ihnen mitzuteilen, dass ich heute leider nicht zur Arbeit kommen kann, da ich hohes Fieber habe und mich sehr schwach fühle.
+
+Der Arzt hat mich bis einschließlich Freitag krankgeschrieben. Das ärztliche Attest werde ich Ihnen per E-Mail im Anhang zusenden.
+
+Mein Kollege Herr Müller hat sich freundlicherweise bereit erklärt, meine dringenden Aufgaben für diese Tage zu übernehmen.
+
+Vielen Dank für Ihr Verständnis.
+
+Mit freundlichen Grüßen,
+Arun Vivekanandhan`
+    },
+    {
+      title: "2. Reklamation & Beschwerde (Defective Delivery)",
+      scenario: "You ordered a laptop online, but the screen is scratched and the charger is missing.",
+      points: [
+        "1. Bestelldetails (Bestellnummer, Datum)",
+        "2. Beschreibung des Mangels (Kratzer, fehlendes Kabel)",
+        "3. Forderung: Ersatzlieferung oder Rückerstattung"
+      ],
+      template: `Sehr geehrte Damen und Herren,
+
+am 15. September habe ich in Ihrem Online-Shop einen Laptop bestellt (Bestellnummer: #48291).
+
+Als das Paket gestern ankam, musste ich leider feststellen, dass das Gerät beschädigt ist. Der Bildschirm weist deutliche Kratzer auf, und das Ladekabel fehlt komplett in der Verpackung.
+
+Aus diesem Grund bitte ich Sie, mir innerhalb einer Woche ein neues, einwandfreies Ersatzgerät zuzusenden oder mir den vollen Kaufpreis auf mein Bankkonto zu erstatten.
+
+Ich hoffe auf eine schnelle und unkomplizierte Lösung.
+
+Mit freundlichen Grüßen,
+Arun Vivekanandhan`
+    }
+  ]
+};
+
+/* =========================================================================
+   UI CONTROLLER
+   ========================================================================= */
+function init(){
+  renderSubTabs();
+  renderView();
+}
+
+function setMode(mode){
+  currentMode = mode;
+  document.getElementById("tabOral").className = "modetab " + (mode==='oral'?'active':'');
+  document.getElementById("tabVault").className = "modetab " + (mode==='vault'?'active':'');
+  document.getElementById("tabWritten").className = "modetab " + (mode==='written'?'active':'');
+
+  if(mode === 'oral') currentSub = 'teil1';
+  else if(mode === 'vault') currentSub = 'vault';
+  else if(mode === 'written') currentSub = 'cloze';
+
+  renderSubTabs();
+  renderView();
+}
+
+function setSub(sub){
+  currentSub = sub;
+  renderSubTabs();
+  renderView();
+}
+
+function renderSubTabs(){
+  const container = document.getElementById("subTabs");
+  let items = [];
+  if(currentMode === 'oral'){
+    items = [
+      {id:'teil1', label:'Teil 1: Vorstellung & Fragen'},
+      {id:'teil2', label:'Teil 2: Thema präsentieren'},
+      {id:'teil3', label:'Teil 3: Gemeinsam planen'}
+    ];
+  } else if(currentMode === 'vault'){
+    items = [
+      {id:'vault', label:'All Spoken Phrases'}
+    ];
+  } else if(currentMode === 'written'){
+    items = [
+      {id:'cloze', label:'Sprachbausteine Cloze Test'},
+      {id:'letters', label:'Brief-Schmiede (Letter Builder)'}
+    ];
+  }
+
+  container.innerHTML = items.map(it=>`
+    <div class="subtab ${it.id===currentSub?'active':''}" onclick="setSub('${it.id}')">${it.label}</div>
+  `).join("");
+}
+
+function renderView(){
+  const container = document.getElementById("mainView");
+  if(currentMode === 'oral'){
+    if(currentSub === 'teil1') renderTeil1(container);
+    else if(currentSub === 'teil2') renderTeil2(container);
+    else if(currentSub === 'teil3') renderTeil3(container);
+  } else if(currentMode === 'vault'){
+    renderVault(container);
+  } else if(currentMode === 'written'){
+    if(currentSub === 'cloze') renderCloze(container);
+    else if(currentSub === 'letters') renderLetters(container);
+  }
+}
+
+/* ---------------- ORAL TEIL 1 ---------------- */
+function renderTeil1(container){
+  const data = ORAL_MODULES.teil1;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${data.title}</h2>
+      <p class="card-desc">${data.desc}</p>
+
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-bottom:8px;">
+        1. MASTER INTRODUCTORY PROMPTS (Click 🔊 to hear native pronunciation):
+      </div>
+      <div class="phrase-grid" style="margin-bottom:18px;">
+        ${data.prompts.map(p=>`
+          <div class="phrase-card" id="p-teil1-${p.topic.replace(/\s+/g,'_')}">
+            <div style="flex:1">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--gold); font-weight:700;">${p.topic.toUpperCase()}</div>
+              <div class="phrase-de">${p.de}</div>
+              <div class="phrase-en">${p.en}</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="audio-btn" onclick="speak('${escapeQuotes(p.de)}')">🔊</button>
+              <button class="rec-btn" onclick="startRecording('${escapeQuotes(p.de)}', 'p-teil1-${p.topic.replace(/\s+/g,'_')}')">🎙️</button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--red); margin-bottom:8px;">
+        2. SIMULATE EXAMINER SPONTANEOUS QUESTIONS:
+      </div>
+      <div class="dialog-stream">
+        ${data.examinerQuestions.map((q,i)=>`
+          <div class="speech-bubble examiner">
+            <div class="speaker-label">Prüfer (Examiner) #0${i+1}
+              <button class="speaker-audio-btn" onclick="speak('${escapeQuotes(q.q)}')">🔊 Hear question</button>
+            </div>
+            <div style="font-weight:700; font-size:15px; margin-bottom:4px;">„${q.q}”</div>
+            <div style="font-size:12px; color:var(--ink-soft); font-style:italic; margin-bottom:8px;">„${q.en}”</div>
+            <div style="background:#fff; border-left:3px solid var(--green); padding:6px 10px; border-radius:4px; font-size:13px;" id="q-teil1-ans-${i}">
+              <b>Suggested Answer:</b> „${q.modelAns}”
+              <div style="display:inline-flex; align-items:center; gap:6px; vertical-align:middle;">
+                <button class="speaker-audio-btn" onclick="speak('${escapeQuotes(q.modelAns)}')">🔊</button>
+                <button class="rec-btn" style="width:24px; height:24px; font-size:12px;" onclick="startRecording('${escapeQuotes(q.modelAns)}', 'q-teil1-ans-${i}')">🎙️</button>
+              </div>
+              <div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Tip: ${q.hint}</div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="bigbtn green" onclick="setSub('teil2')">Proceed to Teil 2: Thema präsentieren ➡️</button>
+    </div>
+  `;
+}
+
+/* ---------------- ORAL TEIL 2 ---------------- */
+function renderTeil2(container){
+  const data = ORAL_MODULES.teil2;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${data.title}</h2>
+      <p class="card-desc">${data.desc}</p>
+
+      ${data.topics.map(topic=>`
+        <div style="background:#fff; border:1.5px solid var(--line); border-radius:8px; padding:14px; margin-bottom:16px;">
+          <h3 style="font-family:'Fjalla One',sans-serif; font-size:18px; color:var(--red); margin:0 0 10px;">📋 Thema: ${topic.name}</h3>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            ${topic.steps.map((st, i)=>`
+              <div style="background:var(--card); border-left:3px solid var(--blue); padding:8px 12px; border-radius:0 6px 6px 0;" id="step-teil2-${topic.name.replace(/\s+/g,'_')}-${i}">
+                <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; color:var(--blue);">${st.step}</div>
+                <div style="font-size:14px; font-weight:600; color:var(--ink); margin:2px 0;">„${st.de}”</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; color:var(--ink-soft); font-style:italic;">${st.en}</span>
+                  <div style="display:flex; gap:6px;">
+                    <button class="audio-btn" style="width:28px; height:28px;" onclick="speak('${escapeQuotes(st.de)}')">🔊</button>
+                    <button class="rec-btn" style="width:28px; height:28px;" onclick="startRecording('${escapeQuotes(st.de)}', 'step-teil2-${topic.name.replace(/\s+/g,'_')}-${i}')">🎙️</button>
+                  </div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+
+      <button class="bigbtn green" onclick="setSub('teil3')">Proceed to Teil 3: Gemeinsam planen ➡️</button>
+    </div>
+  `;
+}
+
+/* ---------------- ORAL TEIL 3 ---------------- */
+let selectedTeil3ScenarioIdx = 0;
+function renderTeil3(container){
+  const data = ORAL_MODULES.teil3;
+  const sc = data.scenarios[selectedTeil3ScenarioIdx] || data.scenarios[0];
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${data.title}</h2>
+      <p class="card-desc">${data.desc}</p>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
+        ${data.scenarios.map((s, idx)=>`
+          <button style="padding:6px 12px; font-family:'Fjalla One',sans-serif; font-size:13px; border-radius:20px; border:1.5px solid var(--ink); background:${idx===selectedTeil3ScenarioIdx?'var(--ink)':'#fff'}; color:${idx===selectedTeil3ScenarioIdx?'#fff':'var(--ink)'}; cursor:pointer;" onclick="selectedTeil3ScenarioIdx=${idx}; renderTeil3(document.getElementById('appMain'));">
+            ${idx+1}. ${s.name}
+          </button>
+        `).join('')}
+      </div>
+
+      <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:14px;">
+        <h3 style="font-family:'Fjalla One',sans-serif; font-size:16px; margin:0 0 6px; color:var(--gold);">📍 Aktives Szenario: ${sc.name}</h3>
+        <p style="font-size:12.5px; color:var(--ink-soft); margin:0;">
+          Listen to the simulated partner line by line. Notice how each proposal is acknowledged and matched with an alternative date, location, or responsibility!
+        </p>
+      </div>
+
+      <div class="dialog-stream">
+        ${sc.dialogue.map((d, i)=>{
+          const isEx = d.speaker.includes("Examiner");
+          const divId = `dlg-teil3-${i}`;
+          return `
+            <div class="speech-bubble ${isEx?'examiner':'user'}" id="${divId}">
+              <div class="speaker-label">${d.speaker}
+                ${!isEx ? `<button class="speaker-audio-btn" onclick="startRecording('${escapeQuotes(d.de)}', '${divId}')">🎙️ Record</button>` : `<button class="speaker-audio-btn" onclick="speak('${escapeQuotes(d.de)}')">🔊 Play</button>`}
+              </div>
+              <div style="font-weight:600; font-size:14px;">„${d.de}”</div>
+              <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; font-style:italic;">„${d.en}”</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <button class="bigbtn" onclick="setMode('vault')">Open Spoken Redemittel Vault 🎙️</button>
+    </div>
+  `;
+}
+
+/* ---------------- VAULT ---------------- */
+function renderVault(container){
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">🎙️ Spoken Redemittel Vault</h2>
+      <p class="card-desc">Click 🔊 next to any phrase to hear natural German intonation. Repeat each phrase aloud 3 times!</p>
+
+      ${VAULT_CATEGORIES.map(cat=>`
+        <div style="margin-bottom:18px;">
+          <h3 style="font-family:'Fjalla One',sans-serif; font-size:17px; color:var(--blue); border-bottom:1px dashed var(--line); padding-bottom:4px; margin:0 0 8px;">
+            ${cat.category}
+          </h3>
+          <div class="phrase-grid">
+            ${cat.items.map(it=>`
+              <div class="phrase-card" id="vault-${cat.category.replace(/\s+/g,'_')}-${it.de.substring(0,10).replace(/\s+/g,'_')}">
+                <div style="flex:1">
+                  <div class="phrase-de">${it.de}</div>
+                  <div class="phrase-en">${it.en}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="audio-btn" onclick="speak('${escapeQuotes(it.de)}')">🔊</button>
+                  <button class="rec-btn" onclick="startRecording('${escapeQuotes(it.de)}', 'vault-${cat.category.replace(/\s+/g,'_')}-${it.de.substring(0,10).replace(/\s+/g,'_')}')">🎙️</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+
+      <button class="bigbtn secondary" onclick="setMode('written')">Go to Written Exam Practice (Sprachbausteine) ✍️</button>
+    </div>
+  `;
+}
+
+/* ---------------- CLOZE TEST ---------------- */
+function renderCloze(container){
+  const cl = WRITTEN_DATA.cloze;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${cl.title}</h2>
+      <p class="card-desc">${cl.desc}</p>
+
+      <div class="cloze-text">
+        ${cl.text.map(chunk=>{
+          const match = chunk.match(/\((\d):([^)]+)\)/);
+          if(!match) return chunk.replace(/\n/g, '<br>');
+          const qNum = parseInt(match[1]);
+          const q = cl.questions.find(x=>x.num === qNum);
+          return `
+            <select class="cloze-select" id="clozeSel_${qNum}">
+              <option value="">[(${qNum}) Select...]</option>
+              ${q.options.map(opt=>`<option value="${opt}">${opt}</option>`).join("")}
+            </select>
+          `;
+        }).join("")}
+      </div>
+
+      <button class="bigbtn" onclick="checkCloze()">Check Answers &amp; Show Explanations</button>
+      <div id="clozeFeedback" style="margin-top:14px; display:none;"></div>
+    </div>
+  `;
+}
+
+function checkCloze(){
+  const cl = WRITTEN_DATA.cloze;
+  let correctCount = 0;
+  let html = `<div style="background:#fff; border:1px solid var(--line); border-radius:6px; padding:14px;">`;
+
+  cl.questions.forEach(q=>{
+    const sel = document.getElementById(`clozeSel_${q.num}`);
+    const chosen = sel ? sel.value : "";
+    const isCorr = chosen === q.options[q.correct];
+    if(isCorr) correctCount++;
+    if(sel){
+      sel.style.background = isCorr ? '#E2EED8' : '#F8E4E3';
+      sel.style.borderColor = isCorr ? 'var(--green)' : 'var(--red)';
+    }
+    html += `
+      <div style="margin-bottom:8px; font-size:13px; border-bottom:1px dashed var(--line); padding-bottom:6px;">
+        <b>Gap (${q.num}):</b> Correct answer is <b style="color:var(--green);">${q.options[q.correct]}</b>.
+        Your answer: <i>${chosen||'(none)'}</i> ${isCorr?'✅':'❌'}
+        <div style="color:var(--ink-soft); font-size:11.5px; margin-top:2px;">${q.exp}</div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div style="font-family:'Fjalla One',sans-serif; font-size:18px; margin-top:10px; color:${correctCount>=5?'var(--green)':'var(--red)'};">
+      Score: ${correctCount} / ${cl.questions.length} (${Math.round((correctCount/cl.questions.length)*100)}%)
+    </div>
+  </div>`;
+
+  const fb = document.getElementById("clozeFeedback");
+  fb.innerHTML = html;
+  fb.style.display = "block";
+}
+
+/* ---------------- LETTERS ---------------- */
+function renderLetters(container){
+  const letters = WRITTEN_DATA.letters;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">✍️ Brief-Schmiede (Exam Letter Master)</h2>
+      <p class="card-desc">
+        In the B1 writing exam, <b>addressing all 3 Leitpunkte (key points)</b> counts for 70% of your grade! Study these 2 top exam blueprints.
+      </p>
+
+      ${letters.map((letObj,idx)=>`
+        <div style="background:#fff; border:1.5px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px;">
+          <h3 style="font-family:'Fjalla One',sans-serif; font-size:18px; color:var(--red); margin:0 0 6px;">${letObj.title}</h3>
+          <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;"><b>Task:</b> ${letObj.scenario}</div>
+
+          <div style="background:var(--paper-dark); border-radius:6px; padding:10px 12px; margin-bottom:12px;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase;">
+              Required 3 Leitpunkte Checklist:
+            </div>
+            ${letObj.points.map(pt=>`
+              <div class="checklist-item">
+                <input type="checkbox" checked disabled>
+                <span>${pt}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--blue); margin-bottom:4px; text-transform:uppercase;">
+            High-Score Sample Letter:
+          </div>
+          <div style="background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px; font-size:13px; line-height:1.6; white-space:pre-wrap; font-family:'IBM Plex Sans',sans-serif;">${letObj.template}</div>
+
+          <button class="bigbtn secondary" style="font-size:13px; padding:8px 12px; width:auto; margin-top:10px;" onclick="speak('${escapeQuotes(letObj.template)}')">🔊 Listen to full letter</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+/* ---------------- AUDIO PLAYBACK ---------------- */
+function speak(txt){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = "de-DE";
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+
+/* ---------------- DIFF HIGHLIGHT ---------------- */
+function diffHighlight(a, b){
+  let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i && j<b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+  const aMid=a.slice(i,a.length-j), bMid=b.slice(i,b.length-j);
+  const wrap=(s)=> s?`<span class="diffchar">${s}</span>`:'';
+  return { a: a.slice(0,i)+wrap(aMid)+a.slice(a.length-j), b: b.slice(0,i)+wrap(bMid)+b.slice(b.length-j) };
+}
+
+/* ---------------- SPEECH RECOGNITION ---------------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recObj = null;
+
+function startRecording(targetText, containerId) {
+  if (!SR) {
+    alert("Speech recognition not supported in this browser. Please use Chrome or Edge.");
+    return;
+  }
+
+  const btn = event.currentTarget;
+  btn.classList.add('recording');
+  btn.innerText = '🛑';
+
+  recObj = new SR();
+  recObj.lang = "de-DE";
+  recObj.interimResults = false;
+
+  recObj.onresult = (ev) => {
+    const transcript = ev.results[0][0].transcript;
+    showComparison(targetText, transcript, containerId);
+    stopRecording(btn);
+  };
+
+  recObj.onerror = (ev) => {
+    console.error("SR Error:", ev.error);
+    stopRecording(btn);
+  };
+
+  recObj.onend = () => {
+    stopRecording(btn);
+  };
+
+  recObj.start();
+}
+
+function stopRecording(btn) {
+  if (recObj) {
+    recObj.stop();
+    recObj = null;
+  }
+  if (btn) {
+    btn.classList.remove('recording');
+    btn.innerText = '🎙️';
+  }
+}
+
+function showComparison(target, spoken, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const diff = diffHighlight(target.toLowerCase().trim(), spoken.toLowerCase().trim());
+
+  const feedbackHtml = `
+    <div class="user-transcript visible" id="transcript_${containerId}">
+      <span class="transcript-label">Your Spoken Version:</span>
+      <div style="margin-bottom:8px;">${diff.b}</div>
+      <span class="transcript-label">Target Version:</span>
+      <div>${diff.a}</div>
+    </div>
+  `;
+
+  // Append or replace previous feedback
+  const existing = container.querySelector('.user-transcript');
+  if (existing) existing.remove();
+  container.insertAdjacentHTML('beforeend', feedbackHtml);
+}
+
+function escapeQuotes(str){
+  return (str||'').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+window.onload = init;
+</script>
+</body>
+</html>

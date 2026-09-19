@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>German Grammar &amp; Rules Trainer — Dein Deutsch-Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
+    --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
+    padding:12px 10px 60px; display:flex; flex-direction:column; align-items:center;
+  }
+  .wrap{width:100%; max-width:780px;}
+
+  /* Header & Navigation Suite Hub */
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 4px 10px var(--shadow);
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:14px; display:flex; align-items:center; gap:6px;}
+  .hub-links{display:flex; gap:6px; flex-wrap:wrap;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
+
+  /* Mode Tabs */
+  .modetabs{display:flex; gap:6px; margin-bottom:14px;}
+  .modetab{
+    flex:1; font-family:'Fjalla One',sans-serif; font-size:14px; padding:10px 4px; text-align:center;
+    border:1.5px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink);
+    cursor:pointer; transition:all .15s;
+  }
+  .modetab.active{background:var(--ink); color:#fff;}
+
+  /* Rule Selector Chips */
+  .filterbox{
+    background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px;
+    margin-bottom:14px; box-shadow:0 6px 14px var(--shadow);
+  }
+  .filterlabel{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase;
+    letter-spacing:0.6px; color:var(--ink-soft); margin-bottom:6px; font-weight:700;
+  }
+  .chiprow{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:6px 10px; border:1.5px solid var(--line);
+    background:var(--paper); border-radius:16px; cursor:pointer; color:var(--ink-soft);
+    display:flex; align-items:center; gap:5px; transition:all .15s;
+  }
+  .chip.active{border-color:var(--ink); color:var(--ink); font-weight:600; background:#fff;}
+  .chip .dot{width:8px; height:8px; border-radius:50%;}
+
+  .subtab{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:5px 12px; border:1.5px solid var(--line);
+    background:var(--card); border-radius:16px; cursor:pointer; color:var(--ink-soft); font-weight:600;
+    transition:all .15s;
+  }
+  .subtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  /* Rule Explanation Card */
+  .rule-card{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 10px 24px var(--shadow); padding:16px; margin-bottom:16px;
+  }
+  .rule-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px dashed var(--line); padding-bottom:8px;}
+  .rule-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase;
+    padding:3px 8px; border-radius:4px; color:#fff; font-weight:600;
+  }
+  .rule-title{font-family:'Fjalla One',sans-serif; font-size:20px; color:var(--ink); margin:0;}
+  .rule-summary{font-size:14px; line-height:1.6; margin-bottom:14px; color:var(--ink);}
+
+  .formula-box{
+    background:var(--paper-dark); border-left:4px solid var(--gold); border-radius:0 6px 6px 0;
+    padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.6;
+    margin-bottom:14px;
+  }
+
+  .table-box{overflow-x:auto; margin-bottom:14px;}
+  table.de-table{width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;}
+  table.de-table th{background:var(--ink); color:#fff; padding:6px 8px; font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  table.de-table td{padding:6px 8px; border-bottom:1px solid var(--line); background:#fff;}
+  table.de-table tr:nth-child(even) td{background:var(--card);}
+
+  .example-list{display:flex; flex-direction:column; gap:8px; margin-bottom:14px;}
+  .example-item{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .example-de{font-size:14px; font-weight:600; color:var(--ink);}
+  .example-en{font-size:11.5px; color:var(--ink-soft); margin-top:2px; font-style:italic;}
+  .speak-btn{
+    background:none; border:1.5px solid var(--line); border-radius:50%; width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .speak-btn:hover{background:var(--paper); border-color:var(--ink);}
+
+  /* Drill Practice Area */
+  .drill-card{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 10px 24px var(--shadow); padding:18px; margin-bottom:14px;
+  }
+  .drill-meta{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+  }
+  .drill-prompt{font-size:18px; line-height:1.6; margin-bottom:16px; font-weight:600;}
+  .drill-gap{
+    display:inline-block; border-bottom:2px dashed var(--red); padding:0 8px;
+    min-width:60px; text-align:center; color:var(--red);
+  }
+  .drill-en{font-size:13px; color:var(--ink-soft); font-style:italic; margin-bottom:16px;}
+  .opt-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;}
+  .opt-btn{
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:12px; border:1.5px solid var(--ink);
+    border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; text-align:center;
+    transition:all .15s; font-weight:600;
+  }
+  .opt-btn:hover{background:var(--paper-dark);}
+  .opt-btn.correct{background:var(--green); color:#fff; border-color:var(--green);}
+  .opt-btn.wrong{background:var(--red); color:#fff; border-color:var(--red);}
+  .opt-btn:disabled{cursor:default; opacity:0.9;}
+
+  /* Sentence Builder / Pick & Build Styles */
+  .en-challenge-box{
+    background:#fff; border:1.5px solid var(--ink); border-left:5px solid var(--blue);
+    border-radius:6px; padding:12px 14px; margin-bottom:14px; box-shadow:0 2px 6px var(--shadow);
+  }
+  .en-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700;
+    color:var(--blue); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px;
+  }
+  .en-prompt-text{
+    font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600;
+    color:var(--ink); line-height:1.4;
+  }
+  .buildarea{
+    min-height:56px; display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; align-content:flex-start;
+    padding:10px; background:var(--paper-dark); border-radius:6px; margin-bottom:12px; border:2px dashed var(--line);
+    transition:border-color .15s;
+  }
+  .buildarea .placeholder{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); padding:8px;}
+  .wordchip{
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-weight:600; padding:8px 14px; border-radius:20px;
+    cursor:pointer; user-select:none; border:1.5px solid var(--ink); transition:all .15s;
+  }
+  .wordchip:hover{transform:translateY(-1px);}
+  .wordchip.inbank{background:#fff; color:var(--ink); box-shadow:0 2px 4px var(--shadow);}
+  .wordchip.inbank:hover{background:var(--card);}
+  .wordchip.inbuild{background:var(--ink); color:#fff; box-shadow:0 2px 6px rgba(27,42,74,0.3);}
+  .wordchip.inbuild:hover{background:var(--red); border-color:var(--red-dark);}
+  .bankarea{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; min-height:46px;}
+  .build-action-row{display:flex; gap:8px; margin-bottom:10px;}
+  .actbtn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.4px;
+    padding:10px 14px; border-radius:6px; cursor:pointer; border:1.5px solid var(--ink); font-weight:700;
+    transition:all .15s;
+  }
+  .actbtn.reset{background:var(--paper); color:var(--ink-soft); border-color:var(--line);}
+  .actbtn.reset:hover{background:var(--paper-dark); color:var(--ink);}
+  .actbtn.check{background:var(--gold); color:#fff; border-color:#8a6a1e; flex:1;}
+  .actbtn.check:hover{background:#9d7524;}
+
+  .feedback-box{
+    border-radius:6px; padding:12px; margin-top:12px; font-size:13px; line-height:1.6;
+    display:none;
+  }
+  .feedback-box.correct{background:#E2EED8; border:1.5px solid var(--green); color:#214427;}
+  .feedback-box.wrong{background:#F8E4E3; border:1.5px solid var(--red); color:#661B14;}
+  .feedback-title{font-family:'Fjalla One',sans-serif; font-size:15px; margin-bottom:4px;}
+
+  .bigbtn{
+    width:100%; font-family:'Fjalla One',sans-serif; font-size:16px; padding:14px; border:none;
+    border-radius:6px; background:var(--ink); color:#fff; cursor:pointer; text-align:center;
+    box-shadow:0 4px 0 #0d1525; margin-top:12px;
+  }
+  .bigbtn:active{transform:translateY(2px); box-shadow:0 2px 0 #0d1525;}
+  .bigbtn.secondary{background:var(--red); box-shadow:0 4px 0 var(--red-dark);}
+
+  .stats-row{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px; text-align:center;
+  }
+  .stat-card{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:8px 4px;}
+  .stat-num{font-family:'Fjalla One',sans-serif; font-size:20px; color:var(--red);}
+  .stat-lbl{font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--ink-soft); margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Suite Navigation Hub -->
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main Coach</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link active">📚 Grammar &amp; Rules</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Speaking &amp; Exam</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns &amp; Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+    </div>
+  </div>
+
+  <h1>German Grammar &amp; Rules Trainer</h1>
+  <div class="sub">16 Essential Grammar Pillars for Fluent Speaking &amp; B1 Exam Success</div>
+
+  <!-- Mode Tabs -->
+  <div class="modetabs">
+    <div class="modetab active" id="tabStudy" onclick="switchMode('study')">📖 Rule Guide &amp; Tables</div>
+    <div class="modetab" id="tabDrill" onclick="switchMode('drill')">⚡ Interactive Practice Drill</div>
+    <div class="modetab" id="tabStats" onclick="switchMode('stats')">📊 Mastery &amp; Progress</div>
+  </div>
+
+  <!-- Rule Filter Chips -->
+  <div class="filterbox">
+    <div class="filterlabel">Select German Grammar Pillar:</div>
+    <div class="chiprow" id="ruleChips"></div>
+  </div>
+
+  <!-- Dynamic Content Area -->
+  <div id="contentArea"></div>
+
+</div>
+
+<script>
+/* =========================================================================
+   16 ESSENTIAL GERMAN GRAMMAR RULES WITH EXPLANATIONS, TABLES & DRILLS
+   ========================================================================= */
+const GRAMMAR_RULES = [
+  {
+    id: "r1_wordorder",
+    num: "1",
+    title: "Verb Position & Satzklammer (Sentence Structure)",
+    category: "Syntax",
+    color: "var(--red)",
+    summary: "In German, the verb controls the whole sentence structure! There are 3 golden rules you must memorize to sound fluent and pass the exam.",
+    formula: "• Hauptsatz: Verb is ALWAYS in Position 2!\n• Nebensatz (weil, dass, wenn, obwohl...): Verb moves to the VERY END!\n• Position 0 (ADUSO: aber, denn, und, sondern, oder): Verb stays in Pos 2!\n• Position 1 Adverbs (deshalb, trotzdem, sonst): Verb follows immediately in Pos 2!\n• TeKaMoLo: When? (Temporal) → Why? (Kausal) → How? (Modal) → Where? (Lokal)",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Clause Type</th><th>Connector</th><th>Word Order Example</th></tr>
+        <tr><td><b>Hauptsatz</b></td><td>None / Normal</td><td>Heute <b>gehe</b> ich mit Freunden ins Kino.</td></tr>
+        <tr><td><b>Position 0 (ADUSO)</b></td><td><i>denn</i></td><td>Ich lerne Deutsch, <b>denn</b> ich <b>möchte</b> in Berlin arbeiten.</td></tr>
+        <tr><td><b>Position 1 Adverb</b></td><td><i>deshalb</i></td><td>Es regnet stark, <b>deshalb</b> <b>bleibe</b> ich zu Hause.</td></tr>
+        <tr><td><b>Nebensatz</b></td><td><i>weil / dass</i></td><td>Ich bleibe zu Hause, <b>weil</b> es stark <b>regnet</b>.</td></tr>
+        <tr><td><b>Satzklammer (Bracket)</b></td><td>Modal / Perfekt</td><td>Ich <b>habe</b> gestern einen neuen Job <b>bekommen</b>.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich lerne fleißig, weil ich die B1-Prüfung bestehen will.", en:"I study diligently because I want to pass the B1 exam."},
+      {de:"Gestern habe ich mit meinem Chef gesprochen.", en:"Yesterday I spoke with my boss. (Verb in Pos 2)"},
+      {de:"Er war krank, trotzdem ist er zur Arbeit gegangen.", en:"He was sick, nevertheless he went to work. (Pos 1 adverb)"}
+    ],
+    drills: [
+      {
+        prompt: "Ich kann heute nicht zum Unterricht kommen, ___ ich hohes Fieber habe.",
+        en: "I cannot come to class today because I have a high fever.",
+        options: ["weil", "denn", "deshalb", "trotzdem"],
+        correct: 0,
+        explain: "'weil' sends the conjugated verb ('habe') to the very end of the clause. 'denn' would require 'denn ich habe hohes Fieber' (verb in Pos 2)."
+      },
+      {
+        prompt: "Der Zug hatte Verspätung, ___ kam Herr Müller zu spät zum Termin.",
+        en: "The train was delayed, therefore Mr. Müller arrived too late for the appointment.",
+        options: ["deshalb", "weil", "obwohl", "denn"],
+        correct: 0,
+        explain: "'deshalb' is a Position 1 adverb! It is immediately followed by the conjugated verb ('kam')."
+      },
+      {
+        prompt: "Wir gehen spazieren, ___ es kalt ist.",
+        en: "We are going for a walk, although it is cold.",
+        options: ["obwohl", "trotzdem", "aber", "denn"],
+        correct: 0,
+        explain: "'obwohl' is a subordinating connector that kicks the verb ('ist') to the end."
+      },
+      {
+        prompt: "Gestern ___ meine Schwester eine neue Wohnung gefunden.",
+        en: "Yesterday my sister found a new apartment.",
+        options: ["hat", "hatte", "wurde", "ist"],
+        correct: 0,
+        explain: "In a main clause, the auxiliary verb ('hat') must be in Position 2, with the participle ('gefunden') at the end (Satzklammer)."
+      }
+    ]
+  },
+
+  {
+    id: "r2_cases",
+    num: "2",
+    title: "Die 4 Fälle (Nominativ, Akkusativ, Dativ, Genitiv)",
+    category: "Cases",
+    color: "var(--blue)",
+    summary: "German cases indicate who does what to whom. German only changes the masculine article in the Akkusativ (der → den), but Dativ changes almost everything!",
+    formula: "• Nominativ: Subject (Wer/Was?)\n• Akkusativ: Direct object (Wen/Was?) → der → den, ein → einen, mein → meinen\n• Dativ: Indirect recipient (Wem?) → der/das → dem, die → der, Plural → den + n\n• Genitiv: Possession (Wessen?) → des Mannes / der Frau / der Kinder",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Case</th><th>Masculine (der)</th><th>Neutral (das)</th><th>Feminine (die)</th><th>Plural (die)</th></tr>
+        <tr><td><b>Nominativ</b></td><td>der / ein / kein</td><td>das / ein / kein</td><td>die / eine / keine</td><td>die / keine</td></tr>
+        <tr><td><b>Akkusativ</b></td><td><b>den / einen / keinen</b></td><td>das / ein / kein</td><td>die / eine / keine</td><td>die / keine</td></tr>
+        <tr><td><b>Dativ</b></td><td><b>dem / einem / keinem</b></td><td><b>dem / einem / keinem</b></td><td><b>der / einer / keiner</b></td><td><b>den ...n / keinen ...n</b></td></tr>
+        <tr><td><b>Genitiv</b></td><td>des ...s / eines ...s</td><td>des ...s / eines ...s</td><td>der / einer</td><td>der / keiner</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Der Vater (Nom) schenkt dem Sohn (Dat) einen Ball (Akk).", en:"The father gives the son a ball."},
+      {de:"Ich danke dir für deine Hilfe.", en:"I thank you for your help. (danken takes Dativ!)"},
+      {de:"Die Tasche der Lehrerin liegt auf dem Tisch.", en:"The teacher's bag is on the table. (Genitiv of possession)"}
+    ],
+    drills: [
+      {
+        prompt: "Ich möchte ___ neuen Kollegen helfen.",
+        en: "I would like to help the new colleague.",
+        options: ["dem", "den", "der", "des"],
+        correct: 0,
+        explain: "The verb 'helfen' strictly demands the DATIV case! Masculine Dativ is 'dem'."
+      },
+      {
+        prompt: "Herr Schneider sucht ___ Schlüssel seit einer halben Stunde.",
+        en: "Mr. Schneider has been looking for the key for half an hour.",
+        options: ["seinen", "seinem", "sein", "seiner"],
+        correct: 0,
+        explain: "'der Schlüssel' is the direct object (Akkusativ masculine) → 'seinen Schlüssel'."
+      },
+      {
+        prompt: "Wie gefällt ___ das neue Auto?",
+        en: "How do you like the new car?",
+        options: ["dir", "dich", "du", "dein"],
+        correct: 0,
+        explain: "'gefallen' always governs the DATIV case (Wem gefällt es?) → 'dir'."
+      },
+      {
+        prompt: "Wir gratulieren ___ Chef zum Geburtstag.",
+        en: "We congratulate our boss on his birthday.",
+        options: ["unserem", "unseren", "unser", "unseres"],
+        correct: 0,
+        explain: "'gratulieren' takes Dativ! Masculine Dativ is 'unserem Chef'."
+      }
+    ]
+  },
+
+  {
+    id: "r3_prepositions",
+    num: "3",
+    title: "Präpositionen: Akkusativ, Dativ & Wechselpräpositionen",
+    category: "Prepositions",
+    color: "var(--green)",
+    summary: "Prepositions determine the case of the noun that follows. Wechselpräpositionen (Two-way prepositions) depend on whether there is movement/destination or static location!",
+    formula: "• Only Akkusativ (DOGFU): Durch, Ohne, Gegen, Für, Um\n• Only Dativ (ABMNSVZ): Aus, Bei, Mit, Nach, Seit, Von, Zu, Gegenüber\n• Wechselpräpositionen (an, auf, hinter, in, neben, über, unter, vor, zwischen):\n   - Wohin? (Movement / Destination) → AKKUSATIV\n   - Wo? (Static location / Position) → DATIV",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Question</th><th>Case</th><th>Action / Verb Type</th><th>Example</th></tr>
+        <tr><td><b>Wohin? (Destination)</b></td><td><b>Akkusativ</b></td><td>stellen, legen, hängen, gehen</td><td>Ich lege das Buch <b>auf den Tisch</b>.</td></tr>
+        <tr><td><b>Wo? (Location)</b></td><td><b>Dativ</b></td><td>stehen, liegen, hängen, sein</td><td>Das Buch liegt <b>auf dem Tisch</b>.</td></tr>
+        <tr><td><b>Dativ Preps</b></td><td><b>Dativ</b></td><td>mit, nach, bei, seit, von, zu</td><td>Ich fahre <b>mit dem Bus</b> zur Arbeit.</td></tr>
+        <tr><td><b>Akkusativ Preps</b></td><td><b>Akkusativ</b></td><td>für, ohne, um, durch, gegen</td><td>Das Geschenk ist <b>für meinen Vater</b>.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich fahre jeden Tag mit dem Zug (Dat) zur Arbeit (Dat).", en:"I travel by train to work every day."},
+      {de:"Er wartet seit zwei Stunden auf den Bus (Akk).", en:"He has been waiting for the bus for 2 hours. (warten auf + Akk)"},
+      {de:"Wir treffen uns vor dem Kino (Dat).", en:"We are meeting in front of the cinema. (Wo? → Dativ)"}
+    ],
+    drills: [
+      {
+        prompt: "Er stellt die Lampe neben ___ Schreibtisch.",
+        en: "He puts the lamp next to the desk.",
+        options: ["den", "dem", "der", "des"],
+        correct: 0,
+        explain: "'stellen' is an action of movement (Wohin?) → Akkusativ masculine: 'neben den Schreibtisch'."
+      },
+      {
+        prompt: "Die Lampe steht neben ___ Schreibtisch.",
+        en: "The lamp is standing next to the desk.",
+        options: ["dem", "den", "der", "des"],
+        correct: 0,
+        explain: "'stehen' is static location (Wo?) → Dativ masculine: 'neben dem Schreibtisch'."
+      },
+      {
+        prompt: "Ich wohne schon ___ einem Jahr in Frankfurt.",
+        en: "I have already been living in Frankfurt for one year.",
+        options: ["seit", "für", "vor", "ab"],
+        correct: 0,
+        explain: "'seit' takes Dativ and expresses an action that began in the past and is still ongoing."
+      },
+      {
+        prompt: "Arun interessiert sich sehr ___ die deutsche Kultur.",
+        en: "Arun is very interested in German culture.",
+        options: ["für", "über", "an", "mit"],
+        correct: 0,
+        explain: "The fixed preposition for 'sich interessieren' is always 'für + Akkusativ'."
+      }
+    ]
+  },
+
+  {
+    id: "r4_adjectives",
+    num: "4",
+    title: "Adjektiv-Endungen (The 3 Declension Tables)",
+    category: "Adjectives",
+    color: "var(--gold)",
+    summary: "Adjective endings change depending on whether there is a definite article (der), an indefinite article (ein), or no article at all.",
+    formula: "• Type 1 (after der/die/das): Weak declension → mostly -e in Singular, -en everywhere else (Plural & all Dativ/Genitiv/Akk-masc)!\n• Type 2 (after ein/eine/kein/mein): Mixed declension → reflects gender endings in Nom (-er, -es, -e), -en everywhere in Dativ/Genitiv/Plural!\n• Type 3 (no article): Strong declension → adjective carries the definite article endings (e.g. kalter Kaffee, frische Milch).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Case &amp; Gender</th><th>After der/die/das</th><th>After ein/kein/mein</th><th>Zero Article (Without article)</th></tr>
+        <tr><td>Nom. Maskulin</td><td>der neu<b>e</b> Wagen</td><td>ein neu<b>er</b> Wagen</td><td>neu<b>er</b> Wagen</td></tr>
+        <tr><td>Akk. Maskulin</td><td>den neu<b>en</b> Wagen</td><td>einen neu<b>en</b> Wagen</td><td>neu<b>en</b> Wagen</td></tr>
+        <tr><td>Nom/Akk Neutral</td><td>das neu<b>e</b> Haus</td><td>ein neu<b>es</b> Haus</td><td>neu<b>es</b> Haus</td></tr>
+        <tr><td>Nom/Akk Feminin</td><td>die neu<b>e</b> Stadt</td><td>eine neu<b>e</b> Stadt</td><td>neu<b>e</b> Stadt</td></tr>
+        <tr><td>All Dativ &amp; Plural</td><td>dem/den neu<b>en</b> ...</td><td>einem/meinen neu<b>en</b> ...</td><td>neu<b>en</b> ... (Dat pl: -en)</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich habe einen interessanten Film gesehen.", en:"I saw an interesting movie. (ein- + Akk masc → -en)"},
+      {de:"Der freundliche Nachbar hat mir geholfen.", en:"The friendly neighbor helped me. (der + Nom masc → -e)"},
+      {de:"Wir trinken gern kalten Tee im Sommer.", en:"We like drinking cold tea in summer. (Zero article Akk masc → -en)"}
+    ],
+    drills: [
+      {
+        prompt: "Er hat sich ein ___ Auto gekauft.",
+        en: "He bought himself a fast car.",
+        options: ["schnelles", "schnelle", "schneller", "schnellen"],
+        correct: 0,
+        explain: "'Auto' is neutral (das Auto). After 'ein' in Akkusativ, neutral takes '-es' → 'ein schnelles Auto'."
+      },
+      {
+        prompt: "Ich danke der ___ Dame für ihre Hilfe.",
+        en: "I thank the friendly lady for her help.",
+        options: ["freundlichen", "freundliche", "freundlicher", "freundlichem"],
+        correct: 0,
+        explain: "In Dativ, adjective endings after a definite article ('der Dame') are ALWAYS '-en'!"
+      },
+      {
+        prompt: "Auf der Straße steht ein groß___ Baum.",
+        en: "On the street stands a tall tree.",
+        options: ["er", "es", "en", "e"],
+        correct: 0,
+        explain: "'der Baum' is masculine subject (Nominativ). After 'ein', it must take the signal ending '-er' → 'ein großer Baum'."
+      }
+    ]
+  },
+
+  {
+    id: "r5_konjunktiv",
+    num: "5",
+    title: "Konjunktiv II (Polite Requests, Wishes, Advice)",
+    category: "Verbs & Mood",
+    color: "var(--purple)",
+    summary: "Konjunktiv II is essential for everyday spoken German! It allows you to make polite requests, give friendly advice, and express hypothetical dreams.",
+    formula: "• Polite requests: Könnten Sie...? / Würden Sie bitte...? / Ich hätte gern...\n• Advice: An deiner Stelle würde ich... / Du solltest...\n• Unreal conditions / Dreams: Wenn ich reich wäre, würde ich um die Welt reisen.",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Infinitive</th><th>Konjunktiv II</th><th>Spoken Example</th></tr>
+        <tr><td><b>können</b></td><td><b>könnte / könnten</b></td><td><b>Könnten</b> Sie mir bitte den Weg zeigen?</td></tr>
+        <tr><td><b>haben</b></td><td><b>hätte / hätten</b></td><td>Ich <b>hätte</b> gern ein Glas Wasser.</td></tr>
+        <tr><td><b>sein</b></td><td><b>wäre / wären</b></td><td>Es <b>wäre</b> schön, wenn du kommen könntest.</td></tr>
+        <tr><td><b>werden</b></td><td><b>würde + Infinitiv</b></td><td>Ich <b>würde</b> gern mehr Sport machen.</td></tr>
+        <tr><td><b>sollen</b></td><td><b>sollte / sollten</b></td><td>Du <b>solltest</b> zum Arzt gehen.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Könnten Sie das bitte noch einmal wiederholen?", en:"Could you please repeat that once more? (Crucial for exams!)"},
+      {de:"Ich hätte gern einen Termin bei Herrn Dr. Weber.", en:"I would like to have an appointment with Dr. Weber."},
+      {de:"Wenn ich mehr Zeit hätte, würde ich jeden Tag Deutsch üben.", en:"If I had more time, I would practice German every day."}
+    ],
+    drills: [
+      {
+        prompt: "Entschuldigung, ___ Sie mir bitte sagen, wo der Bahnhof ist?",
+        en: "Excuse me, could you please tell me where the train station is?",
+        options: ["könnten", "können", "würden", "hätten"],
+        correct: 0,
+        explain: "'Könnten Sie...' is the standard polite formula for requesting information."
+      },
+      {
+        prompt: "Guten Tag, ich ___ gern zwei Brötchen und einen Kaffee.",
+        en: "Hello, I would like two bread rolls and a coffee.",
+        options: ["hätte", "wäre", "würde", "könnte"],
+        correct: 0,
+        explain: "'Ich hätte gern...' is the authentic German way to order in bakeries, cafes, and shops."
+      },
+      {
+        prompt: "Du siehst sehr müde aus. An deiner Stelle ___ ich heute früher schlafen gehen.",
+        en: "You look very tired. In your shoes, I would go to sleep earlier today.",
+        options: ["würde", "wäre", "hätte", "könnte"],
+        correct: 0,
+        explain: "Giving advice with 'An deiner Stelle' requires 'würde + Infinitiv'."
+      }
+    ]
+  },
+
+  {
+    id: "r6_passiv",
+    num: "6",
+    title: "Passiv (Passive Voice in Present & Past)",
+    category: "Verbs",
+    color: "var(--red)",
+    summary: "The passive voice is used when the action or the result is more important than who performs it. It is tested heavily in B1 reading, official letters, and news.",
+    formula: "• Präsens Passiv: werden (conjugated) + Partizip II (at the end)\n• Präteritum Passiv: wurden + Partizip II\n• Passiv mit Modalverb: Modalverb (Pos 2) + Partizip II + werden (at end)\n• By whom? → von + Dativ",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Tense</th><th>Structure</th><th>Example</th></tr>
+        <tr><td><b>Präsens Passiv</b></td><td>wird / werden + Partizip II</td><td>Das Auto <b>wird</b> in der Werkstatt <b>repariert</b>.</td></tr>
+        <tr><td><b>Präteritum Passiv</b></td><td>wurde / wurden + Partizip II</td><td>Das Gebäude <b>wurde</b> im Jahr 1995 <b>gebaut</b>.</td></tr>
+        <tr><td><b>Mit Modalverb</b></td><td>muss / kann + Partizip II + werden</td><td>Die Rechnung <b>muss</b> bis morgen <b>bezahlt werden</b>.</td></tr>
+        <tr><td><b>Mit Urheber (Agent)</b></td><td>von + Dativ</td><td>Der Brief wurde <b>von der Chefin</b> unterschrieben.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Hier wird Deutsch gesprochen.", en:"German is spoken here."},
+      {de:"Die Pakete werden jeden Morgen zugestellt.", en:"The packages are delivered every morning."},
+      {de:"Der Patient wurde vom Arzt gründlich untersucht.", en:"The patient was thoroughly examined by the doctor."}
+    ],
+    drills: [
+      {
+        prompt: "Das neue Rathaus ___ nächstes Jahr eröffnet.",
+        en: "The new town hall is being opened next year.",
+        options: ["wird", "ist", "hat", "wurde"],
+        correct: 0,
+        explain: "Present tense passive with singular subject ('das neue Rathaus') uses 'wird + eröffnet'."
+      },
+      {
+        prompt: "Alle Aufgaben müssen bis Freitag erledigt ___.",
+        en: "All tasks must be finished by Friday.",
+        options: ["werden", "worden", "geworden", "sein"],
+        correct: 0,
+        explain: "Modal verbs with passive take 'Partizip II + werden' at the end of the sentence."
+      },
+      {
+        prompt: "Das Buch ___ von einem berühmten Autor geschrieben.",
+        en: "The book was written by a famous author.",
+        options: ["wurde", "worden", "hat", "ist"],
+        correct: 0,
+        explain: "Past action completed in narrative form (Präteritum Passiv) uses 'wurde + Partizip II'."
+      }
+    ]
+  },
+
+  {
+    id: "r7_relativsatz",
+    num: "7",
+    title: "Relativsätze (Relative Clauses)",
+    category: "Syntax",
+    color: "var(--blue)",
+    summary: "Relative clauses give extra information about a noun. The pronoun matches the GENDER and NUMBER of the noun, but its CASE depends on its grammatical job inside the relative clause!",
+    formula: "• Masculine: der (Nom), den (Akk), dem (Dat), dessen (Gen)\n• Neutral: das (Nom), das (Akk), dem (Dat), dessen (Gen)\n• Feminine: die (Nom), die (Akk), der (Dat), deren (Gen)\n• Plural: die (Nom), die (Akk), denen (Dat), deren (Gen)\n• Rule: Always separated by a comma, and the conjugated verb moves to the VERY END!",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Role inside Clause</th><th>Masculine (der Mann)</th><th>Neutral (das Kind)</th><th>Feminine (die Frau)</th><th>Plural (die Freunde)</th></tr>
+        <tr><td><b>Nominativ (Subject)</b></td><td>..., <b>der</b> hier wohnt</td><td>..., <b>das</b> dort spielt</td><td>..., <b>die</b> nett ist</td><td>..., <b>die</b> uns helfen</td></tr>
+        <tr><td><b>Akkusativ (Direct obj)</b></td><td>..., <b>den</b> ich kenne</td><td>..., <b>das</b> ich mag</td><td>..., <b>die</b> ich suche</td><td>..., <b>die</b> wir einladen</td></tr>
+        <tr><td><b>Dativ (Indirect obj)</b></td><td>..., <b>dem</b> ich helfe</td><td>..., <b>dem</b> es gehört</td><td>..., <b>der</b> ich danke</td><td>..., <b>denen</b> wir vertrauen</td></tr>
+        <tr><td><b>Mit Präposition</b></td><td>..., mit <b>dem</b> ich arbeite</td><td>..., in <b>dem</b> ich wohne</td><td>..., von <b>der</b> ich spreche</td><td>..., für <b>die</b> ich sorge</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Das ist der Kollege, den ich gestern kennengelernt habe.", en:"That is the colleague whom I met yesterday."},
+      {de:"Die Wohnung, in der ich lebe, ist sehr gemütlich.", en:"The apartment in which I live is very cozy."},
+      {de:"Der Mann, dem das Auto gehört, ist mein Nachbar.", en:"The man to whom the car belongs is my neighbor."}
+    ],
+    drills: [
+      {
+        prompt: "Das ist der Arzt, ___ mir so gut geholfen hat.",
+        en: "That is the doctor who helped me so well.",
+        options: ["der", "den", "dem", "dessen"],
+        correct: 0,
+        explain: "'der Arzt' is masculine, and in the relative clause he is the subject (Nominativ) → 'der'."
+      },
+      {
+        prompt: "Kennst du die Frau, mit ___ Thomas gestern gesprochen hat?",
+        en: "Do you know the woman with whom Thomas spoke yesterday?",
+        options: ["der", "die", "den", "dessen"],
+        correct: 0,
+        explain: "'die Frau' is feminine. After the preposition 'mit' (which strictly requires Dativ), it becomes 'mit der'."
+      },
+      {
+        prompt: "Das Buch, ___ ich gerade lese, ist sehr spannend.",
+        en: "The book that I am currently reading is very exciting.",
+        options: ["das", "dem", "den", "dessen"],
+        correct: 0,
+        explain: "'das Buch' is neutral. As the direct object (Akkusativ) of 'lese', it remains 'das'."
+      }
+    ]
+  },
+
+  {
+    id: "r8_infinitiv",
+    num: "8",
+    title: "Infinitiv mit „zu“ & „um ... zu“ vs. „damit“",
+    category: "Syntax",
+    color: "var(--green)",
+    summary: "Infinitives with 'zu' connect actions. The distinction between 'um ... zu' and 'damit' is a classic exam question!",
+    formula: "• Infinitiv mit zu: After certain verbs/adjectives (Es ist wichtig,... / Ich habe vor, ... zu machen).\n• um ... zu + Infinitiv: Indicates PURPOSE when BOTH clauses have the SAME SUBJECT.\n• damit + Nebensatz: Indicates PURPOSE when clauses have DIFFERENT SUBJECTS (Verb moves to the end!).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Structure</th><th>Subject Condition</th><th>Example</th></tr>
+        <tr><td><b>um ... zu + Infinitiv</b></td><td>Same Subject in both clauses</td><td><b>Ich</b> lerne Deutsch, <b>um</b> eine gute Arbeit <b>zu finden</b>.</td></tr>
+        <tr><td><b>damit + Verb am Ende</b></td><td>Different Subjects</td><td><b>Ich</b> lerne viel, <b>damit</b> <b>meine Familie</b> stolz auf mich <b>ist</b>.</td></tr>
+        <tr><td><b>Infinitiv mit „zu“</b></td><td>after vorhaben, hoffen, versuchen, wichtig sein...</td><td>Ich versuche, jeden Tag pünktlich <b>zu sein</b>.</td></tr>
+        <tr><td><b>Trennbare Verben mit „zu“</b></td><td>„zu“ goes BETWEEN prefix and stem</td><td>Ich habe vergessen, das Licht <b>auszumachen</b>.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich gehe zum Deutschkurs, um die B1-Prüfung zu bestehen.", en:"I go to German class in order to pass the B1 exam. (Same subject)"},
+      {de:"Der Lehrer spricht deutlich, damit alle Schüler ihn verstehen.", en:"The teacher speaks clearly so that all students understand him. (Different subjects)"},
+      {de:"Es ist nicht leicht, eine bezahlbare Wohnung zu finden.", en:"It is not easy to find an affordable apartment."}
+    ],
+    drills: [
+      {
+        prompt: "Arun spart Geld, ___ eine Reise nach Deutschland machen zu können.",
+        en: "Arun saves money in order to be able to take a trip to Germany.",
+        options: ["um", "damit", "weil", "dass"],
+        correct: 0,
+        explain: "Same subject ('Arun') + infinitive with 'zu' at the end requires 'um ... zu'."
+      },
+      {
+        prompt: "Die Mutter kocht gesundes Essen, ___ die Kinder gesund bleiben.",
+        en: "The mother cooks healthy food so that the children stay healthy.",
+        options: ["damit", "um", "weil", "obwohl"],
+        correct: 0,
+        explain: "The subjects are different ('Die Mutter' vs 'die Kinder') → 'damit' must be used!"
+      },
+      {
+        prompt: "Ich habe ganz vergessen, dich gestern ___.",
+        en: "I completely forgot to call you yesterday.",
+        options: ["anzurufen", "zu anrufen", "anrufen zu", "angerufen"],
+        correct: 0,
+        explain: "For separable verbs, '-zu-' is inserted between prefix and root verb: 'an-zu-rufen'."
+      }
+    ]
+  },
+
+  {
+    id: "r9_connectors",
+    num: "9",
+    title: "Zweiteilige Konnektoren (Two-Part Connectors)",
+    category: "Connectors",
+    color: "var(--gold)",
+    summary: "Using two-part connectors instantly elevates your German from basic A2 to advanced B1! Examiners award high marks when they hear them in speaking and writing.",
+    formula: "• nicht nur ... sondern auch (not only ... but also — strong positive addition)\n• sowohl ... als auch (both ... and)\n• weder ... noch (neither ... nor — double negative, no 'nicht' needed!)\n• entweder ... oder (either ... or — alternative)\n• zwar ... aber (admittedly ... but — concession)\n• je ... desto / umso (the more ... the more — comparative)",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Connector Pair</th><th>Function</th><th>Example</th></tr>
+        <tr><td><b>nicht nur ... sondern auch</b></td><td>Positive addition</td><td>Er spricht <b>nicht nur</b> Deutsch, <b>sondern auch</b> Englisch und Tamil.</td></tr>
+        <tr><td><b>sowohl ... als auch</b></td><td>Both / And</td><td>Wir bieten <b>sowohl</b> Vormittags- <b>als auch</b> Abendkurse an.</td></tr>
+        <tr><td><b>weder ... noch</b></td><td>Double negation</td><td>Ich trinke <b>weder</b> Kaffee <b>noch</b> Alkohol.</td></tr>
+        <tr><td><b>zwar ... aber</b></td><td>Concession / Contrast</td><td>Die Wohnung ist <b>zwar</b> klein, <b>aber</b> sehr zentral.</td></tr>
+        <tr><td><b>je ... desto</b></td><td>Proportional</td><td><b>Je</b> mehr du sprichst, <b>desto</b> schneller lernst du.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich möchte nicht nur die Prüfung bestehen, sondern auch fließend sprechen.", en:"I want not only to pass the exam, but also to speak fluently."},
+      {de:"Je mehr Vokabeln ich lerne, desto besser verstehe ich Zeitungsartikel.", en:"The more vocabulary I learn, the better I understand newspaper articles."},
+      {de:"Er hat weder Zeit noch Geld für einen langen Urlaub.", en:"He has neither time nor money for a long vacation."}
+    ],
+    drills: [
+      {
+        prompt: "Er spricht ___ gut Deutsch als auch fließend Englisch.",
+        en: "He speaks both good German and fluent English.",
+        options: ["sowohl", "nicht nur", "weder", "zwar"],
+        correct: 0,
+        explain: "The partner connector for 'als auch' is always 'sowohl' ('sowohl ... als auch')."
+      },
+      {
+        prompt: "___ mehr du wiederholst, desto sicherer fühlst du dich bei der Prüfung.",
+        en: "The more you repeat, the more confident you feel in the exam.",
+        options: ["Je", "Wie", "Wenn", "Als"],
+        correct: 0,
+        explain: "The comparative connector construction always begins with 'Je + Komparativ, desto/umso + Komparativ'."
+      },
+      {
+        prompt: "Die Stelle ist ___ anstrengend, aber das Team ist fantastisch.",
+        en: "The job is admittedly exhausting, but the team is fantastic.",
+        options: ["zwar", "nicht", "weder", "entweder"],
+        correct: 0,
+        explain: "The pairing 'zwar ... aber' expresses concession: admitting a downside while emphasizing an upside."
+      }
+    ]
+  },
+
+  {
+    id: "r10_reflexiv",
+    num: "10",
+    title: "Reflexive Verben (Akkusativ vs. Dativ Reflexiv)",
+    category: "Verbs",
+    color: "var(--purple)",
+    summary: "Reflexive verbs express actions that reflect back onto the subject. Knowing when to use 'mich/dich' (Akkusativ) versus 'mir/dir' (Dativ) makes your German sound like a native.",
+    formula: "• General Rule: If there is NO OTHER direct object, use AKKUSATIV (mich, dich, sich, uns, euch, sich).\n• Special Dativ Rule: If a SPECIFIC BODY PART or OBJECT is named, the pronoun shifts to DATIV (mir, dir, sich, uns, euch, sich)!\n• Example: Ich wasche mich (Akk). BUT: Ich wasche mir (Dat) die Hände (Akk).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Person</th><th>Akkusativ (mich)</th><th>Dativ (mir)</th><th>Common Example</th></tr>
+        <tr><td>ich</td><td><b>mich</b></td><td><b>mir</b></td><td>Ich freue <b>mich</b>. / Ich putze <b>mir</b> die Zähne.</td></tr>
+        <tr><td>du</td><td><b>dich</b></td><td><b>dir</b></td><td>Du beeilst <b>dich</b>. / Du ziehst <b>dir</b> eine Jacke an.</td></tr>
+        <tr><td>er/sie/es/man</td><td><b>sich</b></td><td><b>sich</b></td><td>Er erinnert <b>sich</b> an den Termin.</td></tr>
+        <tr><td>wir</td><td><b>uns</b></td><td><b>uns</b></td><td>Wir unterhalten <b>uns</b> über Politik.</td></tr>
+        <tr><td>ihr</td><td><b>euch</b></td><td><b>euch</b></td><td>Habt ihr <b>euch</b> gut erholt?</td></tr>
+        <tr><td>sie/Sie</td><td><b>sich</b></td><td><b>sich</b></td><td>Setzen Sie <b>sich</b> bitte!</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich ziehe mich schnell an.", en:"I get dressed quickly. (Akkusativ reflexiv)"},
+      {de:"Ich ziehe mir einen warmen Pullover an.", en:"I put on a warm sweater. (Dativ reflexiv because 'Pullover' is direct object!)"},
+      {de:"Wir freuen uns sehr auf das Wochenende.", en:"We are very much looking forward to the weekend."}
+    ],
+    drills: [
+      {
+        prompt: "Ich muss ___ beeilen, sonst verpasse ich den Bus.",
+        en: "I have to hurry, otherwise I'll miss the bus.",
+        options: ["mich", "mir", "dich", "sich"],
+        correct: 0,
+        explain: "'sich beeilen' is strictly Akkusativ reflexive without a second object → 'Ich muss mich beeilen'."
+      },
+      {
+        prompt: "Vor dem Essen wasche ich ___ immer gründlich die Hände.",
+        en: "Before eating I always wash my hands thoroughly.",
+        options: ["mir", "mich", "dir", "sich"],
+        correct: 0,
+        explain: "Because 'die Hände' is the direct object (Akkusativ), the reflexive pronoun becomes Dativ: 'wasche ich mir die Hände'."
+      },
+      {
+        prompt: "Können Sie ___ bitte kurz vorstellen?",
+        en: "Could you please briefly introduce yourself? (Crucial oral exam prompt!)",
+        options: ["sich", "Ihnen", "mich", "uns"],
+        correct: 0,
+        explain: "Formal 'Sie' always takes 'sich' as the reflexive pronoun."
+      }
+    ]
+  },
+
+  {
+    id: "r11_paragraph",
+    num: "11",
+    title: "Paragraph Making & Text Cohesion (Absatzbau & Textverknüpfung)",
+    category: "Text Structure",
+    color: "var(--red)",
+    summary: "In German writing and speaking exams, a high-scoring paragraph follows a strict 4-step architecture: Thesensatz (Topic sentence) → Begründung (Why/Explanation) → Belege/Beispiel (Example/Evidence) → Fazit/Überleitung (Conclusion). Connect sentences logically using transition words!",
+    formula: "• Stage 1 (Thesensatz / Topic): Introduce main point (Meiner Ansicht nach ist...)\n• Stage 2 (Begründung / Reason): Explain why (Denn..., da..., aus diesem Grund...)\n• Stage 3 (Beispiel / Evidence): Concrete proof (Ein typisches Beispiel dafür ist... / Beispielsweise...)\n• Stage 4 (Gegenüberstellung / Contrast): Contrast aspects (Einerseits ... andererseits / Zwar ... aber)\n• Stage 5 (Fazit / Conclusion): Wrap up (Zusammenfassend lässt sich sagen, dass...)",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Paragraph Function</th><th>Essential Connectors &amp; Phrases</th><th>Example in Context</th></tr>
+        <tr><td><b>Opening / Topic</b></td><td>Zunächst, Am Anfang, Meiner Meinung nach</td><td><b>Zunächst einmal</b> ist regelmäßiger Sport für die Gesundheit wichtig.</td></tr>
+        <tr><td><b>Adding Points</b></td><td>Darüber hinaus, Außerdem, Nicht nur ... sondern auch</td><td><b>Darüber hinaus</b> verbessert Sport die Konzentration bei der Arbeit.</td></tr>
+        <tr><td><b>Giving Examples</b></td><td>Beispielsweise, Ein typisches Beispiel ist...</td><td><b>Ein typisches Beispiel dafür ist</b> das tägliche Joggen im Park.</td></tr>
+        <tr><td><b>Contrasting</b></td><td>Einerseits ... andererseits, Zwar ... aber, Jedoch</td><td><b>Andererseits</b> sollte man es mit dem Training nicht übertreiben.</td></tr>
+        <tr><td><b>Concluding / Fazit</b></td><td>Zusammenfassend lässt sich sagen, dass...</td><td><b>Zusammenfassend lässt sich sagen, dass</b> Mäßigung der Schlüssel ist.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Zusammenfassend lässt sich sagen, dass eine gesunde Ernährung viele Krankheiten verhindert.", en:"In conclusion it can be said that a healthy diet prevents many illnesses."},
+      {de:"Darüber hinaus zeigen neue Studien, dass regelmäßige Bewegung den Stress abbaut.", en:"Furthermore, new studies show that regular exercise reduces stress."},
+      {de:"Einerseits spart man Zeit beim Online-Shopping, andererseits fehlt der persönliche Kontakt.", en:"On the one hand you save time online shopping, on the other hand personal contact is missing."}
+    ],
+    drills: [
+      {
+        prompt: "___ lässt sich sagen, dass Fremdsprachenkenntnisse die Karrierechancen deutlich verbessern.",
+        en: "In conclusion it can be said that foreign language skills significantly improve career opportunities.",
+        options: ["Zusammenfassend", "Zunächst", "Beispielsweise", "Darüber hinaus"],
+        correct: 0,
+        explain: "'Zusammenfassend lässt sich sagen, dass...' is the standard B1 paragraph conclusion formula (Fazit)."
+      },
+      {
+        prompt: "Das Internet bietet viele Vorteile. ___ birgt die ständige Erreichbarkeit auch gesundheitliche Risiken.",
+        en: "The internet offers many advantages. However, constant availability also carries health risks.",
+        options: ["Allerdings", "Beispielsweise", "Deshalb", "Zunächst"],
+        correct: 0,
+        explain: "'Allerdings' / 'Jedoch' introduces a contrasting limitation or counter-argument within a text paragraph."
+      }
+    ]
+  },
+
+  {
+    id: "r12_comma",
+    num: "12",
+    title: "Kommasetzung (German Comma Rules)",
+    category: "Punctuation & Syntax",
+    color: "var(--blue)",
+    summary: "In German, commas are strictly grammatical, not musical pauses! Missing commas between clauses will cost points in the writing exam.",
+    formula: "• Rule 1: Always put a comma between Hauptsatz and Nebensatz (weil, dass, wenn, obwohl, da...).\n• Rule 2: Always put a comma before and after a Relativsatz (Der Mann, den ich kenne, ist nett).\n• Rule 3: Put a comma before contrasting connectors: aber, sondern, denn, doch.\n• Rule 4: Put a comma before Infinitivgruppen with um...zu, ohne...zu, statt...zu, or depending on a noun/verb (Ich habe vor, Deutsch zu lernen).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Sentence Structure</th><th>Comma Rule</th><th>Example</th></tr>
+        <tr><td><b>Nebensatz</b></td><td>Comma BEFORE connector</td><td>Ich bleibe zu Hause<b>, weil</b> ich mich krank fühle.</td></tr>
+        <tr><td><b>Relativsatz</b></td><td>Comma BEFORE and AFTER</td><td>Der Kollege<b>, der neu im Team ist,</b> spricht fließend Deutsch.</td></tr>
+        <tr><td><b>Infinitiv mit „zu“</b></td><td>Comma before infinitive group</td><td>Er lernt viel<b>, um</b> die B1-Prüfung zu bestehen.</td></tr>
+        <tr><td><b>Kontrast-Konnektoren</b></td><td>Comma before aber/sondern/denn</td><td>Er ist müde<b>, aber</b> er arbeitet weiter.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich rufe dich an, sobald ich am Flughafen gelandet bin.", en:"I will call you as soon as I have landed at the airport."},
+      {de:"Die Wohnung, in der wir wohnen, ist sehr hell.", en:"The apartment in which we live is very bright."},
+      {de:"Vergiss bitte nicht, die Haustür abzuschließen.", en:"Please don't forget to lock the front door."}
+    ],
+    drills: [
+      {
+        prompt: "Ich freue mich sehr___ dass du mich am Wochenende besuchst.",
+        en: "I am very glad that you are visiting me on the weekend.",
+        options: [", (Komma Pflicht)", "kein Komma", "; (Semikolon)", ": (Doppelpunkt)"],
+        correct: 0,
+        explain: "A comma is mandatory before subordinating connectors like 'dass', 'weil', 'wenn', 'obwohl'!"
+      },
+      {
+        prompt: "Er versucht jeden Tag___ mindestens dreißig Minuten Deutsch zu üben.",
+        en: "He tries every day to practice German for at least thirty minutes.",
+        options: [", (Komma vor Infinitivgruppe)", "kein Komma", "- (Bindestrich)", "; (Semikolon)"],
+        correct: 0,
+        explain: "Infinitivgruppen depending on verbs like 'versuchen' are separated by a comma."
+      }
+    ]
+  },
+
+  {
+    id: "r13_ndeklination",
+    num: "13",
+    title: "N-Deklination (Weak Masculine Nouns)",
+    category: "Nouns & Cases",
+    color: "var(--green)",
+    summary: "A special group of masculine nouns add -(e)n in EVERY case (Akkusativ, Dativ, Genitiv) EXCEPT Nominative singular! This is one of the most frequent traps in B1 grammar tests.",
+    formula: "• Affected Nouns: Masculine living beings ending in -e (der Kollege, der Kunde, der Junge, der Neffe), nationalities (der Franzose, der Pole), and loanwords in -ist, -ent, -ant (der Polizist, der Student, der Praktikant, der Herr, der Nachbar).\n• Nominativ: der Kollege (NO -n!)\n• Akkusativ: den Kolleg<b>en</b>\n• Dativ: dem Kolleg<b>en</b>\n• Genitiv: des Kolleg<b>en</b> (NO -s!)",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Case</th><th>der Kollege</th><th>der Kunde</th><th>der Herr</th><th>der Nachbar</th></tr>
+        <tr><td><b>Nominativ</b></td><td>der Kollege</td><td>der Kunde</td><td>der Herr</td><td>der Nachbar</td></tr>
+        <tr><td><b>Akkusativ</b></td><td>den Kolleg<b>en</b></td><td>den Kund<b>en</b></td><td>den Herr<b>n</b></td><td>den Nachbar<b>n</b></td></tr>
+        <tr><td><b>Dativ</b></td><td>dem Kolleg<b>en</b></td><td>dem Kund<b>en</b></td><td>dem Herr<b>n</b></td><td>dem Nachbar<b>n</b></td></tr>
+        <tr><td><b>Genitiv</b></td><td>des Kolleg<b>en</b></td><td>des Kund<b>en</b></td><td>des Herr<b>n</b></td><td>des Nachbar<b>n</b></td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich habe gestern mit dem neuen Kollegen (Dat) gesprochen.", en:"I spoke with the new colleague yesterday."},
+      {de:"Kennen Sie diesen Herrn (Akk)?", en:"Do you know this gentleman?"},
+      {de:"Der Sachbearbeiter hilft dem Kunden (Dat) sofort.", en:"The clerk helps the customer immediately."}
+    ],
+    drills: [
+      {
+        prompt: "Der Chef möchte heute Nachmittag mit dem neu___ sprechen.",
+        en: "The boss would like to speak with the new intern this afternoon.",
+        options: ["Praktikanten", "Praktikant", "Praktikants", "Praktikantenes"],
+        correct: 0,
+        explain: "'der Praktikant' is an N-Deklination noun! In Dativ ('mit dem'), it adds '-en' → 'dem Praktikanten'."
+      },
+      {
+        prompt: "Hast du gestern den neu___ im Hausflur gesehen?",
+        en: "Did you see the new neighbor in the hallway yesterday?",
+        options: ["Nachbarn", "Nachbar", "Nachbars", "Nachbare"],
+        correct: 0,
+        explain: "'der Nachbar' belongs to N-Deklination. In Akkusativ ('den'), it takes '-n' → 'den Nachbarn'."
+      }
+    ]
+  },
+
+  {
+    id: "r14_pronominaladverb",
+    num: "14",
+    title: "Da- & Wo-Komposita (Pronominaladverbien)",
+    category: "Pronouns & Prepositions",
+    color: "var(--gold)",
+    summary: "When combining prepositions with THINGS or WHOLE CLAUSES (not people!), German creates compound words using da(r)- and wo(r)- (darauf, darüber, woran, worauf).",
+    formula: "• For PEOPLE: Use Preposition + Pronoun (Ich warte auf Thomas → Ich warte auf ihn / Auf wen wartest du?)\n• For THINGS / IDEAS: Use da(r)- + Preposition (Ich warte auf den Bus → Ich warte darauf / Worauf wartest du?)\n• Vowel rule: If preposition begins with a vowel, insert 'r': da + r + auf = darauf, wo + r + über = worüber.\n• Leading into Nebensatz: Ich freue mich darauf, dass wir uns bald sehen.",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Question (Things)</th><th>Question (People)</th><th>Statement (Things)</th><th>Statement (People)</th></tr>
+        <tr><td><b>Worauf</b> wartest du?</td><td><b>Auf wen</b> wartest du?</td><td>Ich warte <b>darauf</b>.</td><td>Ich warte <b>auf ihn</b>.</td></tr>
+        <tr><td><b>Worüber</b> sprecht ihr?</td><td><b>Über wen</b> sprecht ihr?</td><td>Wir sprechen <b>darüber</b>.</td><td>Wir sprechen <b>über sie</b>.</td></tr>
+        <tr><td><b>Woran</b> denkst du?</td><td><b>An wen</b> denkst du?</td><td>Ich denke <b>daran</b>.</td><td>Ich denke <b>an dich</b>.</td></tr>
+        <tr><td><b>Womit</b> fährst du?</td><td><b>Mit wem</b> fährst du?</td><td>Ich fahre <b>damit</b>.</td><td>Ich fahre <b>mit ihm</b>.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Ich freue mich sehr darauf, dich am Samstag zu treffen.", en:"I am very much looking forward to meeting you on Saturday."},
+      {de:"Worüber ärgerst du dich? — Über den verpassten Zug.", en:"What are you annoyed about? — About the missed train."},
+      {de:"Mit wem gehst du ins Kino? — Mit meinem Bruder.", en:"With whom are you going to the cinema? — With my brother. (Person!)"}
+    ],
+    drills: [
+      {
+        prompt: "Denkst du an den Termin morgen? — Ja, ich denke schon den ganzen Tag ___.",
+        en: "Are you thinking about the appointment tomorrow? — Yes, I have been thinking about it all day.",
+        options: ["daran", "an ihn", "woran", "damit"],
+        correct: 0,
+        explain: "The appointment is a THING, so use Pronominaladverb: 'da + r + an = daran'."
+      },
+      {
+        prompt: "___ sprichst du am Telefon? — Mit meiner Schwester.",
+        en: "Who are you speaking with on the phone? — With my sister.",
+        options: ["Mit wem", "Womit", "Worüber", "Über wen"],
+        correct: 0,
+        explain: "The sister is a PERSON, so ask 'Mit wem?', NOT 'Womit?'."
+      }
+    ]
+  },
+
+  {
+    id: "r15_temporale",
+    num: "15",
+    title: "Temporale Konnektoren (als vs. wenn, während, nachdem, bevor)",
+    category: "Time & Tenses",
+    color: "var(--purple)",
+    summary: "The single biggest exam trap in German time expressions is knowing when to use 'als' versus 'wenn'. All temporal connectors kick the conjugated verb to the end!",
+    formula: "• als: Single, one-time event in the PAST (Als ich ein Kind war, wohnte ich in Indien).\n• wenn: REPEATED event in the past (Immer wenn ich krank war...) OR present/future event (Wenn ich morgen Zeit habe...).\n• nachdem: Past action completed before main clause (Nachdem ich gefrühstückt hatte, ging ich zur Arbeit).\n• während: Simultaneous actions happening at the same time (Während er kochte, las sie ein Buch).\n• bevor: Action happening before another (Wasch dir die Hände, bevor du isst).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Connector</th><th>Time &amp; Frequency</th><th>Example</th></tr>
+        <tr><td><b>als</b></td><td>Einmalig in der Vergangenheit</td><td><b>Als</b> ich 18 Jahre alt war, machte ich den Führerschein.</td></tr>
+        <tr><td><b>wenn</b></td><td>Wiederholt in der Vergangenheit</td><td>Immer <b>wenn</b> die Sonne schien, gingen wir schwimmen.</td></tr>
+        <tr><td><b>wenn</b></td><td>Gegenwart &amp; Zukunft</td><td><b>Wenn</b> du Hilfe brauchst, ruf mich einfach an.</td></tr>
+        <tr><td><b>nachdem</b></td><td>Vorzeitigkeit (Past completion)</td><td><b>Nachdem</b> er die Arbeit beendet hatte, fuhr er nach Hause.</td></tr>
+        <tr><td><b>während</b></td><td>Gleichzeitigkeit (Simultaneous)</td><td><b>Während</b> ich arbeite, höre ich leise Musik.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Als ich zum ersten Mal nach Deutschland kam, sprach ich kein Wort Deutsch.", en:"When I came to Germany for the first time, I spoke no German."},
+      {de:"Immer wenn ich am Wochenende Zeit habe, koche ich für Freunde.", en:"Whenever I have time on the weekend, I cook for friends."},
+      {de:"Bitte schalten Sie das Licht aus, bevor Sie das Büro verlassen.", en:"Please turn off the light before you leave the office."}
+    ],
+    drills: [
+      {
+        prompt: "___ ich 2020 mein Studium abgeschlossen habe, fand ich sofort eine Stelle.",
+        en: "When I completed my studies in 2020, I found a job immediately.",
+        options: ["Als", "Wenn", "Wann", "Seitdem"],
+        correct: 0,
+        explain: "A specific, one-time historical event in the PAST strictly requires 'Als'!"
+      },
+      {
+        prompt: "Immer ___ der Chef das Büro betrat, standen alle Mitarbeiter auf.",
+        en: "Whenever the boss entered the office, all employees stood up.",
+        options: ["wenn", "als", "wann", "während"],
+        correct: 0,
+        explain: "A REPEATED action in the past ('Immer...') strictly requires 'wenn'!"
+      }
+    ]
+  },
+
+  {
+    id: "r16_modalverb",
+    num: "16",
+    title: "Modalverben Nuancen (müssen vs. nicht dürfen vs. nicht brauchen zu)",
+    category: "Modal Verbs",
+    color: "var(--ink)",
+    summary: "German modal verbs have nuanced meanings that mislead English speakers. For instance, 'nicht müssen' DOES NOT mean 'must not' — it means 'you don't have to'!",
+    formula: "• müssen: Absolute obligation (Ich muss die Rechnung bezahlen).\n• NICHT müssen / nicht brauchen zu: NO obligation / Optional (Du musst morgen nicht kommen = You don't have to come).\n• NICHT dürfen: STRICT PROHIBITION / Forbidden (Hier darf man nicht parken = Parking strictly forbidden!).\n• sollen: Recommendation or advice from another person (Der Arzt sagt, ich soll viel Wasser trinken).\n• wollen: Personal internal ambition (Ich will fließend Deutsch sprechen).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Modal Expression</th><th>Meaning in English</th><th>Example</th></tr>
+        <tr><td><b>müssen</b></td><td>Must / have to (Obligation)</td><td>Alle Fahrgäste <b>müssen</b> ein Ticket kaufen.</td></tr>
+        <tr><td><b>nicht müssen</b></td><td>Don't have to (No obligation)</td><td>Heute ist Sonntag, du <b>musst nicht</b> arbeiten.</td></tr>
+        <tr><td><b>nicht dürfen</b></td><td>Must not / Forbidden!</td><td>In der Tankstelle <b>darf man nicht</b> rauchen!</td></tr>
+        <tr><td><b>sollen</b></td><td>Should / Advice from someone</td><td>Du <b>solltest</b> mehr Obst und Gemüse essen.</td></tr>
+        <tr><td><b>können</b></td><td>Can / Able to / Permitted</td><td>Hier <b>kann</b> man kostenlos parken.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Du brauchst dir keine Sorgen zu machen, alles ist in Ordnung.", en:"You don't need to worry, everything is in order."},
+      {de:"In der Bibliothek darf man nicht laut telefonieren.", en:"In the library one must not talk loudly on the phone. (Forbidden!)"},
+      {de:"Ich soll Ihnen schöne Grüße von Herrn Weber ausrichten.", en:"I am supposed to give you warm regards from Mr. Weber."}
+    ],
+    drills: [
+      {
+        prompt: "Hier ist ein Naturschutzgebiet: Man ___ seinen Hund auf keinen Fall frei herumlaufen lassen!",
+        en: "This is a nature reserve: Under no circumstances is one allowed to let their dog run free!",
+        options: ["darf", "muss", "kann", "will"],
+        correct: 0,
+        explain: "Strict legal prohibition ('auf keinen Fall') requires 'darf nicht'!"
+      },
+      {
+        prompt: "Morgen ist Samstag, deshalb ___ du nicht früh aufstehen.",
+        en: "Tomorrow is Saturday, therefore you don't have to get up early.",
+        options: ["musst", "darfst", "sollst", "willst"],
+        correct: 0,
+        explain: "'nicht müssen' indicates absence of obligation (you don't have to), which fits having Saturday off!"
+      }
+    ]
+  }
+];
+
+/* =========================================================================
+   APPLICATION STATE & CONTROLLER (WITH INFINITE QUESTION GENERATOR)
+   ========================================================================= */
+let currentMode = 'study'; // 'study', 'drill', 'stats'
+let selectedRuleId = 'alle'; // Default to all rules mixed for endless training!
+let endlessMode = true; // TRUE = generate questions indefinitely!
+let drillFormat = 'mixed'; // 'mixed' (alternating), 'choice' (gap-fill), 'build' (sentence builder)
+let currentStreak = 0;
+let bestStreak = 0;
+let currentQuestion = null;
+let drillAnswered = false;
+let drillStats = { correct: 0, wrong: 0, total: 0 };
+let buildSlots = []; // Selected tokens in Sentence Builder
+let bankWords = [];  // Available token bank in Sentence Builder
+
+const LS_KEY = "gp_progress_v1";
+let PROGRESS = loadProgress();
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveProgress(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(PROGRESS));
+  }catch(e){}
+}
+
+/* =========================================================================
+   INFINITE DYNAMIC QUESTION GENERATORS FOR ALL 16 GRAMMAR PILLARS
+   ========================================================================= */
+const DYNAMIC_GENERATORS = {
+  r1_wordorder: [
+    ()=>{
+      const subs = [
+        {name:"ich", vEnd:"muss", en:"I have to work longer in the office"},
+        {name:"er", vEnd:"muss", en:"he has to work longer in the office"},
+        {name:"sie", vEnd:"will", en:"she wants to finish the project"},
+        {name:"wir", vEnd:"können", en:"we cannot attend today"}
+      ];
+      const s = subs[Math.floor(Math.random()*subs.length)];
+      return {
+        ruleNum: 1, ruleTitle: "Verb Position & Connectors",
+        prompt: `Ich kann heute nicht zum Kurs kommen, ___ ${s.name} heute länger im Büro arbeiten ${s.vEnd}.`,
+        en: `I cannot come to class today because ${s.en}.`,
+        options: ["weil", "denn", "deshalb", "trotzdem"],
+        correct: 0,
+        explain: `'weil' sends the conjugated verb ('${s.vEnd}') to the very end of the subordinate clause.`
+      };
+    },
+    ()=>{
+      const events = [
+        {cause:"Der Zug hatte 30 Minuten Verspätung", effect:"kam Thomas zu spät zur Besprechung", en:"The train had a 30-minute delay, therefore Thomas arrived late to the meeting."},
+        {cause:"Es hat die ganze Nacht geschneit", effect:"fuhren die Busse heute Morgen sehr langsam", en:"It snowed all night, therefore the buses drove very slowly this morning."},
+        {cause:"Arun hat die ganze Woche fleißig gelernt", effect:"hat er die Grammatik-Prüfung ohne Probleme bestanden", en:"Arun studied diligently all week, therefore he passed the grammar test without problems."}
+      ];
+      const ev = events[Math.floor(Math.random()*events.length)];
+      return {
+        ruleNum: 1, ruleTitle: "Verb Position & Inversion",
+        prompt: `${ev.cause}, ___ ${ev.effect}.`,
+        en: ev.en,
+        options: ["deshalb", "weil", "obwohl", "denn"],
+        correct: 0,
+        explain: "'deshalb' is a Position 1 adverb! The verb follows immediately in Position 2 (inversion)."
+      };
+    },
+    ()=>{
+      const pairs = [
+        {p:"Wir gehen heute im Park spazieren, ___ das Wetter ziemlich kühl ist.", en:"We are going for a walk in the park although the weather is quite chilly.", o:["obwohl","trotzdem","aber","denn"], c:0, exp:"'obwohl' kicks the verb 'ist' to the end of the clause."},
+        {p:"Das Wetter war ziemlich kühl, ___ sind wir im Park spazieren gegangen.", en:"The weather was quite chilly, nevertheless we went for a walk in the park.", o:["trotzdem","obwohl","weil","dass"], c:0, exp:"'trotzdem' is a Position 1 adverb followed immediately by the verb 'sind'."},
+        {p:"Ich lerne fleißig Deutsch, ___ ich möchte bald in Deutschland arbeiten.", en:"I study German diligently, for I would like to work in Germany soon.", o:["denn","weil","deshalb","obwohl"], c:0, exp:"'denn' is a Position 0 connector (ADUSO); the verb 'möchte' stays in normal Position 2."},
+        {p:"Er wohnt nicht in München, ___ er hat eine Wohnung in Nürnberg gemietet.", en:"He doesn't live in Munich, but rather he rented an apartment in Nuremberg.", o:["sondern","aber","denn","weil"], c:0, exp:"'sondern' (Position 0) corrects a negative statement ('nicht in München')."}
+      ];
+      const it = pairs[Math.floor(Math.random()*pairs.length)];
+      return {
+        ruleNum: 1, ruleTitle: "Verb Position & Connectors",
+        prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp
+      };
+    }
+  ],
+
+  r2_cases: [
+    ()=>{
+      const nouns = [
+        {de:"Schlüssel", en:"key"}, {de:"Koffer", en:"suitcase"},
+        {de:"Laptop", en:"laptop"}, {de:"Wagen", en:"car"}, {de:"Ausweis", en:"ID card"}
+      ];
+      const n = nouns[Math.floor(Math.random()*nouns.length)];
+      return {
+        ruleNum: 2, ruleTitle: "Die 4 Fälle (Akkusativ Maskulin)",
+        prompt: `Herr Schneider sucht überall nach sein___ ${n.de}.`,
+        en: `Mr. Schneider is looking everywhere for his ${n.en}.`,
+        options: ["em", "en", "es", "er"],
+        correct: 0,
+        explain: `'nach' requires DATIV! Masculine Dativ takes '-em' → 'nach seinem ${n.de}'.`
+      };
+    },
+    ()=>{
+      const directObjs = [
+        {de:"den neuen Mitarbeiter", en:"the new coworker"},
+        {de:"den freundlichen Hausmeister", en:"the friendly caretaker"},
+        {de:"den zuständigen Sachbearbeiter", en:"the responsible clerk"},
+        {de:"den erfahrenen Arzt", en:"the experienced doctor"}
+      ];
+      const d = directObjs[Math.floor(Math.random()*directObjs.length)];
+      return {
+        ruleNum: 2, ruleTitle: "Die 4 Fälle (Akkusativ Direct Object)",
+        prompt: `Haben Sie gestern ___ im Büro gesehen?`,
+        en: `Did you see ${d.en} in the office yesterday?`,
+        options: [d.de, d.de.replace("den", "dem"), d.de.replace("den", "der"), d.de.replace("den", "des")],
+        correct: 0,
+        explain: "'sehen' takes the direct object in AKKUSATIV! Masculine Akkusativ is 'den neuen...'."
+      };
+    },
+    ()=>{
+      const datVerbs = [
+        {p:"Ich möchte ___ gern bei dem Projekt helfen.", en:"I would like to help you with the project.", o:["dir","dich","du","dein"], c:0, exp:"'helfen' strictly takes DATIV → 'dir'."},
+        {p:"Wir danken ___ herzlich für die Gastfreundschaft.", en:"We thank you warmly for the hospitality.", o:["Ihnen","Sie","Ihr","Sich"], c:0, exp:"'danken' strictly takes DATIV → 'Ihnen'."},
+        {p:"Wie gefällt ___ die neue Wohnung in Frankfurt?", en:"How do you like the new apartment in Frankfurt?", o:["euch","euer","ihr","sie"], c:0, exp:"'gefallen' strictly takes DATIV (Wem gefällt es?) → 'euch'."},
+        {p:"Das Essen schmeckt ___ Gästen ausgezeichnet.", en:"The food tastes excellent to the guests.", o:["den","die","der","dem"], c:0, exp:"Plural Dativ takes 'den' + -n → 'den Gästen'."},
+        {p:"Alle Kollegen gratulieren ___ Chef zum Jubiläum.", en:"All colleagues congratulate the boss on the anniversary.", o:["dem","den","des","der"], c:0, exp:"'gratulieren' takes Dativ masculine → 'dem Chef'."}
+      ];
+      const dv = datVerbs[Math.floor(Math.random()*datVerbs.length)];
+      return {
+        ruleNum: 2, ruleTitle: "Die 4 Fälle (Dativ-Verben)",
+        prompt: dv.p, en: dv.en, options: dv.o, correct: dv.c, explain: dv.exp
+      };
+    }
+  ],
+
+  r3_prepositions: [
+    ()=>{
+      const pairs = [
+        {vAct:"stellt", vStat:"steht", n:"Tisch", artAkk:"den", artDat:"dem", enA:"puts the vase onto the table", enS:"stands on the table"},
+        {vAct:"legt", vStat:"liegt", n:"Sofa", artAkk:"das", artDat:"dem", enA:"puts the blanket onto the sofa", enS:"lies on the sofa"},
+        {vAct:"hängt", vStat:"hängt", n:"Wand", artAkk:"die", artDat:"der", enA:"hangs the picture onto the wall", enS:"hangs on the wall"}
+      ];
+      const pair = pairs[Math.floor(Math.random()*pairs.length)];
+      const isMovement = Math.random() > 0.5;
+      if(isMovement){
+        return {
+          ruleNum: 3, ruleTitle: "Wechselpräpositionen (Wohin? → Akkusativ)",
+          prompt: `Er ${pair.vAct} den Gegenstand auf/an ___ ${pair.n}.`,
+          en: `He ${pair.enA}. (Movement / Destination)`,
+          options: [pair.artAkk, pair.artDat, "des", "eines"],
+          correct: 0,
+          explain: `Movement/Destination (Wohin?) requires AKKUSATIV → '${pair.artAkk} ${pair.n}'.`
+        };
+      } else {
+        return {
+          ruleNum: 3, ruleTitle: "Wechselpräpositionen (Wo? → Dativ)",
+          prompt: `Der Gegenstand ${pair.vStat} auf/an ___ ${pair.n}.`,
+          en: `The item ${pair.enS}. (Static Location)`,
+          options: [pair.artDat, pair.artAkk, "des", "einen"],
+          correct: 0,
+          explain: `Static Location (Wo?) requires DATIV → '${pair.artDat} ${pair.n}'.`
+        };
+      }
+    },
+    ()=>{
+      const fixedPreps = [
+        {p:"Arun freut sich schon sehr ___ das kommende Wochenende.", en:"Arun is looking forward to the upcoming weekend.", o:["auf","über","an","für"], c:0, exp:"Future anticipation: 'sich freuen auf + Akkusativ'."},
+        {p:"Wir haben uns sehr ___ deinen Besuch gefreut.", en:"We were very glad about your visit.", o:["über","auf","von","an"], c:0, exp:"Past/present event: 'sich freuen über + Akkusativ'."},
+        {p:"Sie träumt seit vielen Jahren von ___ Reise nach Japan.", en:"She has been dreaming of a trip to Japan for many years.", o:["einer","eine","einem","einen"], c:0, exp:"'träumen von' strictly takes DATIV (feminine: 'einer')."},
+        {p:"Denkst du bitte an ___ Termin beim Bürgeramt?", en:"Will you please remember the appointment at the citizens' office?", o:["den","dem","das","der"], c:0, exp:"'denken an' strictly takes AKKUSATIV masculine → 'den Termin'."},
+        {p:"Er interessiert sich sehr ___ klassische Musik.", en:"He is very interested in classical music.", o:["für","über","an","auf"], c:0, exp:"'sich interessieren für + Akkusativ'."}
+      ];
+      const fp = fixedPreps[Math.floor(Math.random()*fixedPreps.length)];
+      return {
+        ruleNum: 3, ruleTitle: "Verben mit festen Präpositionen",
+        prompt: fp.p, en: fp.en, options: fp.o, correct: fp.c, explain: fp.exp
+      };
+    }
+  ],
+
+  r4_adjectives: [
+    ()=>{
+      const adjCases = [
+        {p:"Wir haben einen spannend___ Film im Kino gesehen.", en:"We saw an exciting movie at the cinema.", o:["en","e","er","es"], c:0, exp:"Akkusativ masculine after 'einen' always takes '-en'."},
+        {p:"Der neu___ Kollege hat sich heute im Team vorgestellt.", en:"The new colleague introduced himself to the team today.", o:["e","er","en","es"], c:0, exp:"Nominativ masculine after definite article 'der' takes '-e'."},
+        {p:"Sie hat sich ein modern___ Smartphone gekauft.", en:"She bought herself a modern smartphone.", o:["es","e","en","er"], c:0, exp:"Neutral Akkusativ after 'ein' reflects the gender ending '-es'."},
+        {p:"Ich habe gestern mit der nett___ Nachbarin gesprochen.", en:"I spoke with the friendly neighbor yesterday.", o:["en","e","er","em"], c:0, exp:"All Dativ cases after articles take '-en'."},
+        {p:"Im Sommer trinke ich am liebsten kalt___ Mineralwasser.", en:"In summer I prefer drinking cold mineral water.", o:["es","e","en","em"], c:0, exp:"Zero article (strong declension) neutral Akkusativ takes '-es'."}
+      ];
+      const ac = adjCases[Math.floor(Math.random()*adjCases.length)];
+      return {
+        ruleNum: 4, ruleTitle: "Adjektiv-Endungen",
+        prompt: ac.p, en: ac.en, options: ac.o, correct: ac.c, explain: ac.exp
+      };
+    }
+  ],
+
+  r5_konjunktiv: [
+    ()=>{
+      const konjs = [
+        {p:"Entschuldigung, ___ Sie mir bitte sagen, wie viel Uhr es ist?", en:"Excuse me, could you please tell me what time it is?", o:["könnten","können","würden","hätten"], c:0, exp:"'Könnten Sie...' is the polite spoken request formula in German."},
+        {p:"Guten Tag, ich ___ gern einen Termin für nächste Woche vereinbart.", en:"Hello, I would like to arrange an appointment for next week.", o:["hätte","wäre","würde","könnte"], c:0, exp:"'Ich hätte gern...' expresses polite desire."},
+        {p:"Wenn ich reich ___, würde ich ein großes Haus am Meer kaufen.", en:"If I were rich, I would buy a large house by the sea.", o:["wäre","hätte","würde","könnte"], c:0, exp:"Unreal condition with 'sein' uses 'wäre'."},
+        {p:"An deiner Stelle ___ ich sofort den Kundenservice anrufen.", en:"In your shoes, I would call customer service immediately.", o:["würde","wäre","hätte","könnte"], c:0, exp:"Giving friendly advice with 'An deiner Stelle' requires 'würde + Infinitiv'."}
+      ];
+      const kj = konjs[Math.floor(Math.random()*konjs.length)];
+      return {
+        ruleNum: 5, ruleTitle: "Konjunktiv II (Höflichkeit & Ratschläge)",
+        prompt: kj.p, en: kj.en, options: kj.o, correct: kj.c, explain: kj.exp
+      };
+    }
+  ],
+
+  r6_passiv: [
+    ()=>{
+      const passives = [
+        {p:"In dieser Bäckerei ___ jedes Brot von Hand gebacken.", en:"In this bakery every loaf of bread is baked by hand.", o:["wird","ist","hat","wurde"], c:0, exp:"Present passive singular takes 'wird + Partizip II'."},
+        {p:"Das Schloss ___ im 18. Jahrhundert von einem König erbaut.", en:"The castle was built in the 18th century by a king.", o:["wurde","worden","ist","hat"], c:0, exp:"Past historical narrative passive uses 'wurde + Partizip II'."},
+        {p:"Die Bewerbungsunterlagen müssen bis Ende des Monats eingereicht ___.", en:"The application documents must be submitted by the end of the month.", o:["werden","worden","geworden","sein"], c:0, exp:"Passive with modal verbs places 'Partizip II + werden' at the end."}
+      ];
+      const ps = passives[Math.floor(Math.random()*passives.length)];
+      return {
+        ruleNum: 6, ruleTitle: "Passiv (Vorgangspassiv)",
+        prompt: ps.p, en: ps.en, options: ps.o, correct: ps.c, explain: ps.exp
+      };
+    }
+  ],
+
+  r7_relativsatz: [
+    ()=>{
+      const rels = [
+        {p:"Das ist der Kollege, ___ gestern die Präsentation gehalten hat.", en:"That is the colleague who gave the presentation yesterday.", o:["der","den","dem","dessen"], c:0, exp:"Masculine subject (Nominativ) in relative clause is 'der'."},
+        {p:"Kennst du den Film, ___ wir letzte Woche im Kino gesehen haben?", en:"Do you know the movie that we saw in the cinema last week?", o:["den","der","dem","das"], c:0, exp:"Masculine direct object (Akkusativ) in relative clause is 'den'."},
+        {p:"Das ist das Hotel, in ___ wir während unseres Urlaubs gewohnt haben.", en:"That is the hotel in which we stayed during our vacation.", o:["dem","das","den","dessen"], c:0, exp:"'in' with static location takes Dativ neutral ('in dem' / 'im')."},
+        {p:"Die Kollegin, mit ___ ich das Büro teile, ist sehr hilfsbereit.", en:"The coworker with whom I share the office is very helpful.", o:["der","die","den","deren"], c:0, exp:"Feminine after 'mit' (strictly Dativ) is 'mit der'."}
+      ];
+      const rl = rels[Math.floor(Math.random()*rels.length)];
+      return {
+        ruleNum: 7, ruleTitle: "Relativsätze",
+        prompt: rl.p, en: rl.en, options: rl.o, correct: rl.c, explain: rl.exp
+      };
+    }
+  ],
+
+  r8_infinitiv: [
+    ()=>{
+      const infs = [
+        {p:"Arun spart Geld, ___ eine eigene Wohnung kaufen zu können.", en:"Arun saves money in order to be able to buy an own apartment.", o:["um","damit","weil","dass"], c:0, exp:"Same subject with 'zu + Infinitiv' takes 'um ... zu'."},
+        {p:"Der Lehrer erklärt die Regel langsam, ___ alle Schüler sie verstehen.", en:"The teacher explains the rule slowly so that all students understand it.", o:["damit","um","weil","obwohl"], c:0, exp:"Different subjects ('Der Lehrer' vs 'alle Schüler') requires 'damit'."},
+        {p:"Ich habe ganz vergessen, den Müll ___.", en:"I completely forgot to take out the trash.", o:["hinunterzubringen","zu hinunterbringen","hinunterbringen zu","hinuntergebracht"], c:0, exp:"Separable verbs insert '-zu-' between prefix and verb stem ('hinunter-zu-bringen')."}
+      ];
+      const inf = infs[Math.floor(Math.random()*infs.length)];
+      return {
+        ruleNum: 8, ruleTitle: "Infinitiv mit „zu“ & „um ... zu“ vs. „damit“",
+        prompt: inf.p, en: inf.en, options: inf.o, correct: inf.c, explain: inf.exp
+      };
+    }
+  ],
+
+  r9_connectors: [
+    ()=>{
+      const pairs = [
+        {p:"Sie spricht ___ fließend Spanisch als auch ausgezeichnetes Deutsch.", en:"She speaks both fluent Spanish and excellent German.", o:["sowohl","nicht nur","weder","zwar"], c:0, exp:"The counterpart of 'als auch' is 'sowohl' ('sowohl ... als auch')."},
+        {p:"Er hat ___ Zeit noch Lust, heute Abend auszugehen.", en:"He has neither time nor desire to go out tonight.", o:["weder","entweder","sowohl","nicht"], c:0, exp:"The counterpart of 'noch' is 'weder' ('weder ... noch')."},
+        {p:"___ mehr du auf Deutsch liest, desto größer wird dein Wortschatz.", en:"The more you read in German, the larger your vocabulary becomes.", o:["Je","Wie","Wenn","Als"], c:0, exp:"Proportional comparison always opens with 'Je + Komparativ'."},
+        {p:"Die Arbeit ist ___ anstrengend, aber sie macht großen Spaß.", en:"The work is admittedly exhausting, but it is great fun.", o:["zwar","weder","nicht","entweder"], c:0, exp:"Concession pairing is 'zwar ... aber'."}
+      ];
+      const pr = pairs[Math.floor(Math.random()*pairs.length)];
+      return {
+        ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren",
+        prompt: pr.p, en: pr.en, options: pr.o, correct: pr.c, explain: pr.exp
+      };
+    }
+  ],
+
+  r10_reflexiv: [
+    ()=>{
+      const refls = [
+        {p:"Ich muss ___ beeilen, sonst komme ich zu spät.", en:"I have to hurry, otherwise I will be late.", o:["mich","mir","dich","sich"], c:0, exp:"'sich beeilen' is strictly Akkusativ reflexive → 'mich'."},
+        {p:"Morgens putze ich ___ gründlich die Zähne.", en:"In the morning I brush my teeth thoroughly.", o:["mir","mich","dir","sich"], c:0, exp:"Because 'die Zähne' is the direct object, the reflexive pronoun becomes DATIV ('mir')."},
+        {p:"Zieh ___ bitte feste Schuhe an, wir gehen wandern.", en:"Please put on sturdy shoes, we are going hiking.", o:["dir","dich","du","dein"], c:0, exp:"Because 'feste Schuhe' is the direct object, the reflexive pronoun is DATIV ('dir')."},
+        {p:"Die Kinder haben ___ den ganzen Tag auf den Ausflug gefreut.", en:"The children looked forward to the excursion all day.", o:["sich","ihnen","sie","uns"], c:0, exp:"Third-person plural reflexive pronoun is always 'sich'."}
+      ];
+      const rf = refls[Math.floor(Math.random()*refls.length)];
+      return {
+        ruleNum: 10, ruleTitle: "Reflexive Verben (Akkusativ vs. Dativ Reflexiv)",
+        prompt: rf.p, en: rf.en, options: rf.o, correct: rf.c, explain: rf.exp
+      };
+    }
+  ],
+
+  r11_paragraph: [
+    ()=>{
+      const templates = [
+        {p:"___ lässt sich sagen, dass eine ausgewogene Ernährung für die Gesundheit unerlässlich ist.", en:"In conclusion it can be said that a balanced diet is essential for health.", o:["Zusammenfassend","Zunächst","Beispielsweise","Andererseits"], c:0, exp:"'Zusammenfassend lässt sich sagen, dass...' is the classic paragraph conclusion formula (Fazit)."},
+        {p:"Ein gesundes Frühstück gibt Energie. ___ zeigt eine aktuelle Studie, dass Menschen produktiver arbeiten.", en:"A healthy breakfast provides energy. Furthermore, a recent study shows that people work more productively.", o:["Darüber hinaus","Trotzdem","Zusammenfassend","Hingegen"], c:0, exp:"'Darüber hinaus' (Furthermore/In addition) connects supporting arguments within a paragraph."},
+        {p:"Sport ist gesund. Ein typisches ___ dafür ist das tägliche Joggen im Park.", en:"Sports are healthy. A typical example of this is daily jogging in the park.", o:["Beispiel","Fazit","Argument","Gegenteil"], c:0, exp:"'Ein typisches Beispiel dafür ist...' introduces concrete illustrative evidence in a paragraph."},
+        {p:"Einerseits spart man beim Online-Shopping Zeit, ___ ist die persönliche Beratung im Fachgeschäft besser.", en:"On the one hand you save time shopping online, on the other hand personal consultation in a specialized store is better.", o:["andererseits","zusammenfassend","beispielsweise","zunächst"], c:0, exp:"The connector pair for presenting contrasting aspects across paragraph arguments is 'einerseits ... andererseits'."}
+      ];
+      const t = templates[Math.floor(Math.random()*templates.length)];
+      return { ruleNum:11, ruleTitle:"Paragraph Making & Cohesion", prompt:t.p, en:t.en, options:t.o, correct:t.c, explain:t.exp };
+    }
+  ],
+
+  r12_comma: [
+    ()=>{
+      const commaTests = [
+        {p:"Ich freue mich sehr___ weil du die B1-Prüfung bestanden hast.", en:"I am very glad because you passed the B1 exam.", o:[", (Komma erforderlich)", "kein Komma", "; (Semikolon)", "- (Bindestrich)"], c:0, exp:"Subordinating clauses with 'weil', 'dass', 'wenn', etc. MUST ALWAYS be separated by a comma!"},
+        {p:"Er hat vor___ im nächsten Jahr nach Berlin zu ziehen.", en:"He intends to move to Berlin next year.", o:[", (Komma vor Infinitivgruppe)", "kein Komma", "; (Semikolon)", ": (Doppelpunkt)"], c:0, exp:"Infinitivgruppen with 'vorhaben, ... zu ziehen' take a comma separating the main clause from the infinitive clause."},
+        {p:"Das ist der Kollege___ den ich gestern im Meeting kennengelernt habe.", en:"That is the colleague whom I met yesterday in the meeting.", o:[", (Komma vor Relativsatz)", "kein Komma", ": (Doppelpunkt)", "- (Gedankenstrich)"], c:0, exp:"Relative clauses in German are ALWAYS enclosed by commas!"},
+        {p:"Sie lernt fleißig Deutsch___ aber sie spricht noch etwas vorsichtig.", en:"She studies German diligently, but she still speaks somewhat cautiously.", o:[", (Komma vor 'aber')", "kein Komma", ": (Doppelpunkt)", "; (Semikolon)"], c:0, exp:"Coordinating connectors expressing contrast ('aber', 'sondern', 'doch') strictly require a comma!"}
+      ];
+      const ct = commaTests[Math.floor(Math.random()*commaTests.length)];
+      return { ruleNum:12, ruleTitle:"Kommasetzung (German Comma Rules)", prompt:ct.p, en:ct.en, options:ct.o, correct:ct.c, explain:ct.exp };
+    }
+  ],
+
+  r13_ndeklination: [
+    ()=>{
+      const nNouns = [
+        {nom:"der Kollege", akk:"den Kollegen", en:"the coworker"},
+        {nom:"der Kunde", akk:"den Kunden", en:"the customer/client"},
+        {nom:"der Herr", akk:"den Herrn", en:"the gentleman"},
+        {nom:"der Nachbar", akk:"den Nachbarn", en:"the neighbor"},
+        {nom:"der Praktikant", akk:"den Praktikanten", en:"the intern"}
+      ];
+      const item = nNouns[Math.floor(Math.random()*nNouns.length)];
+      return {
+        ruleNum:13, ruleTitle:"N-Deklination (Weak Masculine Nouns)",
+        prompt: `Ich habe gestern ein langes Gespräch mit ${item.akk.replace("den", "dem")} geführt.`,
+        en: `Yesterday I had a long conversation with ${item.en}. (Dativ)`,
+        options: [item.akk.replace("den", "dem"), item.nom.replace("der", "dem"), item.nom.replace("der", "den"), item.nom.replace("der", "des")],
+        correct: 0,
+        explain: `'${item.nom}' belongs to N-Deklination! In all cases except Nominative singular, it adds -(e)n → '${item.akk.replace("den", "dem")}'.`
+      };
+    }
+  ],
+
+  r14_pronominaladverb: [
+    ()=>{
+      const prons = [
+        {p:"Hast du mit Thomas gesprochen? — Ja, ich habe gestern mit ___ telefoniert.", en:"Did you speak with Thomas? — Yes, I phoned with him yesterday.", o:["ihm","damit","ihn","womit"], c:0, exp:"Thomas is a PERSON, so use Preposition + Personal Pronoun: 'mit ihm' (NOT 'damit')!"},
+        {p:"Wartest du auf den Bus? — Ja, ich warte schon seit 20 Minuten ___.", en:"Are you waiting for the bus? — Yes, I have already been waiting for it for 20 minutes.", o:["darauf","auf ihn","worauf","damit"], c:0, exp:"'der Bus' is a THING, so use Pronominaladverb: 'da(r) + auf = darauf'!"},
+        {p:"___ denkst du gerade? — An meinen nächsten Urlaub.", en:"What are you thinking about right now? — About my next vacation.", o:["Woran","An wen","Worauf","Woraus"], c:0, exp:"Asking about a thing/topic with 'denken an' requires 'Wo(r) + an = Woran?'."},
+        {p:"___ wartest du hier am Eingang? — Auf meine Kollegin Frau Weber.", en:"Who are you waiting for here at the entrance? — For my colleague Ms. Weber.", o:["Auf wen","Worauf","An wen","Woran"], c:0, exp:"Asking about a PERSON with 'warten auf' requires 'Auf wen?'."}
+      ];
+      const pr = prons[Math.floor(Math.random()*prons.length)];
+      return { ruleNum:14, ruleTitle:"Da- & Wo-Komposita (Pronominaladverbien)", prompt:pr.p, en:pr.en, options:pr.o, correct:pr.c, explain:pr.exp };
+    }
+  ],
+
+  r15_temporale: [
+    ()=>{
+      const temporals = [
+        {p:"___ ich 18 Jahre alt war, bin ich zum ersten Mal nach Berlin gereist.", en:"When I was 18 years old, I traveled to Berlin for the first time.", o:["Als","Wenn","Wann","Nachdem"], c:0, exp:"A single, one-time event in the PAST strictly requires 'Als'!"},
+        {p:"Immer ___ ich als Kind Kopfschmerzen hatte, kochte meine Mutter einen Tee.", en:"Whenever I had a headache as a child, my mother cooked tea.", o:["wenn","als","wann","während"], c:0, exp:"A REPEATED event in the past ('Immer...') strictly requires 'wenn'!"},
+        {p:"___ ich morgen Feierabend habe, rufe ich dich sofort an.", en:"When I finish work tomorrow, I will call you immediately.", o:["Wenn","Als","Wann","Seitdem"], c:0, exp:"Present or future conditional/temporal events strictly take 'Wenn'!"},
+        {p:"Wasch dir bitte die Hände, ___ du dich an den Tisch setzt.", en:"Please wash your hands before you sit down at the table.", o:["bevor","nachdem","während","seitdem"], c:0, exp:"'bevor' (before) introduces an action that occurs after the main clause action."}
+      ];
+      const tm = temporals[Math.floor(Math.random()*temporals.length)];
+      return { ruleNum:15, ruleTitle:"Temporale Konnektoren (als vs. wenn)", prompt:tm.p, en:tm.en, options:tm.o, correct:tm.c, explain:tm.exp };
+    }
+  ],
+
+  r16_modalverb: [
+    ()=>{
+      const modals = [
+        {p:"Im Krankenhaus ___ man absolut leise sein und darf nicht rauchen.", en:"In the hospital one must be absolutely quiet and smoking is not allowed.", o:["muss","kann","will","mag"], c:0, exp:"'muss' indicates absolute necessity and legal rule."},
+        {p:"Morgen ist ein Feiertag, deshalb ___ du nicht früh aufstehen.", en:"Tomorrow is a public holiday, therefore you don't have to get up early.", o:["musst","darfst","willst","sollst"], c:0, exp:"'nicht müssen' means 'no obligation / don't have to' (it is NOT a prohibition!)."},
+        {p:"In der Prüfung ___ man kein Smartphone benutzen — das ist streng verboten!", en:"In the exam one must not use a smartphone — that is strictly forbidden!", o:["darf","muss","kann","will"], c:0, exp:"'nicht dürfen' indicates strict prohibition (forbidden!)."}
+      ];
+      const md = modals[Math.floor(Math.random()*modals.length)];
+      return { ruleNum:16, ruleTitle:"Modalverben Nuancen (müssen vs. dürfen)", prompt:md.p, en:md.en, options:md.o, correct:md.c, explain:md.exp };
+    }
+  ]
+};
+
+/* =========================================================================
+   SENTENCE BUILDER GENERATORS (PICK & BUILD FROM ENGLISH TRANSLATION)
+   ========================================================================= */
+const BUILD_GENERATORS = {
+  r1_wordorder: [
+    ()=>({
+      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer",
+      en: "Because the weather is bad today, we are staying at home.",
+      tokens: ["Weil", "das Wetter", "heute schlecht ist,", "bleiben", "wir", "zu Hause."],
+      correctSentence: "Weil das Wetter heute schlecht ist, bleiben wir zu Hause.",
+      explain: "In a subordinate clause with 'weil', the conjugated verb ('ist') goes to the very end. In the following main clause, the verb ('bleiben') is in Position 2."
+    }),
+    ()=>({
+      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer",
+      en: "Thomas missed the bus, therefore he arrived late at the office.",
+      tokens: ["Thomas", "hat den Bus verpasst,", "deshalb", "kam er", "zu spät", "ins Büro."],
+      correctSentence: "Thomas hat den Bus verpasst, deshalb kam er zu spät ins Büro.",
+      explain: "'deshalb' is a Position 1 adverb! The conjugated verb ('kam') follows immediately in Position 2 (inversion)."
+    }),
+    ()=>({
+      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer",
+      en: "Although she is tired, she is preparing for the exam.",
+      tokens: ["Obwohl", "sie müde ist,", "bereitet sie sich", "auf die Prüfung", "vor."],
+      correctSentence: "Obwohl sie müde ist, bereitet sie sich auf die Prüfung vor.",
+      explain: "'obwohl' moves the verb ('ist') to the end. The separable prefix ('vor') stays at the end of the main clause."
+    })
+  ],
+
+  r2_cases: [
+    ()=>({
+      ruleNum: 2, ruleTitle: "Die 4 Fälle",
+      en: "The father gives the little boy a new football.",
+      tokens: ["Der Vater", "schenkt", "dem kleinen Jungen", "einen neuen", "Fußball."],
+      correctSentence: "Der Vater schenkt dem kleinen Jungen einen neuen Fußball.",
+      explain: "'schenken' takes Dativ for recipient ('dem kleinen Jungen') and Akkusativ for direct object ('einen neuen Fußball')."
+    }),
+    ()=>({
+      ruleNum: 2, ruleTitle: "Die 4 Fälle",
+      en: "I thank the helpful colleague heartily for the great help.",
+      tokens: ["Ich danke", "dem hilfsbereiten Kollegen", "herzlich", "für die", "große Hilfe."],
+      correctSentence: "Ich danke dem hilfsbereiten Kollegen herzlich für die große Hilfe.",
+      explain: "The verb 'danken' strictly demands DATIV ('dem hilfsbereiten Kollegen')."
+    })
+  ],
+
+  r3_prepositions: [
+    ()=>({
+      ruleNum: 3, ruleTitle: "Präpositionen",
+      en: "The girl puts the notebook onto the desk.",
+      tokens: ["Das Mädchen", "legt", "das Notizbuch", "auf den", "Schreibtisch."],
+      correctSentence: "Das Mädchen legt das Notizbuch auf den Schreibtisch.",
+      explain: "'legen' is a directional action (Wohin?) demanding Akkusativ with 'auf' → 'auf den Schreibtisch'."
+    }),
+    ()=>({
+      ruleNum: 3, ruleTitle: "Präpositionen",
+      en: "The notebook is lying on the wooden desk in the office.",
+      tokens: ["Das Notizbuch", "liegt", "auf dem Holzschreibtisch", "im", "Büro."],
+      correctSentence: "Das Notizbuch liegt auf dem Holzschreibtisch im Büro.",
+      explain: "'liegen' is a static location (Wo?) demanding Dativ with 'auf' → 'auf dem Holzschreibtisch'."
+    })
+  ],
+
+  r4_adjectives: [
+    ()=>({
+      ruleNum: 4, ruleTitle: "Adjektiv-Endungen",
+      en: "The new employee introduced himself to the friendly team.",
+      tokens: ["Der neue Mitarbeiter", "hat sich", "dem freundlichen Team", "vorgestellt."],
+      correctSentence: "Der neue Mitarbeiter hat sich dem freundlichen Team vorgestellt.",
+      explain: "Definite article Nominative masculine takes '-e' ('Der neue'), and Dativ takes '-en' ('dem freundlichen')."
+    }),
+    ()=>({
+      ruleNum: 4, ruleTitle: "Adjektiv-Endungen",
+      en: "Fresh bread with butter and cheese is very popular in Germany.",
+      tokens: ["Frisches Brot", "mit Butter und Käse", "ist in Deutschland", "sehr", "beliebt."],
+      correctSentence: "Frisches Brot mit Butter und Käse ist in Deutschland sehr beliebt.",
+      explain: "Strong declension without article: Neutral Nominative takes '-es' ('Frisches Brot')."
+    })
+  ],
+
+  r5_konjunktiv: [
+    ()=>({
+      ruleNum: 5, ruleTitle: "Konjunktiv II",
+      en: "Could you please tell me where the nearest pharmacy is?",
+      tokens: ["Könnten Sie", "mir bitte sagen,", "wo die nächste", "Apotheke", "ist?"],
+      correctSentence: "Könnten Sie mir bitte sagen, wo die nächste Apotheke ist?",
+      explain: "'Könnten Sie...' is the polite spoken Konjunktiv II request formula."
+    }),
+    ()=>({
+      ruleNum: 5, ruleTitle: "Konjunktiv II",
+      en: "If I had more time, I would learn German every day.",
+      tokens: ["Wenn ich", "mehr Zeit hätte,", "würde ich", "jeden Tag", "Deutsch lernen."],
+      correctSentence: "Wenn ich mehr Zeit hätte, würde ich jeden Tag Deutsch lernen.",
+      explain: "Hypothetical condition: 'Wenn... hätte, würde ich... lernen'."
+    })
+  ],
+
+  r6_passiv: [
+    ()=>({
+      ruleNum: 6, ruleTitle: "Passiv",
+      en: "The important contract is signed by the director.",
+      tokens: ["Der wichtige Vertrag", "wird vom Direktor", "unterschrieben."],
+      correctSentence: "Der wichtige Vertrag wird vom Direktor unterschrieben.",
+      explain: "Präsens Vorgangspassiv: 'wird ... unterschrieben' (werden + Partizip II)."
+    }),
+    ()=>({
+      ruleNum: 6, ruleTitle: "Passiv",
+      en: "The application documents must be submitted by Friday.",
+      tokens: ["Die Bewerbungsunterlagen", "müssen bis Freitag", "eingereicht", "werden."],
+      correctSentence: "Die Bewerbungsunterlagen müssen bis Freitag eingereicht werden.",
+      explain: "Modalverb Passiv: 'müssen ... eingereicht werden' (Modalverb + Partizip II + werden)."
+    })
+  ],
+
+  r7_relativsatz: [
+    ()=>({
+      ruleNum: 7, ruleTitle: "Relativsätze",
+      en: "That is the doctor who treated my father yesterday.",
+      tokens: ["Das ist", "der freundliche Arzt,", "der gestern", "meinen Vater", "behandelt hat."],
+      correctSentence: "Das ist der freundliche Arzt, der gestern meinen Vater behandelt hat.",
+      explain: "Relative clause with masculine subject pronoun 'der'; verb 'behandelt hat' moves to the end."
+    }),
+    ()=>({
+      ruleNum: 7, ruleTitle: "Relativsätze",
+      en: "The apartment that we rented is near the station.",
+      tokens: ["Die Wohnung,", "die wir gemietet haben,", "liegt in der Nähe", "vom Bahnhof."],
+      correctSentence: "Die Wohnung, die wir gemietet haben, liegt in der Nähe vom Bahnhof.",
+      explain: "Feminine Akkusativ relative pronoun 'die' referring back to 'Die Wohnung'."
+    })
+  ],
+
+  r8_infinitiv: [
+    ()=>({
+      ruleNum: 8, ruleTitle: "Infinitiv mit „zu“ & „um ... zu“",
+      en: "Arun gets up early in order to catch the train on time.",
+      tokens: ["Arun steht", "früh auf,", "um den Zug", "pünktlich", "zu erreichen."],
+      correctSentence: "Arun steht früh auf, um den Zug pünktlich zu erreichen.",
+      explain: "'um ... zu + Infinitiv' expresses the purpose or goal of the main clause action."
+    }),
+    ()=>({
+      ruleNum: 8, ruleTitle: "Infinitiv mit „zu“ & „um ... zu“",
+      en: "It is important to practice German grammar rules regularly.",
+      tokens: ["Es ist wichtig,", "die deutschen Grammatikregeln", "regelmäßig", "zu üben."],
+      correctSentence: "Es ist wichtig, die deutschen Grammatikregeln regelmäßig zu üben.",
+      explain: "Impersonal expression 'Es ist wichtig,...' requires an infinitive clause with 'zu üben'."
+    })
+  ],
+
+  r9_connectors: [
+    ()=>({
+      ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren",
+      en: "She speaks not only German, but also fluent French.",
+      tokens: ["Sie spricht", "nicht nur", "fließend Deutsch,", "sondern auch", "Französisch."],
+      correctSentence: "Sie spricht nicht nur fließend Deutsch, sondern auch Französisch.",
+      explain: "'nicht nur ..., sondern auch ...' links two positive parallel qualifications."
+    }),
+    ()=>({
+      ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren",
+      en: "He has neither a driver's license nor a car.",
+      tokens: ["Er hat", "in dieser Stadt", "weder einen Führerschein", "noch", "ein eigenes Auto."],
+      correctSentence: "Er hat in dieser Stadt weder einen Führerschein noch ein eigenes Auto.",
+      explain: "'weder ... noch ...' connects two negative alternatives (neither ... nor)."
+    })
+  ],
+
+  r10_reflexiv: [
+    ()=>({
+      ruleNum: 10, ruleTitle: "Reflexive Verben",
+      en: "In the morning I brush my teeth thoroughly before breakfast.",
+      tokens: ["Morgens", "putze ich mir", "gründlich die Zähne,", "bevor ich", "frühstücke."],
+      correctSentence: "Morgens putze ich mir gründlich die Zähne, bevor ich frühstücke.",
+      explain: "With a direct object ('die Zähne'), the reflexive pronoun must be DATIV ('mir')."
+    }),
+    ()=>({
+      ruleNum: 10, ruleTitle: "Reflexive Verben",
+      en: "We have to hurry because the bus leaves in five minutes.",
+      tokens: ["Wir müssen uns", "beeilen,", "weil der Bus", "in fünf Minuten", "abfährt."],
+      correctSentence: "Wir müssen uns beeilen, weil der Bus in fünf Minuten abfährt.",
+      explain: "'sich beeilen' takes the Akkusativ reflexive pronoun ('uns')."
+    })
+  ],
+
+  r11_paragraph: [
+    ()=>({
+      ruleNum: 11, ruleTitle: "Paragraph Making & Cohesion",
+      en: "In conclusion it can be said that healthy nutrition is essential.",
+      tokens: ["Zusammenfassend", "lässt sich sagen,", "dass gesunde Ernährung", "für alle", "unerlässlich ist."],
+      correctSentence: "Zusammenfassend lässt sich sagen, dass gesunde Ernährung für alle unerlässlich ist.",
+      explain: "'Zusammenfassend lässt sich sagen, dass...' is the standard B1 paragraph conclusion formula."
+    }),
+    ()=>({
+      ruleNum: 11, ruleTitle: "Paragraph Making & Cohesion",
+      en: "A typical example of this is the daily jogging in the park.",
+      tokens: ["Ein typisches", "Beispiel dafür ist", "das tägliche Joggen", "im", "Stadtpark."],
+      correctSentence: "Ein typisches Beispiel dafür ist das tägliche Joggen im Stadtpark.",
+      explain: "'Ein typisches Beispiel dafür ist...' introduces concrete illustrative evidence in a paragraph."
+    })
+  ],
+
+  r12_comma: [
+    ()=>({
+      ruleNum: 12, ruleTitle: "Kommasetzung",
+      en: "I am glad because you passed the German exam without problems.",
+      tokens: ["Ich freue mich sehr,", "weil du die", "Deutschprüfung", "ohne Probleme", "bestanden hast."],
+      correctSentence: "Ich freue mich sehr, weil du die Deutschprüfung ohne Probleme bestanden hast.",
+      explain: "A comma is strictly required before subordinating connectors ('weil')."
+    }),
+    ()=>({
+      ruleNum: 12, ruleTitle: "Kommasetzung",
+      en: "He decided to accept the new job offer.",
+      tokens: ["Er hat sich entschieden,", "das neue", "Jobangebot", "anzunehmen."],
+      correctSentence: "Er hat sich entschieden, das neue Jobangebot anzunehmen.",
+      explain: "A comma separates the main clause from the infinitive group ('..., das neue Jobangebot anzunehmen')."
+    })
+  ],
+
+  r13_ndeklination: [
+    ()=>({
+      ruleNum: 13, ruleTitle: "N-Deklination",
+      en: "Yesterday I had a long conversation with the client.",
+      tokens: ["Gestern habe ich", "ein langes Gespräch", "mit dem Kunden", "geführt."],
+      correctSentence: "Gestern habe ich ein langes Gespräch mit dem Kunden geführt.",
+      explain: "'der Kunde' belongs to N-Deklination: in Dativ with 'mit dem' it adds '-n' → 'dem Kunden'."
+    }),
+    ()=>({
+      ruleNum: 13, ruleTitle: "N-Deklination",
+      en: "The manager helps the intern with the presentation.",
+      tokens: ["Der Abteilungsleiter", "hilft dem", "neuen Praktikanten", "bei der", "Projektpräsentation."],
+      correctSentence: "Der Abteilungsleiter hilft dem neuen Praktikanten bei der Projektpräsentation.",
+      explain: "'der Praktikant' is a weak masculine noun adding '-en' in Dativ → 'dem neuen Praktikanten'."
+    })
+  ],
+
+  r14_pronominaladverb: [
+    ()=>({
+      ruleNum: 14, ruleTitle: "Da- & Wo-Komposita",
+      en: "Are you waiting for the bus? — Yes, I am waiting for it.",
+      tokens: ["Wartest du auf den Bus?", "— Ja,", "ich warte", "schon seit zwanzig Minuten", "darauf."],
+      correctSentence: "Wartest du auf den Bus? — Ja, ich warte schon seit zwanzig Minuten darauf.",
+      explain: "'der Bus' is a thing, so 'auf' combines with 'da(r)-' to form the Pronominaladverb 'darauf'."
+    }),
+    ()=>({
+      ruleNum: 14, ruleTitle: "Da- & Wo-Komposita",
+      en: "Who are you waiting for at the entrance? — For my colleague.",
+      tokens: ["Auf wen", "wartest du am Eingang?", "— Auf meine", "Kollegin Frau Weber."],
+      correctSentence: "Auf wen wartest du am Eingang? — Auf meine Kollegin Frau Weber.",
+      explain: "Waiting for a PERSON requires Preposition + Interrogative Pronoun: 'Auf wen?' (NOT 'Worauf')."
+    })
+  ],
+
+  r15_temporale: [
+    ()=>({
+      ruleNum: 15, ruleTitle: "Temporale Konnektoren",
+      en: "When I was eighteen years old, I traveled to Berlin for the first time.",
+      tokens: ["Als ich", "achtzehn Jahre alt war,", "bin ich zum ersten Mal", "nach Berlin", "gereist."],
+      correctSentence: "Als ich achtzehn Jahre alt war, bin ich zum ersten Mal nach Berlin gereist.",
+      explain: "A one-time, unique event in the past strictly demands 'Als'."
+    }),
+    ()=>({
+      ruleNum: 15, ruleTitle: "Temporale Konnektoren",
+      en: "Please wash your hands before you sit down at the dinner table.",
+      tokens: ["Wasch dir bitte die Hände,", "bevor du dich", "an den", "Esstisch setzt."],
+      correctSentence: "Wasch dir bitte die Hände, bevor du dich an den Esstisch setzt.",
+      explain: "'bevor' introduces the subordinate clause with verb 'setzt' at the end."
+    })
+  ],
+
+  r16_modalverb: [
+    ()=>({
+      ruleNum: 16, ruleTitle: "Modalverben Nuancen",
+      en: "In the hospital one must be quiet and smoking is forbidden.",
+      tokens: ["Im Krankenhaus", "muss man absolut leise sein", "und darf", "auf keinen Fall", "rauchen."],
+      correctSentence: "Im Krankenhaus muss man absolut leise sein und darf auf keinen Fall rauchen.",
+      explain: "'muss' expresses necessity; 'darf nicht' strictly expresses prohibition (forbidden)."
+    }),
+    ()=>({
+      ruleNum: 16, ruleTitle: "Modalverben Nuancen",
+      en: "Tomorrow is a holiday, therefore you do not have to get up early.",
+      tokens: ["Morgen ist ein Feiertag,", "deshalb musst du", "nicht so früh", "aufstehen."],
+      correctSentence: "Morgen ist ein Feiertag, deshalb musst du nicht so früh aufstehen.",
+      explain: "'nicht müssen' indicates absence of obligation (you don't have to; it is optional)."
+    })
+  ]
+};
+
+function generateInfiniteQuestion(ruleId) {
+  let targetRule = ruleId;
+  if (ruleId === 'alle' || !DYNAMIC_GENERATORS[ruleId]) {
+    const keys = Object.keys(DYNAMIC_GENERATORS);
+    targetRule = keys[Math.floor(Math.random() * keys.length)];
+  }
+
+  // Determine question format:
+  let chosenFormat = drillFormat;
+  if (drillFormat === 'mixed') {
+    chosenFormat = Math.random() < 0.5 ? 'choice' : 'build';
+  }
+
+  if (chosenFormat === 'build' && BUILD_GENERATORS[targetRule]) {
+    const list = BUILD_GENERATORS[targetRule];
+    const gen = list[Math.floor(Math.random() * list.length)];
+    const raw = gen();
+    const tokenObjs = raw.tokens.map((w, idx) => ({ word: w, id: idx }));
+    buildSlots = [];
+    bankWords = [...tokenObjs].sort(() => Math.random() - 0.5);
+    return {
+      ...raw,
+      type: 'build',
+      ruleId: targetRule
+    };
+  } else {
+    const generatorList = DYNAMIC_GENERATORS[targetRule];
+    const generatorFn = generatorList[Math.floor(Math.random() * generatorList.length)];
+    const raw = generatorFn();
+    const correctOpt = raw.options[raw.correct];
+    const shuffled = [...raw.options].sort(()=>Math.random() - 0.5);
+    return {
+      ...raw,
+      type: 'choice',
+      ruleId: targetRule,
+      options: shuffled,
+      correct: shuffled.indexOf(correctOpt)
+    };
+  }
+}
+
+function init(){
+  renderRuleChips();
+  renderContent();
+}
+
+function renderRuleChips(){
+  const container = document.getElementById("ruleChips");
+  const allList = [
+    { id: "alle", num: "🎲", title: "All 16 Rules Mixed (Endless Marathon)", category: "Mixed", color: "var(--purple)" },
+    ...GRAMMAR_RULES
+  ];
+  container.innerHTML = allList.map(r=>{
+    const active = r.id === selectedRuleId ? "active" : "";
+    return `
+      <div class="chip ${active}" onclick="selectRule('${r.id}')">
+        <span class="dot" style="background:${r.color};"></span>
+        <span>${r.id==='alle' ? '🎲 All 16 Rules Mixed' : `Rule ${r.num}: ${r.title.split('(')[0].trim()}`}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function selectRule(ruleId){
+  selectedRuleId = ruleId;
+  renderRuleChips();
+  if(ruleId === 'alle'){
+    switchMode('drill');
+  } else if(currentMode === 'drill'){
+    startDrillForRule(ruleId);
+  } else {
+    renderContent();
+  }
+}
+
+function switchMode(mode){
+  currentMode = mode;
+  document.getElementById("tabStudy").className = "modetab " + (mode==='study' ? 'active' : '');
+  document.getElementById("tabDrill").className = "modetab " + (mode==='drill' ? 'active' : '');
+  document.getElementById("tabStats").className = "modetab " + (mode==='stats' ? 'active' : '');
+
+  if(mode === 'drill'){
+    startDrillForRule(selectedRuleId);
+  } else {
+    renderContent();
+  }
+}
+
+function renderContent(){
+  const area = document.getElementById("contentArea");
+  if(currentMode === 'study'){
+    renderStudyView(area);
+  } else if(currentMode === 'drill'){
+    renderDrillView(area);
+  } else if(currentMode === 'stats'){
+    renderStatsView(area);
+  }
+}
+
+/* ---------------- 1. STUDY VIEW ---------------- */
+function renderStudyView(container){
+  const rule = GRAMMAR_RULES.find(r=>r.id === selectedRuleId) || GRAMMAR_RULES[0];
+  container.innerHTML = `
+    <div class="rule-card">
+      <div class="rule-header">
+        <span class="rule-badge" style="background:${rule.color};">${rule.category} · RULE ${rule.num}</span>
+        <button class="speak-btn" title="Start Drill on this Rule" onclick="switchMode('drill')">⚡ Üben</button>
+      </div>
+      <h2 class="rule-title">${rule.title}</h2>
+      <p class="rule-summary">${rule.summary}</p>
+
+      <div class="filterlabel">Core Rule Formula &amp; Blueprint:</div>
+      <div class="formula-box">${rule.formula.replace(/\n/g, '<br>')}</div>
+
+      <div class="filterlabel">Systematic Grammar Matrix:</div>
+      <div class="table-box">${rule.tableHTML}</div>
+
+      <div class="filterlabel">Living Examples with Native Audio:</div>
+      <div class="example-list">
+        ${rule.examples.map((ex,idx)=>`
+          <div class="example-item">
+            <div>
+              <div class="example-de">${ex.de}</div>
+              <div class="example-en">${ex.en}</div>
+            </div>
+            <button class="speak-btn" onclick="speakText('${escapeQuotes(ex.de)}')">🔊</button>
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="bigbtn" onclick="switchMode('drill')">⚡ Start Practice Drill on Rule ${rule.num}</button>
+    </div>
+  `;
+}
+
+/* ---------------- 2. DRILL VIEW (INFINITE & INDEFINITE) ---------------- */
+function startDrillForRule(ruleId){
+  selectedRuleId = ruleId;
+  drillStats = { correct:0, wrong:0, total:0 };
+  currentStreak = 0;
+  drillAnswered = false;
+  currentQuestion = generateInfiniteQuestion(ruleId);
+  renderContent();
+}
+
+function setDrillMode(isEndless){
+  endlessMode = isEndless;
+  startDrillForRule(selectedRuleId);
+}
+
+function setDrillFormat(fmt){
+  drillFormat = fmt;
+  drillAnswered = false;
+  currentQuestion = generateInfiniteQuestion(selectedRuleId);
+  renderContent();
+}
+
+function renderDrillView(container){
+  const cur = currentQuestion || generateInfiniteQuestion(selectedRuleId);
+  currentQuestion = cur;
+  const accPct = drillStats.total > 0 ? Math.round((drillStats.correct / drillStats.total) * 100) : 100;
+
+  const headerHUD = `
+    <!-- Mode Controls & Real-Time Performance HUD -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="subtab ${endlessMode?'active':''}" onclick="setDrillMode(true)">♾️ Endless</button>
+        <button class="subtab ${!endlessMode?'active':''}" onclick="setDrillMode(false)">⚡ 10-Sprint</button>
+        <span style="border-left:1px solid var(--line); margin:0 2px;"></span>
+        <button class="subtab ${drillFormat==='mixed'?'active':''}" onclick="setDrillFormat('mixed')" title="Mix Gap-Fill and Sentence Building">🔀 Mixed</button>
+        <button class="subtab ${drillFormat==='choice'?'active':''}" onclick="setDrillFormat('choice')" title="Multiple Choice Lückentext">🔤 Gap Fill</button>
+        <button class="subtab ${drillFormat==='build'?'active':''}" onclick="setDrillFormat('build')" title="Pick & Build from English">🧩 Satz-Baukasten</button>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);">
+        Answered: <b>#${drillStats.total}</b> · Acc: <b>${drillStats.total>0?accPct+'%':'---'}</b> · Streak: <b style="color:var(--red);">${currentStreak} 🔥</b> (Best: ${bestStreak})
+      </div>
+    </div>
+  `;
+
+  if(cur.type === 'build'){
+    container.innerHTML = `
+      ${headerHUD}
+      <div class="drill-card">
+        <div class="drill-meta">
+          <span>RULE ${cur.ruleNum}: ${cur.ruleTitle.toUpperCase()} · SATZ-BAUKASTEN</span>
+          <span>${endlessMode ? '♾️ INDEFINITE GENERATION' : `Question ${drillStats.total + 1} of 10`}</span>
+        </div>
+
+        <div class="en-challenge-box">
+          <div class="en-badge">🇬🇧 TRANSLATE INTO GERMAN (PICK &amp; ASSEMBLE WORDS IN CORRECT ORDER):</div>
+          <div class="en-prompt-text">„${cur.en}”</div>
+        </div>
+
+        <div class="filterlabel" style="margin-top:12px;">Your German Sentence (Click words below to add):</div>
+        <div class="buildarea" id="buildArea"></div>
+
+        <div class="filterlabel">Word Bank (Pick tokens):</div>
+        <div class="bankarea" id="bankArea"></div>
+
+        <div class="build-action-row" id="buildActionRow">
+          <button class="actbtn reset" id="resetBuildBtn" onclick="resetBuildSlots()">↺ Reset Words</button>
+          <button class="actbtn check" id="checkBuildBtn" onclick="checkBuildAnswer()">✓ Check Sentence</button>
+        </div>
+
+        <div class="feedback-box" id="feedbackBox">
+          <div class="feedback-title" id="feedbackTitle"></div>
+          <div id="feedbackText"></div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button class="bigbtn" id="nextDrillBtn" style="display:none; flex:2;" onclick="advanceDrill()">Next Question ➡️</button>
+          <button class="bigbtn secondary" id="finishDrillBtn" style="display:none; flex:1;" onclick="showSessionSummary()">🏁 Finish Session</button>
+        </div>
+      </div>
+    `;
+    renderBuildSlots();
+    return;
+  }
+
+  // Otherwise cur.type === 'choice'
+  container.innerHTML = `
+    ${headerHUD}
+    <div class="drill-card">
+      <div class="drill-meta">
+        <span>RULE ${cur.ruleNum}: ${cur.ruleTitle.toUpperCase()} · LÜCKENTEXT</span>
+        <span>${endlessMode ? '♾️ INDEFINITE GENERATION' : `Question ${drillStats.total + 1} of 10`}</span>
+      </div>
+
+      <div class="drill-prompt">${cur.prompt.replace('___', '<span class="drill-gap">___</span>')}</div>
+      <div class="drill-en">„${cur.en}”</div>
+
+      <div class="opt-grid">
+        ${cur.options.map((opt,i)=>`
+          <button class="opt-btn" id="optBtn_${i}" onclick="checkAnswer(${i})">
+            <span style="opacity:0.6; font-size:11px; margin-right:4px;">[${i+1}]</span> ${opt}
+          </button>
+        `).join("")}
+      </div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-title" id="feedbackTitle"></div>
+        <div id="feedbackText"></div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="bigbtn" id="nextDrillBtn" style="display:none; flex:2;" onclick="advanceDrill()">Next Question (Generate New) ➡️</button>
+        <button class="bigbtn secondary" id="finishDrillBtn" style="display:none; flex:1;" onclick="showSessionSummary()">🏁 Finish Session</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- SENTENCE BUILDER INTERACTION HANDLERS ---------------- */
+function renderBuildSlots(){
+  const build = document.getElementById('buildArea');
+  const bank = document.getElementById('bankArea');
+  if(!build || !bank) return;
+
+  build.innerHTML = buildSlots.length
+    ? buildSlots.map((w, idx) => `
+        <span class="wordchip inbuild" onclick="removeBuildToken(${idx})" title="Click to return to bank">
+          ${w.word} <span style="font-size:10px; opacity:0.7; margin-left:3px;">✕</span>
+        </span>
+      `).join('')
+    : `<span class="placeholder">👇 Click the words below in the correct order to form the German sentence ...</span>`;
+
+  bank.innerHTML = bankWords.map((w, idx) => `
+    <span class="wordchip inbank" onclick="addBankToken(${idx})" title="Click to add to sentence">
+      ${w.word}
+    </span>
+  `).join('');
+}
+
+function addBankToken(bankIdx){
+  if(drillAnswered) return;
+  const item = bankWords[bankIdx];
+  bankWords.splice(bankIdx, 1);
+  buildSlots.push(item);
+  renderBuildSlots();
+}
+
+function removeBuildToken(buildIdx){
+  if(drillAnswered) return;
+  const item = buildSlots[buildIdx];
+  buildSlots.splice(buildIdx, 1);
+  bankWords.push(item);
+  renderBuildSlots();
+}
+
+function resetBuildSlots(){
+  if(drillAnswered) return;
+  bankWords = [...buildSlots, ...bankWords].sort(() => Math.random() - 0.5);
+  buildSlots = [];
+  renderBuildSlots();
+}
+
+function checkBuildAnswer(){
+  if(drillAnswered) return;
+  if(buildSlots.length === 0){
+    alert("Please click words from the bank below to build your German sentence!");
+    return;
+  }
+  drillAnswered = true;
+  const cur = currentQuestion;
+  const userSentence = buildSlots.map(w => w.word).join(' ').trim();
+  const correctSentence = cur.correctSentence || cur.tokens.join(' ');
+
+  const isCorrect = userSentence === correctSentence || 
+                    (cur.alternates && cur.alternates.includes(userSentence));
+
+  const fb = document.getElementById("feedbackBox");
+  const fbTitle = document.getElementById("feedbackTitle");
+  const fbText = document.getElementById("feedbackText");
+  const actionRow = document.getElementById("buildActionRow");
+  if(actionRow) actionRow.style.display = "none";
+
+  fb.style.display = "block";
+  drillStats.total++;
+  if(isCorrect){
+    drillStats.correct++;
+    currentStreak++;
+    if(currentStreak > bestStreak) bestStreak = currentStreak;
+    fb.className = "feedback-box correct";
+    fbTitle.textContent = "✅ Richtig! Ausgezeichnete Satzstellung!";
+    recordRuleResult(cur.ruleId || selectedRuleId, true);
+  } else {
+    drillStats.wrong++;
+    currentStreak = 0;
+    fb.className = "feedback-box wrong";
+    fbTitle.textContent = "❌ Noch nicht ganz!";
+    recordRuleResult(cur.ruleId || selectedRuleId, false);
+  }
+
+  fbText.innerHTML = `
+    <div style="margin-bottom:8px;">
+      <b>Correct German Sentence:</b><br>
+      <span style="font-size:15px; color:var(--green); font-weight:700;">„${escapeQuotes(correctSentence)}”</span>
+    </div>
+    <div style="font-size:13px; line-height:1.5; margin-bottom:8px;">
+      <b>Grammar Rule:</b> ${cur.explain}
+    </div>
+    <button class="speak-btn" style="width:auto; border-radius:18px; padding:6px 12px; gap:6px;" onclick="speakText('${escapeQuotes(correctSentence)}')">
+      🔊 Satz auf Deutsch anhören
+    </button>
+  `;
+
+  document.getElementById("nextDrillBtn").style.display = "block";
+  document.getElementById("finishDrillBtn").style.display = "block";
+}
+
+function checkAnswer(chosenIdx){
+  if(drillAnswered) return;
+  drillAnswered = true;
+  const cur = currentQuestion;
+  const isCorrect = chosenIdx === cur.correct;
+  const fb = document.getElementById("feedbackBox");
+  const fbTitle = document.getElementById("feedbackTitle");
+  const fbText = document.getElementById("feedbackText");
+
+  cur.options.forEach((_,i)=>{
+    const btn = document.getElementById(`optBtn_${i}`);
+    if(btn){
+      btn.disabled = true;
+      if(i === cur.correct) btn.classList.add("correct");
+      else if(i === chosenIdx) btn.classList.add("wrong");
+    }
+  });
+
+  fb.style.display = "block";
+  drillStats.total++;
+  if(isCorrect){
+    drillStats.correct++;
+    currentStreak++;
+    if(currentStreak > bestStreak) bestStreak = currentStreak;
+    fb.className = "feedback-box correct";
+    fbTitle.textContent = "✅ Richtig! Ausgezeichnet!";
+    recordRuleResult(cur.ruleId || selectedRuleId, true);
+  } else {
+    drillStats.wrong++;
+    currentStreak = 0;
+    fb.className = "feedback-box wrong";
+    fbTitle.textContent = "❌ Nicht ganz!";
+    recordRuleResult(cur.ruleId || selectedRuleId, false);
+  }
+  fbText.innerHTML = cur.explain + `<div style="margin-top:8px;"><button class="speak-btn" onclick="speakText('${escapeQuotes(cur.prompt.replace('___', cur.options[cur.correct]))}')">🔊 Listen to full sentence</button></div>`;
+
+  document.getElementById("nextDrillBtn").style.display = "block";
+  document.getElementById("finishDrillBtn").style.display = "block";
+}
+
+function advanceDrill(){
+  if(!endlessMode && drillStats.total >= 10){
+    showSessionSummary();
+    return;
+  }
+  drillAnswered = false;
+  currentQuestion = generateInfiniteQuestion(selectedRuleId);
+  renderContent();
+}
+
+function showSessionSummary(){
+  const area = document.getElementById("contentArea");
+  const pct = drillStats.total > 0 ? Math.round((drillStats.correct / drillStats.total) * 100) : 0;
+  area.innerHTML = `
+    <div class="drill-card" style="text-align:center;">
+      <h2 style="font-family:'Fjalla One',sans-serif; font-size:26px; margin:0 0 8px;">🎉 Training Session Summary</h2>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:16px; margin-bottom:12px;">
+        Questions Completed: <b>${drillStats.total}</b> · Score: <b style="color:var(--green); font-size:24px;">${drillStats.correct}</b> / ${drillStats.total} (${pct}%)
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:14px; margin-bottom:18px; color:var(--red);">
+        Best Streak: <b>${bestStreak} 🔥</b>
+      </div>
+      <p style="font-size:13px; color:var(--ink-soft); margin-bottom:20px;">
+        ${pct >= 80 ? "Hervorragend! Your German grammar intuition is sharpening rapidly!" : "Gute Übung! Keep training endlessly to cement the automatic word order and endings."}
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button class="bigbtn" style="flex:1;" onclick="startDrillForRule(selectedRuleId)">♾️ Continue Endless Training</button>
+        <button class="bigbtn secondary" style="flex:1;" onclick="switchMode('stats')">📊 View Mastery Matrix</button>
+      </div>
+    </div>
+  `;
+}
+
+function nextRuleDrill(){
+  const curIdx = GRAMMAR_RULES.findIndex(r=>r.id === selectedRuleId);
+  const nextIdx = (curIdx + 1) % GRAMMAR_RULES.length;
+  selectRule(GRAMMAR_RULES[nextIdx].id);
+  switchMode('drill');
+}
+
+function recordRuleResult(ruleId, correct){
+  if(ruleId === 'alle') return;
+  if(!PROGRESS[ruleId]) PROGRESS[ruleId] = { correct:0, wrong:0, box:1 };
+  if(correct){
+    PROGRESS[ruleId].correct++;
+    PROGRESS[ruleId].box = Math.min(5, (PROGRESS[ruleId].box || 1) + 1);
+  } else {
+    PROGRESS[ruleId].wrong++;
+    PROGRESS[ruleId].box = 1;
+  }
+  saveProgress();
+}
+
+// Keyboard shortcuts for fast training (1, 2, 3, 4 for gap-fill; Enter to check/advance)
+document.addEventListener("keydown", (e)=>{
+  if(currentMode !== 'drill') return;
+  if(['1','2','3','4'].includes(e.key)){
+    const idx = parseInt(e.key) - 1;
+    const btn = document.getElementById(`optBtn_${idx}`);
+    if(btn && !btn.disabled) checkAnswer(idx);
+  } else if(e.key === 'Enter'){
+    const nextBtn = document.getElementById("nextDrillBtn");
+    if(nextBtn && nextBtn.style.display !== 'none'){
+      advanceDrill();
+    } else if(currentQuestion && currentQuestion.type === 'build' && !drillAnswered){
+      checkBuildAnswer();
+    }
+  }
+});
+
+/* ---------------- 3. STATS VIEW ---------------- */
+function renderStatsView(container){
+  let totalMastered = 0;
+  let totalPracticed = 0;
+  GRAMMAR_RULES.forEach(r=>{
+    const p = PROGRESS[r.id];
+    if(p && (p.box||1) >= 4) totalMastered++;
+    if(p && (p.correct + p.wrong > 0)) totalPracticed++;
+  });
+
+  container.innerHTML = `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">${GRAMMAR_RULES.length}</div>
+        <div class="stat-lbl">CORE RULES</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${totalPracticed}</div>
+        <div class="stat-lbl">RULES PRACTICED</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${totalMastered}</div>
+        <div class="stat-lbl">RULES MASTERED</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${Math.round((totalMastered/GRAMMAR_RULES.length)*100)}%</div>
+        <div class="stat-lbl">EXAM READINESS</div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <h2 style="font-family:'Fjalla One',sans-serif; font-size:18px; margin:0 0 12px;">Pillar Mastery Breakdown</h2>
+      <table class="de-table">
+        <tr><th>Rule Pillar</th><th>Box (1–5)</th><th>Accuracy</th><th>Action</th></tr>
+        ${GRAMMAR_RULES.map(r=>{
+          const p = PROGRESS[r.id] || { correct:0, wrong:0, box:1 };
+          const tot = p.correct + p.wrong;
+          const acc = tot ? Math.round((p.correct/tot)*100) + "%" : "Not yet";
+          return `
+            <tr>
+              <td><b>Rule ${r.num}:</b> ${r.title.split('(')[0]}</td>
+              <td><span style="font-weight:700; color:${p.box>=4?'var(--green)':p.box>=2?'var(--gold)':'var(--red)'};">Box ${p.box || 1}</span></td>
+              <td>${acc} (${p.correct}/${tot})</td>
+              <td><button class="hub-link" onclick="selectRule('${r.id}'); switchMode('drill');">⚡ Practice</button></td>
+            </tr>
+          `;
+        }).join("")}
+      </table>
+      <button class="bigbtn secondary" style="margin-top:16px;" onclick="resetProgress()">Reset Grammar Progress</button>
+    </div>
+  `;
+}
+
+function resetProgress(){
+  if(confirm("Reset all grammar progress?")){
+    PROGRESS = {};
+    saveProgress();
+    renderContent();
+  }
+}
+
+/* ---------------- AUDIO SPEECH SYNTHESIS ---------------- */
+function speakText(txt){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = "de-DE";
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+
+function escapeQuotes(str){
+  return (str||'').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// Initial boot
+window.onload = init;
+</script>
+</body>
+</html>

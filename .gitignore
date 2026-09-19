@@ -1,0 +1,5 @@
+﻿*.tmp
+*.temp
+temp_*
+scratch/
+.system_generated/
