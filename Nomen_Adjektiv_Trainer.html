@@ -1836,6 +1836,34 @@ if (document.readyState === 'loading') {
   initSuiteTheme();
 }
 
+
+// --- Swipe Gestures for Flashcards ---
+let touchStartX = 0;
+let touchEndX = 0;
+document.addEventListener('touchstart', e => {
+  if (e.target.closest('.flashcard') || e.target.closest('.card')) {
+    touchStartX = e.changedTouches[0].screenX;
+  }
+}, {passive: true});
+document.addEventListener('touchend', e => {
+  const card = e.target.closest('.flashcard') || e.target.closest('.card');
+  if (card) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe(card);
+  }
+}, {passive: true});
+function handleSwipe(cardElement) {
+  const swipeThreshold = 50;
+  if (touchEndX < touchStartX - swipeThreshold) {
+    const btn = document.getElementById('btn-nochmal') || document.querySelector('.btn-fail');
+    if(btn && !btn.disabled) btn.click();
+  }
+  if (touchEndX > touchStartX + swipeThreshold) {
+    const btn = document.getElementById('btn-gewusst') || document.querySelector('.btn-pass');
+    if(btn && !btn.disabled) btn.click();
+  }
+}
+
 </script>
 
 <script>
