@@ -422,7 +422,22 @@
     .selectors-row { flex-direction: column; }
     .dark-select { width: 100%; }
   }
+
+  @media (max-width: 600px) {
+    .call-container { height: 280px; }
+  }
+
 </style>
+
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed', err));
+    });
+  }
+</script>
+
 </head>
 <body>
 
@@ -471,6 +486,7 @@
 
   <!-- Quick Voice & Interaction Bar -->
   <div class="action-bar">
+    <button class="mic-button-hero" id="prompterBtn" style="background:#10b981;" onclick="givePromptHint()">💡 Tipp</button>
     <button class="mic-button-hero" id="heroMicBtn" onclick="toggleHeroMic()">
       <span id="heroMicIcon">🎙️</span>
       <span id="heroMicLabel">Sprechen (Tap to Speak German)</span>
@@ -480,12 +496,16 @@
   <!-- Controls Bar: Personas, CEFR, Topics, AI Engines -->
   <div class="controls-bar">
     <div class="selectors-row">
+      <button class="dark-select" onclick="toggleTheme()" title="Theme">🌓 Theme</button>
       <select class="dark-select" id="humanPersonaSelect" onchange="changeHumanPersona()">
         <option value="schmidt" selected>👩‍🏫 Frau Schmidt (Warm, encouraging, clear speech)</option>
         <option value="weber">👨‍🏫 Herr Weber (DTZ / Goethe Official Examiner)</option>
         <option value="lukas">🧑 Lukas (Young Berlin native, casual conversation)</option>
         <option value="dr_hoffmann">👨‍⚕️ Dr. Hoffmann (Professional medical &amp; work)</option>
       </select>
+      
+<button class="dark-select" onclick="toggleSubtitles()">📺 Untertitel An/Aus</button>
+
 
       <select class="dark-select" id="humanCefrSelect" onchange="changeHumanCefr()">
         <option value="A1">Niveau: A1 (Einfache Sätze)</option>
@@ -513,6 +533,7 @@
         <option value="gemini">✨ Google Gemini 1.5</option>
         <option value="ollama">💻 Local Ollama (Offline)</option>
       </select>
+      <button class="dark-select" style="background:var(--accent); color:#0F172A; font-weight:700;" onclick="exportChatTranscript()">📥 Transkript exportieren</button>
       <button class="dark-select" style="background:var(--accent); color:#0F172A; font-weight:700;" onclick="openSettings()">⚙️ Key</button>
     </div>
   </div>
@@ -986,6 +1007,14 @@ function initSTT() {
   };
 }
 
+
+async function givePromptHint() {
+  document.getElementById('humanTextInput').value = "Lade Tipp...";
+  setTimeout(() => {
+    document.getElementById('humanTextInput').value = "Können Sie das bitte wiederholen?";
+  }, 1000);
+}
+
 function toggleHeroMic() {
   if (!recognition) {
     alert("Spracherkennung wird in diesem Browser nicht unterstützt. Bitte nutze Chrome, Safari oder Edge oder tippe unten in das Textfeld.");
@@ -1094,7 +1123,7 @@ function replayCurrentVoice() {
    ========================================================================= */
 
 let activeProvider = localStorage.getItem('de_ai_provider') || 'deepseek';
-let conversationHistory = [];
+let conversationHistory = JSON.parse(localStorage.getItem('de_human_partner_history_v1') || '[]');
 
 const AI_PROVIDERS = {
   deepseek: { name: "DeepSeek AI", endpoint: "https://api.deepseek.com/chat/completions", model: "deepseek-chat" },
@@ -1199,7 +1228,7 @@ Gib NUR reines JSON zurück.`;
 
     // Human Voice Speech
     conversationHistory.push({ role: "user", content: userGermanText });
-    conversationHistory.push({ role: "assistant", content: parsed.reply_de });
+    conversationHistory.push({ role: "assistant", content: parsed.reply_de }); localStorage.setItem('de_human_partner_history_v1', JSON.stringify(conversationHistory));
 
     speakHumanVoice(parsed.reply_de, parsed.reply_en);
 
@@ -1210,7 +1239,15 @@ Gib NUR reines JSON zurück.`;
   }
 }
 
+
 function renderFeedbackCard(origText, parsed) {
+  lastCorrection = {
+    original: origText,
+    corrected: parsed.corrected_user_sentence || origText,
+    explanations: parsed.rule_explanations || [],
+    better_alternative: parsed.native_upgrade || ''
+  };
+
   const container = document.getElementById('liveCorrectionContainer');
   const isPerfect = parsed.score >= 95;
   const cardClass = isPerfect ? 'correction-card perfect' : 'correction-card error';
@@ -1231,7 +1268,7 @@ function renderFeedbackCard(origText, parsed) {
     <div class="${cardClass}">
       <div class="user-speech-row">Du: <b>"${escapeHtml(origText)}"</b></div>
       ${!isPerfect ? `<div class="corrected-sentence">Korrektur: ${escapeHtml(parsed.corrected_user_sentence || origText)}</div>` : `<div style="color:var(--green); font-weight:600; font-size:13px;">🌟 Perfekt formuliert!</div>`}
-      <div class="rule-tips">${ruleHtml}</div>
+      <div class="rule-tips">${ruleHtml}</div>\n      <button onclick="saveToVault()" style="margin-top:8px; padding:4px 8px; font-size:12px; background:var(--gold); border:none; border-radius:4px; cursor:pointer;">⭐ Merken</button>
       ${upgradeHtml}
     </div>
   `;
@@ -1267,6 +1304,59 @@ function switchAiProvider() {
   localStorage.setItem('de_ai_provider', activeProvider);
   const config = AI_PROVIDERS[activeProvider];
   document.getElementById('currentProviderLabel').textContent = config.name;
+}
+
+
+function exportChatTranscript() {
+  let md = "# Chat Transcript
+
+";
+  conversationHistory.forEach(msg => {
+    if (msg.role === 'user') md += `**Du**: ${msg.content}
+
+`;
+    else if (msg.role === 'assistant') md += `**Coach**: ${msg.content}
+
+`;
+  });
+  const blob = new Blob([md], {type: 'text/markdown'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'chat_transcript.md';
+  a.click();
+}
+
+let lastCorrection = null;
+function saveToVault() {
+  if (lastCorrection) {
+    const vault = JSON.parse(localStorage.getItem('de_coach_vault') || '[]');
+    vault.push(lastCorrection);
+    localStorage.setItem('de_coach_vault', JSON.stringify(vault));
+    alert('Gemerkter Fehler im Fehler-Buch gespeichert!');
+  } else {
+    alert('Kein Fehler zum Speichern gefunden!');
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.style.background === 'white';
+  if (isLight) {
+    document.body.style.background = 'radial-gradient(circle at top, #1E293B 0%, #0F172A 100%)';
+    document.body.style.color = '#F8FAFC';
+    document.documentElement.style.setProperty('--card-bg', '#1E293B');
+  } else {
+    document.body.style.background = 'white';
+    document.body.style.color = 'black';
+    document.documentElement.style.setProperty('--card-bg', '#F3F4F6');
+  }
+}
+
+
+function toggleSubtitles() {
+  const box = document.getElementById('subtitlesBox');
+  if (box.style.display === 'none') box.style.display = 'flex';
+  else box.style.display = 'none';
 }
 
 function openSettings() {

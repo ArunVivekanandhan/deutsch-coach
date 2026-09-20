@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Nouns &amp; Adjectives — Form Trainer</title>
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -117,25 +118,52 @@
   .voicewarn{font-size:11px; color:var(--red-dark); background:#f6e9e7; border-left:3px solid var(--red);
     padding:6px 9px; border-radius:0 5px 5px 0; margin-bottom:10px; display:none;}
   footer{margin-top:20px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); text-align:center; line-height:1.6;}
+
+  html.dark-theme {
+    --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
+    --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
+    --gold: #ffcc00; --green: #55cc55; --blue: #5599ff; --purple: #b366ff;
+  }
+
+
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);
+    width:100%; max-width:1100px;
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600; cursor:pointer;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div style="background:var(--card); border:1.5px solid var(--ink); border-radius:8px; padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; box-shadow:0 4px 10px var(--shadow);">
-    <div style="font-family:'Fjalla One',sans-serif; font-size:13px;">🧭 <b>DEUTSCH-COACH SUITE</b></div>
-    <div style="display:flex; gap:6px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px;">
-      <a href="./index.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🏠 Main Coach</a>
-      <a href="./Grammatik_Regel_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📚 Grammar</a>
-      <a href="./Sprech_Pruefungs_Simulator.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🗣️ Speaking</a>
-      <a href="./German_A2_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🔬 A2 Studio</a>
-      <a href="./German_B1_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🔬 B1 Studio</a>
-      <a href="./Verb_Transformation_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">⚡ Verben</a>
-      <a href="./Nomen_Adjektiv_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📦 Nouns/Adj</a>
-      <a href="./Satzbau_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🧩 Satzbau</a>
-      <a href="./Verben_Hoeren_EN_DE.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🎧 Audio Coach</a>
-      <a href="./konnektoren_referenz.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📋 Konnektoren</a>
+  
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main</a>
+      <a href="./KI_Human_Partner.html" class="hub-link">👤 Live Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Chat</a>
+      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Sprechen</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verben</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns/Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+      <button id="themeToggle" class="hub-link" style="cursor:pointer; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px; font-weight:600;">🌙 Dark Mode</button>
     </div>
   </div>
+
 
   <h1>Nomen &amp; Adjektive — Formen-Trainer</h1>
   <div class="sub">Singular → Plural · Positiv → Komparativ → Superlativ</div>
@@ -302,7 +330,10 @@ function renderChips(){
   gc.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ meaningLang=el.dataset.lang; refreshAll(); });
 
   const dc = document.getElementById('dirChips');
-  dc.innerHTML = DIRS.map(o=>`<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
+  let currentDirs = [...DIRS];
+  if(curMode === 'nomen') { currentDirs.push({k:'gender', l:'Artikel (der/die/das)'}); }
+  else if(curDir === 'gender') { curDir = 'de2en'; }
+  dc.innerHTML = currentDirs.map(o=>`<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
   dc.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curDir=el.dataset.dir; refreshAll(); });
 }
 
@@ -442,30 +473,49 @@ function renderCard(){
   let promptHTML, revealHTML;
   if(curMode==='nomen'){
     const wordDisp = `${v.a} ${v.sg}`;
-    promptHTML = reverse ? `
-      <div class="qlabel">Meaning → Noun · 📦 ${boxNames[box]}</div>
+    if (curDir === 'gender') {
+      promptHTML = `
+      <div class="qlabel">Artikel (der/die/das) · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
-        <div class="word" style="font-size:22px;">${meaningPromptText(v)}</div>
-        <div class="subq">What is the noun (with article) — and what is the plural?</div>
+        <div class="wordline"><div class="word">___ ${v.sg}</div>${speakBtn(v.a+' '+v.sg,'Listen to word')}</div>
+        <div class="subq">Welcher Artikel (der, die oder das)?</div>
         <div style="margin-top:10px;">
-          <input type="text" id="naTypeInput" placeholder="Optional: Type here to practice (e.g. die Tür, die Türen)..." style="width:100%; padding:8px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
+          <input type="text" id="naTypeInput" placeholder="der / die / das..." style="width:100%; padding:8px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
         </div>
-      </div>` : `
-      <div class="qlabel">Singular → Plural · 📦 ${boxNames[box]}</div>
-      <div class="prompt">
-        <div class="wordicon">${getIcon(v)}</div>
-        <div class="wordline"><div class="word">${wordDisp}</div>${speakBtn(wordDisp,'Listen to word')}</div>
-        <div class="subq">What is the plural?</div>
       </div>`;
-    const diag = diffHighlight(v.sg.replace(/\(.*?\)/g,''), v.pl.replace(/\(.*?\)/g,''));
-    revealHTML = `
+      revealHTML = `
       <div class="revealbox">
-        ${reverse ? `<div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>` : meaningHTML(v)}
+        <div class="formrow"><span class="flabel">Artikel + Singular</span><span class="fval">${v.a} ${v.sg}${speakBtn(v.a+' '+v.sg,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
-        <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
-        ${ruleExplanationNoun(v)}
+        ${meaningHTML(v)}
       </div>`;
+    } else {
+      promptHTML = reverse ? `
+        <div class="qlabel">Meaning → Noun · 📦 ${boxNames[box]}</div>
+        <div class="prompt">
+          <div class="wordicon">${getIcon(v)}</div>
+          <div class="word" style="font-size:22px;">${meaningPromptText(v)}</div>
+          <div class="subq">What is the noun (with article) — and what is the plural?</div>
+          <div style="margin-top:10px;">
+            <input type="text" id="naTypeInput" placeholder="Optional: Type here to practice (e.g. die Tür, die Türen)..." style="width:100%; padding:8px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
+          </div>
+        </div>` : `
+        <div class="qlabel">Singular → Plural · 📦 ${boxNames[box]}</div>
+        <div class="prompt">
+          <div class="wordicon">${getIcon(v)}</div>
+          <div class="wordline"><div class="word">${wordDisp}</div>${speakBtn(wordDisp,'Listen to word')}</div>
+          <div class="subq">What is the plural?</div>
+        </div>`;
+      const diag = diffHighlight(v.sg.replace(/\(.*?\)/g,''), v.pl.replace(/\(.*?\)/g,''));
+      revealHTML = `
+        <div class="revealbox">
+          ${reverse ? `<div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>` : meaningHTML(v)}
+          <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
+          <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
+          ${ruleExplanationNoun(v)}
+        </div>`;
+    }
   } else {
     promptHTML = reverse ? `
       <div class="qlabel">Meaning → Adjective · 📦 ${boxNames[box]}</div>
@@ -519,7 +569,62 @@ function renderCard(){
 }
 function advance(){ sessionIdx++; renderDash(); renderCard(); }
 
+document.addEventListener('keydown', (e) => {
+  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+  
+  const btnReveal = document.getElementById('revealBtn');
+  if (e.code === 'Space' && btnReveal && btnReveal.style.display !== 'none') {
+    e.preventDefault();
+    btnReveal.click();
+    return;
+  }
+  
+  const revealArea = document.getElementById('revealArea');
+  if (revealArea && revealArea.innerHTML !== '') {
+    const btnNochmal = document.getElementById('btnNochmal');
+    const btnGewusst = document.getElementById('btnGewusst');
+    const btnEasy = document.getElementById('btnEasy');
+    
+    if (e.key === '1' && btnNochmal) {
+      e.preventDefault(); btnNochmal.click();
+    } else if (e.key === '2' && btnGewusst) {
+      e.preventDefault(); btnGewusst.click();
+    } else if (e.key === '3' && btnEasy) {
+      e.preventDefault(); btnEasy.click();
+    }
+  }
+});
+
 refreshAll();
 </script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if(themeToggle) {
+      const currentTheme = localStorage.getItem('de_theme') || 'light';
+      if(currentTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Light Mode';
+      }
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark-theme');
+        if(document.documentElement.classList.contains('dark-theme')){
+          localStorage.setItem('de_theme', 'dark');
+          themeToggle.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('de_theme', 'light');
+          themeToggle.textContent = '🌙 Dark Mode';
+        }
+      });
+    }
+  });
+</script>
+
 </body>
 </html>

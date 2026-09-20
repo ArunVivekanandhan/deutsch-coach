@@ -760,7 +760,32 @@
     .control-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
     .btn-circle { width: 40px; height: 40px; font-size: 16px; }
   }
+
+  [data-theme='dark'] {
+    --paper: #0f172a;
+    --paper-dark: #1e293b;
+    --card: #1e293b;
+    --ink: #f8fafc;
+    --ink-soft: #94a3b8;
+    --red: #ef4444;
+    --red-bg: rgba(239, 68, 68, 0.15);
+    --green: #22c55e;
+    --green-bg: rgba(34, 197, 94, 0.15);
+    --blue: #38bdf8;
+    --line: #334155;
+  }
+
 </style>
+
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed', err));
+    });
+  }
+</script>
+
 </head>
 <body>
 
@@ -800,9 +825,14 @@
         </div>
       </div>
       <div class="hero-actions">
+        <button class="action-pill-btn" onclick="toggleTheme()" title="Theme">🌓 Theme</button>
         <button class="action-pill-btn" onclick="openMistakeVault()" title="Saved corrections">
           📓 Fehler-Buch (<span id="vaultCount">0</span>)
         </button>
+        
+        <button class="action-pill-btn" onclick="clearChatConfirm()" title="Chat leeren">🗑️ Chat leeren</button>
+        <button class="action-pill-btn" onclick="exportChatTranscript()" title="Chat exportieren">📥 Exportieren</button>
+
         <button class="action-pill-btn primary" onclick="openSettingsModal()" title="AI API Key & Settings">
           ⚙️ AI &amp; Key
         </button>
@@ -872,6 +902,25 @@
     <!-- Initial Greeting rendered by JS -->
   </div>
 
+  
+  <div class="redemittel-dock" style="position:fixed; bottom:80px; left:10px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px; box-shadow:0 4px 12px var(--shadow); z-index:100; max-width:300px;">
+    <div style="font-size:12px; font-weight:bold; margin-bottom:5px;">💬 B1 Redemittel</div>
+    <div style="display:flex; flex-wrap:wrap; gap:4px;">
+      <span class="quick-chip" onclick="insertRedemittel('allerdings ')">allerdings</span>
+      <span class="quick-chip" onclick="insertRedemittel('deshalb ')">deshalb</span>
+      <span class="quick-chip" onclick="insertRedemittel('einerseits ... andererseits ')">einerseits...andererseits</span>
+      <span class="quick-chip" onclick="insertRedemittel('meiner Meinung nach ')">meiner Meinung nach</span>
+      <span class="quick-chip" onclick="insertRedemittel('obwohl ')">obwohl</span>
+    </div>
+  </div>
+  <script>
+    function insertRedemittel(text) {
+      const input = document.getElementById('userInput');
+      input.value += text;
+      input.focus();
+    }
+  </script>
+
   <!-- Sticky Bottom Input Panel -->
   <div class="input-panel">
     <div class="quick-chips" id="quickChips">
@@ -928,6 +977,24 @@
       </select>
     </div>
 
+    
+    <div class="form-group">
+      <label class="form-label">Dein Name</label>
+      <input type="text" class="form-input" id="userNameInput" placeholder="Arun" value="Arun">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Muttersprache</label>
+      <input type="text" class="form-input" id="userLangInput" placeholder="English / Tamil" value="English">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ziel-Prüfung</label>
+      <select class="form-select" id="userExamSelect">
+        <option value="DTZ">DTZ</option>
+        <option value="Goethe B1">Goethe B1</option>
+        <option value="telc B2">telc B2</option>
+      </select>
+    </div>
+
     <div class="form-group" id="apiKeyGroup">
       <label class="form-label">API Key für <span id="keyProviderName">DeepSeek</span></label>
       <div class="key-input-wrapper">
@@ -980,6 +1047,7 @@
   </div>
   <div style="margin-top:10px; display:flex; gap:6px;">
     <button class="action-pill-btn" style="flex:1; text-align:center; justify-content:center;" onclick="clearMistakeVault()">🗑️ Alle löschen</button>
+    <button class="action-pill-btn primary" style="flex:1; text-align:center; justify-content:center;" onclick="startSrsDrill()">🎯 Fehler trainieren (SRS Drill)</button>
     <button class="action-pill-btn primary" style="flex:1; text-align:center; justify-content:center;" onclick="closeMistakeVault()">Schließen</button>
   </div>
 </div>
@@ -1083,7 +1151,7 @@ const TOPIC_PROMPTS = {
 };
 
 /* Application State */
-let chatHistory = [];
+let chatHistory = JSON.parse(localStorage.getItem('de_chat_history_v1') || '[]');
 let mistakeVault = JSON.parse(localStorage.getItem('de_coach_vault') || '[]');
 let isSpeaking = false;
 let isRecording = false;
@@ -1121,6 +1189,19 @@ let appSettings = {
 /* =========================================================================
    INITIALIZATION & UI SETUP
    ========================================================================= */
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('de_theme', next);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('de_theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   updateVaultCount();
   setupSpeechRecognition();
@@ -1193,6 +1274,28 @@ function changeTopic() {
   sendMessageToAI(`[SYSTEM HINWEIS: Wir wechseln jetzt zum Szenario: "${topicTitle}". Starte dieses Szenario mit einer passenden Eröffnungsfrage auf Deutsch passend zum Niveau ${appSettings.cefr}.]`, true);
 }
 
+
+function clearChatConfirm() {
+  if (confirm('Möchtest du den Chat wirklich löschen?')) {
+    chatHistory = [];
+    localStorage.removeItem('de_chat_history_v1');
+    initConversation();
+  }
+}
+function exportChatTranscript() {
+  let md = "# Chat Transcript\n\n";
+  chatHistory.forEach(msg => {
+    if (msg.role === 'user') md += `**Du**: ${msg.text}\n\n`;
+    else if (msg.role === 'assistant') md += `**Coach**: ${msg.coachReply}\n\n`;
+  });
+  const blob = new Blob([md], {type: 'text/markdown'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'chat_transcript.md';
+  a.click();
+}
+
 function resetConversation() {
   stopAudio();
   initConversation();
@@ -1220,6 +1323,7 @@ function sendQuickPrompt(text) {
    ========================================================================= */
 
 function renderChat() {
+  localStorage.setItem('de_chat_history_v1', JSON.stringify(chatHistory));
   const container = document.getElementById('chatBox');
   container.innerHTML = '';
 
@@ -1390,7 +1494,12 @@ function buildSystemPrompt() {
   const cefr = appSettings.cefr;
   const topicDesc = TOPIC_PROMPTS[appSettings.topic];
 
-  return `Du bist ${persona.name}, ein hochqualifizierter und sympathischer Deutsch-Coach für den Lernenden "Arun".
+  const userName = appSettings.userName || "Arun";
+  const userLang = appSettings.userLang || "English";
+  const userExam = appSettings.userExam || "DTZ";
+  return `Du bist ${persona.name}, ein hochqualifizierter und sympathischer Deutsch-Coach für den Lernenden "${userName}".
+Muttersprache des Lernenden: ${userLang}. Ziel-Prüfung: ${userExam}.
+
 Deine Rolle: ${persona.role}.
 Dein Sprachstil: ${persona.style}.
 Aktuelles CEFR-Niveau des Lernenden: ${cefr}.
@@ -1751,6 +1860,23 @@ function removeVaultItem(idx) {
   openMistakeVault();
 }
 
+
+function startSrsDrill() {
+  if (mistakeVault.length === 0) {
+    alert("Keine Fehler im Tagebuch. Mache zuerst ein paar Fehler!");
+    return;
+  }
+  const randomMistake = mistakeVault[Math.floor(Math.random() * mistakeVault.length)];
+  const answer = prompt(`Bitte korrigiere diesen Satz:\n\n${randomMistake.original}`);
+  if (answer) {
+    if (answer.trim().toLowerCase() === randomMistake.corrected.toLowerCase()) {
+      alert("Richtig! Gut gemacht.");
+    } else {
+      alert(`Leider falsch.\n\nKorrekt wäre:\n${randomMistake.corrected}\n\nTipp: ${randomMistake.explanations.join(', ')}`);
+    }
+  }
+}
+
 function clearMistakeVault() {
   if (confirm("Möchten Sie wirklich alle Einträge aus dem Fehler-Buch löschen?")) {
     mistakeVault = [];
@@ -1806,6 +1932,14 @@ function toggleKeyVisibility() {
 }
 
 function saveSettings() {
+
+  localStorage.setItem('de_user_name', document.getElementById('userNameInput').value);
+  localStorage.setItem('de_user_lang', document.getElementById('userLangInput').value);
+  localStorage.setItem('de_user_exam', document.getElementById('userExamSelect').value);
+  appSettings.userName = document.getElementById('userNameInput').value;
+  appSettings.userLang = document.getElementById('userLangInput').value;
+  appSettings.userExam = document.getElementById('userExamSelect').value;
+
   const provider = document.getElementById('providerSelect').value;
   const key = document.getElementById('apiKeyInput').value.trim();
   const model = document.getElementById('modelInput').value.trim();

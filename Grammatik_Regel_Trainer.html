@@ -3,15 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<link rel="manifest" href="manifest.json">
 <title>German Grammar &amp; Rules Trainer — Dein Deutsch-Coach</title>
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  
   :root{
     --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
     --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
     --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
   }
+  [data-theme="dark"] {
+    --paper: #121212; --paper-dark: #1E1E1E; --card: #1E1E1E; --ink: #E0E0E0; --ink-soft: #A0A0A0;
+    --red: #FF6B6B; --red-dark: #FF4F4F; --gold: #FFD93D; --green: #6BCB77; --blue: #4D96FF;
+    --purple: #B590CA; --line: #333333; --shadow: rgba(0,0,0,0.5);
+  }
   *{box-sizing:border-box;}
+
   body{
     margin:0; font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
     padding:12px 10px 60px; display:flex; flex-direction:column; align-items:center;
@@ -207,6 +215,7 @@
 <div class="wrap">
 
   <!-- Suite Navigation Hub -->
+  
   <div class="hub-banner">
     <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
     <div class="hub-links">
@@ -223,7 +232,9 @@
       <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
       <a href="./konnektoren_referenz.html" class="hub-link">📋 Konnektoren</a>
     </div>
+    <button onclick="toggleDarkMode()" style="cursor:pointer; background:none; border:1px solid var(--line); border-radius:4px; padding:4px 8px; color:var(--ink);">🌓</button>
   </div>
+
 
   <h1>German Grammar &amp; Rules Trainer</h1>
   <div class="sub">16 Essential Grammar Pillars for Fluent Speaking &amp; B1 Exam Success</div>
@@ -237,8 +248,11 @@
 
   <!-- Rule Filter Chips -->
   <div class="filterbox">
+    
     <div class="filterlabel">Select German Grammar Pillar:</div>
+    <div style="margin-bottom:8px;"><button onclick="toggleWeaknessVault()" id="btnWeakness" class="subtab" style="background:var(--red); color:#fff; border-color:var(--red-dark);">🏋️ Drill Weaknesses (Box 1-2)</button></div>
     <div class="chiprow" id="ruleChips"></div>
+
   </div>
 
   <!-- Dynamic Content Area -->
@@ -995,6 +1009,100 @@ const GRAMMAR_RULES = [
 /* =========================================================================
    APPLICATION STATE & CONTROLLER (WITH INFINITE QUESTION GENERATOR)
    ========================================================================= */
+
+/* =========================================================================
+   NEW LOGIC: Persistence, AI Explanations, Dark Mode, Mistake Filter
+   ========================================================================= */
+function toggleDarkMode() {
+  const isDark = document.body.getAttribute("data-theme") === "dark";
+  document.body.setAttribute("data-theme", isDark ? "light" : "dark");
+  localStorage.setItem('de_theme', isDark ? "light" : "dark");
+}
+if(localStorage.getItem('de_theme') === 'dark') document.body.setAttribute("data-theme", "dark");
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed', err));
+}
+
+let drillWeaknessesOnly = false;
+function toggleWeaknessVault() {
+  drillWeaknessesOnly = !drillWeaknessesOnly;
+  const btn = document.getElementById("btnWeakness");
+  if(drillWeaknessesOnly) {
+    btn.style.boxShadow = "0 0 8px var(--red)";
+    btn.innerText = "🏋️ Drilling Weaknesses Only";
+  } else {
+    btn.style.boxShadow = "none";
+    btn.innerText = "🏋️ Drill Weaknesses (Box 1-2)";
+  }
+}
+
+function loadStreaks() {
+  const saved = JSON.parse(localStorage.getItem('gp_progress_v1'));
+  if(saved) {
+    currentStreak = saved.currentStreak || 0;
+    bestStreak = saved.bestStreak || 0;
+  }
+}
+
+function saveStreaks() {
+  const saved = JSON.parse(localStorage.getItem('gp_progress_v1')) || {};
+  saved.currentStreak = currentStreak;
+  saved.bestStreak = bestStreak;
+  localStorage.setItem('gp_progress_v1', JSON.stringify(saved));
+}
+
+async function callAIGrammarExplanation(promptText, callback) {
+  const apiKey = localStorage.getItem('de_ai_key_groq') || localStorage.getItem('de_ai_key_openai');
+  if(!apiKey) { alert("AI Key not found in localStorage (de_ai_key_groq or de_ai_key_openai)."); return; }
+  
+  const isGroq = !!localStorage.getItem('de_ai_key_groq');
+  const endpoint = isGroq ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+  const model = isGroq ? 'llama3-8b-8192' : 'gpt-4o-mini';
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: model,
+        messages: [{ role: "user", content: promptText }]
+      })
+    });
+    const data = await res.json();
+    if(data.choices && data.choices.length>0) {
+      callback(data.choices[0].message.content);
+    } else {
+      callback("AI Error: " + JSON.stringify(data));
+    }
+  } catch(e) {
+    callback("Error connecting to AI: " + e.message);
+  }
+}
+
+function explainWrongAnswerAI(chosenOpt) {
+  const fbBtn = document.getElementById("aiExplainBtn");
+  if(fbBtn) fbBtn.innerText = "⏳ Loading...";
+  
+  const q = currentQuestion;
+  const promptTxt = `I am learning German. I answered this grammar question incorrectly.
+Sentence: "${q.prompt}"
+Correct answer: "${q.options ? q.options[q.correct] : q.en}"
+My incorrect answer: "${chosenOpt}"
+Rule context: ${currentRule ? currentRule.summary : ''}
+
+Briefly explain EXACTLY why my answer is wrong and why the correct answer is right. Keep it short and encouraging.`;
+
+  callAIGrammarExplanation(promptTxt, (exp) => {
+    const fbBox = document.getElementById("aiExplainBox");
+    if(fbBox) {
+      fbBox.innerHTML = `<strong>🤖 KI-Erklärung:</strong><br>${exp.replace(/\n/g, '<br>')}`;
+      fbBox.style.display = "block";
+    }
+    if(fbBtn) fbBtn.style.display = "none";
+  });
+}
+
 let currentMode = 'study'; // 'study', 'drill', 'stats'
 let selectedRuleId = 'alle'; // Default to all rules mixed for endless training!
 let endlessMode = true; // TRUE = generate questions indefinitely!
@@ -1002,6 +1110,7 @@ let drillFormat = 'mixed'; // 'mixed' (alternating), 'choice' (gap-fill), 'build
 let currentStreak = 0;
 let bestStreak = 0;
 let currentQuestion = null;
+loadStreaks();
 let drillAnswered = false;
 let drillStats = { correct: 0, wrong: 0, total: 0 };
 let buildSlots = []; // Selected tokens in Sentence Builder
@@ -1971,13 +2080,16 @@ function checkBuildAnswer(){
   if(isCorrect){
     drillStats.correct++;
     currentStreak++;
+    saveStreaks();
     if(currentStreak > bestStreak) bestStreak = currentStreak;
+    saveStreaks();
     fb.className = "feedback-box correct";
     fbTitle.textContent = "✅ Richtig! Ausgezeichnete Satzstellung!";
     recordRuleResult(cur.ruleId || selectedRuleId, true);
   } else {
     drillStats.wrong++;
     currentStreak = 0;
+    saveStreaks();
     fb.className = "feedback-box wrong";
     fbTitle.textContent = "❌ Noch nicht ganz!";
     recordRuleResult(cur.ruleId || selectedRuleId, false);
@@ -1996,7 +2108,9 @@ function checkBuildAnswer(){
         🔊 Listen in German
       </button>
       ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
+      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI Erklärung</button>` : ''}
     </div>
+    <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
   `;
 
   document.getElementById("nextDrillBtn").style.display = "block";
@@ -2026,13 +2140,16 @@ function checkAnswer(chosenIdx){
   if(isCorrect){
     drillStats.correct++;
     currentStreak++;
+    saveStreaks();
     if(currentStreak > bestStreak) bestStreak = currentStreak;
+    saveStreaks();
     fb.className = "feedback-box correct";
     fbTitle.textContent = "✅ Richtig! Ausgezeichnet!";
     recordRuleResult(cur.ruleId || selectedRuleId, true);
   } else {
     drillStats.wrong++;
     currentStreak = 0;
+    saveStreaks();
     fb.className = "feedback-box wrong";
     fbTitle.textContent = "❌ Nicht ganz!";
     recordRuleResult(cur.ruleId || selectedRuleId, false);
@@ -2044,7 +2161,9 @@ function checkAnswer(chosenIdx){
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button class="speak-btn" onclick="speakText('${escapeQuotes(cur.prompt.replace('___', cur.options[cur.correct]))}')">🔊 Listen to full sentence</button>
       ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
+      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI Erklärung</button>` : ''}
     </div>
+    <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
   `;
 
   document.getElementById("nextDrillBtn").style.display = "block";

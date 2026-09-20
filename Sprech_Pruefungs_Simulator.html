@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Speaking Coach &amp; Exam Simulator — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -11,12 +12,17 @@
     --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
     --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
   }
+  html.dark-theme {
+    --paper:#0f172a; --paper-dark:#1e293b; --card:#1e293b; --ink:#f8fafc; --ink-soft:#94a3b8;
+    --red:#f87171; --red-dark:#ef4444; --gold:#fbbf24; --green:#4ade80; --blue:#38bdf8;
+    --purple:#c084fc; --line:#334155; --shadow:rgba(0,0,0,0.5);
+  }
   *{box-sizing:border-box;}
   body{
     margin:0; font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
     padding:12px 10px 60px; display:flex; flex-direction:column; align-items:center;
   }
-  .wrap{width:100%; max-width:800px;}
+  .wrap{width:100%; max-width:850px;}
 
   /* Suite Navigation Hub */
   .hub-banner{
@@ -24,14 +30,18 @@
     padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
     align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 4px 10px var(--shadow);
   }
-  .hub-title{font-family:'Fjalla One',sans-serif; font-size:14px; display:flex; align-items:center; gap:6px;}
-  .hub-links{display:flex; gap:6px; flex-wrap:wrap;}
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:14px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
   .hub-link{
     font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
     text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
     transition:all .15s; font-weight:600;
   }
   .hub-link:hover, .hub-link.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .theme-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer; font-weight:600;
+  }
 
   h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 4px;}
   .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
@@ -174,7 +184,8 @@
     <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
     <div class="hub-links">
       <a href="./index.html" class="hub-link">🏠 Main Coach</a>
-      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Coach</a>
+      <a href="./KI_Human_Partner.html" class="hub-link">👤 Live Human Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Text Coach</a>
       <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar &amp; Rules</a>
       <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link active">🗣️ Speaking &amp; Exam</a>
       <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
@@ -182,6 +193,8 @@
       <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
       <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns &amp; Adj</a>
       <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio Speaker</a>
+      <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()">🌙 Theme</button>
     </div>
   </div>
 
@@ -997,11 +1010,30 @@ function showComparison(target, spoken, containerId) {
   container.insertAdjacentHTML('beforeend', feedbackHtml);
 }
 
-function escapeQuotes(str){
-  return (str||'').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+function toggleTheme(){
+  const isDark = document.documentElement.classList.toggle('dark-theme');
+  localStorage.setItem('de_theme', isDark ? 'dark' : 'light');
+  const btn = document.getElementById('themeToggleBtn');
+  if(btn) btn.innerText = isDark ? '☀️ Theme' : '🌙 Theme';
 }
 
-window.onload = init;
+function initTheme(){
+  const saved = localStorage.getItem('de_theme');
+  if(saved === 'dark'){
+    document.documentElement.classList.add('dark-theme');
+    const btn = document.getElementById('themeToggleBtn');
+    if(btn) btn.innerText = '☀️ Theme';
+  }
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+window.onload = function(){
+  initTheme();
+  init();
+};
 </script>
 </body>
 </html>

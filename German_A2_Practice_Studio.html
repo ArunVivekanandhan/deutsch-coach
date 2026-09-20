@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Dein Deutsch-Coach — A2 Praxis-Studio</title>
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -977,6 +978,29 @@
   .family-list li:last-child {
     border-bottom: none;
   }
+
+  html.dark-theme {
+    --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
+    --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
+    --gold: #ffcc00; --green: #55cc55; --blue: #5599ff; --purple: #b366ff;
+  }
+
+
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);
+    width:100%; max-width:1100px;
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600; cursor:pointer;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
 </style>
 </head>
 <body onload="initApp()">
@@ -2081,5 +2105,34 @@ function escapeQuotes(str) {
   return (str || '').replace(/'/g, "\'").replace(/"/g, '&quot;');
 }
 </script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if(themeToggle) {
+      const currentTheme = localStorage.getItem('de_theme') || 'light';
+      if(currentTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Light Mode';
+      }
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark-theme');
+        if(document.documentElement.classList.contains('dark-theme')){
+          localStorage.setItem('de_theme', 'dark');
+          themeToggle.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('de_theme', 'light');
+          themeToggle.textContent = '🌙 Dark Mode';
+        }
+      });
+    }
+  });
+</script>
+
 </body>
 </html>

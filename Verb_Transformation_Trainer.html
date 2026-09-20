@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Present → Past — Verb Trainer</title>
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -241,25 +242,52 @@
   .family-list li { margin-bottom: 2px; }
   .family-list b { color: var(--ink); }
 
+
+  html.dark-theme {
+    --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
+    --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
+    --gold: #ffcc00; --green: #55cc55; --blue: #5599ff; --purple: #b366ff;
+  }
+
+
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);
+    width:100%; max-width:1100px;
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600; cursor:pointer;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div style="background:var(--card); border:1.5px solid var(--ink); border-radius:8px; padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; box-shadow:0 4px 10px var(--shadow);">
-    <div style="font-family:'Fjalla One',sans-serif; font-size:13px;">🧭 <b>DEUTSCH-COACH SUITE</b></div>
-    <div style="display:flex; gap:6px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px;">
-      <a href="./index.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🏠 Main Coach</a>
-      <a href="./Continuous_Verb_Speaker.html" style="text-decoration:none; color:var(--ink); background:#fff9e6; padding:3px 7px; border-radius:4px; border:1px solid var(--gold); font-weight:700;">🎧 Auto Speaker</a>
-      <a href="./Grammatik_Regel_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📚 Grammar</a>
-      <a href="./Sprech_Pruefungs_Simulator.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🗣️ Speaking</a>
-      <a href="./German_A2_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🔬 A2 Studio</a>
-      <a href="./German_B1_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🔬 B1 Studio</a>
-      <a href="./Verb_Transformation_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">⚡ Verben</a>
-      <a href="./Nomen_Adjektiv_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📦 Nouns/Adj</a>
-      <a href="./Satzbau_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">🧩 Satzbau</a>
-      <a href="./konnektoren_referenz.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line,#cdc7b2); font-weight:600;">📋 Konnektoren</a>
+  
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main</a>
+      <a href="./KI_Human_Partner.html" class="hub-link">👤 Live Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Chat</a>
+      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Sprechen</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verben</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns/Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+      <button id="themeToggle" class="hub-link" style="cursor:pointer; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px; font-weight:600;">🌙 Dark Mode</button>
     </div>
   </div>
+
 
   <h1>Present → Past</h1>
   <div class="sub">Practice verb transformation — Simple Past (Präteritum), Present Perfect (Perfekt) &amp; related noun · 503 verbs (A2 + B1)</div>
@@ -636,6 +664,7 @@ function renderDash(){
 function refreshAll(){ renderChips(); renderDash(); }
 
 document.getElementById('nounToggle').addEventListener('change', e=>{ nounMode = e.target.checked; });
+document.getElementById('auxToggle').addEventListener('change', e=>{ auxMode = e.target.checked; renderCard(); });
 
 /* ---- Smart queue ---- */
 function shuffleArr(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -944,7 +973,7 @@ function renderCard(){
   const box = PROGRESS[v.uid] ? PROGRESS[v.uid].box : 1;
   const boxNames = {1:'New',2:'Learning',3:'Familiar',4:'Strong',5:'Mastered'};
 
-  const qType = (nounMode && v.noun && Math.random()<0.35) ? 'noun' : 'past';
+  const qType = auxMode ? 'aux' : ((nounMode && v.noun && Math.random()<0.35) ? 'noun' : 'past');
   const reverse = (curDir === 'en2de');
 
   function meaningPromptText(v){
@@ -1103,5 +1132,34 @@ function triggerProductionChallenge(v){
 /* ---- init ---- */
 refreshAll();
 </script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if(themeToggle) {
+      const currentTheme = localStorage.getItem('de_theme') || 'light';
+      if(currentTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Light Mode';
+      }
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark-theme');
+        if(document.documentElement.classList.contains('dark-theme')){
+          localStorage.setItem('de_theme', 'dark');
+          themeToggle.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('de_theme', 'light');
+          themeToggle.textContent = '🌙 Dark Mode';
+        }
+      });
+    }
+  });
+</script>
+
 </body>
 </html>

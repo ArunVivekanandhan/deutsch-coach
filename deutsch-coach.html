@@ -626,12 +626,6 @@
     .topicgrid{grid-template-columns:repeat(5,1fr);}
   }
   /* Top Suite Navigation Hub */
-  .hub-banner{
-    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
-    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
-    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow, rgba(27,42,74,0.15));
-    width:100%; max-width:1100px;
-  }
   .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
   .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
   .hub-link{
@@ -645,22 +639,7 @@
 </head>
 <body>
   <!-- Suite Navigation Hub -->
-  <div class="hub-banner">
-    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
-    <div class="hub-links">
-      <a href="./index.html" class="hub-link active">🏠 Main Coach</a>
-      <a href="./KI_Human_Partner.html" class="hub-link highlight" style="background:#0284c7; color:#fff; border-color:#0284c7;">👤 Live Human Coach</a>
-      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Text Coach</a>
-      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar &amp; Rules</a>
-      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Speaking &amp; Exam</a>
-      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
-      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
-      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
-      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns &amp; Adj</a>
-      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
-      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio Speaker</a>
-    </div>
-  </div>
+  
 
   <div class="appshell">
     <div class="sidebar">
@@ -685,7 +664,7 @@
           <a href="./Satzbau_Trainer.html" class="suitelink"><span>🧩 Satzbau</span><span class="badge">Wortstellung ↗</span></a>
         </div>
       </div>
-      <div class="streakbox" style="text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak · Days Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig · Words Due</div>
+      <div class="streakbox" style="display:flex; align-items:center; gap:8px;" style="text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak · Days Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig · Words Due</div>
       <div class="levelbar" id="levelBar"></div>
       <div class="togglebar" id="catBar" style="margin-bottom:12px;"></div>
       <div class="navbar" id="navBar"></div>
@@ -2235,7 +2214,7 @@ function renderRecallMeaning(card, advanceFn){
       <div class="prompt">
         ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word">${card.w}</div>
+        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Was bedeutet das? · What does this mean? (Think first…)</div>
       </div>
       <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎 · Reveal</button>
@@ -2265,7 +2244,7 @@ function renderMcDe2En(card, advanceFn){
       <div class="prompt">
         ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word">${card.w}</div>
+        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
       </div>
       <div style="padding:8px 18px 4px;">
         ${opts.map(o=>`<button class="mcopt" data-val="${o.replace(/"/g,'&quot;')}">${o}</button>`).join("")}
@@ -2385,7 +2364,7 @@ function renderPlural(card, advanceFn){
       <div class="prompt">
         ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word">${card.w}</div>
+        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Wie lautet der Plural?</div>
       </div>
       <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
@@ -2414,7 +2393,7 @@ function renderVerbTense(card, advanceFn){
       <div class="qlabel">Verbformen</div>
       <div class="prompt">
         ${promptIconHTML(card)}
-        <div class="word">${card.w}</div>
+        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Präteritum? Perfekt?</div>
       </div>
       <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
@@ -2884,7 +2863,7 @@ function renderSprechen(){
         try {
           const sys = `Du bist ein deutscher B1-Prüfungscoach. Korrigiere den gesprochenen Text, hebe Grammatik- und Satzbaufehler hervor und gib 1-2 konkrete B1-Tipps.`;
           const resp = await callAI(sys, `Gesprochener Text zum Thema "${t.label}":\n"${txt}"`);
-          fBox.innerHTML = `<h4>🤖 KI Feedback zum Sprechen:</h4><div style="line-height:1.5; font-size:13.5px;">${resp.replace(/\n/g, '<br>')}</div>`;
+          fBox.innerHTML = `<h4>🤖 KI Feedback zum Sprechen:</h4><button onclick="addMistakeToSRS(this.nextElementSibling.innerText, event)" style="padding:6px 12px; font-size:13px; margin-bottom:10px; cursor:pointer; background:var(--ink); color:var(--paper); border:none; border-radius:4px;">📥 In Lernkartei aufnehmen</button><div style="line-height:1.5; font-size:13.5px;">${resp.replace(/\n/g, '<br>')}</div>`;
         } catch(e) {
           fBox.innerHTML = `❌ Fehler: ${e.message}`;
         }
@@ -2946,7 +2925,7 @@ function renderSchreiben(){
 3. Erkläre kurz die wichtigsten 2-3 Fehler auf Deutsch/Englisch.
 4. Gib eine Punktzahl von 0-100 und ein geschätztes Sprachniveau (A1/A2/B1/B2).`;
       const resp = await callAI(sys, `Thema: "${t.label}" (${level})\nText:\n"${txt}"`);
-      fBox.innerHTML = `<h4>🤖 KI Korrektur &amp; Feedback:</h4><div style="line-height:1.55; font-size:13.5px;">${resp.replace(/\n/g, '<br>')}</div>`;
+      fBox.innerHTML = `<h4>🤖 KI Korrektur &amp; Feedback:</h4><button onclick="addMistakeToSRS(this.nextElementSibling.innerText, event)" style="padding:6px 12px; font-size:13px; margin-bottom:10px; cursor:pointer; background:var(--ink); color:var(--paper); border:none; border-radius:4px;">📥 In Lernkartei aufnehmen</button><div style="line-height:1.55; font-size:13.5px;">${resp.replace(/\n/g, '<br>')}</div>`;
     } catch(e) {
       fBox.innerHTML = `❌ Fehler: ${e.message}`;
     }
@@ -3182,5 +3161,198 @@ renderCatBar();
 renderNavBar();
 renderView();
 </script>
+
+<!-- Settings Modal -->
+<div id="aiSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; padding:15px;">
+  <div style="background:var(--card); color:var(--ink); padding:20px; border-radius:10px; width:100%; max-width:400px; max-height:90vh; overflow-y:auto; border:2px solid var(--ink);">
+    <h2 style="margin-top:0;">⚙️ AI Settings</h2>
+    <label style="display:block; margin-bottom:8px; font-weight:600;">Provider</label>
+    <select id="aiProvider" style="width:100%; padding:8px; margin-bottom:15px; border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink);">
+      <option value="deepseek">DeepSeek</option>
+      <option value="openai">OpenAI</option>
+      <option value="groq">Groq</option>
+      <option value="gemini">Gemini</option>
+      <option value="openrouter">OpenRouter</option>
+      <option value="ollama">Ollama</option>
+    </select>
+    <div id="apiKeysContainer"></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onclick="saveAiSettings()" style="flex:1; padding:10px; background:var(--ink); color:var(--paper); border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Speichern</button>
+      <button onclick="document.getElementById('aiSettingsModal').style.display='none'" style="flex:1; padding:10px; background:var(--paper); color:var(--ink); border:1px solid var(--line); border-radius:6px; font-weight:bold; cursor:pointer;">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// --- Theme Toggle ---
+const savedTheme = localStorage.getItem('de_theme') || 'light';
+if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('themeToggle');
+    if (toggle) {
+        toggle.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        toggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('de_theme', isDark ? 'dark' : 'light');
+            toggle.textContent = isDark ? '☀️' : '🌙';
+        });
+    }
+});
+
+// --- AI Settings ---
+function initAiSettings() {
+    const providers = ['deepseek', 'openai', 'groq', 'gemini', 'openrouter', 'ollama'];
+    const container = document.getElementById('apiKeysContainer');
+    container.innerHTML = '';
+    providers.forEach(p => {
+        const val = localStorage.getItem('de_ai_key_' + p) || '';
+        const modelVal = localStorage.getItem('de_ai_model_' + p) || '';
+        container.innerHTML += `
+        <div id="settings_${p}" class="provider-settings" style="display:none; margin-bottom:10px;">
+            <label style="display:block; margin-bottom:5px; font-size:14px;">${p.toUpperCase()} API Key</label>
+            <input type="password" id="key_${p}" value="${val}" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink);">
+            <label style="display:block; margin-bottom:5px; font-size:14px;">Model (optional)</label>
+            <input type="text" id="model_${p}" value="${modelVal}" placeholder="Default model" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink);">
+        </div>`;
+    });
+    const provSelect = document.getElementById('aiProvider');
+    provSelect.value = localStorage.getItem('de_ai_provider') || 'deepseek';
+    provSelect.addEventListener('change', (e) => {
+        document.querySelectorAll('.provider-settings').forEach(el => el.style.display = 'none');
+        const sel = document.getElementById('settings_' + e.target.value);
+        if(sel) sel.style.display = 'block';
+    });
+    provSelect.dispatchEvent(new Event('change'));
+}
+
+function saveAiSettings() {
+    const prov = document.getElementById('aiProvider').value;
+    localStorage.setItem('de_ai_provider', prov);
+    const providers = ['deepseek', 'openai', 'groq', 'gemini', 'openrouter', 'ollama'];
+    providers.forEach(p => {
+        localStorage.setItem('de_ai_key_' + p, document.getElementById('key_' + p).value);
+        localStorage.setItem('de_ai_model_' + p, document.getElementById('model_' + p).value);
+    });
+    document.getElementById('aiSettingsModal').style.display = 'none';
+}
+
+function openAiSettings() {
+    initAiSettings();
+    document.getElementById('aiSettingsModal').style.display = 'flex';
+}
+
+// --- Text To Speech ---
+window.playTTS = function(txt, e) {
+    if (e) { e.stopPropagation(); e.preventDefault(); }
+    const msg = new SpeechSynthesisUtterance(txt);
+    msg.lang = 'de-DE';
+    window.speechSynthesis.speak(msg);
+};
+</script>
+
+
+<script>
+function exportData() {
+    const keys = ['dc_progress_v1', 'dc_meta_v1', 'de_ai_provider', 'de_coach_vault', 'gp_progress_v1', 'vt_progress_v1', 'na_progress_v1', 'sb_progress_v1', 'a2_studio_progress_v2', 'b1_studio_progress_v1', 'sps_progress_v1'];
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (keys.includes(k) || k.startsWith('de_ai_') || k.startsWith('de_theme')) {
+            data[k] = localStorage.getItem(k);
+        }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'deutsch_coach_backup.json';
+    a.click();
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = JSON.parse(evt.target.result);
+            for (const key in data) {
+                localStorage.setItem(key, data[key]);
+            }
+            alert('Backup erfolgreich importiert! Die Seite wird neu geladen.');
+            location.reload();
+        } catch (err) {
+            alert('Fehler beim Importieren der Datei.');
+        }
+    };
+    reader.readAsText(file);
+}
+</script>
+
+
+<script>
+document.addEventListener("keydown", (e) => {
+    // Only if a modal or input is not focused
+    if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT')) return;
+    
+    const revealBtn = document.getElementById("revealBtn");
+    
+    if(e.code === 'Space' || e.code === 'Enter') {
+        if(revealBtn) { revealBtn.click(); e.preventDefault(); return; }
+    }
+    
+    if(e.code === 'KeyS') {
+        const speakBtn = document.querySelector('button[title="Speak"]');
+        if(speakBtn) speakBtn.click();
+    }
+    
+    const b0 = document.getElementById('b0');
+    const b1 = document.getElementById('b1');
+    const b2 = document.getElementById('b2');
+    const b3 = document.getElementById('b3');
+    
+    if(e.code === 'Digit1' || e.code === 'KeyN') {
+        if(b0) { b0.click(); e.preventDefault(); }
+        else if(document.getElementById('b-0')) { document.getElementById('b-0').click(); e.preventDefault(); }
+    } else if(e.code === 'Digit2' || e.code === 'KeyG') {
+        if(b1) { b1.click(); e.preventDefault(); }
+        else if(document.getElementById('b-1')) { document.getElementById('b-1').click(); e.preventDefault(); }
+    } else if(e.code === 'Digit3' || e.code === 'KeyE') {
+        if(b2) { b2.click(); e.preventDefault(); }
+        else if(document.getElementById('b-2')) { document.getElementById('b-2').click(); e.preventDefault(); }
+    } else if(e.code === 'Digit4') {
+        if(b3) { b3.click(); e.preventDefault(); }
+        else if(document.getElementById('b-3')) { document.getElementById('b-3').click(); e.preventDefault(); }
+    }
+});
+</script>
+
+
+<script>
+window.addMistakeToSRS = function(text, event) {
+    if(event) event.preventDefault();
+    
+    const newUid = "mistake_" + Date.now();
+    const newCard = {
+        uid: newUid,
+        cat: "Fehler (KI)",
+        w: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+        en: text,
+        type: "mistake"
+    };
+    if (typeof ALL_CARDS !== 'undefined') ALL_CARDS.push(newCard);
+    
+    if (typeof PROGRESS !== 'undefined') {
+        PROGRESS[newUid] = { box: 0, next: Date.now() };
+        if (typeof saveProgress === 'function') saveProgress();
+    }
+    
+    alert("Fehler in Lernkartei (Box 0) aufgenommen!");
+};
+</script>
+
 </body>
 </html>

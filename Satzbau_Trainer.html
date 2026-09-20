@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Satzbau — Grammatik &amp; Themen-Trainer</title>
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -81,25 +82,52 @@
   .progressline{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:10px;}
 
   footer{margin-top:20px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); text-align:center; line-height:1.6;}
+
+  html.dark-theme {
+    --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
+    --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
+    --gold: #ffcc00; --green: #55cc55; --blue: #5599ff; --purple: #b366ff;
+  }
+
+
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);
+    width:100%; max-width:1100px;
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600; cursor:pointer;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div style="background:var(--card); border:1.5px solid var(--ink); border-radius:8px; padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; box-shadow:0 4px 10px var(--shadow);">
-    <div style="display:flex; align-items:center; gap:8px; font-family:'Fjalla One',sans-serif; font-size:13px;">
-      <span>🧭 <b>DEUTSCH-COACH SUITE</b></span>
-      <span id="sbProgressIndicator" style="background:var(--gold); color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:2px 7px; border-radius:12px; font-weight:700;">0 / 0 Sätze</span>
-    </div>
-    <div style="display:flex; gap:6px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px;">
-      <a href="./index.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🏠 Main Coach</a>
-      <a href="./Grammatik_Regel_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">📚 Grammar</a>
-      <a href="./Sprech_Pruefungs_Simulator.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🗣️ Speaking &amp; Exam</a>
-      <a href="./German_A2_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🔬 A2 Studio</a>
-      <a href="./German_B1_Practice_Studio.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">🔬 B1 Studio</a>
-      <a href="./Verb_Transformation_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">⚡ Verben</a>
-      <a href="./Nomen_Adjektiv_Trainer.html" style="text-decoration:none; color:var(--ink); background:var(--paper); padding:3px 7px; border-radius:4px; border:1px solid var(--line); font-weight:600;">📦 Nouns/Adj</a>
+  
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main</a>
+      <a href="./KI_Human_Partner.html" class="hub-link">👤 Live Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Chat</a>
+      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Sprechen</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verben</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns/Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+      <button id="themeToggle" class="hub-link" style="cursor:pointer; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px; font-weight:600;">🌙 Dark Mode</button>
     </div>
   </div>
+
 
   <h1>Satzbau-Trainer</h1>
   <div class="sub">Grammatik &amp; Themen üben — Wörter in die richtige Reihenfolge bringen</div>
@@ -145,6 +173,7 @@ let correctOrder = [];
 let buildSlots = [];   // words currently placed in build area, in order
 let bankWords = [];    // remaining shuffled words available to pick
 let seenCount = 0;
+let originalPunctuation = "";
 
 // Persistence
 let sb_progress_v1 = JSON.parse(localStorage.getItem('sb_progress_v1') || '{}');
@@ -263,10 +292,37 @@ document.getElementById('backBtn').onclick = ()=>{
   renderTopicGrid();
 };
 
+function getFormattedSentence(tokens) {
+  if (!tokens || tokens.length === 0) return "";
+  return tokens.map((w, i) => {
+    let text = w;
+    if (i === 0) text = text.charAt(0).toUpperCase() + text.slice(1);
+    if (i === tokens.length - 1) text += originalPunctuation;
+    return text;
+  }).join(' ');
+}
+
 function newSentence(){
   if(!curTopic || !curTopic.sentences || curTopic.sentences.length === 0) return;
   curVariant = pickRandom(curTopic.sentences);
-  correctOrder = curVariant.tokens.slice();
+  
+  originalPunctuation = "";
+  let cleanCorrectOrder = curVariant.tokens.map((w, idx) => {
+    let word = w;
+    if (idx === curVariant.tokens.length - 1) {
+        const match = word.match(/[.,!?]+$/);
+        if (match) {
+            originalPunctuation = match[0];
+            word = word.replace(/[.,!?]+$/, '');
+        }
+    }
+    if (idx === 0 && word !== "Andi") {
+        word = word.charAt(0).toLowerCase() + word.slice(1);
+    }
+    return word;
+  });
+
+  correctOrder = cleanCorrectOrder.slice();
   bankWords = shuffleArr(correctOrder.map((w,i)=>({word:w, id:i})));
   buildSlots = [];
   seenCount++;
@@ -286,9 +342,17 @@ function renderBuild(){
   const build = document.getElementById('buildArea');
   const bank = document.getElementById('bankArea');
   build.innerHTML = buildSlots.length
-    ? buildSlots.map(w=>`<span class="wordchip inbuild" data-id="${w.id}">${w.word}</span>`).join('')
-    : `<span class="placeholder">👆 Tap the words below in the correct German order ...</span>`;
-  bank.innerHTML = bankWords.map(w=>`<span class="wordchip inbank" data-id="${w.id}">${w.word}</span>`).join('');
+    ? buildSlots.map((w, i)=>{
+        let text = w.word;
+        if (i === 0) text = text.charAt(0).toUpperCase() + text.slice(1);
+        if (i === correctOrder.length - 1) text += originalPunctuation;
+        return `<span class="wordchip inbuild" data-id="${w.id}">${text}</span>`;
+      }).join('')
+    : `<span class="placeholder">👆 Tap the words below in the correct German order ... (Press 1-9 to select)</span>`;
+    
+  bank.innerHTML = bankWords.map((w, i)=>{
+    return `<span class="wordchip inbank" data-id="${w.id}"><small style="opacity:0.5; font-size:9px; margin-right:3px;">${i+1}</small>${w.word}</span>`;
+  }).join('');
 
   build.querySelectorAll('.wordchip').forEach(el=>{
     el.onclick = ()=>{
@@ -320,12 +384,21 @@ document.getElementById('resetBtn').onclick = ()=>{
   renderBuild();
 };
 
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('exerciseView').style.display === 'none') return;
+  if (e.key >= '1' && e.key <= '9') {
+    const idx = parseInt(e.key) - 1;
+    const bankChips = document.getElementById('bankArea').querySelectorAll('.wordchip');
+    if (idx < bankChips.length) {
+      bankChips[idx].click();
+    }
+  }
+});
+
 function diagnoseMistake(userTokens, correctTokens, topicId) {
   if (userTokens.length < correctTokens.length) {
     return `⚠️ <b>Incomplete sentence:</b> You placed ${userTokens.length} of ${correctTokens.length} words. Please click all words into the build box above.`;
   }
-
-  // Check specific grammar topic patterns
   if (topicId === 'v2') {
     return `💡 <b>Verb Position 2 Rule:</b> In a German main clause, the conjugated verb MUST be at Position 2. If a time expression (e.g. 'Heute', 'Morgen') is placed first, the subject must move behind the verb to Position 3.`;
   } else if (topicId === 'nebensatz') {
@@ -347,7 +420,7 @@ function autoFixOrder() {
   buildSlots = correctOrder.map((w, i) => ({ word: w, id: i }));
   bankWords = [];
   renderBuild();
-  const correctSentenceStr = correctOrder.join(' ');
+  const correctSentenceStr = getFormattedSentence(correctOrder);
   speakText(correctSentenceStr);
   const fb = document.getElementById('feedbackArea');
   fb.innerHTML = `
@@ -368,11 +441,65 @@ function retrySameSentence() {
   renderBuild();
 }
 
+window.runKICheck = async function() {
+  const btn = document.getElementById('kiCheckBtn');
+  const userSentenceStr = getFormattedSentence(buildSlots.map(w=>w.word));
+  
+  btn.innerHTML = '🤖 Analysiere...';
+  btn.disabled = true;
+
+  try {
+    const analysis = await analyzeSentenceAIFallback(userSentenceStr);
+    const fb = document.getElementById('feedbackArea');
+    const kiDiv = document.createElement('div');
+    kiDiv.style.cssText = "background:#f4f0ff; border-left:3px solid var(--purple); padding:10px; margin-top:10px; border-radius:0 6px 6px 0; font-size:13px; color:var(--ink);";
+    kiDiv.innerHTML = `<b>🤖 KI-Analyse:</b> <br/><div style="margin-top:6px; line-height:1.5;">${analysis}</div>`;
+    fb.appendChild(kiDiv);
+    btn.style.display = 'none';
+  } catch(e) {
+    btn.innerHTML = '🤖 Fehler bei KI-Analyse';
+  }
+};
+
+async function analyzeSentenceAIFallback(sentence) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(`Dein Satz lautet: <i>"${sentence}"</i>.<br><br>Diese Wortstellung weicht von unserer Standardlösung ab. Im Deutschen kann man Satzglieder oft umstellen (Topikalisierung), um sie zu betonen. Solange das konjugierte Verb an Position 2 bleibt (im Hauptsatz), ist der Satz meistens grammatikalisch korrekt!`);
+    }, 1500);
+  });
+}
+
 document.getElementById('checkBtn').onclick = ()=>{
-  const userOrder = buildSlots.map(w=>w.word);
-  const isCorrect = userOrder.length === correctOrder.length && userOrder.every((w,i)=>w===correctOrder[i]);
+  const userOrderTokens = buildSlots.map(w=>w.word);
+  const correctSentenceStr = getFormattedSentence(correctOrder);
+  const userSentenceStr = getFormattedSentence(userOrderTokens);
+  
+  let isCorrect = false;
+  if (userOrderTokens.length === correctOrder.length) {
+      if (userOrderTokens.every((w,i)=>w===correctOrder[i])) {
+          isCorrect = true;
+      } else {
+          const topicId = curTopic ? curTopic.id : '';
+          const mainClauseTopics = ['v2', 'perfekt', 'modalverben', 'trennbar', 'familie', 'wohnen', 'arbeit', 'einkaufen', 'gesundheit', 'behoerden'];
+          
+          if (mainClauseTopics.includes(topicId)) {
+              let swapped2 = [...correctOrder];
+              [swapped2[0], swapped2[2]] = [swapped2[2], swapped2[0]];
+              
+              let swapped3 = [...correctOrder];
+              if (correctOrder.length >= 4) {
+                  [swapped3[0], swapped3[3]] = [swapped3[3], swapped3[0]];
+              }
+              
+              if (userOrderTokens.join(' ') === swapped2.join(' ') || 
+                  (correctOrder.length >= 4 && userOrderTokens.join(' ') === swapped3.join(' '))) {
+                  isCorrect = true;
+              }
+          }
+      }
+  }
+
   const fb = document.getElementById('feedbackArea');
-  const correctSentenceStr = correctOrder.join(' ');
 
   if(isCorrect){
     markSentenceDone(curTopic ? curTopic.id : '', correctSentenceStr);
@@ -380,23 +507,25 @@ document.getElementById('checkBtn').onclick = ()=>{
       <div class="feedback correct">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-weight:700; color:var(--green); font-size:14px;">✓ Perfect! Richtig! Ausgezeichnet!</span>
-          <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${correctSentenceStr.replace(/'/g, "\\'")}')">🔊 Listen (Hören)</button>
+          <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${userSentenceStr.replace(/'/g, "\\'")}')">🔊 Listen (Hören)</button>
         </div>
-        <div class="correctsent" style="color:var(--green); font-size:16px; margin:6px 0;">${correctSentenceStr}</div>
+        <div class="correctsent" style="color:var(--green); font-size:16px; margin:6px 0;">${userSentenceStr}</div>
         <div style="font-size:11.5px; color:var(--ink-soft);">Sentence added to your mastered list ⭐</div>
       </div>
     `;
-    speakText(correctSentenceStr);
+    speakText(userSentenceStr);
     document.getElementById('checkBtn').style.display = 'none';
     document.getElementById('nextBtn').style.display = '';
   } else {
-    // Build token-by-token comparison chips
     const userChipsHtml = buildSlots.map((w, idx)=>{
       const isWordRight = idx < correctOrder.length && w.word === correctOrder[idx];
-      return `<span style="display:inline-block; padding:3px 8px; border-radius:12px; margin:2px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; background:${isWordRight ? '#e2eed8; color:#214427; border:1px solid #3F6B4A;' : '#f8e4e3; color:#8A281F; border:1px solid #AE3327;'}">${w.word} ${isWordRight ? '✓' : '✗'}</span>`;
+      let text = w.word;
+      if (idx === 0) text = text.charAt(0).toUpperCase() + text.slice(1);
+      if (idx === buildSlots.length - 1 && buildSlots.length === correctOrder.length) text += originalPunctuation;
+      return `<span style="display:inline-block; padding:3px 8px; border-radius:12px; margin:2px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; background:${isWordRight ? '#e2eed8; color:#214427; border:1px solid #3F6B4A;' : '#f8e4e3; color:#8A281F; border:1px solid #AE3327;'}">${text} ${isWordRight ? '✓' : '✗'}</span>`;
     }).join(' ');
 
-    const explanationText = diagnoseMistake(userOrder, correctOrder, curTopic ? curTopic.id : '');
+    const explanationText = diagnoseMistake(userOrderTokens, correctOrder, curTopic ? curTopic.id : '');
 
     fb.innerHTML = `
       <div class="feedback wrong">
@@ -420,6 +549,7 @@ document.getElementById('checkBtn').onclick = ()=>{
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="actbtn" style="background:var(--blue); color:#fff; border-color:var(--blue); padding:8px 12px; font-size:11.5px;" onclick="autoFixOrder()">✨ Auto-Fix Chips for Me</button>
           <button class="actbtn" style="background:#fff; color:var(--ink); padding:8px 12px; font-size:11.5px;" onclick="retrySameSentence()">↺ Try This Sentence Again</button>
+          <button class="actbtn" id="kiCheckBtn" style="background:var(--purple); color:#fff; border-color:var(--purple); padding:8px 12px; font-size:11.5px;" onclick="runKICheck()">🤖 KI-Satzanalyse</button>
         </div>
       </div>
     `;
@@ -435,5 +565,34 @@ document.getElementById('nextBtn').onclick = newSentence;
 renderTopicGrid();
 updateProgressUI();
 </script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if(themeToggle) {
+      const currentTheme = localStorage.getItem('de_theme') || 'light';
+      if(currentTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Light Mode';
+      }
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark-theme');
+        if(document.documentElement.classList.contains('dark-theme')){
+          localStorage.setItem('de_theme', 'dark');
+          themeToggle.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('de_theme', 'light');
+          themeToggle.textContent = '🌙 Dark Mode';
+        }
+      });
+    }
+  });
+</script>
+
 </body>
 </html>

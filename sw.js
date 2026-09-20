@@ -1,48 +1,52 @@
-/* Complete offline cache for Dein Deutsch-Coach Suite.
-   Caches all 7 applications, icons, and manifest for 100% offline access. */
-const CACHE_NAME = "deutsch-coach-v4";
-const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./deutsch-coach.html",
-  "./KI_Human_Partner.html",
-  "./KI_German_Coach.html",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./Grammatik_Regel_Trainer.html",
-  "./Sprech_Pruefungs_Simulator.html",
-  "./German_A2_Practice_Studio.html",
-  "./German_B1_Practice_Studio.html",
-  "./Verb_Transformation_Trainer.html",
-  "./Nomen_Adjektiv_Trainer.html",
-  "./Satzbau_Trainer.html",
-  "./Continuous_Verb_Speaker.html",
-  "./Verben_Hoeren_EN_DE.html",
-  "./konnektoren_referenz.html"
+const CACHE_NAME = 'deutsch-coach-v5';
+const urlsToCache = [
+  './',
+  './index.html',
+  './deutsch-coach.html',
+  './Sprech_Pruefungs_Simulator.html',
+  './Grammatik_Regel_Trainer.html',
+  './KI_Human_Partner.html',
+  './KI_German_Coach.html',
+  './German_A2_Practice_Studio.html',
+  './German_B1_Practice_Studio.html',
+  './Nomen_Adjektiv_Trainer.html',
+  './Satzbau_Trainer.html',
+  './Verb_Transformation_Trainer.html',
+  './Continuous_Verb_Speaker.html',
+  './icon-192.png',
+  './icon-512.png',
+  './manifest.json'
 ];
 
-self.addEventListener("install", (event)=>{
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).catch(()=>{})
-  );
+self.addEventListener('install', event => {
   self.skipWaiting();
-});
-
-self.addEventListener("activate", (event)=>{
   event.waitUntil(
-    caches.keys().then(keys=>Promise.all(
-      keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))
-    ))
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache).catch(err => console.log('Cache addAll error:', err)))
   );
-  self.clients.claim();
 });
 
-self.addEventListener("fetch", (event)=>{
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(cached=>{
-      if(cached) return cached;
-      return fetch(event.request).catch(()=>cached);
-    })
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).then(
+          function(response) {
+            // Check if we received a valid response
+            if(!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            var responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(function(cache) {
+                cache.put(event.request, responseToCache);
+              });
+            return response;
+          }
+        );
+      })
   );
 });
