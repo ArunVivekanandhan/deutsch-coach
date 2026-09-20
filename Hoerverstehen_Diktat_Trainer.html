@@ -116,6 +116,8 @@
   <div class="sub">Listen to the German sentence and type what you hear (Dictation).</div>
 
   <select id="topicSelect" class="topic-select" onchange="loadNewSentence()">
+    
+    <option value="ai">🤖 KI-Modus (AI Generated - Unlimited)</option>
     <option value="all">Mix All Topics (Zufall)</option>
   </select>
 
@@ -180,21 +182,95 @@
     return pool;
   }
 
-  function loadNewSentence() {
-    const pool = getFlatSentences();
-    if(pool.length === 0) return;
-    currentSentenceObj = pool[Math.floor(Math.random() * pool.length)];
+  
+  const AI_PROVIDERS = {
+    deepseek: { endpoint: 'https://api.deepseek.com/v1/chat/completions', requiresKey: true },
+    openai: { endpoint: 'https://api.openai.com/v1/chat/completions', requiresKey: true },
+    groq: { endpoint: 'https://api.groq.com/openai/v1/chat/completions', requiresKey: true },
+    gemini: { endpoint: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', requiresKey: true },
+    openrouter: { endpoint: 'https://openrouter.ai/api/v1/chat/completions', requiresKey: true },
+    ollama: { endpoint: localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions', requiresKey: false }
+  };
+
+  async function generateAiSentence() {
+    document.getElementById('dictationInput').disabled = true;
+    document.getElementById('dictationInput').value = "🤖 KI generiert neuen Satz... (AI is generating...)";
     
+    const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const config = AI_PROVIDERS[provider];
+    let apiKey = localStorage.getItem('de_ai_key_' + provider) || '';
+    const model = localStorage.getItem('de_ai_model_' + provider) || (provider==='deepseek'?'deepseek-chat':'gpt-4o-mini');
+    
+    // Default fallback key if none provided for Deepseek
+    if(provider === 'deepseek' && !apiKey) apiKey = 'sk-3f59c8de2c0c4c478a87611dc82bcbfd'; // safe fallback from other files
+
+    if (config.requiresKey && !apiKey) {
+      alert("Please configure an AI API Key in the KI Coach settings to use AI Generation Mode.");
+      document.getElementById('topicSelect').value = 'all';
+      loadNewSentence();
+      return;
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (config.requiresKey && apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+    try {
+      const response = await fetch(config.endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: "system", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level) about a random everyday topic. Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
+          ],
+          temperature: 0.8,
+          response_format: (provider === 'deepseek' || provider === 'openai') ? { type: "json_object" } : undefined
+        })
+      });
+
+      if (!response.ok) throw new Error("API Error: " + response.status);
+      
+      const data = await response.json();
+      const rawContent = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '{}';
+      
+      let parsed = JSON.parse(rawContent.replace(/```json/g,'').replace(/```/g,''));
+      if(!parsed.de || !parsed.en) throw new Error("Invalid format");
+      
+      currentSentenceObj = parsed;
+      setupSentenceUI();
+    } catch (err) {
+      console.error(err);
+      alert("KI Generierung fehlgeschlagen (AI Generation failed). Falling back to standard mix.");
+      document.getElementById('topicSelect').value = 'all';
+      loadNewSentence();
+    }
+  }
+
+  function setupSentenceUI() {
     document.getElementById('dictationInput').value = '';
     document.getElementById('dictationInput').disabled = false;
     document.getElementById('feedbackBox').className = 'feedback-box';
-    /* nextBtn always visible */
+    // nextBtn always visible
     document.getElementById('dictationInput').focus();
     autoRepeat = true;
     updateLoopBtnUI();
-
     playCurrentAudio();
   }
+
+
+  function loadNewSentence() {
+    const val = document.getElementById('topicSelect').value;
+    if (val === 'ai') {
+      generateAiSentence();
+      return;
+    }
+    
+    const pool = getFlatSentences();
+    if(pool.length === 0) return;
+    currentSentenceObj = pool[Math.floor(Math.random() * pool.length)];
+    setupSentenceUI();
+  }
+
 
   let autoRepeat = true;
   let loopTimeout = null;
