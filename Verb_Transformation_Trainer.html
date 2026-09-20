@@ -1869,6 +1869,134 @@ function renderCheatCodesHTML(v) {
   `;
 }
 
+const KNOWN_SISTER_VERBS = {
+  "fotografieren": [
+    { v: "abfotografieren", en: "to photograph off / scan", ta: "நகலெடு" },
+    { v: "befotografieren", en: "to take photos of someone", ta: "படம் பிடி" },
+    { v: "verfotografieren", en: "to botch a photo / waste film", ta: "புகைப்படம் வீணாகு" }
+  ],
+  "kaufen": [
+    { v: "einkaufen", en: "to shop / buy groceries", ta: "கடைக்குச் சென்று வாங்கு" },
+    { v: "verkaufen", en: "to sell", ta: "விற்க" },
+    { v: "abkaufen", en: "to buy from someone", ta: "ஒருவரிடமிருந்து வாங்கு" }
+  ],
+  "kommen": [
+    { v: "ankommen", en: "to arrive", ta: "வந்து சேர்" },
+    { v: "mitkommen", en: "to come along", ta: "கூட வா" },
+    { v: "bekommen", en: "to receive / get", ta: "பெறு" },
+    { v: "zurückkommen", en: "to return", ta: "திரும்பி வா" }
+  ],
+  "stehen": [
+    { v: "aufstehen", en: "to get up / wake up", ta: "எழுந்திரு" },
+    { v: "verstehen", en: "to understand", ta: "புரிந்துகொள்" },
+    { v: "bestehen", en: "to pass exam / exist", ta: "தேர்ச்சி பெறு / நிலைத்திரு" },
+    { v: "entstehen", en: "to arise / develop", ta: "உருவாகு" }
+  ],
+  "fahren": [
+    { v: "abfahren", en: "to depart", ta: "புறப்படு" },
+    { v: "mitfahren", en: "to ride along", ta: "கூட செல்" },
+    { v: "erfahren", en: "to learn / experience", ta: "அறிந்துகொள்" }
+  ],
+  "schreiben": [
+    { v: "aufschreiben", en: "to write down / note", ta: "குறிப்பெடு" },
+    { v: "beschreiben", en: "to describe", ta: "விவரி" },
+    { v: "unterschreiben", en: "to sign", ta: "கையெழுத்திடு" }
+  ],
+  "lernen": [
+    { v: "kennenlernen", en: "to get to know", ta: "அறிமுகமாகு" },
+    { v: "verlernen", en: "to unlearn / forget", ta: "கற்றதை மறக்க" },
+    { v: "erlernen", en: "to master / acquire", ta: "முழுமையாகக் கற்றுக்கொள்" }
+  ],
+  "sehen": [
+    { v: "fernsehen", en: "to watch TV", ta: "தொலைக்காட்சி பார்" },
+    { v: "aussehen", en: "to look / appear", ta: "தோற்றமளி" },
+    { v: "wiedersehen", en: "to see again", ta: "மீண்டும் பார்" }
+  ],
+  "hören": [
+    { v: "aufhören", en: "to stop / quit", ta: "நிறுத்து" },
+    { v: "zuhören", en: "to listen attentively", ta: "கவனித்துக் கேள்" },
+    { v: "gehören", en: "to belong to", ta: "உரிமையாகு" }
+  ],
+  "arbeiten": [
+    { v: "bearbeiten", en: "to edit / process", ta: "செயலாக்கு" },
+    { v: "ausarbeiten", en: "to work out / elaborate", ta: "விரிவாக்கு" },
+    { v: "zusammenarbeiten", en: "to collaborate", ta: "இணைந்து பணியாற்று" }
+  ],
+  "geben": [
+    { v: "abgeben", en: "to hand in / deliver", ta: "ஒப்படை" },
+    { v: "ausgeben", en: "to spend money", ta: "செலவழி" },
+    { v: "aufgeben", en: "to give up / quit", ta: "கைவிடு" }
+  ],
+  "nehmen": [
+    { v: "mitnehmen", en: "to take along", ta: "உடன் எடுத்துச் செல்" },
+    { v: "abnehmen", en: "to lose weight / decrease", ta: "எடை குறைய" },
+    { v: "zunehmen", en: "to gain weight / increase", ta: "எடை கூட" }
+  ],
+  "stellen": [
+    { v: "vorstellen", en: "to introduce / imagine", ta: "அறிமுகப்படுத்து" },
+    { v: "einstellen", en: "to hire / adjust", ta: "வேலைக்கு எடு / சரிசெய்" },
+    { v: "herstellen", en: "to produce / manufacture", ta: "தயாரி" }
+  ],
+  "schlafen": [
+    { v: "einschlafen", en: "to fall asleep", ta: "தூங்கிவிடு" },
+    { v: "ausschlafen", en: "to sleep in / rest well", ta: "நன்றாக உறங்கு" },
+    { v: "verschlafen", en: "to oversleep", ta: "அதிகமாக உறங்கு" }
+  ]
+};
+
+const PREFIX_MEANINGS = {
+  "ab": { en: "to finish / copy / detach", ta: "நகலெடு / முடிக்க" },
+  "an": { en: "to start / target", ta: "தொடங்க / நோக்கி" },
+  "auf": { en: "to open / upwards / stop", ta: "திறக்க / மேலே" },
+  "aus": { en: "to exit / elaborate / empty", ta: "வெளியே / விரிவாக்க" },
+  "be": { en: "to focus action onto object", ta: "பொருள் சார்ந்த செயல்" },
+  "ein": { en: "to get in / start / pack", ta: "உள்ளே / தொடங்க" },
+  "er": { en: "to achieve / experience", ta: "அறிந்து / சாதிக்க" },
+  "mit": { en: "to do along / join in", ta: "கூட செய்ய" },
+  "nach": { en: "to follow / check / copy", ta: "பின்பற்ற / சரிபார்க்க" },
+  "ver": { en: "to change / mistake / consume", ta: "மாற்ற / தவறாக / வீணாக" },
+  "vor": { en: "to prepare / demonstrate", ta: "முன்னதாக / காட்ட" },
+  "zu": { en: "to close / listen / add", ta: "மூட / கேட்க / சேர்க்க" },
+  "zer": { en: "to break / destroy", ta: "உடைக்க / அழிக்க" },
+  "ent": { en: "to escape / originate", ta: "தப்ப / உருவாக" }
+};
+
+function getFamilyRelatedWithMeanings(inf, baseRoot, en, ta) {
+  const lower = (inf || '').toLowerCase().trim();
+  const root = (baseRoot || lower.replace(/^(ab|an|auf|aus|be|ein|er|ge|mit|nach|ver|vor|zer|zu|ent|emp|miss)/, '')).toLowerCase().trim();
+
+  // 1. Direct dictionary match
+  if (KNOWN_SISTER_VERBS[lower]) {
+    return KNOWN_SISTER_VERBS[lower].map(s => `${s.v} (${s.en} - ${s.ta})`).join(' · ');
+  }
+  if (KNOWN_SISTER_VERBS[root]) {
+    const list = KNOWN_SISTER_VERBS[root].filter(s => s.v !== lower);
+    if (list.length > 0) {
+      const sisters = list.map(s => `${s.v} (${s.en} - ${s.ta})`);
+      if (root !== lower) sisters.unshift(`Base: ${root} (core verb)`);
+      return sisters.join(' · ');
+    }
+  }
+
+  // 2. Dynamic generation with prefix meanings
+  const candidatePrefixes = ['ab', 'be', 'ver', 'an', 'auf', 'aus', 'ein', 'er', 'mit'];
+  const generated = [];
+
+  for (const pfx of candidatePrefixes) {
+    if (!lower.startsWith(pfx)) {
+      const verbCandidate = pfx + root;
+      const pInfo = PREFIX_MEANINGS[pfx];
+      const enAction = en ? en.replace(/^to\s+/,'') : 'action';
+      const enMeaning = pInfo ? `${pInfo.en} ${enAction}` : 'related action';
+      const taMeaning = pInfo ? pInfo.ta : 'தொடர்புடைய செயல்';
+      generated.push(`${verbCandidate} (${enMeaning} - ${taMeaning})`);
+      if (generated.length >= 3) break;
+    }
+  }
+
+  return generated.join(' · ');
+}
+
 function renderUniversal3StepMemoryHack(v){
   const inf = (v.inf || '').toLowerCase().trim();
   const en = v.en || 'action';
@@ -1937,9 +2065,15 @@ function renderUniversal3StepMemoryHack(v){
     ];
   }
 
-  let familyNoun = direct && direct.family && direct.family.noun ? direct.family.noun : (v.noun || ('das ' + v.inf.charAt(0).toUpperCase() + v.inf.slice(1)));
-  let familyAdj = direct && direct.family && direct.family.adj ? direct.family.adj : (inf.replace(/en$/, '') + 'bar (feasible), ' + inf.replace(/en$/, '') + 'end (active)');
-  let familyRelated = direct && direct.family && direct.family.related ? direct.family.related : (prefixKey ? 'Core: ' + (ana.root || ana.stem) + ', Sister: ' + (prefixKey==='an'?'ab'+(ana.root||''):'an'+(ana.root||'')) : 'ver' + inf + ', be' + inf);
+  let familyNoun = direct && direct.family && direct.family.noun 
+    ? direct.family.noun 
+    : (v.noun ? `${v.noun} (${en} - ${ta})` : `das ${v.inf.charAt(0).toUpperCase() + v.inf.slice(1)} (act of ${en} - ${ta})`);
+  let familyAdj = direct && direct.family && direct.family.adj 
+    ? direct.family.adj 
+    : `${inf.replace(/en$/, '').replace(/n$/, '')}bar (${en}able / feasible - செய்யக்கூடிய), ${inf.replace(/en$/, '').replace(/n$/, '')}end (active ${en}ing - நிகழ்கால நிலை)`;
+  let familyRelated = (direct && direct.family && direct.family.related && direct.family.related.includes('('))
+    ? direct.family.related
+    : getFamilyRelatedWithMeanings(v.inf, ana.root || ana.stem, en, ta);
 
   let grammarClassText = '';
   if (typ === 'weak') {
