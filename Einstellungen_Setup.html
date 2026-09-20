@@ -137,6 +137,16 @@
         <input type="text" id="aiEndpoint" placeholder="e.g., https://api.openai.com/v1/chat/completions">
       </div>
 
+      <div id="proxyHelpBlock" style="display:none; margin-top:16px; padding:12px; background:var(--line); border-radius:8px;">
+        <label style="color:var(--ink); font-size:11px;">⚠️ Required for Ollama Cloud</label>
+        <div class="help-text" style="margin-bottom:8px; color:var(--ink);">Ollama blocks direct browser connections. Run this proxy in your terminal:</div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="proxyCommand" value="node ollama_proxy.js" readonly style="flex:1; font-family:'IBM Plex Mono', monospace; background:var(--bg); color:var(--ink); padding:8px; font-size:13px;">
+          <button class="btn btn-secondary" style="width:auto; padding:0 16px; background:var(--paper);" onclick="copyProxyCommand()">📋 Copy</button>
+        </div>
+      </div>
+    
+
       </div>
       <div class="action-row">
         <button class="btn btn-primary" onclick="saveSettings()">💾 Speichern (Save Settings)</button>
@@ -219,6 +229,17 @@
     ollama: localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions'
   };
 
+  
+  function copyProxyCommand() {
+    const cmd = document.getElementById('proxyCommand');
+    cmd.select();
+    document.execCommand('copy');
+    const st = document.getElementById('connectionStatus');
+    st.textContent = "📋 Command copied to clipboard!";
+    st.style.color = "var(--blue)";
+    setTimeout(() => st.textContent="", 3000);
+  }
+
   function loadSettings() {
     const aiEnabled = localStorage.getItem('de_ai_enabled') !== 'false';
     document.getElementById('aiEnabledToggle').checked = aiEnabled;
@@ -251,6 +272,7 @@
       document.getElementById('providerHelp').textContent = "Leave API Key blank if using local Ollama. Fill it if using Ollama Cloud Pro.";
     } else {
       document.getElementById('endpointGroup').style.display = 'none';
+    document.getElementById('proxyHelpBlock').style.display = 'none';
       document.getElementById('providerHelp').textContent = "Your API key is securely saved directly in your browser's LocalStorage.";
     }
   }
