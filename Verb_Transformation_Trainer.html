@@ -1091,87 +1091,749 @@ const VERB_SENTENCES = {
   "finden": { p: "Ich finde meine Schlüssel nicht. Hast du sie gefunden?", en: "I can't find my keys. Have you found them?" }
 };
 
+const VERB_MNEMONIC_DB = {
+  "wissen": {
+    anchor: "Wisdom / Wizard",
+    image: "Imagine a wise old wizard with a glowing beard who knows every single fact, statistic, and secret in the universe.",
+    lock: "Facts, data, addresses, numbers, or clauses with 'dass / wie / wo / was / warum' = WIZARD = Wissen!",
+    situations: [
+      "Asking for factual data: 'Weißt du die Telefonnummer / die Uhrzeit?'",
+      "Knowing that something happened: 'Ich weiß, dass er heute kommt.'",
+      "Saying 'I don't know' to a question: 'Ich weiß es nicht.'"
+    ],
+    family: { noun: "das Wissen (knowledge/facts)", adj: "wissbegierig (eager to learn), wissenschaftlich (scientific)", related: "das Gewissen (conscience)" },
+    story: "The wise Wizard flips through his ancient encyclopedia to find the exact fact.",
+    punch: "WISSEN = WIZARD → FACTUAL KNOWLEDGE / DATA",
+    prep: "wissen über (+ Akk) / von (+ Dat)",
+    confusion: { target: "kennen", rule: "Use WISSEN for facts/info/dass-clauses (Ich weiß, wer er ist); use KENNEN for people, cities, and familiarity (Ich kenne ihn)." },
+    sentences: [
+      { de: "Ich weiß die Antwort [fact], aber ich kenne die Person nicht.", en: "I know the answer [fact], but I don't know the person." },
+      { de: "Weißt du, wo der Bahnhof ist?", en: "Do you know where the train station is? [question word]" },
+      { de: "Er hat schon immer alles besser gewusst.", en: "He has always known everything better." }
+    ],
+    quiz: {
+      cloze: "Ich ___ (know [fact]), dass der Deutschkurs um 9 Uhr beginnt.",
+      clozeAns: "weiß",
+      mc: "When do you use 'wissen' instead of 'kennen'?",
+      mcOpts: ["Talking about your best friend", "Stating a fact or answering with 'dass...'", "Visiting a foreign city"],
+      mcAns: "Stating a fact or answering with 'dass...'",
+      transform: "wissen → wusste → hat gewusst (Mixed Verb: i → u + regular -te/-t)"
+    }
+  },
+  "kennen": {
+    anchor: "Ken (Barbie doll / Familiar Person)",
+    image: "Imagine meeting the famous Ken doll in Berlin. He is a person you are personally acquainted with.",
+    lock: "People, places, cities, songs, movies, or familiarity = KEN = Kennen!",
+    situations: [
+      "Knowing a person personally: 'Kennst du meinen Bruder Tom?'",
+      "Familiarity with a city or country: 'Ich kenne Berlin sehr gut.'",
+      "Knowing a song, book, or brand: 'Kennst du dieses Lied?'"
+    ],
+    family: { noun: "die Kenntnis (knowledge/skill), das Kennen", adj: "bekannt (famous/well-known), unbekannt (unknown)", related: "kennenlernen (to get to know), die Bekanntschaft" },
+    story: "You bump into Ken the doll on Alexanderplatz and greet him as an old friend.",
+    punch: "KENNEN = KEN DOLL → FAMILIAR PERSON / PLACE",
+    prep: "kennen + Akkusativ (direct person/place)",
+    confusion: { target: "wissen", rule: "Use KENNEN for people & places (Ich kenne Tom); use WISSEN for facts (Ich weiß, wo Tom wohnt)." },
+    sentences: [
+      { de: "Ich kenne diese Stadt sehr gut.", en: "I know this city very well [place]." },
+      { de: "Kennst du den neuen Kollegen?", en: "Do you know the new colleague? [person]." },
+      { de: "Wir haben uns früher gut gekannt.", en: "We knew each other well in the past." }
+    ],
+    quiz: {
+      cloze: "___ du den neuen Lehrer schon?",
+      clozeAns: "Kennst",
+      mc: "Which sentence correctly uses 'kennen'?",
+      mcOpts: ["Ich kenne, wie spät es ist.", "Ich kenne Herrn Müller schon lange.", "Ich kenne, dass er krank ist."],
+      mcAns: "Ich kenne Herrn Müller schon lange.",
+      transform: "kennen → kannte → hat gekannt (Mixed Verb: e → a + regular -te/-t)"
+    }
+  },
+  "schädigen": {
+    anchor: "Shady (Shady vandal causing damage)",
+    image: "Imagine a shady character in a dark hooded jacket sneaking around a parking lot scratching and damaging car paint.",
+    lock: "Doing harm, inflicting damage, or hurting health/reputation = SHADY = Schädigen!",
+    situations: [
+      "Health / Lifestyle: 'Rauchen schädigt die Lunge und das Herz.'",
+      "Reputation / Business: 'Der Skandal schädigte das Ansehen der Firma.'",
+      "Environment / Nature: 'Pestizide schädigen nützliche Insekten und die Umwelt.'"
+    ],
+    family: { noun: "der Schaden (damage/harm), die Schädigung (act of damaging)", adj: "schädlich (harmful/toxic), unschädlich (harmless)", related: "beschädigen (damage physical item), entschädigen (compensate)" },
+    story: "A shady vandal damages the shiny parked car, causing a massive financial Schaden.",
+    punch: "SCHÄDIGEN = SHADY → DAMAGE / CAUSE HARM",
+    prep: "schädigen + Akkusativ (direct object)",
+    confusion: { target: "beschädigen", rule: "SCHÄDIGEN = cause general harm/damage to health, nature, or reputation; BESCHÄDIGEN = direct physical damage to a concrete object (e.g. Das Auto wurde beschädigt)." },
+    sentences: [
+      { de: "Zu viel Stress schädigt die Gesundheit.", en: "Too much stress damages one's health." },
+      { de: "Die Chemikalien haben den Boden nachhaltig geschädigt.", en: "The chemicals have permanently damaged the soil." },
+      { de: "Falsche Gerüchte schädigten seinen guten Ruf.", en: "False rumors damaged his good reputation." }
+    ],
+    quiz: {
+      cloze: "Rauchen ___ (damages) die Lunge.",
+      clozeAns: "schädigt",
+      mc: "What is the noun associated with 'schädigen'?",
+      mcOpts: ["der Schatten", "der Schaden", "die Schande"],
+      mcAns: "der Schaden",
+      transform: "schädigen → schädigte → hat geschädigt (Weak Verb: regular -te / ge-...-t)"
+    }
+  },
+  "fahren": {
+    anchor: "Fare / Ferry",
+    image: "Imagine paying your bus FARE or boarding a speeding FERRY to travel across the river.",
+    lock: "Moving via any vehicle (car, bus, train, ferry, bike) = FARE / FERRY = Fahren!",
+    situations: [
+      "Commuting by vehicle: 'Ich fahre jeden Morgen mit der Bahn zur Arbeit.'",
+      "Traveling on vacation: 'Wir fahren im Sommer nach Italien.'",
+      "Driving carefully: 'Fahr bitte vorsichtig bei diesem Regen!'"
+    ],
+    family: { noun: "die Fahrt (journey/trip), der Fahrer (driver), das Fahrzeug (vehicle)", adj: "fahrbar (drivable), fahrplanmäßig (on schedule)", related: "abfahren (depart), mitfahren (ride along), erfahren (experience)" },
+    story: "You pay the bus fare and board the ferry to drive across the scenic lake.",
+    punch: "FAHREN = FARE / FERRY → TRAVEL BY VEHICLE / DRIVE",
+    prep: "fahren mit (+ Dat) / nach (+ Dat)",
+    confusion: { target: "gehen", rule: "FAHREN = by vehicle or on wheels (mit dem Auto/Zug); GEHEN = on foot (zu Fuß)." },
+    sentences: [
+      { de: "Er fährt mit dem Auto nach Berlin.", en: "He drives by car to Berlin." },
+      { de: "Gestern sind wir mit dem Fahrrad gefahren.", en: "Yesterday we rode by bicycle [ist gefahren]." },
+      { de: "Der Zug fuhr pünktlich um 10 Uhr ab.", en: "The train departed on time at 10 AM." }
+    ],
+    quiz: {
+      cloze: "Letzte Woche ___ er nach München gefahren (sein/haben).",
+      clozeAns: "ist",
+      mc: "Which auxiliary verb does 'fahren' take for movement?",
+      mcOpts: ["haben (hat gefahren)", "sein (ist gefahren)", "werden (wird gefahren)"],
+      mcAns: "sein (ist gefahren)",
+      transform: "fahren → fuhr → ist gefahren (Strong Verb: a → u → a)"
+    }
+  },
+  "essen": {
+    anchor: "Essence / S-shaped Sausage",
+    image: "Imagine taking a giant bite of an S-shaped sizzling German Bratwurst, enjoying every bit of delicious food ESSENCE.",
+    lock: "Consuming solid food = S-sausage ESSENCE = Essen!",
+    situations: [
+      "Daily meals: 'Wir essen jeden Tag um 19 Uhr gemeinsam zu Abend.'",
+      "Ordering food: 'Was möchtest du im Restaurant essen?'",
+      "Diet preferences: 'Ich esse kein Fleisch, ich bin Vegetarier.'"
+    ],
+    family: { noun: "das Essen (food/meal), das Esszimmer (dining room)", adj: "essbar (edible), ungenießbar (inedible)", related: "aufessen (eat up), der Esslöffel (tablespoon)" },
+    story: "You take a big bite of the sizzling S-sausage and savor the rich food essence.",
+    punch: "ESSEN = S-SAUSAGE ESSENCE → EAT FOOD",
+    prep: "essen + Akkusativ (food item)",
+    confusion: { target: "fressen", rule: "ESSEN is for humans eating; FRESSEN is for animals eating." },
+    sentences: [
+      { de: "Was isst du heute zum Mittagessen?", en: "What are you eating today for lunch?" },
+      { de: "Ich habe gestern eine leckere Pizza gegessen.", en: "I ate a delicious pizza yesterday." },
+      { de: "Er aß schnell einen Apfel vor der Schule.", en: "He quickly ate an apple before school." }
+    ],
+    quiz: {
+      cloze: "Du ___ (eat) sehr gesund!",
+      clozeAns: "isst",
+      mc: "What is the Präteritum (Simple Past) of 'essen'?",
+      mcOpts: ["esste", "aß", "geasst"],
+      mcAns: "aß",
+      transform: "essen → aß → hat gegessen (Strong Verb: e → a → e)"
+    }
+  },
+  "aufstehen": {
+    anchor: "Auf (Up) + Stehen (Stand)",
+    image: "When the alarm rings, you throw off the blanket, pop straight UP (auf) and STAND (stehen) on your feet.",
+    lock: "Leaving bed / rising to feet = AUF (Up) + STEHEN (Stand) = Aufstehen!",
+    situations: [
+      "Morning routine: 'Ich stehe unter der Woche um 6:30 Uhr auf.'",
+      "Rising in a meeting/church: 'Alle Teilnehmer standen auf.'",
+      "Health check: 'Können Sie bitte aufstehen und ein paar Schritte gehen?'"
+    ],
+    family: { noun: "das Aufstehen (rising/getting up), der Aufstand (rebellion/uprising)", adj: "aufgestanden", related: "aufwachen (wake up), stehen (stand stationary)" },
+    story: "When morning arrives, you jump UP (auf) and STAND (stehen) ready to conquer the day.",
+    punch: "AUFSTEHEN = AUF (UP) + STAND → GET UP / RISE",
+    prep: "aufstehen von (+ Dat)",
+    confusion: { target: "aufwachen", rule: "AUFWACHEN = opening eyes / waking up in bed; AUFSTEHEN = physically getting out of bed onto your feet." },
+    sentences: [
+      { de: "Ich stehe jeden Morgen früh auf.", en: "I get up early every morning." },
+      { de: "Heute bin ich um 7 Uhr aufgestanden.", en: "Today I got up at 7 AM [ist aufgestanden]." },
+      { de: "Er stand langsam vom Stuhl auf.", en: "He stood up slowly from the chair." }
+    ],
+    quiz: {
+      cloze: "Wann bist du heute Morgen ___ (aufstehen - Perfekt)?",
+      clozeAns: "aufgestanden",
+      mc: "Is 'aufstehen' separable (trennbar) and what is its auxiliary?",
+      mcOpts: ["Inseparable, takes haben", "Separable (steht...auf), takes sein (ist aufgestanden)", "Separable, takes haben"],
+      mcAns: "Separable (steht...auf), takes sein (ist aufgestanden)",
+      transform: "aufstehen → stand auf → ist aufgestanden (Strong Separable: e → a → a)"
+    }
+  },
+  "erinnern": {
+    anchor: "Er- + INNER mind vault",
+    image: "Imagine diving deep into your INNER mind vault, pulling open a golden drawer to retrieve a cherished memory.",
+    lock: "Remembering or reminding = digging inside your INNER mind = Erinnern!",
+    situations: [
+      "Recalling past events: 'Ich erinnere mich gern an unsere Reise nach Wien.'",
+      "Reminding someone: 'Bitte erinnere mich morgen an das Meeting.'",
+      "Recognizing someone: 'Ich kann mich nicht mehr an seinen Namen erinnern.'"
+    ],
+    family: { noun: "die Erinnerung (memory/recollection), das Erinnerungsfoto", adj: "erinnerlich (memorable)", related: "innerlich (internal/inner), sich besinnen (reflect)" },
+    story: "You reach deep into your inner mind to bring back a forgotten childhood memory.",
+    punch: "ERINNERN = INNER MIND → REMEMBER / RECALL (sich erinnern an + Akk)",
+    prep: "sich erinnern an (+ Akk) / jemanden erinnern an (+ Akk)",
+    confusion: { target: "merken", rule: "SICH ERINNERN AN (+ Akk) = recall a past memory; SICH MERKEN (+ Akk) = store/memorize something in mind for the future." },
+    sentences: [
+      { de: "Ich erinnere mich an diesen schönen Tag.", en: "I remember that beautiful day [an + Akkusativ]." },
+      { de: "Erinnerst du mich bitte an den Arzttermin?", en: "Will you please remind me of the doctor appointment?" },
+      { de: "Wir haben uns lange an die Schulzeit erinnert.", en: "We remembered our school days for a long time." }
+    ],
+    quiz: {
+      cloze: "Ich erinnere mich ___ meinen ersten Schultag (Preposition: an/auf/über).",
+      clozeAns: "an",
+      mc: "Which preposition and case does 'sich erinnern' require?",
+      mcOpts: ["an + Akkusativ", "von + Dativ", "über + Dativ"],
+      mcAns: "an + Akkusativ",
+      transform: "erinnern → erinnerte → hat erinnert (Inseparable prefix er-: no ge-)"
+    }
+  },
+  "stehen": {
+    anchor: "Statue / Stand",
+    image: "Imagine a stone STATUE standing upright and motionless in the town square.",
+    lock: "Stationary upright posture + Dativ (Wo?) = STATUE = Stehen!",
+    situations: [
+      "Object position: 'Das Glas steht auf dem Tisch.'",
+      "Waiting / traffic: 'Wir standen eine Stunde im Stau.'",
+      "Standing upright: 'Er steht an der Bushaltestelle.'"
+    ],
+    family: { noun: "der Stand (status/booth), der Stillstand", adj: "ständig (constant), standhaft", related: "stellen (put upright), aufstehen (get up)" },
+    story: "The tall statue stands steady and proud in the center of the park.",
+    punch: "STEHEN = STATUE STAND → UPRIGHT POSITION (DATIV)",
+    prep: "stehen auf / an / vor (+ Dativ - Wo?)",
+    confusion: { target: "stellen", rule: "STEHEN = static position (Wo? + Dativ); STELLEN = active movement putting upright (Wohin? + Akkusativ)." },
+    sentences: [
+      { de: "Das Glas steht auf dem Tisch.", en: "The glass is standing on the table [Dativ: wo?]." },
+      { de: "Er stand lange vor der Tür.", en: "He stood in front of the door for a long time." },
+      { de: "Wo hast du gestern gestanden?", en: "Where did you stand yesterday?" }
+    ],
+    quiz: {
+      cloze: "Das Buch ___ auf dem Regal (steht/stellt).",
+      clozeAns: "steht",
+      mc: "What case does 'stehen' answer?",
+      mcOpts: ["Wo? + Dativ (location)", "Wohin? + Akkusativ (destination)", "Woher? + Genitiv"],
+      mcAns: "Wo? + Dativ (location)",
+      transform: "stehen → stand → hat gestanden (Strong: e → a → a)"
+    }
+  },
+  "stellen": {
+    anchor: "Setting / Stalling into place",
+    image: "Imagine your hands actively setting a fragile vase upright onto the kitchen counter.",
+    lock: "Active motion placing something upright + Akkusativ (Wohin?) = SETTING = Stellen!",
+    situations: [
+      "Placing upright: 'Ich stelle die Flasche in den Kühlschrank.'",
+      "Setting an alarm: 'Ich stelle den Wecker auf 7 Uhr.'",
+      "Asking a question: 'Darf ich Ihnen eine Frage stellen?'"
+    ],
+    family: { noun: "die Stelle (spot/job), die Stellung", adj: "festgestellt", related: "vorstellen (introduce), bestellen (order)" },
+    story: "You carefully place the tall bottle upright on top of the shelf.",
+    punch: "STELLEN = SET UPRIGHT → ACTIVE PLACING (AKKUSATIV)",
+    prep: "stellen auf / in / an (+ Akkusativ - Wohin?)",
+    confusion: { target: "stehen", rule: "STELLEN = action (Ich stelle das Glas auf den Tisch); STEHEN = location (Das Glas steht auf dem Tisch)." },
+    sentences: [
+      { de: "Ich stelle das Glas auf den Tisch.", en: "I place the glass onto the table [Akkusativ: wohin?]." },
+      { de: "Er stellte den Wecker auf 6 Uhr.", en: "He set the alarm clock for 6 AM." },
+      { de: "Sie hat die Blumen ins Wasser gestellt.", en: "She has put the flowers into the water." }
+    ],
+    quiz: {
+      cloze: "Ich ___ die Tasse auf den Tisch (stelle/stehe).",
+      clozeAns: "stelle",
+      mc: "What case does 'stellen' answer?",
+      mcOpts: ["Wohin? + Akkusativ (action/destination)", "Wo? + Dativ (static position)", "Wann? + Dativ"],
+      mcAns: "Wohin? + Akkusativ (action/destination)",
+      transform: "stellen → stellte → hat gestellt (Weak Verb)"
+    }
+  },
+  "liegen": {
+    anchor: "Lying down / Lounging lazy",
+    image: "Imagine a lazy cat lying flat on the warm carpet without moving.",
+    lock: "Flat horizontal position + Dativ (Wo?) = LYING = Liegen!",
+    situations: [
+      "Resting in bed: 'Er liegt krank im Bett.'",
+      "Object lying flat: 'Das Buch liegt auf dem Schreibtisch.'",
+      "Geographic location: 'Berlin liegt im Osten von Deutschland.'"
+    ],
+    family: { noun: "die Lage (location/situation), die Liege (couch/lounger)", adj: "gelegen (located/convenient)", related: "legen (lay flat down)" },
+    story: "The sleepy cat lies flat across the sunny rug all afternoon.",
+    punch: "LIEGEN = LYING FLAT → HORIZONTAL REST (DATIV)",
+    prep: "liegen auf / in / unter (+ Dativ - Wo?)",
+    confusion: { target: "legen", rule: "LIEGEN = resting flat (Wo? + Dativ); LEGEN = active placement flat down (Wohin? + Akkusativ)." },
+    sentences: [
+      { de: "Das Buch liegt auf dem Tisch.", en: "The book is lying on the table [Dativ: wo?]." },
+      { de: "Er lag gestern den ganzen Tag im Bett.", en: "He lay in bed all day yesterday." },
+      { de: "München hat im Süden gelegen.", en: "Munich is situated in the south." }
+    ],
+    quiz: {
+      cloze: "Der Schlüssel ___ auf dem Teppich (liegt/legt).",
+      clozeAns: "liegt",
+      mc: "Which sentence is correct for a static flat position?",
+      mcOpts: ["Das Handy liegt auf dem Sofa.", "Das Handy legt auf dem Sofa.", "Das Handy stellt auf dem Sofa."],
+      mcAns: "Das Handy liegt auf dem Sofa.",
+      transform: "liegen → lag → hat gelegen (Strong: ie → a → e)"
+    }
+  },
+  "legen": {
+    anchor: "Laying eggs / Laying flat",
+    image: "Imagine a hen laying a smooth egg into the nest, placing it down flat.",
+    lock: "Active motion placing something flat down + Akkusativ (Wohin?) = LAYING = Legen!",
+    situations: [
+      "Putting an object down: 'Ich lege das Handy auf den Tisch.'",
+      "Lying yourself down: 'Ich lege mich für eine halbe Stunde hin.'",
+      "Putting value on something: 'Wir legen großen Wert auf Pünktlichkeit.'"
+    ],
+    family: { noun: "die Ablage (filing/storage), die Unterlage", adj: "angelegt", related: "hinlegen (lie down), ablegen (file away)" },
+    story: "You gently lay the fragile phone flat on the soft blanket.",
+    punch: "LEGEN = LAY FLAT → ACTIVE PLACEMENT (AKKUSATIV)",
+    prep: "legen auf / in (+ Akkusativ - Wohin?)",
+    confusion: { target: "liegen", rule: "LEGEN = action of placing flat (Wohin? + Akk); LIEGEN = condition of being flat (Wo? + Dat)." },
+    sentences: [
+      { de: "Ich lege das Buch auf das Bett.", en: "I lay the book onto the bed [Akkusativ: wohin?]." },
+      { de: "Er legte die Papiere in die Schublade.", en: "He put the papers into the drawer." },
+      { de: "Hast du die Schlüssel auf den Schrank gelegt?", en: "Did you place the keys onto the cupboard?" }
+    ],
+    quiz: {
+      cloze: "Ich ___ mich kurz aufs Sofa (lege/liege).",
+      clozeAns: "lege",
+      mc: "What does 'sich legen' mean?",
+      mcOpts: ["To lie down (action)", "To stand up", "To sit down"],
+      mcAns: "To lie down (action)",
+      transform: "legen → legte → hat gelegt (Weak Verb)"
+    }
+  },
+  "sitzen": {
+    anchor: "Sitting chair / Statue sitting",
+    image: "Imagine sitting relaxed on a comfortable armchair enjoying a warm cup of tea.",
+    lock: "Seated stationary posture + Dativ (Wo?) = SITZEN!",
+    situations: [
+      "Seated posture: 'Er sitzt am Schreibtisch und arbeitet.'",
+      "Restaurant/Cinema: 'Wir saßen in der ersten Reihe.'",
+      "Resting: 'Komm, setz dich nicht auf den Boden, sitz auf dem Stuhl.'"
+    ],
+    family: { noun: "der Sitz (seat/headquarters), der Sitzplatz", adj: "sitzend", related: "setzen (sit down), besitzen (own/possess)" },
+    story: "You sit comfortably on the chair reading your favorite book.",
+    punch: "SITZEN = SEATED POSTURE → WO? (DATIV)",
+    prep: "sitzen auf / in / an (+ Dativ - Wo?)",
+    confusion: { target: "setzen", rule: "SITZEN = seated posture (Wo? + Dativ); SETZEN = placing into seat / sich setzen (Wohin? + Akkusativ)." },
+    sentences: [
+      { de: "Er sitzt auf dem Stuhl.", en: "He is sitting on the chair [Dativ: wo?]." },
+      { de: "Wir saßen stundenlang im Café.", en: "We sat in the café for hours." },
+      { de: "Hast du gut gesessen?", en: "Were you seated comfortably?" }
+    ],
+    quiz: {
+      cloze: "Sie ___ auf dem Sofa und liest ein Buch (sitzt/setzt).",
+      clozeAns: "sitzt",
+      mc: "What is the Präteritum of 'sitzen'?",
+      mcOpts: ["sitzte", "saß", "gesessen"],
+      mcAns: "saß",
+      transform: "sitzen → saß → hat gesessen (Strong: i → a → e)"
+    }
+  },
+  "setzen": {
+    anchor: "Seat yourself / Setting down",
+    image: "Imagine taking a seat onto a chair or placing a potted plant onto the windowsill.",
+    lock: "Active action of sitting down (sich setzen) or placing down + Akkusativ (Wohin?) = SETZEN!",
+    situations: [
+      "Sitting down: 'Setzen Sie sich bitte!'",
+      "Placing an object: 'Er setzte den Hut auf den Kopf.'",
+      "Focusing on something: 'Wir setzen auf Qualität.'"
+    ],
+    family: { noun: "der Satz (sentence/set), die Besetzung", adj: "festgesetzt", related: "sitzen (be seated), übersetzen (translate)" },
+    story: "You actively take a seat on the chair and make yourself comfortable.",
+    punch: "SETZEN = SIT DOWN / PLACE → WOHIN? (AKKUSATIV)",
+    prep: "setzen auf / in (+ Akkusativ - Wohin?)",
+    confusion: { target: "sitzen", rule: "SETZEN = active motion into seat (Wohin? + Akk); SITZEN = stationary state of sitting (Wo? + Dat)." },
+    sentences: [
+      { de: "Er setzt sich auf den Stuhl.", en: "He sits down onto the chair [Akkusativ: wohin?]." },
+      { de: "Ich setzte mich neben meinen Freund.", en: "I sat down next to my friend." },
+      { de: "Haben Sie sich schon gesetzt?", en: "Have you taken a seat already?" }
+    ],
+    quiz: {
+      cloze: "Bitte ___ Sie sich! (Take a seat)",
+      clozeAns: "setzen",
+      mc: "What case follows 'sich setzen'?",
+      mcOpts: ["Wohin? + Akkusativ", "Wo? + Dativ", "Woher? + Dativ"],
+      mcAns: "Wohin? + Akkusativ",
+      transform: "setzen → setzte → hat gesetzt (Weak Verb)"
+    }
+  },
+  "leihen": {
+    anchor: "Lie on borrowed books",
+    image: "Imagine lying on a pile of borrowed library books that you must return next week.",
+    lock: "Borrowing or lending temporarily without money = LEIHEN!",
+    situations: [
+      "Borrowing from a friend: 'Kannst du mir 10 Euro leihen?'",
+      "Library / tools: 'Ich habe mir ein Buch aus der Bibliothek geliehen.'",
+      "Lending your car: 'Er hat seinem Nachbarn das Fahrrad geliehen.'"
+    ],
+    family: { noun: "die Leihe (lending/loan), die Leihgabe", adj: "leihweise (on loan)", related: "verleihen (award / lend out), ausleihen (borrow)" },
+    story: "You borrow a friend's bike for the day and promise to return it tonight.",
+    punch: "LEIHEN = LEND / BORROW (NO RENT MONEY)",
+    prep: "leihen von (+ Dat) / an (+ Akk)",
+    confusion: { target: "mieten", rule: "LEIHEN = borrow/lend for free (e.g. from a friend); MIETEN = rent for money (e.g. an apartment or rental car)." },
+    sentences: [
+      { de: "Kannst du mir deinen Stift leihen?", en: "Can you lend me your pen?" },
+      { de: "Er lieh mir gestern sein Auto.", en: "He lent me his car yesterday." },
+      { de: "Ich habe mir etwas Geld geliehen.", en: "I borrowed some money." }
+    ],
+    quiz: {
+      cloze: "Er hat mir sein Fahrrad ___ (leihen - Perfekt).",
+      clozeAns: "geliehen",
+      mc: "Notice the vowel shift in 'leihen' (ei → ie):",
+      mcOpts: ["leihte", "lieh / geliehen", "gelieht"],
+      mcAns: "lieh / geliehen",
+      transform: "leihen → lieh → hat geliehen (Strong: ei → ie → ie)"
+    }
+  }
+};
+
+const ROOT_MNEMONIC_DB = {
+  "steh": { anchor: "Stand / Statue", idea: "standing upright, presence", tamil: "நில்", conf: { target: "stellen", rule: "stehen = Wo? (Dativ); stellen = Wohin? (Akkusativ)" } },
+  "fahr": { anchor: "Fare / Ferry", idea: "vehicular motion, journey", tamil: "பயணி / ஓட்டு", conf: { target: "gehen", rule: "fahren = by vehicle; gehen = on foot" } },
+  "geh": { anchor: "Go / Leg motion", idea: "walking on foot, proceeding", tamil: "செல் / நட" },
+  "komm": { anchor: "Come / Welcome", idea: "arriving, approaching here", tamil: "வா" },
+  "bring": { anchor: "Bring / Delivery", idea: "transporting something to someone", tamil: "கொண்டு வா", conf: { target: "holen", rule: "bringen = transport here; holen = go fetch from there" } },
+  "sprech": { anchor: "Speech / Speak", idea: "vocal communication, speaking", tamil: "பேசு" },
+  "schreib": { anchor: "Scribe / Write", idea: "writing, recording text", tamil: "எழுது" },
+  "les": { anchor: "Lesson / Read", idea: "reading text, decoding words", tamil: "படி / வாசி" },
+  "seh": { anchor: "Sight / See", idea: "visual perception, watching", tamil: "பார்" },
+  "hör": { anchor: "Hear / Audio", idea: "auditory listening, hearing", tamil: "கேள்" },
+  "kauf": { anchor: "Coffee cart / Buy", idea: "purchasing goods with money", tamil: "வாங்கு" },
+  "arbeit": { anchor: "Hard bite / Work", idea: "labor, employment, tasks", tamil: "வேலை செய்" },
+  "wohn": { anchor: "Dwelling / Reside", idea: "living in a home/city", tamil: "வசி" },
+  "leb": { anchor: "Life / Live", idea: "being alive, existence", tamil: "வாழ்" },
+  "denk": { anchor: "Think / Brain tank", idea: "mental cognition, reflecting", tamil: "சிந்தி" },
+  "wiss": { anchor: "Wizard / Wisdom", idea: "factual data, knowing info", tamil: "அறி / தெரி", conf: { target: "kennen", rule: "wissen = facts/dass; kennen = people/places" } },
+  "kenn": { anchor: "Ken Doll / Person", idea: "personal familiarity, knowing someone/somewhere", tamil: "தெரி", conf: { target: "wissen", rule: "kennen = people/places; wissen = facts" } },
+  "schad": { anchor: "Shady / Damage", idea: "inflicting harm, damage, loss", tamil: "சேதப்படுத்து", conf: { target: "beschädigen", rule: "schädigen = general harm; beschädigen = physical object damage" } },
+  "schädig": { anchor: "Shady / Damage", idea: "inflicting harm, damage, loss", tamil: "சேதப்படுத்து", conf: { target: "beschädigen", rule: "schädigen = general harm; beschädigen = physical object damage" } },
+  "nehm": { anchor: "Name & Take", idea: "grasping, taking possession", tamil: "எடு" },
+  "geb": { anchor: "Give / Gift", idea: "handing over, donating", tamil: "கொடு" },
+  "find": { anchor: "Find / Treasure", idea: "discovering, locating", tamil: "கண்டுபிடி", conf: { target: "suchen", rule: "suchen = look for; finden = actually found" } },
+  "such": { anchor: "Search / Seeking", idea: "looking for something lost", tamil: "தேடு" },
+  "zeig": { anchor: "Signal / Show", idea: "pointing out, demonstrating", tamil: "காட்டு" },
+  "mach": { anchor: "Make / Do", idea: "creating, doing, performing", tamil: "செய் / பண்ணு" },
+  "ruf": { anchor: "Roof shout / Call", idea: "shouting, phoning, summoning", tamil: "அழை" },
+  "halt": { anchor: "Halt / Hold", idea: "stopping, holding in place", tamil: "பிடி / நிறுத்து" },
+  "lass": { anchor: "Let / Lease", idea: "permitting, leaving behind", tamil: "விடு / அனுமதி" },
+  "lauf": { anchor: "Leg trot / Run", idea: "running fast or walking", tamil: "ஓடு / நட" },
+  "renn": { anchor: "Race / Running sprint", idea: "sprinting at high speed", tamil: "வேகமாக ஓடு" },
+  "schneid": { anchor: "Scissors / Snip", idea: "cutting with blade/knife", tamil: "வெட்டு" },
+  "wasch": { anchor: "Wash / Water splash", idea: "cleansing with soap and water", tamil: "கழுவு" },
+  "putz": { anchor: "Polish / Clean", idea: "cleaning, scrubbing surfaces", tamil: "சுத்தம் செய்" },
+  "rein": { anchor: "Refine / Pure clean", idea: "purifying, cleaning", tamil: "சுத்தப்படுத்து" },
+  "koch": { anchor: "Cook / Kitchen pot", idea: "boiling, cooking meals", tamil: "சமை" },
+  "back": { anchor: "Bake / Oven bread", idea: "baking bread or cakes", tamil: "சுடு" },
+  "bau": { anchor: "Build / Bricklayer", idea: "constructing buildings/structures", tamil: "கட்டு" },
+  "helf": { anchor: "Help / Helping hand", idea: "assisting someone in need", tamil: "உதவு" },
+  "trag": { anchor: "Trek / Carry / Wear", idea: "carrying load or wearing clothes", tamil: "சும / அணி" },
+  "zieh": { anchor: "Tug / Pull / Move", idea: "pulling force or moving home", tamil: "இழு / குடிபெயர்" },
+  "drück": { anchor: "Press / Push button", idea: "pressing down or hugging", tamil: "அழுத்து" },
+  "zahl": { anchor: "Toll / Pay tally", idea: "paying money, counting", tamil: "பணம் செலுத்து", conf: { target: "bezahlen", rule: "zahlen = general paying; bezahlen = pay a specific bill/item [Akk]" } },
+  "kling": { anchor: "Cling / Ring chime", idea: "sounding, chiming, ringing", tamil: "ஒலி" },
+  "öffn": { anchor: "Open / Unlocked door", idea: "opening an entryway or box", tamil: "திற" },
+  "schließ": { anchor: "Slit lock / Shut", idea: "closing, locking", tamil: "மூடு / பூட்டு" },
+  "pass": { anchor: "Fit / Matching piece", idea: "fitting well, being suitable", tamil: "பொருந்து" },
+  "fehl": { anchor: "Fail / Missing part", idea: "lacking, missing, absent", tamil: "குறைவாக இரு" },
+  "folg": { anchor: "Follow / Footsteps", idea: "following after, succeeding", tamil: "பின்தொடர்" },
+  "hoff": { anchor: "Hope / Wishing star", idea: "hoping for good outcome", tamil: "நம்பு / ஆசைப்படு" },
+  "lieb": { anchor: "Love / Heart", idea: "loving dearly", tamil: "நேசி" },
+  "hass": { anchor: "Hate / Dark frown", idea: "detesting strongly", tamil: "வெறு" },
+  "wein": { anchor: "Whine / Weeping tears", idea: "crying, shedding tears", tamil: "அழு" },
+  "lach": { anchor: "Laugh / Chuckle", idea: "laughing joyfully", tamil: "சிரி" },
+  "freu": { anchor: "Friendly joy / Glad", idea: "rejoicing, looking forward", tamil: "மகிழ்" },
+  "ärger": { anchor: "Anger / Irritation", idea: "annoying, getting upset", tamil: "கோபப்படு" },
+  "stör": { anchor: "Stir up / Disturb", idea: "interrupting, bothering", tamil: "தொந்தரவு செய்" },
+  "treff": { anchor: "Target hit / Meet", idea: "meeting someone, hitting mark", tamil: "சந்தி" },
+  "wähl": { anchor: "Vote / Well-chosen", idea: "selecting, choosing, dialing", tamil: "தேர்ந்தெடு" },
+  "änder": { anchor: "Alter / Changing draft", idea: "modifying, altering", tamil: "மாற்று" },
+  "wechsel": { anchor: "Switch / Exchange coin", idea: "swapping, exchanging", tamil: "பரிமாறு / மாற்று" },
+  "studier": { anchor: "Student / University degree", idea: "studying at university", tamil: "பல்கலைக்கழகத்தில் படி", conf: { target: "lernen", rule: "studieren = academic degree at university; lernen = general learning/memorizing" } },
+  "reparier": { anchor: "Repair / Fix tool", idea: "fixing broken items", tamil: "பழுதுபார்" },
+  "stürz": { anchor: "Stumble / Fall crash", idea: "plummeting, crashing down", tamil: "விழு" },
+  "sterb": { anchor: "Starve / Perish", idea: "dying, passing away", tamil: "இற" },
+  "wachs": { anchor: "Wax / Grow tall", idea: "growing, expanding", tamil: "வளர்" },
+  "schlaf": { anchor: "Sleep / Slumber bed", idea: "sleeping peacefully", tamil: "தூங்கு" },
+  "trink": { anchor: "Drink / Thirst quencher", idea: "drinking liquids", tamil: "குடி" },
+  "setz": { anchor: "Seat / Sit down", idea: "placing in seat / sitting down", tamil: "உட்கார வை", conf: { target: "sitzen", rule: "sitzen = Wo? (Dativ); setzen = Wohin? (Akkusativ)" } },
+  "sitz": { anchor: "Sitting chair", idea: "seated stationary posture", tamil: "உட்கார்", conf: { target: "setzen", rule: "sitzen = Wo? (Dativ); setzen = Wohin? (Akkusativ)" } }
+};
+
+const PREFIX_METAPHORS = {
+  "ab": { dir: "away / off / departure / down", icon: "🛫", hint: "detaching or leaving a starting point" },
+  "an": { dir: "at / on / start / attach / contact", icon: "🎯", hint: "initiating contact or switching on" },
+  "auf": { dir: "up / open / arise / sudden", icon: "⬆️", hint: "upward motion, opening, or sudden start" },
+  "aus": { dir: "out / exit / complete / turn off", icon: "🚪", hint: "outward movement or thorough completion" },
+  "ein": { dir: "in / into / enter / initiate", icon: "📥", hint: "moving inside or settling in" },
+  "mit": { dir: "with / along / accompany", icon: "🤝", hint: "joining together with others" },
+  "nach": { dir: "after / follow / look up / replicate", icon: "🔍", hint: "following behind or checking closely" },
+  "vor": { dir: "before / forward / prepare / demonstrate", icon: "⏩", hint: "presenting in front or doing beforehand" },
+  "zu": { dir: "shut / towards / add / agree", icon: "🔒", hint: "closing tight or moving towards a target" },
+  "zurück": { dir: "back / return", icon: "🔄", hint: "returning to original state/place" },
+  "weg": { dir: "away / gone / discarded", icon: "💨", hint: "moving far away or removing" },
+  "be": { dir: "transitive focus / target object", icon: "🎯", hint: "directing the action squarely onto an object (inseparable: no ge-)" },
+  "ge": { dir: "collective / result / belong", icon: "🏛️", hint: "collective outcome or intrinsic state (inseparable)" },
+  "er": { dir: "achievement / origin / result / deep state", icon: "🏆", hint: "reaching an outcome through effort (inseparable: no ge-)" },
+  "ver": { dir: "change / away / mistake / consume / intensive", icon: "🔀", hint: "transformation, going wrong, or intensive action (inseparable: no ge-)" },
+  "zer": { dir: "destruction / into pieces", icon: "💥", hint: "breaking into fragments or destroying (inseparable: no ge-)" },
+  "ent": { dir: "removal / escape / origin / unlock", icon: "🔓", hint: "escaping, removing, or initial emergence (inseparable: no ge-)" },
+  "emp": { dir: "receive / feel / recommend", icon: "🤲", hint: "internal perception or reception (inseparable: no ge-)" },
+  "miss": { dir: "wrong / mis- / failure", icon: "❌", hint: "incorrect execution or erroneous state (inseparable: no ge-)" }
+};
+
 function renderUniversal3StepMemoryHack(v){
-  const inf = v.inf.toLowerCase();
-  const ana = analyzeVerb(v.inf);
-  const cognate = COGNATES[inf] || (ana.root ? COGNATES[ana.root] : null);
-  const isSep = ana.prefixInfo ? (ana.prefixInfo.sep !== false) : false;
-  const isAuxSein = v.perfekt && v.perfekt.startsWith('ist');
+  const inf = (v.inf || '').toLowerCase().trim();
+  const en = v.en || 'action';
+  const ta = v.ta || '';
+  const typ = v.typ || 'weak';
+  const praet = v.praeteritum || '';
+  const perf = v.perfekt || '';
+  const isAuxSein = perf.startsWith('ist');
+  const ana = (typeof analyzeVerb === 'function') ? analyzeVerb(v.inf) : { prefix: '', root: '', stem: inf.replace(/en$/, '').replace(/n$/, '') };
 
-  // STEP 1: The Sound-Link Trick & Mnemonic
-  let step1 = '';
-  if (inf === 'wissen') {
-    step1 = `• 🧙‍♂️ <b>Wissen</b> sounds like <i>"Wisdom / Wizard"</i>: Imagine a wise old wizard who knows every single fact, statistic, and secret in the universe. Whenever stating a <b>fact/info</b>, picture the Wizard: <b>Wissen</b>!`;
-  } else if (inf === 'kennen') {
-    step1 = `• 👱‍♂️ <b>Kennen</b> sounds like <i>"Ken" (Barbie doll)</i>: Ken is a person/celebrity. You are familiar with him. When talking about a <b>person, city or place</b>, picture the Ken doll: <b>Kennen</b>!`;
-  } else if (inf === 'kennenlernen') {
-    step1 = `• 🤝 <b>Kennenlernen</b> = <i>Ken Doll + Lernen</i>: Imagine meeting the Ken doll for the first time and learning all about him! Used for meeting/getting to know someone new.`;
-  } else if (inf === 'leihen') {
-    step1 = `• 📚 <b>Sound-Link:</b> <i>LEIHEN</i> → 'Lie on what you borrow / lend'. Notice how the diphthong <b>-ei-</b> flips into <b>-ie-</b> in past (<i>lieh / geliehen</i>)!`;
-  } else if (cognate) {
-    step1 = `• 🤝 <b>English Cousin Mnemonic:</b> English <b>${cognate.en}</b>. ${cognate.tip}`;
-  } else if (ana.prefix && ana.prefixInfo) {
-    step1 = `• 🧩 <b>Compound Mnemonic:</b> Think of <b>${ana.prefix}-</b> (<i>${ana.prefixInfo.en} · ${ana.prefixInfo.ta || ''}</i>) + <b>${ana.root ? ana.root : ana.stem}</b> (<i>${ana.rootInfo ? ana.rootInfo.en : ''}</i>). Combining them literally means "${ana.prefixInfo.en.split('/')[0].trim()} ${ana.rootInfo ? ana.rootInfo.en.replace('to ','') : 'action'}" → <b>„${v.en}”</b> (${v.ta || ''})!`;
-  } else if (v.mnemonic) {
-    step1 = `• 💡 <b>Visual Mnemonic:</b> ${v.mnemonic}`;
-  } else {
-    step1 = `• 💡 <b>Word Link:</b> Picture the action clearly: <b>${v.inf}</b> = <i>„${v.en}”</i> (${v.ta ? v.ta : ''}).`;
+  let direct = VERB_MNEMONIC_DB[inf];
+
+  let matchedRootKey = '';
+  let matchedRoot = null;
+  if (!direct) {
+    for (const rk in ROOT_MNEMONIC_DB) {
+      if (inf.includes(rk) || (ana.root && ana.root.includes(rk)) || (ana.stem && ana.stem.includes(rk))) {
+        matchedRootKey = rk;
+        matchedRoot = ROOT_MNEMONIC_DB[rk];
+        break;
+      }
+    }
   }
 
-  // STEP 2: The Grammar "Hook" (Look at the Trigger / Suffix / Vowel Shift)
-  let step2 = '';
-  if (inf === 'wissen' || inf === 'kennen') {
-    step2 = `• If next word is a <b>Person or a Place</b> → use <b>Kennen</b> (<i>Ich kenne Tom / Ich kenne Berlin</i>).<br>• If next word is a <b>Question word</b> (<i>wie, wo, was, warum</i>) or <b>dass</b> → use <b>Wissen</b> (<i>Ich weiß, dass...</i>).`;
-  } else if (inf === 'stehen' || inf === 'stellen') {
-    step2 = `• <b>stehen</b> (strong, <i>hat gestanden</i>): Stationary posture + <b>Dativ [wo?]</b> (<i>Das Glas steht auf dem Tisch</i>).<br>• <b>stellen</b> (weak, <i>hat gestellt</i>): Action of placing upright + <b>Akkusativ [wohin?]</b> (<i>Ich stelle das Glas auf den Tisch</i>).`;
-  } else if (inf === 'liegen' || inf === 'legen') {
-    step2 = `• <b>liegen</b> (strong, <i>hat gelegen</i>): Lying flat + <b>Dativ [wo?]</b> (<i>Das Buch liegt auf dem Sofa</i>).<br>• <b>legen</b> (weak, <i>hat gelegt</i>): Action of putting flat + <b>Akkusativ [wohin?]</b> (<i>Ich lege das Buch auf das Sofa</i>).`;
-  } else if (inf === 'sitzen' || inf === 'setzen') {
-    step2 = `• <b>sitzen</b> (strong, <i>hat gesessen</i>): Sitting posture + <b>Dativ [wo?]</b> (<i>Er sitzt auf dem Stuhl</i>).<br>• <b>setzen</b> (weak, <i>hat gesetzt</i>): Placing in a seat / sich setzen + <b>Akkusativ [wohin?]</b> (<i>Er setzt sich auf den Stuhl</i>).`;
-  } else if (ana.prefix && isSep) {
-    step2 = `🚀 <b>Separable Verb (Trennbar):</b> In Present & Past, <b>${ana.prefix}</b> splits and flies to the end: <i>„Er ... <u>${ana.prefix}</u>.”</i> In Perfekt: <b>${ana.prefix}-ge-...</b> → <i>„${v.perfekt}”</i>.`;
-  } else if (ana.prefix && !isSep) {
-    step2 = `🛡️ <b>Inseparable Verb (Untrennbar):</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> NEVER split & NEVER take <i>ge-</i> in Perfekt → <i>„${v.perfekt}”</i>.`;
+  let prefixKey = ana.prefix || '';
+  let prefixInfo = PREFIX_METAPHORS[prefixKey] || null;
+  const isSeparable = prefixKey ? (ana.prefixInfo ? (ana.prefixInfo.sep !== false) : !['be','ge','er','ver','zer','ent','emp','miss'].includes(prefixKey)) : false;
+
+  let soundLinkAnchor = '';
+  let mentalImage = '';
+  let memoryLock = '';
+
+  if (direct) {
+    soundLinkAnchor = direct.anchor;
+    mentalImage = direct.image;
+    memoryLock = direct.lock;
+  } else if (prefixKey && matchedRoot) {
+    soundLinkAnchor = prefixKey.toUpperCase() + '- (' + (prefixInfo ? prefixInfo.dir : 'direction') + ') + ' + matchedRoot.anchor;
+    mentalImage = 'Picture the core action "' + matchedRoot.idea + '" directed ' + (prefixInfo ? prefixInfo.dir : 'forward') + ': you ' + en + ' with focus.';
+    memoryLock = 'Whenever you need to say "' + en + '", combine ' + prefixKey + '- (' + (prefixInfo ? prefixInfo.hint : 'prefix') + ') with the root "' + matchedRootKey + '" → ' + v.inf + '!';
+  } else if (matchedRoot) {
+    soundLinkAnchor = matchedRoot.anchor;
+    mentalImage = 'Picture the action clearly: ' + matchedRoot.idea + ' → you ' + en + ' with intent.';
+    memoryLock = 'Link "' + en + '" with ' + matchedRoot.anchor + ' → ' + v.inf + '!';
+  } else {
+    const stemCluster = ana.stem ? ana.stem.slice(0, 4) : inf.slice(0, 4);
+    soundLinkAnchor = '"' + stemCluster + '..." → German Action Sound';
+    mentalImage = 'Picture performing "' + en + '" (' + ta + ') vividly in a real German daily scene.';
+    memoryLock = 'Focus on the active verb stem "' + (ana.stem || inf) + '" to lock in the meaning: ' + en + ' (' + ta + ').';
+  }
+
+  let situations = [];
+  if (direct && direct.situations) {
+    situations = direct.situations;
+  } else if (prefixKey && matchedRoot) {
+    situations = [
+      'Daily situation: Expressing the directed action "' + en + '" in everyday tasks.',
+      'Work/Study context: Using "' + v.inf + '" to describe specific procedural actions.',
+      'Conversational trigger: When talking about ' + matchedRoot.idea + (prefixInfo ? ' (' + prefixInfo.dir + ')' : '') + '.'
+    ];
+  } else {
+    situations = [
+      'Everyday life: Using "' + v.inf + '" when you need to ' + en + ' (' + ta + ').',
+      'Past experience: Talking about when you ' + (perf || 'did this action') + '.',
+      'Future plans: Expressing intentions with "Ich möchte gerne ' + v.inf + '..."'
+    ];
+  }
+
+  let familyNoun = direct && direct.family && direct.family.noun ? direct.family.noun : (v.noun || ('das ' + v.inf.charAt(0).toUpperCase() + v.inf.slice(1)));
+  let familyAdj = direct && direct.family && direct.family.adj ? direct.family.adj : (inf.replace(/en$/, '') + 'bar (feasible), ' + inf.replace(/en$/, '') + 'end (active)');
+  let familyRelated = direct && direct.family && direct.family.related ? direct.family.related : (prefixKey ? 'Core: ' + (ana.root || ana.stem) + ', Sister: ' + (prefixKey==='an'?'ab'+(ana.root||''):'an'+(ana.root||'')) : 'ver' + inf + ', be' + inf);
+
+  let grammarClassText = '';
+  if (typ === 'weak') {
+    grammarClassText = '🌱 <b>Weak Regular (Schwach):</b> Predictable stem with <b>-te</b> in Past and <b>-t</b> in Perfekt.';
+  } else if (typ === 'strong') {
+    grammarClassText = '⚡ <b>Strong Verb (Stammvokalwechsel Ablaut):</b> Vowel shifts in past forms — memorize the sound melody!';
+  } else if (typ === 'mixed') {
+    grammarClassText = '🔥 <b>Mixed Verb (Brennendes Haus):</b> Stem vowel changes + retains regular <b>-te/-t</b> endings.';
+  }
+
+  let auxText = isAuxSein 
+    ? '🚶 <b>Auxiliary SEIN (ist):</b> Indicates directional movement from Point A to B, or a fundamental change of state.'
+    : '⚡ <b>Auxiliary HABEN (hat):</b> Used for transitive actions with direct object (Akkusativ) or stationary states.';
+
+  let prefixRuleText = '';
+  if (prefixKey && isSeparable) {
+    prefixRuleText = '🚀 <b>Separable Prefix (' + prefixKey + '-):</b> Splits in Präsens/Präteritum (<i>„Er ... ' + prefixKey + '.”</i>) and puts <b>-ge-</b> in the middle for Perfekt: <i>„' + perf + '”</i>.';
+  } else if (prefixKey && !isSeparable) {
+    prefixRuleText = '🛡️ <b>Inseparable Prefix (' + prefixKey + '-):</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> NEVER separate and NEVER take <i>ge-</i> in Perfekt: <i>„' + perf + '”</i>.';
   } else if (inf.endsWith('ieren')) {
-    step2 = `⚡ <b>-ieren Suffix Law:</b> 100% weak, never takes <i>ge-</i> → Simple Past: <i>${v.praeteritum}</i> | Perfekt: <i>${v.perfekt}</i>.`;
-  } else if (v.typ === 'strong') {
-    step2 = `⚡ <b>Strong Verb (Ablaut):</b> Stem vowel shifts to <b>${v.praeteritum}</b> (Past) & <b>${v.perfekt}</b> (Perfekt). ${isAuxSein ? '🚶 <b>SEIN Rule:</b> Uses <i>ist</i> for movement A→B / state change.' : '⚡ <b>HABEN Rule:</b> Uses <i>hat</i>.'}`;
-  } else if (v.typ === 'mixed') {
-    step2 = `🔥 <b>Mixed Verb (Burning House):</b> Vowel changes to <b>${v.praeteritum}</b> + keeps regular <b>-te/-t</b> endings (<i>${v.perfekt}</i>).`;
-  } else {
-    step2 = `🌱 <b>Weak Regular:</b> Stem stays intact with <b>-te</b> (<i>${v.praeteritum}</i>) and <b>ge-...-t</b> (<i>${v.perfekt}</i>).`;
+    prefixRuleText = '⚡ <b>-ieren Verb Law:</b> 100% weak, takes regular <b>-te</b> in Past, and NEVER takes <i>ge-</i> in Perfekt (<i>hat ...-iert</i>).';
   }
 
-  // STEP 3: Practice with Sentence Patterns (Muscle Memory Rhythm)
-  let step3 = '';
-  const curated = VERB_SENTENCES[inf];
-  if (curated) {
-    step3 = `🗣️ <i>„${curated.p}”</i><br><small style="opacity:0.85; font-size:11.5px;">(${curated.en})</small>`;
-  } else if (ana.prefix && isSep) {
-    step3 = `🗣️ Präsens: <i>„Er ${v.praeteritum ? v.praeteritum.split(' ')[0] : v.inf} jeden Tag ... <b>${ana.prefix}</b>.”</i><br>🗣️ Perfekt: <i>„Er ${isAuxSein ? 'ist' : 'hat'} gestern <b>${v.perfekt.replace(/^(hat|ist)\s+/, '')}</b>.”</i>`;
+  let sentences = [];
+  if (direct && direct.sentences) {
+    sentences = direct.sentences;
+  } else if (prefixKey && isSeparable) {
+    sentences = [
+      { de: 'Ich ' + (praet ? praet.split(' ')[0] : inf.replace(/en$/,'e')) + ' heute pünktlich ' + prefixKey + '.', en: 'I ' + en + ' on time today [Präsens: prefix splits].' },
+      { de: 'Gestern ' + (isAuxSein ? 'bin' : 'habe') + ' ich ' + perf.replace(/^(hat|ist)\\s+/, '') + '.', en: 'Yesterday I ' + en + 'ed [Perfekt: ' + perf + '].' },
+      { de: 'Er ' + (praet ? praet : inf) + ' früher immer gerne.', en: 'He used to ' + en + ' gladly [Präteritum].' }
+    ];
   } else {
-    step3 = `🗣️ Präsens: <i>„Ich ${v.inf.replace(/en$/, 'e').replace(/n$/, 'e')} gerne.”</i><br>🗣️ Perfekt: <i>„Ich ${isAuxSein ? 'bin' : 'habe'} gestern <b>${v.perfekt.replace(/^(hat|ist)\s+/, '')}</b>.”</i>`;
+    sentences = [
+      { de: 'Ich ' + inf.replace(/en$/,'e').replace(/n$/,'e') + ' gerne jeden Tag.', en: 'I like to ' + en + ' every day.' },
+      { de: 'Wir haben gestern ' + (perf ? perf.replace(/^(hat|ist)\\s+/, '') : inf) + ' können.', en: 'We were able to ' + en + ' yesterday.' },
+      { de: 'Er ' + (praet ? praet : (inf.replace(/en$/,'te'))) + ' die ganze Zeit.', en: 'He ' + en + 'ed the whole time [Präteritum].' }
+    ];
   }
+
+  let confusionObj = direct && direct.confusion ? direct.confusion : (matchedRoot && matchedRoot.conf ? matchedRoot.conf : null);
+
+  let story = direct && direct.story ? direct.story : ('You visualize ' + soundLinkAnchor + ' and actively ' + en + ' (' + ta + '), cementing "' + v.inf + '" into your memory forever.');
+
+  let punch = direct && direct.punch ? direct.punch : (v.inf.toUpperCase() + ' = ' + soundLinkAnchor.toUpperCase() + ' → ' + en.toUpperCase() + ' (' + ta + ')');
+
+  let prep = direct && direct.prep ? direct.prep : '';
+
+  let quiz = direct && direct.quiz ? direct.quiz : {
+    cloze: 'Ich möchte heute gerne ___ (' + en + ' - Infinitiv).',
+    clozeAns: v.inf,
+    mc: 'What is the correct Perfekt form of "' + v.inf + '"?',
+    mcOpts: [perf || ('hat ge' + inf), (isAuxSein ? 'hat' : 'ist') + ' ' + (perf ? perf.replace(/^(hat|ist)\\s+/, '') : inf), 'hat ge' + inf + 't'],
+    mcAns: perf || ('hat ge' + inf),
+    transform: 'Forms of ' + v.inf + ': ' + (praet || inf) + ' (Past) / ' + (perf || ('hat ge' + inf)) + ' (Perfekt)'
+  };
+
+  const triplet = v.inf + ' → ' + (praet || '—') + ' → ' + (perf || '—');
 
   return `
-    <div style="background:#fffdf5; border:1.5px solid var(--gold); border-radius:8px; padding:12px 14px; margin-top:10px; box-shadow:0 3px 8px rgba(185,138,46,0.15); text-align:left;">
-      <div style="font-family:'Fjalla One',sans-serif; font-size:13.5px; color:var(--gold); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-        🧠 3-Step Long-Term Memory Hack: <i>${v.inf}</i>
-      </div>
-      
-      <div style="margin-bottom:8px; font-size:12px; line-height:1.55;">
-        <b>1. The Sound-Link / Mnemonic:</b><br>
-        ${step1}
+    <div style="background:#fffdf5; border:1.5px solid var(--gold); border-radius:10px; padding:13px 14px; margin-top:12px; box-shadow:0 4px 12px rgba(185,138,46,0.15); text-align:left;">
+      <div style="font-family:'Fjalla One',sans-serif; font-size:13.5px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #fae8b4; padding-bottom:6px;">
+        <span>🧠 9-Step Permanent Memory System · <i>${v.inf}</i></span>
+        <span style="font-size:10px; background:var(--gold); color:#fff; padding:2px 6px; border-radius:4px; font-family:'IBM Plex Mono',monospace;">Full Mnemonic</span>
       </div>
 
-      <div style="margin-bottom:8px; font-size:12px; line-height:1.55; background:var(--paper); padding:8px 10px; border-radius:6px;">
-        <b>2. The Grammar "Hook" (Pattern &amp; Rules):</b><br>
-        ${step2}
+      <!-- 1. Sound-Link & Mnemonic -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🎬 1. Sound-Link / Mnemonic (ஒலி இணைப்பு):</div>
+        <div style="background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+          • <b>Sound Anchor:</b> <i>„${soundLinkAnchor}”</i><br>
+          • <b>Mental Image:</b> ${mentalImage}<br>
+          • 🔒 <b>Memory Lock:</b> ${memoryLock}
+        </div>
       </div>
 
-      <div style="font-size:12px; line-height:1.55; color:var(--ink);">
-        <b>3. Practice with Sentence Pattern (Muscle Memory):</b><br>
-        ${step3}
+      <!-- 2. Meaning & Situation Hook -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧠 2. Situation &amp; Meaning Trigger (பயன்பாட்டு சூழல்):</div>
+        <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px;">
+          ${situations.map((s, idx) => `<div style="margin-bottom:3px;">• <b>Situation ${idx+1}:</b> ${s}</div>`).join('')}
+        </div>
+      </div>
+
+      <!-- 3. Word Family -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🌱 3. Word-Family Hook (சொல் குடும்பம்):</div>
+        <div style="background:var(--paper); padding:8px 10px; border-radius:4px; font-size:12px; line-height:1.6;">
+          <div>🏛️ <b>Noun:</b> <code>${familyNoun}</code></div>
+          <div>🎨 <b>Adjective:</b> <code>${familyAdj}</code></div>
+          <div>🌲 <b>Sister / Related:</b> <code>${familyRelated}</code></div>
+        </div>
+      </div>
+
+      <!-- 4. Grammar & Verb Mechanics Hook -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🔧 4. Grammar &amp; Verb Hook (இலக்கண இயக்கம்):</div>
+        <div style="background:#fff; border:1px solid var(--line); padding:8px 10px; border-radius:4px; font-size:12px;">
+          <div>⚡ <b>Forms Triplet:</b> <b style="color:var(--blue);">${triplet}</b></div>
+          <div style="margin-top:2px;">${grammarClassText}</div>
+          <div style="margin-top:2px;">${auxText}</div>
+          ${prefixRuleText ? `<div style="margin-top:2px;">${prefixRuleText}</div>` : ''}
+          ${prep ? `<div style="margin-top:2px; color:var(--purple);">🎯 <b>Preposition / Case:</b> <b>${prep}</b></div>` : ''}
+        </div>
+      </div>
+
+      <!-- 5. Muscle Memory Sentences -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🗣️ 5. Muscle-Memory Spoken Sentences (நடைமுறை வாக்கியங்கள்):</div>
+        <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px;">
+          ${sentences.map(sent => `
+            <div style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px dashed #fae8b4;">
+              🗣️ <i>„${sent.de}”</i><br>
+              <small style="color:var(--ink-soft); font-size:11px;">↳ ${sent.en}</small>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- 6. Confusion Buster -->
+      ${confusionObj ? `
+        <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+          <div style="font-weight:700; color:var(--red); margin-bottom:2px;">⚖️ 6. Confusion Buster (குழப்பம் தீர்க்கும் உத்தி):</div>
+          <div style="background:#fef2f2; border:1px solid #fecaca; border-left:3px solid var(--red); padding:8px 10px; border-radius:4px; color:#991b1b; font-size:12px;">
+            <b>${v.inf} vs. ${confusionObj.target}:</b> ${confusionObj.rule}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 7. Mini Memory Story -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🎬 7. Mini Memory Story (குறு நினைவுக் கதை):</div>
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 10px; border-radius:4px; color:#166534; font-size:12px; font-style:italic;">
+          „${story}”
+        </div>
+      </div>
+
+      <!-- 8. One-Second Recall Formula -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--gold); margin-bottom:2px;">⚡ 8. One-Second Recall Formula (1-வினாடி சூத்திரம்):</div>
+        <div style="background:var(--paper); border:1.5px solid var(--gold); padding:6px 10px; border-radius:4px; text-align:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12px; color:var(--ink);">
+          ${punch}
+        </div>
+      </div>
+
+      <!-- 9. Interactive Active Recall Quiz -->
+      <div style="font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--blue); margin-bottom:4px;">🎯 9. Interactive Active Recall (சுய பரிசோதனை வினாடி வினா):</div>
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; padding:8px 10px; border-radius:6px; font-size:12px;">
+          <!-- Q1: Cloze -->
+          <div style="margin-bottom:6px;">
+            <b>Q1 (Fill Blank):</b> ${quiz.cloze}
+            <details style="margin-top:2px; cursor:pointer;">
+              <summary style="color:var(--blue); font-size:11px; font-weight:600;">👁️ Reveal Cloze Answer</summary>
+              <div style="padding:4px 6px; background:#fff; border-radius:4px; margin-top:2px; font-weight:700; color:var(--green);">
+                Answer: ${quiz.clozeAns}
+              </div>
+            </details>
+          </div>
+
+          <!-- Q2: Context Drill -->
+          <div style="margin-bottom:6px; padding-top:4px; border-top:1px dashed #bae6fd;">
+            <b>Q2:</b> ${quiz.mc}
+            <details style="margin-top:2px; cursor:pointer;">
+              <summary style="color:var(--blue); font-size:11px; font-weight:600;">👁️ Reveal Question &amp; Options</summary>
+              <div style="padding:4px 6px; background:#fff; border-radius:4px; margin-top:2px; color:var(--ink);">
+                ${quiz.mcOpts ? quiz.mcOpts.map(opt => `<div style="font-size:11.5px; margin:2px 0;">• ${opt}</div>`).join('') : ''}
+                <div style="margin-top:4px; font-weight:700; color:var(--green);">✓ Correct: ${quiz.mcAns}</div>
+              </div>
+            </details>
+          </div>
+
+          <!-- Q3: Form Transformation -->
+          <div style="padding-top:4px; border-top:1px dashed #bae6fd;">
+            <b>Q3 (Conjugation Check):</b> Simple Past &amp; Perfekt forms of <i>${v.inf}</i>?
+            <details style="margin-top:2px; cursor:pointer;">
+              <summary style="color:var(--blue); font-size:11px; font-weight:600;">👁️ Reveal Conjugation</summary>
+              <div style="padding:4px 6px; background:#fff; border-radius:4px; margin-top:2px; font-weight:700; color:var(--purple);">
+                ${quiz.transform}
+              </div>
+            </details>
+          </div>
+        </div>
       </div>
     </div>
   `;
