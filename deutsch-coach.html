@@ -905,7 +905,7 @@
   }
   .suitelauncher-links {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 16px;
       width: 100%;
   }
@@ -934,6 +934,11 @@
       border: 2px solid var(--blue);
   }
 
+
+  @media (max-width: 600px) {
+      .hero-banner { flex-direction: column !important; text-align: center; }
+      .hero-banner > div:last-child { width: 100% !important; height: 120px; border-radius: 0 0 var(--radius-lg) var(--radius-lg) !important; }
+  }
 </style>
 </head>
 <body>
@@ -947,16 +952,26 @@
           <h1>Dein Deutsch-Coach <span style="font-size:13px; font-weight:400; color:var(--ink-soft); display:block;">Your German Practice Coach</span></h1>
           <div class="sub" id="subtitleLine">A1 · A2 · B1.1 · B1.2</div>
 
-  <div class="hero-banner" style="width:100%; max-width:700px; margin-bottom:24px; border-radius:var(--radius-lg); overflow:hidden; position:relative; box-shadow:var(--shadow-md); background:linear-gradient(135deg, var(--blue), var(--purple)); color:white; padding: 24px; display:flex; align-items:center; gap:20px;; padding: 0; display: flex; align-items: stretch;">
+  
+        </div>
+      </div>
+      
+      
+      <div class="streakbox" style="display:flex; align-items:center; gap:8px;" style="text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak · Days Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig · Words Due</div>
+      <div class="levelbar" id="levelBar"></div>
+      <div class="togglebar" id="catBar" style="margin-bottom:12px;"></div>
+      <div class="navbar" id="navBar"></div>
+    </div>
+    <div class="maincol">
+      <div class="hero-banner" style="width:100%; max-width:700px; margin-bottom:24px; border-radius:var(--radius-lg); overflow:hidden; position:relative; box-shadow:var(--shadow-md); background:linear-gradient(135deg, var(--blue), var(--purple)); color:white; padding: 24px; display:flex; align-items:center; gap:20px;; padding: 0; display: flex; align-items: stretch;">
       <div style="flex:1; padding: 24px; display: flex; flex-direction: column; justify-content: center;">
           <h2 style="margin:0 0 8px 0; font-family:'Fjalla One'; font-size:24px; letter-spacing:0.5px;">Willkommen zurück!</h2>
           <p style="margin:0; font-size:14px; opacity:0.9; line-height:1.5;">Dein tägliches Training wartet. Wähle eine Kategorie, um dein Deutsch auf das nächste Level zu bringen.</p>
       </div>
       <div style="width: 150px; flex-shrink: 0; background-image: url('assets/images/hero_dashboard.jpg'); background-size: cover; background-position: center; border-radius: 0 var(--radius-lg) var(--radius-lg) 0;"></div>
   </div>
-        </div>
-      </div>
-      <div class="suitelauncher">
+
+<div class="suitelauncher">
         <div class="suitelauncher-title">🧭 App-Suite Launcher</div>
         <div class="suitelauncher-links">
           <a href="./Wortschatz_Master_Grid.html" class="suitelink" style="background:#fef3c7; border-color:var(--gold);"><span style="font-weight:700;">👑 Spalten-Wortschatz Grid</span><span class="badge" style="background:var(--gold); color:#000;">Master Grid ↗</span></a>
@@ -976,12 +991,7 @@
           <a href="./Satzbau_Trainer.html" class="suitelink"><span>🧩 Satzbau Trainer</span><span class="badge">Wortstellung ↗</span></a>
         </div>
       </div>
-      <div class="streakbox" style="display:flex; align-items:center; gap:8px;" style="text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak · Days Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig · Words Due</div>
-      <div class="levelbar" id="levelBar"></div>
-      <div class="togglebar" id="catBar" style="margin-bottom:12px;"></div>
-      <div class="navbar" id="navBar"></div>
-    </div>
-    <div class="maincol">
+
       <div class="stage" id="stage"></div>
       <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Wortschatz stammt aus echten telc-Quellen: B1.1/B1.2 aus „Auf jeden Fall!" B1.1/B1.2, A2 (Thema Arbeit) aus dem „Auf jeden Fall! A2.1"-Probekapitel (Lektion 5, Lernwortschatz). A1 hat bisher nur ein Beispielwort; weitere Niveaus/Themen lassen sich jederzeit ergänzen, es wird nichts erfunden. Wort-Icons sind selbst gezeichnete, einfache Symbole (keine Fotos) — copyright-frei und offline nutzbar. Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
     </div>
