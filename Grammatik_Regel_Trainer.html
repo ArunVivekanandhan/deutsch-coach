@@ -448,15 +448,15 @@ const GRAMMAR_RULES = [
     category: "Syntax",
     color: "var(--red)",
     summary: "In German, the verb controls the whole sentence structure! There are 3 golden rules you must memorize to sound fluent and pass the exam.",
-    formula: "• Hauptsatz: Verb is ALWAYS in Position 2!\n• Nebensatz (weil, dass, wenn, obwohl...): Verb moves to the VERY END!\n• Position 0 (ADUSO: aber, denn, und, sondern, oder): Verb stays in Pos 2!\n• Position 1 Adverbs (deshalb, trotzdem, sonst): Verb follows immediately in Pos 2!\n• TeKaMoLo: When? (Temporal) → Why? (Kausal) → How? (Modal) → Where? (Lokal)",
+    formula: "• Hauptsatz (Main Clause): Verb is ALWAYS in Position 2!\n• Nebensatz (Subordinate Clause - weil, dass, wenn, obwohl...): Verb moves to the VERY END!\n• Position 0 (ADUSO: aber, denn, und, sondern, oder): Verb stays in Pos 2!\n• Position 1 Adverbs (deshalb, trotzdem, sonst): Verb follows immediately in Pos 2!\n• TeKaMoLo (Time, Cause, Manner, Place): When? (Temporal) → Why? (Kausal) → How? (Modal) → Where? (Lokal)",
     tableHTML: `
       <table class="de-table">
         <tr><th>Clause Type</th><th>Connector</th><th>Word Order Example</th></tr>
-        <tr><td><b>Hauptsatz</b></td><td>None / Normal</td><td>Heute <b>gehe</b> ich mit Freunden ins Kino.</td></tr>
-        <tr><td><b>Position 0 (ADUSO)</b></td><td><i>denn</i></td><td>Ich lerne Deutsch, <b>denn</b> ich <b>möchte</b> in Berlin arbeiten.</td></tr>
-        <tr><td><b>Position 1 Adverb</b></td><td><i>deshalb</i></td><td>Es regnet stark, <b>deshalb</b> <b>bleibe</b> ich zu Hause.</td></tr>
-        <tr><td><b>Nebensatz</b></td><td><i>weil / dass</i></td><td>Ich bleibe zu Hause, <b>weil</b> es stark <b>regnet</b>.</td></tr>
-        <tr><td><b>Satzklammer (Bracket)</b></td><td>Modal / Perfekt</td><td>Ich <b>habe</b> gestern einen neuen Job <b>bekommen</b>.</td></tr>
+        <tr><td><b>Hauptsatz</b><br><small>(Main Clause)</small></td><td>None / Normal</td><td>Heute <b>gehe</b> ich mit Freunden ins Kino.</td></tr>
+        <tr><td><b>Position 0 (ADUSO)</b><br><small>(Coordinating Conjunctions)</small></td><td><i>denn</i></td><td>Ich lerne Deutsch, <b>denn</b> ich <b>möchte</b> in Berlin arbeiten.</td></tr>
+        <tr><td><b>Position 1 Adverb</b><br><small>(Connecting Adverbs)</small></td><td><i>deshalb</i></td><td>Es regnet stark, <b>deshalb</b> <b>bleibe</b> ich zu Hause.</td></tr>
+        <tr><td><b>Nebensatz</b><br><small>(Sub. Clause)</small></td><td><i>weil / dass</i></td><td>Ich bleibe zu Hause, <b>weil</b> es stark <b>regnet</b>.</td></tr>
+        <tr><td><b>Satzklammer (Sentence Bracket)</b><br><small>(Perfekt / Modals)</small></td><td>Modal / Perfekt</td><td>Ich <b>habe</b> gestern einen neuen Job <b>bekommen</b>.</td></tr>
       </table>
     `,
     examples: [
@@ -499,7 +499,7 @@ const GRAMMAR_RULES = [
   {
     id: "r2_cases",
     num: "2",
-    title: "Die 4 Fälle (Nominativ, Akkusativ, Dativ, Genitiv)",
+    title: "Die 4 Fälle (The 4 Cases: Nominative, Accusative, Dative, Genitive)",
     category: "Cases",
     color: "var(--blue)",
     summary: "German cases indicate who does what to whom. German only changes the masculine article in the Akkusativ (der → den), but Dativ changes almost everything!",
@@ -553,11 +553,11 @@ const GRAMMAR_RULES = [
   {
     id: "r3_prepositions",
     num: "3",
-    title: "Präpositionen: Akkusativ, Dativ & Wechselpräpositionen",
+    title: "Präpositionen: Akkusativ, Dativ & Wechselpräpositionen (Two-Way Prepositions)",
     category: "Prepositions",
     color: "var(--green)",
-    summary: "Prepositions determine the case of the noun that follows. Wechselpräpositionen (Two-way prepositions) depend on whether there is movement/destination or static location!",
-    formula: "• Only Akkusativ (DOGFU): Durch, Ohne, Gegen, Für, Um\n• Only Dativ (ABMNSVZ): Aus, Bei, Mit, Nach, Seit, Von, Zu, Gegenüber\n• Wechselpräpositionen (an, auf, hinter, in, neben, über, unter, vor, zwischen):\n   - Wohin? (Movement / Destination) → AKKUSATIV\n   - Wo? (Static location / Position) → DATIV",
+    summary: "Prepositions determine the case of the noun that follows. Wechselpräpositionen (Two-Way Prepositions) (Two-way prepositions) depend on whether there is movement/destination or static location!",
+    formula: "• Only Akkusativ (DOGFU): Durch, Ohne, Gegen, Für, Um\n• Only Dativ (ABMNSVZ): Aus, Bei, Mit, Nach, Seit, Von, Zu, Gegenüber\n• Wechselpräpositionen (Two-Way Prepositions) (an, auf, hinter, in, neben, über, unter, vor, zwischen):\n   - Wohin? (Movement / Destination) → AKKUSATIV\n   - Wo? (Static location / Position) → DATIV",
     tableHTML: `
       <table class="de-table">
         <tr><th>Question</th><th>Case</th><th>Action / Verb Type</th><th>Example</th></tr>
@@ -990,7 +990,7 @@ const GRAMMAR_RULES = [
     tableHTML: `
       <table class="de-table">
         <tr><th>Sentence Structure</th><th>Comma Rule</th><th>Example</th></tr>
-        <tr><td><b>Nebensatz</b></td><td>Comma BEFORE connector</td><td>Ich bleibe zu Hause<b>, weil</b> ich mich krank fühle.</td></tr>
+        <tr><td><b>Nebensatz</b><br><small>(Sub. Clause)</small></td><td>Comma BEFORE connector</td><td>Ich bleibe zu Hause<b>, weil</b> ich mich krank fühle.</td></tr>
         <tr><td><b>Relativsatz</b></td><td>Comma BEFORE and AFTER</td><td>Der Kollege<b>, der neu im Team ist,</b> spricht fließend Deutsch.</td></tr>
         <tr><td><b>Infinitiv mit „zu“</b></td><td>Comma before infinitive group</td><td>Er lernt viel<b>, um</b> die B1-Prüfung zu bestehen.</td></tr>
         <tr><td><b>Kontrast-Konnektoren</b></td><td>Comma before aber/sondern/denn</td><td>Er ist müde<b>, aber</b> er arbeitet weiter.</td></tr>
@@ -1022,7 +1022,7 @@ const GRAMMAR_RULES = [
   {
     id: "r13_ndeklination",
     num: "13",
-    title: "N-Deklination (Weak Masculine Nouns)",
+    title: "N-Deklination (Weak Masculine Nouns: der Junge -> den Jungen)",
     category: "Nouns & Cases",
     color: "var(--green)",
     summary: "A special group of masculine nouns add -(e)n in EVERY case (Akkusativ, Dativ, Genitiv) EXCEPT Nominative singular! This is one of the most frequent traps in B1 grammar tests.",
@@ -1062,7 +1062,7 @@ const GRAMMAR_RULES = [
   {
     id: "r14_pronominaladverb",
     num: "14",
-    title: "Da- & Wo-Komposita (Pronominaladverbien)",
+    title: "Da- & Wo-Komposita (Pronominal Adverbs: damit, wofür...)",
     category: "Pronouns & Prepositions",
     color: "var(--gold)",
     summary: "When combining prepositions with THINGS or WHOLE CLAUSES (not people!), German creates compound words using da(r)- and wo(r)- (darauf, darüber, woran, worauf).",
@@ -1102,7 +1102,7 @@ const GRAMMAR_RULES = [
   {
     id: "r15_temporale",
     num: "15",
-    title: "Temporale Konnektoren (als vs. wenn, während, nachdem, bevor)",
+    title: "Temporale Konnektoren (Temporal Connectors) (als vs. wenn, während, nachdem, bevor)",
     category: "Time & Tenses",
     color: "var(--purple)",
     summary: "The single biggest exam trap in German time expressions is knowing when to use 'als' versus 'wenn'. All temporal connectors kick the conjugated verb to the end!",
@@ -1420,7 +1420,7 @@ const DYNAMIC_GENERATORS = {
       const isMovement = Math.random() > 0.5;
       if(isMovement){
         return {
-          ruleNum: 3, ruleTitle: "Wechselpräpositionen (Wohin? → Akkusativ)",
+          ruleNum: 3, ruleTitle: "Wechselpräpositionen (Two-Way Prepositions) (Wohin? → Akkusativ)",
           prompt: `Er ${pair.vAct} den Gegenstand auf/an ___ ${pair.n}.`,
           en: `He ${pair.enA}. (Movement / Destination)`,
           options: [pair.artAkk, pair.artDat, "des", "eines"],
@@ -1429,7 +1429,7 @@ const DYNAMIC_GENERATORS = {
         };
       } else {
         return {
-          ruleNum: 3, ruleTitle: "Wechselpräpositionen (Wo? → Dativ)",
+          ruleNum: 3, ruleTitle: "Wechselpräpositionen (Two-Way Prepositions) (Wo? → Dativ)",
           prompt: `Der Gegenstand ${pair.vStat} auf/an ___ ${pair.n}.`,
           en: `The item ${pair.enS}. (Static Location)`,
           options: [pair.artDat, pair.artAkk, "des", "einen"],
@@ -1602,7 +1602,7 @@ const DYNAMIC_GENERATORS = {
       ];
       const item = nNouns[Math.floor(Math.random()*nNouns.length)];
       return {
-        ruleNum:13, ruleTitle:"N-Deklination (Weak Masculine Nouns)",
+        ruleNum:13, ruleTitle:"N-Deklination (Weak Masculine Nouns: der Junge -> den Jungen)",
         prompt: `Ich habe gestern ein langes Gespräch mit ${item.akk.replace("den", "dem")} geführt.`,
         en: `Yesterday I had a long conversation with ${item.en}. (Dativ)`,
         options: [item.akk.replace("den", "dem"), item.nom.replace("der", "dem"), item.nom.replace("der", "den"), item.nom.replace("der", "des")],
@@ -1621,7 +1621,7 @@ const DYNAMIC_GENERATORS = {
         {p:"___ wartest du hier am Eingang? — Auf meine Kollegin Frau Weber.", en:"Who are you waiting for here at the entrance? — For my colleague Ms. Weber.", o:["Auf wen","Worauf","An wen","Woran"], c:0, exp:"Asking about a PERSON with 'warten auf' requires 'Auf wen?'."}
       ];
       const pr = prons[Math.floor(Math.random()*prons.length)];
-      return { ruleNum:14, ruleTitle:"Da- & Wo-Komposita (Pronominaladverbien)", prompt:pr.p, en:pr.en, options:pr.o, correct:pr.c, explain:pr.exp };
+      return { ruleNum:14, ruleTitle:"Da- & Wo-Komposita (Pronominal Adverbs: damit, wofür...)", prompt:pr.p, en:pr.en, options:pr.o, correct:pr.c, explain:pr.exp };
     }
   ],
 
@@ -1634,7 +1634,7 @@ const DYNAMIC_GENERATORS = {
         {p:"Wasch dir bitte die Hände, ___ du dich an den Tisch setzt.", en:"Please wash your hands before you sit down at the table.", o:["bevor","nachdem","während","seitdem"], c:0, exp:"'bevor' (before) introduces an action that occurs after the main clause action."}
       ];
       const tm = temporals[Math.floor(Math.random()*temporals.length)];
-      return { ruleNum:15, ruleTitle:"Temporale Konnektoren (als vs. wenn)", prompt:tm.p, en:tm.en, options:tm.o, correct:tm.c, explain:tm.exp };
+      return { ruleNum:15, ruleTitle:"Temporale Konnektoren (Temporal Connectors) (als vs. wenn)", prompt:tm.p, en:tm.en, options:tm.o, correct:tm.c, explain:tm.exp };
     }
   ],
 
@@ -1902,14 +1902,14 @@ const BUILD_GENERATORS = {
 
   r15_temporale: [
     ()=>({
-      ruleNum: 15, ruleTitle: "Temporale Konnektoren",
+      ruleNum: 15, ruleTitle: "Temporale Konnektoren (Temporal Connectors)",
       en: "When I was eighteen years old, I traveled to Berlin for the first time.",
       tokens: ["Als ich", "achtzehn Jahre alt war,", "bin ich zum ersten Mal", "nach Berlin", "gereist."],
       correctSentence: "Als ich achtzehn Jahre alt war, bin ich zum ersten Mal nach Berlin gereist.",
       explain: "A one-time, unique event in the past strictly demands 'Als'."
     }),
     ()=>({
-      ruleNum: 15, ruleTitle: "Temporale Konnektoren",
+      ruleNum: 15, ruleTitle: "Temporale Konnektoren (Temporal Connectors)",
       en: "Please wash your hands before you sit down at the dinner table.",
       tokens: ["Wasch dir bitte die Hände,", "bevor du dich", "an den", "Esstisch setzt."],
       correctSentence: "Wasch dir bitte die Hände, bevor du dich an den Esstisch setzt.",
