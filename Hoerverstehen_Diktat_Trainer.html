@@ -212,7 +212,7 @@
     }
 
     const headers = { 'Content-Type': 'application/json' };
-    if (config.requiresKey && apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    if (apiKey && apiKey.trim() !== "") headers['Authorization'] = `Bearer ${apiKey}`;
 
     try {
       const response = await fetch(config.endpoint, {

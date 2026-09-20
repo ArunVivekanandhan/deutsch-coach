@@ -1180,7 +1180,7 @@ if (document.readyState === 'loading') {
         <option value="groq">Groq (Ultra Fast: Llama-3.3-70B)</option>
         <option value="gemini">Google Gemini (Gemini 1.5 / 2.0 Flash)</option>
         <option value="openrouter">OpenRouter (Universal AI Proxy)</option>
-        <option value="ollama">Ollama (Lokal &amp; 100% Kostenlos auf localhost)</option>
+        <option value="ollama">Ollama (Local & Cloud Pro)</option>
       </select>
     </div>
 
@@ -1307,7 +1307,7 @@ const PROVIDER_CONFIGS = {
     endpoint: "http://localhost:11434/v1/chat/completions",
     defaultModel: "llama3:latest",
     requiresKey: false,
-    help: "100% lokal & privat auf Ihrem Rechner (Ollama muss laufen)."
+    help: "100% lokal (localhost) ODER Ollama Cloud Pro (Key & Endpoint eintragen)."
   }
 };
 
@@ -1803,7 +1803,7 @@ async function sendMessageToAI(promptText, isSystemTrigger = false, userMsgRef =
       'Content-Type': 'application/json'
     };
 
-    if (config.requiresKey && apiKey) {
+    if (apiKey && apiKey.trim() !== "") {
       headers['Authorization'] = `Bearer ${apiKey}`;
     }
 
@@ -2189,7 +2189,7 @@ async function testAiConnection() {
     }
 
     const headers = { 'Content-Type': 'application/json' };
-    if (config.requiresKey && key) {
+    if (key && key.trim() !== "") {
       headers['Authorization'] = `Bearer ${key}`;
     }
 
