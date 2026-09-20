@@ -1,8 +1,9 @@
-const CACHE_NAME = 'deutsch-coach-v5';
+const CACHE_NAME = 'deutsch-coach-v6';
 const urlsToCache = [
   './',
   './index.html',
   './deutsch-coach.html',
+  './German_Grammar_Cheat_Codes.html',
   './Sprech_Pruefungs_Simulator.html',
   './Grammatik_Regel_Trainer.html',
   './KI_Human_Partner.html',

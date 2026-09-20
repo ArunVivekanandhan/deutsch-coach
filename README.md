@@ -12,6 +12,7 @@
 
 | Application | Direct Live Link | Description |
 | :--- | :--- | :--- |
+| ⚡ **Cheat Codes &amp; Shortcuts** | [Open Cheat Codes](https://arunvivekanandhan.github.io/deutsch-coach/German_Grammar_Cheat_Codes.html) | 30+ shortcut hacks using English cognate cousins, Tamil structural bridges, and instant live scanners (Verb strong/weak, noun suffix der/die/das). |
 | 👤 **Live Human Video Coach** | [Open Human Coach](https://arunvivekanandhan.github.io/deutsch-coach/KI_Human_Partner.html) | Interactive 1-on-1 video call experience with an animated realistic German teacher, synchronized lip-sync speech, live speech recognition, and real-time grammar breakdown. |
 | 🤖 **KI Deutsch-Coach** | [Open KI Coach](https://arunvivekanandhan.github.io/deutsch-coach/KI_German_Coach.html) | Full conversational AI German Coach with multi-AI engine (DeepSeek, OpenAI, Groq, Gemini, Ollama), live grammar corrections, and Mistake Vault. |
 | 🏠 **Main Vocabulary Coach** | [Open Main Coach](https://arunvivekanandhan.github.io/deutsch-coach/index.html) | 500+ A1–B1.2 words with Leitner Spaced Repetition, mnemonics, audio, AI writing and speaking analysis. |

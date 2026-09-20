@@ -20,8 +20,13 @@
   ],
   "shortcuts": [
     {
+      "name": "Cheat Codes & Hacks",
+      "url": "./German_Grammar_Cheat_Codes.html",
+      "description": "30+ German grammar shortcuts and tricks"
+    },
+    {
       "name": "Human Partner",
-      "url": "/KI_Human_Partner.html",
+      "url": "./KI_Human_Partner.html",
       "description": "Practise with an AI human partner"
     },
     {

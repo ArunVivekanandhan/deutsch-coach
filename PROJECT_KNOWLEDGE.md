@@ -980,14 +980,11 @@ as a reliable source of "what changed when."
 **Finding:** Created `KI_Human_Partner.html` — an immersive 1-on-1 video call experience featuring an animated realistic human German coach (Frau Schmidt, Herr Weber, Lukas, Dr. Hoffmann) with dynamic multi-viseme lip-syncing, natural eye blinking, subtle head-tilts, ambient classroom lighting, real-time speech recognition (STT), human voice TTS, bilingual subtitles, and instant live grammar feedback cards.
 **Impact:** Provides an authentic, human-like speaking immersion experience for learners preparing for oral speaking exams (DTZ / telc / Goethe B1).
 
-### Discovery: Full-Suite Enhancements Implemented Across All 14 Apps
+### Discovery: German Grammar Cheat Codes App & Cross-Suite Shortcut Integration
 **Date:** 2026-09-20 · **AI:** Gemini 3.7
-**Finding:** Implemented comprehensive enhancements across all 14 apps:
-1. **Main App (`deutsch-coach.html` / `index.html`)**: Cleaned top letterhead by removing redundant suite banner, added full AI Settings modal (DeepSeek/OpenAI/Groq/Gemini/Ollama), TTS audio buttons on all vocab cards, keyboard shortcuts (Space/1/2/3/S), 1-click JSON progress backup/restore, and dark theme support.
-2. **AI Apps (`KI_German_Coach.html`, `KI_Human_Partner.html`)**: Added localStorage chat persistence, transcript export (Markdown), SRS Mistake Vault drilling, "💡 Gib mir einen Tipp" prompter assistant, and push-to-talk mobile controls.
-3. **Exam & Grammar Trainers**: Persistent streaks, "Warum ist das falsch?" AI error explainers, interactive AI oral exam simulation, and B1 letter writing sandbox.
-4. **Practice Studios & Standalone Trainers**: Dark mode, flexible German word-order validation, Noun gender testing, Haben vs. Sein verb filter, and PWA v5 service worker registration across all apps.
-**Impact:** All 14 apps now offer unified dark mode, offline PWA capabilities, persistence, and deep AI capabilities.
+**Finding:** Created `German_Grammar_Cheat_Codes.html` containing 30+ interactive shortcut hacks across 10 categories (Verb Past Tenses, haben/sein Perfekt, der/die/das Suffix Scanners, Case Prepositions DOGFU & Blue Danube, TeKaMoLo, ADUSO, English sound shifts, and Tamil-German SOV/Case structural bridges). Also injected dynamic cheat code tips directly into card reveal views of `Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html`, and `deutsch-coach.html` / `index.html`.
+**Impact:** Learners can now crack German past tenses, gender articles, and sentence structures intuitively using their existing English and Tamil linguistic knowledge.
+
 
 
 

@@ -938,14 +938,36 @@ function vowelChangeNote(v){
   return null;
 }
 
+function getVerbShortcutTip(v){
+  const inf = (v.inf||'').toLowerCase();
+  let tips = [];
+  if(inf.endsWith('ieren')){
+    tips.push(`⚡ <b>100% Suffix Rule:</b> All <i>-ieren</i> verbs are strictly weak and never take <i>ge-</i> in Perfekt!`);
+  } else if(inf.includes('ei')){
+    tips.push(`⚡ <b>Diphthong Scanner:</b> <i>-ei-</i> verbs are 99% strong! They shift to <i>-ie-</i> or <i>-i-</i> in the past.`);
+  } else if(inf.includes('ie')){
+    tips.push(`⚡ <b>Diphthong Scanner:</b> <i>-ie-</i> verbs are 99% strong! They shift to <i>-o-</i> in the past.`);
+  }
+  
+  if(v.perfekt && v.perfekt.startsWith('ist')){
+    tips.push(`🚶 <b>SEIN Rule:</b> Uses <i>ist</i> because it describes movement from A→B or a state change!`);
+  }
+
+  if(tips.length > 0){
+    return `<div style="background:#fef3c7; border-left:3px solid var(--gold); padding:6px 10px; font-size:12px; margin-top:8px; border-radius:0 4px 4px 0; color:#78350f;">${tips.join('<br>')}</div>`;
+  }
+  return '';
+}
+
 function ruleExplanation(v){
   const shift = vowelChangeNote(v);
+  const tip = getVerbShortcutTip(v);
   if(v.typ==='weak'){
-    return `<div class="rulebox weak"><b>Rule: Weak.</b> The stem stays the same — only endings are added: stem + <b>-te</b> (Simple Past), <b>ge-</b> + stem + <b>-t</b> (Present Perfect). <br><br><b>Why is "${v.inf}" weak?</b> Because the stem vowel doesn't change when moving to the past. It follows the most predictable pattern in German. No vowel changes in <b>${v.inf}</b> — that's what makes it weak.</div>`;
+    return `<div class="rulebox weak"><b>Rule: Weak.</b> The stem stays the same — only endings are added: stem + <b>-te</b> (Simple Past), <b>ge-</b> + stem + <b>-t</b> (Present Perfect). <br><br><b>Why is "${v.inf}" weak?</b> Because the stem vowel doesn't change when moving to the past. It follows the most predictable pattern in German.${tip}</div>`;
   } else if(v.typ==='mixed'){
-    return `<div class="rulebox mixed"><b>Rule: Mixed.</b> A small, closed group (bringen, denken, kennen, nennen, rennen, brennen, senden, wenden, wissen). In <b>${v.inf}</b>${shift?` the vowel changes (<b>${shift}</b>)`:''} — <i>and</i> it still keeps the <b>-te/-t</b> ending, unlike strong verbs.</div>`;
+    return `<div class="rulebox mixed"><b>Rule: Mixed.</b> A small, closed group (bringen, denken, kennen, nennen, rennen, brennen, senden, wenden, wissen). In <b>${v.inf}</b>${shift?` the vowel changes (<b>${shift}</b>)`:''} — <i>and</i> it still keeps the <b>-te/-t</b> ending, unlike strong verbs.${tip}</div>`;
   } else {
-    return `<div class="rulebox strong"><b>Rule: Strong.</b> The stem vowel changes (ablaut)${shift?` — specifically <b>${shift}</b> in <b>${v.inf}</b>`:''} — no <b>-te</b> ending in the Simple Past. Has to be memorized as vocabulary, not derived.</div>`;
+    return `<div class="rulebox strong"><b>Rule: Strong.</b> The stem vowel changes (ablaut)${shift?` — specifically <b>${shift}</b> in <b>${v.inf}</b>`:''} — no <b>-te</b> ending in the Simple Past. Has to be memorized as vocabulary, not derived.${tip}</div>`;
   }
 }
 

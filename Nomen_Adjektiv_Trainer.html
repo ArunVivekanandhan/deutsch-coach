@@ -433,6 +433,22 @@ function typLabelAdj(t){
   return {regular:'Regelmäßig', umlaut:'Umlaut', irregular:'Unregelmäßig'}[t] || t;
 }
 
+function getNounCheatTip(v){
+  const sg = (v.sg||'').toLowerCase();
+  let tips = [];
+  if(sg.endsWith('ung') || sg.endsWith('heit') || sg.endsWith('keit') || sg.endsWith('schaft') || sg.endsWith('tion') || sg.endsWith('tät') || sg.endsWith('in')){
+    tips.push(`🔴 <b>100% Suffix Rule:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 100% <b>die (feminin)</b>, and plural is almost always <b>-(e)n</b>!`);
+  } else if(sg.endsWith('chen') || sg.endsWith('lein') || sg.endsWith('ment') || sg.endsWith('um')){
+    tips.push(`🟢 <b>100% Suffix Rule:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 100% <b>das (neutral)</b>!`);
+  } else if(sg.endsWith('ling') || sg.endsWith('ismus') || sg.endsWith('ist') || sg.endsWith('or')){
+    tips.push(`🔵 <b>95% Suffix Rule:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 95% <b>der (maskulin)</b>!`);
+  }
+  if(tips.length > 0){
+    return `<div style="background:#fef3c7; border-left:3px solid var(--gold); padding:6px 10px; font-size:12px; margin-top:8px; border-radius:0 4px 4px 0; color:#78350f;">${tips.join('<br>')}</div>`;
+  }
+  return '';
+}
+
 function ruleExplanationNoun(v){
   const map = {
     en: `<b>Rule: -en/-n.</b> Very common for feminine nouns. Simply add -en (or just -n after -e), no umlaut.`,
@@ -442,7 +458,8 @@ function ruleExplanationNoun(v){
     unchanged: `<b>Rule: unchanged.</b> Masculine/neuter nouns ending in -er, -en, -el, -chen, -lein remain identical in plural (only the article becomes "die").`,
     umlaut_only: `<b>Rule: umlaut only.</b> No ending — only the stem vowel changes (a→ä, o→ö, u→ü).`,
   };
-  return `<div class="rulebox ${v.typ}">${map[v.typ]||''}</div>`;
+  const tip = getNounCheatTip(v);
+  return `<div class="rulebox ${v.typ}">${map[v.typ]||''}${tip}</div>`;
 }
 function ruleExplanationAdj(v){
   const map = {
