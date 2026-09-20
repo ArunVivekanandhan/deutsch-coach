@@ -29,6 +29,8 @@
       --gold-light: #fffbeb;
       --purple: #9333ea;
       --purple-light: #faf5ff;
+      --amber: #f59e0b;
+      --amber-light: #fef3c7;
       
       --der-blue: #1d4ed8;
       --der-bg: #dbeafe;
@@ -60,6 +62,8 @@
       --gold-light: #2c2411;
       --purple: #c084fc;
       --purple-light: #291a38;
+      --amber: #fbbf24;
+      --amber-light: #2c2411;
       
       --der-blue: #60a5fa;
       --der-bg: #1e3a8a;
@@ -181,7 +185,7 @@
       margin: 0 0 14px;
     }
 
-    /* Stats & Audio Controls */
+    /* Stats & Action Controls */
     .stats-bar {
       display: flex;
       flex-wrap: wrap;
@@ -206,6 +210,26 @@
       border-color: var(--blue);
       color: var(--blue);
       font-weight: 700;
+    }
+    .cheat-code-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: var(--amber-light);
+      border: 1.5px solid var(--amber);
+      color: #92400e;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .cheat-code-btn:hover {
+      background: var(--amber);
+      color: #ffffff;
+      transform: translateY(-1px);
     }
 
     /* Filters Toolbar */
@@ -294,6 +318,15 @@
       color: var(--paper);
       border-color: var(--ink);
       font-weight: 700;
+    }
+    .pos-btn.trennbar-btn {
+      border-color: var(--amber);
+      color: #92400e;
+    }
+    .pos-btn.trennbar-btn.active {
+      background: #d97706;
+      color: #ffffff;
+      border-color: #d97706;
     }
 
     /* Alphabet Jump Bar */
@@ -457,6 +490,46 @@
     .badge-noun { background: var(--red-light); color: var(--red); border: 1px solid rgba(220,38,38,0.3); }
     .badge-adj { background: var(--green-light); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
 
+    .badge-trennbar {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      display: inline-block;
+      margin-top: 2px;
+      width: fit-content;
+    }
+    .badge-untrennbar {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      display: inline-block;
+      margin-top: 2px;
+      width: fit-content;
+    }
+    .badge-ieren {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      display: inline-block;
+      margin-top: 2px;
+      width: fit-content;
+    }
+
     .verb-main {
       font-family: 'IBM Plex Sans', sans-serif;
       font-size: 14px;
@@ -543,6 +616,82 @@
       line-height: 1.35;
     }
 
+    /* Modal for Past Tense Cheat Codes */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .modal-title {
+      font-family: 'Fjalla One', sans-serif;
+      font-size: 22px;
+      margin: 0;
+      color: var(--ink);
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--ink-muted);
+    }
+    .cheat-card-item {
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .cheat-card-title {
+      font-family: 'Fjalla One', sans-serif;
+      font-size: 16px;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .cheat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 8px 0;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .cheat-table th {
+      background: rgba(0,0,0,0.06);
+      padding: 6px;
+      text-align: left;
+      border: 1px solid var(--line);
+    }
+    .cheat-table td {
+      padding: 6px;
+      border: 1px solid var(--line);
+    }
+
     /* Pagination */
     .pagination-row {
       display: flex;
@@ -618,21 +767,27 @@
         <h1 class="main-title">
           📑 Spalten- & Zeilen-Wortschatz (Column & Row Wise Master Grid)
         </h1>
-        <div style="display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;">
-          <span>🔊 Voice:</span>
-          <select id="voiceSelect" onchange="onVoiceChanged(this.value)" style="border:1px solid var(--line); border-radius:4px; padding:3px 6px; font-size:11px; background:var(--paper); color:var(--ink);">
-            <option value="">Standard German Voice</option>
-          </select>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="cheat-code-btn" onclick="openCheatCodeModal()">
+            ⚡ Past Tense Cheat Codes (Regeln & Tricks)
+          </button>
+          <div style="display:flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+            <span>🔊 Voice:</span>
+            <select id="voiceSelect" onchange="onVoiceChanged(this.value)" style="border:1px solid var(--line); border-radius:4px; padding:3px 6px; font-size:11px; background:var(--paper); color:var(--ink);">
+              <option value="">Standard German Voice</option>
+            </select>
+          </div>
         </div>
       </div>
       <p class="main-desc">
-        Jede Zeile enthält die vollständige deutsche Wortfamilie: <b>🇬🇧 English / 🇮🇳 தமிழ்</b>, <b>⚡ Verb & Zeitformen (Präsens, Präteritum, Perfekt)</b>, <b>📦 Nomen (Artikel & Plural)</b>, <b>🎨 Adjektiv (-bar, -end, Steigerung)</b>, <b>🌲 Sister Verbs mit Bedeutungen</b> und <b>Merkhilfe</b>. Mit Audio 🔊 für jedes einzelne Wort!
+        Jede Zeile enthält die vollständige deutsche Wortfamilie: <b>🇬🇧 English / 🇮🇳 தமிழ்</b>, <b>⚡ Verb & Zeitformen (Präsens, Präteritum, Perfekt, Trennbar ✂️)</b>, <b>📦 Nomen (Artikel & Plural)</b>, <b>🎨 Adjektiv (-bar, -end)</b>, <b>🌲 Sister Verbs</b> und <b>Merkhilfe</b>. Mit Audio 🔊 für jedes einzelne Wort!
       </p>
 
       <div class="stats-bar">
         <div style="display:flex; flex-wrap:wrap; gap:8px;">
           <div class="stat-pill highlight" id="statTotal">🌟 Gesamtwortschatz: 1,117 Einträge</div>
           <div class="stat-pill">⚡ 503 Verben</div>
+          <div class="stat-pill" style="border-color:var(--amber); color:#b45309; background:#fef3c7;">✂️ <span id="statTrennbar">180+</span> Trennbare Verben</div>
           <div class="stat-pill">📦 378 Nomen</div>
           <div class="stat-pill">🎨 236 Adjektive</div>
         </div>
@@ -646,9 +801,10 @@
     <section class="filter-panel">
       <!-- POS Tabs -->
       <div class="pos-strip">
-        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--ink-muted);">Wortart:</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--ink-muted);">Wortart & Filter:</span>
         <button class="pos-btn active" data-pos="all" onclick="setPosFilter('all')">🌟 Alle Wörter (1117)</button>
         <button class="pos-btn" data-pos="verb" onclick="setPosFilter('verb')">⚡ Nur Verben (503)</button>
+        <button class="pos-btn trennbar-btn" data-pos="trennbar" onclick="setPosFilter('trennbar')">✂️ Trennbare Verben (<span id="countTrennbar">180+</span>)</button>
         <button class="pos-btn" data-pos="noun" onclick="setPosFilter('noun')">📦 Nur Nomen (378)</button>
         <button class="pos-btn" data-pos="adj" onclick="setPosFilter('adj')">🎨 Nur Adjektive (236)</button>
       </div>
@@ -656,8 +812,8 @@
       <!-- Filter Controls Grid -->
       <div class="filter-row-top">
         <div class="form-group">
-          <label class="form-lbl" for="searchInput">🔍 Schnellsuche (DE / EN / தமிழ் / Präteritum / Perfekt)</label>
-          <input type="text" id="searchInput" class="search-field" placeholder="z.B. fotografieren, photograph, படம், fotografierte..." oninput="onSearchChanged()">
+          <label class="form-lbl" for="searchInput">🔍 Schnellsuche (DE / EN / தமிழ் / Präteritum / Perfekt / Prefix)</label>
+          <input type="text" id="searchInput" class="search-field" placeholder="z.B. einkaufen, fotografieren, photograph, படம், fotografierte..." oninput="onSearchChanged()">
         </div>
 
         <div class="form-group">
@@ -721,6 +877,87 @@
       <button class="page-btn" id="nextBtn" onclick="changePage(1)">Nächste →</button>
     </div>
   </main>
+
+  <!-- Past Tense Cheat Codes Modal -->
+  <div class="modal-overlay" id="cheatModal" onclick="if(event.target===this) closeCheatCodeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">⚡ Past Tense & Trennbar Cheat Codes</h2>
+        <button class="modal-close" onclick="closeCheatCodeModal()">✕</button>
+      </div>
+
+      <!-- Shortcut 25 -->
+      <div class="cheat-card-item">
+        <div class="cheat-card-title">⏳ 1. The 3 Past Tense Formulas (Weak, Strong, Mixed)</div>
+        <p style="font-size:13px; margin:4px 0 8px;">German forms Präteritum (Simple Past) and Perfekt (Present Perfect) with 3 core formulas:</p>
+        <table class="cheat-table">
+          <thead>
+            <tr><th>Verb Type</th><th>Präteritum (Simple Past)</th><th>Perfekt (Present Perfect)</th><th>Beispiel</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>🌱 <b>Weak (Regular)</b></td><td>Stem + <b>-te</b></td><td><b>ge-</b> + Stem + <b>-t</b></td><td>lernen → <b>lernte</b> → hat <b>gelernt</b></td></tr>
+            <tr><td>⚡ <b>Strong (Irregular)</b></td><td><b>Vowel Shift</b></td><td><b>ge-</b> + Vowel Shift + <b>-en</b></td><td>trinken → <b>trank</b> → hat <b>getrunken</b></td></tr>
+            <tr><td>🧬 <b>Mixed (Mischverben)</b></td><td>Vowel Shift + <b>-te</b></td><td><b>ge-</b> + Shifted Stem + <b>-t</b></td><td>denken → <b>dachte</b> → hat <b>gedacht</b></td></tr>
+            <tr><td>⚡ <b>-ieren Verbs</b></td><td>Stem + <b>-te</b></td><td><b>NO ge-!</b> Stem + <b>-t</b></td><td>fotografieren → <b>fotografierte</b> → hat <b>fotografiert</b></td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:11.5px; color:var(--gold); font-weight:600;">
+          💡 <b>Tamil Hack:</b> Weak-ல் -te/-t வரும்! Strong-ல் உயிர் எழுத்து மாறும் + -en வரும்! -ieren வந்தால் 'ge-' வரவே வராது!
+        </div>
+      </div>
+
+      <!-- Shortcut 28 -->
+      <div class="cheat-card-item">
+        <div class="cheat-card-title">🥪 2. Trennbare Verben: The "-ge- Sandwich" Rule</div>
+        <p style="font-size:13px; margin:4px 0 8px;">Separable verbs split in Präsens and sandwich <b>-ge-</b> in the middle in Perfekt:</p>
+        <table class="cheat-table">
+          <thead>
+            <tr><th>Verb & Prefix</th><th>Präsens (Splits!)</th><th>Präteritum</th><th>Perfekt (-ge- Sandwich!)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>auf</b>stehen</td><td>Ich stehe um 7 Uhr <b>auf</b>.</td><td>Ich stand <b>auf</b>.</td><td>Ich bin <b>auf-ge-standen</b></td></tr>
+            <tr><td><b>ein</b>kaufen</td><td>Ich kaufe im Markt <b>ein</b>.</td><td>Ich kaufte <b>ein</b>.</td><td>Ich habe <b>ein-ge-kauft</b></td></tr>
+            <tr><td><b>an</b>rufen</td><td>Ich rufe dich <b>an</b>.</td><td>Ich rief <b>an</b>.</td><td>Ich habe <b>an-ge-rufen</b></td></tr>
+            <tr><td><b>mit</b>bringen</td><td>Ich bringe Kuchen <b>mit</b>.</td><td>Ich brachte <b>mit</b>.</td><td>Ich habe <b>mit-ge-bracht</b></td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:11.5px; color:var(--gold); font-weight:600;">
+          💡 <b>Tamil Hack:</b> பிரிக்கக்கூடிய வினைகளில் 'ge' என்ற எழுத்து prefix-க்கும் தண்டுக்கும் நடுவில் சாண்ட்விச் போல வரும்!
+        </div>
+      </div>
+
+      <!-- Shortcut 27 -->
+      <div class="cheat-card-item">
+        <div class="cheat-card-title">🚫 3. Inseparable Prefixes: The "NO-ge-" Rule</div>
+        <p style="font-size:13px; margin:4px 0 8px;">Verbs starting with <b>be-, ge-, er-, ver-, zer-, ent-, emp-, miss-</b> NEVER take <b>ge-</b> in Perfekt!</p>
+        <table class="cheat-table">
+          <thead>
+            <tr><th>Prefix</th><th>Verb</th><th>Präteritum</th><th>Perfekt (NO ge-!)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>ver-</b></td><td>verstehen</td><td>verstand</td><td>hat <b>verstanden</b> (nicht ge-verstanden!)</td></tr>
+            <tr><td><b>be-</b></td><td>bezahlen</td><td>bezahlte</td><td>hat <b>bezahlt</b> (nicht gebezahlt!)</td></tr>
+            <tr><td><b>er-</b></td><td>erzählen</td><td>erzählte</td><td>hat <b>erzählt</b> (nicht geerzählt!)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Shortcut 29 -->
+      <div class="cheat-card-item">
+        <div class="cheat-card-title">🗣️ 4. Spoken German Rule: When to Use Präteritum vs. Perfekt!</div>
+        <p style="font-size:13px; margin:4px 0 8px;">In spoken German, <b>90% of verbs MUST use Perfekt</b>. ONLY use Präteritum for:</p>
+        <ul style="font-size:12.5px; line-height:1.6; margin:0 0 8px 20px;">
+          <li><b>Auxiliaries:</b> <i>Ich war müde / Ich hatte keine Zeit</i> (besser als 'bin gewesen / habe gehabt')</li>
+          <li><b>Modal Verbs:</b> <i>Ich musste arbeiten / Ich konnte nicht kommen / Ich wollte...</i></li>
+          <li><b>Mental Verbs:</b> <i>Das wusste ich nicht / Ich dachte...</i></li>
+        </ul>
+      </div>
+      
+      <button onclick="closeCheatCodeModal()" style="width:100%; padding:9px; background:var(--blue); color:#fff; font-weight:700; border:none; border-radius:6px; cursor:pointer; font-family:'IBM Plex Mono',monospace;">
+        Verstanden! Fenster schließen
+      </button>
+    </div>
+  </div>
 
   <div id="gridToast"></div>
 
@@ -1567,6 +1804,9 @@
   let currentPage = 1;
   const PAGE_SIZE = 40;
 
+  const SEPARABLE_PFX_SET = ['ab', 'an', 'auf', 'aus', 'ein', 'mit', 'nach', 'vor', 'zu', 'zurück', 'fern', 'weiter', 'vorbei', 'weg', 'her', 'hin', 'zusammen', 'los'];
+  const INSEPARABLE_PFX_SET = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
+
   // Speech Synthesis
   let germanVoices = [];
   let selectedVoiceURI = '';
@@ -1622,6 +1862,14 @@
     setTimeout(() => { t.style.display = 'none'; }, 2000);
   }
 
+  function openCheatCodeModal() {
+    document.getElementById('cheatModal').classList.add('open');
+  }
+
+  function closeCheatCodeModal() {
+    document.getElementById('cheatModal').classList.remove('open');
+  }
+
   // Sister Verbs Generator
   function getSisterVerbsList(inf, baseRoot, en, ta) {
     const lower = (inf || '').toLowerCase().trim();
@@ -1654,18 +1902,51 @@
   // Build Master Data
   function buildMasterData() {
     MASTER_DATA = [];
+    let trennbarCount = 0;
 
     // 1. Verbs
     (VERBS || []).forEach(v => {
       const inf = v.inf.trim();
+      const lower = inf.toLowerCase();
       const stem = inf.replace(/en$/, '').replace(/n$/, '');
-      const direct = VERB_MNEMONIC_DB[inf.toLowerCase()];
+      const direct = VERB_MNEMONIC_DB[lower];
 
-      let praesens = stem + 't';
-      if (inf === 'sein') praesens = 'ist';
-      else if (inf === 'haben') praesens = 'hat';
-      else if (inf === 'werden') praesens = 'wird';
-      else if (inf === 'wissen') praesens = 'weiß';
+      // Detect prefix
+      let sepPrefix = '';
+      for (const p of SEPARABLE_PFX_SET) {
+        if (lower.startsWith(p) && lower.length > p.length + 2) {
+          sepPrefix = p;
+          break;
+        }
+      }
+
+      let insepPrefix = '';
+      if (!sepPrefix) {
+        for (const p of INSEPARABLE_PFX_SET) {
+          if (lower.startsWith(p) && lower.length > p.length + 2) {
+            insepPrefix = p;
+            break;
+          }
+        }
+      }
+
+      const isIeren = lower.endsWith('ieren');
+      const isTrennbar = !!sepPrefix;
+      if (isTrennbar) trennbarCount++;
+
+      let praesens = '';
+      if (isTrennbar) {
+        const baseVerb = lower.slice(sepPrefix.length);
+        const baseStem = baseVerb.replace(/en$/, '').replace(/n$/, '');
+        praesens = `er/sie/es ... ${sepPrefix} (${baseStem}t ... ${sepPrefix})`;
+      } else {
+        let pStem = stem + 't';
+        if (inf === 'sein') pStem = 'ist';
+        else if (inf === 'haben') pStem = 'hat';
+        else if (inf === 'werden') pStem = 'wird';
+        else if (inf === 'wissen') pStem = 'weiß';
+        praesens = `er/sie/es ${pStem}`;
+      }
 
       let nounForm = '';
       if (direct && direct.family && direct.family.noun) nounForm = direct.family.noun;
@@ -1680,6 +1961,10 @@
         id: 'verb_' + inf,
         primaryWord: inf,
         pos: 'verb',
+        isTrennbar: isTrennbar,
+        sepPrefix: sepPrefix,
+        insepPrefix: insepPrefix,
+        isIeren: isIeren,
         level: v.level || 'A2',
         gender: '—',
         en: v.en || '',
@@ -1687,7 +1972,7 @@
         ta_translit: v.ta_translit || '',
         verb: {
           inf: inf,
-          praesens: `er/sie/es ${praesens}`,
+          praesens: praesens,
           praet: v.praeteritum || '—',
           perfekt: v.perfekt || '—',
           typ: v.typ || 'weak'
@@ -1695,7 +1980,7 @@
         noun: {
           display: nounForm,
           article: nounForm.startsWith('die ') ? 'die' : nounForm.startsWith('der ') ? 'der' : 'das',
-          word: nounForm.replace(/^(der|die|das)s+/, '').split('(')[0].trim(),
+          word: nounForm.replace(/^(der|die|das)\s+/, '').split('(')[0].trim(),
           pl: ''
         },
         adj: {
@@ -1717,6 +2002,7 @@
         id: 'noun_' + n.sg,
         primaryWord: fullNoun,
         pos: 'noun',
+        isTrennbar: false,
         level: n.level || 'A2',
         gender: n.a,
         en: n.en || '',
@@ -1754,6 +2040,7 @@
         id: 'adj_' + a.w,
         primaryWord: a.w,
         pos: 'adj',
+        isTrennbar: false,
         level: a.level || 'A1',
         gender: '—',
         en: a.en || '',
@@ -1783,6 +2070,9 @@
       });
     });
 
+    document.getElementById('countTrennbar').textContent = trennbarCount;
+    document.getElementById('statTrennbar').textContent = trennbarCount;
+
     applyFilters();
   }
 
@@ -1790,6 +2080,7 @@
   function applyFilters() {
     FILTERED_DATA = MASTER_DATA.filter(item => {
       if (currentPos === 'verb' && item.pos !== 'verb') return false;
+      if (currentPos === 'trennbar' && !item.isTrennbar) return false;
       if (currentPos === 'noun' && item.pos !== 'noun') return false;
       if (currentPos === 'adj' && item.pos !== 'adj') return false;
 
@@ -1804,7 +2095,7 @@
       if (searchQuery) {
         const q = searchQuery.toLowerCase().trim();
         const sistersText = (item.sisters || []).map(s => `${s.v} ${s.en} ${s.ta}`).join(' ');
-        const fullSearchable = `${item.primaryWord} ${item.en} ${item.ta} ${item.ta_translit} ${item.verb.inf} ${item.verb.praet} ${item.verb.perfekt} ${item.noun.display} ${item.adj.display} ${sistersText} ${item.rule}`.toLowerCase();
+        const fullSearchable = `${item.primaryWord} ${item.en} ${item.ta} ${item.ta_translit} ${item.verb.inf} ${item.verb.praet} ${item.verb.perfekt} ${item.noun.display} ${item.adj.display} ${sistersText} ${item.rule} ${item.sepPrefix || ''}`.toLowerCase();
         if (!fullSearchable.includes(q)) return false;
       }
 
@@ -1866,6 +2157,18 @@
     pageItems.forEach(item => {
       const posClass = item.pos === 'verb' ? 'badge-verb' : item.pos === 'noun' ? 'badge-noun' : 'badge-adj';
       
+      // Trennbar & Inseparable badges
+      let verbPfxBadge = '';
+      if (item.pos === 'verb') {
+        if (item.isTrennbar) {
+          verbPfxBadge = `<span class="badge-trennbar">✂️ TRENNBAR (Prefix: ${item.sepPrefix}-)</span>`;
+        } else if (item.insepPrefix) {
+          verbPfxBadge = `<span class="badge-untrennbar">🔒 UNTRENNBAR (No ge-)</span>`;
+        } else if (item.isIeren) {
+          verbPfxBadge = `<span class="badge-ieren">⚡ -IEREN (No ge-)</span>`;
+        }
+      }
+
       // Sister Verbs formatted
       const sistersHTML = (item.sisters && item.sisters.length > 0)
         ? item.sisters.map(s => {
@@ -1908,7 +2211,8 @@
               ⚡ ${item.verb.inf}
               ${renderAudioBtn(verbWord)}
             </div>
-            <div class="verb-tenses">
+            ${verbPfxBadge}
+            <div class="verb-tenses" style="margin-top:2px;">
               <div>Präs: <b>${item.verb.praesens}</b></div>
               <div>Prät (Past): <b style="color:var(--green);">${item.verb.praet}</b></div>
               <div>Perfekt: <b style="color:var(--purple);">${item.verb.perfekt}</b></div>

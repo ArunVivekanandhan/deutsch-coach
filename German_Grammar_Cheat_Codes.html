@@ -151,7 +151,7 @@
   }
   .scanner-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 10px;
   }
   @media (max-width: 650px) {
@@ -417,6 +417,14 @@
           </label>
           <input type="text" class="scanner-input" id="suffixScannerInput" placeholder="Type suffix (e.g. ung, heit, chen, er, ment)..." oninput="scanNounSuffix()">
           <div class="scanner-res" id="suffixScannerRes">💡 Type a German noun ending to see its gender rule.</div>
+        </div>
+
+        <div>
+          <label style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:4px;">
+            3. German Verb → Past Tense &amp; Trennbar Scanner
+          </label>
+          <input type="text" class="scanner-input" id="deVerbScannerInput" placeholder="Type German verb (e.g. einkaufen, verstehen, lernen)..." oninput="scanGermanVerb()">
+          <div class="scanner-res" id="deVerbScannerRes">💡 Type a German verb to scan its Past Tense &amp; Trennbar rule.</div>
         </div>
       </div>
     </div>
@@ -884,6 +892,115 @@ const CHEAT_CODES = [
     },
     tamil: "💡 <b>Sandwich Rule:</b> வாக்கியத்தின் நடுவில் எத்தனை தகவல்கள் வந்தாலும், துணை வினை இறுதியில் மட்டுமே அமையும்!",
     accuracy: "Fundamental Syntax Rule"
+  },
+  {
+    id: 25,
+    cat: "verbs",
+    num: "Shortcut 25",
+    title: "The Past Tense Master Formulas (Weak, Strong, Mixed) ⏳",
+    rule: "German verbs form Präteritum (Simple Past) and Perfekt (Present Perfect) using 3 core formulas:",
+    table: {
+      headers: ["Verb Category", "Präteritum Formula", "Perfekt Formula", "Live Example"],
+      rows: [
+        ["🌱 <b>Weak (Regular)</b>", "Stem + <b>-te</b> (lernte, machte)", "<b>ge-</b> + Stem + <b>-t</b>", "lernen → <b>lernte</b> → hat <b>gelernt</b>"],
+        ["⚡ <b>Strong (Irregular)</b>", "Vowel Shift (sang, fuhr, trank)", "<b>ge-</b> + Vowel Shift + <b>-en</b>", "trinken → <b>trank</b> → hat <b>getrunken</b>"],
+        ["🧬 <b>Mixed (Mischverben)</b>", "Vowel Shift + <b>-te</b> (dachte, brachte)", "<b>ge-</b> + Shifted Stem + <b>-t</b>", "denken → <b>dachte</b> → hat <b>gedacht</b>"],
+        ["⚡ <b>-ieren Verbs (Always Weak)</b>", "Stem + <b>-te</b> (studierte)", "<b>NO ge-!</b> Stem + <b>-t</b>", "studieren → <b>studierte</b> → hat <b>studiert</b>"]
+      ]
+    },
+    tamil: "💡 <b>Past Tense Formula:</b> Weak வினைச்சொற்கள் -te/-t பெறும்! Strong வினைச்சொற்கள் உயிர் எழுத்து மாறும் (Vowel Shift) + -en பெறும்! Mixed இரண்டையும் இணைக்கும்!",
+    accuracy: "100% Structural Matrix"
+  },
+  {
+    id: 26,
+    cat: "verbs",
+    num: "Shortcut 26",
+    title: "The 4 Big Strong Verb Vowel-Shift Chains (Ablautreihen) 🔄",
+    rule: "Over 80% of all strong irregular German verbs follow one of these 4 predictable vowel shift patterns in the past tense:",
+    table: {
+      headers: ["Vowel Shift Pattern", "Infinitiv", "Präteritum (Past)", "Perfekt (Partizip II)", "More Examples"],
+      rows: [
+        ["<b>ei → ie / i</b>", "bl<b>ei</b>ben", "bl<b>ie</b>b", "gebl<b>ie</b>ben", "schreiben (schrieb/geschrieben), beißen (biss/gebissen)"],
+        ["<b>i → a → u</b>", "tr<b>i</b>nken", "tr<b>a</b>nk", "getr<b>u</b>nken", "singen (sang/gesungen), schwimmen (schwamm/geschwommen)"],
+        ["<b>e/ie → a/o → o</b>", "spr<b>e</b>chen", "spr<b>a</b>ch", "gespr<b>o</b>chen", "helfen (half/geholfen), fliegen (flog/geflogen), ziehen (zog/gezogen)"],
+        ["<b>a → u/ie → a</b>", "f<b>a</b>hren", "f<b>u</b>hr", "gef<b>a</b>hren", "schlafen (schlief/geschlafen), fallen (fiel/gefallen)"]
+      ]
+    },
+    tamil: "💡 <b>Vowel Shift Hack:</b> ei வந்தால் ie-ஆக மாறும் (bleiben→blieb). i வந்தால் a→u மாறும் (trinken→trank→getrunken)!",
+    accuracy: "80%+ Strong Verb Coverage"
+  },
+  {
+    id: 27,
+    cat: "verbs",
+    num: "Shortcut 27",
+    title: "Inseparable Prefixes: The 'NO-ge-' Rule 🚫",
+    rule: "Verbs starting with <b>be-, ge-, er-, ver-, zer-, ent-, emp-, miss-</b> (BeGeErVerZerEntEmpMiss) NEVER take <b>ge-</b> in Perfekt!",
+    table: {
+      headers: ["Inseparable Prefix", "Verb", "Präteritum", "Perfekt Form", "Common Mistake ❌"],
+      rows: [
+        ["<b>ver-</b>", "verstehen", "verstand", "hat <b>verstanden</b>", "❌ hat ge-verstanden / hat vergestanden"],
+        ["<b>be-</b>", "bezahlen", "bezahlte", "hat <b>bezahlt</b>", "❌ hat gebezahlt / hat beigezahlt"],
+        ["<b>er-</b>", "erzählen", "erzählte", "hat <b>erzählt</b>", "❌ hat geerzählt"],
+        ["<b>ge-</b>", "gefallen", "gefiel", "hat <b>gefallen</b>", "❌ hat gegefallen"],
+        ["<b>zer-</b>", "zerstören", "zerstörte", "hat <b>zerstört</b>", "❌ hat gezerstört"]
+      ]
+    },
+    tamil: "💡 <b>Never-ge Rule:</b> BeGeErVerZerEntEmpMiss उपसर्गங்கள் வந்தால் Perfekt-ல் 'ge-' வரவே வராது! (verstehen → verstanden).",
+    accuracy: "100% Guaranteed Rule"
+  },
+  {
+    id: 28,
+    cat: "verbs",
+    num: "Shortcut 28",
+    title: "Trennbare Verben: The '-ge- Sandwich' Rule 🥪",
+    rule: "Separable verbs (ab-, an-, auf-, aus-, ein-, mit-, nach-, vor-, zu-) split in present tense and sandwich <b>-ge-</b> inside the past participle in Perfekt!",
+    table: {
+      headers: ["Verb & Prefix", "Präsens (Splits!)", "Präteritum (Splits!)", "Perfekt (-ge- Sandwich!)"],
+      rows: [
+        ["<b>auf</b>stehen", "Ich stehe um 7 Uhr <b>auf</b>.", "Ich stand um 7 Uhr <b>auf</b>.", "Ich bin <b>auf-ge-standen</b>. <button class='audio-btn' onclick='speakDE(\"Ich bin aufgestanden\")'>🔊</button>"],
+        ["<b>ein</b>kaufen", "Ich kaufe im Markt <b>ein</b>.", "Ich kaufte im Markt <b>ein</b>.", "Ich habe <b>ein-ge-kauft</b>. <button class='audio-btn' onclick='speakDE(\"Ich habe eingekauft\")'>🔊</button>"],
+        ["<b>an</b>rufen", "Ich rufe dich <b>an</b>.", "Ich rief dich <b>an</b>.", "Ich habe dich <b>an-ge-rufen</b>. <button class='audio-btn' onclick='speakDE(\"Ich habe dich angerufen\")'>🔊</button>"],
+        ["<b>mit</b>bringen", "Ich bringe Kuchen <b>mit</b>.", "Ich brachte Kuchen <b>mit</b>.", "Ich habe Kuchen <b>mit-ge-bracht</b>. <button class='audio-btn' onclick='speakDE(\"Ich habe Kuchen mitgebracht\")'>🔊</button>"]
+      ]
+    },
+    tamil: "💡 <b>-ge- Sandwich:</b> பிரிக்கக்கூடிய வினைகளில் (Trennbare Verben) 'ge' என்ற எழுத்து prefix-க்கும் தண்டுக்கும் நடுவில் சாண்ட்விச் போல வரும் (auf-ge-standen, ein-ge-kauft)!",
+    accuracy: "100% Structural Rule"
+  },
+  {
+    id: 29,
+    cat: "verbs",
+    num: "Shortcut 29",
+    title: "Spoken German Rule: When to Use Präteritum vs. Perfekt! 🗣️",
+    rule: "In spoken German (Alltag, DTZ, B1 Speaking), <b>90% of verbs use Perfekt</b>. You should ONLY use Präteritum for these 3 specific groups:",
+    table: {
+      headers: ["Verb Group", "Use in Speaking", "Examples (Präteritum)", "Why?"],
+      rows: [
+        ["<b>1. Auxiliaries (sein / haben)</b>", "<b>Präteritum</b> ✅", "Ich <b>war</b> müde. / Ich <b>hatte</b> keine Zeit.", "Much more natural than 'Ich bin gewesen / habe gehabt'."],
+        ["<b>2. Modal Verbs (können, müssen...)</b>", "<b>Präteritum</b> ✅", "Ich <b>musste</b> arbeiten. / Ich <b>konnte</b> nicht kommen.", "Avoids awkward double infinitive structures."],
+        ["<b>3. Mental Verbs (wissen, denken)</b>", "<b>Präteritum</b> ✅", "Das <b>wusste</b> ich nicht. / Ich <b>dachte</b>...", "Short, punchy & idiomatic."],
+        ["<b>4. ALL OTHER VERBS (90%+)</b>", "<b>Perfekt</b> ✅", "Ich habe gegessen, geschlafen, gelernt, gekauft...", "Präteritum sounds bookish/literary in conversation!"]
+      ]
+    },
+    tamil: "💡 <b>Speaking Exam Secret:</b> பேசும்போது 90% Perfekt மட்டுமே பயன்படுத்தவும்! Modal Verbs (musste, konnte) மற்றும் war, hatte-க்கு மட்டுமே Präteritum பயன்படுத்தவும்!",
+    accuracy: "Native Conversational Standard"
+  },
+  {
+    id: 30,
+    cat: "tamil",
+    num: "Shortcut 30",
+    title: "The Right-Side Boss & German Punarchi (Glue Letters) 👑🇮🇳",
+    rule: "When German words are glued together, the LAST word on the right dictates the gender (der/die/das) and main meaning. In between, 'glue letters' (Fugenlaute: -s-, -n-, -er-, -e-) appear just like Tamil புணர்ச்சி (க், ச், த், ப்)!",
+    table: {
+      headers: ["Joined German Word", "Splitting (பிரித்து எழுதுக)", "Glue Letter (புணர்ச்சி)", "Actual Meaning"],
+      rows: [
+        ["<b>der Arbeitsplatz</b>", "Arbeit + Platz 👑", "<b>-s-</b> (Arbeit-<b>s</b>-platz)", "Workplace (der Platz)"],
+        ["<b>das Schweinefleisch</b>", "Schwein + Fleisch 👑", "<b>-e-</b> (Schwein-<b>e</b>-fleisch)", "Pork (das Fleisch)"],
+        ["<b>die Sonnenbrille</b>", "Sonne + Brille 👑", "<b>-n-</b> (Sonne-<b>n</b>-brille)", "Sunglasses (die Brille)"],
+        ["<b>der Kindergarten</b>", "Kind + Garten 👑", "<b>-er-</b> (Kind-<b>er</b>-garten)", "Kindergarten (der Garten)"]
+      ]
+    },
+    tamil: "💡 <b>German Punarchi (ஜெர்மன் புணர்ச்சி):</b> தமிழ் புணர்ச்சியில் (தமிழ் + தாய் = தமிழ்த்தாய்) 'த்' தோன்றுவது போல, ஜெர்மனில் -s-, -n-, -er-, -e- போன்ற 'Fugenlaute' எழுத்துக்கள் இணையும்!",
+    accuracy: "100% Morphological Rule"
   }
 ];
 
@@ -1067,6 +1184,66 @@ function scanNounSuffix() {
       </div>
     `;
   }
+}
+
+// 3. German Verb Past Tense & Trennbar Scanner
+const SEPARABLE_PFX_LIST = ['ab', 'an', 'auf', 'aus', 'ein', 'mit', 'nach', 'vor', 'zu', 'zurück', 'fern', 'weiter', 'vorbei', 'weg'];
+const INSEPARABLE_PFX_LIST = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
+
+function scanGermanVerb() {
+  const input = document.getElementById('deVerbScannerInput').value.toLowerCase().trim();
+  const res = document.getElementById('deVerbScannerRes');
+  if (!input) {
+    res.innerHTML = "💡 Type a German verb to scan its Past Tense &amp; Trennbar rule.";
+    return;
+  }
+
+  // Detect Prefix
+  let sepPrefix = '';
+  for (const p of SEPARABLE_PFX_LIST) {
+    if (input.startsWith(p) && input.length > p.length + 2) {
+      sepPrefix = p;
+      break;
+    }
+  }
+
+  let insepPrefix = '';
+  if (!sepPrefix) {
+    for (const p of INSEPARABLE_PFX_LIST) {
+      if (input.startsWith(p) && input.length > p.length + 2) {
+        insepPrefix = p;
+        break;
+      }
+    }
+  }
+
+  const isIeren = input.endsWith('ieren');
+
+  let prefixBadge = '';
+  let pastRule = '';
+
+  if (sepPrefix) {
+    prefixBadge = `<span style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:3px; font-weight:700;">✂️ TRENNBAR (Prefix: ${sepPrefix}-)</span>`;
+    pastRule = `Präsens: <i>Ich ... <b>${sepPrefix}</b></i> | Perfekt: <b>${sepPrefix}-ge-...</b> (Sandwich Rule!)`;
+  } else if (insepPrefix) {
+    prefixBadge = `<span style="background:#fee2e2; color:#b91c1c; padding:1px 6px; border-radius:3px; font-weight:700;">🔒 UNTRENNBAR (Prefix: ${insepPrefix}-)</span>`;
+    pastRule = `Perfekt: <b>NO ge-!</b> (e.g. hat ${input.replace(/en$/, 't')})`;
+  } else if (isIeren) {
+    prefixBadge = `<span style="background:#dcfce7; color:#15803d; padding:1px 6px; border-radius:3px; font-weight:700;">⚡ -IEREN VERB (Always Weak)</span>`;
+    pastRule = `Perfekt: <b>NO ge-!</b> (hat ${input.replace(/en$/, 't')})`;
+  } else {
+    prefixBadge = `<span style="background:#e0f2fe; color:#0369a1; padding:1px 6px; border-radius:3px; font-weight:700;">🌱 STANDARD BASE VERB</span>`;
+    pastRule = `Weak: <i>ge-...-t</i> | Strong: <i>ge-...-en</i> (vowel shift)`;
+  }
+
+  res.innerHTML = `
+    <div style="font-size:13px; margin-bottom:3px;">
+      ${prefixBadge}
+    </div>
+    <div style="font-size:11.5px; color:var(--ink); font-weight:600;">
+      ${pastRule}
+    </div>
+  `;
 }
 
 /* =========================================================================
