@@ -1,10 +1,11 @@
-const CACHE_NAME = 'deutsch-coach-v10';
+const CACHE_NAME = 'deutsch-coach-v11';
 const urlsToCache = [
   './',
   './index.html',
   './deutsch-coach.html',
-  './Deutsch_Wortschatz_Excel_Sheet.html',
+  './Wortschatz_Master_Grid.html',
   './Wortfamilien_Explorer.html',
+  './Deutsch_Wortschatz_Excel_Sheet.html',
   './German_Grammar_Cheat_Codes.html',
   './Sprech_Pruefungs_Simulator.html',
   './Grammatik_Regel_Trainer.html',

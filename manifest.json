@@ -20,6 +20,11 @@
   ],
   "shortcuts": [
     {
+      "name": "Spalten-Wortschatz Grid",
+      "url": "./Wortschatz_Master_Grid.html",
+      "description": "Column & Row Wise German Word Families"
+    },
+    {
       "name": "Excel Master Sheet",
       "url": "./Deutsch_Wortschatz_Excel_Sheet.html",
       "description": "Full German Vocabulary & Grammar Spreadsheet"
