@@ -105,7 +105,7 @@
   <nav class="suite-hub">
     <div class="suite-brand"><span class="hub-logo">dY -</span> <b>SUITE</b></div>
     <div class="suite-nav-links">
-      <a href="./deutsch-coach.html" class="suite-link">Dashboard</a>
+      <a href="./deutsch-coach.html" class="suite-link" style="background:var(--ink); color:var(--bg);">⬅️ Zurück (Back)</a>
       <a href="./Hoerverstehen_Diktat_Trainer.html" class="suite-link active">Hörverstehen (Dictation)</a>
       <a href="./Satzbau_Trainer.html" class="suite-link">Satzbau</a>
       <a href="./Einstellungen_Setup.html" class="suite-link" style="border:none; font-size:16px;" title="Global Setup & API">⚙️</a>
@@ -202,6 +202,7 @@
   async function generateAiSentence() {
     document.getElementById('dictationInput').disabled = true;
     document.getElementById('dictationInput').value = "🤖 KI generiert neuen Satz... (AI is generating...)";
+    document.getElementById('nextBtn').disabled = true;
     
     const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
     const config = AI_PROVIDERS[provider];
@@ -228,7 +229,7 @@
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: "user", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level) about a random everyday topic. Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
+            { role: "user", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level) about a random everyday topic (Seed: " + Math.random() + "). Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
           ],
           temperature: 0.8,
           response_format: (provider === 'deepseek' || provider === 'openai') ? { type: "json_object" } : undefined
@@ -247,6 +248,7 @@
       setupSentenceUI();
     } catch (err) {
       console.error(err);
+      document.getElementById('nextBtn').disabled = false;
       alert("KI Generierung fehlgeschlagen (AI Generation failed). Falling back to standard mix.");
       document.getElementById('topicSelect').value = 'all';
       loadNewSentence();
@@ -256,6 +258,7 @@
   function setupSentenceUI() {
     document.getElementById('dictationInput').value = '';
     document.getElementById('dictationInput').disabled = false;
+      document.getElementById('nextBtn').disabled = false;
     document.getElementById('feedbackBox').className = 'feedback-box';
     // nextBtn always visible
     document.getElementById('dictationInput').focus();
