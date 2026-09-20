@@ -107,6 +107,32 @@
   .rulebox.umlaut_only{background:#f5efe0; border-left:3px solid #8a6a1e;}
   .rulebox b{color:var(--ink);}
 
+  /* Morphological & Memory Trick Box */
+  .morph-box {
+    background: #fff; border: 1.5px solid var(--gold); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(185,138,46,0.1);
+    text-align: left;
+  }
+  .morph-header {
+    font-family: 'Fjalla One', sans-serif; font-size: 13.5px; color: var(--gold);
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .morph-mnemonic {
+    font-size: 12.5px; line-height: 1.55; color: var(--ink);
+    background: #fffdf5; border-left: 3px solid var(--gold); padding: 8px 10px;
+    border-radius: 0 4px 4px 0; margin-bottom: 8px;
+  }
+  .morph-mnemonic b { color: var(--red); }
+  .morph-formula {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    background: var(--paper); padding: 6px 10px; border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; margin-bottom: 8px;
+  }
+  .morph-part { padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+  .morph-part.prefix { background: #e8e0f0; color: var(--purple); }
+  .morph-part.root { background: #dce7f2; color: var(--blue); }
+
   .answerbtns{display:flex; gap:8px; padding:0 18px 18px;}
   .actbtn{flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.3px; text-transform:uppercase;
     padding:13px 2px; border-radius:6px; cursor:pointer; border:1.5px solid var(--ink); background:var(--paper);}
@@ -433,20 +459,114 @@ function typLabelAdj(t){
   return {regular:'Regelmäßig', umlaut:'Umlaut', irregular:'Unregelmäßig'}[t] || t;
 }
 
-function getNounCheatTip(v){
+function renderNounMemoryHack(v){
   const sg = (v.sg||'').toLowerCase();
-  let tips = [];
-  if(sg.endsWith('ung') || sg.endsWith('heit') || sg.endsWith('keit') || sg.endsWith('schaft') || sg.endsWith('tion') || sg.endsWith('tät') || sg.endsWith('in')){
-    tips.push(`🔴 <b>100% Suffix Rule:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 100% <b>die (feminin)</b>, and plural is almost always <b>-(e)n</b>!`);
-  } else if(sg.endsWith('chen') || sg.endsWith('lein') || sg.endsWith('ment') || sg.endsWith('um')){
-    tips.push(`🟢 <b>100% Suffix Rule:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 100% <b>das (neutral)</b>!`);
-  } else if(sg.endsWith('ling') || sg.endsWith('ismus') || sg.endsWith('ist') || sg.endsWith('or')){
-    tips.push(`🔵 <b>95% Suffix Rule:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 95% <b>der (maskulin)</b>!`);
+  const art = (v.a||'').toLowerCase();
+  let genderRule = '';
+  let pluralRule = '';
+  let soundLink = '';
+
+  // Gender heuristics
+  if(sg.endsWith('ung') || sg.endsWith('heit') || sg.endsWith('keit') || sg.endsWith('schaft') || sg.endsWith('tion') || sg.endsWith('tät') || sg.endsWith('ik') || sg.endsWith('ie') || sg.endsWith('in')){
+    genderRule = `🔴 <b>100% Feminine Suffix:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are ALWAYS <b>die</b>!`;
+  } else if(sg.endsWith('chen') || sg.endsWith('lein') || sg.endsWith('ment') || sg.endsWith('um') || sg.endsWith('tum') || sg.endsWith('ma')){
+    genderRule = `🟢 <b>100% Neuter Suffix:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are ALWAYS <b>das</b>!`;
+  } else if(sg.endsWith('ling') || sg.endsWith('ismus') || sg.endsWith('ist') || sg.endsWith('or') || sg.endsWith('ant') || sg.endsWith('ent')){
+    genderRule = `🔵 <b>95% Masculine Suffix:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 95% <b>der</b>!`;
+  } else if(art === 'die' && sg.endsWith('e')){
+    genderRule = `🔴 <b>90% Feminine Rule:</b> Most 2-syllable German nouns ending in <i>-e</i> are <b>die (feminin)</b>!`;
+  } else if(art === 'das' && v.sg[0] === v.sg[0].toUpperCase() && v.sg.endsWith('en')){
+    genderRule = `🟢 <b>Nominalized Verb Rule:</b> Verbs converted into nouns (like <i>das ${v.sg}</i>) are 100% <b>das</b>!`;
+  } else {
+    const artEmoji = art === 'der' ? '🔵 <b>der (maskulin)</b>' : art === 'die' ? '🔴 <b>die (feminin)</b>' : '🟢 <b>das (neutral)</b>';
+    genderRule = `🎨 <b>Article Anchor:</b> Picture <b>${v.sg}</b> with ${artEmoji}.`;
   }
-  if(tips.length > 0){
-    return `<div style="background:#fef3c7; border-left:3px solid var(--gold); padding:6px 10px; font-size:12px; margin-top:8px; border-radius:0 4px 4px 0; color:#78350f;">${tips.join('<br>')}</div>`;
+
+  // Plural patterns
+  if(v.typ === 'en'){
+    pluralRule = `📦 <b>Plural Trick (-en/-n):</b> Add <b>-(e)n</b> to form plural (<i>die ${v.pl}</i>). No umlaut is needed!`;
+  } else if(v.typ === 'e'){
+    pluralRule = `📦 <b>Plural Trick (-e):</b> Common for masculine/neuter words — adds <b>-e</b> (and often gains an umlaut: <i>die ${v.pl}</i>).`;
+  } else if(v.typ === 'er'){
+    pluralRule = `📦 <b>Plural Trick (-er):</b> Neuter core words love <b>-er</b> + Umlaut (<i>${v.sg} → die ${v.pl}</i>).`;
+  } else if(v.typ === 's'){
+    pluralRule = `📦 <b>Plural Trick (-s):</b> Anglicisms & international loan words take a clean <b>-s</b> (<i>die ${v.pl}</i>).`;
+  } else if(v.typ === 'unchanged'){
+    pluralRule = `📦 <b>Plural Trick (Unchanged):</b> Words ending in <i>-er, -el, -en</i> don't change in plural — only the article switches to <b>die</b> (<i>die ${v.pl}</i>)!`;
+  } else if(v.typ === 'umlaut_only'){
+    pluralRule = `📦 <b>Plural Trick (Umlaut Only):</b> The ending stays intact; only the vowel sprouts two dots (<i>die ${v.pl}</i>)!`;
   }
-  return '';
+
+  soundLink = `💡 <b>Meaning Lock:</b> <b>${v.a} ${v.sg}</b> (${v.pl ? 'Pl: die '+v.pl : ''}) = <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.`;
+
+  return `
+    <div class="morph-box">
+      <div class="morph-header">
+        <span>🧩 Noun Memory Trick &amp; Gender Lock</span>
+        <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; opacity:0.8;">Memory Hack</span>
+      </div>
+      <div class="morph-mnemonic">
+        ${genderRule ? `<div style="margin-bottom:6px;">${genderRule}</div>` : ''}
+        ${pluralRule ? `<div style="margin-bottom:6px;">${pluralRule}</div>` : ''}
+        <div style="font-size:11.5px; opacity:0.9;">${soundLink}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAdjMemoryHack(v){
+  const w = (v.w||'').toLowerCase();
+  let umlautRule = '';
+  let irregularRule = '';
+  let suffixRule = '';
+
+  // Irregular Top 5
+  if(w === 'gut'){
+    irregularRule = `⭐ <b>Top Irregular (English Cousin):</b> <i>gut → besser → am besten</i> (Good → Better → Best). Same root pattern as English!`;
+  } else if(w === 'viel'){
+    irregularRule = `⭐ <b>Top Irregular (English Cousin):</b> <i>viel → mehr → am meisten</i> (Much → More → Most). Direct cognate to English!`;
+  } else if(w === 'gern' || w === 'gerne'){
+    irregularRule = `⭐ <b>Top Irregular:</b> <i>gern → lieber → am liebsten</i> (Gladly → Rather → Favorite/Most gladly). Essential for speaking!`;
+  } else if(w === 'hoch'){
+    irregularRule = `⭐ <b>Spelling Shift Trick:</b> <i>hoch → höher → am höchsten</i>. Note: The letter <b>'c' drops out</b> in comparative (<i>höher</i>), but returns in superlative (<i>am höchsten</i>)!`;
+  } else if(w === 'nah'){
+    irregularRule = `⭐ <b>Spelling Shift Trick:</b> <i>nah → näher → am nächsten</i>. Note: 'h' transforms into 'ch' in superlative (<i>nächste Woche</i> = next week)!`;
+  } else if(w === 'teuer' || w === 'dunkel' || w === 'sauer'){
+    irregularRule = `⭐ <b>Vowel Drop Trick:</b> The inner <b>-e-</b> drops out (<i>${w} → ${v.komp}</i>) to keep pronunciation smooth and flowing!`;
+  }
+
+  // Umlaut Rule
+  if(v.typ === 'umlaut'){
+    umlautRule = `⚡ <b>Umlaut Law:</b> Short, 1-syllable adjectives with <b>a, o, u</b> (<i>alt, groß, kurz, jung, kalt, warm, stark, lang</i>) explode with umlaut dots in comparative: <b>${v.w} → ${v.komp} → ${v.sup}</b>!`;
+  }
+
+  // Suffix Decoders
+  if(w.endsWith('bar')){
+    suffixRule = `🔍 <b>Suffix Decoder (-bar):</b> Equals English <b>-able / -ible</b> (e.g. <i>${v.w}</i> = able to be done)!`;
+  } else if(w.endsWith('los')){
+    suffixRule = `🔍 <b>Suffix Decoder (-los):</b> Equals English <b>-less / without</b> (e.g. <i>${v.w}</i> = without)!`;
+  } else if(w.endsWith('reich') || w.endsWith('voll')){
+    suffixRule = `🔍 <b>Suffix Decoder (-reich/-voll):</b> Equals <b>full of / rich in</b>!`;
+  } else if(w.endsWith('lich')){
+    suffixRule = `🔍 <b>Suffix Decoder (-lich):</b> Equals English <b>-ly / -like</b> (manner/frequency)!`;
+  }
+
+  let baseTip = `💡 <b>Comparison Formula:</b> Positive (<i>${v.w}</i>) → Comparative (+<b>-er</b>: <i>${v.komp}</i>) → Superlative (<b>am ...-(e)sten</b>: <i>${v.sup}</i>). Meaning: <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.`;
+
+  return `
+    <div class="morph-box">
+      <div class="morph-header">
+        <span>📐 Adjective Memory Trick &amp; Rules</span>
+        <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; opacity:0.8;">Comparison Hack</span>
+      </div>
+      <div class="morph-mnemonic">
+        ${irregularRule ? `<div style="margin-bottom:6px; color:#991b1b;">${irregularRule}</div>` : ''}
+        ${umlautRule ? `<div style="margin-bottom:6px; color:#1e40af;">${umlautRule}</div>` : ''}
+        ${suffixRule ? `<div style="margin-bottom:6px; color:#065f46;">${suffixRule}</div>` : ''}
+        <div style="font-size:11.5px; opacity:0.9;">${baseTip}</div>
+      </div>
+    </div>
+  `;
 }
 
 function ruleExplanationNoun(v){
@@ -458,9 +578,9 @@ function ruleExplanationNoun(v){
     unchanged: `<b>Rule: unchanged.</b> Masculine/neuter nouns ending in -er, -en, -el, -chen, -lein remain identical in plural (only the article becomes "die").`,
     umlaut_only: `<b>Rule: umlaut only.</b> No ending — only the stem vowel changes (a→ä, o→ö, u→ü).`,
   };
-  const tip = getNounCheatTip(v);
-  return `<div class="rulebox ${v.typ}">${map[v.typ]||''}${tip}</div>`;
+  return `<div class="rulebox ${v.typ}">${map[v.typ]||''}</div>`;
 }
+
 function ruleExplanationAdj(v){
   const map = {
     regular: `<b>Rule: Regular.</b> Stem + <b>-er</b> (Comparative), <b>am</b> + Stem + <b>-(e)sten</b> (Superlative) — an -e- is inserted for stems ending in d/t/s/ß/z/sch.`,
@@ -506,6 +626,8 @@ function renderCard(){
         <div class="formrow"><span class="flabel">Artikel + Singular</span><span class="fval">${v.a} ${v.sg}${speakBtn(v.a+' '+v.sg,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
         ${meaningHTML(v)}
+        ${renderNounMemoryHack(v)}
+        ${ruleExplanationNoun(v)}
       </div>`;
     } else {
       promptHTML = reverse ? `
@@ -530,6 +652,7 @@ function renderCard(){
           ${reverse ? `<div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>` : meaningHTML(v)}
           <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
           <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
+          ${renderNounMemoryHack(v)}
           ${ruleExplanationNoun(v)}
         </div>`;
     }
@@ -554,6 +677,7 @@ function renderCard(){
         <div class="formrow"><span class="flabel">Comparative</span><span class="fval">${v.komp}${speakBtn(v.komp,'Comparative listen')}</span></div>
         <div class="formrow"><span class="flabel">Superlative</span><span class="fval">${v.sup}${speakBtn(v.sup,'Superlative listen')}</span></div>
         <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
+        ${renderAdjMemoryHack(v)}
         ${ruleExplanationAdj(v)}
       </div>`;
   }

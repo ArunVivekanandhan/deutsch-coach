@@ -764,32 +764,45 @@ function meaningHTML(v){
 
 
 /* =========================================================================
-   MORPHOLOGY & VERB FAMILY EXPLORATION ENGINE
+   MORPHOLOGY, TRENNBAR & VERB MEMORY TRICK ENGINE
    ========================================================================= */
 const PREFIX_DB = {
-  "unter": { en: "under / beneath / below", ta: "கீழ் / அடியில்", hint: "Positioned underneath or subordinate to" },
-  "über": { en: "over / above / across", ta: "மேலே / கடந்து", hint: "Positioned above or transferring across" },
-  "auf": { en: "up / open / upon", ta: "மேலே / திறந்து", hint: "Upward motion or opening" },
-  "aus": { en: "out / from / completely", ta: "வெளியே / முற்றிலும்", hint: "Outward movement or finishing" },
-  "an": { en: "at / on / start", ta: "அருகில் / தொடங்கு", hint: "Approaching, turning on or initiating" },
-  "ab": { en: "off / away / down", ta: "விலகி / கீழே", hint: "Departing, detaching or reducing" },
-  "ein": { en: "in / into / inside", ta: "உள்ளே", hint: "Inward movement or joining" },
-  "mit": { en: "with / along / together", ta: "உடன் / சேர்ந்து", hint: "Participating or accompanying" },
-  "vor": { en: "before / forward / in front", ta: "முன்னால்", hint: "Ahead, preparing or demonstrating" },
-  "nach": { en: "after / follow / re-", ta: "பின்னால் / தொடர்ந்து", hint: "Following or checking later" },
-  "zu": { en: "to / closed / towards", ta: "நோக்கி / மூடி", hint: "Direction towards or closing" },
-  "weg": { en: "away / off", ta: "தொலைவில் / விலகி", hint: "Removing or moving far away" },
-  "zurück": { en: "back / return", ta: "திரும்பி", hint: "Returning to previous state/place" },
-  "ver": { en: "completely / transform / away", ta: "முற்றிலும் / உருமாற்றம்", hint: "Transformation, completion or mistake" },
-  "be": { en: "make into / apply to / direct", ta: "முழுமையாக மாற்று", hint: "Directing action onto an object" },
-  "ent": { en: "away / remove / origin", ta: "அகற்று / தோற்றம்", hint: "Originating or escaping from" },
-  "er": { en: "achieve / attain / start", ta: "அடை / பெறு", hint: "Reaching a result or acquiring" },
-  "zer": { en: "apart / destroy / pieces", ta: "உடை / சிதைவு", hint: "Breaking into pieces or destroying" },
-  "miss": { en: "mis- / wrong / bad", ta: "தவறாக", hint: "Incorrect, ill or failing" },
-  "wider": { en: "against / counter", ta: "எதிராக", hint: "Standing in resistance or opposing" },
-  "wieder": { en: "again / re-", ta: "மீண்டும்", hint: "Repeating the action" },
-  "durch": { en: "through / across", ta: "வழியாக / ஊடாக", hint: "Passing through from start to end" },
-  "um": { en: "around / change / over", ta: "சுற்றி / மாற்றம்", hint: "Surrounding or altering state" }
+  // Separable prefixes (Trennbare Präfixe)
+  "unter": { en: "under / beneath", ta: "கீழ் / அடியில்", hint: "Positioned underneath or subordinate", sep: true },
+  "über": { en: "over / across", ta: "மேலே / கடந்து", hint: "Transferring across or over", sep: true },
+  "auf": { en: "up / open", ta: "மேலே / திறந்து", hint: "Upward movement or opening state", sep: true },
+  "aus": { en: "out / off / completely", ta: "வெளியே / அணைத்து", hint: "Outward motion, turning off, or finishing", sep: true },
+  "an": { en: "at / on / start", ta: "அருகில் / இயக்கி", hint: "Approaching, turning on or initiating", sep: true },
+  "ab": { en: "off / away / departing", ta: "விலகி / புறப்பட்டு", hint: "Departing, detaching or reduction", sep: true },
+  "ein": { en: "in / into / inside", ta: "உள்ளே", hint: "Inward movement or joining", sep: true },
+  "mit": { en: "with / along / together", ta: "உடன் / சேர்ந்து", hint: "Participating or accompanying", sep: true },
+  "vor": { en: "before / forward / in front", ta: "முன்னால்", hint: "Ahead, preparing or demonstrating", sep: true },
+  "nach": { en: "after / follow / re-", ta: "பின்னால் / தொடர்ந்து", hint: "Following, copying or checking later", sep: true },
+  "zu": { en: "to / closed / towards", ta: "நோக்கி / மூடி", hint: "Direction towards, listening, or closing", sep: true },
+  "weg": { en: "away / off", ta: "தொலைவில் / விலகி", hint: "Removing or moving far away", sep: true },
+  "zurück": { en: "back / return", ta: "திரும்பி", hint: "Returning to previous state/place", sep: true },
+  "fern": { en: "far / television", ta: "தொலைவில்", hint: "Action from a distance (e.g. fernsehen)", sep: true },
+  "fest": { en: "firm / tight", ta: "உறுதியாக", hint: "Fixing, holding firmly or establishing", sep: true },
+  "teil": { en: "part / participate", ta: "பங்கு / இணைந்து", hint: "Taking part (teilnehmen)", sep: true },
+  "zusammen": { en: "together", ta: "ஒன்றாக", hint: "Joining, combining or colliding", sep: true },
+  "weiter": { en: "further / continue", ta: "தொடர்ந்து", hint: "Continuing the action", sep: true },
+  "vorbei": { en: "past / over", ta: "கடந்து / முடிந்து", hint: "Passing by or being over", sep: true },
+  "herum": { en: "around", ta: "சுற்றி", hint: "Moving around in circles", sep: true },
+  "einver": { en: "agreed", ta: "ஒப்புக்கொண்டு", hint: "Agreeing (einverstanden)", sep: true },
+
+  // Inseparable prefixes (Untrennbare Präfixe - BeGeErVerZerEntEmpMiss)
+  "ver": { en: "completely / change / away", ta: "முற்றிலும் / மாற்றம்", hint: "Transformation, completion or mistake", sep: false },
+  "be": { en: "make into / apply directly", ta: "முழுமையாக மாற்று", hint: "Directing action onto an object", sep: false },
+  "ent": { en: "away / remove / origin", ta: "அகற்று / தோற்றம்", hint: "Originating, escaping or removing", sep: false },
+  "er": { en: "achieve / attain / start", ta: "அடை / பெறு", hint: "Reaching a successful result or acquiring", sep: false },
+  "zer": { en: "apart / destroy / pieces", ta: "உடை / சிதைவு", hint: "Breaking into pieces or destruction", sep: false },
+  "emp": { en: "receive / feel", ta: "பெறு / உணர்", hint: "Receiving or sensing (empfehlen, empfangen)", sep: false },
+  "ge": { en: "together / state", ta: "நிலை", hint: "Belonging, winning or pleasing (gehören, gefallen)", sep: false },
+  "miss": { en: "mis- / wrong / bad", ta: "தவறாக", hint: "Incorrect, ill or failing", sep: false },
+  "wider": { en: "against / counter", ta: "எதிராக", hint: "Standing in resistance or opposing", sep: false },
+  "wieder": { en: "again / re-", ta: "மீண்டும்", hint: "Repeating the action", sep: true },
+  "durch": { en: "through / across", ta: "வழியாக / ஊடாக", hint: "Passing through from start to end", sep: true },
+  "um": { en: "around / change / over", ta: "சுற்றி / மாற்றம்", hint: "Surrounding, changing or turning", sep: true }
 };
 
 const ROOT_DB = {
@@ -823,7 +836,67 @@ const ROOT_DB = {
   "öffnen": { en: "to open", ta: "திறப்பது", base_sense: "uncovering" },
   "rufen": { en: "to call", ta: "அழைப்பது", base_sense: "vocal summoning" },
   "zahlen": { en: "to pay / count", ta: "செலுத்துவது", base_sense: "financial exchange" },
-  "reisen": { en: "to travel", ta: "பயணிப்பது", base_sense: "journey" }
+  "reisen": { en: "to travel", ta: "பயணிப்பது", base_sense: "journey" },
+  "denken": { en: "to think", ta: "நினைப்பது", base_sense: "mental cognition" },
+  "wohnen": { en: "to reside", ta: "வசிப்பது", base_sense: "living in a home" },
+  "lernen": { en: "to learn", ta: "கற்பது", base_sense: "acquiring skill/knowledge" },
+  "kennen": { en: "to know (person/place)", ta: "தெரிவது", base_sense: "familiarity with people/places" },
+  "wissen": { en: "to know (fact/info)", ta: "அறிவது", base_sense: "factual knowledge" },
+  "suchen": { en: "to search", ta: "தேடுவது", base_sense: "seeking" },
+  "fragen": { en: "to ask", ta: "கேட்பது", base_sense: "questioning" },
+  "danken": { en: "to thank", ta: "நன்றி கூறுவது", base_sense: "expressing gratitude" },
+  "gewinnen": { en: "to win", ta: "வெல்வது", base_sense: "victory" },
+  "verlieren": { en: "to lose", ta: "இழப்பது", base_sense: "loss" },
+  "fliegen": { en: "to fly", ta: "பறப்பது", base_sense: "airborne travel" },
+  "trinken": { en: "to drink", ta: "குடிப்பது", base_sense: "ingesting liquid" },
+  "essen": { en: "to eat", ta: "உண்பது", base_sense: "ingesting food" },
+  "singen": { en: "to sing", ta: "பாடுவது", base_sense: "vocal melody" },
+  "helfen": { en: "to help", ta: "உதவுவது", base_sense: "assisting" },
+  "laufen": { en: "to run / walk", ta: "ஓடுவது", base_sense: "swift movement" },
+  "schlafen": { en: "to sleep", ta: "தூங்குவது", base_sense: "resting" },
+  "sparen": { en: "to save (money)", ta: "சேமிப்பது", base_sense: "conserving resources" },
+  "wechseln": { en: "to exchange", ta: "மாற்றுவது", base_sense: "swapping" },
+  "steigen": { en: "to climb / rise", ta: "ஏறுவது", base_sense: "ascending or boarding" },
+  "bieten": { en: "to offer", ta: "வழங்குவது", base_sense: "presenting options" },
+  "bitten": { en: "to request", ta: "வேண்டுவது", base_sense: "polite asking" },
+  "laden": { en: "to load / invite", ta: "ஏற்றுவது / அழைப்பது", base_sense: "loading or inviting" },
+  "brennen": { en: "to burn", ta: "எரிவது", base_sense: "fire" },
+  "senden": { en: "to send", ta: "அனுப்புவது", base_sense: "transmitting" }
+};
+
+// Cognate & English Cousin mapping
+const COGNATES = {
+  "singen": { en: "sing → sang → sung", tip: "Identical vowel change in English (sing/sang/sung)!" },
+  "trinken": { en: "drink → drank → drunk", tip: "Identical English cousin (drink/drank/drunk)!" },
+  "schwimmen": { en: "swim → swam → swum", tip: "Identical English cousin (swim/swam/swum)!" },
+  "sinken": { en: "sink → sank → sunk", tip: "Identical English vowel shift (sink/sank/sunk)!" },
+  "beginnen": { en: "begin → began → begun", tip: "Identical English vowel shift (begin/began/begun)!" },
+  "finden": { en: "find → found", tip: "Both English and German shift vowel to past (find/found)!" },
+  "binden": { en: "bind → bound", tip: "Both English and German shift vowel (bind/bound)!" },
+  "stehen": { en: "stand → stood", tip: "English stand/stood is strong → German stehen/stand is strong!" },
+  "sitzen": { en: "sit → sat", tip: "English sit/sat shifts vowel → German sitzen/saß/gesessen shifts too!" },
+  "geben": { en: "give → gave → given", tip: "English cousin: give/gave/given!" },
+  "sehen": { en: "see → saw → seen", tip: "English cousin: see/saw/seen!" },
+  "sprechen": { en: "speak → spoke → spoken", tip: "English cousin: speak/spoke/spoken!" },
+  "brechen": { en: "break → broke → broken", tip: "English cousin: break/broke/broken!" },
+  "helfen": { en: "help → half (archaic: holp)", tip: "Historically strong in English too! German shifts e → a → o (helfen → half → geholfen)!" },
+  "bringen": { en: "bring → brought", tip: "Mixed verb: brings the same vowel shift as English (bring/brought) + -te ending!" },
+  "denken": { en: "think → thought", tip: "Mixed verb: same vowel shift as English (think/thought) + -te ending!" },
+  "fahren": { en: "fare / ferry", tip: "English 'farewell' (travel well). Shifts a → u (fahren → fuhr)!" },
+  "fallen": { en: "fall → fell → fallen", tip: "English cousin: fall/fell/fallen!" },
+  "halten": { en: "hold → held", tip: "English cousin: hold/held!" },
+  "kommen": { en: "come → came → come", tip: "English cousin: come/came/come!" },
+  "fliegen": { en: "fly → flew → flown", tip: "English cousin: fly/flew/flown!" },
+  "schlafen": { en: "sleep → slept", tip: "English cousin: sleep/slept!" },
+  "beißen": { en: "bite → bit → bitten", tip: "English cousin: bite/bit/bitten (ei → i)!" },
+  "reiten": { en: "ride → rode → ridden", tip: "English cousin: ride/rode/ridden!" },
+  "schneiden": { en: "cut / slice", tip: "Diphthong -ei- shifts to -i- (schnitt / geschnitten)!" },
+  "lachen": { en: "laugh", tip: "Weak verb: Regular stem + -te (lachte, gelacht)!" },
+  "kochen": { en: "cook", tip: "Weak verb: Regular stem + -te (kochte, gekocht)!" },
+  "planen": { en: "plan", tip: "Weak verb: Regular stem + -te (plante, geplant)!" },
+  "wohnen": { en: "live / reside", tip: "Weak verb: Regular stem + -te (wohnte, gewohnt)!" },
+  "lernen": { en: "learn", tip: "Weak verb: Regular stem + -te (lernte, gelernt)!" },
+  "kaufen": { en: "buy", tip: "Weak verb: Regular stem + -te (kaufte, gekauft)!" }
 };
 
 function analyzeVerb(verbStr) {
@@ -867,47 +940,74 @@ function analyzeVerb(verbStr) {
 
 function renderVerbMorphology(v) {
   const ana = analyzeVerb(v.inf);
-  if (!ana.prefix && !ana.root) return '';
+  const cognate = COGNATES[v.inf.toLowerCase()] || (ana.root ? COGNATES[ana.root] : null);
 
   let formulaHTML = '';
   let mnemonicHTML = '';
+  let trennbarBadge = '';
 
-  if (ana.prefix && ana.root) {
+  if (ana.prefix && ana.prefixInfo) {
+    const isSep = ana.prefixInfo.sep !== false;
+    trennbarBadge = isSep ? `
+      <div style="display:inline-flex; align-items:center; gap:6px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; margin-bottom:8px; border:1px solid #fde68a;">
+        🚀 TRENNBAR (Separable Prefix)
+      </div>
+    ` : `
+      <div style="display:inline-flex; align-items:center; gap:6px; background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; margin-bottom:8px; border:1px solid #fecaca;">
+        🛡️ UNTRENNBAR (Inseparable Prefix)
+      </div>
+    `;
+
     formulaHTML = `
       <div class="morph-formula">
         <span class="morph-part prefix">${ana.prefix}- <small>(${ana.prefixInfo.en} · ${ana.prefixInfo.ta})</small></span>
         <span>+</span>
-        <span class="morph-part root">${ana.root} <small>(${ana.rootInfo.en} · ${ana.rootInfo.ta})</small></span>
+        <span class="morph-part root">${ana.root ? ana.root : ana.stem} <small>(${ana.rootInfo ? ana.rootInfo.en : ''} ${ana.rootInfo ? '· '+ana.rootInfo.ta : ''})</small></span>
         <span>=</span>
         <span style="font-weight:700; color:var(--red);">${v.inf}</span>
       </div>
     `;
+
+    const sepExample = isSep 
+      ? `• <b>Sentence Split:</b> <i>„Er ${v.praeteritum ? v.praeteritum.split(' ')[0] : v.inf} jeden Tag <u>${ana.prefix}</u>.”</i><br>• <b>Perfekt Sandwich:</b> <b>${ana.prefix}-ge-...</b> → <i>„${v.perfekt}”</i>`
+      : `• <b>Inseparable Rule:</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> NEVER split & NEVER take <i>ge-</i> in Perfekt → <i>„${v.perfekt}”</i>`;
+
     mnemonicHTML = `
       <div class="morph-mnemonic">
-        💡 <b>Memory Trick:</b> Think of <i>${ana.prefixInfo.en.split('/')[0].trim()}</i> + <i>${ana.rootInfo.en}</i>. 
-        In German, combining <b>${ana.prefix}-</b> with <b>${ana.root}</b> literally means "${ana.prefixInfo.en.split('/')[0].trim()} ${ana.rootInfo.en.replace('to ','')}", giving it the meaning: <b>„${v.en}”</b> (${v.ta ? v.ta : ''}).
+        ${trennbarBadge}
+        <div>💡 <b>Meaning Logic:</b> <b>${ana.prefix}-</b> (${ana.prefixInfo.hint}) + <b>${ana.root ? ana.root : ana.stem}</b> (${ana.rootInfo ? ana.rootInfo.en : 'action'}) = <b>„${v.en}”</b> (${v.ta || ''}).</div>
+        <div style="margin-top:6px; font-size:11.5px; opacity:0.95; line-height:1.5;">${sepExample}</div>
       </div>
     `;
-  } else if (ana.root) {
+  } else if (ana.root && ana.rootInfo) {
     formulaHTML = `
       <div class="morph-formula">
-        <span class="morph-part root">🌱 Root Verb: ${ana.root} <small>(${ana.rootInfo.en} · ${ana.rootInfo.ta})</small></span>
+        <span class="morph-part root">🌱 Core Verb: ${ana.root} <small>(${ana.rootInfo.en} · ${ana.rootInfo.ta})</small></span>
       </div>
     `;
     mnemonicHTML = `
       <div class="morph-mnemonic">
-        💡 <b>Core German Verb:</b> <b>${ana.root}</b> means <b>${ana.rootInfo.en}</b> (${ana.rootInfo.ta}). Many compound verbs are built by adding prefixes to this root!
+        💡 <b>Core German Root:</b> <b>${ana.root}</b> means <b>${ana.rootInfo.en}</b> (${ana.rootInfo.ta}). Many compound verbs branch out from this root!
       </div>
     `;
   }
 
-  // Find prefix family in current VERBS database
+  // Cognate / English cousin trick
+  let cognateHTML = '';
+  if (cognate) {
+    cognateHTML = `
+      <div style="background:#ecfdf5; border-left:3px solid var(--green); padding:6px 10px; font-size:12px; border-radius:0 4px 4px 0; margin-bottom:8px; color:#065f46;">
+        🤝 <b>English Cousin Rule:</b> <b>${cognate.en}</b>. ${cognate.tip}
+      </div>
+    `;
+  }
+
+  // Find prefix & root family in current VERBS database
   let prefixFamilyVerbs = [];
   if (ana.prefix) {
     prefixFamilyVerbs = VERBS.filter(item => item.inf !== v.inf && item.inf.toLowerCase().startsWith(ana.prefix)).slice(0, 5);
   }
 
-  // Find root family in current VERBS database
   let rootFamilyVerbs = [];
   if (ana.root) {
     rootFamilyVerbs = VERBS.filter(item => item.inf !== v.inf && item.inf.toLowerCase().endsWith(ana.root)).slice(0, 5);
@@ -938,6 +1038,8 @@ function renderVerbMorphology(v) {
     `;
   }
 
+  if (!formulaHTML && !mnemonicHTML && !cognateHTML) return '';
+
   return `
     <div class="morph-box">
       <div class="morph-header">
@@ -946,6 +1048,7 @@ function renderVerbMorphology(v) {
       </div>
       ${formulaHTML}
       ${mnemonicHTML}
+      ${cognateHTML}
       ${familyHTML}
     </div>
   `;
@@ -954,26 +1057,30 @@ function renderVerbMorphology(v) {
 function renderMnemonic(v){
   let morph = renderVerbMorphology(v);
   if(morph) return morph;
-  if(!v.mnemonic && !v.split && !v.story) return '';
-  let html = '';
-  if(v.story){
-    html += `<div class="context-story">
-      <span class="story-label">Context Story</span>
-      ${v.story}
-    </div>`;
+
+  // Universal Fallback Mnemonic for any verb not covered by prefix/root
+  const inf = v.inf.toLowerCase();
+  let defaultMnemonic = `Think of <b>${v.inf}</b> = <i>„${v.en}”</i> (${v.ta ? v.ta : ''}). `;
+  if (v.typ === 'weak') {
+    defaultMnemonic += `Regular weak verb: keeps the stem intact with <b>-te</b> (<i>${v.praeteritum}</i>) and <b>ge-...-t</b> (<i>${v.perfekt}</i>).`;
+  } else if (v.typ === 'strong') {
+    defaultMnemonic += `Strong verb: ablaut shifts the stem vowel to <b>${v.praeteritum}</b> in Simple Past and <b>${v.perfekt}</b> in Present Perfect.`;
+  } else {
+    defaultMnemonic += `Mixed verb: stem vowel shifts like strong verbs, but takes regular <b>-te/-t</b> endings (<i>${v.praeteritum}</i>, <i>${v.perfekt}</i>).`;
   }
-  if(v.split){
-    html += `<div class="word-split-box">
-      <div class="split-label">Morphological Split</div>
-      <div class="word-split">${v.split}</div>
-    </div>`;
-  }
-  if(v.mnemonic){
-    html += `<div class="mnemonic-hint">
-      <b>Memory Trick:</b> ${v.mnemonic}
-    </div>`;
-  }
-  return html;
+
+  return `
+    <div class="morph-box">
+      <div class="morph-header">
+        <span>💡 Memory Trick &amp; Grammar Hack</span>
+        <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; opacity:0.8;">Memory Lock</span>
+      </div>
+      <div class="morph-mnemonic">
+        ${v.mnemonic ? `<b>Visual Mnemonic:</b> ${v.mnemonic}<br><br>` : ''}
+        ${defaultMnemonic}
+      </div>
+      ${v.story ? `<div class="context-story"><span class="story-label">Context Story</span>${v.story}</div>` : ''}
+  `;
 }
 
 function vowelChangeNote(v){
