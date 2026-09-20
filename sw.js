@@ -1,10 +1,9 @@
-const CACHE_NAME = 'deutsch-coach-v12';
+const CACHE_NAME = 'deutsch-coach-v13';
 const urlsToCache = [
   './',
   './index.html',
   './deutsch-coach.html',
   './Wortschatz_Master_Grid.html',
-  './Wortfamilien_Explorer.html',
   './Deutsch_Wortschatz_Excel_Sheet.html',
   './German_Grammar_Cheat_Codes.html',
   './Sprech_Pruefungs_Simulator.html',
@@ -24,7 +23,6 @@ const urlsToCache = [
   './manifest.json'
 ];
 
-// Install Event
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
@@ -33,14 +31,12 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activate Event - Delete all old caches immediately
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
-            console.log('Clearing old service worker cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -49,10 +45,8 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch Event - Network first for HTML, Cache fallback for offline
 self.addEventListener('fetch', event => {
   const isHTML = event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html');
-
   if (isHTML) {
     event.respondWith(
       fetch(event.request)

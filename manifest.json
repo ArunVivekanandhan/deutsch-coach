@@ -1,7 +1,7 @@
 {
   "name": "Deutsch-Coach Suite",
   "short_name": "Deutsch-Coach",
-  "description": "A comprehensive German vocabulary & B1 exam preparation suite with 17 interconnected learning tools.",
+  "description": "A comprehensive German vocabulary & B1 exam preparation suite.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#111827",
@@ -22,12 +22,7 @@
     {
       "name": "Spalten-Wortschatz Grid",
       "url": "./Wortschatz_Master_Grid.html",
-      "description": "Column & Row Wise German Word Families"
-    },
-    {
-      "name": "Wortfamilien Explorer",
-      "url": "./Wortfamilien_Explorer.html",
-      "description": "Master German Word Family & Vocabulary Explorer"
+      "description": "Unified German Vocabulary & Word Families Master Matrix"
     },
     {
       "name": "Excel Master Sheet",
@@ -42,32 +37,12 @@
     {
       "name": "Konnektoren Referenz",
       "url": "./konnektoren_referenz.html",
-      "description": "Complete German Connectors and Sentence Structure Guide"
+      "description": "German Connectors and Sentence Structure Guide"
     },
     {
       "name": "Verben Hören Audio Coach",
       "url": "./Verben_Hoeren_EN_DE.html",
       "description": "Bilingual Verb Listening & Pronunciation Coach"
-    },
-    {
-      "name": "Human Partner",
-      "url": "./KI_Human_Partner.html",
-      "description": "Practise with an AI human partner"
-    },
-    {
-      "name": "German Coach",
-      "url": "./KI_German_Coach.html",
-      "description": "Practise with an AI German coach"
-    },
-    {
-      "name": "Grammatik Trainer",
-      "url": "./Grammatik_Regel_Trainer.html",
-      "description": "Practice Grammar"
-    },
-    {
-      "name": "Sprechen Simulator",
-      "url": "./Sprech_Pruefungs_Simulator.html",
-      "description": "Speaking Exam Simulator"
     }
   ]
 }
