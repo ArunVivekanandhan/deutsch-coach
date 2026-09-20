@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Global Setup & Settings - Deutsch-Coach Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8fafc; --paper: #ffffff; --ink: #0f172a; --ink-soft: #475569;
+    --line: #e2e8f0; --accent: #10b981; --blue: #3b82f6; --red: #ef4444;
+    --gold: #f59e0b; --purple: #8b5cf6;
+    --radius-lg: 16px; --radius-md: 12px; --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a; --paper: #1e293b; --ink: #f8fafc; --ink-soft: #94a3b8;
+    --line: #334155; --accent: #10b981; --blue: #3b82f6; --red: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.5;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 20px; }
+  
+  /* Navigation */
+  .suite-hub { display: flex; flex-wrap: wrap; gap: 8px; background: var(--paper); padding: 12px; border-radius: var(--radius-lg); border: 1px solid var(--line); margin-bottom: 24px; box-shadow: var(--shadow-sm); align-items: center; justify-content: space-between; }
+  .hub-logo { font-family: 'Fjalla One'; color: var(--blue); }
+  .suite-nav-links { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; margin: 0 16px; }
+  .suite-link { text-decoration: none; font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--ink-soft); padding: 4px 8px; border: 1px solid var(--line); border-radius: 4px; transition: 0.2s; }
+  .suite-link:hover { background: var(--line); color: var(--ink); }
+  .suite-link.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .suite-btn-theme { background: var(--paper); border: 1px solid var(--line); color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+  h1 { font-family: 'Fjalla One', sans-serif; margin: 0 0 8px 0; font-size: 28px; }
+  .sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; }
+
+  .settings-grid {
+    display: grid; grid-template-columns: 1fr; gap: 24px;
+  }
+  @media(min-width: 700px){
+    .settings-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .card {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card h2 { font-family: 'Fjalla One', sans-serif; margin: 0 0 16px 0; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+  
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type="text"], input[type="password"], select {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 14px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  
+  .help-text { font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+
+  .btn {
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-secondary { background: var(--line); color: var(--ink); }
+  .btn-secondary:hover { background: #cbd5e1; }
+  
+  .action-row { display: flex; gap: 12px; margin-top: 24px; }
+</style>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<div class="wrap">
+  <nav class="suite-hub">
+    <div class="suite-brand"><span class="hub-logo">dY -</span> <b>SUITE</b></div>
+    <div class="suite-nav-links">
+      <a href="./deutsch-coach.html" class="suite-link">Dashboard</a>
+      <a href="./Einstellungen_Setup.html" class="suite-link active">⚙️ Global Setup</a>
+    </div>
+    <button id="themeToggleBtn" class="suite-btn-theme" onclick="toggleSuiteTheme()" title="Toggle Dark/Light Mode">🌙</button>
+  </nav>
+
+  <h1>⚙️ App Suite Configuration</h1>
+  <div class="sub">Manage your AI API keys, personal profile, and data across all Deutsch-Coach apps here. Changes apply globally instantly.</div>
+
+  <div class="settings-grid">
+    
+    <!-- AI Config -->
+    <div class="card" style="grid-column: 1 / -1; border-color: var(--blue);">
+      <h2>🤖 AI Engine & API Keys</h2>
+      <div class="help-text" style="margin-bottom: 16px;">Configure your API provider to unlock the <b>Hörverstehen Dictation</b>, <b>Speaking Simulator</b>, and <b>KI Coach</b>.</div>
+      
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Provider</label>
+          <select id="aiProvider" onchange="handleProviderChange()">
+            <option value="deepseek">DeepSeek (Recommended/Cheapest)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="groq">Groq (Ultra-Fast)</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="ollama">Ollama (Local & Cloud Pro)</option>
+          </select>
+        </div>
+        
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>AI Model</label>
+          <input type="text" id="aiModel" placeholder="e.g., gpt-4o-mini">
+        </div>
+      </div>
+
+      <div class="form-group" id="apiKeyGroup">
+        <label>API Key (Bearer Token)</label>
+        <div style="display:flex; gap:8px;">
+          <input type="password" id="aiKey" placeholder="sk-..." style="flex:1;">
+          <button class="btn btn-secondary" style="width:auto; padding:0 16px;" onclick="toggleKeyVisibility()">👁️</button>
+        </div>
+        <div class="help-text" id="providerHelp">Your API key is securely saved directly in your browser's LocalStorage.</div>
+      </div>
+
+      <div class="form-group" id="endpointGroup" style="display:none;">
+        <label>Custom Endpoint URL</label>
+        <input type="text" id="aiEndpoint" placeholder="e.g., https://api.openai.com/v1/chat/completions">
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Speichern (Save Settings)</button>
+        <button class="btn btn-secondary" onclick="testConnection()">🔄 Verbindung testen (Test)</button>
+      </div>
+      <div id="connectionStatus" style="margin-top:12px; font-weight:600; font-size:13px; text-align:center;"></div>
+    </div>
+
+    <!-- User Profile -->
+    <div class="card">
+      <h2>👤 User Profile</h2>
+      <div class="form-group">
+        <label>Display Name</label>
+        <input type="text" id="userName" placeholder="Your Name">
+      </div>
+      <div class="form-group">
+        <label>Native Language / Support Language</label>
+        <select id="userLang">
+          <option value="English">English</option>
+          <option value="Tamil">Tamil (தமிழ்)</option>
+          <option value="Spanish">Spanish</option>
+          <option value="None">None (Immersion)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Target Level / Exam</label>
+        <select id="userLevel">
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1 (DTZ)">B1 (DTZ Integration)</option>
+          <option value="B1 (Goethe)">B1 (Goethe/telc)</option>
+          <option value="B2">B2</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="card">
+      <h2>💾 Data & Storage</h2>
+      <div class="help-text" style="margin-bottom: 16px;">All your progress, XP, streaks, and saved phrases live strictly in this browser.</div>
+      
+      <button class="btn btn-primary" style="margin-bottom:12px; background:var(--blue);" onclick="exportData()">📥 Backup & Export Data</button>
+      
+      <label class="btn btn-secondary" style="margin-bottom:12px; text-align:center;">
+        📂 Restore from Backup
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+      </label>
+      
+      <button class="btn btn-secondary" style="color:var(--red); border-color:var(--red);" onclick="wipeData()">🗑️ Wipe All Data</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Theme support
+  function toggleSuiteTheme(){
+    const b = document.body;
+    if(b.getAttribute('data-theme')==='dark'){
+      b.removeAttribute('data-theme');
+      localStorage.setItem('de_theme','light');
+    } else {
+      b.setAttribute('data-theme','dark');
+      localStorage.setItem('de_theme','dark');
+    }
+  }
+  if(localStorage.getItem('de_theme')==='dark') document.body.setAttribute('data-theme','dark');
+
+  // Load Settings
+  const defaultModels = {
+    deepseek: 'deepseek-chat', openai: 'gpt-4o-mini', groq: 'llama-3.3-70b-versatile',
+    gemini: 'gemini-1.5-flash', openrouter: 'meta-llama/llama-3.3-70b-instruct', ollama: 'llama3:latest'
+  };
+  const endpoints = {
+    deepseek: 'https://api.deepseek.com/v1/chat/completions',
+    openai: 'https://api.openai.com/v1/chat/completions',
+    groq: 'https://api.groq.com/openai/v1/chat/completions',
+    gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+    openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+    ollama: localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions'
+  };
+
+  function loadSettings() {
+    const prov = localStorage.getItem('de_ai_provider') || 'deepseek';
+    document.getElementById('aiProvider').value = prov;
+    
+    document.getElementById('userName').value = localStorage.getItem('de_user_name') || '';
+    document.getElementById('userLang').value = localStorage.getItem('de_user_lang') || 'English';
+    document.getElementById('userLevel').value = localStorage.getItem('de_user_level') || 'B1 (Goethe)';
+
+    handleProviderChange();
+  }
+
+  function handleProviderChange() {
+    const prov = document.getElementById('aiProvider').value;
+    
+    document.getElementById('aiKey').value = localStorage.getItem('de_ai_key_' + prov) || '';
+    document.getElementById('aiModel').value = localStorage.getItem('de_ai_model_' + prov) || defaultModels[prov];
+
+    if (prov === 'ollama') {
+      document.getElementById('endpointGroup').style.display = 'block';
+      document.getElementById('aiEndpoint').value = localStorage.getItem('de_ai_endpoint_ollama') || endpoints.ollama;
+      document.getElementById('providerHelp').textContent = "Leave API Key blank if using local Ollama. Fill it if using Ollama Cloud Pro.";
+    } else {
+      document.getElementById('endpointGroup').style.display = 'none';
+      document.getElementById('providerHelp').textContent = "Your API key is securely saved directly in your browser's LocalStorage.";
+    }
+  }
+
+  function toggleKeyVisibility() {
+    const k = document.getElementById('aiKey');
+    k.type = k.type === 'password' ? 'text' : 'password';
+  }
+
+  function saveSettings() {
+    const prov = document.getElementById('aiProvider').value;
+    localStorage.setItem('de_ai_provider', prov);
+    localStorage.setItem('de_ai_key_' + prov, document.getElementById('aiKey').value.trim());
+    localStorage.setItem('de_ai_model_' + prov, document.getElementById('aiModel').value.trim());
+    
+    if (prov === 'ollama') {
+      localStorage.setItem('de_ai_endpoint_ollama', document.getElementById('aiEndpoint').value.trim());
+    }
+
+    localStorage.setItem('de_user_name', document.getElementById('userName').value.trim());
+    localStorage.setItem('de_user_lang', document.getElementById('userLang').value);
+    localStorage.setItem('de_user_level', document.getElementById('userLevel').value);
+
+    const st = document.getElementById('connectionStatus');
+    st.textContent = "✅ Settings Saved Globally!";
+    st.style.color = "var(--accent)";
+    setTimeout(() => st.textContent="", 3000);
+  }
+
+  async function testConnection() {
+    saveSettings();
+    const st = document.getElementById('connectionStatus');
+    st.textContent = "🔄 Testing connection...";
+    st.style.color = "var(--ink-soft)";
+
+    const prov = document.getElementById('aiProvider').value;
+    let endpoint = endpoints[prov];
+    if(prov === 'ollama') endpoint = document.getElementById('aiEndpoint').value.trim();
+    const key = document.getElementById('aiKey').value.trim();
+    const model = document.getElementById('aiModel').value.trim();
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (key) headers['Authorization'] = `Bearer ${key}`;
+
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: "user", content: "Reply with the single word 'OK'." }],
+          max_tokens: 10
+        })
+      });
+      if(resp.ok) {
+        st.textContent = "✅ Connection Successful! AI is ready.";
+        st.style.color = "var(--accent)";
+      } else {
+        const txt = await resp.text();
+        st.textContent = `❌ API Error (${resp.status}): ${txt.substring(0, 100)}`;
+        st.style.color = "var(--red)";
+      }
+    } catch (e) {
+      st.textContent = `❌ Network Error: ${e.message}`;
+      st.style.color = "var(--red)";
+    }
+  }
+
+  // Backup & Restore Logic
+  function exportData() {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('de_') || k.startsWith('dc_') || k.endsWith('_progress_v1') || k.endsWith('_progress_v2'));
+    let data = {};
+    keys.forEach(k => data[k] = localStorage.getItem(k));
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Deutsch_Coach_Backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+        alert("✅ Backup successfully restored!");
+        loadSettings();
+      } catch(err) {
+        alert("❌ Error parsing backup file.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function wipeData() {
+    if(confirm("Are you SURE you want to wipe ALL your progress, settings, and XP? This cannot be undone!")) {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('de_') || k.startsWith('dc_') || k.endsWith('_progress_v1') || k.endsWith('_progress_v2'));
+      keys.forEach(k => localStorage.removeItem(k));
+      alert("All data wiped. Refreshing...");
+      location.reload();
+    }
+  }
+
+  window.onload = loadSettings;
+</script>
+</body>
+</html>
