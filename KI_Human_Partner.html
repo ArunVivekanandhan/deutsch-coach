@@ -1308,16 +1308,10 @@ function switchAiProvider() {
 
 
 function exportChatTranscript() {
-  let md = "# Chat Transcript
-
-";
+  let md = "# Chat Transcript\n\n";
   conversationHistory.forEach(msg => {
-    if (msg.role === 'user') md += `**Du**: ${msg.content}
-
-`;
-    else if (msg.role === 'assistant') md += `**Coach**: ${msg.content}
-
-`;
+    if (msg.role === 'user') md += `**Du**: ${msg.content}\n\n`;
+    else if (msg.role === 'assistant') md += `**Coach**: ${msg.content}\n\n`;
   });
   const blob = new Blob([md], {type: 'text/markdown'});
   const url = URL.createObjectURL(blob);

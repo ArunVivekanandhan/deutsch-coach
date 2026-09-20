@@ -20,6 +20,11 @@
   ],
   "shortcuts": [
     {
+      "name": "Wortfamilien Explorer",
+      "url": "./Wortfamilien_Explorer.html",
+      "description": "Master German Word Family & Vocabulary Explorer"
+    },
+    {
       "name": "Cheat Codes & Hacks",
       "url": "./German_Grammar_Cheat_Codes.html",
       "description": "30+ German grammar shortcuts and tricks"
