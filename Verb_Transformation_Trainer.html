@@ -346,10 +346,8 @@
     <div class="chiprow" id="levelChips"></div>
     <div class="filterlabel">Verb Type (Difficulty)</div>
     <div class="chiprow" id="typeChips"></div>
-    <div class="filterlabel">Direction</div>
+    <div class="filterlabel">Direction &amp; Language (Richtung &amp; Sprache)</div>
     <div class="chiprow" id="dirChips"></div>
-    <div class="filterlabel">Show meaning as</div>
-    <div class="chiprow" id="langChips"></div>
     <div class="togglerow" style="display:flex; gap:16px; flex-wrap:wrap;">
       <div style="display:flex; align-items:center; gap:8px;">
         <label class="switch"><input type="checkbox" id="nounToggle"><span class="slider"></span></label>
@@ -406,12 +404,18 @@ const TYPES = [{k:'alle',l:'All',dot:null},{k:'weak',l:'Weak',dot:'dot-weak'},{k
 
 let curLevel = 'alle';
 let curType = 'alle';
-let curDir = 'de2en';   // 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
+let curDir = 'de2en';   // 'de2en' | 'en2de'
 let nounMode = false;
 let auxMode = false;
-let meaningLang = 'en';
-const LANGS = [{k:'en',l:'English'},{k:'ta',l:'தமிழ்'},{k:'both',l:'Both'}];
-const DIRS = [{k:'de2en',l:'German → Meaning'},{k:'en2de',l:'Meaning → German'}];
+let meaningLang = 'en'; // 'en' | 'ta' | 'both'
+const DIRS = [
+  { k:'de2en', dir:'de2en', lang:'en', l:'🇩🇪 Deutsch → 🇬🇧 English' },
+  { k:'de2ta', dir:'de2en', lang:'ta', l:'🇩🇪 Deutsch → 🇮🇳 தமிழ்' },
+  { k:'en2de', dir:'en2de', lang:'en', l:'🇬🇧 English → 🇩🇪 Deutsch' },
+  { k:'ta2de', dir:'en2de', lang:'ta', l:'🇮🇳 தமிழ் → 🇩🇪 Deutsch' },
+  { k:'de2both', dir:'de2en', lang:'both', l:'🇩🇪 Deutsch → 🌐 EN + தமிழ்' },
+  { k:'both2de', dir:'en2de', lang:'both', l:'🌐 EN + தமிழ் → 🇩🇪 Deutsch' }
+];
 
 let session = [];
 let sessionIdx = 0;
@@ -707,13 +711,19 @@ function renderChips(){
   }).join('');
   tc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curType=el.dataset.type; refreshAll(); });
 
-  const gc = document.getElementById('langChips');
-  gc.innerHTML = LANGS.map(o=> `<div class="chip ${meaningLang===o.k?'active':''}" data-lang="${o.k}">${o.l}</div>`).join('');
-  gc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ meaningLang=el.dataset.lang; refreshAll(); });
-
   const dc = document.getElementById('dirChips');
-  dc.innerHTML = DIRS.map(o=> `<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
-  dc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curDir=el.dataset.dir; refreshAll(); });
+  if(dc){
+    dc.innerHTML = DIRS.map(o=>{
+      const isActive = (curDir === o.dir && meaningLang === o.lang);
+      return `<div class="chip ${isActive?'active':''}" data-dir="${o.dir}" data-lang="${o.lang}">${o.l}</div>`;
+    }).join('');
+    dc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{
+      curDir = el.dataset.dir;
+      meaningLang = el.dataset.lang;
+      refreshAll();
+      if(session && session.length > 0) renderCard();
+    });
+  }
 }
 
 function renderDash(){
@@ -1950,9 +1960,14 @@ function toggleInlinePeek(){
 }
 
 function meaningPromptText(v){
-  if(meaningLang==='ta') return v.ta ? `${v.ta} ${v.ta_translit ? `(${v.ta_translit})` : ''}` : v.en;
-  if(meaningLang==='both') return v.ta ? `${v.en} · ${v.ta} ${v.ta_translit ? `(${v.ta_translit})` : ''}` : v.en;
-  return v.en;
+  if(!v) return '';
+  if(meaningLang==='ta') {
+    return v.ta ? `${v.ta}${v.ta_translit ? ` (${v.ta_translit})` : ''}` : (v.en || '');
+  }
+  if(meaningLang==='both') {
+    return v.ta ? `${v.en} · ${v.ta}${v.ta_translit ? ` (${v.ta_translit})` : ''}` : (v.en || '');
+  }
+  return v.en || '';
 }
 
 function renderCard(){
@@ -1969,27 +1984,25 @@ function renderCard(){
 
   const qType = auxMode ? 'aux' : ((nounMode && v.noun && Math.random()<0.35) ? 'noun' : 'past');
   const reverse = (curDir === 'en2de');
-  const langLabel = meaningLang==='ta' ? 'தமிழ்' : meaningLang==='both' ? 'EN + தமிழ்' : 'English';
+  const langLabel = meaningLang==='ta' ? '🇮🇳 தமிழ்' : meaningLang==='both' ? '🌐 EN + தமிழ்' : '🇬🇧 English';
+  const dirLabel = reverse ? 'Meaning → DE' : 'DE → Meaning';
 
   let promptHTML, revealCoreHTML;
   if(qType === 'noun'){
     promptHTML = reverse ? `
-      <div class="qlabel">Noun → Verb · 📦 ${boxNames[box]}</div>
+      <div class="qlabel">${meaningLang==='ta'?'🇮🇳 தமிழ் → 🇩🇪 Noun/Verb':meaningLang==='both'?'🌐 EN + தமிழ் → 🇩🇪 Noun/Verb':'🇬🇧 English → 🇩🇪 Noun/Verb'} · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
-        <div class="wordline">
-          <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
-            ${v.noun} <span style="font-size:13px; opacity:0.7;">👁️</span>
-          </div>
-          ${speakBtn(v.noun,'Listen to noun')}
+        <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German words" style="font-size:24px; font-weight:700;">
+          ${meaningPromptText(v)} <span style="font-size:14px; opacity:0.7;">👁️</span>
         </div>
-        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; cursor:pointer;" onclick="toggleInlinePeek()">
-          👆 <i>Click word (or press T) to peek translation</i>
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
+          👆 <i>Click meaning (or press T) to peek German verb &amp; noun</i>
         </div>
-        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:7px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:13px; color:var(--ink);">
-          <b>Meaning:</b> ${meaningPromptText(v)}
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+          <b>German Verb:</b> <span style="color:var(--blue); font-weight:700;">${v.inf}</span> · <b>Noun:</b> <span style="color:var(--purple); font-weight:700;">${v.noun}</span>
         </div>
-        <div class="subq" style="margin-top:10px;">Which verb does this noun come from?</div>
+        <div class="subq" style="margin-top:10px;">Which German <b>verb</b> and <b>noun</b> belong to this meaning?</div>
       </div>` : `
       <div class="qlabel">Verb → Noun · 📦 ${boxNames[box]}</div>
       <div class="prompt">
@@ -2000,39 +2013,40 @@ function renderCard(){
           </div>
           ${speakBtn(v.inf,'Listen to verb')}
         </div>
-        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; cursor:pointer;" onclick="toggleInlinePeek()">
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
           👆 <i>Click word (or press T) to peek translation</i>
         </div>
-        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:7px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:13px; color:var(--ink);">
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
           <b>Meaning:</b> ${meaningPromptText(v)}
         </div>
         <div class="subq" style="margin-top:10px;">Which noun belongs to this verb?</div>
       </div>`;
     revealCoreHTML = `
       <div class="revealbox">
-        ${reverse ? `<div class="formrow"><span class="flabel">Verb</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>` : meaningHTML(v)}
+        <div class="formrow"><span class="flabel">Verb</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>
         <div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
+        ${meaningHTML(v)}
         ${transformDiagram(v)}
       </div>`;
   } else {
     promptHTML = reverse ? `
-      <div class="qlabel">Meaning → German · 📦 ${boxNames[box]}</div>
+      <div class="qlabel">${meaningLang==='ta'?'🇮🇳 தமிழ் → 🇩🇪 German':meaningLang==='both'?'🌐 EN + தமிழ் → 🇩🇪 German':'🇬🇧 English → 🇩🇪 German'} · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
-        <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German verb" style="font-size:22px;">
-          ${meaningPromptText(v)} <span style="font-size:13px; opacity:0.7;">👁️</span>
+        <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German verb" style="font-size:24px; font-weight:700;">
+          ${meaningPromptText(v)} <span style="font-size:14px; opacity:0.7;">👁️</span>
         </div>
-        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; cursor:pointer;" onclick="toggleInlinePeek()">
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
           👆 <i>Click meaning (or press T) to peek German verb</i>
         </div>
-        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:7px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:13px; color:var(--ink);">
-          <b>German Verb:</b> ${v.inf}
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+          <b>German Verb:</b> <span style="color:var(--blue); font-weight:700;">${v.inf}</span> (${v.praeteritum}, ${v.perfekt})
         </div>
-        <div class="subq" style="margin-top:10px;">What is the German verb — and its Simple Past &amp; Perfekt forms?</div>
+        <div class="subq" style="margin-top:10px;">What is the German verb — and its <b>Simple Past</b> &amp; <b>Perfekt</b> forms?</div>
       </div>` : `
-      <div class="qlabel">Present → Past · 📦 ${boxNames[box]}</div>
+      <div class="qlabel">${meaningLang==='ta'?'🇩🇪 Deutsch → 🇮🇳 தமிழ்':meaningLang==='both'?'🇩🇪 Deutsch → 🌐 EN + தமிழ்':'🇩🇪 Deutsch → 🇬🇧 English'} · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="wordline">
@@ -2041,20 +2055,21 @@ function renderCard(){
           </div>
           ${speakBtn(v.inf,'Listen to verb')}
         </div>
-        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; cursor:pointer;" onclick="toggleInlinePeek()">
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
           👆 <i>Click word (or press T) to peek translation</i>
         </div>
-        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:7px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:13px; color:var(--ink);">
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
           <b>Meaning:</b> ${meaningPromptText(v)}
         </div>
         <div class="subq" style="margin-top:10px;">What are the <b>Simple Past</b> (Präteritum) and <b>Present Perfect</b> (Perfekt) forms?</div>
       </div>`;
     revealCoreHTML = `
       <div class="revealbox">
-        ${reverse ? `<div class="formrow"><span class="flabel">Infinitive</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>` : meaningHTML(v)}
+        <div class="formrow"><span class="flabel">Infinitive</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${v.noun ? `<div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>` : ''}
+        ${meaningHTML(v)}
         ${transformDiagram(v)}
       </div>`;
   }
