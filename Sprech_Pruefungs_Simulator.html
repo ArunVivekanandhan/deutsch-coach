@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Speaking Coach &amp; Exam Simulator — Dein Deutsch-Coach</title>
 <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -196,6 +196,20 @@
 
   <!-- Subtabs -->
   <div class="subtabs" id="subTabs"></div>
+
+  
+  <!-- Exam Timer Bar -->
+  <div style="background:#fff; border:1.5px solid var(--ink); border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);">
+    <div style="font-family:'Fjalla One',sans-serif; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px;">
+      ⏱️ <span id="timerLabel">Exam Timer</span>: <span id="timerDisplay" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700; color:var(--red);">15:00</span>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <button onclick="setExamTimer(15*60, '15m Oral Exam')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);">15m Full</button>
+      <button onclick="setExamTimer(3*60, '3m Teil 2 Talk')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);">3m Teil 2</button>
+      <button id="timerToggleBtn" onclick="toggleTimer()" style="padding:4px 10px; font-size:11px; font-weight:600; font-family:'IBM Plex Mono',monospace; border:1.5px solid var(--ink); border-radius:4px; cursor:pointer; background:var(--ink); color:#fff;">▶ Start</button>
+      <button onclick="resetTimer()" style="padding:4px 8px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);">↺</button>
+    </div>
+  </div>
 
   <!-- Main Container -->
   <div id="mainView"></div>
@@ -725,7 +739,7 @@ function renderTeil3(container){
 
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
         ${data.scenarios.map((s, idx)=>`
-          <button style="padding:6px 12px; font-family:'Fjalla One',sans-serif; font-size:13px; border-radius:20px; border:1.5px solid var(--ink); background:${idx===selectedTeil3ScenarioIdx?'var(--ink)':'#fff'}; color:${idx===selectedTeil3ScenarioIdx?'#fff':'var(--ink)'}; cursor:pointer;" onclick="selectedTeil3ScenarioIdx=${idx}; renderTeil3(document.getElementById('appMain'));">
+          <button style="padding:6px 12px; font-family:'Fjalla One',sans-serif; font-size:13px; border-radius:20px; border:1.5px solid var(--ink); background:${idx===selectedTeil3ScenarioIdx?'var(--ink)':'#fff'}; color:${idx===selectedTeil3ScenarioIdx?'#fff':'var(--ink)'}; cursor:pointer;" onclick="selectedTeil3ScenarioIdx=${idx}; renderTeil3(document.getElementById('mainView'));">
             ${idx+1}. ${s.name}
           </button>
         `).join('')}
