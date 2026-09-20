@@ -448,7 +448,7 @@ const GRAMMAR_RULES = [
     category: "Syntax",
     color: "var(--red)",
     summary: "In German, the verb controls the whole sentence structure! There are 3 golden rules you must memorize to sound fluent and pass the exam.",
-    formula: "• Hauptsatz (Main Clause): Verb is ALWAYS in Position 2!\n• Nebensatz (Subordinate Clause - weil, dass, wenn, obwohl...): Verb moves to the VERY END!\n• Position 0 (ADUSO: aber, denn, und, sondern, oder): Verb stays in Pos 2!\n• Position 1 Adverbs (deshalb, trotzdem, sonst): Verb follows immediately in Pos 2!\n• TeKaMoLo (Time, Cause, Manner, Place): When? (Temporal) → Why? (Kausal) → How? (Modal) → Where? (Lokal)",
+    formula: "• Hauptsatz (Main Clause): Verb is ALWAYS in Position 2!\n• Nebensatz (Subordinate Clause - weil, dass, wenn, obwohl...): Verb moves to the VERY END!\n• Position 0 (Coordinating Conjunctions - ADUSO: aber/but, denn/because, und/and, sondern/rather, oder/or): Verb stays in Pos 2!\n• Position 1 Adverbs (Connecting Adverbs: deshalb/therefore, trotzdem/nevertheless, sonst/otherwise): Verb follows immediately in Pos 2!\n• TeKaMoLo (Time, Cause, Manner, Place): When? (Temporal) → Why? (Kausal) → How? (Modal) → Where? (Lokal)",
     tableHTML: `
       <table class="de-table">
         <tr><th>Clause Type</th><th>Connector</th><th>Word Order Example</th></tr>
@@ -503,7 +503,7 @@ const GRAMMAR_RULES = [
     category: "Cases",
     color: "var(--blue)",
     summary: "German cases indicate who does what to whom. German only changes the masculine article in the Akkusativ (der → den), but Dativ changes almost everything!",
-    formula: "• Nominativ: Subject (Wer/Was?)\n• Akkusativ: Direct object (Wen/Was?) → der → den, ein → einen, mein → meinen\n• Dativ: Indirect recipient (Wem?) → der/das → dem, die → der, Plural → den + n\n• Genitiv: Possession (Wessen?) → des Mannes / der Frau / der Kinder",
+    formula: "• Nominativ: Subject (Wer/Was?)\n• Akkusativ (Direct Object): Direct object (Wen/Was?) → der → den, ein → einen, mein → meinen\n• Dativ (Indirect Object): Indirect recipient (Wem?) → der/das → dem, die → der, Plural → den + n\n• Genitiv (Possession): Possession (Wessen?) → des Mannes / der Frau / der Kinder",
     tableHTML: `
       <table class="de-table">
         <tr><th>Case</th><th>Masculine (der)</th><th>Neutral (das)</th><th>Feminine (die)</th><th>Plural (die)</th></tr>
@@ -659,7 +659,7 @@ const GRAMMAR_RULES = [
     category: "Verbs & Mood",
     color: "var(--purple)",
     summary: "Konjunktiv II is essential for everyday spoken German! It allows you to make polite requests, give friendly advice, and express hypothetical dreams.",
-    formula: "• Polite requests: Könnten Sie...? / Würden Sie bitte...? / Ich hätte gern...\n• Advice: An deiner Stelle würde ich... / Du solltest...\n• Unreal conditions / Dreams: Wenn ich reich wäre, würde ich um die Welt reisen.",
+    formula: "• Höflichkeit (Polite requests): Könnten Sie...? / Würden Sie bitte...? / Ich hätte gern...\n• Ratschläge (Advice): An deiner Stelle würde ich... / Du solltest...\n• Irreale Bedingungen (Unreal conditions / Dreams): Wenn ich reich wäre, würde ich um die Welt reisen.",
     tableHTML: `
       <table class="de-table">
         <tr><th>Infinitive</th><th>Konjunktiv II</th><th>Spoken Example</th></tr>
@@ -707,7 +707,7 @@ const GRAMMAR_RULES = [
     category: "Verbs",
     color: "var(--red)",
     summary: "The passive voice is used when the action or the result is more important than who performs it. It is tested heavily in B1 reading, official letters, and news.",
-    formula: "• Präsens Passiv: werden (conjugated) + Partizip II (at the end)\n• Präteritum Passiv: wurden + Partizip II\n• Passiv mit Modalverb (Passive with Modal): Modalverb (Pos 2) + Partizip II + werden (at end)\n• By whom? → von + Dativ",
+    formula: "• Präsens Passiv (Present Passive): werden (conjugated) + Partizip II (at the end)\n• Präteritum Passiv (Past Passive): wurden + Partizip II\n• Passiv mit Modalverb (Passive with Modal): Modalverb (Pos 2) + Partizip II + werden (at end)\n• By whom? → von + Dativ",
     tableHTML: `
       <table class="de-table">
         <tr><th>Tense</th><th>Structure</th><th>Example</th></tr>
@@ -926,7 +926,7 @@ const GRAMMAR_RULES = [
         en: "Before eating I always wash my hands thoroughly.",
         options: ["mir", "mich", "dir", "sich"],
         correct: 0,
-        explain: "Because 'die Hände' is the direct object (Akkusativ), the reflexive pronoun becomes Dativ: 'wasche ich mir die Hände'."
+        explain: "Because 'die Hände' is the direct object (Akkusativ), the reflexive pronoun becomes Dativ (Indirect Object): 'wasche ich mir die Hände'."
       },
       {
         prompt: "Können Sie ___ bitte kurz vorstellen?",
@@ -1026,7 +1026,7 @@ const GRAMMAR_RULES = [
     category: "Nouns & Cases",
     color: "var(--green)",
     summary: "A special group of masculine nouns add -(e)n in EVERY case (Akkusativ, Dativ, Genitiv) EXCEPT Nominative singular! This is one of the most frequent traps in B1 grammar tests.",
-    formula: "• Affected Nouns: Masculine living beings ending in -e (der Kollege, der Kunde, der Junge, der Neffe), nationalities (der Franzose, der Pole), and loanwords in -ist, -ent, -ant (der Polizist, der Student, der Praktikant, der Herr, der Nachbar).\n• Nominativ: der Kollege (NO -n!)\n• Akkusativ: den Kolleg<b>en</b>\n• Dativ: dem Kolleg<b>en</b>\n• Genitiv: des Kolleg<b>en</b> (NO -s!)",
+    formula: "• Affected Nouns: Masculine living beings ending in -e (der Kollege, der Kunde, der Junge, der Neffe), nationalities (der Franzose, der Pole), and loanwords in -ist, -ent, -ant (der Polizist, der Student, der Praktikant, der Herr, der Nachbar).\n• Nominativ: der Kollege (NO -n!)\n• Akkusativ (Direct Object): den Kolleg<b>en</b>\n• Dativ (Indirect Object): dem Kolleg<b>en</b>\n• Genitiv (Possession): des Kolleg<b>en</b> (NO -s!)",
     tableHTML: `
       <table class="de-table">
         <tr><th>Case</th><th>der Kollege</th><th>der Kunde</th><th>der Herr</th><th>der Nachbar</th></tr>
