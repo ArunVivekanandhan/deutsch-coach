@@ -7,12 +7,13 @@ const APP_NAVIGATION = [
   {
     group: 'Dashboard',
     links: [
-      { name: 'Home', path: 'deutsch-coach.html', icon: '📊' }
+      { name: 'Home', path: 'index.html', icon: '📊' }
     ]
   },
   {
     group: 'Lernen',
     links: [
+      { name: 'SRS Smart Learn', path: 'deutsch-coach.html', icon: '🧠' },
       { name: 'Wortschatz Grid', path: 'Wortschatz_Master_Grid.html', icon: '📝' },
       { name: 'Grammatik Regeln', path: 'Grammatik_Regel_Trainer.html', icon: '🧩' },
       { name: 'Satzbau Trainer', path: 'Satzbau_Trainer.html', icon: '🏗️' },
@@ -52,8 +53,8 @@ function renderAppShell() {
   // We will wrap the existing body content into the new shell.
   const body = document.body;
   if (!body.querySelector('.app-layout')) {
-    const existingContent = body.innerHTML;
-    body.innerHTML = '';
+    // Move nodes instead of using innerHTML to preserve event listeners and script execution!
+    const childrenToMove = Array.from(body.childNodes);
     
     const layout = document.createElement('div');
     layout.className = 'app-layout';
@@ -71,7 +72,7 @@ function renderAppShell() {
     const nav = document.createElement('nav');
     nav.className = 'app-sidebar-nav';
     
-    const currentPath = window.location.pathname.split('/').pop() || 'deutsch-coach.html';
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
     
     APP_NAVIGATION.forEach(group => {
       const groupEl = document.createElement('div');
@@ -102,9 +103,12 @@ function renderAppShell() {
     const header = document.createElement('header');
     header.className = 'app-header';
     header.innerHTML = \`
-      <div style="font-weight:600;">\${document.title}</div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <button class="ds-btn ds-btn-secondary ds-mobile-menu-btn" onclick="document.querySelector('.app-sidebar').classList.toggle('open')" style="padding:8px;">☰</button>
+        <div style="font-weight:600;">\${document.title}</div>
+      </div>
       <div>
-        <button class="ds-btn ds-btn-secondary" onclick="document.body.classList.toggle('dark')">🌙 Theme</button>
+        <button class="ds-btn ds-btn-secondary" onclick="const isD = document.body.classList.toggle('dark'); localStorage.setItem('de_theme', isD ? 'dark' : 'light');">🌙 Theme</button>
       </div>
     \`;
     main.appendChild(header);
@@ -112,9 +116,13 @@ function renderAppShell() {
     const content = document.createElement('div');
     content.className = 'app-content';
     
-    // Create a legacy wrapper so old CSS doesn't break entirely, but we hide old navs
+    // Create legacy wrapper
     const legacyWrapper = document.createElement('div');
-    legacyWrapper.innerHTML = existingContent;
+    legacyWrapper.className = 'legacy-wrapper';
+    
+    childrenToMove.forEach(child => {
+        legacyWrapper.appendChild(child);
+    });
     
     // Hide all old suite-hubs automatically
     const oldHubs = legacyWrapper.querySelectorAll('.suite-hub, .appshell > .sidebar, .hub-links');
@@ -130,3 +138,10 @@ function renderAppShell() {
 
 // Auto-init on load
 document.addEventListener('DOMContentLoaded', renderAppShell);
+
+
+// Auto-load theme
+const savedTheme = localStorage.getItem('de_theme');
+if (savedTheme === 'dark') {
+  document.body.classList.add('dark');
+}
