@@ -1097,24 +1097,57 @@ function vowelChangeNote(v){
 function getVerbShortcutTip(v){
   const inf = (v.inf||'').toLowerCase();
   let tips = [];
-  if(inf === 'wissen'){
-    tips.push(`🧙‍♂️ <b>Wizard Trick:</b> WISSEN = 'Wisdom / Wizard'. Use for facts, secrets, dates, and before question words (<i>wie, wo, was</i>) or <i>dass</i>! <br><i>„Ich weiß, wo das ist.”</i>`);
-  } else if(inf === 'kennen'){
-    tips.push(`👱‍♂️ <b>Ken Doll Trick:</b> KENNEN = 'Ken Doll (Barbie)'. Use for people, places, and things you are familiar with! <br><i>„Ich kenne die Person / die Stadt.”</i>`);
+
+  if(inf === 'wissen' || inf === 'kennen'){
+    return `
+      <div style="background:#fffdf5; border:1.5px solid var(--gold); border-radius:8px; padding:12px 14px; margin-top:10px; box-shadow:0 3px 8px rgba(185,138,46,0.15); text-align:left;">
+        <div style="font-family:'Fjalla One',sans-serif; font-size:13.5px; color:var(--gold); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          🧙‍♂️ vs 👱‍♂️ Long-Term Memory Hacks: <i>Wissen</i> vs. <i>Kennen</i>
+        </div>
+        
+        <div style="margin-bottom:8px; font-size:12px; line-height:1.55;">
+          <b>1. The Sound-Link Trick (Mnemonic):</b><br>
+          • 🧙‍♂️ <b>Wissen</b> sounds like <i>"Wisdom / Wizard"</i>: Imagine a wise old wizard who knows every single fact, statistic, and secret in the universe. Whenever you need to say a <b>fact/info</b> (like a phone number or time), picture the Wizard and think: <b>Wissen</b>!<br>
+          • 👱‍♂️ <b>Kennen</b> sounds like <i>"Ken" (the Barbie doll)</i>: Think of the famous character Ken. He is a person. You know him, and you are familiar with him. When talking about a <b>person, city or place</b>, picture the Ken doll and think: <b>Kennen</b>!
+        </div>
+
+        <div style="margin-bottom:8px; font-size:12px; line-height:1.55; background:var(--paper); padding:8px 10px; border-radius:6px;">
+          <b>2. The Grammar "Hook" (Look at the next word):</b><br>
+          • If the next word is a <b>Person or a Place</b>, use <b>Kennen</b> (e.g. <i>Ich kenne Tom / Ich kenne Berlin</i>).<br>
+          • If the next word is a <b>Question word</b> (<i>wie, wo, was, warum</i>) or the word <b>dass</b> (that), use <b>Wissen</b> (e.g. <i>Ich weiß, wie... / Ich weiß, dass...</i>).
+        </div>
+
+        <div style="font-size:12px; line-height:1.55; color:var(--ink);">
+          <b>3. Practice with a Sentence Pattern (Muscle Memory):</b><br>
+          🗣️ <i>„Ich weiß die Antwort [fact], aber ich kenne die Person nicht [person].”</i><br>
+          🗣️ <i>„Ich kenne Paris [place], aber ich weiß nicht, wo das Hotel ist [fact].”</i>
+        </div>
+      </div>
+    `;
+  } else if(inf === 'kennenlernen'){
+    tips.push(`🤝 <b>Ken Doll Trick:</b> KENNENLERNEN = 'Ken Doll + Lernen' → Getting to know someone for the very first time! (<i>„Ich möchte dich kennenlernen.”</i>)`);
+  } else if(inf === 'stehen' || inf === 'stellen'){
+    tips.push(`🧍 <b>Posture vs. Action (Positional Verbs):</b><br>• <b>stehen</b> (strong): Stationary upright posture + <b>Dativ</b> (<i>„Das Glas steht auf dem Tisch.”</i>)<br>• <b>stellen</b> (weak): Placing something upright + <b>Akkusativ</b> (<i>„Ich stelle das Glas auf den Tisch.”</i>)`);
+  } else if(inf === 'liegen' || inf === 'legen'){
+    tips.push(`🛏️ <b>Posture vs. Action (Positional Verbs):</b><br>• <b>liegen</b> (strong): Lying flat + <b>Dativ</b> (<i>„Das Buch liegt auf dem Sofa.”</i>)<br>• <b>legen</b> (weak): Putting something flat + <b>Akkusativ</b> (<i>„Ich lege das Buch auf das Sofa.”</i>)`);
+  } else if(inf === 'sitzen' || inf === 'setzen'){
+    tips.push(`🪑 <b>Posture vs. Action (Positional Verbs):</b><br>• <b>sitzen</b> (strong): Sitting posture + <b>Dativ</b> (<i>„Er sitzt auf dem Stuhl.”</i>)<br>• <b>setzen</b> (weak): Placing someone in a seat / sich setzen + <b>Akkusativ</b> (<i>„Er setzt sich auf den Stuhl.”</i>)`);
+  } else if(inf === 'leihen'){
+    tips.push(`📚 <b>Sound-Link Trick:</b> <i>LEIHEN</i> → 'Lie on what you borrow / lend'. (<i>leihen → lieh → geliehen</i>: Diphthong -ei- shifts to -ie-!)`);
   } else if(inf.endsWith('ieren')){
-    tips.push(`⚡ <b>100% Suffix Rule:</b> All <i>-ieren</i> verbs are strictly weak and never take <i>ge-</i> in Perfekt!`);
-  } else if(inf.includes('ei')){
-    tips.push(`⚡ <b>Diphthong Scanner:</b> <i>-ei-</i> verbs are 99% strong! They shift to <i>-ie-</i> or <i>-i-</i> in the past.`);
+    tips.push(`⚡ <b>100% Suffix Rule:</b> All <i>-ieren</i> verbs are strictly weak and never take <i>ge-</i> in Perfekt! (<i>studieren → hat studiert, reparieren → hat repariert</i>)`);
+  } else if(inf.includes('ei') && !inf.endsWith('ieren')){
+    tips.push(`⚡ <b>Diphthong Scanner (-ei-):</b> <i>-ei-</i> verbs are 99% strong! They shift to <i>-ie-</i> or <i>-i-</i> in the past (<i>schreiben → schrieb, bleiben → blieb, reiten → ritt</i>).`);
   } else if(inf.includes('ie')){
-    tips.push(`⚡ <b>Diphthong Scanner:</b> <i>-ie-</i> verbs are 99% strong! They shift to <i>-o-</i> in the past.`);
+    tips.push(`⚡ <b>Diphthong Scanner (-ie-):</b> <i>-ie-</i> verbs are 99% strong! They shift to <i>-o-</i> in the past (<i>fliegen → flog, ziehen → zog, schließen → schloss</i>).`);
   }
   
   if(v.perfekt && v.perfekt.startsWith('ist')){
-    tips.push(`🚶 <b>SEIN Rule:</b> Uses <i>ist</i> because it describes movement from A→B or a state change!`);
+    tips.push(`🚶 <b>SEIN Movement Rule:</b> Uses <i>ist</i> because it describes movement from Point A→B or a state change (<i>${v.inf} → ${v.perfekt}</i>)!`);
   }
 
   if(tips.length > 0){
-    return `<div style="background:#fef3c7; border-left:3px solid var(--gold); padding:6px 10px; font-size:12px; margin-top:8px; border-radius:0 4px 4px 0; color:#78350f;">${tips.join('<br>')}</div>`;
+    return `<div style="background:#fef3c7; border-left:3px solid var(--gold); padding:8px 12px; font-size:12px; margin-top:8px; border-radius:0 4px 4px 0; color:#78350f; line-height:1.5;">${tips.join('<br><br>')}</div>`;
   }
   return '';
 }
