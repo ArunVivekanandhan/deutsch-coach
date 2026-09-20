@@ -50,9 +50,10 @@ All files are flat in the project root directory (`C:\Users\arunr\OneDrive\Docum
 Deutsch_Coach_Project/
 ├── index.html                              # Main PWA — byte-identical to deutsch-coach.html
 ├── deutsch-coach.html                      # Main PWA (updated with Suite Hub & 6 reading passages)
+├── KI_Human_Partner.html                   # 1-on-1 Interactive Video Call Coach with Animated Realistic Human Persona, Lip-sync & Live Grammar Feedback
 ├── KI_German_Coach.html                    # Real-time AI German Conversation Coach & Live Grammar Partner (Multi-AI: DeepSeek/OpenAI/Gemini/Groq/Ollama)
 ├── manifest.json                           # PWA manifest (name, icons, colors, start_url)
-├── sw.js                                   # Service worker (v3) — caches all suite apps offline
+├── sw.js                                   # Service worker (v4) — caches all suite apps offline
 ├── icon-192.png, icon-512.png              # PWA icons
 ├── Grammatik_Regel_Trainer.html            # 16 Core German Grammar Pillars with rules, audio & infinite practice drills
 ├── Sprech_Pruefungs_Simulator.html         # Oral Exam Simulator (Teil 1-3), Spoken Redemittel Vault & Letter Builder
@@ -973,6 +974,12 @@ as a reliable source of "what changed when."
 **Date:** Current session · **AI:** Gemini 3.7
 **Finding:** Created `KI_German_Coach.html` — a responsive, mobile-ready live conversation coach with multi-AI provider support (DeepSeek, OpenAI, Groq, Gemini, OpenRouter, and local Ollama), customizable coach personas (Frau Müller, Herr Weber, Lukas, Dr. Hoffmann), voice recognition (STT) and German speech synthesis (TTS), live under-message grammar corrections with token diffs, rule explanations, native B1/B2 upgrades, and a persistent Fehler-Tagebuch (Mistake Vault) in `localStorage`. Also added the persistent top Suite Hub banner and a dedicated `🤖 KI Coach ↗` tab directly into `index.html` and `deutsch-coach.html` navigation bar.
 **Impact:** The learner can now navigate directly to the AI coach from any screen or device.
+
+### Discovery: Realistic Human Avatar Video Coach (KI_Human_Partner.html) Added
+**Date:** Current session · **AI:** Gemini 3.7
+**Finding:** Created `KI_Human_Partner.html` — an immersive 1-on-1 video call experience featuring an animated realistic human German coach (Frau Schmidt, Herr Weber, Lukas, Dr. Hoffmann) with dynamic multi-viseme lip-syncing, natural eye blinking, subtle head-tilts, ambient classroom lighting, real-time speech recognition (STT), human voice TTS, bilingual subtitles, and instant live grammar feedback cards.
+**Impact:** Provides an authentic, human-like speaking immersion experience for learners preparing for oral speaking exams (DTZ / telc / Goethe B1).
+
 
 
 

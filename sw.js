@@ -1,10 +1,11 @@
 /* Complete offline cache for Dein Deutsch-Coach Suite.
    Caches all 7 applications, icons, and manifest for 100% offline access. */
-const CACHE_NAME = "deutsch-coach-v3";
+const CACHE_NAME = "deutsch-coach-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./deutsch-coach.html",
+  "./KI_Human_Partner.html",
   "./KI_German_Coach.html",
   "./manifest.json",
   "./icon-192.png",

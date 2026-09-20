@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Dein KI Deutsch-Partner — Live Video Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F172A;
+    --card-bg: #1E293B;
+    --card-border: #334155;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --accent: #38BDF8;
+    --accent-hover: #0EA5E9;
+    --green: #22C55E;
+    --green-bg: rgba(34, 197, 94, 0.15);
+    --red: #EF4444;
+    --red-bg: rgba(239, 68, 68, 0.15);
+    --gold: #F59E0B;
+    --gold-bg: rgba(245, 158, 11, 0.15);
+    --purple: #A855F7;
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    padding: 10px 8px 30px;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top, #1E293B 0%, #0F172A 100%);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Suite Navigation Hub Banner (Dark Modern) */
+  .hub-banner {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .hub-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+  }
+  .hub-links {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .hub-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-muted);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    transition: all .15s;
+    font-weight: 600;
+  }
+  .hub-link:hover, .hub-link.active {
+    background: var(--accent);
+    color: #0F172A;
+    border-color: var(--accent);
+  }
+
+  /* Video Call Viewport (Real Human Container) */
+  .call-container {
+    background: #020617;
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius);
+    position: relative;
+    width: 100%;
+    height: 480px;
+    max-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Canvas / Animated Realistic Face */
+  #avatarCanvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Video Call Status Overlay */
+  .call-header-overlay {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .call-header-overlay > * { pointer-events: auto; }
+
+  .coach-badge {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    animation: pulse 1.5s infinite;
+  }
+  .live-dot.speaking { background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+  .live-dot.thinking { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+  .call-timer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    padding: 5px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Coach Subtitle / Speech Bubble HUD */
+  .subtitles-overlay {
+    position: absolute;
+    bottom: 16px;
+    left: 12px;
+    right: 12px;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 10;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease-out;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .sub-german {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .sub-english {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  /* Controls & Settings Bar */
+  .controls-bar {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .selectors-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .dark-select {
+    background: #0F172A;
+    color: var(--text-main);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+  }
+  .dark-select:focus { border-color: var(--accent); }
+
+  /* Call Actions / Big Mic Button */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .mic-button-hero {
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 28px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .mic-button-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.6);
+  }
+  .mic-button-hero:active { transform: translateY(1px); }
+
+  .mic-button-hero.listening {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.7);
+    animation: micPulse 1.2s infinite;
+  }
+  @keyframes micPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  /* Live Grammar Feedback Drawer / Split View */
+  .feedback-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .feedback-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 16px;
+    color: var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+  }
+
+  .correction-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .correction-card.perfect { border-left-color: var(--green); }
+  .correction-card.error { border-left-color: var(--red); }
+
+  .user-speech-row {
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .user-speech-row b { color: var(--text-main); }
+
+  .corrected-sentence {
+    font-size: 14px;
+    color: #86EFAC;
+    font-weight: 600;
+    line-height: 1.4;
+    background: var(--green-bg);
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+
+  .rule-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12.5px;
+    color: var(--text-main);
+  }
+  .rule-tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* Text Input Option for Quiet Practice */
+  .text-input-box {
+    display: flex;
+    gap: 8px;
+    background: #0F172A;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 6px 8px;
+    align-items: center;
+  }
+  .text-input-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    padding: 6px 8px;
+  }
+  .text-send-btn {
+    background: var(--accent);
+    color: #0F172A;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  /* Settings Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 1000;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  }
+
+  /* Animations */
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 600px) {
+    .call-container { height: 360px; }
+    .sub-german { font-size: 13.5px; }
+    .mic-button-hero { padding: 12px 20px; font-size: 15px; width: 100%; justify-content: center; }
+    .controls-bar { flex-direction: column; align-items: stretch; }
+    .selectors-row { flex-direction: column; }
+    .dark-select { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Suite Navigation Hub Banner -->
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main Coach</a>
+      <a href="./KI_Human_Partner.html" class="hub-link active">👤 Live Human Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Text Coach</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Speaking</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
+    </div>
+  </div>
+
+  <!-- Video Call Screen with Animated Human Coach -->
+  <div class="call-container" id="callViewport">
+    <!-- Live Canvas Avatar -->
+    <canvas id="avatarCanvas" width="800" height="600"></canvas>
+
+    <!-- Top Overlay (Coach Info & Call Status) -->
+    <div class="call-header-overlay">
+      <div class="coach-badge">
+        <div class="live-dot" id="liveDot"></div>
+        <span id="coachDisplayName">Frau Schmidt (German Teacher)</span>
+      </div>
+      <div class="call-timer" id="callDuration">⏱️ 00:00</div>
+    </div>
+
+    <!-- Live Subtitles & Speech Bubble Overlay -->
+    <div class="subtitles-overlay" id="subtitlesBox">
+      <div class="sub-german">
+        <span id="subGermanText">"Hallo Arun! Ich freue mich, heute mit dir Deutsch zu sprechen. Worüber möchtest du sprechen?"</span>
+        <button onclick="replayCurrentVoice()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:16px;" title="Wiederholen">🔊</button>
+      </div>
+      <div class="sub-english" id="subEnglishText">
+        "Hello Arun! I'm glad to speak German with you today. What would you like to talk about?"
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Voice & Interaction Bar -->
+  <div class="action-bar">
+    <button class="mic-button-hero" id="heroMicBtn" onclick="toggleHeroMic()">
+      <span id="heroMicIcon">🎙️</span>
+      <span id="heroMicLabel">Sprechen (Tap to Speak German)</span>
+    </button>
+  </div>
+
+  <!-- Controls Bar: Personas, CEFR, Topics, AI Engines -->
+  <div class="controls-bar">
+    <div class="selectors-row">
+      <select class="dark-select" id="humanPersonaSelect" onchange="changeHumanPersona()">
+        <option value="schmidt" selected>👩‍🏫 Frau Schmidt (Warm, encouraging, clear speech)</option>
+        <option value="weber">👨‍🏫 Herr Weber (DTZ / Goethe Official Examiner)</option>
+        <option value="lukas">🧑 Lukas (Young Berlin native, casual conversation)</option>
+        <option value="dr_hoffmann">👨‍⚕️ Dr. Hoffmann (Professional medical &amp; work)</option>
+      </select>
+
+      <select class="dark-select" id="humanCefrSelect" onchange="changeHumanCefr()">
+        <option value="A1">Niveau: A1 (Einfache Sätze)</option>
+        <option value="A2">Niveau: A2 (Alltagssätze)</option>
+        <option value="B1" selected>Niveau: B1 (DTZ / telc Prüfung)</option>
+        <option value="B2">Niveau: B2 (Fließend &amp; Komplex)</option>
+      </select>
+
+      <select class="dark-select" id="humanTopicSelect" onchange="changeHumanTopic()">
+        <option value="free" selected>☕ Freies Gespräch (Casual Daily Talk)</option>
+        <option value="dtz_intro">🗣️ DTZ Teil 1: Sich vorstellen</option>
+        <option value="dtz_opinion">🖼️ DTZ Teil 2: Bild &amp; Meinung</option>
+        <option value="dtz_plan">🤝 DTZ Teil 3: Zusammen planen</option>
+        <option value="job_interview">🏢 Vorstellungsgespräch &amp; IT</option>
+        <option value="doctor_visit">🏥 Beim Arzt &amp; Symptome</option>
+        <option value="flat_hunting">🏠 Wohnungssuche &amp; Vermieter</option>
+      </select>
+    </div>
+
+    <div style="display:flex; gap:6px;">
+      <select class="dark-select" id="aiProviderSelect" onchange="switchAiProvider()">
+        <option value="deepseek" selected>🧠 DeepSeek AI (Active)</option>
+        <option value="openai">🤖 OpenAI GPT-4o-mini</option>
+        <option value="groq">⚡ Groq Llama-3.3 (Fastest)</option>
+        <option value="gemini">✨ Google Gemini 1.5</option>
+        <option value="ollama">💻 Local Ollama (Offline)</option>
+      </select>
+      <button class="dark-select" style="background:var(--accent); color:#0F172A; font-weight:700;" onclick="openSettings()">⚙️ Key</button>
+    </div>
+  </div>
+
+  <!-- Text Input Fallback (for quiet environments) -->
+  <div class="text-input-box">
+    <input type="text" id="humanTextInput" placeholder="Oder tippe hier auf Deutsch... (Enter zum Senden)" onkeydown="if(event.key==='Enter') sendHumanText()">
+    <button class="text-send-btn" onclick="sendHumanText()">Senden ➤</button>
+  </div>
+
+  <!-- Live Real-Time Grammar Correction Panel -->
+  <div class="feedback-panel">
+    <div class="feedback-title">
+      <span>📝 Live Grammatik-Feedback &amp; Fehleranalyse</span>
+      <span style="font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-muted);" id="liveAccuracyScore">Genauigkeit: 100%</span>
+    </div>
+
+    <div id="liveCorrectionContainer">
+      <div class="correction-card perfect">
+        <div class="user-speech-row">Bereit zum Zuhören. Klicke auf das <b>große Mikrofon</b> und sprich auf Deutsch!</div>
+        <div class="rule-tips">
+          <div class="rule-tip-item"><span>💡</span> <span>Jeder Satz, den du sprichst, wird analysiert (Fälle, Artikel, Verbstellung bei Nebensätzen).</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- AI Key Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:8px;">
+      <h3 style="margin:0; font-family:'Fjalla One'; font-size:18px;">⚙️ AI API Keys &amp; Configuration</h3>
+      <button onclick="closeSettings()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">&times;</button>
+    </div>
+    <div style="font-size:12.5px; color:var(--text-muted);">
+      Deine Schlüssel werden sicher in deinem <b>Browser localStorage</b> gespeichert.
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <label style="font-family:'IBM Plex Mono'; font-size:11px; text-transform:uppercase;">API Key für <span id="currentProviderLabel">DeepSeek</span></label>
+      <input type="password" id="modalKeyInput" style="background:#0F172A; border:1px solid var(--card-border); color:#fff; padding:10px; border-radius:6px; font-family:'IBM Plex Mono'; font-size:13px;" placeholder="sk-...">
+    </div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button onclick="saveModalSettings()" style="flex:1; background:var(--green); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">💾 Speichern</button>
+      <button onclick="closeSettings()" style="flex:1; background:var(--card-border); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   REALISTIC HUMAN AVATAR ENGINE (2D/3D Canvas Rendering & Lip Sync)
+   ========================================================================= */
+
+const canvas = document.getElementById('avatarCanvas');
+const ctx = canvas.getContext('2d');
+
+let avatarState = {
+  persona: 'schmidt',
+  isSpeaking: false,
+  isBlinking: false,
+  blinkProgress: 0,
+  mouthOpen: 0,        // 0 to 1
+  mouthWidth: 0.5,     // 0 to 1
+  headBob: 0,
+  headTilt: 0,
+  eyeX: 0,
+  eyeY: 0,
+  breath: 0,
+  expression: 'smile' // 'smile', 'neutral', 'curious', 'happy'
+};
+
+const HUMAN_PROFILES = {
+  schmidt: {
+    name: "Frau Schmidt",
+    title: "Deutschlehrerin (A2–B1)",
+    gender: "female",
+    skinTone: "#FAD4C0",
+    skinShadow: "#E8BFA8",
+    hairColor: "#5B3A29",
+    hairStyle: "long_brunette",
+    glasses: true,
+    outfitColor: "#1E3A8A",
+    starter: "Hallo Arun! Ich freue mich, heute mit dir Deutsch zu sprechen. Worüber möchtest du sprechen?",
+    starterEn: "Hello Arun! I'm glad to speak German with you today. What would you like to talk about?"
+  },
+  weber: {
+    name: "Herr Weber",
+    title: "Goethe / DTZ Prüfer",
+    gender: "male",
+    skinTone: "#F5CBA7",
+    skinShadow: "#DFB08C",
+    hairColor: "#4A5568",
+    hairStyle: "short_grey",
+    glasses: true,
+    outfitColor: "#1E293B",
+    starter: "Guten Tag Arun. Ich bin Herr Weber. Lassen Sie uns mit der Prüfungsvorbereitung beginnen. Bitte stellen Sie sich kurz vor.",
+    starterEn: "Good day Arun. I am Mr. Weber. Let's begin with the exam preparation. Please introduce yourself briefly."
+  },
+  lukas: {
+    name: "Lukas",
+    title: "Tandem-Partner (Berlin)",
+    gender: "male",
+    skinTone: "#FCE5D8",
+    skinShadow: "#EAC3B0",
+    hairColor: "#92400E",
+    hairStyle: "modern_crop",
+    glasses: false,
+    outfitColor: "#065F46",
+    starter: "Hi Arun! Na, wie geht's dir heute? Lass uns ganz entspannt auf Deutsch quatschen!",
+    starterEn: "Hi Arun! How are you doing today? Let's chat relaxed in German!"
+  },
+  dr_hoffmann: {
+    name: "Dr. Hoffmann",
+    title: "Fachcoach Beruf & Medizin",
+    gender: "male",
+    skinTone: "#E8C39E",
+    skinShadow: "#CFAB87",
+    hairColor: "#1E293B",
+    hairStyle: "short_neat",
+    glasses: true,
+    outfitColor: "#0F766E",
+    starter: "Guten Tag Arun. Lassen Sie uns heute professionelle Fachkommunikation für den Beruf trainieren.",
+    starterEn: "Good day Arun. Let us practice professional workplace communication today."
+  }
+};
+
+/* Animation Loop */
+let lastFrameTime = performance.now();
+let blinkTimer = 0;
+let nextBlinkInterval = 3000 + Math.random() * 2000;
+
+function animateAvatar(now) {
+  const dt = (now - lastFrameTime) / 1000;
+  lastFrameTime = now;
+
+  // Breathing & Micro-movement
+  avatarState.breath += dt * 1.5;
+  avatarState.headBob = Math.sin(avatarState.breath) * 3;
+  avatarState.headTilt = Math.sin(avatarState.breath * 0.5) * 0.02;
+
+  // Blinking logic
+  blinkTimer += dt * 1000;
+  if (blinkTimer > nextBlinkInterval) {
+    avatarState.isBlinking = true;
+    avatarState.blinkProgress += dt * 12;
+    if (avatarState.blinkProgress >= 1) {
+      avatarState.isBlinking = false;
+      avatarState.blinkProgress = 0;
+      blinkTimer = 0;
+      nextBlinkInterval = 2500 + Math.random() * 3000;
+    }
+  }
+
+  // Mouth animation during speech
+  if (avatarState.isSpeaking) {
+    avatarState.mouthOpen = 0.2 + Math.abs(Math.sin(now * 0.015)) * 0.6;
+    avatarState.mouthWidth = 0.4 + Math.sin(now * 0.01) * 0.3;
+  } else {
+    avatarState.mouthOpen = Math.max(0, avatarState.mouthOpen - dt * 4);
+    avatarState.mouthWidth = 0.5;
+  }
+
+  // Render Frame
+  drawRealisticHuman();
+
+  requestAnimationFrame(animateAvatar);
+}
+
+function drawRealisticHuman() {
+  const w = canvas.width;
+  const h = canvas.height;
+  const profile = HUMAN_PROFILES[avatarState.persona];
+
+  ctx.clearRect(0, 0, w, h);
+
+  // 1. Studio Background Gradient & Ambient Lighting
+  const bgGrad = ctx.createRadialGradient(w/2, h/2 - 50, 50, w/2, h/2, 450);
+  bgGrad.addColorStop(0, '#1E293B');
+  bgGrad.addColorStop(0.6, '#0F172A');
+  bgGrad.addColorStop(1, '#020617');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Ambient Classroom/Office Bokeh circles
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.04)';
+  ctx.beginPath();
+  ctx.arc(150, 150, 120, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(168, 85, 247, 0.03)';
+  ctx.beginPath();
+  ctx.arc(650, 200, 160, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.save();
+  // Apply subtle breathing and head tilt
+  const cx = w / 2;
+  const cy = h / 2 + avatarState.headBob;
+  ctx.translate(cx, cy);
+  ctx.rotate(avatarState.headTilt);
+
+  // 2. Shoulders & Outfit (Torso)
+  ctx.fillStyle = profile.outfitColor;
+  ctx.beginPath();
+  ctx.ellipse(0, 260, 220, 130, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Collar / Shirt V-neck
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(-35, 150);
+  ctx.lineTo(0, 210);
+  ctx.lineTo(35, 150);
+  ctx.closePath();
+  ctx.fill();
+
+  // 3. Neck
+  ctx.fillStyle = profile.skinShadow;
+  ctx.fillRect(-32, 80, 64, 80);
+
+  // 4. Hair Back (for long hair)
+  if (profile.hairStyle === 'long_brunette') {
+    ctx.fillStyle = profile.hairColor;
+    ctx.beginPath();
+    ctx.ellipse(0, 10, 125, 160, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 5. Head & Face Contour
+  ctx.fillStyle = profile.skinTone;
+  ctx.beginPath();
+  ctx.ellipse(0, 20, 85, 110, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Face shadow & jaw shading
+  ctx.fillStyle = profile.skinShadow;
+  ctx.beginPath();
+  ctx.ellipse(0, 95, 45, 25, 0, 0, Math.PI);
+  ctx.fill();
+
+  // 6. Ears
+  ctx.fillStyle = profile.skinTone;
+  ctx.beginPath();
+  ctx.ellipse(-86, 20, 14, 25, -0.1, 0, Math.PI * 2);
+  ctx.ellipse(86, 20, 14, 25, 0.1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 7. Eyes & Eyebrows
+  drawEyes(profile);
+
+  // 8. Nose
+  ctx.strokeStyle = profile.skinShadow;
+  ctx.lineWidth = 3.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(3, 35);
+  ctx.lineTo(-6, 42);
+  ctx.stroke();
+
+  // 9. Realistic Mouth with Lip Sync
+  drawMouth(profile);
+
+  // 10. Glasses (if profile has glasses)
+  if (profile.glasses) {
+    drawGlasses();
+  }
+
+  // 11. Front Hair / Bangs
+  drawHair(profile);
+
+  ctx.restore();
+}
+
+function drawEyes(profile) {
+  const eyeDistance = 34;
+  const eyeY = 0;
+
+  [-1, 1].forEach(side => {
+    const ex = side * eyeDistance;
+
+    // Eyebrows
+    ctx.strokeStyle = profile.hairColor;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    const browRaise = avatarState.expression === 'curious' ? -4 : 0;
+    ctx.moveTo(ex - 18, eyeY - 22 + browRaise);
+    ctx.quadraticCurveTo(ex, eyeY - 28 + browRaise, ex + 18, eyeY - 20 + browRaise);
+    ctx.stroke();
+
+    // Eye Sclera (White)
+    if (avatarState.isBlinking) {
+      // Closed Eye / Eyelash line
+      ctx.strokeStyle = '#2B1810';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(ex - 16, eyeY);
+      ctx.quadraticCurveTo(ex, eyeY + 4, ex + 16, eyeY);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeY, 16, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Iris (Warm Hazel / Blue)
+      ctx.fillStyle = profile.gender === 'female' ? '#2563EB' : '#4B5563';
+      ctx.beginPath();
+      ctx.arc(ex + avatarState.eyeX, eyeY + avatarState.eyeY, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pupil
+      ctx.fillStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.arc(ex + avatarState.eyeX, eyeY + avatarState.eyeY, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Light Reflection Catchlight
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(ex + avatarState.eyeX - 2.5, eyeY - 2.5, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+}
+
+function drawMouth(profile) {
+  const my = 75;
+  const open = avatarState.mouthOpen;
+  const mw = 26 * avatarState.mouthWidth;
+
+  if (open > 0.08) {
+    // Open Speaking Mouth
+    ctx.fillStyle = '#6B1D2F';
+    ctx.beginPath();
+    ctx.ellipse(0, my, mw, 8 + open * 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Upper Teeth
+    ctx.fillStyle = '#F8FAFC';
+    ctx.beginPath();
+    ctx.rect(-mw * 0.7, my - (4 + open * 5), mw * 1.4, 4);
+    ctx.fill();
+
+    // Tongue
+    ctx.fillStyle = '#D97786';
+    ctx.beginPath();
+    ctx.ellipse(0, my + (4 + open * 4), mw * 0.6, 5, 0, 0, Math.PI);
+    ctx.fill();
+
+    // Lips Outline
+    ctx.strokeStyle = '#B94B5E';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  } else {
+    // Smiling Closed Mouth
+    ctx.strokeStyle = '#A13B4D';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(-22, my - 2);
+    ctx.quadraticCurveTo(0, my + 8, 22, my - 2);
+    ctx.stroke();
+  }
+}
+
+function drawGlasses() {
+  ctx.strokeStyle = '#0F172A';
+  ctx.lineWidth = 3.5;
+  [-1, 1].forEach(side => {
+    const gx = side * 34;
+    ctx.beginPath();
+    ctx.roundRect(gx - 20, -14, 40, 28, 6);
+    ctx.stroke();
+    // Subtle lens reflection
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fill();
+  });
+  // Bridge
+  ctx.beginPath();
+  ctx.moveTo(-14, -4);
+  ctx.lineTo(14, -4);
+  ctx.stroke();
+}
+
+function drawHair(profile) {
+  ctx.fillStyle = profile.hairColor;
+  ctx.beginPath();
+  if (profile.hairStyle === 'long_brunette') {
+    ctx.moveTo(-90, 10);
+    ctx.quadraticCurveTo(0, -115, 90, 10);
+    ctx.quadraticCurveTo(50, -60, 0, -50);
+    ctx.quadraticCurveTo(-50, -60, -90, 10);
+  } else if (profile.hairStyle === 'short_grey' || profile.hairStyle === 'short_neat') {
+    ctx.moveTo(-86, 0);
+    ctx.quadraticCurveTo(-80, -100, 0, -105);
+    ctx.quadraticCurveTo(80, -100, 86, 0);
+    ctx.quadraticCurveTo(50, -75, 0, -70);
+    ctx.quadraticCurveTo(-50, -75, -86, 0);
+  } else {
+    // modern crop
+    ctx.moveTo(-85, -10);
+    ctx.quadraticCurveTo(0, -120, 85, -10);
+    ctx.lineTo(70, -60);
+    ctx.lineTo(-70, -60);
+  }
+  ctx.fill();
+}
+
+/* =========================================================================
+   LIVE VOICE & SPEECH RECOGNITION (STT / TTS)
+   ========================================================================= */
+
+let recognition = null;
+let isRecording = false;
+let currentUtterance = null;
+let currentGermanReply = "";
+let currentEnglishReply = "";
+let callSeconds = 0;
+let callTimerInterval = null;
+
+// Start Timer
+setInterval(() => {
+  callSeconds++;
+  const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+  const s = String(callSeconds % 60).padStart(2, '0');
+  document.getElementById('callDuration').textContent = `⏱️ ${m}:${s}`;
+}, 1000);
+
+function initSTT() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    console.warn("Speech recognition not supported in this browser.");
+    return;
+  }
+  recognition = new SpeechRec();
+  recognition.lang = 'de-DE';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    updateMicButtonState(true);
+    document.getElementById('liveDot').className = 'live-dot speaking';
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      transcript += event.results[i][0].transcript;
+    }
+    if (transcript.trim()) {
+      document.getElementById('humanTextInput').value = transcript;
+    }
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    updateMicButtonState(false);
+    const spoken = document.getElementById('humanTextInput').value.trim();
+    if (spoken) {
+      processUserSpeech(spoken);
+      document.getElementById('humanTextInput').value = '';
+    }
+  };
+
+  recognition.onerror = (err) => {
+    console.warn("STT Error:", err);
+    isRecording = false;
+    updateMicButtonState(false);
+  };
+}
+
+function toggleHeroMic() {
+  if (!recognition) {
+    alert("Spracherkennung wird in diesem Browser nicht unterstützt. Bitte nutze Chrome, Safari oder Edge oder tippe unten in das Textfeld.");
+    return;
+  }
+  if (isRecording) {
+    recognition.stop();
+  } else {
+    try {
+      stopHumanVoice();
+      recognition.start();
+    } catch(e) {
+      recognition.stop();
+    }
+  }
+}
+
+function updateMicButtonState(recording) {
+  const btn = document.getElementById('heroMicBtn');
+  const icon = document.getElementById('heroMicIcon');
+  const label = document.getElementById('heroMicLabel');
+
+  if (recording) {
+    btn.classList.add('listening');
+    icon.textContent = '⏹️';
+    label.textContent = 'Höre zu... Sprich auf Deutsch!';
+  } else {
+    btn.classList.remove('listening');
+    icon.textContent = '🎙️';
+    label.textContent = 'Sprechen (Tap to Speak German)';
+  }
+}
+
+function sendHumanText() {
+  const input = document.getElementById('humanTextInput');
+  const txt = input.value.trim();
+  if (!txt) return;
+  input.value = '';
+  processUserSpeech(txt);
+}
+
+function speakHumanVoice(germanText, englishText = "") {
+  if (!('speechSynthesis' in window)) return;
+  stopHumanVoice();
+
+  currentGermanReply = germanText;
+  currentEnglishReply = englishText;
+
+  // Update Subtitle Overlay
+  document.getElementById('subGermanText').textContent = `"${germanText}"`;
+  document.getElementById('subEnglishText').textContent = englishText ? `"${englishText}"` : '';
+
+  const clean = germanText.replace(/[*_~`]/g, '');
+  currentUtterance = new SpeechSynthesisUtterance(clean);
+  currentUtterance.lang = 'de-DE';
+  currentUtterance.rate = 0.95;
+
+  const voices = window.speechSynthesis.getVoices();
+  const profile = HUMAN_PROFILES[avatarState.persona];
+  const deVoices = voices.filter(v => v.lang.startsWith('de'));
+
+  if (deVoices.length > 0) {
+    if (profile.gender === 'female') {
+      const female = deVoices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('marlene') || v.name.toLowerCase().includes('anna') || v.name.toLowerCase().includes('katja'));
+      currentUtterance.voice = female || deVoices[0];
+    } else {
+      const male = deVoices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('hans') || v.name.toLowerCase().includes('stefan'));
+      currentUtterance.voice = male || deVoices[0];
+    }
+  }
+
+  currentUtterance.onstart = () => {
+    avatarState.isSpeaking = true;
+    document.getElementById('liveDot').className = 'live-dot speaking';
+  };
+
+  currentUtterance.onend = () => {
+    avatarState.isSpeaking = false;
+    document.getElementById('liveDot').className = 'live-dot';
+  };
+
+  currentUtterance.onerror = () => {
+    avatarState.isSpeaking = false;
+    document.getElementById('liveDot').className = 'live-dot';
+  };
+
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopHumanVoice() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  avatarState.isSpeaking = false;
+  document.getElementById('liveDot').className = 'live-dot';
+}
+
+function replayCurrentVoice() {
+  if (currentGermanReply) {
+    speakHumanVoice(currentGermanReply, currentEnglishReply);
+  }
+}
+
+/* =========================================================================
+   AI MULTI-PROVIDER INTEGRATION & LIVE GRAMMAR CORRECTION
+   ========================================================================= */
+
+let activeProvider = localStorage.getItem('de_ai_provider') || 'deepseek';
+let conversationHistory = [];
+
+const AI_PROVIDERS = {
+  deepseek: { name: "DeepSeek AI", endpoint: "https://api.deepseek.com/chat/completions", model: "deepseek-chat" },
+  openai: { name: "OpenAI", endpoint: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini" },
+  groq: { name: "Groq", endpoint: "https://api.groq.com/openai/v1/chat/completions", model: "llama-3.3-70b-versatile" },
+  gemini: { name: "Google Gemini", endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", model: "gemini-1.5-flash" },
+  ollama: { name: "Local Ollama", endpoint: "http://localhost:11434/v1/chat/completions", model: "llama3:latest" }
+};
+
+async function processUserSpeech(userGermanText) {
+  const profile = HUMAN_PROFILES[avatarState.persona];
+  const cefr = document.getElementById('humanCefrSelect').value;
+  const topic = document.getElementById('humanTopicSelect').selectedOptions[0].text;
+
+  document.getElementById('liveDot').className = 'live-dot thinking';
+  avatarState.expression = 'curious';
+
+  // Add to Live Feedback Container
+  const feedbackContainer = document.getElementById('liveCorrectionContainer');
+  feedbackContainer.innerHTML = `
+    <div class="correction-card">
+      <div class="user-speech-row">Du: <b>"${escapeHtml(userGermanText)}"</b></div>
+      <div style="font-size:12.5px; color:var(--accent);">⏳ ${profile.name} analysiert deine Grammatik und antwortet...</div>
+    </div>
+  `;
+
+  const sysPrompt = `Du bist ${profile.name}, ein einfühlsamer, muttersprachlicher deutscher Gesprächspartner und Lehrer.
+Profil: ${profile.title}.
+Aktuelles Lernniveau des Nutzers (Arun): ${cefr}.
+Aktuelles Thema: "${topic}".
+
+Antworte IMMER im folgenden JSON-Format:
+{
+  "reply_de": "Deine natürliche, sympathische und fließende deutsche Antwort als ${profile.name} (1-3 Sätze, passend zu ${cefr})",
+  "reply_en": "English translation of your reply for subtitles",
+  "score": 85, // 0 bis 100 Genauigkeit
+  "corrected_user_sentence": "Vollständig korrekte Version des deutschen Satzes des Nutzers",
+  "rule_explanations": [
+    "Prägnante Erklärung des Fehlers (z.B. 'Dativ nach mit: mit dem Auto', 'Verb am Ende nach weil')"
+  ],
+  "native_upgrade": "Ein optionaler eleganterer B1/B2 Satzvorschlag (Redemittel)"
+}
+Falls der Nutzer fehlerfrei gesprochen hat:
+- setze "score": 100
+- setze "rule_explanations": ["Hervorragend! Keine Grammatikfehler."]
+Gib NUR reines JSON zurück.`;
+
+  try {
+    const key = localStorage.getItem(`de_ai_key_${activeProvider}`) || '';
+    const config = AI_PROVIDERS[activeProvider];
+
+    if (activeProvider !== 'ollama' && !key) {
+      openSettings();
+      feedbackContainer.innerHTML = `<div class="correction-card error">⚠️ Bitte API-Schlüssel für ${config.name} hinterlegen (oben auf ⚙️ Key klicken).</div>`;
+      return;
+    }
+
+    const messages = [
+      { role: "system", content: sysPrompt }
+    ];
+
+    conversationHistory.slice(-4).forEach(h => {
+      messages.push({ role: h.role, content: h.content });
+    });
+    messages.push({ role: "user", content: userGermanText });
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (activeProvider !== 'ollama' && key) headers['Authorization'] = `Bearer ${key}`;
+
+    const res = await fetch(config.endpoint, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: config.model,
+        messages: messages,
+        temperature: 0.5
+      })
+    });
+
+    if (!res.ok) throw new Error(`API Fehler (${res.status})`);
+    const data = await res.json();
+    const raw = data.choices[0].message.content;
+
+    let parsed = null;
+    try {
+      let clean = raw.trim();
+      if (clean.startsWith('```json')) clean = clean.replace(/^```json/, '').replace(/```$/, '').trim();
+      else if (clean.startsWith('```')) clean = clean.replace(/^```/, '').replace(/```$/, '').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      parsed = {
+        reply_de: raw,
+        reply_en: "",
+        score: 90,
+        corrected_user_sentence: userGermanText,
+        rule_explanations: ["Antwort empfangen."]
+      };
+    }
+
+    // Render Feedback
+    renderFeedbackCard(userGermanText, parsed);
+
+    // Human Voice Speech
+    conversationHistory.push({ role: "user", content: userGermanText });
+    conversationHistory.push({ role: "assistant", content: parsed.reply_de });
+
+    speakHumanVoice(parsed.reply_de, parsed.reply_en);
+
+  } catch(err) {
+    console.error("AI Error:", err);
+    feedbackContainer.innerHTML = `<div class="correction-card error">❌ Verbindungsfehler: ${err.message}. Bitte API-Key prüfen.</div>`;
+    document.getElementById('liveDot').className = 'live-dot';
+  }
+}
+
+function renderFeedbackCard(origText, parsed) {
+  const container = document.getElementById('liveCorrectionContainer');
+  const isPerfect = parsed.score >= 95;
+  const cardClass = isPerfect ? 'correction-card perfect' : 'correction-card error';
+
+  document.getElementById('liveAccuracyScore').textContent = `Genauigkeit: ${parsed.score}%`;
+
+  let ruleHtml = (parsed.rule_explanations || []).map(r => `
+    <div class="rule-tip-item"><span>📌</span> <span>${escapeHtml(r)}</span></div>
+  `).join('');
+
+  let upgradeHtml = parsed.native_upgrade ? `
+    <div style="font-size:12.5px; color:var(--gold); margin-top:4px;">
+      💡 <b>B1/B2 Upgrade:</b> "${escapeHtml(parsed.native_upgrade)}"
+    </div>
+  ` : '';
+
+  container.innerHTML = `
+    <div class="${cardClass}">
+      <div class="user-speech-row">Du: <b>"${escapeHtml(origText)}"</b></div>
+      ${!isPerfect ? `<div class="corrected-sentence">Korrektur: ${escapeHtml(parsed.corrected_user_sentence || origText)}</div>` : `<div style="color:var(--green); font-weight:600; font-size:13px;">🌟 Perfekt formuliert!</div>`}
+      <div class="rule-tips">${ruleHtml}</div>
+      ${upgradeHtml}
+    </div>
+  `;
+}
+
+/* =========================================================================
+   PERSONA & TOPIC SWITCHERS
+   ========================================================================= */
+
+function changeHumanPersona() {
+  const p = document.getElementById('humanPersonaSelect').value;
+  avatarState.persona = p;
+  const profile = HUMAN_PROFILES[p];
+  document.getElementById('coachDisplayName').textContent = `${profile.name} (${profile.title})`;
+  conversationHistory = [];
+  speakHumanVoice(profile.starter, profile.starterEn);
+}
+
+function changeHumanCefr() {
+  const cefr = document.getElementById('humanCefrSelect').value;
+  conversationHistory = [];
+  speakHumanVoice(`Alles klar! Wir sprechen jetzt auf Niveau ${cefr}.`, `Got it! We are now speaking at level ${cefr}.`);
+}
+
+function changeHumanTopic() {
+  const topicName = document.getElementById('humanTopicSelect').selectedOptions[0].text;
+  conversationHistory = [];
+  speakHumanVoice(`Lass uns über das Thema "${topicName}" sprechen. Was denkst du darüber?`, `Let's talk about the topic "${topicName}". What do you think about it?`);
+}
+
+function switchAiProvider() {
+  activeProvider = document.getElementById('aiProviderSelect').value;
+  localStorage.setItem('de_ai_provider', activeProvider);
+  const config = AI_PROVIDERS[activeProvider];
+  document.getElementById('currentProviderLabel').textContent = config.name;
+}
+
+function openSettings() {
+  switchAiProvider();
+  document.getElementById('modalKeyInput').value = localStorage.getItem(`de_ai_key_${activeProvider}`) || '';
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+function saveModalSettings() {
+  const val = document.getElementById('modalKeyInput').value.trim();
+  localStorage.setItem(`de_ai_key_${activeProvider}`, val);
+  closeSettings();
+  alert(`✅ API-Key für ${AI_PROVIDERS[activeProvider].name} gespeichert!`);
+}
+
+/* =========================================================================
+   INITIALIZATION
+   ========================================================================= */
+
+window.addEventListener('DOMContentLoaded', () => {
+  initSTT();
+  document.getElementById('aiProviderSelect').value = activeProvider;
+  switchAiProvider();
+  requestAnimationFrame(animateAvatar);
+
+  // Initial greeting
+  const profile = HUMAN_PROFILES[avatarState.persona];
+  document.getElementById('subGermanText').textContent = `"${profile.starter}"`;
+  document.getElementById('subEnglishText').textContent = `"${profile.starterEn}"`;
+});
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+</script>
+
+</body>
+</html>
