@@ -459,56 +459,455 @@ function typLabelAdj(t){
   return {regular:'Regelmäßig', umlaut:'Umlaut', irregular:'Unregelmäßig'}[t] || t;
 }
 
-function renderNounMemoryHack(v){
-  const sg = (v.sg||'').toLowerCase();
-  const art = (v.a||'').toLowerCase();
+const COMPOUND_ROOTS_DB = {
+  "fuß": { de: "Fuß", en: "foot", ta: "பாதம்" },
+  "fuss": { de: "Fuß", en: "foot", ta: "பாதம்" },
+  "gänger": { de: "Gänger", en: "walker", ta: "நடப்பவர்" },
+  "gaenger": { de: "Gänger", en: "walker", ta: "நடப்பவர்" },
+  "zone": { de: "Zone", en: "zone / area", ta: "பகுதி" },
+  "krank": { de: "Krank", en: "sick / ill", ta: "நோய்வாய்ப்பட்ட" },
+  "kranken": { de: "Kranken", en: "sick people / patients", ta: "நோயாளிகள்" },
+  "haus": { de: "Haus", en: "house / building", ta: "வீடு / கட்டிடம்" },
+  "arbeit": { de: "Arbeit", en: "work / job", ta: "வேலை" },
+  "arbeits": { de: "Arbeits", en: "work-related", ta: "வேலை சார்ந்த" },
+  "platz": { de: "Platz", en: "place / square / spot", ta: "இடம்" },
+  "fahr": { de: "Fahr", en: "travel / ride", ta: "பயணம்" },
+  "karte": { de: "Karte", en: "card / ticket", ta: "சீட்டு / அட்டை" },
+  "karten": { de: "Karten", en: "tickets / cards", ta: "டிக்கெட்டுகள்" },
+  "fahrkarte": { de: "Fahrkarte", en: "travel ticket", ta: "பயணச் சீட்டு" },
+  "fahrkarten": { de: "Fahrkarten", en: "travel tickets", ta: "பயணச் சீட்டுகள்" },
+  "automat": { de: "Automat", en: "machine / dispenser", ta: "இயந்திரம்" },
+  "wohn": { de: "Wohn", en: "living / dwelling", ta: "குடியிருப்பு" },
+  "zimmer": { de: "Zimmer", en: "room", ta: "அறை" },
+  "schlaf": { de: "Schlaf", en: "sleep", ta: "தூக்கம்" },
+  "ess": { de: "Ess", en: "eating / dining", ta: "சாப்பாடு" },
+  "küche": { de: "Küche", en: "kitchen", ta: "சமையலறை" },
+  "bad": { de: "Bad", en: "bath / bathroom", ta: "குளியலறை" },
+  "bahn": { de: "Bahn", en: "train / track", ta: "ரயில் / பாதை" },
+  "hof": { de: "Hof", en: "court / yard / station", ta: "நிலையம் / முற்றம்" },
+  "bahnhof": { de: "Bahnhof", en: "train station", ta: "ரயில் நிலையம்" },
+  "haupt": { de: "Haupt", en: "main / central", ta: "முக்கிய" },
+  "hauptbahnhof": { de: "Hauptbahnhof", en: "main train station", ta: "மத்திய ரயில் நிலையம்" },
+  "flug": { de: "Flug", en: "flight", ta: "விமானம் / பறத்தல்" },
+  "hafen": { de: "Hafen", en: "harbor / port", ta: "துறைமுகம்" },
+  "flughafen": { de: "Flughafen", en: "airport", ta: "விமான நிலையம்" },
+  "rad": { de: "Rad", en: "wheel / bike", ta: "சக்கரம்" },
+  "fahrrad": { de: "Fahrrad", en: "bicycle", ta: "மிதிவண்டி" },
+  "auto": { de: "Auto", en: "car", ta: "கார்" },
+  "schrank": { de: "Schrank", en: "closet / cupboard", ta: "அலமாரி" },
+  "kühl": { de: "Kühl", en: "cool / cold", ta: "குளிர்ச்சியான" },
+  "kühlschrank": { de: "Kühlschrank", en: "refrigerator", ta: "குளிர்சாதனப் பெட்டி" },
+  "wörter": { de: "Wörter", en: "words", ta: "வார்த்தைகள்" },
+  "buch": { de: "Buch", en: "book", ta: "புத்தகம்" },
+  "wörterbuch": { de: "Wörterbuch", en: "dictionary", ta: "அகராதி" },
+  "aufgabe": { de: "Aufgabe", en: "task / assignment", ta: "பணி / கடமை" },
+  "hausaufgabe": { de: "Hausaufgabe", en: "homework", ta: "வீட்டுப்பாடம்" },
+  "geburt": { de: "Geburt", en: "birth", ta: "பிறப்பு" },
+  "tag": { de: "Tag", en: "day", ta: "நாள்" },
+  "geburtstag": { de: "Geburtstag", en: "birthday", ta: "பிறந்தநாள்" },
+  "zeit": { de: "Zeit", en: "time", ta: "நேரம்" },
+  "jahr": { de: "Jahr", en: "year", ta: "வருடம்" },
+  "jahreszeit": { de: "Jahreszeit", en: "season", ta: "பருவகாலம்" },
+  "vertrag": { de: "Vertrag", en: "contract", ta: "ஒப்பந்தம்" },
+  "handy": { de: "Handy", en: "mobile phone", ta: "கைப்பேசி" },
+  "handyvertrag": { de: "Handyvertrag", en: "mobile contract", ta: "கைப்பேசி ஒப்பந்தம்" },
+  "tisch": { de: "Tisch", en: "table", ta: "மேசை" },
+  "stuhl": { de: "Stuhl", en: "chair", ta: "நாற்காலி" },
+  "schlüssel": { de: "Schlüssel", en: "key", ta: "சாவி" },
+  "tasche": { de: "Tasche", en: "bag / pocket", ta: "பை" },
+  "geld": { de: "Geld", en: "money", ta: "பணம்" },
+  "schein": { de: "Schein", en: "certificate / banknote", ta: "சான்றிதழ் / நோட்டு" },
+  "geldschein": { de: "Geldschein", en: "banknote", ta: "ரூபாய் நோட்டு" },
+  "brille": { de: "Brille", en: "glasses", ta: "கண்ணாடி" },
+  "sonne": { de: "Sonne", en: "sun", ta: "சூரியன்" },
+  "sonnenbrille": { de: "Sonnenbrille", en: "sunglasses", ta: "சூரியக் கண்ணாடி" }
+};
+
+const NOUN_MNEMONIC_DB = {
+  "fußgängerzone": {
+    image: "Imagine a giant, friendly cartoon FOOT walking peacefully down a wide cobblestone street where all cars and traffic are strictly forbidden.",
+    breakdown: ["Fuß (foot)", "Gänger (walker)", "Zone (zone)"],
+    breakdownEn: "FOOT-WALKER ZONE",
+    emojiScene: "🚶🚶🚶 People walking + 🚫🚗 No cars → Fußgängerzone",
+    punch: "DIE + FOOT + WALKER + ZONE → die Fußgängerzone"
+  },
+  "wohnung": {
+    image: "Imagine relaxing in your cozy APARTMENT where you 'WON' (wohn-) ultimate peace, quiet, and independence.",
+    breakdown: ["Wohnen (to live/reside)", "-ung (noun suffix)"],
+    breakdownEn: "LIVING PLACE / FLAT",
+    emojiScene: "🛋️ Cozy home + 🔑 Private key → die Wohnung",
+    punch: "DIE + WOHNEN (-ung) → die Wohnung"
+  },
+  "mädchen": {
+    image: "Imagine a little cheerful girl wearing a red coat. The diminutive suffix '-chen' shrinks everything into cute NEUTER (das)!",
+    breakdown: ["Magd (young maiden/girl)", "-chen (little/diminutive)"],
+    breakdownEn: "LITTLE MAIDEN / GIRL",
+    emojiScene: "👧 Little girl + 🎀 Small diminutive (-chen) → das Mädchen",
+    punch: "DAS + MÄD- + -CHEN → das Mädchen"
+  },
+  "apfel": {
+    image: "Imagine biting into a crisp, juicy red APPLE that makes a loud 'CRUNCH'! The singular 'A' flips into 'Ä' for plural (Äpfel).",
+    breakdown: ["Apfel (Germanic apple)"],
+    breakdownEn: "CRISP RED APPLE",
+    emojiScene: "🍎 Crisp apple + 🌳 Fruit tree → der Apfel",
+    punch: "DER + APPLE (A → Ä) → der Apfel"
+  },
+  "kind": {
+    image: "Imagine a happy young CHILD playing kindly with wooden building blocks.",
+    breakdown: ["Kind (kin / child)"],
+    breakdownEn: "YOUNG CHILD",
+    emojiScene: "👶 Happy child + 🧸 Toys (-er plural) → das Kind",
+    punch: "DAS + KIND (+er) → das Kind"
+  },
+  "auto": {
+    image: "Imagine a sleek, shiny blue sports CAR zooming down the German Autobahn. Ends in '-o' like Kino/Foto → neuter DAS!",
+    breakdown: ["Auto (automobile / self-moving)"],
+    breakdownEn: "MOTOR VEHICLE / CAR",
+    emojiScene: "🚗 Fast car + 🛣️ Autobahn → das Auto",
+    punch: "DAS + AUTO (+s) → das Auto"
+  },
+  "schlüssel": {
+    image: "Imagine turning a solid silver KEY that goes 'CLICK' to close and lock (schließen) your front door safely.",
+    breakdown: ["Schließen (to lock/close)", "-el (tool suffix)"],
+    breakdownEn: "LOCKING TOOL / KEY",
+    emojiScene: "🗝️ Silver key + 🔒 Secure lock → der Schlüssel",
+    punch: "DER + SCHLIESSEN TOOL → der Schlüssel"
+  },
+  "lampe": {
+    image: "Imagine switching on an elegant glowing bedside LAMP that illuminates the whole dark room in warm light.",
+    breakdown: ["Lampe (light fixture)"],
+    breakdownEn: "GLOWING LIGHT LAMP",
+    emojiScene: "💡 Glowing lamp + 🛏️ Bedside table → die Lampe",
+    punch: "DIE + LAMP (-e) → die Lampe"
+  },
+  "buch": {
+    image: "Imagine opening an ancient leather-bound BOOK filled with magical stories and glowing letters. Plural adds umlaut: Bücher!",
+    breakdown: ["Buch (beech wood tablet / book)"],
+    breakdownEn: "BOUND BOOK",
+    emojiScene: "📖 Open book + 📚 Library shelf → das Buch",
+    punch: "DAS + BOOK (u → ü + er) → das Buch"
+  },
+  "möglichkeit": {
+    image: "Imagine a golden master key unlocking multiple glowing doors of endless OPPORTUNITY and possibility. Suffix '-keit' is 100% DIE!",
+    breakdown: ["Möglich (possible)", "-keit (quality / state)"],
+    breakdownEn: "STATE OF POSSIBILITY / OPTION",
+    emojiScene: "🚪 Open doors + ✨ Endless choices → die Möglichkeit",
+    punch: "DIE + MÖGLICH + -KEIT → die Möglichkeit"
+  },
+  "arbeitsplatz": {
+    image: "Imagine walking into your modern office and sitting at your dedicated WORK DESK equipped with monitor, notebook, and coffee.",
+    breakdown: ["Arbeit (work)", "s (connector)", "Platz (place / spot)"],
+    breakdownEn: "WORK PLACE / JOB SPOT",
+    emojiScene: "💼 Work tasks + 🖥️ Office desk → der Arbeitsplatz",
+    punch: "DER + ARBEIT + PLATZ → der Arbeitsplatz"
+  },
+  "fahrkartenautomat": {
+    image: "Imagine standing on the train platform tapping the touchscreen of a tall, red TICKET VENDING MACHINE to buy your train pass.",
+    breakdown: ["Fahrkarte (travel ticket)", "n (connector)", "Automat (vending machine)"],
+    breakdownEn: "TRAVEL-TICKET MACHINE",
+    emojiScene: "🎫 Train ticket + 🤖 Dispenser machine → der Fahrkartenautomat",
+    punch: "DER + FAHRKARTE + AUTOMAT → der Fahrkartenautomat"
+  },
+  "krankenhaus": {
+    image: "Imagine a large, modern hospital building where dedicated doctors and nurses help sick people recover.",
+    breakdown: ["Kranken (sick people/patients)", "Haus (building/house)"],
+    breakdownEn: "SICK-PEOPLE HOUSE / HOSPITAL",
+    emojiScene: "🏥 Hospital building + 🩺 Doctors caring → das Krankenhaus",
+    punch: "DAS + KRANKEN + HAUS → das Krankenhaus"
+  }
+};
+
+function analyzeNoun(v) {
+  const sg = (v.sg || '').trim();
+  const sgLower = sg.toLowerCase();
+  const art = (v.a || '').trim().toLowerCase();
+  const pl = (v.pl || '').trim();
+  const plLower = pl.toLowerCase();
+  const en = v.en || 'noun';
+  const ta = v.ta || '';
+
+  // --- A. GENDER RULE ANALYSIS ---
   let genderRule = '';
-  let pluralRule = '';
-  let soundLink = '';
+  let genderClass = art === 'die' ? 'fem' : art === 'der' ? 'masc' : 'neut';
 
-  // Gender heuristics
-  if(sg.endsWith('ung') || sg.endsWith('heit') || sg.endsWith('keit') || sg.endsWith('schaft') || sg.endsWith('tion') || sg.endsWith('tät') || sg.endsWith('ik') || sg.endsWith('ie') || sg.endsWith('in')){
-    genderRule = `🔴 <b>100% Feminine Suffix:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are ALWAYS <b>die</b>!`;
-  } else if(sg.endsWith('chen') || sg.endsWith('lein') || sg.endsWith('ment') || sg.endsWith('um') || sg.endsWith('tum') || sg.endsWith('ma')){
-    genderRule = `🟢 <b>100% Neuter Suffix:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are ALWAYS <b>das</b>!`;
-  } else if(sg.endsWith('ling') || sg.endsWith('ismus') || sg.endsWith('ist') || sg.endsWith('or') || sg.endsWith('ant') || sg.endsWith('ent')){
-    genderRule = `🔵 <b>95% Masculine Suffix:</b> Nouns ending in <i>-${sg.slice(-4)}</i> are 95% <b>der</b>!`;
-  } else if(art === 'die' && sg.endsWith('e')){
-    genderRule = `🔴 <b>90% Feminine Rule:</b> Most 2-syllable German nouns ending in <i>-e</i> are <b>die (feminin)</b>!`;
-  } else if(art === 'das' && v.sg[0] === v.sg[0].toUpperCase() && v.sg.endsWith('en')){
-    genderRule = `🟢 <b>Nominalized Verb Rule:</b> Verbs converted into nouns (like <i>das ${v.sg}</i>) are 100% <b>das</b>!`;
+  if (sgLower.endsWith('ung')) {
+    genderRule = '🔴 <b>-ung → DIE:</b> 100% feminine suffix for action/process nouns (e.g. <i>die Wohnung, die Rechnung, die Zeitung</i>).';
+  } else if (sgLower.endsWith('heit')) {
+    genderRule = '🔴 <b>-heit → DIE:</b> 100% feminine suffix for states and qualities (e.g. <i>die Gesundheit, die Freiheit, die Wahrheit</i>).';
+  } else if (sgLower.endsWith('keit')) {
+    genderRule = '🔴 <b>-keit → DIE:</b> 100% feminine suffix for abstract properties and abilities (e.g. <i>die Möglichkeit, die Pünktlichkeit</i>).';
+  } else if (sgLower.endsWith('schaft')) {
+    genderRule = '🔴 <b>-schaft → DIE:</b> 100% feminine suffix for collectives and relations (e.g. <i>die Freundschaft, die Mannschaft</i>).';
+  } else if (sgLower.endsWith('tion') || sgLower.endsWith('sion') || sgLower.endsWith('ion')) {
+    genderRule = '🔴 <b>-ion / -tion → DIE:</b> 100% feminine Latin loan suffix (e.g. <i>die Station, die Information, die Diskussion</i>).';
+  } else if (sgLower.endsWith('tät')) {
+    genderRule = '🔴 <b>-tät → DIE:</b> 100% feminine suffix for qualities and institutions (e.g. <i>die Universität, die Qualität</i>).';
+  } else if (sgLower.endsWith('ik')) {
+    genderRule = '🔴 <b>-ik → DIE:</b> Feminine suffix for fields, arts, and systems (e.g. <i>die Musik, die Politik, die Grammatik</i>).';
+  } else if (sgLower.endsWith('in') && (art === 'die')) {
+    genderRule = '🔴 <b>-in → DIE:</b> Feminine suffix for female professions and persons (e.g. <i>die Kollegin, die Ärztin, die Lehrerin</i>).';
+  } else if (sgLower.endsWith('ei') || sgLower.endsWith('erei')) {
+    genderRule = '🔴 <b>-ei → DIE:</b> Feminine suffix for businesses and workshops (e.g. <i>die Bäckerei, die Bücherei, die Datei</i>).';
+  } else if (sgLower.endsWith('chen')) {
+    genderRule = '🟢 <b>-chen → DAS:</b> 100% neuter diminutive suffix that makes things small/endearing (e.g. <i>das Mädchen, das Brötchen</i>).';
+  } else if (sgLower.endsWith('lein')) {
+    genderRule = '🟢 <b>-lein → DAS:</b> 100% neuter diminutive suffix (e.g. <i>das Fräulein, das Büchlein</i>).';
+  } else if (sgLower.endsWith('ment')) {
+    genderRule = '🟢 <b>-ment → DAS:</b> Neuter suffix for instruments and documents (e.g. <i>das Dokument, das Medikament</i>).';
+  } else if (sgLower.endsWith('um')) {
+    genderRule = '🟢 <b>-um → DAS:</b> 100% neuter Latin suffix for centers, dates, and institutions (e.g. <i>das Zentrum, das Museum, das Datum</i>).';
+  } else if (sgLower.endsWith('tum') && art === 'das') {
+    genderRule = '🟢 <b>-tum → DAS:</b> Neuter suffix for collective states (e.g. <i>das Eigentum, das Wachstum</i>; exceptions: der Reichtum/Irrtum).';
+  } else if (sgLower.endsWith('ma') && art === 'das') {
+    genderRule = '🟢 <b>-ma → DAS:</b> Neuter Greek loan suffix (e.g. <i>das Thema, das Klima, das Drama</i>).';
+  } else if (sgLower.endsWith('o') && art === 'das') {
+    genderRule = '🟢 <b>-o → DAS:</b> Neuter international loan suffix (e.g. <i>das Auto, das Foto, das Kino, das Büro, das Radio</i>).';
+  } else if (sgLower.endsWith('ismus')) {
+    genderRule = '🔵 <b>-ismus → DER:</b> 100% masculine suffix for systems, movements, and concepts (e.g. <i>der Tourismus, der Optimismus</i>).';
+  } else if (sgLower.endsWith('or') && art === 'der') {
+    genderRule = '🔵 <b>-or → DER:</b> 100% masculine Latin suffix for actors and apparatus (e.g. <i>der Motor, der Doktor, der Professor</i>).';
+  } else if (sgLower.endsWith('ling')) {
+    genderRule = '🔵 <b>-ling → DER:</b> 100% masculine suffix for persons and living things (e.g. <i>der Schmetterling, der Lehrling, der Frühling</i>).';
+  } else if (sgLower.endsWith('ist') && art === 'der') {
+    genderRule = '🔵 <b>-ist → DER:</b> 100% masculine person suffix (e.g. <i>der Polizist, der Tourist, der Spezialist</i>).';
+  } else if ((sgLower.endsWith('ant') || sgLower.endsWith('ent')) && art === 'der') {
+    genderRule = '🔵 <b>-ant / -ent → DER:</b> Masculine person suffix (e.g. <i>der Praktikant, der Assistent, der Student</i>).';
+  } else if (art === 'die' && sgLower.endsWith('e')) {
+    genderRule = '🔴 <b>Useful Feminine Rule:</b> Many German nouns ending in <i>-e</i> are feminine, so <b>DIE</b> is a useful first guess (e.g. <i>die Zone, die Straße, die Lampe, die Schule</i>) — though there are exceptions (e.g. <i>der Name, der Junge, das Auge, das Ende</i>).';
+  } else if (art === 'der' && sgLower.endsWith('e')) {
+    genderRule = '🔵 <b>Weak Masculine (N-Deklination):</b> Masculine persons/beings ending in <i>-e</i> are <b>der</b> (e.g. <i>der Kollege, der Junge, der Kunde, der Name</i>).';
+  } else if (art === 'das' && sg[0] === sg[0].toUpperCase() && sgLower.endsWith('en') && !sgLower.endsWith('chen')) {
+    genderRule = '🟢 <b>Nominalized Verb Rule:</b> Verbs converted into capitalized nouns are 100% <b>das</b> (e.g. <i>das Essen, das Lernen, das Leben</i>).';
+  } else if (art === 'der' && (sgLower.endsWith('er') || sgLower.endsWith('el'))) {
+    genderRule = '🔵 <b>-er / -el Agent/Tool Rule:</b> Nouns denoting an active person or mechanical tool ending in <i>-er / -el</i> are usually <b>der</b> (e.g. <i>der Schlüssel, der Fahrer, der Computer</i>).';
   } else {
-    const artEmoji = art === 'der' ? '🔵 <b>der (maskulin)</b>' : art === 'die' ? '🔴 <b>die (feminin)</b>' : '🟢 <b>das (neutral)</b>';
-    genderRule = `🎨 <b>Article Anchor:</b> Picture <b>${v.sg}</b> with ${artEmoji}.`;
+    if (art === 'der') {
+      genderRule = '🔵 <b>Visual Gender Anchor:</b> Picture <b>' + sg + '</b> with a bold <b>blue shield / masculine anchor (DER)</b>.';
+    } else if (art === 'die') {
+      genderRule = '🔴 <b>Visual Gender Anchor:</b> Picture <b>' + sg + '</b> with a vibrant <b>red flower / feminine anchor (DIE)</b>.';
+    } else {
+      genderRule = '🟢 <b>Visual Gender Anchor:</b> Picture <b>' + sg + '</b> with a fresh <b>green gift box / neuter anchor (DAS)</b>.';
+    }
   }
 
-  // Plural patterns
-  if(v.typ === 'en'){
-    pluralRule = `📦 <b>Plural Trick (-en/-n):</b> Add <b>-(e)n</b> to form plural (<i>die ${v.pl}</i>). No umlaut is needed!`;
-  } else if(v.typ === 'e'){
-    pluralRule = `📦 <b>Plural Trick (-e):</b> Common for masculine/neuter words — adds <b>-e</b> (and often gains an umlaut: <i>die ${v.pl}</i>).`;
-  } else if(v.typ === 'er'){
-    pluralRule = `📦 <b>Plural Trick (-er):</b> Neuter core words love <b>-er</b> + Umlaut (<i>${v.sg} → die ${v.pl}</i>).`;
-  } else if(v.typ === 's'){
-    pluralRule = `📦 <b>Plural Trick (-s):</b> Anglicisms & international loan words take a clean <b>-s</b> (<i>die ${v.pl}</i>).`;
-  } else if(v.typ === 'unchanged'){
-    pluralRule = `📦 <b>Plural Trick (Unchanged):</b> Words ending in <i>-er, -el, -en</i> don't change in plural — only the article switches to <b>die</b> (<i>die ${v.pl}</i>)!`;
-  } else if(v.typ === 'umlaut_only'){
-    pluralRule = `📦 <b>Plural Trick (Umlaut Only):</b> The ending stays intact; only the vowel sprouts two dots (<i>die ${v.pl}</i>)!`;
+  // --- B. PLURAL PATTERN & UMLAUT ANALYSIS ---
+  let pluralPattern = '';
+  let pluralTrick = '';
+  let umlautStatus = '🟢 No umlaut';
+
+  const hasUmlautSg = /[äöüÄÖÜ]/.test(sg);
+  const hasUmlautPl = /[äöüÄÖÜ]/.test(pl);
+  const gainsUmlaut = !hasUmlautSg && hasUmlautPl;
+
+  if (plLower === sgLower || plLower === '') {
+    pluralPattern = 'Unchanged (unverändert)';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut alone';
+      pluralTrick = 'Umlaut alone (vowel changes, no ending added): ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Unchanged ending (stem stays intact, only article becomes die): ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('innen') && sgLower.endsWith('in')) {
+    pluralPattern = '+ -nen';
+    umlautStatus = '🟢 No umlaut';
+    pluralTrick = 'Add <b>-nen</b> for female professions: ' + sg + ' → die ' + pl;
+  } else if (plLower.endsWith('en') && !sgLower.endsWith('en')) {
+    pluralPattern = '+ -en';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-en</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-en</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('n') && !sgLower.endsWith('n')) {
+    pluralPattern = '+ -n';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-n</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-n</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('er') && !sgLower.endsWith('er')) {
+    pluralPattern = '+ -er';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-er</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-er</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('e') && !sgLower.endsWith('e')) {
+    pluralPattern = '+ -e';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-e</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-e</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('s') && !sgLower.endsWith('s')) {
+    pluralPattern = '+ -s';
+    umlautStatus = '🟢 No umlaut';
+    pluralTrick = 'Add <b>-s</b> (international loan pattern): ' + sg + ' → die ' + pl;
+  } else if (gainsUmlaut) {
+    umlautStatus = '🟠 Umlaut alone';
+    pluralTrick = 'Umlaut shift: ' + sg + ' → die ' + pl;
+  } else {
+    pluralPattern = 'Special / Irregular';
+    pluralTrick = 'Plural form: ' + sg + ' → die ' + pl;
   }
 
-  soundLink = `💡 <b>Meaning Lock:</b> <b>${v.a} ${v.sg}</b> (${v.pl ? 'Pl: die '+v.pl : ''}) = <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.`;
+  // --- C. COMPOUND WORD BREAKDOWN ---
+  let wordBreakdown = [];
+  let breakdownEn = '';
+  const directMnemonic = NOUN_MNEMONIC_DB[sgLower];
 
+  if (directMnemonic && directMnemonic.breakdown) {
+    wordBreakdown = directMnemonic.breakdown;
+    breakdownEn = directMnemonic.breakdownEn;
+  } else {
+    const rootsFound = [];
+    let rem = sgLower;
+    const sortedKeys = Object.keys(COMPOUND_ROOTS_DB).sort((a, b) => b.length - a.length);
+
+    for (const k of sortedKeys) {
+      const idx = rem.indexOf(k);
+      if (idx !== -1 && k.length >= 3) {
+        rootsFound.push({ idx: idx, key: k, info: COMPOUND_ROOTS_DB[k] });
+      }
+    }
+
+    rootsFound.sort((a, b) => a.idx - b.idx);
+    if (rootsFound.length >= 2) {
+      wordBreakdown = rootsFound.map(r => r.info.de + ' (' + r.info.en + ')');
+      breakdownEn = rootsFound.map(r => r.info.en.toUpperCase().split('/')[0].trim()).join(' + ');
+    } else if (rootsFound.length === 1 && rootsFound[0].key.length < sgLower.length) {
+      const r = rootsFound[0];
+      const suffix = sgLower.replace(r.key, '');
+      wordBreakdown = [r.info.de + ' (' + r.info.en + ')', (suffix.startsWith('-') ? suffix : '+' + suffix)];
+      breakdownEn = r.info.en.toUpperCase();
+    }
+  }
+
+  // --- D. MNEMONIC IMAGE, EMOJI SCENE & PUNCH FORMULA ---
+  let mentalImage = '';
+  let emojiScene = '';
+  let punch = '';
+
+  if (directMnemonic) {
+    mentalImage = directMnemonic.image;
+    emojiScene = directMnemonic.emojiScene;
+    punch = directMnemonic.punch;
+  } else if (wordBreakdown.length >= 2) {
+    mentalImage = 'Deconstruct the compound: ' + wordBreakdown.join(' + ') + '. Picture the composite concept clearly to reconstruct the word!';
+    emojiScene = '🧩 ' + wordBreakdown.map(b => b.split(' ')[0]).join(' + ') + ' → ' + art.toUpperCase() + ' ' + sg;
+    punch = art.toUpperCase() + ' + ' + (breakdownEn || sg.toUpperCase()) + ' → ' + art + ' ' + sg;
+  } else {
+    mentalImage = 'Picture ' + en + ' (' + ta + ') vividly with ' + (art === 'der' ? 'a blue masculine anchor (DER)' : art === 'die' ? 'a red feminine anchor (DIE)' : 'a green neuter anchor (DAS)') + '.';
+    emojiScene = (art === 'der' ? '🔵' : art === 'die' ? '🔴' : '🟢') + ' ' + sg + ' → ' + en;
+    punch = art.toUpperCase() + ' + ' + sg.toUpperCase() + ' → ' + art + ' ' + sg;
+  }
+
+  return {
+    sg: sg,
+    art: art,
+    artUpper: art.toUpperCase(),
+    pl: pl,
+    en: en,
+    ta: ta,
+    genderClass: genderClass,
+    genderRule: genderRule,
+    pluralPattern: pluralPattern,
+    pluralTrick: pluralTrick,
+    umlautStatus: umlautStatus,
+    wordBreakdown: wordBreakdown,
+    breakdownEn: breakdownEn,
+    mentalImage: mentalImage,
+    emojiScene: emojiScene,
+    punch: punch
+  };
+}
+
+function renderNounMemoryHack(v){
+  const data = analyzeNoun(v);
   return `
-    <div class="morph-box">
-      <div class="morph-header">
-        <span>🧩 Noun Memory Trick &amp; Gender Lock</span>
-        <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; opacity:0.8;">Memory Hack</span>
+    <div style="background:#fffdf5; border:1.5px solid var(--gold); border-radius:10px; padding:13px 14px; margin-top:12px; box-shadow:0 4px 12px rgba(185,138,46,0.15); text-align:left;">
+      <!-- Header -->
+      <div style="font-family:'Fjalla One',sans-serif; font-size:13.5px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #fae8b4; padding-bottom:6px;">
+        <span>🧠 NOUN MEMORY TRICK &amp; GENDER LOCK · <i>${data.artUpper} ${data.sg}</i></span>
+        <span style="font-size:10px; background:var(--gold); color:#fff; padding:2px 6px; border-radius:4px; font-family:'IBM Plex Mono',monospace;">Noun Lock</span>
       </div>
-      <div class="morph-mnemonic">
-        ${genderRule ? `<div style="margin-bottom:6px;">${genderRule}</div>` : ''}
-        ${pluralRule ? `<div style="margin-bottom:6px;">${pluralRule}</div>` : ''}
-        <div style="font-size:11.5px; opacity:0.9;">${soundLink}</div>
+
+      <!-- 1. Gender Lock -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🔒 1. GENDER LOCK: <span style="font-size:14px; color:${data.art==='der'?'var(--blue)':data.art==='die'?'var(--red)':'var(--green)'};">${data.artUpper}</span></div>
+        <div style="background:#fff; border:1px solid #fae8b4; border-left:3px solid ${data.art==='der'?'var(--blue)':data.art==='die'?'var(--red)':'var(--green)'}; padding:8px 10px; border-radius:4px;">
+          ${data.genderRule}
+        </div>
+      </div>
+
+      <!-- 2. Memory Trick -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧠 2. NOUN MEMORY TRICK (நினைவாற்றல் உத்தி):</div>
+        <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px;">
+          • ${data.mentalImage}
+        </div>
+      </div>
+
+      <!-- 3. Plural Trick -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">📦 3. PLURAL TRICK: <code>${data.sg} → die ${data.pl}</code></div>
+        <div style="background:var(--paper); padding:8px 10px; border-radius:4px; font-size:12px;">
+          • ${data.pluralTrick}
+        </div>
+      </div>
+
+      <!-- 4. Umlaut Lock -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🔄 4. UMLAUT LOCK:</div>
+        <div style="background:#fff; border:1px solid #fae8b4; padding:6px 10px; border-radius:4px; font-weight:600; font-size:12px;">
+          ${data.umlautStatus}
+        </div>
+      </div>
+
+      <!-- 5. Word-Building Lock (if compound) -->
+      ${data.wordBreakdown && data.wordBreakdown.length >= 2 ? `
+        <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+          <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧩 5. WORD-BUILDING LOCK (வார்த்தை பகுப்பாய்வு):</div>
+          <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px; font-size:12px;">
+            <div>• <b>Components:</b> ${data.wordBreakdown.join(' + ')}</div>
+            <div style="color:var(--ink-soft); font-size:11.5px; margin-top:2px;">↳ Meaning Structure: <b>"${data.breakdownEn}"</b></div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 6. Meaning Lock -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">💡 6. MEANING LOCK:</div>
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 10px; border-radius:4px; font-size:12px; color:#166534;">
+          <div><b>${data.art} ${data.sg}</b> (Plural: <b>die ${data.pl}</b>) = <b>„${data.en}”</b> ${data.ta ? `(${data.ta})` : ''}</div>
+          <div style="margin-top:4px; font-style:italic;">${data.emojiScene}</div>
+        </div>
+      </div>
+
+      <!-- 7. Compact Final Noun Memory Card -->
+      <div style="margin-top:12px; border:2px solid var(--gold); border-radius:8px; background:#fefce8; padding:10px 12px; font-size:12px; line-height:1.6;">
+        <div style="font-family:'Fjalla One',sans-serif; font-size:12.5px; color:var(--gold); text-transform:uppercase; margin-bottom:6px; border-bottom:1px solid #fae8b4; padding-bottom:3px;">
+          🎯 NOUN MEMORY LOCK SUMMARY
+        </div>
+        <div>🔒 <b>Gender:</b> <span style="font-weight:700; color:${data.art==='der'?'var(--blue)':data.art==='die'?'var(--red)':'var(--green)'};">${data.artUpper}</span> (${data.genderRule.replace(/<[^>]+>/g, '').split(':')[0]})</div>
+        <div>🧠 <b>Memory Trick:</b> ${data.mentalImage}</div>
+        <div>📦 <b>Plural:</b> die ${data.pl}</div>
+        <div>➕ <b>Plural Trick:</b> ${data.pluralPattern}</div>
+        <div>⭕ <b>Umlaut:</b> ${data.umlautStatus}</div>
+        <div>💡 <b>Meaning:</b> ${data.en}</div>
+        ${data.wordBreakdown && data.wordBreakdown.length >= 2 ? `<div>🧩 <b>Word Build:</b> ${data.wordBreakdown.map(b => b.split(' ')[0]).join(' + ')}</div>` : ''}
+        <div style="margin-top:6px; background:var(--paper); border:1px solid var(--gold); padding:5px 8px; border-radius:4px; text-align:center; font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink);">
+          ⚡ <b>One-Second Recall:</b> ${data.punch}
+        </div>
       </div>
     </div>
   `;
