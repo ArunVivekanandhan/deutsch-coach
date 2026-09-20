@@ -145,6 +145,38 @@
     padding:6px 9px; border-radius:0 5px 5px 0; margin-bottom:10px; display:none;}
   footer{margin-top:20px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); text-align:center; line-height:1.6;}
 
+  /* Fast Mode Details Panel & Inputs */
+  .details-toggle {
+    margin-top: 14px; border: 1.5px solid var(--gold); border-radius: 8px;
+    background: #fffdf5; overflow: hidden; text-align: left;
+  }
+  .details-summary {
+    font-family: 'Fjalla One', sans-serif; font-size: 13.5px; color: var(--gold);
+    padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between;
+    align-items: center; user-select: none; background: #fffdf5; transition: background 0.15s ease;
+  }
+  .details-summary:hover { background: #fefce8; }
+  .details-toggle[open] .details-summary { border-bottom: 1px solid #fae8b4; }
+  .details-content { padding: 4px 6px 12px; }
+
+  .fast-input {
+    width: 100%; padding: 9px 12px; font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px; border: 1.5px solid var(--line); border-radius: 6px;
+    box-sizing: border-box; background: #fff; color: var(--ink); margin-top: 8px;
+  }
+  .fast-input:focus {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(185,138,46,0.15);
+  }
+  .feedback-box {
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; line-height: 1.5;
+  }
+  .feedback-box.correct { background: #ecfdf5; border-left: 4px solid var(--green); color: #065f46; }
+  .feedback-box.wrong { background: #fef2f2; border-left: 4px solid var(--red); color: #991b1b; }
+  .shortcuts-hint {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft);
+    text-align: center; margin-top: 10px; opacity: 0.85;
+  }
+
   html.dark-theme {
     --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
     --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
@@ -1006,10 +1038,11 @@ function renderCard(){
   }
   const reverse = (curDir === 'en2de');
 
-  let promptHTML, revealHTML;
+  let promptHTML, revealCoreHTML, inputPlaceholder = '';
   if(curMode==='nomen'){
     const wordDisp = `${v.a} ${v.sg}`;
     if (curDir === 'gender') {
+      inputPlaceholder = 'der / die / das...';
       promptHTML = `
       <div class="qlabel">Artikel (der/die/das) · 📦 ${boxNames[box]}</div>
       <div class="prompt">
@@ -1017,18 +1050,18 @@ function renderCard(){
         <div class="wordline"><div class="word">___ ${v.sg}</div>${speakBtn(v.a+' '+v.sg,'Listen to word')}</div>
         <div class="subq">Welcher Artikel (der, die oder das)?</div>
         <div style="margin-top:10px;">
-          <input type="text" id="naTypeInput" placeholder="der / die / das..." style="width:100%; padding:8px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
+          <input type="text" id="naTypeInput" class="fast-input" placeholder="${inputPlaceholder}" autocomplete="off">
         </div>
+        <div id="typedFeedbackArea" style="margin-top:8px;"></div>
       </div>`;
-      revealHTML = `
+      revealCoreHTML = `
       <div class="revealbox">
         <div class="formrow"><span class="flabel">Artikel + Singular</span><span class="fval">${v.a} ${v.sg}${speakBtn(v.a+' '+v.sg,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
         ${meaningHTML(v)}
-        ${renderNounMemoryHack(v)}
-        ${ruleExplanationNoun(v)}
       </div>`;
     } else {
+      inputPlaceholder = reverse ? `e.g. ${v.a} ${v.sg}, die ${v.pl}...` : `Type plural form (e.g. die ${v.pl})...`;
       promptHTML = reverse ? `
         <div class="qlabel">Meaning → Noun · 📦 ${boxNames[box]}</div>
         <div class="prompt">
@@ -1036,48 +1069,58 @@ function renderCard(){
           <div class="word" style="font-size:22px;">${meaningPromptText(v)}</div>
           <div class="subq">What is the noun (with article) — and what is the plural?</div>
           <div style="margin-top:10px;">
-            <input type="text" id="naTypeInput" placeholder="Optional: Type here to practice (e.g. die Tür, die Türen)..." style="width:100%; padding:8px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; border:1.5px solid var(--line); border-radius:6px; box-sizing:border-box;">
+            <input type="text" id="naTypeInput" class="fast-input" placeholder="${inputPlaceholder}" autocomplete="off">
           </div>
+          <div id="typedFeedbackArea" style="margin-top:8px;"></div>
         </div>` : `
         <div class="qlabel">Singular → Plural · 📦 ${boxNames[box]}</div>
         <div class="prompt">
           <div class="wordicon">${getIcon(v)}</div>
           <div class="wordline"><div class="word">${wordDisp}</div>${speakBtn(wordDisp,'Listen to word')}</div>
           <div class="subq">What is the plural?</div>
+          <div style="margin-top:10px;">
+            <input type="text" id="naTypeInput" class="fast-input" placeholder="${inputPlaceholder}" autocomplete="off">
+          </div>
+          <div id="typedFeedbackArea" style="margin-top:8px;"></div>
         </div>`;
       const diag = diffHighlight(v.sg.replace(/\(.*?\)/g,''), v.pl.replace(/\(.*?\)/g,''));
-      revealHTML = `
+      revealCoreHTML = `
         <div class="revealbox">
           ${reverse ? `<div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>` : meaningHTML(v)}
           <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
           <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
-          ${renderNounMemoryHack(v)}
-          ${ruleExplanationNoun(v)}
         </div>`;
     }
   } else {
+    inputPlaceholder = reverse ? `Type adjective forms...` : `Type forms (e.g. ${v.komp}, am ${v.sup})...`;
     promptHTML = reverse ? `
       <div class="qlabel">Meaning → Adjective · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="word" style="font-size:22px;">${meaningPromptText(v)}</div>
         <div class="subq">What is the adjective — and what are the Comparative &amp; Superlative forms?</div>
+        <div style="margin-top:10px;">
+          <input type="text" id="naTypeInput" class="fast-input" placeholder="${inputPlaceholder}" autocomplete="off">
+        </div>
+        <div id="typedFeedbackArea" style="margin-top:8px;"></div>
       </div>` : `
       <div class="qlabel">Positive → Comparative → Superlative · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="wordline"><div class="word">${v.w}</div>${speakBtn(v.w,'Listen to word')}</div>
         <div class="subq">What are the Comparative and Superlative forms?</div>
+        <div style="margin-top:10px;">
+          <input type="text" id="naTypeInput" class="fast-input" placeholder="${inputPlaceholder}" autocomplete="off">
+        </div>
+        <div id="typedFeedbackArea" style="margin-top:8px;"></div>
       </div>`;
     const diag = diffHighlight(v.w.replace(/\(.*?\)/g,''), v.komp);
-    revealHTML = `
+    revealCoreHTML = `
       <div class="revealbox">
         ${reverse ? `<div class="formrow"><span class="flabel">Positive</span><span class="fval">${v.w}${speakBtn(v.w,'Listen to word')}</span></div>` : meaningHTML(v)}
         <div class="formrow"><span class="flabel">Comparative</span><span class="fval">${v.komp}${speakBtn(v.komp,'Comparative listen')}</span></div>
         <div class="formrow"><span class="flabel">Superlative</span><span class="fval">${v.sup}${speakBtn(v.sup,'Superlative listen')}</span></div>
         <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
-        ${renderAdjMemoryHack(v)}
-        ${ruleExplanationAdj(v)}
       </div>`;
   }
 
@@ -1090,47 +1133,187 @@ function renderCard(){
       <div class="stripe ${v.typ}"></div>
       <div class="meta"><span>${srcOrLevel}</span><span style="display:flex; gap:4px;"><span class="pill ${v.typ}">${typLbl}</span></span></div>
       ${promptHTML}
-      <button class="thinkbtn" id="revealBtn">Show answer 🔎</button>
+      <div id="frontActions" style="display:flex; gap:8px; margin-top:12px;">
+        <button class="thinkbtn" id="revealBtn" style="margin:0; flex:2; font-weight:700;">CHECK ANSWER 🔎 (Space / Enter)</button>
+        <button class="actbtn" id="skipBtn" style="flex:1; background:var(--paper-dark); color:var(--ink); font-weight:700;" onclick="advance()">→ NEXT (N)</button>
+      </div>
       <div id="revealArea"></div>
+      <div class="shortcuts-hint">⌨️ Shortcuts: <b>Space / Enter</b> = Check · <b>N</b> = Next · <b>1</b> = Again · <b>2</b> = Knew it · <b>M</b> = Details</div>
     </div>`;
 
+  // Auto-focus input
+  setTimeout(()=>{
+    const inp = document.getElementById('naTypeInput');
+    if (inp) inp.focus();
+  }, 50);
+
   document.getElementById('revealBtn').onclick = ()=>{
-    document.getElementById('revealArea').innerHTML = revealHTML + `
-      <div class="answerbtns">
-        <button class="actbtn nochmal" id="btnNochmal">Again</button>
-        <button class="actbtn gewusst" id="btnGewusst">Knew it</button>
-        <button class="actbtn easy" id="btnEasy">🎯 Know it well</button>
-      </div>`;
-    document.getElementById('revealBtn').style.display = 'none';
+    const userInput = document.getElementById('naTypeInput')?.value?.trim();
+    let feedbackHTML = '';
+
+    if (userInput) {
+      const uLower = userInput.toLowerCase();
+      let isMatch = false;
+      let correctExpected = '';
+
+      if (curMode === 'nomen') {
+        const artClean = (v.a || '').toLowerCase();
+        const sgClean = (v.sg || '').toLowerCase();
+        const plClean = (v.pl || '').toLowerCase();
+
+        if (curDir === 'gender') {
+          isMatch = (uLower === artClean);
+          correctExpected = `${v.a} ${v.sg}`;
+        } else if (curDir === 'en2de') {
+          isMatch = uLower.includes(sgClean) || uLower.includes(plClean) || uLower === `${artClean} ${sgClean}`;
+          correctExpected = `${v.a} ${v.sg}, die ${v.pl}`;
+        } else {
+          isMatch = (uLower === plClean || uLower === `die ${plClean}` || uLower === `die ${plClean}`.toLowerCase());
+          correctExpected = `die ${v.pl}`;
+        }
+      } else {
+        const wClean = (v.w || '').toLowerCase();
+        const kompClean = (v.komp || '').toLowerCase();
+        const supClean = (v.sup || '').toLowerCase();
+        isMatch = (uLower === kompClean || uLower === supClean || uLower === `am ${supClean}` || uLower.includes(kompClean) || uLower.includes(wClean));
+        correctExpected = `${v.w} → ${v.komp} → ${v.sup}`;
+      }
+
+      if (isMatch) {
+        feedbackHTML = `<div class="feedback-box correct">✓ <b>CORRECT!</b> You typed: <i>"${userInput}"</i></div>`;
+      } else {
+        feedbackHTML = `<div class="feedback-box wrong">
+          ✗ <b>YOUR ANSWER:</b> "${userInput}"<br>
+          ✓ <b>CORRECT:</b> <b>${correctExpected}</b>
+          <button onclick="toggleMemoryDetails(true)" style="margin-left:8px; font-size:11px; cursor:pointer; background:#fff; border:1px solid #f87171; border-radius:4px; padding:2px 6px;">🧠 Why?</button>
+        </div>`;
+      }
+    }
+
+    const fullDetailsHTML = `
+      <details class="details-toggle" id="memoryDetails">
+        <summary class="details-summary">
+          <span>🧠 ${curMode === 'nomen' ? 'Noun Memory Trick & Gender/Plural Lock (M)' : 'Adjective Memory Trick & Rules (M)'}</span>
+          <span style="font-size:10.5px; background:var(--gold); color:#fff; padding:2px 8px; border-radius:12px; font-family:'IBM Plex Mono',monospace;">One-Click Details</span>
+        </summary>
+        <div class="details-content">
+          ${curMode === 'nomen' ? renderNounMemoryHack(v) : renderAdjMemoryHack(v)}
+          ${curMode === 'nomen' ? ruleExplanationNoun(v) : ruleExplanationAdj(v)}
+        </div>
+      </details>
+    `;
+
+    document.getElementById('revealArea').innerHTML = revealCoreHTML + `
+      <div class="answerbtns" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;">
+        <button class="actbtn nochmal" id="btnNochmal" style="flex:1; min-width:80px;">↺ Again (1)</button>
+        <button class="actbtn gewusst" id="btnGewusst" style="flex:1; min-width:80px;">✓ Knew it (2)</button>
+        <button class="actbtn easy" id="btnEasy" style="flex:1; min-width:80px;">🎯 Master (3)</button>
+        <button class="actbtn" id="btnNextAfterReveal" style="flex:1.5; min-width:110px; background:var(--ink); color:#fff; font-weight:700; border-color:var(--ink);" onclick="advance()">→ NEXT (N)</button>
+      </div>
+      ${fullDetailsHTML}
+    `;
+
+    if (feedbackHTML) {
+      const fbArea = document.getElementById('typedFeedbackArea');
+      if (fbArea) fbArea.innerHTML = feedbackHTML;
+    }
+
+    document.getElementById('frontActions').style.display = 'none';
     document.getElementById('btnNochmal').onclick = ()=>{ recordAnswer(v.uid,false); advance(); };
     document.getElementById('btnGewusst').onclick = ()=>{ recordAnswer(v.uid,true); advance(); };
     document.getElementById('btnEasy').onclick = ()=>{ const p=getProg(v.uid); p.box=5; p.nextDue=addDays(30); saveProgress(PROGRESS); advance(); };
   };
 }
+
+function toggleMemoryDetails(forceOpen){
+  const el = document.getElementById('memoryDetails');
+  if (el) {
+    if (typeof forceOpen === 'boolean') el.open = forceOpen;
+    else el.open = !el.open;
+    if (el.open) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
 function advance(){ sessionIdx++; renderDash(); renderCard(); }
 
+/* ---- Keyboard Shortcuts for Fast Learning ---- */
 document.addEventListener('keydown', (e) => {
-  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+  const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
   
-  const btnReveal = document.getElementById('revealBtn');
-  if (e.code === 'Space' && btnReveal && btnReveal.style.display !== 'none') {
-    e.preventDefault();
-    btnReveal.click();
+  if (isInput) {
+    if (e.code === 'Enter') {
+      const revealBtn = document.getElementById('revealBtn');
+      if (revealBtn && revealBtn.style.display !== 'none' && revealBtn.offsetParent !== null) {
+        e.preventDefault();
+        revealBtn.click();
+      }
+    }
     return;
   }
   
-  const revealArea = document.getElementById('revealArea');
-  if (revealArea && revealArea.innerHTML !== '') {
-    const btnNochmal = document.getElementById('btnNochmal');
-    const btnGewusst = document.getElementById('btnGewusst');
-    const btnEasy = document.getElementById('btnEasy');
-    
-    if (e.key === '1' && btnNochmal) {
-      e.preventDefault(); btnNochmal.click();
-    } else if (e.key === '2' && btnGewusst) {
-      e.preventDefault(); btnGewusst.click();
-    } else if (e.key === '3' && btnEasy) {
-      e.preventDefault(); btnEasy.click();
+  if (!session || session.length === 0) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      const startBtn = document.getElementById('startBtn');
+      if (startBtn) startBtn.click();
+    }
+    return;
+  }
+
+  const revealBtn = document.getElementById('revealBtn');
+  const btnNochmal = document.getElementById('btnNochmal');
+  const btnGewusst = document.getElementById('btnGewusst');
+  const btnEasy = document.getElementById('btnEasy');
+  const memDetails = document.getElementById('memoryDetails');
+  const v = session[sessionIdx];
+
+  // M key: Toggle Memory Details
+  if (e.key === 'm' || e.key === 'M') {
+    e.preventDefault();
+    toggleMemoryDetails();
+    return;
+  }
+
+  // Escape key: Close details if open
+  if (e.code === 'Escape') {
+    if (memDetails && memDetails.open) {
+      e.preventDefault();
+      memDetails.open = false;
+    }
+    return;
+  }
+
+  // N key: Next card immediately
+  if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    advance();
+    return;
+  }
+
+  if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    if (revealBtn && revealBtn.style.display !== 'none' && revealBtn.offsetParent !== null) {
+      revealBtn.click();
+    } else if (btnGewusst && btnGewusst.offsetParent !== null) {
+      btnGewusst.click();
+    }
+    return;
+  }
+
+  if (e.key === '1' && btnNochmal && btnNochmal.offsetParent !== null) {
+    e.preventDefault(); btnNochmal.click(); return;
+  }
+  if (e.key === '2' && btnGewusst && btnGewusst.offsetParent !== null) {
+    e.preventDefault(); btnGewusst.click(); return;
+  }
+  if (e.key === '3' && btnEasy && btnEasy.offsetParent !== null) {
+    e.preventDefault(); btnEasy.click(); return;
+  }
+  if (e.code === 'KeyS') {
+    if (v) {
+      e.preventDefault();
+      const txt = curMode === 'nomen' ? `${v.a} ${v.sg}` : v.w;
+      speak(txt);
     }
   }
 });

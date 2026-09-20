@@ -242,6 +242,38 @@
   .family-list li { margin-bottom: 2px; }
   .family-list b { color: var(--ink); }
 
+  /* Fast Mode Details Panel & Inputs */
+  .details-toggle {
+    margin-top: 14px; border: 1.5px solid var(--gold); border-radius: 8px;
+    background: #fffdf5; overflow: hidden; text-align: left;
+  }
+  .details-summary {
+    font-family: 'Fjalla One', sans-serif; font-size: 13.5px; color: var(--gold);
+    padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between;
+    align-items: center; user-select: none; background: #fffdf5; transition: background 0.15s ease;
+  }
+  .details-summary:hover { background: #fefce8; }
+  .details-toggle[open] .details-summary { border-bottom: 1px solid #fae8b4; }
+  .details-content { padding: 4px 6px 12px; }
+
+  .fast-input {
+    width: 100%; padding: 9px 12px; font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px; border: 1.5px solid var(--line); border-radius: 6px;
+    box-sizing: border-box; background: #fff; color: var(--ink); margin-top: 8px;
+  }
+  .fast-input:focus {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(185,138,46,0.15);
+  }
+  .feedback-box {
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; line-height: 1.5;
+  }
+  .feedback-box.correct { background: #ecfdf5; border-left: 4px solid var(--green); color: #065f46; }
+  .feedback-box.wrong { background: #fef2f2; border-left: 4px solid var(--red); color: #991b1b; }
+  .shortcuts-hint {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft);
+    text-align: center; margin-top: 10px; opacity: 0.85;
+  }
+
 
   html.dark-theme {
     --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
@@ -1900,7 +1932,7 @@ function renderCard(){
     return v.en;
   }
 
-  let promptHTML, revealHTML;
+  let promptHTML, revealCoreHTML;
   if(qType === 'noun'){
     promptHTML = reverse ? `
       <div class="qlabel">Noun → Verb · 📦 ${boxNames[box]}</div>
@@ -1908,22 +1940,23 @@ function renderCard(){
         <div class="wordicon">${getIcon(v)}</div>
         <div class="wordline"><div class="word">${v.noun}</div>${speakBtn(v.noun,'Listen to noun')}</div>
         <div class="subq">Which verb does this noun come from? (${meaningPromptText(v)})</div>
+        <input type="text" id="verbTypeInput" class="fast-input" placeholder="Type German verb (optional)..." autofocus>
       </div>` : `
       <div class="qlabel">Verb → Noun · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="wordline"><div class="word">${v.inf}</div>${speakBtn(v.inf,'Listen to verb')}</div>
-        <div class="subq">Which noun belongs to this verb?</div>
+        <div class="subq">Which noun belongs to this verb? (${meaningPromptText(v)})</div>
+        <input type="text" id="verbTypeInput" class="fast-input" placeholder="Type German noun with article (optional)..." autofocus>
       </div>`;
-    revealHTML = `
+    revealCoreHTML = `
       <div class="revealbox">
+        <div id="typedFeedbackArea"></div>
         ${reverse ? `<div class="formrow"><span class="flabel">Verb</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>` : meaningHTML(v)}
         <div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${transformDiagram(v)}
-        ${renderMnemonic(v)}
-        ${ruleExplanation(v)}
       </div>`;
   } else {
     promptHTML = reverse ? `
@@ -1931,32 +1964,33 @@ function renderCard(){
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="word" style="font-size:22px;">${meaningPromptText(v)}</div>
-        <div class="subq">What's the German verb — and what are its Simple Past &amp; Present Perfect forms? (Think first…)</div>
+        <div class="subq">What is the German verb — and its Simple Past &amp; Perfekt forms?</div>
+        <input type="text" id="verbTypeInput" class="fast-input" placeholder="Type German verb or past forms (optional)..." autofocus>
       </div>` : `
       <div class="qlabel">Present → Past · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="wordline"><div class="word">${v.inf}</div>${speakBtn(v.inf,'Listen to verb')}</div>
-        <div class="subq">What are the Simple Past and Present Perfect forms? (Think first…)</div>
+        <div class="subq">Meaning: <b>${meaningPromptText(v)}</b></div>
+        <input type="text" id="verbTypeInput" class="fast-input" placeholder="Type Past or Perfekt (optional)..." autofocus>
       </div>`;
-    revealHTML = `
+    revealCoreHTML = `
       <div class="revealbox">
+        <div id="typedFeedbackArea"></div>
         ${reverse ? `<div class="formrow"><span class="flabel">Infinitive</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>` : meaningHTML(v)}
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${v.noun ? `<div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>` : ''}
         ${transformDiagram(v)}
-        ${renderMnemonic(v)}
-        ${ruleExplanation(v)}
       </div>`;
   }
 
   stage.innerHTML = `
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
+      <span>Card ${sessionIdx+1} / ${session.length} · <b>Fast Mode</b></span>
       <div style="display:flex; gap:6px;">
         ${sessionIdx > 0 ? `<button class="pill" onclick="prevCard()" style="cursor:pointer; background:#fff; border:1px solid var(--line); font-size:11px; padding:2px 8px;">← Prev</button>` : ''}
-        <button class="pill" onclick="nextCardWithoutAnswer()" style="cursor:pointer; background:#fff; border:1px solid var(--line); font-size:11px; padding:2px 8px;">Next Card ➔</button>
+        <button class="pill" onclick="nextCardWithoutAnswer()" style="cursor:pointer; background:var(--ink); color:#fff; border:1px solid var(--ink); font-size:11px; padding:2px 8px; font-weight:700;">→ NEXT (N)</button>
       </div>
     </div>
     <div class="studycard">
@@ -1970,21 +2004,78 @@ function renderCard(){
       </div>
       ${promptHTML}
       <div class="front-actions" id="frontActions" style="display:flex; gap:8px; padding:14px 18px 18px;">
-        <button class="thinkbtn" id="revealBtn" style="margin:0; flex:2;">Show answer 🔎</button>
-        <button class="actbtn" id="skipBtn" style="flex:1; background:var(--paper-dark); color:var(--ink);" onclick="advance()">Skip / Next ➔</button>
+        <button class="thinkbtn" id="revealBtn" style="margin:0; flex:2; font-weight:700;">CHECK ANSWER 🔎 (Space / Enter)</button>
+        <button class="actbtn" id="skipBtn" style="flex:1; background:var(--paper-dark); color:var(--ink); font-weight:700;" onclick="advance()">→ NEXT (N)</button>
       </div>
       <div id="revealArea"></div>
+      <div class="shortcuts-hint">⌨️ Shortcuts: <b>Space / Enter</b> = Check · <b>N</b> = Next · <b>1</b> = Again · <b>2</b> = Knew it · <b>M</b> = Details</div>
     </div>
   `;
 
+  // Auto-focus input
+  setTimeout(()=>{
+    const inp = document.getElementById('verbTypeInput');
+    if (inp) inp.focus();
+  }, 50);
+
   document.getElementById('revealBtn').onclick = ()=>{
-    document.getElementById('revealArea').innerHTML = revealHTML + `
-      <div class="answerbtns">
-        <button class="actbtn nochmal" id="btnNochmal">↺ Again</button>
-        <button class="actbtn gewusst" id="btnGewusst">✓ Knew it</button>
-        <button class="actbtn easy" id="btnEasy">🎯 Master</button>
-        <button class="actbtn" id="btnNextAfterReveal" style="background:var(--paper-dark); border-color:var(--line);" onclick="advance()">Next ➔</button>
-      </div>`;
+    const userInput = document.getElementById('verbTypeInput')?.value?.trim();
+    let feedbackHTML = '';
+
+    if (userInput) {
+      const uLower = userInput.toLowerCase();
+      const praetClean = (v.praeteritum || '').toLowerCase();
+      const perfClean = (v.perfekt || '').toLowerCase();
+      const perfParticiple = perfClean.replace(/^(hat|ist)\s+/, '');
+      const infClean = (v.inf || '').toLowerCase();
+      const nounClean = (v.noun || '').toLowerCase();
+
+      let isMatch = false;
+      if (qType === 'noun') {
+        isMatch = uLower === nounClean || uLower === nounClean.replace(/^(der|die|das)\s+/, '') || uLower === infClean;
+      } else {
+        isMatch = uLower === praetClean || uLower === perfClean || uLower === perfParticiple || uLower === infClean;
+      }
+
+      if (isMatch) {
+        feedbackHTML = `<div class="feedback-box correct">✓ <b>CORRECT!</b> You typed: <i>"${userInput}"</i></div>`;
+      } else {
+        feedbackHTML = `<div class="feedback-box wrong">
+          ✗ <b>YOUR ANSWER:</b> "${userInput}"<br>
+          ✓ <b>CORRECT:</b> <b>${v.praeteritum}</b> · <b>${v.perfekt}</b>
+          <button onclick="toggleMemoryDetails(true)" style="margin-left:8px; font-size:11px; cursor:pointer; background:#fff; border:1px solid #f87171; border-radius:4px; padding:2px 6px;">🧠 Why?</button>
+        </div>`;
+      }
+    }
+
+    const fullDetailsHTML = `
+      <details class="details-toggle" id="memoryDetails">
+        <summary class="details-summary">
+          <span>🧠 9-Step Permanent Memory System &amp; Grammar (M)</span>
+          <span style="font-size:10.5px; background:var(--gold); color:#fff; padding:2px 8px; border-radius:12px; font-family:'IBM Plex Mono',monospace;">One-Click Details</span>
+        </summary>
+        <div class="details-content">
+          ${renderMnemonic(v)}
+          ${ruleExplanation(v)}
+        </div>
+      </details>
+    `;
+
+    document.getElementById('revealArea').innerHTML = revealCoreHTML + `
+      <div class="answerbtns" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;">
+        <button class="actbtn nochmal" id="btnNochmal" style="flex:1; min-width:80px;">↺ Again (1)</button>
+        <button class="actbtn gewusst" id="btnGewusst" style="flex:1; min-width:80px;">✓ Knew it (2)</button>
+        <button class="actbtn easy" id="btnEasy" style="flex:1; min-width:80px;">🎯 Master (3)</button>
+        <button class="actbtn" id="btnNextAfterReveal" style="flex:1.5; min-width:110px; background:var(--ink); color:#fff; font-weight:700; border-color:var(--ink);" onclick="advance()">→ NEXT (N)</button>
+      </div>
+      ${fullDetailsHTML}
+    `;
+
+    if (feedbackHTML) {
+      const fbArea = document.getElementById('typedFeedbackArea');
+      if (fbArea) fbArea.innerHTML = feedbackHTML;
+    }
+
     document.getElementById('frontActions').style.display = 'none';
     document.getElementById('btnNochmal').onclick = ()=>{ recordAnswer(v.uid,false); advance(); };
     document.getElementById('btnGewusst').onclick = ()=>{ recordAnswer(v.uid,true); advance(); };
@@ -1992,6 +2083,15 @@ function renderCard(){
       triggerProductionChallenge(v);
     };
   };
+}
+
+function toggleMemoryDetails(forceOpen){
+  const el = document.getElementById('memoryDetails');
+  if (el) {
+    if (typeof forceOpen === 'boolean') el.open = forceOpen;
+    else el.open = !el.open;
+    if (el.open) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 function advance(){
@@ -2047,9 +2147,21 @@ function triggerProductionChallenge(v){
 }
 
 
-/* ---- Keyboard Shortcuts ---- */
+/* ---- Keyboard Shortcuts for Fast Learning ---- */
 document.addEventListener('keydown', e => {
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+  const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+  
+  if (isInput) {
+    if (e.code === 'Enter') {
+      const revealBtn = document.getElementById('revealBtn');
+      if (revealBtn && revealBtn.style.display !== 'none' && revealBtn.offsetParent !== null) {
+        e.preventDefault();
+        revealBtn.click();
+      }
+    }
+    return;
+  }
+
   if (!session || session.length === 0) {
     if (e.code === 'Space' || e.code === 'Enter') {
       e.preventDefault();
@@ -2057,31 +2169,60 @@ document.addEventListener('keydown', e => {
     }
     return;
   }
+
   const revealBtn = document.getElementById('revealBtn');
   const btnNochmal = document.getElementById('btnNochmal');
   const btnGewusst = document.getElementById('btnGewusst');
   const btnEasy = document.getElementById('btnEasy');
+  const memDetails = document.getElementById('memoryDetails');
   const v = session[sessionIdx];
+
+  // M key: Toggle Memory Details
+  if (e.key === 'm' || e.key === 'M') {
+    e.preventDefault();
+    toggleMemoryDetails();
+    return;
+  }
+
+  // Escape key: Close details if open
+  if (e.code === 'Escape') {
+    if (memDetails && memDetails.open) {
+      e.preventDefault();
+      memDetails.open = false;
+    }
+    return;
+  }
+
+  // N key: Next card immediately
+  if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    advance();
+    return;
+  }
 
   if (e.code === 'Space' || e.code === 'Enter') {
     e.preventDefault();
-    if (revealBtn && revealBtn.offsetParent !== null) {
+    if (revealBtn && revealBtn.style.display !== 'none' && revealBtn.offsetParent !== null) {
       revealBtn.click();
     } else if (btnGewusst && btnGewusst.offsetParent !== null) {
       btnGewusst.click();
     }
-  } else if (e.key === '1' || e.code === 'KeyN') {
-    if (btnNochmal && btnNochmal.offsetParent !== null) { e.preventDefault(); btnNochmal.click(); }
-  } else if (e.key === '2' || e.code === 'KeyG') {
-    if (btnGewusst && btnGewusst.offsetParent !== null) { e.preventDefault(); btnGewusst.click(); }
-  } else if (e.key === '3' || e.code === 'KeyE') {
-    if (btnEasy && btnEasy.offsetParent !== null) { e.preventDefault(); btnEasy.click(); }
-  } else if (e.code === 'KeyS') {
+    return;
+  }
+
+  if (e.key === '1' && btnNochmal && btnNochmal.offsetParent !== null) {
+    e.preventDefault(); btnNochmal.click(); return;
+  }
+  if (e.key === '2' && btnGewusst && btnGewusst.offsetParent !== null) {
+    e.preventDefault(); btnGewusst.click(); return;
+  }
+  if (e.key === '3' && btnEasy && btnEasy.offsetParent !== null) {
+    e.preventDefault(); btnEasy.click(); return;
+  }
+  if (e.code === 'KeyS') {
     if (v) { e.preventDefault(); speak(v.inf); }
   }
 });
-
-/* ---- init ---- */
 refreshAll();
 </script>
 
