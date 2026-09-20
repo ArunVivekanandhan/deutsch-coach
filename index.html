@@ -2437,7 +2437,7 @@ function getCheatCodesForWord(w, cat, opt = {}) {
 }
 
 function renderCheatCodesHTML(card) {
-  const codes = getCheatCodeForWord(card.w, card.cat, card);
+  const codes = getCheatCodesForWord(card.w, card.cat, card);
   if (!codes || codes.length === 0) return '';
   return codes.map(c => `
     <div class="cheat-box">
@@ -2492,6 +2492,7 @@ function renderAnswerButtons(uid, onDone){
       <button class="actbtn nochmal" id="btnNochmal">Nochmal</button>
       <button class="actbtn gewusst" id="btnGewusst">Gewusst</button>
       <button class="actbtn easy" id="btnEasy">🎯 Kenn ich gut</button>
+      <button class="actbtn next" id="btnNext" style="border-color:var(--ink); color:var(--ink); font-weight:700;">→ Weiter</button>
     </div>`;
 }
 
@@ -2502,6 +2503,10 @@ function wireAnswerButtons(card, advanceFn, qType){
     const p = getProgress(card.uid); p.box=5; p.nextDue=addDaysISO(30); p.lastQType=qType; PROGRESS[card.uid]=p; saveProgress(PROGRESS);
     bumpStreak(); sessionStats.remembered++; advanceFn();
   };
+  const btnNext = document.getElementById("btnNext");
+  if(btnNext) {
+    btnNext.onclick = ()=>{ sessionStats.reviewed++; advanceFn(); };
+  }
 }
 
 function difficultBanner(card){
@@ -2526,15 +2531,20 @@ function renderRecallMeaning(card, advanceFn){
         <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Was bedeutet das? · What does this mean? (Think first…)</div>
       </div>
-      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎 · Reveal</button>
+      <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
+        <button class="thinkbtn" id="revealBtn" style="flex:2; margin:0;">Antwort zeigen 🔎 · Reveal</button>
+        <button class="thinkbtn" id="skipCardBtn" style="flex:1; margin:0; background:var(--paper); border:1.5px solid var(--line); color:var(--ink-soft);" title="Skip to next card">→ Weiter</button>
+      </div>
       <div id="revealArea"></div>
     </div>`,
     afterRender(){
       document.getElementById("revealBtn").onclick = ()=>{
         document.getElementById("revealArea").innerHTML = renderInfoPanel(card) + renderAnswerButtons(card.uid);
-        document.getElementById("revealBtn").style.display="none";
+        document.getElementById("cardBtnGroup").style.display="none";
         wireAnswerButtons(card, advanceFn, "recall_meaning");
       };
+      const skipBtn = document.getElementById("skipCardBtn");
+      if(skipBtn) skipBtn.onclick = advanceFn;
     }
   };
 }
@@ -2676,7 +2686,10 @@ function renderPlural(card, advanceFn){
         <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Wie lautet der Plural?</div>
       </div>
-      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
+        <button class="thinkbtn" id="revealBtn" style="flex:2; margin:0;">Antwort zeigen 🔎</button>
+        <button class="thinkbtn" id="skipCardBtn" style="flex:1; margin:0; background:var(--paper); border:1.5px solid var(--line); color:var(--ink-soft);" title="Skip to next card">→ Weiter</button>
+      </div>
       <div id="revealArea"></div>
     </div>`,
     afterRender(){
@@ -2684,9 +2697,11 @@ function renderPlural(card, advanceFn){
         document.getElementById("revealArea").innerHTML =
           `<div class="revealbox"><div class="en-word">${card.p || "(kein Plural / nur Singular üblich)"}</div></div>` +
           renderInfoPanel(card) + renderAnswerButtons(card.uid);
-        document.getElementById("revealBtn").style.display="none";
+        document.getElementById("cardBtnGroup").style.display="none";
         wireAnswerButtons(card, advanceFn, "plural");
       };
+      const skipBtn = document.getElementById("skipCardBtn");
+      if(skipBtn) skipBtn.onclick = advanceFn;
     }
   };
 }
@@ -2705,7 +2720,10 @@ function renderVerbTense(card, advanceFn){
         <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Präteritum? Perfekt?</div>
       </div>
-      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
+        <button class="thinkbtn" id="revealBtn" style="flex:2; margin:0;">Antwort zeigen 🔎</button>
+        <button class="thinkbtn" id="skipCardBtn" style="flex:1; margin:0; background:var(--paper); border:1.5px solid var(--line); color:var(--ink-soft);" title="Skip to next card">→ Weiter</button>
+      </div>
       <div id="revealArea"></div>
     </div>`,
     afterRender(){
@@ -2713,9 +2731,11 @@ function renderVerbTense(card, advanceFn){
         document.getElementById("revealArea").innerHTML =
           `<div class="revealbox"><div class="infoline"><b>Präteritum:</b> ${card.pr} &nbsp;·&nbsp; <b>Perfekt:</b> ${card.pp}</div></div>` +
           renderInfoPanel(card) + renderAnswerButtons(card.uid);
-        document.getElementById("revealBtn").style.display="none";
+        document.getElementById("cardBtnGroup").style.display="none";
         wireAnswerButtons(card, advanceFn, "verbtense");
       };
+      const skipBtn = document.getElementById("skipCardBtn");
+      if(skipBtn) skipBtn.onclick = advanceFn;
     }
   };
 }
@@ -2740,7 +2760,10 @@ function renderFillGap(card, advanceFn){
         <div class="subq" style="font-size:15px; line-height:1.5;">„${gapped}"</div>
         <div class="subq">Welches Wort fehlt — und was bedeutet es?</div>
       </div>
-      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎</button>
+      <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
+        <button class="thinkbtn" id="revealBtn" style="flex:2; margin:0;">Antwort zeigen 🔎</button>
+        <button class="thinkbtn" id="skipCardBtn" style="flex:1; margin:0; background:var(--paper); border:1.5px solid var(--line); color:var(--ink-soft);" title="Skip to next card">→ Weiter</button>
+      </div>
       <div id="revealArea"></div>
     </div>`,
     afterRender(){
@@ -2748,9 +2771,11 @@ function renderFillGap(card, advanceFn){
         document.getElementById("revealArea").innerHTML =
           `<div class="revealbox"><div class="en-word">${card.w}</div></div>` +
           renderInfoPanel(card) + renderAnswerButtons(card.uid);
-        document.getElementById("revealBtn").style.display="none";
+        document.getElementById("cardBtnGroup").style.display="none";
         wireAnswerButtons(card, advanceFn, "fillgap");
       };
+      const skipBtn = document.getElementById("skipCardBtn");
+      if(skipBtn) skipBtn.onclick = advanceFn;
     }
   };
 }
@@ -3604,13 +3629,18 @@ function importData(e) {
 
 <script>
 document.addEventListener("keydown", (e) => {
-    // Only if a modal or input is not focused
     if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT')) return;
     
     const revealBtn = document.getElementById("revealBtn");
+    const skipBtn = document.getElementById("skipCardBtn");
+    const btnNochmal = document.getElementById("btnNochmal");
+    const btnGewusst = document.getElementById("btnGewusst");
+    const btnEasy = document.getElementById("btnEasy");
+    const btnNext = document.getElementById("btnNext");
     
     if(e.code === 'Space' || e.code === 'Enter') {
-        if(revealBtn) { revealBtn.click(); e.preventDefault(); return; }
+        if(revealBtn && revealBtn.offsetParent !== null) { revealBtn.click(); e.preventDefault(); return; }
+        if(btnNext && btnNext.offsetParent !== null) { btnNext.click(); e.preventDefault(); return; }
     }
     
     if(e.code === 'KeyS') {
@@ -3618,23 +3648,15 @@ document.addEventListener("keydown", (e) => {
         if(speakBtn) speakBtn.click();
     }
     
-    const b0 = document.getElementById('b0');
-    const b1 = document.getElementById('b1');
-    const b2 = document.getElementById('b2');
-    const b3 = document.getElementById('b3');
-    
     if(e.code === 'Digit1' || e.code === 'KeyN') {
-        if(b0) { b0.click(); e.preventDefault(); }
-        else if(document.getElementById('b-0')) { document.getElementById('b-0').click(); e.preventDefault(); }
+        if(btnNochmal) { btnNochmal.click(); e.preventDefault(); }
     } else if(e.code === 'Digit2' || e.code === 'KeyG') {
-        if(b1) { b1.click(); e.preventDefault(); }
-        else if(document.getElementById('b-1')) { document.getElementById('b-1').click(); e.preventDefault(); }
+        if(btnGewusst) { btnGewusst.click(); e.preventDefault(); }
     } else if(e.code === 'Digit3' || e.code === 'KeyE') {
-        if(b2) { b2.click(); e.preventDefault(); }
-        else if(document.getElementById('b-2')) { document.getElementById('b-2').click(); e.preventDefault(); }
-    } else if(e.code === 'Digit4') {
-        if(b3) { b3.click(); e.preventDefault(); }
-        else if(document.getElementById('b-3')) { document.getElementById('b-3').click(); e.preventDefault(); }
+        if(btnEasy) { btnEasy.click(); e.preventDefault(); }
+    } else if(e.code === 'Digit4' || e.code === 'ArrowRight') {
+        if(btnNext) { btnNext.click(); e.preventDefault(); }
+        else if(skipBtn) { skipBtn.click(); e.preventDefault(); }
     }
 });
 </script>
