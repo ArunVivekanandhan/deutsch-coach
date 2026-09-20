@@ -330,7 +330,7 @@
   <div class="countline" id="poolCount"></div>
   <div class="dashgrid" id="dashGrid"></div>
 
-  <button class="bigbtn" id="startBtn">🧠 Start practicing<span class="subtext">Due &amp; difficult verbs first</span></button>
+  <button class="bigbtn" id="startBtn" onclick="startPractice()">🧠 Start practicing<span class="subtext">Due &amp; difficult verbs first</span></button>
 
   <div id="stage"></div>
 
@@ -359,6 +359,7 @@ let curLevel = 'alle';
 let curType = 'alle';
 let curDir = 'de2en';   // 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
 let nounMode = false;
+let auxMode = false;
 let meaningLang = 'en';
 const LANGS = [{k:'en',l:'English'},{k:'ta',l:'தமிழ்'},{k:'both',l:'Both'}];
 const DIRS = [{k:'de2en',l:'German → Meaning'},{k:'en2de',l:'Meaning → German'}];
@@ -368,7 +369,14 @@ let sessionIdx = 0;
 
 /* ---- persistence ---- */
 const LS_KEY = 'vt_progress_v1';
-function loadProgress(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch(e){ return {}; } }
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return {};
+    const parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+  }catch(e){ return {}; }
+}
 function saveProgress(p){ try{ localStorage.setItem(LS_KEY, JSON.stringify(p)); }catch(e){} }
 let PROGRESS = loadProgress();
 
@@ -377,8 +385,15 @@ function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return d.getF
 const BOX_SCHEDULE = {1:0,2:1,3:3,4:7,5:14};
 
 function getProg(uid){
-  if(!PROGRESS[uid]) PROGRESS[uid] = {box:1, nextDue:todayISO(), timesSeen:0, timesWrong:0};
-  return PROGRESS[uid];
+  if(!PROGRESS[uid] || typeof PROGRESS[uid] !== 'object'){
+    PROGRESS[uid] = {box:1, nextDue:todayISO(), timesSeen:0, timesWrong:0};
+  }
+  const p = PROGRESS[uid];
+  if(typeof p.box !== 'number') p.box = 1;
+  if(typeof p.nextDue !== 'string') p.nextDue = todayISO();
+  if(typeof p.timesSeen !== 'number') p.timesSeen = 0;
+  if(typeof p.timesWrong !== 'number') p.timesWrong = 0;
+  return p;
 }
 function recordAnswer(uid, correct){
   const p = getProg(uid);
@@ -388,10 +403,10 @@ function recordAnswer(uid, correct){
   p.nextDue = addDays(BOX_SCHEDULE[p.box] !== undefined ? BOX_SCHEDULE[p.box] : 30);
   saveProgress(PROGRESS);
 }
-function isDue(uid){ const p = PROGRESS[uid]; return !p || p.nextDue <= todayISO(); }
-function isNew(uid){ return !PROGRESS[uid] || PROGRESS[uid].timesSeen===0; }
-function isDifficult(uid){ const p = PROGRESS[uid]; return p && p.timesWrong>=2; }
-function isMastered(uid){ const p = PROGRESS[uid]; return p && p.box>=4; }
+function isDue(uid){ const p = PROGRESS[uid]; return !p || !p.nextDue || p.nextDue <= todayISO(); }
+function isNew(uid){ const p = PROGRESS[uid]; return !p || !p.timesSeen; }
+function isDifficult(uid){ const p = PROGRESS[uid]; return p && (p.timesWrong||0)>=2; }
+function isMastered(uid){ const p = PROGRESS[uid]; return p && (p.box||1)>=4; }
 
 VERBS.forEach(v=> v.uid = v.level+'|'+v.inf);
 
@@ -669,8 +684,8 @@ function renderDash(){
 
 function refreshAll(){ renderChips(); renderDash(); }
 
-document.getElementById('nounToggle').addEventListener('change', e=>{ nounMode = e.target.checked; });
-document.getElementById('auxToggle').addEventListener('change', e=>{ auxMode = e.target.checked; renderCard(); });
+document.getElementById('nounToggle')?.addEventListener('change', e=>{ nounMode = e.target.checked; });
+document.getElementById('auxToggle')?.addEventListener('change', e=>{ auxMode = e.target.checked; if(session && session.length > 0) renderCard(); });
 
 /* ---- Smart queue ---- */
 function shuffleArr(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -681,29 +696,57 @@ function buildQueue(p, limit){
   function add(list, cap){
     let n=0;
     for(const v of list){
-      if(used[v.uid]) continue;
+      if(!v || used[v.uid]) continue;
       if(cap!==undefined && n>=cap) break;
       out.push(v); used[v.uid]=true; n++;
       if(out.length>=limit) return;
     }
   }
-  const overdue = p.filter(v=>!isNew(v.uid) && isDue(v.uid)).sort((a,b)=>(PROGRESS[a.uid].nextDue).localeCompare(PROGRESS[b.uid].nextDue));
+  const overdue = p.filter(v=>!isNew(v.uid) && isDue(v.uid)).sort((a,b)=>{
+    const da = (PROGRESS[a.uid] && PROGRESS[a.uid].nextDue) || '';
+    const db = (PROGRESS[b.uid] && PROGRESS[b.uid].nextDue) || '';
+    return da.localeCompare(db);
+  });
   add(overdue);
-  if(out.length<limit){ const diff = p.filter(v=>isDifficult(v.uid)).sort((a,b)=>PROGRESS[b.uid].timesWrong-PROGRESS[a.uid].timesWrong); add(diff); }
-  if(out.length<limit){ const recent = p.filter(v=>!isNew(v.uid) && PROGRESS[v.uid].box<=2); add(recent); }
+  if(out.length<limit){
+    const diff = p.filter(v=>isDifficult(v.uid)).sort((a,b)=>{
+      const wa = (PROGRESS[a.uid] && PROGRESS[a.uid].timesWrong) || 0;
+      const wb = (PROGRESS[b.uid] && PROGRESS[b.uid].timesWrong) || 0;
+      return wb - wa;
+    });
+    add(diff);
+  }
+  if(out.length<limit){
+    const recent = p.filter(v=>!isNew(v.uid) && PROGRESS[v.uid] && (PROGRESS[v.uid].box||1)<=2);
+    add(recent);
+  }
   if(out.length<limit){ add(shuffleArr(p.filter(v=>isNew(v.uid))), Math.max(4, Math.floor(limit*0.5))); }
   if(out.length<limit){ add(shuffleArr(p.filter(v=>isMastered(v.uid))), 3); }
   if(out.length<limit){ add(shuffleArr(p)); }
   return out;
 }
 
-document.getElementById('startBtn').addEventListener('click', ()=>{
-  const p = pool();
-  if(p.length===0){ alert('Keine Verben in dieser Auswahl.'); return; }
-  session = buildQueue(p, Math.min(20, p.length));
-  sessionIdx = 0;
-  renderCard();
-});
+function startPractice(){
+  try {
+    const p = pool();
+    if(!p || p.length===0){ alert('Keine Verben in dieser Auswahl.'); return; }
+    session = buildQueue(p, Math.min(20, p.length));
+    if(!session || session.length===0){
+      session = shuffleArr(p).slice(0, Math.min(20, p.length));
+    }
+    sessionIdx = 0;
+    renderCard();
+    const stage = document.getElementById('stage');
+    if(stage){
+      stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  } catch(err) {
+    console.error('Error starting practice:', err);
+    alert('Fehler beim Starten der Übung: ' + err.message);
+  }
+}
+
+document.getElementById('startBtn')?.addEventListener('click', startPractice);
 
 /* ---- Session card ---- */
 function typLabel(t){ return t==='weak'?'Weak':t==='strong'?'Strong':'Mixed'; }
@@ -1160,6 +1203,40 @@ function triggerProductionChallenge(v){
   };
 }
 
+
+/* ---- Keyboard Shortcuts ---- */
+document.addEventListener('keydown', e => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+  if (!session || session.length === 0) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      startPractice();
+    }
+    return;
+  }
+  const revealBtn = document.getElementById('revealBtn');
+  const btnNochmal = document.getElementById('btnNochmal');
+  const btnGewusst = document.getElementById('btnGewusst');
+  const btnEasy = document.getElementById('btnEasy');
+  const v = session[sessionIdx];
+
+  if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    if (revealBtn && revealBtn.offsetParent !== null) {
+      revealBtn.click();
+    } else if (btnGewusst && btnGewusst.offsetParent !== null) {
+      btnGewusst.click();
+    }
+  } else if (e.key === '1' || e.code === 'KeyN') {
+    if (btnNochmal && btnNochmal.offsetParent !== null) { e.preventDefault(); btnNochmal.click(); }
+  } else if (e.key === '2' || e.code === 'KeyG') {
+    if (btnGewusst && btnGewusst.offsetParent !== null) { e.preventDefault(); btnGewusst.click(); }
+  } else if (e.key === '3' || e.code === 'KeyE') {
+    if (btnEasy && btnEasy.offsetParent !== null) { e.preventDefault(); btnEasy.click(); }
+  } else if (e.code === 'KeyS') {
+    if (v) { e.preventDefault(); speak(v.inf); }
+  }
+});
 
 /* ---- init ---- */
 refreshAll();
