@@ -209,6 +209,107 @@
   table { width: 100%; max-width: 100%; border-collapse: collapse; overflow-x: auto; display: block; }
   @media (min-width: 600px) { table { display: table; } }
   
+
+/* UNIFIED DEUTSCH-COACH SUITE THEME & HUB */
+:root {
+  --suite-bg: #EDEAE1;
+  --suite-card: #F7F5EE;
+  --suite-card-hover: #ffffff;
+  --suite-ink: #1B2A4A;
+  --suite-ink-soft: #4A5878;
+  --suite-line: #cdc7b2;
+  --suite-gold: #B98A2E;
+  --suite-blue: #2F5C8A;
+  --suite-green: #3F6B4A;
+  --suite-red: #AE3327;
+  --suite-shadow: rgba(27, 42, 74, 0.08);
+}
+
+html.dark-theme, body.dark {
+  --suite-bg: #111827;
+  --suite-card: #1f2937;
+  --suite-card-hover: #374151;
+  --suite-ink: #f9fafb;
+  --suite-ink-soft: #9ca3af;
+  --suite-line: #374151;
+  --suite-gold: #fbbf24;
+  --suite-blue: #60a5fa;
+  --suite-green: #34d399;
+  --suite-red: #f87171;
+  --suite-shadow: rgba(0, 0, 0, 0.4);
+}
+
+.suite-hub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--suite-card, #F7F5EE);
+  border: 1.5px solid var(--suite-ink, #1B2A4A);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px var(--suite-shadow, rgba(27,42,74,0.08));
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+.suite-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fjalla One', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--suite-ink, #1B2A4A);
+}
+.suite-nav-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+}
+.suite-link {
+  text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--suite-line, #cdc7b2);
+  background: var(--suite-bg, #EDEAE1);
+  color: var(--suite-ink, #1B2A4A);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.suite-link:hover {
+  background: var(--suite-card-hover, #fff);
+  border-color: var(--suite-gold, #B98A2E);
+}
+.suite-link.active {
+  background: var(--suite-ink, #1B2A4A) !important;
+  color: #ffffff !important;
+  border-color: var(--suite-ink, #1B2A4A) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.suite-hub-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.suite-btn-theme {
+  background: var(--suite-bg, #EDEAE1);
+  color: var(--suite-ink, #1B2A4A);
+  border: 1.5px solid var(--suite-ink, #1B2A4A);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.suite-btn-theme:active { transform: scale(0.92); }
+
 </style>
 </head>
 <body>
@@ -216,8 +317,34 @@
 
   <!-- Suite Navigation Hub -->
   
-  <div class="hub-banner">
-    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+  <!-- UNIFIED DEUTSCH-COACH SUITE HUB -->
+<nav class="suite-hub">
+  <div class="suite-brand">
+    <span class="hub-logo">🧭</span> <b>DEUTSCH-COACH SUITE</b>
+  </div>
+  <div class="suite-nav-links">
+    <a href="./deutsch-coach.html" class="suite-link" title="Dashboard & SRS">🏠 Main Hub</a>
+    <a href="./Wortschatz_Master_Grid.html" class="suite-link" title="Spalten/Zeilen">👑 Wortschatz Grid</a>
+    <a href="./Wortfamilien_Explorer.html" class="suite-link" title="Family Explorer">🌲 Wortfamilien</a>
+    <a href="./Deutsch_Wortschatz_Excel_Sheet.html" class="suite-link" title="Spreadsheet View">📊 Excel Sheet</a>
+    <a href="./German_Grammar_Cheat_Codes.html" class="suite-link" title="Grammar Shortcuts">🧠 Cheat Codes</a>
+    <a href="./Verb_Transformation_Trainer.html" class="suite-link" title="Conjugations & Prefixes">⚡ Verben Trainer</a>
+    <a href="./Nomen_Adjektiv_Trainer.html" class="suite-link" title="Plural & Steigerung">🏷️ Nomen / Adj</a>
+    <a href="./Satzbau_Trainer.html" class="suite-link" title="Sentence Builder">🧩 Satzbau</a>
+    <a href="./Grammatik_Regel_Trainer.html" class="suite-link active" title="Rule Quizzes">📚 Grammatik</a>
+    <a href="./konnektoren_referenz.html" class="suite-link" title="Sentence Structure">🔗 Konnektoren</a>
+    <a href="./Sprech_Pruefungs_Simulator.html" class="suite-link" title="Oral Exam Sim">🎙️ Sprechen</a>
+    <a href="./Verben_Hoeren_EN_DE.html" class="suite-link" title="Bilingual Audio Coach">🎧 Verben Hören</a>
+    <a href="./Continuous_Verb_Speaker.html" class="suite-link" title="Non-stop Player">🔊 Audio Speaker</a>
+    <a href="./German_A2_Practice_Studio.html" class="suite-link" title="A2 Exam Studio">🅰️ A2 Studio</a>
+    <a href="./German_B1_Practice_Studio.html" class="suite-link" title="B1 Exam Studio">🅱️ B1 Studio</a>
+    <a href="./KI_German_Coach.html" class="suite-link" title="AI Grammar Coach">🤖 KI Coach</a>
+    <a href="./KI_Human_Partner.html" class="suite-link" title="Live Conversation Partner">👥 KI Partner</a>
+  </div>
+  <div class="suite-hub-actions">
+    <button id="themeToggleBtn" class="suite-btn-theme" onclick="toggleSuiteTheme()" title="Toggle Dark/Light Mode">🌙</button>
+  </div>
+</nav>
     <div class="hub-links">
       <a href="./index.html" class="hub-link">🏠 Main Hub</a>
       <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Coach</a>
@@ -2323,6 +2450,37 @@ function escapeQuotes(str){
 
 // Initial boot
 window.onload = init;
+
+// UNIFIED SUITE THEME SYSTEM
+function initSuiteTheme() {
+  const saved = localStorage.getItem('de_theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (!saved && prefersDark);
+  applyTheme(isDark);
+}
+function applyTheme(isDark) {
+  if (isDark) {
+    document.documentElement.classList.add('dark-theme');
+    document.body.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark-theme');
+    document.body.classList.remove('dark');
+  }
+  const btn = document.getElementById('themeToggleBtn') || document.getElementById('themeToggle');
+  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+}
+function toggleSuiteTheme() {
+  const isDarkNow = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark');
+  const nextDark = !isDarkNow;
+  localStorage.setItem('de_theme', nextDark ? 'dark' : 'light');
+  applyTheme(nextDark);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSuiteTheme);
+} else {
+  initSuiteTheme();
+}
+
 </script>
 </body>
 </html>

@@ -1,10 +1,10 @@
 {
   "name": "Deutsch-Coach Suite",
   "short_name": "Deutsch-Coach",
-  "description": "A comprehensive B1 German exam preparation suite.",
+  "description": "A comprehensive German vocabulary & B1 exam preparation suite with 17 interconnected learning tools.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#EDEAE1",
+  "background_color": "#111827",
   "theme_color": "#1B2A4A",
   "icons": [
     {
@@ -25,19 +25,29 @@
       "description": "Column & Row Wise German Word Families"
     },
     {
-      "name": "Excel Master Sheet",
-      "url": "./Deutsch_Wortschatz_Excel_Sheet.html",
-      "description": "Full German Vocabulary & Grammar Spreadsheet"
-    },
-    {
       "name": "Wortfamilien Explorer",
       "url": "./Wortfamilien_Explorer.html",
       "description": "Master German Word Family & Vocabulary Explorer"
     },
     {
+      "name": "Excel Master Sheet",
+      "url": "./Deutsch_Wortschatz_Excel_Sheet.html",
+      "description": "Full German Vocabulary & Grammar Spreadsheet"
+    },
+    {
       "name": "Cheat Codes & Hacks",
       "url": "./German_Grammar_Cheat_Codes.html",
       "description": "30+ German grammar shortcuts and tricks"
+    },
+    {
+      "name": "Konnektoren Referenz",
+      "url": "./konnektoren_referenz.html",
+      "description": "Complete German Connectors and Sentence Structure Guide"
+    },
+    {
+      "name": "Verben Hören Audio Coach",
+      "url": "./Verben_Hoeren_EN_DE.html",
+      "description": "Bilingual Verb Listening & Pronunciation Coach"
     },
     {
       "name": "Human Partner",
@@ -46,23 +56,18 @@
     },
     {
       "name": "German Coach",
-      "url": "/KI_German_Coach.html",
+      "url": "./KI_German_Coach.html",
       "description": "Practise with an AI German coach"
     },
     {
       "name": "Grammatik Trainer",
-      "url": "/Grammatik_Regel_Trainer.html",
+      "url": "./Grammatik_Regel_Trainer.html",
       "description": "Practice Grammar"
     },
     {
       "name": "Sprechen Simulator",
-      "url": "/Sprech_Pruefungs_Simulator.html",
+      "url": "./Sprech_Pruefungs_Simulator.html",
       "description": "Speaking Exam Simulator"
-    },
-    {
-      "name": "A2 Practice Studio",
-      "url": "/German_A2_Practice_Studio.html",
-      "description": "A2 Practice"
     }
   ]
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v11';
+const CACHE_NAME = 'deutsch-coach-v12';
 const urlsToCache = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const urlsToCache = [
   './German_Grammar_Cheat_Codes.html',
   './Sprech_Pruefungs_Simulator.html',
   './Grammatik_Regel_Trainer.html',
+  './konnektoren_referenz.html',
+  './Verben_Hoeren_EN_DE.html',
   './KI_Human_Partner.html',
   './KI_German_Coach.html',
   './German_A2_Practice_Studio.html',
@@ -52,7 +54,6 @@ self.addEventListener('fetch', event => {
   const isHTML = event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html');
 
   if (isHTML) {
-    // Network first for HTML navigation so updates show instantly
     event.respondWith(
       fetch(event.request)
         .then(response => {
@@ -65,7 +66,6 @@ self.addEventListener('fetch', event => {
         .catch(() => caches.match(event.request))
     );
   } else {
-    // Cache first for assets/images
     event.respondWith(
       caches.match(event.request).then(response => {
         return response || fetch(event.request).then(networkResponse => {
