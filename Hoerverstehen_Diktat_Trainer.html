@@ -128,7 +128,7 @@
     <div class="controls">
       <button class="btn btn-secondary" onclick="revealTranscript()">👁️ Text anzeigen (Show Transcript)</button>
       <button class="btn btn-primary" onclick="checkAnswer()">✔️ Prüfen (Check)</button>
-      <button class="btn btn-accent" id="nextBtn" style="display:none;" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
+      <button class="btn btn-accent" id="nextBtn" style="display:inline-flex;" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
     </div>
 
     <div id="feedbackBox" class="feedback-box">
@@ -187,7 +187,7 @@
     document.getElementById('dictationInput').value = '';
     document.getElementById('dictationInput').disabled = false;
     document.getElementById('feedbackBox').className = 'feedback-box';
-    document.getElementById('nextBtn').style.display = 'none';
+    /* nextBtn always visible */
     document.getElementById('dictationInput').focus();
 
     playCurrentAudio();
