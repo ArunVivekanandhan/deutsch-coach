@@ -122,6 +122,7 @@
   <div class="stage">
     <button class="audio-giant-btn" id="playBtn" onclick="playCurrentAudio()" title="Play Audio (Spacebar)">🔊</button>
     <div style="font-size:12px; color:var(--ink-soft); margin-bottom: 24px;">Shortcut: Spacebar to play</div>
+    <button id="loopToggleBtn" onclick="toggleLoop()" style="background:none; border:none; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:24px; color:var(--accent);">🔁 Auto-Repeat: ON</button>
 
     <textarea id="dictationInput" class="dictation-input" rows="2" placeholder="Schreib, was du hörst... (Type what you hear)"></textarea>
 
@@ -189,16 +190,61 @@
     document.getElementById('feedbackBox').className = 'feedback-box';
     /* nextBtn always visible */
     document.getElementById('dictationInput').focus();
+    autoRepeat = true;
+    updateLoopBtnUI();
 
     playCurrentAudio();
   }
 
+  let autoRepeat = true;
+  let loopTimeout = null;
+
+  function stopLoop() {
+    autoRepeat = false;
+    clearTimeout(loopTimeout);
+    window.speechSynthesis.cancel();
+    updateLoopBtnUI();
+  }
+
+  function toggleLoop() {
+    autoRepeat = !autoRepeat;
+    updateLoopBtnUI();
+    if(autoRepeat) {
+      playCurrentAudio();
+    } else {
+      clearTimeout(loopTimeout);
+      window.speechSynthesis.cancel();
+    }
+  }
+
+  function updateLoopBtnUI() {
+    const btn = document.getElementById('loopToggleBtn');
+    if(btn) {
+      btn.innerHTML = autoRepeat ? '🔁 Auto-Repeat: ON' : '🔁 Auto-Repeat: OFF';
+      btn.style.color = autoRepeat ? 'var(--accent)' : 'var(--ink-soft)';
+    }
+  }
+
   function playCurrentAudio() {
     if(!currentSentenceObj) return;
+    window.speechSynthesis.cancel();
+    clearTimeout(loopTimeout);
+    
     const ut = new SpeechSynthesisUtterance(currentSentenceObj.de);
     ut.lang = 'de-DE';
     ut.rate = 0.9;
-    window.speechSynthesis.cancel();
+    
+    ut.onend = function() {
+      if(autoRepeat) {
+        loopTimeout = setTimeout(() => {
+          if (autoRepeat) {
+            window.speechSynthesis.cancel(); // just to be safe
+            window.speechSynthesis.speak(ut);
+          }
+        }, 1500); // 1.5s pause between repeats
+      }
+    };
+    
     window.speechSynthesis.speak(ut);
   }
 
@@ -222,6 +268,7 @@
     if (userClean === targetClean && userClean.length > 0) {
       fBox.className = 'feedback-box correct';
       document.getElementById('feedbackTitle').textContent = '🎉 Richtig! (Correct)';
+      stopLoop();
       if(window.addXP) window.addXP(10);
       document.getElementById('dictationInput').disabled = true;
       document.getElementById('nextBtn').style.display = 'inline-flex';
@@ -239,6 +286,7 @@
     fBox.style.borderColor = 'var(--line)';
     fBox.style.color = 'var(--ink)';
     document.getElementById('feedbackTitle').textContent = '📖 Transcript';
+    stopLoop();
     document.getElementById('transcriptDe').textContent = currentSentenceObj.de;
     document.getElementById('transcriptEn').textContent = currentSentenceObj.en;
     document.getElementById('transcriptTa').textContent = currentSentenceObj.ta || '';
