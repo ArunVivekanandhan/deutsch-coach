@@ -625,9 +625,42 @@
   @media (min-width:1100px){
     .topicgrid{grid-template-columns:repeat(5,1fr);}
   }
+  /* Top Suite Navigation Hub */
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow, rgba(27,42,74,0.15));
+    width:100%; max-width:1100px;
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .hub-link.highlight{background:var(--blue); color:#fff; border-color:var(--blue);}
 </style>
 </head>
 <body>
+  <!-- Suite Navigation Hub -->
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link active">🏠 Main Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link highlight">🤖 KI Coach (Live AI)</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar &amp; Rules</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Speaking &amp; Exam</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns &amp; Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio Speaker</a>
+    </div>
+  </div>
+
   <div class="appshell">
     <div class="sidebar">
       <div class="letterhead">
@@ -639,6 +672,7 @@
       <div class="suitelauncher">
         <div class="suitelauncher-title">🧭 App-Suite Launcher</div>
         <div class="suitelauncher-links">
+          <a href="./KI_German_Coach.html" class="suitelink" style="background:#eef4fa; border-color:var(--blue);"><span>🤖 KI Deutsch-Coach</span><span class="badge" style="background:var(--blue); color:#fff;">Live AI ↗</span></a>
           <a href="./Continuous_Verb_Speaker.html" class="suitelink" style="background:#fff9e6; border-color:var(--gold);"><span>🎧 Continuous Audio Speaker</span><span class="badge" style="background:var(--gold); color:#000;">Auto-Play ↗</span></a>
           <a href="./Grammatik_Regel_Trainer.html" class="suitelink"><span>📚 Grammatik-Trainer</span><span class="badge">10 Regeln ↗</span></a>
           <a href="./Sprech_Pruefungs_Simulator.html" class="suitelink"><span>🗣️ Sprechen &amp; Prüfung</span><span class="badge">B1 Oral/Brief ↗</span></a>
@@ -2708,6 +2742,62 @@ function wordBankFor(topic, level){
 let recognitionObj = null;
 let recognizing = false;
 
+/* =========================================================
+   AI HELPER ENGINE (Multi-AI: DeepSeek / OpenAI / Groq / Gemini / Ollama)
+   ========================================================= */
+const SHARED_DEEPSEEK_KEY = "";
+
+async function callAI(systemPrompt, userPrompt) {
+  const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+  const key = localStorage.getItem(`de_ai_key_${provider}`) || (provider === 'deepseek' ? SHARED_DEEPSEEK_KEY : '');
+  const model = localStorage.getItem(`de_ai_model_${provider}`) || (provider === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini');
+  
+  let endpoint = "https://api.deepseek.com/chat/completions";
+  if (provider === 'openai') endpoint = "https://api.openai.com/v1/chat/completions";
+  else if (provider === 'groq') endpoint = "https://api.groq.com/openai/v1/chat/completions";
+  else if (provider === 'gemini') endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+  else if (provider === 'openrouter') endpoint = "https://openrouter.ai/api/v1/chat/completions";
+  else if (provider === 'ollama') endpoint = localStorage.getItem('de_ai_endpoint_ollama') || "http://localhost:11434/v1/chat/completions";
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (provider !== 'ollama' && key) {
+    headers['Authorization'] = `Bearer ${key}`;
+  }
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({
+      model: model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      temperature: 0.4
+    })
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`API Fehler (${res.status}): ${txt.substring(0, 100)}`);
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+async function askAiForWord(word, en) {
+  const box = document.getElementById("aiWordBox");
+  if (!box) return;
+  box.style.display = "block";
+  box.innerHTML = "⏳ Generiere authentische B1 Beispielsätze mit KI...";
+  try {
+    const prompt = `Erstelle genau 2 prägnante, alltagsnahe deutsche B1-Beispielsätze mit dem Wort "${word}" (${en}). Schreibe für jeden Satz die deutsche Version, gefolgt von der englischen Übersetzung in Klammern.`;
+    const resp = await callAI("Du bist ein präziser deutscher Sprachlehrer.", prompt);
+    box.innerHTML = `🤖 <b>KI Beispielsätze (${word}):</b><br>${resp.replace(/\n/g, '<br>')}`;
+  } catch(e) {
+    box.innerHTML = `❌ Fehler: ${e.message}`;
+  }
+}
+
 function renderSprechen(){
   const stage = document.getElementById("stage");
   if(!practiceTopic){
@@ -2736,10 +2826,14 @@ function renderSprechen(){
         <h4>Transkript</h4>
         <div id="transcriptText" style="min-height:40px;"></div>
         <div id="usedWords" style="margin-top:8px;"></div>
+        <button class="bigbtn" style="background:var(--blue); margin-top:10px; font-size:13px; padding:10px;" id="aiSpeakCheckBtn">🤖 Transkript mit KI bewerten</button>
+        <div id="aiSpeakFeedbackBox" class="practicebox" style="display:none; margin-top:10px; border-left:4px solid var(--blue); background:#fff;"></div>
       </div>
     ` : `
       <div class="coach-line">Dein Browser unterstützt keine Spracherkennung (funktioniert am besten in Chrome). Sprich trotzdem laut, und schreib danach 1–2 Sätze zur Selbstkontrolle:</div>
       <textarea class="fillinput" id="manualSpeak" rows="3" placeholder="Kurze Zusammenfassung, was du gesagt hast…"></textarea>
+      <button class="bigbtn" style="background:var(--blue); margin-top:8px;" id="aiManualSpeakBtn">🤖 Mit KI korrigieren</button>
+      <div id="aiSpeakFeedbackBox" class="practicebox" style="display:none; margin-top:10px; border-left:4px solid var(--blue); background:#fff;"></div>
     `}
   `;
   document.getElementById("backTopics").onclick = ()=>{ practiceTopic=null; renderSprechen(); };
@@ -2776,6 +2870,24 @@ function renderSprechen(){
       recognitionObj.onend = ()=>{ recognizing=false; document.getElementById("micBtn").textContent="🎤 Aufnahme starten"; };
       recognitionObj.start();
     };
+
+    const aiSpeakBtn = document.getElementById("aiSpeakCheckBtn");
+    if(aiSpeakBtn){
+      aiSpeakBtn.onclick = async ()=>{
+        const txt = document.getElementById("transcriptText").textContent.trim();
+        if(!txt){ alert("Bitte sprich zuerst etwas ein."); return; }
+        const fBox = document.getElementById("aiSpeakFeedbackBox");
+        fBox.style.display = "block";
+        fBox.innerHTML = "⏳ KI analysiert dein gesprochenes Deutsch...";
+        try {
+          const sys = `Du bist ein deutscher B1-Prüfungscoach. Korrigiere den gesprochenen Text, hebe Grammatik- und Satzbaufehler hervor und gib 1-2 konkrete B1-Tipps.`;
+          const resp = await callAI(sys, `Gesprochener Text zum Thema "${t.label}":\n"${txt}"`);
+          fBox.innerHTML = `<h4>🤖 KI Feedback zum Sprechen:</h4><div style="line-height:1.5; font-size:13.5px;">${resp.replace(/\n/g, '<br>')}</div>`;
+        } catch(e) {
+          fBox.innerHTML = `❌ Fehler: ${e.message}`;
+        }
+      };
+    }
   }
 }
 
@@ -2801,10 +2913,14 @@ function renderSchreiben(){
       <div>${writingPrompt(level, t.label)}</div>
       <div class="wordbank">${bank.map(c=>`<span class="wordchip">${c.w}</span>`).join("")}</div>
     </div>
-    <textarea class="fillinput" id="writeArea" rows="6" placeholder="Schreib hier deinen Text…"></textarea>
+    <textarea class="fillinput" id="writeArea" rows="6" placeholder="Schreib hier deinen Text auf Deutsch…"></textarea>
     <div class="sessionbar" id="wordCount">0 Wörter · 0 Zeichen</div>
-    <button class="checkbtn" id="showRef">Zum Vergleich: Beispieltext anzeigen</button>
-    <div class="coach-line" id="refBox" style="display:none;">Beispieltext (kein automatisches Feedback — nur zum Vergleich): „${sampleWritingText(level, t, bank)}"</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+      <button class="bigbtn" id="aiCheckBtn" style="flex:1; background:var(--blue);">🤖 Mit KI korrigieren &amp; bewerten</button>
+      <button class="checkbtn" id="showRef" style="flex:1;">Beispieltext anzeigen</button>
+    </div>
+    <div id="aiFeedbackBox" class="practicebox" style="display:none; margin-top:12px; border-left:4px solid var(--blue); background:#fff;"></div>
+    <div class="coach-line" id="refBox" style="display:none; margin-top:10px;">Beispieltext (Vergleich): „${sampleWritingText(level, t, bank)}"</div>
   `;
   document.getElementById("backTopics").onclick = ()=>{ practiceTopic=null; renderSchreiben(); };
   document.getElementById("writeArea").addEventListener("input", (e)=>{
@@ -2814,6 +2930,24 @@ function renderSchreiben(){
   });
   document.getElementById("showRef").onclick = ()=>{
     document.getElementById("refBox").style.display = "block";
+  };
+  document.getElementById("aiCheckBtn").onclick = async ()=>{
+    const txt = document.getElementById("writeArea").value.trim();
+    if(!txt){ alert("Bitte schreibe zuerst einen kurzen Text."); return; }
+    const fBox = document.getElementById("aiFeedbackBox");
+    fBox.style.display = "block";
+    fBox.innerHTML = "⏳ KI überprüft deinen Text auf Grammatik, Fälle & Satzbau...";
+    try {
+      const sys = `Du bist ein erfahrener Deutschlehrer (Goethe/telc B1). Bewerte den Text des Lernenden.
+1. Korrigiere Grammatikfehler (Fälle, Artikel, Verbstellung bei Nebensätzen).
+2. Zeige die korrigierte Version.
+3. Erkläre kurz die wichtigsten 2-3 Fehler auf Deutsch/Englisch.
+4. Gib eine Punktzahl von 0-100 und ein geschätztes Sprachniveau (A1/A2/B1/B2).`;
+      const resp = await callAI(sys, `Thema: "${t.label}" (${level})\nText:\n"${txt}"`);
+      fBox.innerHTML = `<h4>🤖 KI Korrektur &amp; Feedback:</h4><div style="line-height:1.55; font-size:13.5px;">${resp.replace(/\n/g, '<br>')}</div>`;
+    } catch(e) {
+      fBox.innerHTML = `❌ Fehler: ${e.message}`;
+    }
   };
 }
 function sampleWritingText(level, topic, bank){
@@ -2944,7 +3078,8 @@ const NAV_ITEMS = [
   {key:"lernen", label:"🧠 Lernen"},
   {key:"sprechen", label:"🗣️ Sprechen"},
   {key:"schreiben", label:"✍️ Schreiben"},
-  {key:"pruefung", label:"📝 Prüfung"}
+  {key:"pruefung", label:"📝 Prüfung"},
+  {key:"ki_coach", label:"🤖 KI Coach ↗", external: "./KI_German_Coach.html"}
 ];
 
 function renderLevelBar(){
@@ -2976,9 +3111,11 @@ function renderCatBar(){
 function renderNavBar(){
   const bar = document.getElementById("navBar");
   bar.innerHTML = NAV_ITEMS.map(n=>
-    `<div class="navbtn ${currentView===n.key?'active':''}" data-v="${n.key}">${n.label}</div>`
+    n.external
+      ? `<a href="${n.external}" class="navbtn" style="background:#eef4fa; border:1.5px solid var(--blue); color:var(--blue); text-decoration:none; display:flex; align-items:center; justify-content:center; font-weight:700;">${n.label}</a>`
+      : `<div class="navbtn ${currentView===n.key?'active':''}" data-v="${n.key}">${n.label}</div>`
   ).join("");
-  bar.querySelectorAll(".navbtn").forEach(el=>{
+  bar.querySelectorAll(".navbtn[data-v]").forEach(el=>{
     el.onclick = ()=> setView(el.dataset.v);
   });
 }

@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>KI Deutsch-Coach &amp; Live Grammar Partner — Dein Deutsch-Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EDEAE1;
+    --paper-dark: #E1DDCF;
+    --card: #F7F5EE;
+    --ink: #1B2A4A;
+    --ink-soft: #4A5878;
+    --red: #AE3327;
+    --red-dark: #8A281F;
+    --red-bg: #FDF2F0;
+    --gold: #B98A2E;
+    --gold-bg: #FFF9E6;
+    --green: #3F6B4A;
+    --green-dark: #2A4A32;
+    --green-bg: #EFF7F1;
+    --blue: #2F5C8A;
+    --blue-bg: #EEF4FA;
+    --purple: #6B4A8A;
+    --line: #cdc7b2;
+    --shadow: rgba(27, 42, 74, 0.14);
+    --shadow-lg: rgba(27, 42, 74, 0.22);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 10px 8px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 860px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Suite Navigation Hub */
+  .hub-banner {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-shadow: 0 3px 8px var(--shadow);
+  }
+  .hub-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink);
+  }
+  .hub-links {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .hub-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    transition: all .15s;
+    font-weight: 600;
+  }
+  .hub-link:hover, .hub-link.active {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  /* Header & Coach Persona Card */
+  .coach-hero {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: 0 4px 12px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .coach-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .coach-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2.5px solid var(--ink);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 3px 8px var(--shadow);
+    flex-shrink: 0;
+  }
+  .avatar-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #10b981;
+    border: 2px solid #fff;
+  }
+  .avatar-badge.speaking {
+    background: var(--gold);
+    animation: pulse 1.2s infinite;
+  }
+  .avatar-badge.thinking {
+    background: var(--blue);
+    animation: pulse 0.8s infinite;
+  }
+
+  .coach-info h1 {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 20px;
+    margin: 0;
+    line-height: 1.2;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .coach-info .status-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 3px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .action-pill-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .15s;
+  }
+  .action-pill-btn:hover {
+    background: var(--ink);
+    color: #fff;
+  }
+  .action-pill-btn.primary {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+
+  /* Scenario & Level Controls Bar */
+  .control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+    background: var(--paper);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .control-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+  .control-select {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 8px;
+    border: 1.5px solid var(--ink);
+    border-radius: 5px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* Chat Timeline Container */
+  .chat-container {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    box-shadow: 0 4px 14px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    min-height: 480px;
+    max-height: 68vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    gap: 16px;
+    position: relative;
+  }
+
+  /* Message Stream & Bubbles */
+  .message-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    animation: fadeIn .25s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .msg-row.user {
+    justify-content: flex-end;
+  }
+  .msg-row.coach {
+    justify-content: flex-start;
+  }
+
+  .msg-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .bubble {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    position: relative;
+    max-width: 85%;
+    word-break: break-word;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  }
+
+  .bubble.user {
+    background: #E4EFE3;
+    border: 1.5px solid var(--green);
+    color: #16331C;
+    border-bottom-right-radius: 2px;
+    margin-left: auto;
+  }
+
+  .bubble.coach {
+    background: #FFFFFF;
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+    border-bottom-left-radius: 2px;
+  }
+
+  .bubble.system {
+    background: var(--paper-dark);
+    border: 1px dashed var(--ink-soft);
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    text-align: center;
+    margin: 4px auto;
+    max-width: 90%;
+  }
+
+  .msg-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .msg-meta.right { justify-content: flex-end; }
+
+  .tts-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--paper);
+    transition: all .15s;
+  }
+  .tts-btn:hover { background: var(--ink); color: #fff; }
+  .tts-btn.active { background: var(--gold); color: #fff; }
+
+  /* Real-Time Grammar Correction Card (Under User Message) */
+  .feedback-box {
+    background: #fff;
+    border: 1.5px solid var(--blue);
+    border-left: 5px solid var(--blue);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 2px;
+    margin-left: auto;
+    width: 96%;
+    max-width: 780px;
+    box-shadow: 0 3px 8px rgba(47, 92, 138, 0.12);
+  }
+  .feedback-box.perfect {
+    border-color: var(--green);
+    border-left-color: var(--green);
+    background: var(--green-bg);
+  }
+  .feedback-box.needs-fix {
+    border-color: var(--red);
+    border-left-color: var(--red);
+    background: var(--red-bg);
+  }
+
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .feedback-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-perfect { background: #d1fae5; color: #065f46; }
+  .badge-improved { background: #fee2e2; color: #991b1b; }
+  .badge-score {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .correction-diff {
+    font-size: 13.5px;
+    line-height: 1.5;
+    background: #fff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    margin-bottom: 8px;
+  }
+  .correction-diff .diff-orig {
+    text-decoration: line-through;
+    color: var(--red);
+    background: #ffebeb;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-right: 4px;
+    font-weight: 500;
+  }
+  .correction-diff .diff-fixed {
+    color: var(--green-dark);
+    background: #e6f7ec;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+  .grammar-points {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .grammar-point {
+    font-size: 12.5px;
+    color: var(--ink);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.4;
+  }
+  .grammar-point-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  .native-upgrade {
+    background: var(--gold-bg);
+    border: 1px solid #e6d396;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    color: #6d4b06;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* Sticky Input Bar (Mobile-Optimized) */
+  .input-panel {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    box-shadow: 0 4px 14px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quick-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .quick-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all .15s;
+    font-weight: 500;
+  }
+  .quick-chip:hover {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .chat-input {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: 10px 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    border: 1.5px solid var(--ink);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    line-height: 1.4;
+    transition: border-color .15s;
+  }
+  .chat-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(47, 92, 138, 0.2);
+  }
+
+  .btn-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all .15s;
+    box-shadow: 0 2px 5px var(--shadow);
+  }
+  .btn-circle:hover { background: var(--paper-dark); }
+  .btn-circle:active { transform: scale(0.95); }
+
+  .btn-circle.mic.recording {
+    background: var(--red);
+    color: #fff;
+    border-color: var(--red-dark);
+    animation: pulse 1.2s infinite;
+  }
+  .btn-circle.send {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn-circle.send:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+
+  /* Settings / API Key Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(27, 42, 74, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 9999;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-card {
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 10px 30px var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: zoomIn .2s ease-out;
+  }
+  @keyframes zoomIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-title {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 20px;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 8px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .form-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .form-input, .form-select {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+    width: 100%;
+  }
+
+  .key-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .key-toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--ink-soft);
+  }
+
+  .btn-full {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: var(--ink);
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: background .15s;
+  }
+  .btn-full:hover { background: var(--blue); }
+
+  /* Mistake Vault / History Drawer */
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 440px;
+    height: 100%;
+    background: var(--card);
+    border-left: 2px solid var(--ink);
+    box-shadow: -5px 0 20px var(--shadow-lg);
+    z-index: 10000;
+    transition: right .3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+  .drawer.open { right: 0; }
+  .drawer-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  /* Loading State Dots */
+  .typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    width: fit-content;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    animation: blink 1.4s infinite both;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1.1); }
+  }
+
+  /* Audio Visualizer Wave */
+  .audio-wave {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+  }
+  .wave-bar {
+    width: 2.5px;
+    height: 100%;
+    background: var(--gold);
+    border-radius: 1px;
+    animation: soundWave 0.8s ease-in-out infinite alternate;
+  }
+  .wave-bar:nth-child(2) { animation-delay: 0.15s; height: 60%; }
+  .wave-bar:nth-child(3) { animation-delay: 0.3s; height: 80%; }
+  .wave-bar:nth-child(4) { animation-delay: 0.45s; height: 40%; }
+  @keyframes soundWave {
+    0% { transform: scaleY(0.3); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* Responsive Media Queries */
+  @media (max-width: 600px) {
+    body { padding: 6px 4px 20px; }
+    .coach-hero { padding: 10px 12px; }
+    .avatar-container { width: 48px; height: 48px; font-size: 26px; }
+    .coach-info h1 { font-size: 17px; }
+    .bubble { font-size: 13.5px; max-width: 92%; }
+    .chat-container { min-height: 380px; max-height: 60vh; padding: 10px 8px; }
+    .control-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-circle { width: 40px; height: 40px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Suite Navigation Hub -->
+  <div class="hub-banner">
+    <div class="hub-title">🧭 <b>DEUTSCH-COACH SUITE</b></div>
+    <div class="hub-links">
+      <a href="./index.html" class="hub-link">🏠 Main Coach</a>
+      <a href="./KI_German_Coach.html" class="hub-link active">🤖 KI Coach</a>
+      <a href="./Grammatik_Regel_Trainer.html" class="hub-link">📚 Grammar &amp; Rules</a>
+      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Speaking &amp; Exam</a>
+      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
+      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
+      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
+      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns &amp; Adj</a>
+      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
+    </div>
+  </div>
+
+  <!-- Coach Persona Card Header -->
+  <div class="coach-hero">
+    <div class="coach-topbar">
+      <div class="coach-profile">
+        <div class="avatar-container" id="coachAvatarContainer">
+          <span id="coachEmoji">👩‍🏫</span>
+          <div class="avatar-badge" id="coachLiveBadge" title="Status: Bereit"></div>
+        </div>
+        <div class="coach-info">
+          <h1 id="coachNameHeading">Frau Müller <span style="font-size:12px; font-weight:normal; color:var(--ink-soft); font-family:'IBM Plex Mono';">(B1 Coach)</span></h1>
+          <div class="status-tag">
+            <span id="coachStatusText">🟢 Online &amp; bereit zum Sprechen</span>
+            <span id="activeAiTag" style="background:var(--paper); padding:1px 6px; border-radius:3px; border:1px solid var(--line); font-size:10px;">DeepSeek</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="action-pill-btn" onclick="openMistakeVault()" title="Saved corrections">
+          📓 Fehler-Buch (<span id="vaultCount">0</span>)
+        </button>
+        <button class="action-pill-btn primary" onclick="openSettingsModal()" title="AI API Key & Settings">
+          ⚙️ AI &amp; Key
+        </button>
+      </div>
+    </div>
+
+    <!-- Scenario & CEFR Controls -->
+    <div class="control-grid">
+      <div class="control-group">
+        <label class="control-label">Coach Persona</label>
+        <select class="control-select" id="personaSelect" onchange="changePersona()">
+          <option value="mueller">👩‍🏫 Frau Müller (Warm, geduldig, A2–B1)</option>
+          <option value="weber">👨‍🏫 Herr Weber (Prüfer DTZ / Goethe B1)</option>
+          <option value="lukas">🧑 Lukas aus Berlin (Alltag &amp; Umgangssprache)</option>
+          <option value="hoffmann">👨‍⚕️ Dr. Hoffmann (Beruf &amp; Fachdeutsch)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Niveau (CEFR Level)</label>
+        <select class="control-select" id="cefrSelect" onchange="updateSystemPersona()">
+          <option value="A1">A1 — Anfänger (Sehr einfach &amp; langsam)</option>
+          <option value="A2">A2 — Grundlegend (Kurze Sätze, Alltag)</option>
+          <option value="B1" selected>B1 — Mittelstufe (DTZ / Goethe Prüfung)</option>
+          <option value="B2">B2 — Fortgeschritten (Fließend &amp; idiomatisch)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Thema / Szenario</label>
+        <select class="control-select" id="topicSelect" onchange="changeTopic()">
+          <option value="free">☕ Freies Gespräch (Casual Chat)</option>
+          <option value="dtz1">🗣️ DTZ Teil 1: Sich vorstellen</option>
+          <option value="dtz2">🖼️ DTZ Teil 2: Bildbeschreibung &amp; Meinung</option>
+          <option value="dtz3">🤝 DTZ Teil 3: Zusammen etwas planen</option>
+          <option value="doctor">🏥 Beim Arzt &amp; Krankmeldung</option>
+          <option value="job">🏢 Vorstellungsgespräch &amp; Beruf</option>
+          <option value="housing">🏠 Wohnungssuche &amp; Vermieter</option>
+          <option value="bank_office">🏛️ Bürgeramt &amp; Banktermin</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">⚡ KI-Modell / Provider</label>
+        <select class="control-select" id="quickProviderSelect" onchange="quickSwitchProvider()">
+          <option value="deepseek" selected>🧠 DeepSeek (deepseek-chat)</option>
+          <option value="openai">🤖 OpenAI (gpt-4o-mini)</option>
+          <option value="groq">⚡ Groq (Llama-3.3 70B Ultra-Fast)</option>
+          <option value="gemini">✨ Google Gemini (1.5 Flash)</option>
+          <option value="openrouter">🌐 OpenRouter (Universal AI)</option>
+          <option value="ollama">💻 Local Ollama (Offline)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Audio &amp; Sprachausgabe</label>
+        <select class="control-select" id="ttsAutoSelect">
+          <option value="auto" selected>🔊 Automatisch vorlesen</option>
+          <option value="manual">🔇 Nur auf Klick vorlesen</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Chat Conversation Feed -->
+  <div class="chat-container" id="chatBox">
+    <!-- Initial Greeting rendered by JS -->
+  </div>
+
+  <!-- Sticky Bottom Input Panel -->
+  <div class="input-panel">
+    <div class="quick-chips" id="quickChips">
+      <span class="quick-chip" onclick="sendQuickPrompt('Hallo! Wie geht es Ihnen heute?')">👋 Hallo!</span>
+      <span class="quick-chip" onclick="sendQuickPrompt('Können wir heute über mein B1 Prüfungsthema sprechen?')">🎯 B1 Thema</span>
+      <span class="quick-chip" onclick="sendQuickPrompt('Können Sie mir bitte eine Frage zu meinem Alltag stellen?')">❓ Frage stellen</span>
+      <span class="quick-chip" onclick="sendQuickPrompt('Ich habe eine Frage zur Grammatik: Wann benutzt man Dativ?')">💡 Grammatikfrage</span>
+      <span class="quick-chip" onclick="resetConversation()">🔄 Neues Gespräch</span>
+    </div>
+
+    <div class="input-row">
+      <button class="btn-circle mic" id="micBtn" onclick="toggleVoiceInput()" title="Sprechen (Spracherkennung de-DE)">
+        🎙️
+      </button>
+
+      <textarea 
+        class="chat-input" 
+        id="userInput" 
+        rows="1" 
+        placeholder="Schreiben oder sprechen Sie auf Deutsch... (Enter zum Senden)" 
+        onkeydown="handleInputKey(event)"
+        oninput="autoResizeInput(this)"
+      ></textarea>
+
+      <button class="btn-circle send" id="sendBtn" onclick="sendMessage()" title="Nachricht senden">
+        ➤
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- AI API Key & Provider Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span>⚙️ AI Integration &amp; API Key</span>
+      <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+    </div>
+
+    <div style="font-size:13px; color:var(--ink-soft); line-height:1.4;">
+      Wählen Sie Ihren bevorzugten KI-Anbieter. Ihre API-Schlüssel werden ausschließlich <b>sicher lokal in Ihrem Browser (localStorage)</b> gespeichert und niemals an Drittserver weitergegeben.
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">KI-Anbieter (Provider)</label>
+      <select class="form-select" id="providerSelect" onchange="onProviderChange()">
+        <option value="deepseek">DeepSeek AI (Empfohlen: deepseek-chat)</option>
+        <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+        <option value="groq">Groq (Ultra Fast: Llama-3.3-70B)</option>
+        <option value="gemini">Google Gemini (Gemini 1.5 / 2.0 Flash)</option>
+        <option value="openrouter">OpenRouter (Universal AI Proxy)</option>
+        <option value="ollama">Ollama (Lokal &amp; 100% Kostenlos auf localhost)</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="apiKeyGroup">
+      <label class="form-label">API Key für <span id="keyProviderName">DeepSeek</span></label>
+      <div class="key-input-wrapper">
+        <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-..." autocomplete="off">
+        <button type="button" class="key-toggle-btn" onclick="toggleKeyVisibility()">👁️</button>
+      </div>
+      <span style="font-size:10.5px; color:var(--ink-soft);" id="keyHelpText">
+        DeepSeek Key ist bereits vorinstalliert oder kann hier aktualisiert werden.
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Modell-Name (Model Identifier)</label>
+      <input type="text" class="form-input" id="modelInput" value="deepseek-chat">
+    </div>
+
+    <div class="form-group" id="endpointGroup" style="display:none;">
+      <label class="form-label">Custom API Endpoint URL</label>
+      <input type="text" class="form-input" id="endpointInput" placeholder="http://localhost:11434/v1/chat/completions">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">TTS Sprechgeschwindigkeit</label>
+      <select class="form-select" id="ttsSpeedSelect">
+        <option value="0.85">0.85x — Langsam (Deutlich für A1/A2)</option>
+        <option value="1.0" selected>1.0x — Normal (Authentisch B1/B2)</option>
+        <option value="1.15">1.15x — Schnell</option>
+      </select>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn-full" style="flex:1; background:var(--green);" onclick="saveSettings()">💾 Speichern</button>
+      <button class="btn-full" style="flex:1; background:var(--blue);" onclick="testAiConnection()">⚡ Verbindung testen</button>
+    </div>
+    <div id="testStatus" style="font-family:'IBM Plex Mono',monospace; font-size:11px; text-align:center;"></div>
+  </div>
+</div>
+
+<!-- Mistake Vault (Fehler-Tagebuch) Drawer -->
+<div class="drawer" id="mistakeDrawer">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--ink); padding-bottom:8px;">
+    <h2 style="font-family:'Fjalla One',sans-serif; font-size:18px; margin:0;">📓 Mein Fehler-Tagebuch</h2>
+    <button class="modal-close" onclick="closeMistakeVault()">&times;</button>
+  </div>
+  <div style="font-size:12px; color:var(--ink-soft); margin-top:6px;">
+    Alle korrigierten Sätze werden hier gesammelt, damit Sie Ihre häufigsten Grammatikmuster wiederholen können.
+  </div>
+  <div class="drawer-content" id="vaultList">
+    <!-- Saved mistakes injected here -->
+  </div>
+  <div style="margin-top:10px; display:flex; gap:6px;">
+    <button class="action-pill-btn" style="flex:1; text-align:center; justify-content:center;" onclick="clearMistakeVault()">🗑️ Alle löschen</button>
+    <button class="action-pill-btn primary" style="flex:1; text-align:center; justify-content:center;" onclick="closeMistakeVault()">Schließen</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   KI DEUTSCH-COACH — CORE ENGINE & CONFIGURATION
+   ========================================================================= */
+
+const DEFAULT_DEEPSEEK_KEY = "";
+
+const PROVIDER_CONFIGS = {
+  deepseek: {
+    name: "DeepSeek AI",
+    endpoint: "https://api.deepseek.com/chat/completions",
+    defaultModel: "deepseek-chat",
+    requiresKey: true,
+    help: "Standard DeepSeek V3/Chat für präzises Deutsch & Grammatik."
+  },
+  openai: {
+    name: "OpenAI",
+    endpoint: "https://api.openai.com/v1/chat/completions",
+    defaultModel: "gpt-4o-mini",
+    requiresKey: true,
+    help: "GPT-4o oder GPT-4o-mini für natürliche Konversation."
+  },
+  groq: {
+    name: "Groq",
+    endpoint: "https://api.groq.com/openai/v1/chat/completions",
+    defaultModel: "llama-3.3-70b-versatile",
+    requiresKey: true,
+    help: "Groq bietet extrem schnelle Latenz für flüssige Audio-Gespräche."
+  },
+  gemini: {
+    name: "Google Gemini",
+    endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    defaultModel: "gemini-1.5-flash",
+    requiresKey: true,
+    help: "Google Gemini über OpenAI-kompatiblen Endpunkt."
+  },
+  openrouter: {
+    name: "OpenRouter",
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    defaultModel: "meta-llama/llama-3.3-70b-instruct",
+    requiresKey: true,
+    help: "Zugriff auf über 100 Modelle mit einem einzigen Schlüssel."
+  },
+  ollama: {
+    name: "Local Ollama",
+    endpoint: "http://localhost:11434/v1/chat/completions",
+    defaultModel: "llama3:latest",
+    requiresKey: false,
+    help: "100% lokal & privat auf Ihrem Rechner (Ollama muss laufen)."
+  }
+};
+
+const PERSONAS = {
+  mueller: {
+    name: "Frau Müller",
+    role: "Geduldige Deutschlehrerin (A2–B1)",
+    emoji: "👩‍🏫",
+    voiceGender: "female",
+    style: "Warm, ermutigend, achtet auf korrekten Satzbau (weil/dass/obwohl) und Dativ/Akkusativ. Erklärt Fehler freundlich.",
+    starter: "Hallo Arun! Schön, dass wir heute wieder Deutsch üben. Worüber möchten Sie heute sprechen?"
+  },
+  weber: {
+    name: "Herr Weber",
+    role: "Goethe / telc / DTZ Prüfer",
+    emoji: "👨‍🏫",
+    voiceGender: "male",
+    style: "Offiziell, professionell, stellt strukturierte Prüfungsfragen für B1 Teil 1-3. Fordert präzise Redemittel und Konnektoren ein.",
+    starter: "Guten Tag. Ich bin Herr Weber, Ihr Prüfer für das heutige Prüfungsgespräch. Lassen Sie uns mit Teil 1 beginnen: Bitte stellen Sie sich kurz vor."
+  },
+  lukas: {
+    name: "Lukas aus Berlin",
+    role: "Muttersprachler & Tandem-Partner",
+    emoji: "🧑",
+    voiceGender: "male",
+    style: "Locker, modern, authentische Umgangssprache, hilft bei Redewendungen und natürlichem Sprechen im Alltag.",
+    starter: "Hi Arun! Na, wie läuft dein Tag so? Was gibt's Neues bei dir?"
+  },
+  hoffmann: {
+    name: "Dr. Hoffmann",
+    role: "Fachcoach für Beruf & Medizin",
+    emoji: "👨‍⚕️",
+    voiceGender: "male",
+    style: "Fokus auf berufsbezogenes Deutsch, Höflichkeitsformen (Konjunktiv II) und professionelle Kommunikation.",
+    starter: "Guten Tag Arun. Lassen Sie uns heute professionelle Kommunikation für den Beruf und Alltag trainieren. Welches Szenario möchten Sie durchgehen?"
+  }
+};
+
+const TOPIC_PROMPTS = {
+  free: "Freies alltägliches Gespräch über Hobbys, Familie, Wetter, Deutschland-Erfahrungen.",
+  dtz1: "DTZ / Goethe Sprechen Teil 1: Sich vorstellen (Name, Herkunft, Wohnort, Beruf, Sprachen, Hobbys). Prüfer stellt Rückfragen.",
+  dtz2: "DTZ / Goethe Sprechen Teil 2: Ein Bild oder Thema beschreiben und eigene Meinung / Erfahrungen darlegen.",
+  dtz3: "DTZ / Goethe Sprechen Teil 3: Zusammen mit dem Partner ein Event planen (z.B. Picknick, Kollegen-Abschied, Ausflug). Vorschläge machen und reagieren.",
+  doctor: "Arztbesuch: Symptome beschreiben (Kopfschmerzen, Fieber), nach Krankschreibung / Rezept fragen, Dosierung verstehen.",
+  job: "Vorstellungsgespräch: Eigene Stärken, Berufserfahrung in der Softwareentwicklung, Motivation und Fragen an den Arbeitgeber.",
+  housing: "Wohnungssuche: Vermieter anrufen, Besichtigungstermin vereinbaren, nach Kaution und Nebenkosten fragen.",
+  bank_office: "Termin bei der Bank oder im Bürgeramt: Ummeldung, Kontoeröffnung, Dokumente vorlegen."
+};
+
+/* Application State */
+let chatHistory = [];
+let mistakeVault = JSON.parse(localStorage.getItem('de_coach_vault') || '[]');
+let isSpeaking = false;
+let isRecording = false;
+let recognition = null;
+let currentUtterance = null;
+
+// Initialize settings from localStorage or defaults
+let appSettings = {
+  provider: localStorage.getItem('de_ai_provider') || 'deepseek',
+  keys: {
+    deepseek: localStorage.getItem('de_ai_key_deepseek') || DEFAULT_DEEPSEEK_KEY,
+    openai: localStorage.getItem('de_ai_key_openai') || '',
+    groq: localStorage.getItem('de_ai_key_groq') || '',
+    gemini: localStorage.getItem('de_ai_key_gemini') || '',
+    openrouter: localStorage.getItem('de_ai_key_openrouter') || '',
+    ollama: ''
+  },
+  models: {
+    deepseek: localStorage.getItem('de_ai_model_deepseek') || 'deepseek-chat',
+    openai: localStorage.getItem('de_ai_model_openai') || 'gpt-4o-mini',
+    groq: localStorage.getItem('de_ai_model_groq') || 'llama-3.3-70b-versatile',
+    gemini: localStorage.getItem('de_ai_model_gemini') || 'gemini-1.5-flash',
+    openrouter: localStorage.getItem('de_ai_model_openrouter') || 'meta-llama/llama-3.3-70b-instruct',
+    ollama: localStorage.getItem('de_ai_model_ollama') || 'llama3:latest'
+  },
+  endpoints: {
+    ollama: localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions'
+  },
+  ttsSpeed: parseFloat(localStorage.getItem('de_ai_tts_speed') || '1.0'),
+  persona: 'mueller',
+  cefr: 'B1',
+  topic: 'free'
+};
+
+/* =========================================================================
+   INITIALIZATION & UI SETUP
+   ========================================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+  updateVaultCount();
+  setupSpeechRecognition();
+  const quickSelect = document.getElementById('quickProviderSelect');
+  if (quickSelect) quickSelect.value = appSettings.provider;
+  updateHeaderUI();
+  initConversation();
+});
+
+function updateHeaderUI() {
+  const persona = PERSONAS[appSettings.persona];
+  document.getElementById('coachEmoji').textContent = persona.emoji;
+  document.getElementById('coachNameHeading').innerHTML = `${persona.name} <span style="font-size:12px; font-weight:normal; color:var(--ink-soft); font-family:'IBM Plex Mono';">(${appSettings.cefr} Coach)</span>`;
+  document.getElementById('activeAiTag').textContent = PROVIDER_CONFIGS[appSettings.provider].name;
+  const quickSelect = document.getElementById('quickProviderSelect');
+  if (quickSelect) quickSelect.value = appSettings.provider;
+}
+
+function quickSwitchProvider() {
+  const selected = document.getElementById('quickProviderSelect').value;
+  appSettings.provider = selected;
+  localStorage.setItem('de_ai_provider', selected);
+  updateHeaderUI();
+  
+  const config = PROVIDER_CONFIGS[selected];
+  if (config.requiresKey && !appSettings.keys[selected]) {
+    appendSystemMessage(`ℹ️ Sie haben zu "${config.name}" gewechselt. Bitte geben Sie Ihren API-Schlüssel ein (⚙️ AI & Key).`);
+    openSettingsModal();
+  } else {
+    appendSystemMessage(`⚡ KI-Anbieter aktiv: ${config.name} (${appSettings.models[selected] || config.defaultModel}).`);
+  }
+}
+
+function initConversation() {
+  const persona = PERSONAS[appSettings.persona];
+  const greeting = persona.starter;
+  
+  chatHistory = [
+    {
+      role: "assistant",
+      coachReply: greeting,
+      correction: null,
+      timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    }
+  ];
+  renderChat();
+}
+
+function changePersona() {
+  appSettings.persona = document.getElementById('personaSelect').value;
+  updateHeaderUI();
+  resetConversation();
+}
+
+function updateSystemPersona() {
+  appSettings.cefr = document.getElementById('cefrSelect').value;
+  updateHeaderUI();
+  appendSystemMessage(`ℹ️ Niveau auf ${appSettings.cefr} angepasst.`);
+}
+
+function changeTopic() {
+  appSettings.topic = document.getElementById('topicSelect').value;
+  const topicTitle = document.getElementById('topicSelect').selectedOptions[0].text;
+  appendSystemMessage(`🎯 Neues Szenario gewählt: ${topicTitle}`);
+  
+  // Prompt coach to initiate new topic
+  const persona = PERSONAS[appSettings.persona];
+  const topicDesc = TOPIC_PROMPTS[appSettings.topic];
+  
+  sendMessageToAI(`[SYSTEM HINWEIS: Wir wechseln jetzt zum Szenario: "${topicTitle}". Starte dieses Szenario mit einer passenden Eröffnungsfrage auf Deutsch passend zum Niveau ${appSettings.cefr}.]`, true);
+}
+
+function resetConversation() {
+  stopAudio();
+  initConversation();
+}
+
+function autoResizeInput(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendQuickPrompt(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+/* =========================================================================
+   CHAT RENDERING & UI GENERATION
+   ========================================================================= */
+
+function renderChat() {
+  const container = document.getElementById('chatBox');
+  container.innerHTML = '';
+
+  chatHistory.forEach((msg, idx) => {
+    if (msg.role === 'user') {
+      const userDiv = document.createElement('div');
+      userDiv.className = 'message-wrapper';
+      userDiv.innerHTML = `
+        <div class="msg-row user">
+          <div class="bubble user">
+            ${escapeHtml(msg.text)}
+            <div class="msg-meta right">
+              <span>Du</span> • <span>${msg.timestamp}</span>
+            </div>
+          </div>
+          <div class="msg-avatar">👤</div>
+        </div>
+      `;
+      container.appendChild(userDiv);
+
+      // If there is a grammar correction card for this user message
+      if (msg.correction) {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'message-wrapper';
+        feedbackDiv.innerHTML = renderCorrectionCard(msg.correction, idx);
+        container.appendChild(feedbackDiv);
+      }
+
+    } else if (msg.role === 'assistant') {
+      const coachDiv = document.createElement('div');
+      coachDiv.className = 'message-wrapper';
+      const persona = PERSONAS[appSettings.persona];
+      
+      coachDiv.innerHTML = `
+        <div class="msg-row coach">
+          <div class="msg-avatar">${persona.emoji}</div>
+          <div class="bubble coach">
+            ${escapeHtml(msg.coachReply)}
+            <div class="msg-meta">
+              <span>${persona.name}</span> • <span>${msg.timestamp}</span>
+              <button class="tts-btn" onclick="playAudio('${escapeForAttr(msg.coachReply)}', this)">
+                🔊 Anhören
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(coachDiv);
+
+    } else if (msg.role === 'system') {
+      const sysDiv = document.createElement('div');
+      sysDiv.className = 'bubble system';
+      sysDiv.textContent = msg.text;
+      container.appendChild(sysDiv);
+    }
+  });
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function renderCorrectionCard(corr, idx) {
+  const isPerfect = corr.score >= 95 || (corr.changes && corr.changes.length === 0);
+  const cardClass = isPerfect ? 'feedback-box perfect' : 'feedback-box needs-fix';
+  const badgeClass = isPerfect ? 'feedback-badge badge-perfect' : 'feedback-badge badge-improved';
+  const badgeText = isPerfect ? '🌟 Perfektes Deutsch!' : '📝 Grammatik-Korrektur';
+
+  let diffHtml = '';
+  if (isPerfect) {
+    diffHtml = `<div style="color:var(--green-dark); font-weight:600;">Keine Fehler gefunden — grammatikalisch einwandfrei formuliert!</div>`;
+  } else {
+    diffHtml = `
+      <div class="correction-diff">
+        <span style="font-weight:700; color:var(--ink); display:block; margin-bottom:3px; font-size:11px; text-transform:uppercase; font-family:'IBM Plex Mono';">Korrigierter Satz:</span>
+        <span class="diff-fixed">${escapeHtml(corr.corrected || corr.original)}</span>
+        <button class="tts-btn" style="margin-left:6px;" onclick="playAudio('${escapeForAttr(corr.corrected)}', this)">🔊</button>
+      </div>
+    `;
+  }
+
+  let grammarPointsHtml = '';
+  if (corr.explanations && corr.explanations.length > 0) {
+    grammarPointsHtml = `
+      <div class="grammar-points">
+        ${corr.explanations.map(exp => `
+          <div class="grammar-point">
+            <span class="grammar-point-icon">📌</span>
+            <span>${escapeHtml(exp)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  let betterAltHtml = '';
+  if (corr.better_alternative) {
+    betterAltHtml = `
+      <div class="native-upgrade">
+        <div>
+          <span style="font-weight:700; font-family:'IBM Plex Mono'; font-size:11px; display:block;">💡 Muttersprachlicher B1/B2 Vorschlag:</span>
+          <span>"${escapeHtml(corr.better_alternative)}"</span>
+        </div>
+        <button class="tts-btn" onclick="playAudio('${escapeForAttr(corr.better_alternative)}', this)">🔊</button>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="${cardClass}">
+      <div class="feedback-header">
+        <span class="${badgeClass}">${badgeText}</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="feedback-badge badge-score">Niveau: ${escapeHtml(corr.cefr_level || 'B1')} | Genauigkeit: ${corr.score || 90}%</span>
+          <button class="action-pill-btn" style="padding:2px 6px; font-size:10px;" onclick="saveToVault(${idx})">⭐ Merken</button>
+        </div>
+      </div>
+      ${diffHtml}
+      ${grammarPointsHtml}
+      ${betterAltHtml}
+    </div>
+  `;
+}
+
+function appendSystemMessage(text) {
+  chatHistory.push({
+    role: "system",
+    text: text,
+    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  });
+  renderChat();
+}
+
+function showTypingIndicator() {
+  const container = document.getElementById('chatBox');
+  const indicator = document.createElement('div');
+  indicator.id = 'typingBubble';
+  indicator.className = 'message-wrapper';
+  indicator.innerHTML = `
+    <div class="msg-row coach">
+      <div class="msg-avatar">${PERSONAS[appSettings.persona].emoji}</div>
+      <div class="typing-indicator">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  `;
+  container.appendChild(indicator);
+  container.scrollTop = container.scrollHeight;
+
+  // Set avatar status
+  document.getElementById('coachLiveBadge').className = 'avatar-badge thinking';
+  document.getElementById('coachStatusText').textContent = 'Denkt nach & analysiert Grammatik...';
+}
+
+function hideTypingIndicator() {
+  const ind = document.getElementById('typingBubble');
+  if (ind) ind.remove();
+  document.getElementById('coachLiveBadge').className = 'avatar-badge';
+  document.getElementById('coachStatusText').textContent = '🟢 Online & bereit zum Sprechen';
+}
+
+/* =========================================================================
+   AI API INTEGRATION & PROMPT SYSTEM
+   ========================================================================= */
+
+function buildSystemPrompt() {
+  const persona = PERSONAS[appSettings.persona];
+  const cefr = appSettings.cefr;
+  const topicDesc = TOPIC_PROMPTS[appSettings.topic];
+
+  return `Du bist ${persona.name}, ein hochqualifizierter und sympathischer Deutsch-Coach für den Lernenden "Arun".
+Deine Rolle: ${persona.role}.
+Dein Sprachstil: ${persona.style}.
+Aktuelles CEFR-Niveau des Lernenden: ${cefr}.
+Aktuelles Thema/Szenario: "${topicDesc}".
+
+WICHTIGE ANWEISUNGEN:
+1. Antworte IMMER als ${persona.name} auf Deutsch. Halte die Konversation natürlich und führe das Gespräch weiter (stelle relevante Fragen, reagiere auf den Inhalt). Passe Wortschatz und Satzlänge an das Niveau ${cefr} an.
+2. Analysiere den deutschen Text des Lernenden penibel auf Grammatikfehler (z.B. falsche Artikel der/die/das, Akkusativ/Dativ-Endungen, Verbposition bei Haupt- und Nebensätzen mit weil/dass/obwohl, trennbare Verben, Perfekt-Partizipien).
+3. Gib deine Antwort AUSSCHLIESSLICH als valides JSON-Objekt zurück, das GENAU dieses Schema hat:
+
+{
+  "coach_reply": "Deine natürliche, sympathische Antwort auf Deutsch, die das Gespräch fortsetzt",
+  "correction": {
+    "original": "Originaltext des Nutzers",
+    "corrected": "Grammatikalisch korrigierte Version des Satzes auf Deutsch",
+    "score": 85, // Zahl von 0 bis 100 für die grammatikalische Richtigkeit
+    "cefr_level": "${cefr}",
+    "explanations": [
+      "Kurze, präzise Erklärung auf Deutsch oder Englisch zum Fehler (z.B. 'Nach *weil* steht das Verb am Ende des Nebensatzes' oder 'mit verlangt immer Dativ: mit dem Bus')"
+    ],
+    "better_alternative": "Ein noch natürlicherer oder eleganterer B1/B2 Satzvorschlag (Redemittel)"
+  }
+}
+
+Falls der Satz des Nutzers bereits 100% fehlerfrei ist:
+- setze "score": 100
+- setze "corrected": "Originaltext unverändert"
+- "explanations": [] (leeres Array)
+- "better_alternative": ein schöner B1/B2 Alternativ-Vorschlag
+
+Gib KEINEN Text außerhalb des JSON-Objekts aus.`;
+}
+
+async function sendMessage() {
+  const inputEl = document.getElementById('userInput');
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  // Add user message to UI
+  const userMsg = {
+    role: "user",
+    text: text,
+    correction: null,
+    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  };
+  chatHistory.push(userMsg);
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  renderChat();
+
+  await sendMessageToAI(text, false, userMsg);
+}
+
+async function sendMessageToAI(promptText, isSystemTrigger = false, userMsgRef = null) {
+  const provider = appSettings.provider;
+  const config = PROVIDER_CONFIGS[provider];
+  const apiKey = appSettings.keys[provider];
+  const model = appSettings.models[provider] || config.defaultModel;
+
+  if (config.requiresKey && !apiKey) {
+    appendSystemMessage(`⚠️ Bitte hinterlegen Sie einen API-Schlüssel für ${config.name} in den Einstellungen (⚙️ Button oben rechts).`);
+    openSettingsModal();
+    return;
+  }
+
+  showTypingIndicator();
+
+  // Prepare messages payload
+  const apiMessages = [
+    { role: "system", content: buildSystemPrompt() }
+  ];
+
+  // Include recent conversation context (last 6 messages)
+  const recentHistory = chatHistory.slice(-6);
+  recentHistory.forEach(m => {
+    if (m.role === 'user') {
+      apiMessages.push({ role: "user", content: m.text });
+    } else if (m.role === 'assistant') {
+      apiMessages.push({ role: "assistant", content: JSON.stringify({ coach_reply: m.coachReply }) });
+    }
+  });
+
+  if (isSystemTrigger) {
+    apiMessages.push({ role: "user", content: promptText });
+  }
+
+  try {
+    let endpoint = config.endpoint;
+    if (provider === 'ollama' && appSettings.endpoints.ollama) {
+      endpoint = appSettings.endpoints.ollama;
+    }
+
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (config.requiresKey && apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: model,
+        messages: apiMessages,
+        temperature: 0.6,
+        response_format: (provider === 'deepseek' || provider === 'openai') ? { type: "json_object" } : undefined
+      })
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error(`API Fehler (${response.status}): ${errBody}`);
+    }
+
+    const data = await response.json();
+    const rawContent = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '';
+
+    parseAndApplyAiResponse(rawContent, userMsgRef);
+
+  } catch (err) {
+    console.error("AI Request failed:", err);
+    hideTypingIndicator();
+    appendSystemMessage(`❌ Verbindungsfehler: ${err.message}. Überprüfen Sie Ihren API-Schlüssel oder das Modell in den Einstellungen.`);
+  }
+}
+
+function parseAndApplyAiResponse(rawContent, userMsgRef) {
+  hideTypingIndicator();
+
+  let parsed = null;
+  try {
+    // Clean potential markdown code blocks ```json ... ```
+    let clean = rawContent.trim();
+    if (clean.startsWith('```json')) {
+      clean = clean.replace(/^```json/, '').replace(/```$/, '').trim();
+    } else if (clean.startsWith('```')) {
+      clean = clean.replace(/^```/, '').replace(/```$/, '').trim();
+    }
+    parsed = JSON.parse(clean);
+  } catch (e) {
+    console.warn("JSON parse fallback on raw content:", rawContent);
+    parsed = {
+      coach_reply: rawContent,
+      correction: null
+    };
+  }
+
+  const coachReply = parsed.coach_reply || parsed.reply || rawContent;
+  
+  if (userMsgRef && parsed.correction) {
+    userMsgRef.correction = parsed.correction;
+  }
+
+  chatHistory.push({
+    role: "assistant",
+    coachReply: coachReply,
+    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  });
+
+  renderChat();
+
+  // Auto TTS if enabled
+  const ttsSetting = document.getElementById('ttsAutoSelect').value;
+  if (ttsSetting === 'auto') {
+    playAudio(coachReply);
+  }
+}
+
+/* =========================================================================
+   SPEECH SYNTHESIS (TTS) & VOICE RECOGNITION (STT)
+   ========================================================================= */
+
+function playAudio(text, btnEl = null) {
+  if (!('speechSynthesis' in window)) {
+    alert("Audio-Sprachausgabe wird in diesem Browser leider nicht unterstützt.");
+    return;
+  }
+
+  stopAudio();
+
+  const cleanText = text.replace(/[*_~`]/g, '');
+  currentUtterance = new SpeechSynthesisUtterance(cleanText);
+  currentUtterance.lang = 'de-DE';
+  currentUtterance.rate = appSettings.ttsSpeed || 1.0;
+
+  // Try to pick a natural German voice
+  const voices = window.speechSynthesis.getVoices();
+  const persona = PERSONAS[appSettings.persona];
+  const deVoices = voices.filter(v => v.lang.startsWith('de'));
+
+  if (deVoices.length > 0) {
+    // Attempt gender matching if names contain hints
+    if (persona.voiceGender === 'female') {
+      const femaleVoice = deVoices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('marlene') || v.name.toLowerCase().includes('anna') || v.name.toLowerCase().includes('hedda') || v.name.toLowerCase().includes('katja'));
+      if (femaleVoice) currentUtterance.voice = femaleVoice;
+      else currentUtterance.voice = deVoices[0];
+    } else {
+      const maleVoice = deVoices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('hans') || v.name.toLowerCase().includes('stefan') || v.name.toLowerCase().includes('conrad'));
+      if (maleVoice) currentUtterance.voice = maleVoice;
+      else currentUtterance.voice = deVoices[0];
+    }
+  }
+
+  currentUtterance.onstart = () => {
+    isSpeaking = true;
+    document.getElementById('coachLiveBadge').className = 'avatar-badge speaking';
+    if (btnEl) btnEl.classList.add('active');
+  };
+
+  currentUtterance.onend = () => {
+    isSpeaking = false;
+    document.getElementById('coachLiveBadge').className = 'avatar-badge';
+    if (btnEl) btnEl.classList.remove('active');
+  };
+
+  currentUtterance.onerror = () => {
+    isSpeaking = false;
+    document.getElementById('coachLiveBadge').className = 'avatar-badge';
+    if (btnEl) btnEl.classList.remove('active');
+  };
+
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopAudio() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  isSpeaking = false;
+  document.getElementById('coachLiveBadge').className = 'avatar-badge';
+  document.querySelectorAll('.tts-btn').forEach(b => b.classList.remove('active'));
+}
+
+function setupSpeechRecognition() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    console.warn("Speech recognition not supported in this browser.");
+    return;
+  }
+
+  recognition = new SpeechRec();
+  recognition.lang = 'de-DE';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    const micBtn = document.getElementById('micBtn');
+    micBtn.classList.add('recording');
+    micBtn.innerHTML = '⏹️';
+    document.getElementById('userInput').placeholder = 'Höre zu... Bitte sprechen Sie auf Deutsch...';
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      transcript += event.results[i][0].transcript;
+    }
+    document.getElementById('userInput').value = transcript;
+    autoResizeInput(document.getElementById('userInput'));
+  };
+
+  recognition.onerror = (event) => {
+    console.warn("Speech recognition error:", event.error);
+    stopVoiceInput();
+  };
+
+  recognition.onend = () => {
+    stopVoiceInput();
+  };
+}
+
+function toggleVoiceInput() {
+  if (!recognition) {
+    alert("Spracherkennung wird in diesem Browser leider nicht unterstützt. Bitte nutzen Sie Google Chrome, Edge oder Safari.");
+    return;
+  }
+
+  if (isRecording) {
+    recognition.stop();
+  } else {
+    try {
+      recognition.start();
+    } catch (e) {
+      recognition.stop();
+    }
+  }
+}
+
+function stopVoiceInput() {
+  isRecording = false;
+  const micBtn = document.getElementById('micBtn');
+  micBtn.classList.remove('recording');
+  micBtn.innerHTML = '🎙️';
+  document.getElementById('userInput').placeholder = 'Schreiben oder sprechen Sie auf Deutsch... (Enter zum Senden)';
+}
+
+/* =========================================================================
+   MISTAKE VAULT (FEHLER-TAGEBUCH)
+   ========================================================================= */
+
+function saveToVault(msgIdx) {
+  const msg = chatHistory[msgIdx];
+  if (!msg || !msg.correction) return;
+
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString(),
+    original: msg.text,
+    corrected: msg.correction.corrected || msg.text,
+    explanations: msg.correction.explanations || [],
+    better: msg.correction.better_alternative || ''
+  };
+
+  mistakeVault.unshift(entry);
+  localStorage.setItem('de_coach_vault', JSON.stringify(mistakeVault));
+  updateVaultCount();
+  alert("⭐ In Ihr Fehler-Tagebuch gespeichert!");
+}
+
+function updateVaultCount() {
+  document.getElementById('vaultCount').textContent = mistakeVault.length;
+}
+
+function openMistakeVault() {
+  const drawer = document.getElementById('mistakeDrawer');
+  const list = document.getElementById('vaultList');
+  
+  if (mistakeVault.length === 0) {
+    list.innerHTML = `<div style="text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13px;">Noch keine Einträge gespeichert. Klicken Sie bei einer Korrektur auf "⭐ Merken".</div>`;
+  } else {
+    list.innerHTML = mistakeVault.map((item, idx) => `
+      <div style="background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px; font-size:13px;">
+        <div style="display:flex; justify-content:space-between; color:var(--ink-soft); font-size:10px; font-family:'IBM Plex Mono'; margin-bottom:4px;">
+          <span>${item.date}</span>
+          <button onclick="removeVaultItem(${idx})" style="background:none; border:none; cursor:pointer; color:var(--red);">🗑️</button>
+        </div>
+        <div style="text-decoration:line-through; color:var(--red); margin-bottom:2px;">${escapeHtml(item.original)}</div>
+        <div style="font-weight:700; color:var(--green-dark); margin-bottom:6px;">${escapeHtml(item.corrected)}</div>
+        ${item.explanations.map(e => `<div style="font-size:11.5px; color:var(--ink-soft);">📌 ${escapeHtml(e)}</div>`).join('')}
+      </div>
+    `).join('');
+  }
+
+  drawer.classList.add('open');
+}
+
+function closeMistakeVault() {
+  document.getElementById('mistakeDrawer').classList.remove('open');
+}
+
+function removeVaultItem(idx) {
+  mistakeVault.splice(idx, 1);
+  localStorage.setItem('de_coach_vault', JSON.stringify(mistakeVault));
+  updateVaultCount();
+  openMistakeVault();
+}
+
+function clearMistakeVault() {
+  if (confirm("Möchten Sie wirklich alle Einträge aus dem Fehler-Buch löschen?")) {
+    mistakeVault = [];
+    localStorage.removeItem('de_coach_vault');
+    updateVaultCount();
+    openMistakeVault();
+  }
+}
+
+/* =========================================================================
+   SETTINGS MODAL & MULTI-PROVIDER CONFIGURATION
+   ========================================================================= */
+
+function openSettingsModal() {
+  const modal = document.getElementById('settingsModal');
+  document.getElementById('providerSelect').value = appSettings.provider;
+  onProviderChange();
+  modal.classList.add('open');
+}
+
+function closeSettingsModal() {
+  document.getElementById('settingsModal').classList.remove('open');
+  document.getElementById('testStatus').textContent = '';
+}
+
+function onProviderChange() {
+  const provider = document.getElementById('providerSelect').value;
+  const config = PROVIDER_CONFIGS[provider];
+
+  document.getElementById('keyProviderName').textContent = config.name;
+  document.getElementById('keyHelpText').textContent = config.help;
+  document.getElementById('modelInput').value = appSettings.models[provider] || config.defaultModel;
+
+  const keyInput = document.getElementById('apiKeyInput');
+  keyInput.value = appSettings.keys[provider] || '';
+
+  const apiKeyGroup = document.getElementById('apiKeyGroup');
+  const endpointGroup = document.getElementById('endpointGroup');
+
+  if (provider === 'ollama') {
+    apiKeyGroup.style.display = 'none';
+    endpointGroup.style.display = 'flex';
+    document.getElementById('endpointInput').value = appSettings.endpoints.ollama || config.endpoint;
+  } else {
+    apiKeyGroup.style.display = 'flex';
+    endpointGroup.style.display = 'none';
+  }
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('apiKeyInput');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function saveSettings() {
+  const provider = document.getElementById('providerSelect').value;
+  const key = document.getElementById('apiKeyInput').value.trim();
+  const model = document.getElementById('modelInput').value.trim();
+  const speed = parseFloat(document.getElementById('ttsSpeedSelect').value);
+
+  appSettings.provider = provider;
+  appSettings.keys[provider] = key;
+  appSettings.models[provider] = model;
+  appSettings.ttsSpeed = speed;
+
+  if (provider === 'ollama') {
+    appSettings.endpoints.ollama = document.getElementById('endpointInput').value.trim();
+    localStorage.setItem('de_ai_endpoint_ollama', appSettings.endpoints.ollama);
+  }
+
+  localStorage.setItem('de_ai_provider', provider);
+  localStorage.setItem(`de_ai_key_${provider}`, key);
+  localStorage.setItem(`de_ai_model_${provider}`, model);
+  localStorage.setItem('de_ai_tts_speed', speed.toString());
+
+  updateHeaderUI();
+  closeSettingsModal();
+  appendSystemMessage(`⚙️ Einstellungen gespeichert: ${PROVIDER_CONFIGS[provider].name} (${model}) aktiv.`);
+}
+
+async function testAiConnection() {
+  const provider = document.getElementById('providerSelect').value;
+  const config = PROVIDER_CONFIGS[provider];
+  const key = document.getElementById('apiKeyInput').value.trim();
+  const model = document.getElementById('modelInput').value.trim();
+  const statusEl = document.getElementById('testStatus');
+
+  statusEl.style.color = 'var(--ink)';
+  statusEl.textContent = '⏳ Teste Verbindung zu ' + config.name + '...';
+
+  try {
+    let endpoint = config.endpoint;
+    if (provider === 'ollama') {
+      endpoint = document.getElementById('endpointInput').value.trim() || config.endpoint;
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (config.requiresKey && key) {
+      headers['Authorization'] = `Bearer ${key}`;
+    }
+
+    const startTime = performance.now();
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: model,
+        messages: [{ role: "user", content: "Antworte mit nur einem Wort: 'OK'" }],
+        max_tokens: 10
+      })
+    });
+
+    const elapsed = Math.round(performance.now() - startTime);
+
+    if (resp.ok) {
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = `✅ Verbindung erfolgreich! (${elapsed}ms Latenz)`;
+    } else {
+      const errText = await resp.text();
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = `❌ Fehler (${resp.status}): ${errText.substring(0, 100)}`;
+    }
+  } catch (err) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = `❌ Verbindungsfehler: ${err.message}`;
+  }
+}
+
+/* Helper utilities */
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+function escapeForAttr(str) {
+  if (!str) return '';
+  return str.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, ' ');
+}
+</script>
+
+</body>
+</html>

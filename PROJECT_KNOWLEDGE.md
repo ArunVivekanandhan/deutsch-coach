@@ -50,15 +50,18 @@ All files are flat in the project root directory (`C:\Users\arunr\OneDrive\Docum
 Deutsch_Coach_Project/
 ├── index.html                              # Main PWA — byte-identical to deutsch-coach.html
 ├── deutsch-coach.html                      # Main PWA (updated with Suite Hub & 6 reading passages)
+├── KI_German_Coach.html                    # Real-time AI German Conversation Coach & Live Grammar Partner (Multi-AI: DeepSeek/OpenAI/Gemini/Groq/Ollama)
 ├── manifest.json                           # PWA manifest (name, icons, colors, start_url)
-├── sw.js                                   # Service worker (v2) — caches all suite apps offline
+├── sw.js                                   # Service worker (v3) — caches all suite apps offline
 ├── icon-192.png, icon-512.png              # PWA icons
 ├── Grammatik_Regel_Trainer.html            # 16 Core German Grammar Pillars with rules, audio & infinite practice drills
 ├── Sprech_Pruefungs_Simulator.html         # Oral Exam Simulator (Teil 1-3), Spoken Redemittel Vault & Letter Builder
 ├── German_A2_Practice_Studio.html          # Interactive 7-module A2 learning studio with Suite Hub
+├── German_B1_Practice_Studio.html          # Interactive 7-module B1 learning studio with Suite Hub
 ├── Verb_Transformation_Trainer.html        # Standalone verb Präsens→Vergangenheit trainer with Suite Hub
 ├── Nomen_Adjektiv_Trainer.html             # Standalone noun-plural / adj-comparison trainer with Suite Hub
 ├── Satzbau_Trainer.html                    # Standalone sentence-building trainer with Suite Hub
+├── Continuous_Verb_Speaker.html            # Standalone audio loop verb speaker with Suite Hub
 ├── Verben_Hoeren_EN_DE.html                # Standalone audio listen-and-repeat player with Suite Hub
 ├── konnektoren_referenz.html               # Static connector-grammar reference page with Suite Hub
 ├── German_A2_Practice_Template.xlsx        # Practice drill template (A2 course curriculum template)
@@ -965,5 +968,11 @@ as a reliable source of "what changed when."
 **Date:** Current session · **AI:** Gemini 3.7
 **Finding:** Added clear bilingual English subtitles, grammar explanations, and topic translations across all 11 HTML files (`index.html`, `Satzbau_Trainer.html`, `German_A2_Practice_Studio.html`, `German_B1_Practice_Studio.html`, `Nomen_Adjektiv_Trainer.html`, `konnektoren_referenz.html`, `Grammatik_Regel_Trainer.html`, `Sprech_Pruefungs_Simulator.html`).
 **Impact:** A learner with English/Tamil as base languages can now clearly navigate every button, topic, and grammar rule without getting lost in German-only chrome.
+
+### Discovery: Multi-AI Live German Coach & Real-Time Grammar Correction App Added
+**Date:** Current session · **AI:** Gemini 3.7
+**Finding:** Created `KI_German_Coach.html` — a responsive, mobile-ready live conversation coach with multi-AI provider support (DeepSeek, OpenAI, Groq, Gemini, OpenRouter, and local Ollama), customizable coach personas (Frau Müller, Herr Weber, Lukas, Dr. Hoffmann), voice recognition (STT) and German speech synthesis (TTS), live under-message grammar corrections with token diffs, rule explanations, native B1/B2 upgrades, and a persistent Fehler-Tagebuch (Mistake Vault) in `localStorage`. Also added the persistent top Suite Hub banner and a dedicated `🤖 KI Coach ↗` tab directly into `index.html` and `deutsch-coach.html` navigation bar.
+**Impact:** The learner can now navigate directly to the AI coach from any screen or device.
+
 
 
