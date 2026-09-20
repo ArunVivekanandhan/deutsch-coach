@@ -941,7 +941,11 @@ function vowelChangeNote(v){
 function getVerbShortcutTip(v){
   const inf = (v.inf||'').toLowerCase();
   let tips = [];
-  if(inf.endsWith('ieren')){
+  if(inf === 'wissen'){
+    tips.push(`🧙‍♂️ <b>Wizard Trick:</b> WISSEN = 'Wisdom / Wizard'. Use for facts, secrets, dates, and before question words (<i>wie, wo, was</i>) or <i>dass</i>! <br><i>„Ich weiß, wo das ist.”</i>`);
+  } else if(inf === 'kennen'){
+    tips.push(`👱‍♂️ <b>Ken Doll Trick:</b> KENNEN = 'Ken Doll (Barbie)'. Use for people, places, and things you are familiar with! <br><i>„Ich kenne die Person / die Stadt.”</i>`);
+  } else if(inf.endsWith('ieren')){
     tips.push(`⚡ <b>100% Suffix Rule:</b> All <i>-ieren</i> verbs are strictly weak and never take <i>ge-</i> in Perfekt!`);
   } else if(inf.includes('ei')){
     tips.push(`⚡ <b>Diphthong Scanner:</b> <i>-ei-</i> verbs are 99% strong! They shift to <i>-ie-</i> or <i>-i-</i> in the past.`);
