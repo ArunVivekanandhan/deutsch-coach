@@ -43,17 +43,7 @@
   }
 
   * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: 'IBM Plex Sans', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
-    padding: 16px 12px 60px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
+  /* legacy body removed */
   .wrap { width: 100%; max-width: 760px; }
 
   /* UNIFIED DEUTSCH-COACH SUITE HUB */
@@ -412,6 +402,7 @@
   }
 
 </style>
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 <div class="wrap">
@@ -781,5 +772,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

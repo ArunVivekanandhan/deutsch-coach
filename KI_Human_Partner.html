@@ -27,18 +27,7 @@
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-  body {
-    margin: 0;
-    padding: 10px 8px 30px;
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(circle at top, #1E293B 0%, #0F172A 100%);
-    color: var(--text-main);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: hidden;
-  }
+  /* legacy body removed */
 
   .wrap {
     width: 100%;
@@ -620,6 +609,7 @@ if (document.readyState === 'loading') {
 
 </script>
 
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 
@@ -683,7 +673,7 @@ if (document.readyState === 'loading') {
     <div class="subtitles-overlay" id="subtitlesBox">
       <div class="sub-german">
         <span id="subGermanText">"Hallo Arun! Ich freue mich, heute mit dir Deutsch zu sprechen. Worüber möchtest du sprechen?"</span>
-        <button onclick="replayCurrentVoice()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:16px;" title="Wiederholen (Repeat)">🔊</button>
+        <button onclick="replayCurrentVoice()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:16px;" title="Wiederholen (Repeat)" class="ds-btn ds-btn-secondary">🔊</button>
       </div>
       <div class="sub-english" id="subEnglishText">
         "Hello Arun! I'm glad to speak German with you today. What would you like to talk about?"
@@ -775,7 +765,7 @@ if (document.readyState === 'loading') {
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:8px;">
       <h3 style="margin:0; font-family:'Fjalla One'; font-size:18px;">⚙️ AI API Keys &amp; Configuration</h3>
-      <button onclick="closeSettings()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">&times;</button>
+      <button onclick="closeSettings()" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;" class="ds-btn ds-btn-secondary">&times;</button>
     </div>
     <div style="font-size:12.5px; color:var(--text-muted);">
       Deine Schlüssel werden sicher in deinem <b>Browser localStorage</b> gespeichert.
@@ -785,8 +775,8 @@ if (document.readyState === 'loading') {
       <input type="password" id="modalKeyInput" style="background:#0F172A; border:1px solid var(--card-border); color:#fff; padding:10px; border-radius:6px; font-family:'IBM Plex Mono'; font-size:13px;" placeholder="sk-...">
     </div>
     <div style="display:flex; gap:8px; margin-top:8px;">
-      <button onclick="saveModalSettings()" style="flex:1; background:var(--green); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">💾 Speichern</button>
-      <button onclick="closeSettings()" style="flex:1; background:var(--card-border); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">Abbrechen (Cancel)</button>
+      <button onclick="saveModalSettings()" style="flex:1; background:var(--green); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;" class="ds-btn ds-btn-secondary">💾 Speichern</button>
+      <button onclick="closeSettings()" style="flex:1; background:var(--card-border); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;" class="ds-btn ds-btn-secondary">Abbrechen (Cancel)</button>
     </div>
   </div>
 </div>
@@ -1475,7 +1465,7 @@ function renderFeedbackCard(origText, parsed) {
     <div class="${cardClass}">
       <div class="user-speech-row">Du: <b>"${escapeHtml(origText)}"</b></div>
       ${!isPerfect ? `<div class="corrected-sentence">Korrektur: ${escapeHtml(parsed.corrected_user_sentence || origText)}</div>` : `<div style="color:var(--green); font-weight:600; font-size:13px;">🌟 Perfekt formuliert!</div>`}
-      <div class="rule-tips">${ruleHtml}</div>\n      <button onclick="saveToVault()" style="margin-top:8px; padding:4px 8px; font-size:12px; background:var(--gold); border:none; border-radius:4px; cursor:pointer;">⭐ Merken (Save)</button>
+      <div class="rule-tips">${ruleHtml}</div>\n      <button onclick="saveToVault()" style="margin-top:8px; padding:4px 8px; font-size:12px; background:var(--gold); border:none; border-radius:4px; cursor:pointer;" class="ds-btn ds-btn-secondary">⭐ Merken (Save)</button>
       ${upgradeHtml}
     </div>
   `;
@@ -1600,5 +1590,6 @@ function escapeHtml(str) {
 </script>
 
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

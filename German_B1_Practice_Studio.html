@@ -35,15 +35,7 @@
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0; padding: 0;
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--paper);
-    color: var(--ink);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  /* legacy body removed */
 
   /* Header Bar */
   header {
@@ -1153,6 +1145,7 @@ html.dark-theme, body.dark {
   }
 
 </style>
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body onload="initApp()">
 <nav class="suite-hub">
@@ -2828,5 +2821,6 @@ if (document.readyState === 'loading') {
 </script>
 
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

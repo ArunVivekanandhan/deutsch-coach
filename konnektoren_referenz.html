@@ -41,16 +41,7 @@
   }
 
   * { box-sizing: border-box; }
-  body {
-    font-family: 'IBM Plex Sans', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
-    margin: 0;
-    padding: 16px 12px 60px;
-    max-width: 960px;
-    margin: 0 auto;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
+  /* legacy body removed */
 
   /* UNIFIED DEUTSCH-COACH SUITE HUB */
   .suite-hub {
@@ -455,6 +446,7 @@
   }
 
 </style>
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 
@@ -732,7 +724,7 @@
     <div class="quiz-hint" id="quizHint"></div>
     <div class="opt-grid" id="optGrid"></div>
     <div id="quizFeedback" style="margin-top:12px; font-weight:700; font-size:14px;"></div>
-    <button id="quizNextBtn" style="display:none; margin-top:14px; background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-family:'Fjalla One',sans-serif; font-size:15px; cursor:pointer;" onclick="nextQuestion()">Nächste Frage ➡️</button>
+    <button id="quizNextBtn" style="display:none; margin-top:14px; background:var(--green); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-family:'Fjalla One',sans-serif; font-size:15px; cursor:pointer;" onclick="nextQuestion()" class="ds-btn ds-btn-secondary">Nächste Frage ➡️</button>
   </div>
 </div>
 
@@ -893,5 +885,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

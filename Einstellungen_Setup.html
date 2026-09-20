@@ -18,10 +18,7 @@
     --line: #334155; --accent: #10b981; --blue: #3b82f6; --red: #ef4444;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 0; font-family: 'Inter', sans-serif;
-    background: var(--bg); color: var(--ink); line-height: 1.5;
-  }
+  /* legacy body removed */
   .wrap { max-width: 800px; margin: 0 auto; padding: 20px; }
   
   /* Navigation */
@@ -73,6 +70,7 @@
   .action-row { display: flex; gap: 12px; margin-top: 24px; }
 </style>
 <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 <div class="wrap">
@@ -85,7 +83,7 @@
     <button id="themeToggleBtn" class="suite-btn-theme" onclick="toggleSuiteTheme()" title="Toggle Dark/Light Mode">🌙</button>
   </nav>
 
-  <h1>⚙️ App Suite Configuration</h1>
+  <h1>️ App Suite Configuration</h1>
   <div class="sub">Manage your AI API keys, personal profile, and data across all Deutsch-Coach apps here. Changes apply globally instantly.</div>
 
   <div class="settings-grid">
@@ -384,5 +382,6 @@
 
   window.onload = loadSettings;
 </script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

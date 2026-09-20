@@ -18,10 +18,7 @@
     --purple:#c084fc; --line:#334155; --shadow:rgba(0,0,0,0.5);
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0; font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
-    padding:12px 10px 60px; display:flex; flex-direction:column; align-items:center;
-  }
+  /* legacy body removed */
   .wrap{width:100%; max-width:850px;}
 
   /* Suite Navigation Hub */
@@ -326,6 +323,7 @@ html.dark-theme, body.dark {
   }
 
 </style>
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 <div class="wrap">
@@ -394,10 +392,10 @@ html.dark-theme, body.dark {
       ⏱️ <span id="timerLabel">Exam Timer</span>: <span id="timerDisplay" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700; color:var(--red);">15:00</span>
     </div>
     <div style="display:flex; gap:6px;">
-      <button onclick="setExamTimer(15*60, '15m Oral Exam')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);">15m Full</button>
-      <button onclick="setExamTimer(3*60, '3m Teil 2 Talk')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);">3m Teil 2</button>
-      <button id="timerToggleBtn" onclick="toggleTimer()" style="padding:4px 10px; font-size:11px; font-weight:600; font-family:'IBM Plex Mono',monospace; border:1.5px solid var(--ink); border-radius:4px; cursor:pointer; background:var(--ink); color:#fff;">▶ Start</button>
-      <button onclick="resetTimer()" style="padding:4px 8px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);">↺</button>
+      <button onclick="setExamTimer(15*60, '15m Oral Exam')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);" class="ds-btn ds-btn-secondary">15m Full</button>
+      <button onclick="setExamTimer(3*60, '3m Teil 2 Talk')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);" class="ds-btn ds-btn-secondary">3m Teil 2</button>
+      <button id="timerToggleBtn" onclick="toggleTimer()" style="padding:4px 10px; font-size:11px; font-weight:600; font-family:'IBM Plex Mono',monospace; border:1.5px solid var(--ink); border-radius:4px; cursor:pointer; background:var(--ink); color:#fff;" class="ds-btn ds-btn-secondary">▶ Start</button>
+      <button onclick="resetTimer()" style="padding:4px 8px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);" class="ds-btn ds-btn-secondary">↺</button>
     </div>
   </div>
 
@@ -929,7 +927,7 @@ function renderTeil3(container){
 
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
         ${data.scenarios.map((s, idx)=>`
-          <button style="padding:6px 12px; font-family:'Fjalla One',sans-serif; font-size:13px; border-radius:20px; border:1.5px solid var(--ink); background:${idx===selectedTeil3ScenarioIdx?'var(--ink)':'#fff'}; color:${idx===selectedTeil3ScenarioIdx?'#fff':'var(--ink)'}; cursor:pointer;" onclick="selectedTeil3ScenarioIdx=${idx}; renderTeil3(document.getElementById('mainView'));">
+          <button style="padding:6px 12px; font-family:'Fjalla One',sans-serif; font-size:13px; border-radius:20px; border:1.5px solid var(--ink); background:${idx===selectedTeil3ScenarioIdx?'var(--ink)':'#fff'}; color:${idx===selectedTeil3ScenarioIdx?'#fff':'var(--ink)'}; cursor:pointer;" onclick="selectedTeil3ScenarioIdx=${idx}; renderTeil3(document.getElementById('mainView'));" class="ds-btn ds-btn-secondary">
             ${idx+1}. ${s.name}
           </button>
         `).join('')}
@@ -1243,5 +1241,6 @@ if (document.readyState === 'loading') {
 
 </script>
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

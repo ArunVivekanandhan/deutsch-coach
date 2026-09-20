@@ -13,8 +13,7 @@
     --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
   }
   *{box-sizing:border-box;}
-  body{margin:0; font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink);
-    padding:14px 12px 60px; display:flex; flex-direction:column; align-items:center;}
+  /* legacy body removed */
   .wrap{width:100%; max-width:640px;}
   h1{font-family:'Fjalla One',sans-serif; font-size:22px; border-bottom:3px solid var(--ink); padding-bottom:8px; margin:0 0 4px;}
   .sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:14px;}
@@ -369,6 +368,7 @@ html.dark-theme, body.dark {
   }
 
 </style>
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 <div class="wrap">
@@ -1962,5 +1962,6 @@ function handleSwipe(cardElement) {
 </script>
 
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>

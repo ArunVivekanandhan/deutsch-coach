@@ -29,7 +29,7 @@
     --shadow: rgba(0,0,0,0.5);
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: 'IBM Plex Sans', sans-serif; background: var(--paper); color: var(--ink); padding: 12px 10px 80px; display: flex; flex-direction: column; align-items: center; }
+  /* legacy body removed */
   .wrap { width: 100%; max-width: 800px; }
   .header-card { background: var(--card); border: 1.5px solid var(--ink); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 10px var(--shadow); }
   .title { font-family: 'Fjalla One', sans-serif; font-size: 24px; margin: 0 0 8px; }
@@ -52,6 +52,7 @@
   
   #loading { display: none; margin-top: 10px; font-size: 14px; color: var(--gold); font-weight: bold; }
 </style>
+  <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
 <div class="wrap">
@@ -160,5 +161,6 @@ Provide feedback on 1) Task fulfillment, 2) Grammar, 3) Vocabulary. Then provide
   if(localStorage.getItem('de_theme') === 'dark') document.body.classList.add('dark');
   renderOutbox();
 </script>
+  <script src="js/app-shell.js"></script>
 </body>
 </html>
