@@ -163,7 +163,13 @@
     });
 
     loadNewSentence();
+
+  const isAiEnabled = localStorage.getItem('de_ai_enabled') !== 'false';
+  if (!isAiEnabled) {
+    const aiOpt = document.querySelector('option[value="ai"]');
+    if(aiOpt) aiOpt.style.display = 'none';
   }
+}
 
   function getFlatSentences() {
     const val = document.getElementById('topicSelect').value;
@@ -222,7 +228,7 @@
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: "system", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level) about a random everyday topic. Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
+            { role: "user", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level) about a random everyday topic. Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
           ],
           temperature: 0.8,
           response_format: (provider === 'deepseek' || provider === 'openai') ? { type: "json_object" } : undefined
@@ -253,7 +259,7 @@
     document.getElementById('feedbackBox').className = 'feedback-box';
     // nextBtn always visible
     document.getElementById('dictationInput').focus();
-    autoRepeat = true;
+    autoRepeat = false;
     updateLoopBtnUI();
     playCurrentAudio();
   }
@@ -273,7 +279,7 @@
   }
 
 
-  let autoRepeat = true;
+  let autoRepeat = false;
   let loopTimeout = null;
 
   function stopLoop() {

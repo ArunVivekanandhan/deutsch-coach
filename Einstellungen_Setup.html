@@ -95,7 +95,16 @@
       <h2>🤖 AI Engine & API Keys</h2>
       <div class="help-text" style="margin-bottom: 16px;">Configure your API provider to unlock the <b>Hörverstehen Dictation</b>, <b>Speaking Simulator</b>, and <b>KI Coach</b>.</div>
       
-      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      
+      <div class="form-group" style="display:flex; align-items:center; gap:12px; padding: 12px; background:var(--line); border-radius:8px; margin-bottom:24px;">
+        <input type="checkbox" id="aiEnabledToggle" style="width:20px; height:20px;">
+        <div>
+          <label style="margin:0; font-size:14px; color:var(--ink);">Enable AI Features (KI aktivieren)</label>
+          <div class="help-text" style="margin:0;">Turn on/off AI generation globally across all apps.</div>
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:16px; flex-wrap:wrap;" id="aiSettingsBlock">
         <div class="form-group" style="flex:1; min-width:200px;">
           <label>Provider</label>
           <select id="aiProvider" onchange="handleProviderChange()">
@@ -128,6 +137,7 @@
         <input type="text" id="aiEndpoint" placeholder="e.g., https://api.openai.com/v1/chat/completions">
       </div>
 
+      </div>
       <div class="action-row">
         <button class="btn btn-primary" onclick="saveSettings()">💾 Speichern (Save Settings)</button>
         <button class="btn btn-secondary" onclick="testConnection()">🔄 Verbindung testen (Test)</button>
@@ -210,6 +220,10 @@
   };
 
   function loadSettings() {
+    const aiEnabled = localStorage.getItem('de_ai_enabled') !== 'false';
+    document.getElementById('aiEnabledToggle').checked = aiEnabled;
+    toggleAiSettingsBlock();
+    document.getElementById('aiEnabledToggle').addEventListener('change', toggleAiSettingsBlock);
     const prov = localStorage.getItem('de_ai_provider') || 'deepseek';
     document.getElementById('aiProvider').value = prov;
     
@@ -220,6 +234,11 @@
     handleProviderChange();
   }
 
+  function toggleAiSettingsBlock() {
+    const isChecked = document.getElementById('aiEnabledToggle').checked;
+    document.getElementById('aiSettingsBlock').style.opacity = isChecked ? '1' : '0.4';
+    document.getElementById('aiSettingsBlock').style.pointerEvents = isChecked ? 'auto' : 'none';
+  }
   function handleProviderChange() {
     const prov = document.getElementById('aiProvider').value;
     
@@ -242,6 +261,7 @@
   }
 
   function saveSettings() {
+    localStorage.setItem('de_ai_enabled', document.getElementById('aiEnabledToggle').checked);
     const prov = document.getElementById('aiProvider').value;
     localStorage.setItem('de_ai_provider', prov);
     localStorage.setItem('de_ai_key_' + prov, document.getElementById('aiKey').value.trim());
