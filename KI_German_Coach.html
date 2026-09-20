@@ -1037,8 +1037,8 @@ if (document.readyState === 'loading') {
           📓 Fehler-Buch (<span id="vaultCount">0</span>)
         </button>
         
-        <button class="action-pill-btn" onclick="clearChatConfirm()" title="Chat leeren">🗑️ Chat leeren</button>
-        <button class="action-pill-btn" onclick="exportChatTranscript()" title="Chat exportieren">📥 Exportieren</button>
+        <button class="action-pill-btn" onclick="clearChatConfirm()" title="Chat leeren (Clear Chat)">🗑️ Chat leeren</button>
+        <button class="action-pill-btn" onclick="exportChatTranscript()" title="Chat exportieren (Export Chat)">📥 Exportieren</button>
 
         <button class="action-pill-btn primary" onclick="openSettingsModal()" title="AI API Key & Settings">
           ⚙️ AI &amp; Key
@@ -1139,7 +1139,7 @@ if (document.readyState === 'loading') {
     </div>
 
     <div class="input-row">
-      <button class="btn-circle mic" id="micBtn" onclick="toggleVoiceInput()" title="Sprechen (Spracherkennung de-DE)">
+      <button class="btn-circle mic" id="micBtn" onclick="toggleVoiceInput()" title="Sprechen (Speak - de-DE)">
         🎙️
       </button>
 
@@ -1152,7 +1152,7 @@ if (document.readyState === 'loading') {
         oninput="autoResizeInput(this)"
       ></textarea>
 
-      <button class="btn-circle send" id="sendBtn" onclick="sendMessage()" title="Nachricht senden">
+      <button class="btn-circle send" id="sendBtn" onclick="sendMessage()" title="Nachricht senden (Send Message)">
         ➤
       </button>
     </div>
@@ -1255,7 +1255,7 @@ if (document.readyState === 'loading') {
   <div style="margin-top:10px; display:flex; gap:6px;">
     <button class="action-pill-btn" style="flex:1; text-align:center; justify-content:center;" onclick="clearMistakeVault()">🗑️ Alle löschen</button>
     <button class="action-pill-btn primary" style="flex:1; text-align:center; justify-content:center;" onclick="startSrsDrill()">🎯 Fehler trainieren (SRS Drill)</button>
-    <button class="action-pill-btn primary" style="flex:1; text-align:center; justify-content:center;" onclick="closeMistakeVault()">Schließen</button>
+    <button class="action-pill-btn primary" style="flex:1; text-align:center; justify-content:center;" onclick="closeMistakeVault()">Schließen (Close)</button>
   </div>
 </div>
 
@@ -1643,7 +1643,7 @@ function renderCorrectionCard(corr, idx) {
         <span class="${badgeClass}">${badgeText}</span>
         <div style="display:flex; align-items:center; gap:8px;">
           <span class="feedback-badge badge-score">Niveau: ${escapeHtml(corr.cefr_level || 'B1')} | Genauigkeit: ${corr.score || 90}%</span>
-          <button class="action-pill-btn" style="padding:2px 6px; font-size:10px;" onclick="saveToVault(${idx})">⭐ Merken</button>
+          <button class="action-pill-btn" style="padding:2px 6px; font-size:10px;" onclick="saveToVault(${idx})">⭐ Merken (Save)</button>
         </div>
       </div>
       ${diffHtml}

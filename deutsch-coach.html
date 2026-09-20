@@ -987,6 +987,7 @@
           <a href="./German_B1_Practice_Studio.html" class="suitelink"><span>🔬 B1 Studio</span><span class="badge">7 Module ↗</span></a>
           <a href="./Verb_Transformation_Trainer.html" class="suitelink"><span>⚡ Verben Flashcards</span><span class="badge">503 Verben ↗</span></a>
           <a href="./Nomen_Adjektiv_Trainer.html" class="suitelink"><span>📦 Nomen &amp; Adjektive</span><span class="badge">Plural/Steig. ↗</span></a>
+          <a href="./Hoerverstehen_Diktat_Trainer.html" class="suitelink" style="background:#fefce8; border-color:var(--gold);"><span>🎧 Hörverstehen Trainer</span><span class="badge" style="background:var(--gold); color:#000;">Dictation ✍️</span></a>
           <a href="./Satzbau_Trainer.html" class="suitelink"><span>🧩 Satzbau Trainer</span><span class="badge">Wortstellung ↗</span></a>
         </div>
       </div>
@@ -3127,8 +3128,8 @@ function metaHTML(card){
 function renderAnswerButtons(uid, onDone){
   return `
     <div class="answerbtns">
-      <button class="actbtn nochmal" id="btnNochmal">Nochmal</button>
-      <button class="actbtn gewusst" id="btnGewusst">Gewusst</button>
+      <button class="actbtn nochmal" id="btnNochmal">Nochmal (Again)</button>
+      <button class="actbtn gewusst" id="btnGewusst">Gewusst (Good)</button>
       <button class="actbtn easy" id="btnEasy">🎯 Kenn ich gut</button>
       <button class="actbtn next" id="btnNext" style="border-color:var(--ink); color:var(--ink); font-weight:700;">→ Weiter</button>
     </div>`;
@@ -3220,7 +3221,7 @@ function renderMcDe2En(card, advanceFn){
           recordAnswer(card.uid, correct, "mc_de2en");
           if(correct) sessionStats.remembered++; else sessionStats.practice++;
           document.getElementById("revealArea").innerHTML = renderInfoPanel(card) +
-            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter</button></div>`;
+            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter (Next)</button></div>`;
           document.getElementById("nextAfterMc").onclick = advanceFn;
         };
       });
@@ -3261,7 +3262,7 @@ function renderMcEn2De(card, advanceFn){
           recordAnswer(card.uid, correct, "mc_en2de");
           if(correct) sessionStats.remembered++; else sessionStats.practice++;
           document.getElementById("revealArea").innerHTML = renderInfoPanel(card) +
-            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter</button></div>`;
+            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter (Next)</button></div>`;
           document.getElementById("nextAfterMc").onclick = advanceFn;
         };
       });
@@ -3301,7 +3302,7 @@ function renderArticle(card, advanceFn){
           recordAnswer(card.uid, correct, "article");
           if(correct) sessionStats.remembered++; else sessionStats.practice++;
           document.getElementById("revealArea").innerHTML = renderInfoPanel(card) +
-            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter</button></div>`;
+            `<div style="padding:0 18px 18px;"><button class="checkbtn" id="nextAfterMc">Weiter (Next)</button></div>`;
           document.getElementById("nextAfterMc").onclick = advanceFn;
         };
       });
@@ -3444,7 +3445,7 @@ function renderSessionCard(label){
     stage.innerHTML = `
       <div class="coach-line">🎉 <b>Sitzung abgeschlossen!</b><br>
       ${sessionStats.reviewed+0} Karten · ${sessionStats.remembered} gewusst · ${sessionStats.practice} brauchen noch Übung.</div>
-      <button class="bigbtn secondary" id="backToLernen">Zurück</button>
+      <button class="bigbtn secondary" id="backToLernen">Zurück (Back)</button>
     `;
     document.getElementById("backToLernen").onclick = ()=>{ currentTopic=null; renderView(); };
     return;
@@ -4149,8 +4150,8 @@ renderView();
     </select>
     <div id="apiKeysContainer"></div>
     <div style="display:flex; gap:10px; margin-top:20px;">
-      <button onclick="saveAiSettings()" style="flex:1; padding:10px; background:var(--ink); color:var(--paper); border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Speichern</button>
-      <button onclick="document.getElementById('aiSettingsModal').style.display='none'" style="flex:1; padding:10px; background:var(--paper); color:var(--ink); border:1px solid var(--line); border-radius:6px; font-weight:bold; cursor:pointer;">Abbrechen</button>
+      <button onclick="saveAiSettings()" style="flex:1; padding:10px; background:var(--ink); color:var(--paper); border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Speichern (Save)</button>
+      <button onclick="document.getElementById('aiSettingsModal').style.display='none'" style="flex:1; padding:10px; background:var(--paper); color:var(--ink); border:1px solid var(--line); border-radius:6px; font-weight:bold; cursor:pointer;">Abbrechen (Cancel)</button>
     </div>
   </div>
 </div>

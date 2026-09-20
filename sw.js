@@ -15,6 +15,7 @@ const urlsToCache = [
   './German_A2_Practice_Studio.html',
   './German_B1_Practice_Studio.html',
   './Nomen_Adjektiv_Trainer.html',
+  './Hoerverstehen_Diktat_Trainer.html',
   './Satzbau_Trainer.html',
   './Verb_Transformation_Trainer.html',
   './Continuous_Verb_Speaker.html',

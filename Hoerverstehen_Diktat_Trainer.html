@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hörverstehen & Diktat Trainer - Deutsch-Coach Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8fafc; --paper: #ffffff; --ink: #0f172a; --ink-soft: #475569;
+    --line: #e2e8f0; --accent: #10b981; --blue: #3b82f6; --red: #ef4444;
+    --red-dark: #b91c1c; --gold: #f59e0b;
+    --radius-lg: 16px; --radius-md: 12px; --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a; --paper: #1e293b; --ink: #f8fafc; --ink-soft: #94a3b8;
+    --line: #334155; --accent: #10b981; --blue: #3b82f6; --red: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.5;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 20px; }
+  
+  /* Navigation & Hub (Simplified from suite) */
+  .suite-hub { display: flex; flex-wrap: wrap; gap: 8px; background: var(--paper); padding: 12px; border-radius: var(--radius-lg); border: 1px solid var(--line); margin-bottom: 24px; box-shadow: var(--shadow-sm); align-items: center; justify-content: space-between; }
+  .hub-logo { font-family: 'Fjalla One'; color: var(--blue); }
+  .suite-nav-links { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; margin: 0 16px; }
+  .suite-link { text-decoration: none; font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--ink-soft); padding: 4px 8px; border: 1px solid var(--line); border-radius: 4px; transition: 0.2s; }
+  .suite-link.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .suite-btn-theme { background: var(--paper); border: 1px solid var(--line); color: var(--ink); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+  h1 { font-family: 'Fjalla One', sans-serif; margin: 0 0 8px 0; font-size: 28px; }
+  .sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; }
+
+  .stage {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 30px 20px;
+    box-shadow: var(--shadow-md); text-align: center;
+  }
+
+  .audio-giant-btn {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--blue); color: white;
+    font-size: 36px; border: none; cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px auto;
+  }
+  .audio-giant-btn:hover { transform: scale(1.05); }
+  .audio-giant-btn:active { transform: scale(0.95); }
+
+  .dictation-input {
+    width: 100%; max-width: 500px; margin: 0 auto 20px auto;
+    font-size: 18px; padding: 16px; border-radius: var(--radius-md);
+    border: 2px solid var(--line); background: var(--bg);
+    color: var(--ink); font-family: 'Inter', sans-serif;
+    text-align: center; resize: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .dictation-input:focus {
+    outline: none; border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .btn {
+    padding: 12px 24px; border: none; border-radius: 8px;
+    font-weight: 600; font-size: 15px; cursor: pointer;
+    transition: 0.2s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--ink-soft); }
+  .btn-secondary { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
+  .btn-secondary:hover { background: var(--line); }
+  .btn-accent { background: var(--accent); color: white; }
+
+  .feedback-box {
+    margin-top: 24px; padding: 20px; border-radius: var(--radius-md);
+    display: none; text-align: left;
+  }
+  .feedback-box.correct { background: #dcfce7; border: 1px solid #86efac; color: #166534; display: block; }
+  .feedback-box.incorrect { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; display: block; }
+  [data-theme="dark"] .feedback-box.correct { background: rgba(22, 101, 52, 0.2); border-color: #166534; color: #4ade80; }
+  [data-theme="dark"] .feedback-box.incorrect { background: rgba(153, 27, 27, 0.2); border-color: #991b1b; color: #f87171; }
+
+  .transcript {
+    font-size: 20px; font-weight: 700; margin-bottom: 8px; font-family: 'Inter', sans-serif;
+  }
+  .translation { font-size: 14px; opacity: 0.9; margin-bottom: 4px; }
+
+  .topic-select {
+    width: 100%; max-width: 300px; padding: 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    margin-bottom: 24px; font-size: 14px; font-weight: 600;
+  }
+</style>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<div class="wrap">
+  <nav class="suite-hub">
+    <div class="suite-brand"><span class="hub-logo">dY -</span> <b>SUITE</b></div>
+    <div class="suite-nav-links">
+      <a href="./deutsch-coach.html" class="suite-link">Dashboard</a>
+      <a href="./Hoerverstehen_Diktat_Trainer.html" class="suite-link active">Hörverstehen (Dictation)</a>
+      <a href="./Satzbau_Trainer.html" class="suite-link">Satzbau</a>
+    </div>
+    <button id="themeToggleBtn" class="suite-btn-theme" onclick="toggleSuiteTheme()" title="Toggle Dark/Light Mode">🌙</button>
+  </nav>
+
+  <h1>Hörverstehen & Diktat</h1>
+  <div class="sub">Listen to the German sentence and type what you hear (Dictation).</div>
+
+  <select id="topicSelect" class="topic-select" onchange="loadNewSentence()">
+    <option value="all">Mix All Topics (Zufall)</option>
+  </select>
+
+  <div class="stage">
+    <button class="audio-giant-btn" id="playBtn" onclick="playCurrentAudio()" title="Play Audio (Spacebar)">🔊</button>
+    <div style="font-size:12px; color:var(--ink-soft); margin-bottom: 24px;">Shortcut: Spacebar to play</div>
+
+    <textarea id="dictationInput" class="dictation-input" rows="2" placeholder="Schreib, was du hörst... (Type what you hear)"></textarea>
+
+    <div class="controls">
+      <button class="btn btn-secondary" onclick="revealTranscript()">👁️ Text anzeigen (Show Transcript)</button>
+      <button class="btn btn-primary" onclick="checkAnswer()">✔️ Prüfen (Check)</button>
+      <button class="btn btn-accent" id="nextBtn" style="display:none;" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
+    </div>
+
+    <div id="feedbackBox" class="feedback-box">
+      <div id="feedbackTitle" style="font-weight:700; margin-bottom:8px; font-size:16px;"></div>
+      <div id="transcriptDe" class="transcript"></div>
+      <div id="transcriptEn" class="translation"></div>
+      <div id="transcriptTa" class="translation" style="color:var(--ink-soft);"></div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets/js/gamification.js"></script>
+<script>
+  // Insert DATA from Satzbau_Trainer
+  const DATA = {"grammar": [{"id": "v2", "title": "Wortstellung: Hauptsatz (Verb Position 2)", "explanation": "Im deutschen Hauptsatz steht das konjugierte Verb IMMER an Position 2 — egal, was auf Position 1 steht (Subjekt, Zeitangabe, Ort...). Steht die Zeitangabe zuerst, rutscht das Subjekt auf Position 3 hinter das Verb.", "sentences": [{"tokens": ["Ich", "kaufe", "heute", "ein Brot."], "en": "I am buying bread today.", "ta": "நான் இன்று ரொட்டி வாங்குகிறேன்."}, {"tokens": ["Heute", "kaufen", "wir", "Gemüse."], "en": "Today we are buying vegetables.", "ta": "இன்று நாங்கள் காய்கறிகள் வாங்குகிறோம்."}, {"tokens": ["Er", "arbeitet", "morgen", "im Büro."], "en": "He works in the office tomorrow.", "ta": "அவர் நாளை அலுவலகத்தில் வேலை செய்கிறார்."}, {"tokens": ["Morgen", "arbeite", "ich", "zu Hause."], "en": "Tomorrow I will work from home.", "ta": "நாளை நான் வீட்டிலிருந்து வேலை செய்வேன்."}, {"tokens": ["Wir", "lernen", "jeden Tag", "Deutsch."], "en": "We study German every day.", "ta": "நாங்கள் தினமும் ஜெர்மன் கற்கிறோம்."}, {"tokens": ["Am Montag", "fährt", "sie", "nach Berlin."], "en": "On Monday she is traveling to Berlin.", "ta": "திங்கட்கிழமை அவள் பெர்லினுக்கு செல்கிறாள்."}], "title_en": "Main Clause Word Order (Verb Position 2)", "explain_en": "In German main clauses, the conjugated verb is ALWAYS at Position 2 — no matter what starts the sentence (subject, time, location). If time or location comes first at Position 1, the subject moves to Position 3 behind the verb."}, {"id": "nebensatz", "title": "Wortstellung: Nebensatz (weil / dass / wenn / ob)", "explanation": "Nach subordinierenden Konnektoren (weil, dass, wenn, ob, obwohl) wandert das konjugierte Verb an das allerletzte Ende des Nebensatzes!", "sentences": [{"tokens": ["Ich", "bleibe", "zu Hause,", "weil", "ich", "krank", "bin."], "en": "I am staying at home because I am sick.", "ta": "எனக்கு உடல்நிலை சரியில்லாததால் நான் வீட்டில் இருக்கிறேன்."}, {"tokens": ["Er", "bleibt", "zu Hause,", "weil", "er", "müde", "ist."], "en": "He stays at home because he is tired.", "ta": "அவர் சோர்வாக இருப்பதால் வீட்டில் இருக்கிறார்."}, {"tokens": ["Ich", "denke,", "dass", "Deutsch", "sehr wichtig", "ist."], "en": "I think that German is very important.", "ta": "ஜெர்மன் மொழி மிகவும் முக்கியமானது என்று நினைக்கிறேன்."}, {"tokens": ["Wenn", "es", "regnet,", "bleibe", "ich", "zu Hause."], "en": "If it rains, I stay at home.", "ta": "மழை பெய்தால் நான் வீட்டில் இருப்பேன்."}, {"tokens": ["Ich", "weiß", "nicht,", "ob", "der Zug", "pünktlich", "kommt."], "en": "I do not know whether the train arrives on time.", "ta": "ரயில் சரியான நேரத்தில் வருமா என்று எனக்குத் தெரியவில்லை."}, {"tokens": ["Obwohl", "er", "müde", "ist,", "lernt", "er", "weiter."], "en": "Although he is tired, he continues learning.", "ta": "அவன் சோர்வாக இருந்தாலும் தொடர்ந்து படிக்கிறான்."}], "title_en": "Subordinate Clause (weil / dass / wenn / ob)", "explain_en": "After subordinating conjunctions (because, that, if/when, whether, although), the conjugated verb is ALWAYS kicked to the very end of the clause."}, {"id": "konnektoren", "title": "Konnektoren: Position 0 vs. Position 1 vs. Nebensatz", "explanation": "ADUSO (aber, denn, und, sondern, oder) = Position 0 (normale Wortstellung). deshalb/trotzdem = Position 1 (Inversion: Verb auf Pos 2, Subjekt auf Pos 3). weil/obwohl = Verb ans Ende.", "sentences": [{"tokens": ["Er", "war", "müde,", "aber", "er", "arbeitete", "trotzdem."], "en": "He was tired, but he worked anyway.", "ta": "அவர் சோர்வாக இருந்தார், ஆனால் தொடர்ந்து வேலை செய்தார்."}, {"tokens": ["Das Wetter", "war", "schlecht,", "deshalb", "blieb", "ich", "zu Hause."], "en": "The weather was bad, therefore I stayed home.", "ta": "வானிலை மோசமாக இருந்தது, அதனால் நான் வீட்டில் தங்கிவிட்டேன்."}, {"tokens": ["Er", "ist", "nicht", "arbeitslos,", "sondern", "hat", "einen neuen Job."], "en": "He is not unemployed, but rather has a new job.", "ta": "அவர் வேலையில்லாமல் இல்லை, மாறாக ஒரு புதிய வேலை கிடைத்துள்ளது."}, {"tokens": ["Ich", "lerne", "fleißig,", "denn", "ich", "möchte", "die B1-Prüfung", "bestehen."], "en": "I study diligently, for I want to pass B1.", "ta": "நான் ஆர்வத்துடன் படிக்கிறேன், ஏனெனில் B1 தேர்வில் தேர்ச்சி பெற விரும்புகிறேன்."}, {"tokens": ["Andi", "war", "nervös,", "trotzdem", "hatte", "er", "ein gutes Gespräch."], "en": "Andi was nervous, nevertheless he had a good interview.", "ta": "ஆண்டி பதற்றமாக இருந்தார், இருப்பினும் நல்ல நேர்காணல் அமைந்தது."}], "title_en": "Connectors: Position 0 vs. Position 1 vs. End", "explain_en": "ADUSO (aber, denn, und, sondern, oder) take Position 0 (normal word order follows). deshalb/trotzdem take Position 1 (inversion: verb at Pos 2, subject at Pos 3). weil/obwohl send verb to end."}, {"id": "perfekt", "title": "Perfekt-Bildung (haben / sein + Partizip II)", "explanation": "Das Hilfsverb (haben/sein) steht konjugiert auf Position 2. Das Partizip II steht ganz am Satzende (Satzklammer).", "sentences": [{"tokens": ["Ich", "habe", "gestern", "ein interessantes Buch", "gelesen."], "en": "Yesterday I read an interesting book.", "ta": "நேற்று நான் ஒரு சுவாரஸ்யமான புத்தகத்தைப் படித்தேன்."}, {"tokens": ["Wir", "haben", "heute Morgen", "viel Deutsch", "gelernt."], "en": "We learned a lot of German this morning.", "ta": "இன்று காலை நாங்கள் நிறைய ஜெர்மன் படித்தோம்."}, {"tokens": ["Er", "ist", "letzte Woche", "nach München", "gefahren."], "en": "He traveled to Munich last week.", "ta": "அவர் கடந்த வாரம் முனிச்சிற்கு சென்றார்."}, {"tokens": ["Sie", "ist", "gestern Abend", "spät nach Hause", "gekommen."], "en": "She came home late yesterday evening.", "ta": "அவள் நேற்று இரவு தாமதமாக வீட்டிற்கு வந்தாள்."}], "title_en": "Past Perfect Tense (haben / sein + Partizip II)", "explain_en": "The helping verb (haben/sein) sits at Position 2. The main verb's Partizip II (ge- form) sits at the very end of the sentence."}, {"id": "modalverben", "title": "Modalverben (können, müssen, wollen, dürfen...)", "explanation": "Das Modalverb steht konjugiert auf Position 2. Der Infinitiv des Hauptverbs steht unverändert ganz am Satzende.", "sentences": [{"tokens": ["Ich", "kann", "heute", "leider nicht", "zum Kurs", "kommen."], "en": "Unfortunately I cannot come to the course today.", "ta": "துரதிர்ஷ்டவசமாக இன்று என்னால் வகுப்பிற்கு வர முடியாது."}, {"tokens": ["Wir", "müssen", "das Formular", "bis Freitag", "beim Amt", "einreichen."], "en": "We must submit the form to the office by Friday.", "ta": "வெள்ளிக்கிழமைக்குள் அலுவலகத்தில் படிவத்தை சமர்ப்பிக்க வேண்டும்."}, {"tokens": ["Er", "möchte", "nächstes Jahr", "eine Ausbildung", "beginnen."], "en": "He would like to start an apprenticeship next year.", "ta": "அவர் அடுத்த ஆண்டு தொழிற்பயிற்சியைத் தொடங்க விரும்புகிறார்."}], "title_en": "Modal Verbs (can, must, want to, may...)", "explain_en": "The conjugated modal verb sits at Position 2. The infinitive of the main action verb sits unchanged at the very end of the sentence."}, {"id": "trennbar", "title": "Trennbare Verben (Vorsilbe ans Satzende)", "explanation": "Der Verbstamm steht konjugiert auf Position 2. Die trennbare Vorsilbe (auf-, an-, ein-, aus-, mit-...) wandert ganz ans Ende des Satzes!", "sentences": [{"tokens": ["Ich", "stehe", "jeden Morgen", "um sechs Uhr", "auf."], "en": "I get up at six o'clock every morning.", "ta": "நான் தினமும் காலை ஆறு மணிக்கு எழுகிறேன்."}, {"tokens": ["Der Zug", "kommt", "in zehn Minuten", "am Bahnhof", "an."], "en": "The train arrives at the station in ten minutes.", "ta": "ரயில் பத்து நிமிடங்களில் ரயில் நிலையத்திற்கு வந்து சேரும்."}, {"tokens": ["Wir", "räumen", "heute", "die ganze Küche", "auf."], "en": "We are cleaning up the entire kitchen today.", "ta": "நாங்கள் இன்று முழு சமையலறையையும் சுத்தம் செய்கிறோம்."}], "title_en": "Separable Verbs (Prefix moves to end)", "explain_en": "The verb stem is conjugated at Position 2. The separable prefix (auf-, an-, ein-, aus-, mit-...) detaches and flies to the very end of the sentence."}, {"id": "adjektiv", "title": "Adjektivendungen (Nominativ & Akkusativ)", "explanation": "Nach bestimmtem Artikel (der/die/das) im Nominativ: -e. Nach unbestimmtem Artikel (ein/eine): maskulin -er, feminin -e, neutral -es. Im Akkusativ Maskulin: immer -en!", "sentences": [{"tokens": ["Der neue Kollege", "ist", "sehr hilfsbereit", "und nett."], "en": "The new colleague is very helpful and nice.", "ta": "புதிய சக ஊழியர் மிகவும் உதவிகரமானவர் மற்றும் நல்லவர்."}, {"tokens": ["Ich", "habe", "eine schöne Wohnung", "im Zentrum", "gefunden."], "en": "I found a beautiful apartment in the city center.", "ta": "நகர மையத்தில் ஒரு அழகான வீட்டை நான் கண்டறிந்தேன்."}, {"tokens": ["Wir", "haben", "einen neuen Tisch", "für die Küche", "gekauft."], "en": "We bought a new table for the kitchen.", "ta": "சமையலறைக்கு ஒரு புதிய மேசையை வாங்கினோம்."}], "title_en": "Adjective Endings (Nominative & Accusative)", "explain_en": "Adjectives change endings based on gender and case (-e, -en, -er, -es). In masculine accusative, the ending is always -en."}, {"id": "praeposition", "title": "Präpositionen mit Dativ & Akkusativ", "explanation": "DOGFU (durch, ohne, gegen, für, um) = immer Akkusativ. ABMNSVZ (aus, bei, mit, nach, seit, von, zu) = immer Dativ. Wechselpräpositionen: wohin? = Akkusativ, wo? = Dativ.", "sentences": [{"tokens": ["Ich", "gehe", "heute", "ohne meinen Bruder", "ins Kino."], "en": "I am going to the cinema today without my brother.", "ta": "இன்று என் சகோதரன் இல்லாமல் திரைப்படத்திற்கு செல்கிறேன்."}, {"tokens": ["Wir", "fahren", "morgen", "mit dem schnellen Zug", "nach Berlin."], "en": "Tomorrow we travel to Berlin by fast train.", "ta": "நாளை அதிவேக ரயிலில் பெர்லினுக்கு செல்கிறோம்."}, {"tokens": ["Ich", "lege", "das Buch", "auf den Tisch."], "en": "I place the book on the table (action/movement).", "ta": "நான் புத்தகத்தை மேசை மீது வைக்கிறேன்."}, {"tokens": ["Das Buch", "liegt", "schon", "auf dem Tisch."], "en": "The book is already lying on the table (position/location).", "ta": "புத்தகம் ஏற்கனவே மேசை மீது உள்ளது."}], "title_en": "Prepositions with Dative & Accusative Cases", "explain_en": "DOGFU prepositions always take Accusative. ABMNSVZ prepositions always take Dative. Dual prepositions take Accusative for movement/direction, and Dative for stationary location."}], "thematic": [{"id": "familie", "title": "Familie & Alltag", "explanation": "Wortschatz und Sätze rund um Familienmitglieder, Beziehungen und alltägliche Aktivitäten.", "sentences": [{"tokens": ["Meine Eltern", "wohnen", "seit vielen Jahren", "in Indien."], "en": "My parents have lived in India for many years.", "ta": "என் பெற்றோர் பல ஆண்டுகளாக இந்தியாவில் வசிக்கின்றனர்."}, {"tokens": ["Ich", "besuche", "meine Familie", "jeden Sommer", "in Chennai."], "en": "I visit my family in Chennai every summer.", "ta": "ஒவ்வொரு கோடையிலும் நான் சென்னையில் உள்ள என் குடும்பத்தினரை சந்திக்கிறேன்."}, {"tokens": ["Unsere Tochter", "geht", "jeden Morgen", "in die Grundschule."], "en": "Our daughter goes to primary school every morning.", "ta": "எங்கள் மகள் தினமும் காலை தொடக்கப் பள்ளிக்குச் செல்கிறாள்."}], "title_en": "Family & Daily Life", "explain_en": "Vocabulary and real-world sentence building about family members, relationships, and everyday activities."}, {"id": "wohnen", "title": "Wohnen & Miete", "explanation": "Sätze für Wohnungssuche, Mietverträge, Umzug und Nachbarschaft.", "sentences": [{"tokens": ["Die Miete", "für diese Wohnung", "ist", "sehr günstig."], "en": "The rent for this apartment is very affordable.", "ta": "இந்த குடியிருப்பின் வாடகை மிகவும் மலிவானது."}, {"tokens": ["Ich", "habe", "den neuen Mietvertrag", "gestern", "unterschrieben."], "en": "I signed the new tenancy agreement yesterday.", "ta": "நேற்று நான் புதிய வாடகை ஒப்பந்தத்தில் கையெழுத்திட்டேன்."}, {"tokens": ["Wir", "sind", "letzten Monat", "in eine größere Wohnung", "umgezogen."], "en": "Last month we moved into a larger apartment.", "ta": "கடந்த மாதம் நாங்கள் ஒரு பெரிய வீட்டிற்கு குடிபெயர்ந்தோம்."}], "title_en": "Housing, Rent & Moving", "explain_en": "Sentence patterns for apartment search, tenancy agreements, rooms, and neighborhood."}, {"id": "arbeit", "title": "Arbeit & Beruf", "explanation": "Sätze für Bewerbung, Arbeitsplatz, Vorstellungsgespräch und Kollegen.", "sentences": [{"tokens": ["Ich", "habe", "mich", "auf die Stelle als Ingenieur", "beworben."], "en": "I applied for the position as an engineer.", "ta": "பொறியாளர் பணிக்கு நான் விண்ணப்பித்துள்ளேன்."}, {"tokens": ["Mein Kollege", "hat", "das wichtige Meeting", "sehr gut", "organisiert."], "en": "My colleague organized the important meeting very well.", "ta": "என் சக ஊழியர் முக்கியமான கூட்டத்தை சிறப்பாக ஏற்பாடு செய்தார்."}, {"tokens": ["Ich", "arbeite", "seit drei Jahren", "in dieser deutschen Firma."], "en": "I have been working at this German company for three years.", "ta": "நான் இந்த ஜெர்மன் நிறுவனத்தில் மூன்று ஆண்டுகளாக வேலை செய்கிறேன்."}], "title_en": "Work, Job & Career", "explain_en": "Sentence patterns for job applications, office meetings, colleagues, and employment contracts."}, {"id": "einkaufen", "title": "Einkaufen & Online-Shopping", "explanation": "Sätze für Supermarkt, Reklamation, Pakete und Rücksendungen.", "sentences": [{"tokens": ["Ich", "habe", "das falsche Paket", "gestern", "zurückgeschickt."], "en": "I returned the wrong package yesterday.", "ta": "நேற்று தவறான பார்சலை திருப்பி அனுப்பினேன்."}, {"tokens": ["Dieser Rabatt-Gutschein", "gilt", "nur noch", "bis Freitag."], "en": "This discount voucher is only valid until Friday.", "ta": "இந்த தள்ளுபடி கூப்பன் வெள்ளிக்கிழமை வரை மட்டுமே செல்லும்."}, {"tokens": ["Ich", "möchte", "diese Jacke", "bitte", "umtauschen."], "en": "I would like to exchange this jacket, please.", "ta": "தயவுசெய்து இந்த ஜாக்கெட்டை மாற்றிக்கொள்ள விரும்புகிறேன்."}], "title_en": "Shopping & Online Orders", "explain_en": "Sentences for supermarket, sales, returning packages, and customer service."}, {"id": "gesundheit", "title": "Gesundheit & Arztbesuch", "explanation": "Sätze für Arzttermin, Symptome, Apotheke und Medikamente.", "sentences": [{"tokens": ["Ich", "habe", "einen dringenden Termin", "beim Arzt", "vereinbart."], "en": "I scheduled an urgent appointment with the doctor.", "ta": "மருத்துவரிடம் அவசர சந்திப்பை பதிவு செய்துள்ளேன்."}, {"tokens": ["Die Ärztin", "hat", "mir", "ein gutes Medikament", "verschrieben."], "en": "The doctor prescribed a good medicine for me.", "ta": "மருத்துவர் எனக்கு நல்ல மருந்தை பரிந்துரைத்தார்."}, {"tokens": ["Er", "ist", "seit drei Tagen", "schwer erkältet."], "en": "He has had a heavy cold for three days.", "ta": "அவருக்கு மூன்று நாட்களாக கடுமையான சளி பிடித்துள்ளது."}], "title_en": "Health & Doctor Appointments", "explain_en": "Sentences for medical visits, symptoms, pharmacy, and medication."}, {"id": "behoerden", "title": "Behörden & Formulare", "explanation": "Sätze für Einwohnermeldeamt, Ausländerbehörde und Anträge.", "sentences": [{"tokens": ["Ich", "muss", "meinen neuen Wohnsitz", "beim Bürgeramt", "anmelden."], "en": "I must register my new address at the registration office.", "ta": "எனது புதிய குடியிருப்பு முகவரியை பதிவு அலுவலகத்தில் பதிவு செய்ய வேண்டும்."}, {"tokens": ["Das Amt", "hat", "meinen Antrag", "letzte Woche", "genehmigt."], "en": "The office approved my application last week.", "ta": "அலுவலகம் கடந்த வாரம் எனது விண்ணப்பத்தை அங்கீகரித்தது."}, {"tokens": ["Ich", "brauche", "eine beglaubigte Kopie", "von meinem Zeugnis."], "en": "I need a certified copy of my certificate.", "ta": "எனது சான்றிதழின் சான்றளிக்கப்பட்ட நகல் எனக்குத் தேவை."}], "title_en": "Authorities, Bureaucracy & Official Forms", "explain_en": "Sentences for registration office, applications, official certificates, and residence."}]};
+
+  let allSentences = [];
+  let currentSentenceObj = null;
+
+  function init() {
+    // Populate topics
+    const select = document.getElementById('topicSelect');
+    [...DATA.grammar, ...DATA.thematic].forEach(t => {
+      let opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.title + (t.title_en ? ` (${t.title_en})` : '');
+      select.appendChild(opt);
+    });
+
+    loadNewSentence();
+  }
+
+  function getFlatSentences() {
+    const val = document.getElementById('topicSelect').value;
+    let pool = [];
+    let cats = val === 'all' ? [...DATA.grammar, ...DATA.thematic] : [...DATA.grammar, ...DATA.thematic].filter(t => t.id === val);
+    cats.forEach(c => {
+      if(c.sentences) {
+        c.sentences.forEach(s => {
+          pool.push({
+            de: s.tokens.join(' '),
+            en: s.en,
+            ta: s.ta
+          });
+        });
+      }
+    });
+    return pool;
+  }
+
+  function loadNewSentence() {
+    const pool = getFlatSentences();
+    if(pool.length === 0) return;
+    currentSentenceObj = pool[Math.floor(Math.random() * pool.length)];
+    
+    document.getElementById('dictationInput').value = '';
+    document.getElementById('dictationInput').disabled = false;
+    document.getElementById('feedbackBox').className = 'feedback-box';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('dictationInput').focus();
+
+    playCurrentAudio();
+  }
+
+  function playCurrentAudio() {
+    if(!currentSentenceObj) return;
+    const ut = new SpeechSynthesisUtterance(currentSentenceObj.de);
+    ut.lang = 'de-DE';
+    ut.rate = 0.9;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(ut);
+  }
+
+  function cleanString(str) {
+    return str.toLowerCase().replace(/[.,!?;:"']/g, '').trim();
+  }
+
+  function checkAnswer() {
+    if(!currentSentenceObj) return;
+    let userText = document.getElementById('dictationInput').value;
+    let targetText = currentSentenceObj.de;
+
+    let userClean = cleanString(userText);
+    let targetClean = cleanString(targetText);
+
+    const fBox = document.getElementById('feedbackBox');
+    document.getElementById('transcriptDe').textContent = targetText;
+    document.getElementById('transcriptEn').textContent = currentSentenceObj.en;
+    document.getElementById('transcriptTa').textContent = currentSentenceObj.ta || '';
+
+    if (userClean === targetClean && userClean.length > 0) {
+      fBox.className = 'feedback-box correct';
+      document.getElementById('feedbackTitle').textContent = '🎉 Richtig! (Correct)';
+      if(window.addXP) window.addXP(10);
+      document.getElementById('dictationInput').disabled = true;
+      document.getElementById('nextBtn').style.display = 'inline-flex';
+    } else {
+      fBox.className = 'feedback-box incorrect';
+      document.getElementById('feedbackTitle').textContent = '❌ Fast! (Almost!) - Vergleiche deinen Text:';
+    }
+  }
+
+  function revealTranscript() {
+    if(!currentSentenceObj) return;
+    const fBox = document.getElementById('feedbackBox');
+    fBox.className = 'feedback-box correct';
+    fBox.style.background = 'var(--paper)';
+    fBox.style.borderColor = 'var(--line)';
+    fBox.style.color = 'var(--ink)';
+    document.getElementById('feedbackTitle').textContent = '📖 Transcript';
+    document.getElementById('transcriptDe').textContent = currentSentenceObj.de;
+    document.getElementById('transcriptEn').textContent = currentSentenceObj.en;
+    document.getElementById('transcriptTa').textContent = currentSentenceObj.ta || '';
+    document.getElementById('nextBtn').style.display = 'inline-flex';
+  }
+
+  // Theme support
+  function toggleSuiteTheme(){
+    const b = document.body;
+    if(b.getAttribute('data-theme')==='dark'){
+      b.removeAttribute('data-theme');
+      localStorage.setItem('de_theme','light');
+    } else {
+      b.setAttribute('data-theme','dark');
+      localStorage.setItem('de_theme','dark');
+    }
+  }
+  if(localStorage.getItem('de_theme')==='dark') document.body.setAttribute('data-theme','dark');
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Only intercept space if not typing in textarea
+    if (e.code === 'Space' && document.activeElement.id !== 'dictationInput') {
+      e.preventDefault();
+      playCurrentAudio();
+    }
+    if (e.code === 'Enter' && document.activeElement.id === 'dictationInput') {
+      e.preventDefault();
+      checkAnswer();
+    }
+  });
+
+  window.onload = init;
+</script>
+</body>
+</html>

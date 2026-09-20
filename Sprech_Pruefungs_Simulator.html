@@ -794,9 +794,9 @@ function renderSubTabs(){
   let items = [];
   if(currentMode === 'oral'){
     items = [
-      {id:'teil1', label:'Teil 1: Vorstellung & Fragen'},
-      {id:'teil2', label:'Teil 2: Thema präsentieren'},
-      {id:'teil3', label:'Teil 3: Gemeinsam planen'}
+      {id:'teil1', label:'Teil 1: Vorstellung & Fragen (Intro & Questions)'},
+      {id:'teil2', label:'Teil 2: Thema präsentieren (Present a Topic)'},
+      {id:'teil3', label:'Teil 3: Gemeinsam planen (Planning Together)'}
     ];
   } else if(currentMode === 'vault'){
     items = [
@@ -804,7 +804,7 @@ function renderSubTabs(){
     ];
   } else if(currentMode === 'written'){
     items = [
-      {id:'cloze', label:'Sprachbausteine Cloze Test'},
+      {id:'cloze', label:'Sprachbausteine (Language Elements) Cloze Test'},
       {id:'letters', label:'Brief-Schmiede (Letter Builder)'}
     ];
   }
@@ -878,7 +878,7 @@ function renderTeil1(container){
         `).join("")}
       </div>
 
-      <button class="bigbtn green" onclick="setSub('teil2')">Proceed to Teil 2: Thema präsentieren ➡️</button>
+      <button class="bigbtn green" onclick="setSub('teil2')">Proceed to Teil 2: Thema präsentieren (Present a Topic) ➡️</button>
     </div>
   `;
 }
@@ -912,7 +912,7 @@ function renderTeil2(container){
         </div>
       `).join("")}
 
-      <button class="bigbtn green" onclick="setSub('teil3')">Proceed to Teil 3: Gemeinsam planen ➡️</button>
+      <button class="bigbtn green" onclick="setSub('teil3')">Proceed to Teil 3: Gemeinsam planen (Planning Together) ➡️</button>
     </div>
   `;
 }

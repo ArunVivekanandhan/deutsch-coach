@@ -683,7 +683,7 @@ if (document.readyState === 'loading') {
     <div class="subtitles-overlay" id="subtitlesBox">
       <div class="sub-german">
         <span id="subGermanText">"Hallo Arun! Ich freue mich, heute mit dir Deutsch zu sprechen. Worüber möchtest du sprechen?"</span>
-        <button onclick="replayCurrentVoice()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:16px;" title="Wiederholen">🔊</button>
+        <button onclick="replayCurrentVoice()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:16px;" title="Wiederholen (Repeat)">🔊</button>
       </div>
       <div class="sub-english" id="subEnglishText">
         "Hello Arun! I'm glad to speak German with you today. What would you like to talk about?"
@@ -693,7 +693,7 @@ if (document.readyState === 'loading') {
 
   <!-- Quick Voice & Interaction Bar -->
   <div class="action-bar">
-    <button class="mic-button-hero" id="prompterBtn" style="background:#10b981;" onclick="givePromptHint()">💡 Tipp</button>
+    <button class="mic-button-hero" id="prompterBtn" style="background:#10b981;" onclick="givePromptHint()">💡 Tipp (Hint)</button>
     <button class="mic-button-hero" id="heroMicBtn" onclick="toggleHeroMic()">
       <span id="heroMicIcon">🎙️</span>
       <span id="heroMicLabel">Sprechen (Tap to Speak German)</span>
@@ -740,7 +740,7 @@ if (document.readyState === 'loading') {
         <option value="gemini">✨ Google Gemini 1.5</option>
         <option value="ollama">💻 Local Ollama (Offline)</option>
       </select>
-      <button class="dark-select" style="background:var(--accent); color:#0F172A; font-weight:700;" onclick="exportChatTranscript()">📥 Transkript exportieren</button>
+      <button class="dark-select" style="background:var(--accent); color:#0F172A; font-weight:700;" onclick="exportChatTranscript()">📥 Transkript exportieren (Export)</button>
       <button class="dark-select" style="background:var(--accent); color:#0F172A; font-weight:700;" onclick="openSettings()">⚙️ Key</button>
     </div>
   </div>
@@ -786,7 +786,7 @@ if (document.readyState === 'loading') {
     </div>
     <div style="display:flex; gap:8px; margin-top:8px;">
       <button onclick="saveModalSettings()" style="flex:1; background:var(--green); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">💾 Speichern</button>
-      <button onclick="closeSettings()" style="flex:1; background:var(--card-border); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">Abbrechen</button>
+      <button onclick="closeSettings()" style="flex:1; background:var(--card-border); color:#fff; border:none; padding:10px; border-radius:6px; font-family:'Fjalla One'; font-size:14px; cursor:pointer;">Abbrechen (Cancel)</button>
     </div>
   </div>
 </div>
@@ -1475,7 +1475,7 @@ function renderFeedbackCard(origText, parsed) {
     <div class="${cardClass}">
       <div class="user-speech-row">Du: <b>"${escapeHtml(origText)}"</b></div>
       ${!isPerfect ? `<div class="corrected-sentence">Korrektur: ${escapeHtml(parsed.corrected_user_sentence || origText)}</div>` : `<div style="color:var(--green); font-weight:600; font-size:13px;">🌟 Perfekt formuliert!</div>`}
-      <div class="rule-tips">${ruleHtml}</div>\n      <button onclick="saveToVault()" style="margin-top:8px; padding:4px 8px; font-size:12px; background:var(--gold); border:none; border-radius:4px; cursor:pointer;">⭐ Merken</button>
+      <div class="rule-tips">${ruleHtml}</div>\n      <button onclick="saveToVault()" style="margin-top:8px; padding:4px 8px; font-size:12px; background:var(--gold); border:none; border-radius:4px; cursor:pointer;">⭐ Merken (Save)</button>
       ${upgradeHtml}
     </div>
   `;
