@@ -229,7 +229,7 @@
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: "user", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level) about a random everyday topic (Seed: " + Math.random() + "). Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
+            { role: "user", content: "You are a German teacher. Generate a single, natural German sentence (A2 or B1 level). The topic MUST be about: " + ["Einkaufen", "Arbeit", "Freizeit", "Reisen", "Gesundheit", "Wetter", "Essen & Trinken", "Familie", "Technologie", "Sport", "Kunst", "Verkehr", "Tiere", "Musik", "Umwelt", "Geld", "Wohnen", "Natur", "Freunde", "Zukunftspläne", "Hobbys", "Kleidung", "Feiertage", "Schule", "Kochen"][Math.floor(Math.random() * 25)] + ". Make it completely unique. Return valid JSON only with properties 'de' (German), 'en' (English translation), and 'ta' (Tamil translation). Do not wrap in markdown." }
           ],
           temperature: 0.8,
           response_format: (provider === 'deepseek' || provider === 'openai') ? { type: "json_object" } : undefined
@@ -241,7 +241,8 @@
       const data = await response.json();
       const rawContent = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : '{}';
       
-      let parsed = JSON.parse(rawContent.replace(/```json/g,'').replace(/```/g,''));
+      let jsonStr = rawContent.substring(rawContent.indexOf('{'), rawContent.lastIndexOf('}') + 1);
+      let parsed = JSON.parse(jsonStr);
       if(!parsed.de || !parsed.en) throw new Error("Invalid format");
       
       currentSentenceObj = parsed;
