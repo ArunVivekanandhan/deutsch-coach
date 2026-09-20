@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v6';
+const CACHE_NAME = 'deutsch-coach-v7';
 const urlsToCache = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const urlsToCache = [
   './manifest.json'
 ];
 
+// Install Event
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
@@ -27,27 +28,51 @@ self.addEventListener('install', event => {
   );
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(
-          function(response) {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            var responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
-            return response;
+// Activate Event - Delete all old caches immediately
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log('Clearing old service worker cache:', cache);
+            return caches.delete(cache);
           }
-        );
-      })
+        })
+      );
+    }).then(() => self.clients.claim())
   );
+});
+
+// Fetch Event - Network first for HTML, Cache fallback for offline
+self.addEventListener('fetch', event => {
+  const isHTML = event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html');
+
+  if (isHTML) {
+    // Network first for HTML navigation so updates show instantly
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    // Cache first for assets/images
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        return response || fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        });
+      })
+    );
+  }
 });
