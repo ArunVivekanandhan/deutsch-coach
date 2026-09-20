@@ -119,6 +119,7 @@
   <select id="topicSelect" class="topic-select" onchange="loadNewSentence()">
     
     <option value="ai">🤖 KI-Modus (AI Generated - Unlimited)</option>
+    <option value="saved_ai">🌟 Meine KI-Sätze (Saved AI Generations)</option>
     <option value="all">Mix All Topics (Zufall)</option>
   </select>
 
@@ -246,6 +247,15 @@
       if(!parsed.de || !parsed.en) throw new Error("Invalid format");
       
       currentSentenceObj = parsed;
+      
+      // Save it for the future!
+      let savedAiSentences = JSON.parse(localStorage.getItem('dc_ai_generated_sentences') || '[]');
+      // Prevent duplicates
+      if(!savedAiSentences.some(s => s.de === parsed.de)) {
+          savedAiSentences.push(parsed);
+          localStorage.setItem('dc_ai_generated_sentences', JSON.stringify(savedAiSentences));
+      }
+
       setupSentenceUI();
     } catch (err) {
       console.error(err);
@@ -272,9 +282,20 @@
   function loadNewSentence() {
     const val = document.getElementById('topicSelect').value;
     if (val === 'ai') {
-      generateAiSentence();
-      return;
-    }
+        generateAiSentence();
+        return;
+      }
+      if (val === 'saved_ai') {
+        const pool = JSON.parse(localStorage.getItem('dc_ai_generated_sentences') || '[]');
+        if (pool.length === 0) {
+            alert("Du hast noch keine KI-Sätze! (No saved AI sentences yet. Generate some using KI-Modus first.)");
+            document.getElementById('topicSelect').value = 'all';
+            return loadNewSentence();
+        }
+        currentSentenceObj = pool[Math.floor(Math.random() * pool.length)];
+        setupSentenceUI();
+        return;
+      }
     
     const pool = getFlatSentences();
     if(pool.length === 0) return;
