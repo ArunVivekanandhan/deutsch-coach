@@ -20,6 +20,11 @@
   ],
   "shortcuts": [
     {
+      "name": "Excel Master Sheet",
+      "url": "./Deutsch_Wortschatz_Excel_Sheet.html",
+      "description": "Full German Vocabulary & Grammar Spreadsheet"
+    },
+    {
       "name": "Wortfamilien Explorer",
       "url": "./Wortfamilien_Explorer.html",
       "description": "Master German Word Family & Vocabulary Explorer"
