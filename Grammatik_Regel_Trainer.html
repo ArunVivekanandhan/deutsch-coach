@@ -707,7 +707,7 @@ const GRAMMAR_RULES = [
     category: "Verbs",
     color: "var(--red)",
     summary: "The passive voice is used when the action or the result is more important than who performs it. It is tested heavily in B1 reading, official letters, and news.",
-    formula: "• Präsens Passiv: werden (conjugated) + Partizip II (at the end)\n• Präteritum Passiv: wurden + Partizip II\n• Passiv mit Modalverb: Modalverb (Pos 2) + Partizip II + werden (at end)\n• By whom? → von + Dativ",
+    formula: "• Präsens Passiv: werden (conjugated) + Partizip II (at the end)\n• Präteritum Passiv: wurden + Partizip II\n• Passiv mit Modalverb (Passive with Modal): Modalverb (Pos 2) + Partizip II + werden (at end)\n• By whom? → von + Dativ",
     tableHTML: `
       <table class="de-table">
         <tr><th>Tense</th><th>Structure</th><th>Example</th></tr>
@@ -1110,9 +1110,9 @@ const GRAMMAR_RULES = [
     tableHTML: `
       <table class="de-table">
         <tr><th>Connector</th><th>Time &amp; Frequency</th><th>Example</th></tr>
-        <tr><td><b>als</b></td><td>Einmalig in der Vergangenheit</td><td><b>Als</b> ich 18 Jahre alt war, machte ich den Führerschein.</td></tr>
-        <tr><td><b>wenn</b></td><td>Wiederholt in der Vergangenheit</td><td>Immer <b>wenn</b> die Sonne schien, gingen wir schwimmen.</td></tr>
-        <tr><td><b>wenn</b></td><td>Gegenwart &amp; Zukunft</td><td><b>Wenn</b> du Hilfe brauchst, ruf mich einfach an.</td></tr>
+        <tr><td><b>als</b></td><td>Einmalig in der Vergangenheit (One-time in past)</td><td><b>Als</b> ich 18 Jahre alt war, machte ich den Führerschein.</td></tr>
+        <tr><td><b>wenn</b></td><td>Wiederholt in der Vergangenheit (Repeated in past)</td><td>Immer <b>wenn</b> die Sonne schien, gingen wir schwimmen.</td></tr>
+        <tr><td><b>wenn</b></td><td>Gegenwart &amp; Zukunft (Present &amp; Future)</td><td><b>Wenn</b> du Hilfe brauchst, ruf mich einfach an.</td></tr>
         <tr><td><b>nachdem</b></td><td>Vorzeitigkeit (Past completion)</td><td><b>Nachdem</b> er die Arbeit beendet hatte, fuhr er nach Hause.</td></tr>
         <tr><td><b>während</b></td><td>Gleichzeitigkeit (Simultaneous)</td><td><b>Während</b> ich arbeite, höre ich leise Musik.</td></tr>
       </table>
@@ -1465,7 +1465,7 @@ const DYNAMIC_GENERATORS = {
       ];
       const ac = adjCases[Math.floor(Math.random()*adjCases.length)];
       return {
-        ruleNum: 4, ruleTitle: "Adjektiv-Endungen",
+        ruleNum: 4, ruleTitle: "Adjektiv-Endungen (Adjective Endings)",
         prompt: ac.p, en: ac.en, options: ac.o, correct: ac.c, explain: ac.exp
       };
     }
@@ -1512,7 +1512,7 @@ const DYNAMIC_GENERATORS = {
       ];
       const rl = rels[Math.floor(Math.random()*rels.length)];
       return {
-        ruleNum: 7, ruleTitle: "Relativsätze",
+        ruleNum: 7, ruleTitle: "Relativsätze (Relative Clauses)",
         prompt: rl.p, en: rl.en, options: rl.o, correct: rl.c, explain: rl.exp
       };
     }
@@ -1543,7 +1543,7 @@ const DYNAMIC_GENERATORS = {
       ];
       const pr = pairs[Math.floor(Math.random()*pairs.length)];
       return {
-        ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren",
+        ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren (Two-Part Connectors)",
         prompt: pr.p, en: pr.en, options: pr.o, correct: pr.c, explain: pr.exp
       };
     }
@@ -1657,21 +1657,21 @@ const DYNAMIC_GENERATORS = {
 const BUILD_GENERATORS = {
   r1_wordorder: [
     ()=>({
-      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer",
+      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer (Sentence Structure)",
       en: "Because the weather is bad today, we are staying at home.",
       tokens: ["Weil", "das Wetter", "heute schlecht ist,", "bleiben", "wir", "zu Hause."],
       correctSentence: "Weil das Wetter heute schlecht ist, bleiben wir zu Hause.",
       explain: "In a subordinate clause with 'weil', the conjugated verb ('ist') goes to the very end. In the following main clause, the verb ('bleiben') is in Position 2."
     }),
     ()=>({
-      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer",
+      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer (Sentence Structure)",
       en: "Thomas missed the bus, therefore he arrived late at the office.",
       tokens: ["Thomas", "hat den Bus verpasst,", "deshalb", "kam er", "zu spät", "ins Büro."],
       correctSentence: "Thomas hat den Bus verpasst, deshalb kam er zu spät ins Büro.",
       explain: "'deshalb' is a Position 1 adverb! The conjugated verb ('kam') follows immediately in Position 2 (inversion)."
     }),
     ()=>({
-      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer",
+      ruleNum: 1, ruleTitle: "Verb Position & Satzklammer (Sentence Structure)",
       en: "Although she is tired, she is preparing for the exam.",
       tokens: ["Obwohl", "sie müde ist,", "bereitet sie sich", "auf die Prüfung", "vor."],
       correctSentence: "Obwohl sie müde ist, bereitet sie sich auf die Prüfung vor.",
@@ -1681,14 +1681,14 @@ const BUILD_GENERATORS = {
 
   r2_cases: [
     ()=>({
-      ruleNum: 2, ruleTitle: "Die 4 Fälle",
+      ruleNum: 2, ruleTitle: "Die 4 Fälle (The 4 Cases)",
       en: "The father gives the little boy a new football.",
       tokens: ["Der Vater", "schenkt", "dem kleinen Jungen", "einen neuen", "Fußball."],
       correctSentence: "Der Vater schenkt dem kleinen Jungen einen neuen Fußball.",
       explain: "'schenken' takes Dativ for recipient ('dem kleinen Jungen') and Akkusativ for direct object ('einen neuen Fußball')."
     }),
     ()=>({
-      ruleNum: 2, ruleTitle: "Die 4 Fälle",
+      ruleNum: 2, ruleTitle: "Die 4 Fälle (The 4 Cases)",
       en: "I thank the helpful colleague heartily for the great help.",
       tokens: ["Ich danke", "dem hilfsbereiten Kollegen", "herzlich", "für die", "große Hilfe."],
       correctSentence: "Ich danke dem hilfsbereiten Kollegen herzlich für die große Hilfe.",
@@ -1698,14 +1698,14 @@ const BUILD_GENERATORS = {
 
   r3_prepositions: [
     ()=>({
-      ruleNum: 3, ruleTitle: "Präpositionen",
+      ruleNum: 3, ruleTitle: "Präpositionen (Prepositions)",
       en: "The girl puts the notebook onto the desk.",
       tokens: ["Das Mädchen", "legt", "das Notizbuch", "auf den", "Schreibtisch."],
       correctSentence: "Das Mädchen legt das Notizbuch auf den Schreibtisch.",
       explain: "'legen' is a directional action (Wohin?) demanding Akkusativ with 'auf' → 'auf den Schreibtisch'."
     }),
     ()=>({
-      ruleNum: 3, ruleTitle: "Präpositionen",
+      ruleNum: 3, ruleTitle: "Präpositionen (Prepositions)",
       en: "The notebook is lying on the wooden desk in the office.",
       tokens: ["Das Notizbuch", "liegt", "auf dem Holzschreibtisch", "im", "Büro."],
       correctSentence: "Das Notizbuch liegt auf dem Holzschreibtisch im Büro.",
@@ -1715,14 +1715,14 @@ const BUILD_GENERATORS = {
 
   r4_adjectives: [
     ()=>({
-      ruleNum: 4, ruleTitle: "Adjektiv-Endungen",
+      ruleNum: 4, ruleTitle: "Adjektiv-Endungen (Adjective Endings)",
       en: "The new employee introduced himself to the friendly team.",
       tokens: ["Der neue Mitarbeiter", "hat sich", "dem freundlichen Team", "vorgestellt."],
       correctSentence: "Der neue Mitarbeiter hat sich dem freundlichen Team vorgestellt.",
       explain: "Definite article Nominative masculine takes '-e' ('Der neue'), and Dativ takes '-en' ('dem freundlichen')."
     }),
     ()=>({
-      ruleNum: 4, ruleTitle: "Adjektiv-Endungen",
+      ruleNum: 4, ruleTitle: "Adjektiv-Endungen (Adjective Endings)",
       en: "Fresh bread with butter and cheese is very popular in Germany.",
       tokens: ["Frisches Brot", "mit Butter und Käse", "ist in Deutschland", "sehr", "beliebt."],
       correctSentence: "Frisches Brot mit Butter und Käse ist in Deutschland sehr beliebt.",
@@ -1732,14 +1732,14 @@ const BUILD_GENERATORS = {
 
   r5_konjunktiv: [
     ()=>({
-      ruleNum: 5, ruleTitle: "Konjunktiv II",
+      ruleNum: 5, ruleTitle: "Konjunktiv II (Subjunctive II)",
       en: "Could you please tell me where the nearest pharmacy is?",
       tokens: ["Könnten Sie", "mir bitte sagen,", "wo die nächste", "Apotheke", "ist?"],
       correctSentence: "Könnten Sie mir bitte sagen, wo die nächste Apotheke ist?",
       explain: "'Könnten Sie...' is the polite spoken Konjunktiv II request formula."
     }),
     ()=>({
-      ruleNum: 5, ruleTitle: "Konjunktiv II",
+      ruleNum: 5, ruleTitle: "Konjunktiv II (Subjunctive II)",
       en: "If I had more time, I would learn German every day.",
       tokens: ["Wenn ich", "mehr Zeit hätte,", "würde ich", "jeden Tag", "Deutsch lernen."],
       correctSentence: "Wenn ich mehr Zeit hätte, würde ich jeden Tag Deutsch lernen.",
@@ -1749,14 +1749,14 @@ const BUILD_GENERATORS = {
 
   r6_passiv: [
     ()=>({
-      ruleNum: 6, ruleTitle: "Passiv",
+      ruleNum: 6, ruleTitle: "Passiv (Passive Voice)",
       en: "The important contract is signed by the director.",
       tokens: ["Der wichtige Vertrag", "wird vom Direktor", "unterschrieben."],
       correctSentence: "Der wichtige Vertrag wird vom Direktor unterschrieben.",
-      explain: "Präsens Vorgangspassiv: 'wird ... unterschrieben' (werden + Partizip II)."
+      explain: "Präsens Vorgangspassiv (Present Passive): 'wird ... unterschrieben' (werden + Partizip II)."
     }),
     ()=>({
-      ruleNum: 6, ruleTitle: "Passiv",
+      ruleNum: 6, ruleTitle: "Passiv (Passive Voice)",
       en: "The application documents must be submitted by Friday.",
       tokens: ["Die Bewerbungsunterlagen", "müssen bis Freitag", "eingereicht", "werden."],
       correctSentence: "Die Bewerbungsunterlagen müssen bis Freitag eingereicht werden.",
@@ -1766,14 +1766,14 @@ const BUILD_GENERATORS = {
 
   r7_relativsatz: [
     ()=>({
-      ruleNum: 7, ruleTitle: "Relativsätze",
+      ruleNum: 7, ruleTitle: "Relativsätze (Relative Clauses)",
       en: "That is the doctor who treated my father yesterday.",
       tokens: ["Das ist", "der freundliche Arzt,", "der gestern", "meinen Vater", "behandelt hat."],
       correctSentence: "Das ist der freundliche Arzt, der gestern meinen Vater behandelt hat.",
       explain: "Relative clause with masculine subject pronoun 'der'; verb 'behandelt hat' moves to the end."
     }),
     ()=>({
-      ruleNum: 7, ruleTitle: "Relativsätze",
+      ruleNum: 7, ruleTitle: "Relativsätze (Relative Clauses)",
       en: "The apartment that we rented is near the station.",
       tokens: ["Die Wohnung,", "die wir gemietet haben,", "liegt in der Nähe", "vom Bahnhof."],
       correctSentence: "Die Wohnung, die wir gemietet haben, liegt in der Nähe vom Bahnhof.",
@@ -1800,14 +1800,14 @@ const BUILD_GENERATORS = {
 
   r9_connectors: [
     ()=>({
-      ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren",
+      ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren (Two-Part Connectors)",
       en: "She speaks not only German, but also fluent French.",
       tokens: ["Sie spricht", "nicht nur", "fließend Deutsch,", "sondern auch", "Französisch."],
       correctSentence: "Sie spricht nicht nur fließend Deutsch, sondern auch Französisch.",
       explain: "'nicht nur ..., sondern auch ...' links two positive parallel qualifications."
     }),
     ()=>({
-      ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren",
+      ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren (Two-Part Connectors)",
       en: "He has neither a driver's license nor a car.",
       tokens: ["Er hat", "in dieser Stadt", "weder einen Führerschein", "noch", "ein eigenes Auto."],
       correctSentence: "Er hat in dieser Stadt weder einen Führerschein noch ein eigenes Auto.",
@@ -1817,14 +1817,14 @@ const BUILD_GENERATORS = {
 
   r10_reflexiv: [
     ()=>({
-      ruleNum: 10, ruleTitle: "Reflexive Verben",
+      ruleNum: 10, ruleTitle: "Reflexive Verben (Reflexive Verbs)",
       en: "In the morning I brush my teeth thoroughly before breakfast.",
       tokens: ["Morgens", "putze ich mir", "gründlich die Zähne,", "bevor ich", "frühstücke."],
       correctSentence: "Morgens putze ich mir gründlich die Zähne, bevor ich frühstücke.",
       explain: "With a direct object ('die Zähne'), the reflexive pronoun must be DATIV ('mir')."
     }),
     ()=>({
-      ruleNum: 10, ruleTitle: "Reflexive Verben",
+      ruleNum: 10, ruleTitle: "Reflexive Verben (Reflexive Verbs)",
       en: "We have to hurry because the bus leaves in five minutes.",
       tokens: ["Wir müssen uns", "beeilen,", "weil der Bus", "in fünf Minuten", "abfährt."],
       correctSentence: "Wir müssen uns beeilen, weil der Bus in fünf Minuten abfährt.",
@@ -1851,14 +1851,14 @@ const BUILD_GENERATORS = {
 
   r12_comma: [
     ()=>({
-      ruleNum: 12, ruleTitle: "Kommasetzung",
+      ruleNum: 12, ruleTitle: "Kommasetzung (Comma Rules)",
       en: "I am glad because you passed the German exam without problems.",
       tokens: ["Ich freue mich sehr,", "weil du die", "Deutschprüfung", "ohne Probleme", "bestanden hast."],
       correctSentence: "Ich freue mich sehr, weil du die Deutschprüfung ohne Probleme bestanden hast.",
       explain: "A comma is strictly required before subordinating connectors ('weil')."
     }),
     ()=>({
-      ruleNum: 12, ruleTitle: "Kommasetzung",
+      ruleNum: 12, ruleTitle: "Kommasetzung (Comma Rules)",
       en: "He decided to accept the new job offer.",
       tokens: ["Er hat sich entschieden,", "das neue", "Jobangebot", "anzunehmen."],
       correctSentence: "Er hat sich entschieden, das neue Jobangebot anzunehmen.",
@@ -1868,14 +1868,14 @@ const BUILD_GENERATORS = {
 
   r13_ndeklination: [
     ()=>({
-      ruleNum: 13, ruleTitle: "N-Deklination",
+      ruleNum: 13, ruleTitle: "N-Deklination (Weak Nouns)",
       en: "Yesterday I had a long conversation with the client.",
       tokens: ["Gestern habe ich", "ein langes Gespräch", "mit dem Kunden", "geführt."],
       correctSentence: "Gestern habe ich ein langes Gespräch mit dem Kunden geführt.",
       explain: "'der Kunde' belongs to N-Deklination: in Dativ with 'mit dem' it adds '-n' → 'dem Kunden'."
     }),
     ()=>({
-      ruleNum: 13, ruleTitle: "N-Deklination",
+      ruleNum: 13, ruleTitle: "N-Deklination (Weak Nouns)",
       en: "The manager helps the intern with the presentation.",
       tokens: ["Der Abteilungsleiter", "hilft dem", "neuen Praktikanten", "bei der", "Projektpräsentation."],
       correctSentence: "Der Abteilungsleiter hilft dem neuen Praktikanten bei der Projektpräsentation.",
@@ -1885,14 +1885,14 @@ const BUILD_GENERATORS = {
 
   r14_pronominaladverb: [
     ()=>({
-      ruleNum: 14, ruleTitle: "Da- & Wo-Komposita",
+      ruleNum: 14, ruleTitle: "Da- & Wo-Komposita (Pronominal Adverbs)",
       en: "Are you waiting for the bus? — Yes, I am waiting for it.",
       tokens: ["Wartest du auf den Bus?", "— Ja,", "ich warte", "schon seit zwanzig Minuten", "darauf."],
       correctSentence: "Wartest du auf den Bus? — Ja, ich warte schon seit zwanzig Minuten darauf.",
       explain: "'der Bus' is a thing, so 'auf' combines with 'da(r)-' to form the Pronominaladverb 'darauf'."
     }),
     ()=>({
-      ruleNum: 14, ruleTitle: "Da- & Wo-Komposita",
+      ruleNum: 14, ruleTitle: "Da- & Wo-Komposita (Pronominal Adverbs)",
       en: "Who are you waiting for at the entrance? — For my colleague.",
       tokens: ["Auf wen", "wartest du am Eingang?", "— Auf meine", "Kollegin Frau Weber."],
       correctSentence: "Auf wen wartest du am Eingang? — Auf meine Kollegin Frau Weber.",
@@ -1919,14 +1919,14 @@ const BUILD_GENERATORS = {
 
   r16_modalverb: [
     ()=>({
-      ruleNum: 16, ruleTitle: "Modalverben Nuancen",
+      ruleNum: 16, ruleTitle: "Modalverben Nuancen (Modal Verb Nuances)",
       en: "In the hospital one must be quiet and smoking is forbidden.",
       tokens: ["Im Krankenhaus", "muss man absolut leise sein", "und darf", "auf keinen Fall", "rauchen."],
       correctSentence: "Im Krankenhaus muss man absolut leise sein und darf auf keinen Fall rauchen.",
       explain: "'muss' expresses necessity; 'darf nicht' strictly expresses prohibition (forbidden)."
     }),
     ()=>({
-      ruleNum: 16, ruleTitle: "Modalverben Nuancen",
+      ruleNum: 16, ruleTitle: "Modalverben Nuancen (Modal Verb Nuances)",
       en: "Tomorrow is a holiday, therefore you do not have to get up early.",
       tokens: ["Morgen ist ein Feiertag,", "deshalb musst du", "nicht so früh", "aufstehen."],
       correctSentence: "Morgen ist ein Feiertag, deshalb musst du nicht so früh aufstehen.",

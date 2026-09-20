@@ -741,7 +741,7 @@ const CHEAT_CODES = [
     cat: "perfekt",
     num: "Shortcut 09",
     title: "The Object Override Rule 🎯",
-    rule: "Even movement verbs switch to <b>haben</b> if they take a direct object (Akkusativ object).",
+    rule: "Even movement verbs switch to <b>haben</b> if they take a direct object (Akkusativ (Direct Object) object).",
     table: {
       headers: ["No Direct Object → sein", "With Direct Object → haben"],
       rows: [
@@ -809,8 +809,8 @@ const CHEAT_CODES = [
     id: 13,
     cat: "cases",
     num: "Shortcut 13",
-    title: "DOGFU — Akkusativ Prepositions 🥋",
-    rule: "Mnemonic: <b>A Dog doing Kung Fu</b>! These 5 prepositions ALWAYS force the Akkusativ case.",
+    title: "DOGFU — Akkusativ (Direct Object) Prepositions 🥋",
+    rule: "Mnemonic: <b>A Dog doing Kung Fu</b>! These 5 prepositions ALWAYS force the Akkusativ (Direct Object) case.",
     table: {
       headers: ["Letter", "Preposition", "Meaning", "Example"],
       rows: [
@@ -821,15 +821,15 @@ const CHEAT_CODES = [
         ["<b>U</b>", "<b>U</b>m", "around", "um <b>den</b> See"]
       ]
     },
-    tamil: "💡 <b>Tamil Case:</b> தமிழ் இரண்டாம் வேற்றுமை உருபு (-ஐ) போன்று, Akkusativ உருவம் மாறும் (der → den).",
+    tamil: "💡 <b>Tamil Case:</b> தமிழ் இரண்டாம் வேற்றுமை உருபு (-ஐ) போன்று, Akkusativ (Direct Object) உருவம் மாறும் (der → den).",
     accuracy: "100% Guaranteed ✅"
   },
   {
     id: 14,
     cat: "cases",
     num: "Shortcut 14",
-    title: "The Blue Danube — Dativ Prepositions 🎵",
-    rule: "Sing to the Blue Danube Waltz melody: <i>'Aus, Außer, Bei, Mit, Nach, Seit, Von, Zu'</i>. They ALWAYS force Dativ!",
+    title: "The Blue Danube — Dativ (Indirect Object) Prepositions 🎵",
+    rule: "Sing to the Blue Danube Waltz melody: <i>'Aus, Außer, Bei, Mit, Nach, Seit, Von, Zu'</i>. They ALWAYS force Dativ (Indirect Object)!",
     table: {
       headers: ["Preposition", "Meaning", "Example"],
       rows: [
@@ -839,7 +839,7 @@ const CHEAT_CODES = [
         ["<b>von</b> / <b>zu</b>", "from-of / to", "von <b>meinem</b> Freund / <b>zum</b> Arzt"]
       ]
     },
-    tamil: "💡 <b>Tamil Case:</b> தமிழ் நான்காம் வேற்றுமை (-க்கு) போன்று, யாருக்கு/எதற்கு என்பதை Dativ குறிக்கும்.",
+    tamil: "💡 <b>Tamil Case:</b> தமிழ் நான்காம் வேற்றுமை (-க்கு) போன்று, யாருக்கு/எதற்கு என்பதை Dativ (Indirect Object) குறிக்கும்.",
     accuracy: "100% Guaranteed ✅"
   },
   {
@@ -847,12 +847,12 @@ const CHEAT_CODES = [
     cat: "cases",
     num: "Shortcut 15",
     title: "Wechselpräpositionen (Two-Way Prepositions): Wo vs. Wohin 🏠",
-    rule: "Two-way prepositions (in, an, auf, neben, hinter, über, unter, vor, zwischen): <b>WO? (stationary) → Dativ</b> vs. <b>WOHIN? (movement) → Akkusativ</b>.",
+    rule: "Two-way prepositions (in, an, auf, neben, hinter, über, unter, vor, zwischen): <b>WO? (stationary) → Dativ (Indirect Object)</b> vs. <b>WOHIN? (movement) → Akkusativ (Direct Object)</b>.",
     table: {
       headers: ["Question", "Case", "Example"],
       rows: [
-        ["<b>Wo</b> ist das Buch? (Where?)", "<b>Dativ</b>", "Das Buch liegt auf <b>dem</b> Tisch. <button class='audio-btn' onclick='speakDE(\"Das Buch liegt auf dem Tisch\")'>🔊</button>"],
-        ["<b>Wohin</b> legst du es? (Where to?)", "<b>Akkusativ</b>", "Ich lege es auf <b>den</b> Tisch. <button class='audio-btn' onclick='speakDE(\"Ich lege es auf den Tisch\")'>🔊</button>"]
+        ["<b>Wo</b> ist das Buch? (Where?)", "<b>Dativ (Indirect Object)</b>", "Das Buch liegt auf <b>dem</b> Tisch. <button class='audio-btn' onclick='speakDE(\"Das Buch liegt auf dem Tisch\")'>🔊</button>"],
+        ["<b>Wohin</b> legst du es? (Where to?)", "<b>Akkusativ (Direct Object)</b>", "Ich lege es auf <b>den</b> Tisch. <button class='audio-btn' onclick='speakDE(\"Ich lege es auf den Tisch\")'>🔊</button>"]
       ]
     },
     tamil: "💡 <b>Hack:</b> அங்கே ஏற்கனவே இருந்தால் (நிலை) = DATIV. அங்கே நோக்கி நகர்ந்தால் (இயக்கம்) = AKKUSATIV!",
@@ -938,10 +938,10 @@ const CHEAT_CODES = [
     table: {
       headers: ["Tamil Case", "Tamil Marker", "German Case", "German Marker"],
       rows: [
-        ["எழுவாய் (Subject)", "— (no suffix)", "<b>Nominativ</b>", "der / die / das"],
-        ["செயப்படுபொருள் (Object)", "<b>-ஐ</b> (-ai)", "<b>Akkusativ</b>", "den / die / das"],
-        ["கொடை (To / For whom)", "<b>-க்கு</b> (-kku)", "<b>Dativ</b>", "dem / der / dem"],
-        ["உடைமை (Possession)", "<b>-இன்</b> (-in)", "<b>Genitiv</b>", "des / der / des"]
+        ["எழுவாய் (Subject)", "— (no suffix)", "<b>Nominativ (Subject)</b>", "der / die / das"],
+        ["செயப்படுபொருள் (Object)", "<b>-ஐ</b> (-ai)", "<b>Akkusativ (Direct Object)</b>", "den / die / das"],
+        ["கொடை (To / For whom)", "<b>-க்கு</b> (-kku)", "<b>Dativ (Indirect Object)</b>", "dem / der / dem"],
+        ["உடைமை (Possession)", "<b>-இன்</b> (-in)", "<b>Genitiv (Possession)</b>", "des / der / des"]
       ]
     },
     tamil: "💡 <b>Example:</b> நாயை (-ஐ) பார்த்தேன் = den Hund gesehen. நண்பனுக்கு (-க்கு) கொடுத்தேன் = dem Freund gegeben.",
