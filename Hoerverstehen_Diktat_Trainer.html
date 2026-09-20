@@ -169,6 +169,9 @@
   if (!isAiEnabled) {
     const aiOpt = document.querySelector('option[value="ai"]');
     if(aiOpt) aiOpt.style.display = 'none';
+      if(document.getElementById('topicSelect').value === 'ai') {
+          document.getElementById('topicSelect').value = 'all';
+      }
   }
 }
 
