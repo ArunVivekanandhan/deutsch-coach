@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>🎭 Dialog Schatten Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f8fafc;
+    --paper-dark: #f1f5f9;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --ink-soft: #475569;
+    --stamp-red: #ef4444;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --blue: #3b82f6;
+    --line: #e2e8f0;
+    --shadow: rgba(0, 0, 0, 0.1);
+  }
+  body.dark {
+    --paper: #0f172a;
+    --paper-dark: #020617;
+    --card: #1e293b;
+    --ink: #f8fafc;
+    --ink-soft: #94a3b8;
+    --line: #334155;
+    --shadow: rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'IBM Plex Sans', sans-serif; background: var(--paper); color: var(--ink); padding: 12px 10px 80px; display: flex; flex-direction: column; align-items: center; }
+  .wrap { width: 100%; max-width: 800px; }
+  .header-card { background: var(--card); border: 1.5px solid var(--ink); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 10px var(--shadow); }
+  .title { font-family: 'Fjalla One', sans-serif; font-size: 24px; margin: 0 0 8px; }
+  .sub { font-size: 14px; color: var(--ink-soft); }
+  .nav-link { display: inline-block; margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-decoration: none; color: var(--green); font-weight: bold; }
+  
+  .generator { background: var(--card); padding: 16px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow); }
+  input { width: 100%; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; padding: 12px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  button { font-family: 'IBM Plex Mono', monospace; font-weight: bold; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; color: #fff; }
+  .btn-gen { background: var(--green); width: 100%; }
+  
+  .script-list { display: flex; flex-direction: column; gap: 12px; }
+  .script-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; cursor: pointer; transition: 0.2s; }
+  .script-card:hover { border-color: var(--green); }
+  
+  .player-view { display: none; }
+  .line-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 12px; display: flex; gap: 12px; align-items: center; }
+  .speaker-badge { background: var(--ink); color: #fff; font-family: 'IBM Plex Mono', monospace; font-weight: bold; padding: 4px 10px; border-radius: 20px; }
+  .text-box { flex: 1; }
+  .de-text { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+  .en-text { font-size: 13px; color: var(--ink-soft); }
+  .btn-play { background: var(--blue); padding: 8px 12px; font-size: 16px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+  
+  #loading { display: none; margin-top: 10px; font-size: 14px; color: var(--gold); font-weight: bold; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="./index.html" class="nav-link">← Back to Hub</a>
+  <div class="header-card">
+    <h1 class="title">🎭 Dialog Schatten Trainer</h1>
+    <p class="sub">Generate B1 dialogue scripts with AI. Listen and shadow the German lines offline.</p>
+  </div>
+
+  <div id="mainView">
+    <div class="generator">
+      <input type="text" id="scenarioInput" placeholder="Szenario (z.B. 'Beim Bäcker' oder 'At the bakery')">
+      <button class="btn-gen" onclick="generateScript()">🪄 Generate Dialogue</button>
+      <div id="loading">⏳ KI schreibt Dialog... (Bitte warten)</div>
+    </div>
+
+    <h2 style="font-family: 'Fjalla One';">📂 Gespeicherte Dialoge</h2>
+    <div class="script-list" id="scriptsContainer"></div>
+  </div>
+
+  <div id="playerView" class="player-view">
+    <button onclick="closePlayer()" style="background:var(--ink); margin-bottom: 16px;">← Back to list</button>
+    <h2 style="font-family: 'Fjalla One';" id="playerTitle">Title</h2>
+    <div id="playerLines"></div>
+  </div>
+</div>
+
+<script>
+  let scripts = JSON.parse(localStorage.getItem('de_dialogue_scripts')) || [];
+
+  function renderScripts() {
+    const container = document.getElementById('scriptsContainer');
+    container.innerHTML = '';
+    scripts.forEach((script, idx) => {
+      const card = document.createElement('div');
+      card.className = 'script-card';
+      card.innerHTML = `<strong>${script.title}</strong><br><span style="font-size:12px; color:var(--ink-soft);">${script.lines.length} lines</span>`;
+      card.onclick = () => openPlayer(idx);
+      container.appendChild(card);
+    });
+  }
+
+  async function generateScript() {
+    const scenario = document.getElementById('scenarioInput').value.trim();
+    if (!scenario) return alert('Bitte gib ein Szenario ein.');
+
+    const prompt = `Write a short B1 level German dialogue for the scenario: "${scenario}".
+Output strictly valid JSON with this schema:
+{
+  "title": "Short title in German",
+  "lines": [
+    { "speaker": "A", "de": "German line", "en": "English translation" },
+    { "speaker": "B", "de": "German line", "en": "English translation" }
+  ]
+}
+No other text outside JSON.`;
+
+    document.getElementById('loading').style.display = 'block';
+
+    const provider = localStorage.getItem('de_ai_provider') || 'ollama';
+    let apiUrl, headers, bodyData, getResponseText;
+
+    if (provider === 'openai' || provider === 'openrouter') {
+      const apiKey = localStorage.getItem(provider === 'openai' ? 'de_ai_key_openai' : 'de_ai_key_openrouter');
+      apiUrl = provider === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
+      const model = localStorage.getItem(provider === 'openai' ? 'de_ai_model_openai' : 'de_ai_model_openrouter') || 'gpt-4o-mini';
+      headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+      bodyData = JSON.stringify({ model: model, response_format: { type: "json_object" }, messages: [{ role: 'user', content: prompt }] });
+      getResponseText = (data) => data.choices[0].message.content;
+    } else {
+      apiUrl = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+      const model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+      headers = { 'Content-Type': 'application/json' };
+      bodyData = JSON.stringify({ model: model, format: 'json', messages: [{ role: 'user', content: prompt }] });
+      getResponseText = (data) => data.choices[0].message.content;
+    }
+
+    try {
+      const response = await fetch(apiUrl, { method: 'POST', headers, body: bodyData });
+      if (!response.ok) throw new Error('API Error');
+      const data = await response.json();
+      const rawText = getResponseText(data);
+      const jsonStr = rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1);
+      const parsed = JSON.parse(jsonStr);
+      
+      scripts.unshift(parsed);
+      localStorage.setItem('de_dialogue_scripts', JSON.stringify(scripts));
+      document.getElementById('scenarioInput').value = '';
+      renderScripts();
+    } catch (err) {
+      alert('Error generating script. Ensure AI provider is configured and returns valid JSON.');
+      console.error(err);
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  function openPlayer(idx) {
+    const script = scripts[idx];
+    document.getElementById('mainView').style.display = 'none';
+    document.getElementById('playerView').style.display = 'block';
+    document.getElementById('playerTitle').innerText = script.title;
+    
+    const container = document.getElementById('playerLines');
+    container.innerHTML = '';
+    script.lines.forEach(line => {
+      const div = document.createElement('div');
+      div.className = 'line-card';
+      div.innerHTML = `
+        <div class="speaker-badge">${line.speaker}</div>
+        <div class="text-box">
+          <div class="de-text">${line.de}</div>
+          <div class="en-text">${line.en}</div>
+        </div>
+        <button class="btn-play" onclick="playAudio(this, \`${line.de.replace(/"/g, '&quot;')}\`)">🔊</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function closePlayer() {
+    window.speechSynthesis.cancel();
+    document.getElementById('playerView').style.display = 'none';
+    document.getElementById('mainView').style.display = 'block';
+  }
+
+  function playAudio(btn, text) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+
+  // Load theme
+  if(localStorage.getItem('de_theme') === 'dark') document.body.classList.add('dark');
+  renderScripts();
+</script>
+</body>
+</html>

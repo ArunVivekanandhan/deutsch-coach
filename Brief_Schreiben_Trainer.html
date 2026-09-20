@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>✉️ Brief Schreiben Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f8fafc;
+    --paper-dark: #f1f5f9;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --ink-soft: #475569;
+    --stamp-red: #ef4444;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --blue: #3b82f6;
+    --line: #e2e8f0;
+    --shadow: rgba(0, 0, 0, 0.1);
+  }
+  body.dark {
+    --paper: #0f172a;
+    --paper-dark: #020617;
+    --card: #1e293b;
+    --ink: #f8fafc;
+    --ink-soft: #94a3b8;
+    --line: #334155;
+    --shadow: rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'IBM Plex Sans', sans-serif; background: var(--paper); color: var(--ink); padding: 12px 10px 80px; display: flex; flex-direction: column; align-items: center; }
+  .wrap { width: 100%; max-width: 800px; }
+  .header-card { background: var(--card); border: 1.5px solid var(--ink); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 10px var(--shadow); }
+  .title { font-family: 'Fjalla One', sans-serif; font-size: 24px; margin: 0 0 8px; }
+  .sub { font-size: 14px; color: var(--ink-soft); }
+  .nav-link { display: inline-block; margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-decoration: none; color: var(--blue); font-weight: bold; }
+  
+  .composer { background: var(--card); padding: 16px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow); }
+  input, textarea { width: 100%; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; padding: 12px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  textarea { min-height: 200px; resize: vertical; }
+  button { font-family: 'IBM Plex Mono', monospace; font-weight: bold; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; color: #fff; }
+  .btn-save { background: var(--ink); }
+  .btn-ai { background: var(--blue); margin-left: 8px; }
+  
+  .outbox { display: flex; flex-direction: column; gap: 12px; }
+  .draft-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .draft-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+  .draft-body { white-space: pre-wrap; font-size: 14px; color: var(--ink-soft); margin-bottom: 12px; }
+  .ai-feedback { background: #f0fdf4; border-left: 4px solid var(--green); padding: 12px; font-size: 14px; color: #166534; white-space: pre-wrap; border-radius: 4px; }
+  body.dark .ai-feedback { background: #064e3b; color: #a7f3d0; }
+  
+  #loading { display: none; margin-top: 10px; font-size: 14px; color: var(--gold); font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="./index.html" class="nav-link">← Back to Hub</a>
+  <div class="header-card">
+    <h1 class="title">✉️ Brief Schreiben Trainer</h1>
+    <p class="sub">Write B1 letters offline. Save drafts and optionally grade them with AI.</p>
+  </div>
+
+  <div class="composer">
+    <input type="text" id="draftTitle" placeholder="Thema / Topic (z.B. Einladung zur Party)">
+    <textarea id="draftContent" placeholder="Schreib deinen Brief hier..."></textarea>
+    <div style="display: flex; align-items: center;">
+      <button class="btn-save" onclick="saveDraft()">💾 Save to Outbox</button>
+      <button class="btn-ai" onclick="gradeDraft()">🤖 Grade with AI</button>
+      <div id="loading">⏳ KI bewertet... (Bitte warten)</div>
+    </div>
+  </div>
+
+  <h2 style="font-family: 'Fjalla One';">📥 Outbox</h2>
+  <div class="outbox" id="outboxContainer"></div>
+</div>
+
+<script>
+  let drafts = JSON.parse(localStorage.getItem('de_brief_outbox')) || [];
+
+  function renderOutbox() {
+    const container = document.getElementById('outboxContainer');
+    container.innerHTML = '';
+    drafts.forEach((draft, index) => {
+      const card = document.createElement('div');
+      card.className = 'draft-card';
+      let html = `<div class="draft-title">${draft.title || 'Ohne Titel'}</div>`;
+      html += `<div class="draft-body">${draft.content}</div>`;
+      if (draft.feedback) {
+        html += `<div class="ai-feedback"><strong>🤖 AI Feedback:</strong><br>${draft.feedback}</div>`;
+      }
+      card.innerHTML = html;
+      container.appendChild(card);
+    });
+  }
+
+  function saveDraft() {
+    const title = document.getElementById('draftTitle').value.trim();
+    const content = document.getElementById('draftContent').value.trim();
+    if (!content) return alert('Bitte schreibe etwas.');
+    
+    drafts.unshift({ title, content, feedback: null, id: Date.now() });
+    localStorage.setItem('de_brief_outbox', JSON.stringify(drafts));
+    document.getElementById('draftTitle').value = '';
+    document.getElementById('draftContent').value = '';
+    renderOutbox();
+  }
+
+  async function gradeDraft() {
+    const title = document.getElementById('draftTitle').value.trim();
+    const content = document.getElementById('draftContent').value.trim();
+    if (!content) return alert('Bitte schreibe etwas, um es bewerten zu lassen.');
+
+    const prompt = `You are a German B1 exam grader. Grade the following letter. Topic: ${title}
+Letter:
+${content}
+
+Provide feedback on 1) Task fulfillment, 2) Grammar, 3) Vocabulary. Then provide a corrected/improved version. Format as plain text.`;
+
+    document.getElementById('loading').style.display = 'block';
+
+    const provider = localStorage.getItem('de_ai_provider') || 'ollama';
+    let apiUrl, headers, bodyData, getResponseText;
+
+    if (provider === 'openai' || provider === 'openrouter') {
+      const apiKey = localStorage.getItem(provider === 'openai' ? 'de_ai_key_openai' : 'de_ai_key_openrouter');
+      apiUrl = provider === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
+      const model = localStorage.getItem(provider === 'openai' ? 'de_ai_model_openai' : 'de_ai_model_openrouter') || 'gpt-4o-mini';
+      headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+      bodyData = JSON.stringify({ model: model, messages: [{ role: 'user', content: prompt }] });
+      getResponseText = (data) => data.choices[0].message.content;
+    } else {
+      apiUrl = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+      const model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+      headers = { 'Content-Type': 'application/json' };
+      bodyData = JSON.stringify({ model: model, messages: [{ role: 'user', content: prompt }] });
+      getResponseText = (data) => data.choices[0].message.content;
+    }
+
+    try {
+      const response = await fetch(apiUrl, { method: 'POST', headers, body: bodyData });
+      if (!response.ok) throw new Error('API Error');
+      const data = await response.json();
+      const feedback = getResponseText(data);
+      
+      drafts.unshift({ title, content, feedback, id: Date.now() });
+      localStorage.setItem('de_brief_outbox', JSON.stringify(drafts));
+      document.getElementById('draftTitle').value = '';
+      document.getElementById('draftContent').value = '';
+      renderOutbox();
+    } catch (err) {
+      alert('Error connecting to AI. Please check settings.');
+      console.error(err);
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  // Load theme
+  if(localStorage.getItem('de_theme') === 'dark') document.body.classList.add('dark');
+  renderOutbox();
+</script>
+</body>
+</html>

@@ -20,6 +20,8 @@ const urlsToCache = [
   './Satzbau_Trainer.html',
   './Verb_Transformation_Trainer.html',
   './Continuous_Verb_Speaker.html',
+  './Brief_Schreiben_Trainer.html',
+  './Dialog_Schatten_Trainer.html',
   './icon-192.png',
   './icon-512.png',
   './manifest.json'

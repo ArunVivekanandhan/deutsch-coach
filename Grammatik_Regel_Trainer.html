@@ -426,7 +426,7 @@ html.dark-theme, body.dark {
   <div class="filterbox">
     
     <div class="filterlabel">Select German Grammar Pillar:</div>
-    <div style="margin-bottom:8px;"><button onclick="toggleWeaknessVault()" id="btnWeakness" class="subtab" style="background:var(--red); color:#fff; border-color:var(--red-dark);">🏋️ Drill Weaknesses (Box 1-2)</button></div>
+    <div style="margin-bottom:8px;"><button onclick="toggleWeaknessVault()" id="btnWeakness" class="subtab" style="background:var(--red); color:#fff; border-color:var(--red-dark);">🏋️ Drill Weaknesses (Box 1-2)</button> <button onclick="showGrammarVault()" class="subtab" style="background:var(--ink); color:#fff;">📖 View My Grammar Weaknesses</button></div>
     <div class="chiprow" id="ruleChips"></div>
 
   </div>
@@ -1229,17 +1229,29 @@ function saveStreaks() {
 }
 
 async function callAIGrammarExplanation(promptText, callback) {
-  const apiKey = localStorage.getItem('de_ai_key_groq') || localStorage.getItem('de_ai_key_openai');
-  if(!apiKey) { alert("AI Key not found in localStorage (de_ai_key_groq or de_ai_key_openai)."); return; }
+  const provider = localStorage.getItem('de_ai_provider') || 'groq';
+  const apiKey = localStorage.getItem('de_ai_key_' + provider);
   
-  const isGroq = !!localStorage.getItem('de_ai_key_groq');
-  const endpoint = isGroq ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
-  const model = isGroq ? 'llama3-8b-8192' : 'gpt-4o-mini';
+  let endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+  let model = 'llama3-8b-8192';
+
+  if (provider === 'openai') {
+    endpoint = 'https://api.openai.com/v1/chat/completions';
+    model = 'gpt-4o-mini';
+  } else if (provider === 'ollama') {
+    endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+    model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+  }
+  
+  const headers = { "Content-Type": "application/json" };
+  if (apiKey) {
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  }
 
   try {
     const res = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+      headers: headers,
       body: JSON.stringify({
         model: model,
         messages: [{ role: "user", content: promptText }]
@@ -1272,10 +1284,21 @@ Briefly explain EXACTLY why my answer is wrong and why the correct answer is rig
   callAIGrammarExplanation(promptTxt, (exp) => {
     const fbBox = document.getElementById("aiExplainBox");
     if(fbBox) {
-      fbBox.innerHTML = `<strong>🤖 KI-Erklärung:</strong><br>${exp.replace(/\n/g, '<br>')}`;
+      fbBox.innerHTML = `<strong>🤖 KI-Erklärung:</strong><br>${exp.replace(/
+/g, '<br>')}`;
       fbBox.style.display = "block";
     }
     if(fbBtn) fbBtn.style.display = "none";
+    
+    const vault = JSON.parse(localStorage.getItem('de_grammar_vault') || '[]');
+    vault.push({
+      date: new Date().toISOString(),
+      prompt: q.prompt,
+      correct: q.options ? q.options[q.correct] : q.en,
+      wrong: chosenOpt,
+      explanation: exp
+    });
+    localStorage.setItem('de_grammar_vault', JSON.stringify(vault));
   });
 }
 
@@ -2284,7 +2307,7 @@ function checkBuildAnswer(){
         🔊 Listen in German
       </button>
       ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
-      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI Erklärung</button>` : ''}
+      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI-Erklärung (Why is this wrong?)</button>` : ''}
     </div>
     <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
   `;
@@ -2337,7 +2360,7 @@ function checkAnswer(chosenIdx){
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button class="speak-btn" onclick="speakText('${escapeQuotes(cur.prompt.replace('___', cur.options[cur.correct]))}')">🔊 Listen to full sentence</button>
       ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
-      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI Erklärung</button>` : ''}
+      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI-Erklärung (Why is this wrong?)</button>` : ''}
     </div>
     <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
   `;
@@ -2532,5 +2555,39 @@ if (document.readyState === 'loading') {
 
 </script>
   <script src="./assets/js/gamification.js"></script>
+
+<!-- Grammar Vault Modal -->
+<div id="grammarVaultModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+  <div style="background:var(--paper); width:100%; max-width:600px; max-height:80vh; overflow-y:auto; border-radius:8px; padding:20px; position:relative;">
+    <button onclick="document.getElementById('grammarVaultModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:var(--red); color:#fff; border:none; border-radius:4px; padding:5px 10px; cursor:pointer;">Close</button>
+    <h2 style="margin-top:0; font-family:'Fjalla One',sans-serif; color:var(--ink);">📖 My Grammar Weaknesses</h2>
+    <div id="grammarVaultContent"></div>
+  </div>
+</div>
+
+<script>
+
+function showGrammarVault() {
+  const vault = JSON.parse(localStorage.getItem('de_grammar_vault') || '[]');
+  const content = document.getElementById('grammarVaultContent');
+  if (vault.length === 0) {
+    content.innerHTML = '<p>No weaknesses recorded yet. Keep practicing!</p>';
+  } else {
+    content.innerHTML = vault.reverse().map(v => `
+      <div style="background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px; margin-bottom:12px;">
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">${new Date(v.date).toLocaleString()}</div>
+        <div style="font-weight:bold; margin-bottom:4px;">Prompt: ${v.prompt}</div>
+        <div style="color:var(--red); margin-bottom:2px;">Your Answer: ${v.wrong}</div>
+        <div style="color:var(--green); margin-bottom:8px;">Correct: ${v.correct}</div>
+        <div style="background:#fff; padding:8px; border-left:3px solid var(--gold); font-size:13px; line-height:1.4;">
+          ${v.explanation.replace(/\n/g, '<br>')}
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('grammarVaultModal').style.display = 'flex';
+}
+
+</script>
 </body>
 </html>

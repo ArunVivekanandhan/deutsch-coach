@@ -832,6 +832,12 @@
         <p class="hero-subtitle">1117 Wörter (503 Verben, 378 Nomen, 236 Adjektive) · English &amp; தமிழ் · Tenses · Sister Verbs · Audio</p>
       </div>
       <div class="modal-actions">
+        <button class="punarchi-btn" style="background: linear-gradient(135deg, #10b981, #047857);" onclick="generateStory()">
+          🤖 Generate Story (KI)
+        </button>
+        <button class="cheat-code-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);" onclick="openStoriesModal()">
+          📚 Lese-Bibliothek
+        </button>
         <button class="cheat-code-btn" onclick="openCheatCodeModal()">
           ⚡ Past Tense Cheat Codes (Shortcuts 1-7)
         </button>
@@ -1858,6 +1864,28 @@
   }
 };
   </script>
+<!-- Lese-Bibliothek Modal -->
+<div class="modal-overlay" id="storiesModal" onclick="closeStoriesModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">📚 Lese-Bibliothek (My Stories)</h2>
+      <button class="modal-close" onclick="closeStoriesModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="storiesList">
+      <!-- Stories injected here -->
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay for Story Generation -->
+<div class="modal-overlay" id="loadingModal" style="z-index: 3000;">
+  <div class="modal-card" style="max-width: 400px; text-align: center; padding: 40px;">
+    <h2>🤖 KI schreibt eine Geschichte...</h2>
+    <p style="color:var(--ink-muted);">Bitte warten, dies kann einige Sekunden dauern.</p>
+    <div style="font-size: 40px; margin-top: 20px;" class="spinner">⏳</div>
+  </div>
+</div>
+
 
   <!-- MASTER SCRIPT -->
   <script>
@@ -2169,7 +2197,7 @@
   function renderGridCardHTML(item) {
     // 1. Meaning Column
     const meaningHTML = `
-      <div class="col-meaning">
+      <div class="col-meaning">`r`n        <div style="position:absolute; top:8px; right:8px;"><input type="checkbox" class="story-vocab-checkbox" value="${item.primaryWord}" style="cursor:pointer; width:18px; height:18px;" title="Select for Story Generator"></div>
         <div class="col-title">🇬🇧 / 🇮🇳 Meaning</div>
         <div class="meaning-en">
           ${item.meaningEn || '—'}
@@ -2304,6 +2332,9 @@
         <table class="vocab-table">
           <thead>
             <tr>
+              <th style="width:40px; text-align:center;">
+                <span title="Select words for Story Generator">🤖</span>
+              </th>
               <th>Meaning (EN / தமிழ்)</th>
               <th>Verb &amp; Tenses</th>
               <th>Noun &amp; Plural</th>
@@ -2315,6 +2346,9 @@
           <tbody>
             ${items.map(item => `
               <tr>
+                <td style="text-align:center;">
+                  <input type="checkbox" class="story-vocab-checkbox" value="${item.primaryWord}" style="cursor:pointer; width:16px; height:16px;">
+                </td>
                 <td>
                   <b>${item.meaningEn}</b>
                   <button class="speaker-btn" onclick="playGermanAudio('${item.primaryWord}', event)">🔊</button>
@@ -2382,6 +2416,153 @@
       document.getElementById('punarchiModal').style.display = 'none';
     }
   }
+
+
+// KI Story Generation
+async function generateStory() {
+  const checkboxes = document.querySelectorAll('.story-vocab-checkbox:checked');
+  const selectedWords = Array.from(checkboxes).map(cb => cb.value);
+
+  if (selectedWords.length < 3 || selectedWords.length > 8) {
+    alert("Bitte wählen Sie 3 bis 8 Wörter aus (aktuell " + selectedWords.length + "), um eine Geschichte zu generieren.");
+    return;
+  }
+
+  const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+  let apiKey = localStorage.getItem('de_ai_key_' + provider) || '';
+  let endpoint = '';
+  if(provider === 'deepseek') endpoint = 'https://api.deepseek.com/v1/chat/completions';
+  else if(provider === 'openai') endpoint = 'https://api.openai.com/v1/chat/completions';
+  else if(provider === 'groq') endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+  else if(provider === 'ollama') endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+
+  if (!apiKey && provider !== 'ollama') {
+    alert("API-Schlüssel für " + provider + " fehlt. Bitte in den Einstellungen eintragen.");
+    return;
+  }
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+  const prompt = `Write a short B1-level German story containing exactly these words: ${selectedWords.join(', ')}. 
+The output MUST be a valid JSON object with EXACTLY three keys: "de" (the German story), "en" (the English translation), and "ta" (the Tamil translation). No markdown, no other text.`;
+
+  document.getElementById('loadingModal').style.display = 'flex';
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: localStorage.getItem('de_ai_model_'+provider) || (provider === 'openai' ? 'gpt-4o-mini' : 'deepseek-chat'),
+        messages: [
+          { role: 'system', content: 'You are a German language teacher. Always respond with raw JSON.' },
+          { role: 'user', content: prompt }
+        ],
+        response_format: { type: "json_object" }
+      })
+    });
+
+    if (!res.ok) throw new Error("API Error: " + res.statusText);
+
+    const data = await res.json();
+    let content = data.choices[0].message.content;
+    
+    // Attempt to parse JSON
+    if(content.startsWith('```json')) {
+      content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+    }
+    const story = JSON.parse(content);
+
+    if (!story.de || !story.en || !story.ta) {
+      throw new Error("Invalid JSON structure returned by AI.");
+    }
+
+    const savedStories = JSON.parse(localStorage.getItem('de_vocab_stories') || '[]');
+    savedStories.push({
+      date: new Date().toISOString(),
+      words: selectedWords,
+      de: story.de,
+      en: story.en,
+      ta: story.ta
+    });
+    localStorage.setItem('de_vocab_stories', JSON.stringify(savedStories));
+
+    // Deselect checkboxes
+    checkboxes.forEach(cb => cb.checked = false);
+
+    alert("Die Geschichte wurde erfolgreich generiert und in der Bibliothek gespeichert!");
+  } catch (err) {
+    console.error(err);
+    alert("Fehler bei der Generierung: " + err.message);
+  } finally {
+    document.getElementById('loadingModal').style.display = 'none';
+  }
+}
+
+function openStoriesModal() {
+  document.getElementById('storiesModal').style.display = 'flex';
+  renderStories();
+}
+
+function closeStoriesModal(e) {
+  if (e && e.target !== document.getElementById('storiesModal')) return;
+  document.getElementById('storiesModal').style.display = 'none';
+}
+
+function renderStories() {
+  const container = document.getElementById('storiesList');
+  const savedStories = JSON.parse(localStorage.getItem('de_vocab_stories') || '[]');
+  
+  if (savedStories.length === 0) {
+    container.innerHTML = "<p style='text-align:center;color:var(--ink-muted);'>Noch keine Geschichten generiert.</p>";
+    return;
+  }
+
+  container.innerHTML = savedStories.reverse().map((story, i) => `
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="font-size:12px; color:var(--ink-muted); font-family:'IBM Plex Mono', monospace;">
+          ${new Date(story.date).toLocaleString()}
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="speaker-btn" style="background:var(--blue-light); padding:4px 8px; border:1px solid var(--blue);" onclick="playStoryAudio('${encodeURIComponent(story.de)}')">🔊 Vorlesen</button>
+          <button class="speaker-btn" style="background:var(--red-light); color:var(--red); padding:4px 8px; border:1px solid var(--red);" onclick="deleteStory(${i})">🗑️</button>
+        </div>
+      </div>
+      <div style="font-size:11px; color:var(--blue); font-weight:bold; margin-bottom:12px;">
+        Verwendete Wörter: ${story.words.join(', ')}
+      </div>
+      <div style="margin-bottom:12px;">
+        <strong style="color:var(--ink);">🇩🇪 Deutsch:</strong><br/>
+        ${story.de}
+      </div>
+      <div style="margin-bottom:12px; font-size:14px; color:var(--ink-soft);">
+        <strong>🇬🇧 English:</strong><br/>
+        ${story.en}
+      </div>
+      <div style="font-size:14px; color:var(--purple);">
+        <strong>🇮🇳 தமிழ்:</strong><br/>
+        ${story.ta}
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteStory(index) {
+  if(!confirm("Möchten Sie diese Geschichte wirklich löschen?")) return;
+  const savedStories = JSON.parse(localStorage.getItem('de_vocab_stories') || '[]');
+  savedStories.reverse().splice(index, 1);
+  localStorage.setItem('de_vocab_stories', JSON.stringify(savedStories.reverse()));
+  renderStories();
+}
+
+function playStoryAudio(text) {
+  const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
+  utterance.lang = 'de-DE';
+  window.speechSynthesis.speak(utterance);
+}
+
 
   // Init
   initMasterData();

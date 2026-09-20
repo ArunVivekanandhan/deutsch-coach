@@ -471,6 +471,67 @@ let sessionIdx = 0;
 
 /* ---- persistence ---- */
 const LS_KEY = 'na_progress_v1';
+
+async function callAIMnemonic(word, article, enMeaning) {
+  const provider = localStorage.getItem('de_ai_provider') || 'groq';
+  const apiKey = localStorage.getItem('de_ai_key_' + provider);
+  
+  let endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+  let model = 'llama3-8b-8192';
+
+  if (provider === 'openai') {
+    endpoint = 'https://api.openai.com/v1/chat/completions';
+    model = 'gpt-4o-mini';
+  } else if (provider === 'ollama') {
+    endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+    model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+  }
+  
+  const headers = { "Content-Type": "application/json" };
+  if (apiKey) {
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  }
+
+  const promptText = `I am learning German nouns. The word is "${article} ${word}" meaning "${enMeaning}". Give me a short, memorable Eselsbrücke (memory hook / mnemonic) in English/Tamil to easily remember its gender (${article}). Keep it to 1-2 sentences.`;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({
+        model: model,
+        messages: [{ role: "user", content: promptText }]
+      })
+    });
+    const data = await res.json();
+    if(data.choices && data.choices.length>0) {
+      return data.choices[0].message.content;
+    } else {
+      return "AI Error: " + JSON.stringify(data);
+    }
+  } catch(e) {
+    return "Error connecting to AI: " + e.message;
+  }
+}
+
+async function requestMnemonicAI(word, article, enMeaning, btnId, boxId) {
+  const btn = document.getElementById(btnId);
+  const box = document.getElementById(boxId);
+  if(btn) btn.innerText = "⏳ Loading...";
+  
+  const mnemonic = await callAIMnemonic(word, article, enMeaning);
+  
+  const vault = JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}');
+  vault[word] = mnemonic;
+  localStorage.setItem('de_nomen_mnemonics', JSON.stringify(vault));
+  
+  if(box) {
+    box.innerHTML = `<strong>💡 KI Eselsbrücke:</strong><br>${mnemonic.replace(/\n/g, '<br>')}`;
+    box.style.display = 'block';
+  }
+  if(btn) btn.style.display = 'none';
+}
+
 function loadProgress(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch(e){ return {}; } }
 function saveProgress(p){ try{ localStorage.setItem(LS_KEY, JSON.stringify(p)); }catch(e){} }
 let PROGRESS = loadProgress();
@@ -1388,6 +1449,12 @@ function renderNounMemoryHack(v){
       ${renderCheatCodesHTML(v, 'n')}
 
       <!-- 2. Memory Trick -->
+
+      <div id="aiMnemonicBox_${v.sg}" style="display:${JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? 'block' : 'none'}; background:#fff; padding:8px; border-left:3px solid var(--gold); border-radius:4px; font-size:13px; margin-bottom:8px;">
+        ${JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? '<strong>💡 KI Eselsbrücke:</strong><br>' + JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg].replace(/\n/g, '<br>') : ''}
+      </div>
+      ${!JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? `<button id="btnAiMnemonic_${v.sg}" class="quick-tool-btn" style="margin-bottom:8px; display:inline-block;" onclick="requestMnemonicAI('${v.sg}', '${v.a}', '${escapeQuotes(v.en)}', 'btnAiMnemonic_${v.sg}', 'aiMnemonicBox_${v.sg}')">💡 Eselsbrücke (Mnemonic) KI</button>` : ''}
+
       <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
         <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧠 2. NOUN MEMORY TRICK (நினைவாற்றல் உத்தி):</div>
         <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px;">
