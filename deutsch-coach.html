@@ -390,6 +390,65 @@
     border-radius:4px;
     font-size:11.5px;
   }
+  .ling-box {
+    background: #fffdf5;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(185,138,46,0.12);
+    text-align: left;
+  }
+  html.dark-theme .ling-box {
+    background: #1e293b;
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+  .ling-header {
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 12.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed rgba(185,138,46,0.3);
+    padding-bottom: 4px;
+  }
+  .ling-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    background: var(--gold);
+    color: #000;
+    padding: 1px 6px;
+    border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .ling-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 11.5px;
+  }
+  .ling-table th, .ling-table td {
+    border: 1px solid var(--line);
+    padding: 5px 7px;
+    text-align: left;
+  }
+  .ling-table th {
+    background: rgba(185,138,46,0.12);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink);
+  }
+  html.dark-theme .ling-table th {
+    background: rgba(251,191,36,0.15);
+  }
   .familybox, .colloc{
     font-size:12px;
     line-height:1.55;
@@ -2451,6 +2510,335 @@ function renderCheatCodesHTML(card) {
   `).join('');
 }
 
+const COMPOUND_ROOTS_DB = {
+  "fuß": { de: "Fuß", en: "foot", ta: "பாதம்" },
+  "fuss": { de: "Fuß", en: "foot", ta: "பாதம்" },
+  "gänger": { de: "Gänger", en: "walker", ta: "நடப்பவர்" },
+  "gaenger": { de: "Gänger", en: "walker", ta: "நடப்பவர்" },
+  "zone": { de: "Zone", en: "zone / area", ta: "பகுதி" },
+  "krank": { de: "Krank", en: "sick / ill", ta: "நோய்வாய்ப்பட்ட" },
+  "haus": { de: "Haus", en: "house / building", ta: "வீடு / கட்டிடம்" },
+  "arbeit": { de: "Arbeit", en: "work / job", ta: "வேலை" },
+  "platz": { de: "Platz", en: "place / square / spot", ta: "இடம்" },
+  "fahr": { de: "Fahr", en: "travel / ride", ta: "பயணம்" },
+  "karte": { de: "Karte", en: "card / ticket", ta: "சீட்டு / அட்டை" },
+  "automat": { de: "Automat", en: "machine / dispenser", ta: "இயந்திரம்" },
+  "wohn": { de: "Wohn", en: "living / dwelling", ta: "குடியிருப்பு" },
+  "zimmer": { de: "Zimmer", en: "room", ta: "அறை" },
+  "schlaf": { de: "Schlaf", en: "sleep", ta: "தூக்கம்" },
+  "ess": { de: "Ess", en: "eating / dining", ta: "சாப்பாடு" },
+  "küche": { de: "Küche", en: "kitchen", ta: "சமையலறை" },
+  "bad": { de: "Bad", en: "bath / bathroom", ta: "குளியலறை" },
+  "bahn": { de: "Bahn", en: "train / track", ta: "ரயில் / பாதை" },
+  "hof": { de: "Hof", en: "court / yard / station", ta: "நிலையம் / முற்றம்" },
+  "bahnhof": { de: "Bahnhof", en: "train station", ta: "ரயில் நிலையம்" },
+  "haupt": { de: "Haupt", en: "main / central", ta: "முக்கிய" },
+  "flug": { de: "Flug", en: "flight", ta: "விமானம் / பறத்தல்" },
+  "hafen": { de: "Hafen", en: "harbor / port", ta: "துறைமுகம்" },
+  "rad": { de: "Rad", en: "wheel / bike", ta: "சக்கரம்" },
+  "auto": { de: "Auto", en: "car", ta: "கார்" },
+  "schrank": { de: "Schrank", en: "closet / cupboard", ta: "அலமாரி" },
+  "kühl": { de: "Kühl", en: "cool / cold", ta: "குளிர்ச்சியான" },
+  "kühlen": { de: "Kühlen", en: "to cool", ta: "குளிர்விக்க" },
+  "schuh": { de: "Schuh", en: "shoe", ta: "காலணி" },
+  "hand": { de: "Hand", en: "hand", ta: "கை" },
+  "wörter": { de: "Wörter", en: "words", ta: "வார்த்தைகள்" },
+  "wort": { de: "Wort", en: "word", ta: "வார்த்தை" },
+  "buch": { de: "Buch", en: "book", ta: "புத்தகம்" },
+  "aufgabe": { de: "Aufgabe", en: "task / assignment", ta: "பணி / கடமை" },
+  "geburt": { de: "Geburt", en: "birth", ta: "பிறப்பு" },
+  "tag": { de: "Tag", en: "day", ta: "நாள்" },
+  "zeit": { de: "Zeit", en: "time", ta: "நேரம்" },
+  "jahr": { de: "Jahr", en: "year", ta: "வருடம்" },
+  "schwein": { de: "Schwein", en: "pig", ta: "பன்றி" },
+  "fleisch": { de: "Fleisch", en: "meat", ta: "இறைச்சி" },
+  "rind": { de: "Rind", en: "beef / cattle", ta: "மாடு / மாட்டிறைச்சி" },
+  "sonne": { de: "Sonne", en: "sun", ta: "சூரியன்" },
+  "brille": { de: "Brille", en: "glasses", ta: "கண்ணாடி" },
+  "geld": { de: "Geld", en: "money", ta: "பணம்" },
+  "schein": { de: "Schein", en: "banknote / cert", ta: "நோட்டு" },
+  "tasche": { de: "Tasche", en: "bag / pocket", ta: "பை" },
+  "schlüssel": { de: "Schlüssel", en: "key", ta: "சாவி" },
+  "apfel": { de: "Apfel", en: "apple", ta: "ஆப்பிள்" },
+  "baum": { de: "Baum", en: "tree", ta: "மரம்" },
+  "brief": { de: "Brief", en: "letter", ta: "கடிதம்" },
+  "kasten": { de: "Kasten", en: "box", ta: "பெட்டி" },
+  "straße": { de: "Straße", en: "street", ta: "தெரு" },
+  "tür": { de: "Tür", en: "door", ta: "கதவு" },
+  "schul": { de: "Schule", en: "school", ta: "பள்ளி" },
+  "schule": { de: "Schule", en: "school", ta: "பள்ளி" },
+  "kind": { de: "Kind", en: "child", ta: "குழந்தை" },
+  "garten": { de: "Garten", en: "garden", ta: "தோட்டம்" },
+  "wasser": { de: "Wasser", en: "water", ta: "தண்ணீர்" },
+  "glas": { de: "Glas", en: "glass", ta: "கண்ணாடி டம்ளர்" },
+  "flasche": { de: "Flasche", en: "bottle", ta: "பாட்டில்" },
+  "tee": { de: "Tee", en: "tea", ta: "தேநீர்" },
+  "kaffee": { de: "Kaffee", en: "coffee", ta: "காபி" },
+  "tasse": { de: "Tasse", en: "cup", ta: "கோப்பை" },
+  "sprach": { de: "Sprache", en: "language", ta: "மொழி" },
+  "kurs": { de: "Kurs", en: "course", ta: "பயிற்சி வகுப்பு" },
+  "verkehr": { de: "Verkehr", en: "traffic / transport", ta: "போக்குவரத்து" },
+  "mittel": { de: "Mittel", en: "means / medium", ta: "சாதனம் / வழிமுறை" },
+  "liebe": { de: "Liebe", en: "love", ta: "அன்பு" }
+};
+
+const SEPARABLE_PREFIXES = {
+  "ab": { en: "off / away / down", ta: "விலகி / கீழே", hint: "departure or removal" },
+  "an": { en: "at / on / start", ta: "மீது / தொடக்கம்", hint: "contact, targeting or starting" },
+  "auf": { en: "up / open", ta: "மேலே / திறந்து", hint: "upward movement or opening" },
+  "aus": { en: "out / off / exit", ta: "வெளியே / அணைத்து", hint: "exiting, turning off or emptying" },
+  "bei": { en: "by / along / assist", ta: "சேர்த்து / கூட", hint: "assisting or contributing" },
+  "ein": { en: "in / into / start", ta: "உள்ளே / தொடக்கம்", hint: "entering, boarding or packing" },
+  "fern": { en: "far / distant / TV", ta: "தொலைவில்", hint: "watching from distance" },
+  "fest": { en: "firm / fixed", ta: "உறுதியாக", hint: "fixing or securing" },
+  "kennen": { en: "familiar / know", ta: "அறிமுகமான", hint: "getting acquainted" },
+  "mit": { en: "with / along", ta: "கூட / உடன்", hint: "accompanying or joining" },
+  "nach": { en: "after / re- / copy", ta: "பின்னால் / மீண்டும்", hint: "following or checking" },
+  "vor": { en: "in front / forward", ta: "முன்னால்", hint: "demonstrating or preparing" },
+  "weg": { en: "away / gone", ta: "விலகி / தொலைந்து", hint: "moving away or discarding" },
+  "weiter": { en: "further / continue", ta: "தொடர்ந்து", hint: "continuing an action" },
+  "zu": { en: "to / close / shut", ta: "நோக்கி / மூடி", hint: "closing or adding" },
+  "zurück": { en: "back / return", ta: "மீண்டும் / திரும்பி", hint: "returning to start" },
+  "zusammen": { en: "together", ta: "ஒன்றாக", hint: "combining or gathering" }
+};
+
+const INSEPARABLE_PREFIXES = {
+  "be": { en: "direct object focus", ta: "நேரடி இலக்கு", hint: "focuses action onto an object" },
+  "ge": { en: "collective / result", ta: "விளைவு / சேர்ந்த நிலை", hint: "result or state" },
+  "er": { en: "achievement / deep outcome", ta: "முயற்சியின் வெற்றி", hint: "achieving an outcome" },
+  "ver": { en: "change / away / mistake", ta: "மாற்றம் / தவறு", hint: "transformation or error" },
+  "zer": { en: "destruction / pieces", ta: "உடைத்தல் / அழிவு", hint: "breaking into pieces" },
+  "ent": { en: "removal / escape", ta: "நீக்குதல் / தப்பித்தல்", hint: "escaping or removing" },
+  "emp": { en: "receive / feel", ta: "உணர்தல் / பெறுதல்", hint: "reception or emotion" },
+  "miss": { en: "mis- / wrong", ta: "தவறான", hint: "erroneous execution" }
+};
+
+function analyzeGermanLinguistics(w, cat, metadata = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase().replace(/^(der|die|das)\s+/, '').replace(/^sich\s+/, '');
+  const en = metadata.en || '';
+  const ta = metadata.ta || '';
+
+  // 1. Separable / Inseparable Verbs
+  if (cat === 'v' || (!cat && (lower.endsWith('en') || lower.endsWith('rn') || lower.endsWith('ln')))) {
+    for (const pfx in SEPARABLE_PREFIXES) {
+      if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
+        const root = lower.slice(pfx.length);
+        const pfxInfo = SEPARABLE_PREFIXES[pfx];
+        return {
+          type: 'separable_verb',
+          word: word,
+          prefix: pfx,
+          root: root,
+          pfxInfo: pfxInfo,
+          title: '🚀 3. Separable Verb (Trennbare Verben / வாக்கியத்தில் பிரியும் வினைகள்)',
+          badge: 'Splits in Sentence',
+          literal: `${pfxInfo.en} + ${root}`,
+          actual: `${en || word} ${ta ? `(${ta})` : ''}`,
+          formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🗣️ <b>Sentence (Präsens):</b> <i>„Ich ${root.replace(/en$/,'e').replace(/n$/,'e')} ... <b style="color:var(--stamp-red);">${pfx}</b>.”</i><br>• 📦 <b>Perfekt Sandwich:</b> <i>„${metadata.pp || (metadata.perfekt || `hat/ist ${pfx}ge...`)}”</i> (<b>-ge-</b> is sandwiched in the middle!)`,
+          tamilInsight: `💡 <b>Tamil Word-Splitting Hack:</b> அகராதியில் ஒன்றாக இருக்கும் சொல், வாக்கியத்தில் இரண்டாகப் பிளந்து, அதன் முதல் பாதி (<b>${pfx}</b>) வாக்கியத்தின் இறுதிக்குச் சென்றுவிடும்!`
+        };
+      }
+    }
+
+    for (const pfx in INSEPARABLE_PREFIXES) {
+      if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
+        const root = lower.slice(pfx.length);
+        const pfxInfo = INSEPARABLE_PREFIXES[pfx];
+        return {
+          type: 'inseparable_verb',
+          word: word,
+          prefix: pfx,
+          root: root,
+          pfxInfo: pfxInfo,
+          title: `🛡️ Inseparable Prefix Shield (${pfx.toUpperCase()}- Never Splits)`,
+          badge: 'Inseparable: No ge-',
+          literal: `${pfxInfo.en} + ${root}`,
+          actual: `${en || word} ${ta ? `(${ta})` : ''}`,
+          formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🛡️ <b>Shield Rule:</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> <b>NEVER split</b> in sentences and <b>NEVER take 'ge-' in Perfekt</b> (<i>${metadata.pp || metadata.perfekt || `hat ${lower}t`}</i>).`,
+          tamil: `💡 <b>Memory:</b> இந்த 8 முன்னொட்டுகள் (Prefixes) ஒருபோதும் பிரியாது, Perfekt-ல் 'ge-' எடுக்காது!`
+        };
+      }
+    }
+  }
+
+  // 2. Compound Nouns (Komposita & Fugenlaute / Punarchi)
+  const keys = Object.keys(COMPOUND_ROOTS_DB).sort((a,b) => b.length - a.length);
+  let matchedParts = [];
+
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    if (lower.startsWith(k)) {
+      const rest = lower.slice(k.length);
+      let glue = '';
+      let cleanRest = rest;
+      if (rest.startsWith('s') && rest.length > 2) { glue = 's'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('en') && rest.length > 3) { glue = 'en'; cleanRest = rest.slice(2); }
+      else if (rest.startsWith('n') && rest.length > 2) { glue = 'n'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('e') && rest.length > 2) { glue = 'e'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('er') && rest.length > 3) { glue = 'er'; cleanRest = rest.slice(2); }
+
+      for (let j = 0; j < keys.length; j++) {
+        const k2 = keys[j];
+        if (cleanRest === k2 || cleanRest.startsWith(k2)) {
+          matchedParts = [
+            { raw: k, info: COMPOUND_ROOTS_DB[k] },
+            { glue: glue },
+            { raw: cleanRest, info: COMPOUND_ROOTS_DB[k2] || { de: cleanRest, en: cleanRest, ta: cleanRest } }
+          ];
+          break;
+        }
+      }
+      if (matchedParts.length > 0) break;
+    }
+  }
+
+  if (matchedParts.length === 0) {
+    if (lower === 'handschuh') {
+      matchedParts = [{ raw: 'hand', info: COMPOUND_ROOTS_DB['hand'] }, { glue: '' }, { raw: 'schuh', info: COMPOUND_ROOTS_DB['schuh'] }];
+    } else if (lower === 'kühlschrank') {
+      matchedParts = [{ raw: 'kühl', info: COMPOUND_ROOTS_DB['kühl'] }, { glue: '' }, { raw: 'schrank', info: COMPOUND_ROOTS_DB['schrank'] }];
+    } else if (lower === 'wörterbuch') {
+      matchedParts = [{ raw: 'wörter', info: COMPOUND_ROOTS_DB['wörter'] }, { glue: '' }, { raw: 'buch', info: COMPOUND_ROOTS_DB['buch'] }];
+    } else if (lower === 'arbeitsplatz') {
+      matchedParts = [{ raw: 'arbeit', info: COMPOUND_ROOTS_DB['arbeit'] }, { glue: 's' }, { raw: 'platz', info: COMPOUND_ROOTS_DB['platz'] }];
+    } else if (lower === 'schweinefleisch') {
+      matchedParts = [{ raw: 'schwein', info: COMPOUND_ROOTS_DB['schwein'] }, { glue: 'e' }, { raw: 'fleisch', info: COMPOUND_ROOTS_DB['fleisch'] }];
+    } else if (lower === 'sonnenbrille') {
+      matchedParts = [{ raw: 'sonne', info: COMPOUND_ROOTS_DB['sonne'] }, { glue: 'n' }, { raw: 'brille', info: COMPOUND_ROOTS_DB['brille'] }];
+    } else if (lower === 'krankenhaus') {
+      matchedParts = [{ raw: 'krank', info: COMPOUND_ROOTS_DB['krank'] }, { glue: 'en' }, { raw: 'haus', info: COMPOUND_ROOTS_DB['haus'] }];
+    } else if (lower === 'kindergarten') {
+      matchedParts = [{ raw: 'kind', info: COMPOUND_ROOTS_DB['kind'] }, { glue: 'er' }, { raw: 'garten', info: COMPOUND_ROOTS_DB['garten'] }];
+    }
+  }
+
+  if (matchedParts.length >= 3) {
+    const p1 = matchedParts[0];
+    const glue = matchedParts[1].glue;
+    const p2 = matchedParts[2];
+    const rightBoss = p2.info ? p2.info.de : p2.raw;
+    const rightBossEn = p2.info ? p2.info.en : p2.raw;
+    const rightBossTa = p2.info ? p2.info.ta : '';
+
+    const p1De = p1.info ? p1.info.de : p1.raw;
+    const p1En = p1.info ? p1.info.en : p1.raw;
+    const p1Ta = p1.info ? p1.info.ta : '';
+
+    const splittingStr = glue 
+      ? `${p1De} + <b style="color:var(--stamp-red); background:#fef2f2; padding:0 3px; border-radius:3px;">${glue}</b> (glue) + <b>${rightBoss}</b> 👑` 
+      : `${p1De} + <b>${rightBoss}</b> 👑`;
+    
+    const literalStr = `${p1En} + ${rightBossEn}`;
+    const actualStr = `${en || word} ${ta ? `(${ta})` : ''}`;
+
+    return {
+      type: 'compound_noun',
+      word: word,
+      p1: p1De,
+      p1En: p1En,
+      p1Ta: p1Ta,
+      glue: glue,
+      rightBoss: rightBoss,
+      rightBossEn: rightBossEn,
+      rightBossTa: rightBossTa,
+      splitting: splittingStr,
+      literal: literalStr,
+      actual: actualStr,
+      title: '👑 1. The "Right-Side Boss" Rule & 🔗 Glue Letters (Punarchi)',
+      badge: 'Compound Word Boss',
+      genderReason: `The very last word on the right (<b>${rightBoss}</b> = <i>${rightBossEn}</i>) is the <b>Boss</b>! It determines the gender (<b>${metadata.a || 'der/die/das'}</b>) and main category. Everything to the left (<b>${p1De}</b>) just describes it.`,
+      punarchiExpl: glue ? `
+        <div style="margin-top:6px; background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+          <b>🔗 2. "Glue Letters" (The German Punarchi / ஜெர்மன் புணர்ச்சி):</b><br>
+          In Tamil, when joining words (புணர்ச்சி), extra letters appear for smooth flow (like <i>க், ச், த், ப்</i> — e.g. <i>தமிழ் + தாய் = தமிழ்த்தாய்</i>).<br>
+          German does the exact same thing by inserting the glue letter <b>„-${glue}-”</b> (Fugenlaut):<br>
+          ↳ <b>${p1De}</b> + <b style="color:var(--stamp-red); background:#fef2f2; padding:1px 4px; border-radius:3px;">-${glue}-</b> + <b>${rightBoss}</b> = <b>${word}</b>!
+        </div>
+      ` : ''
+    };
+  }
+
+  return null;
+}
+
+function renderLinguisticsHTML(card) {
+  const ling = analyzeGermanLinguistics(card.w, card.cat, card);
+  if (!ling) return '';
+
+  if (ling.type === 'compound_noun') {
+    return `
+      <div class="ling-box">
+        <div class="ling-header">
+          <span>${ling.title}</span>
+          <span class="ling-badge">${ling.badge}</span>
+        </div>
+        
+        <table class="ling-table">
+          <thead>
+            <tr>
+              <th>Joined German Word</th>
+              <th>Splitting (பிரித்து எழுதுக)</th>
+              <th>Literal Meaning</th>
+              <th>Actual Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>${ling.word}</b></td>
+              <td>${ling.splitting}</td>
+              <td>${ling.literal}</td>
+              <td><b>${ling.actual}</b></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-size:11.5px; margin-top:4px; line-height:1.5;">
+          • 👑 <b>Right-Side Boss:</b> ${ling.genderReason}
+        </div>
+        ${ling.punarchiExpl || ''}
+      </div>
+    `;
+  }
+
+  if (ling.type === 'separable_verb' || ling.type === 'inseparable_verb') {
+    return `
+      <div class="ling-box">
+        <div class="ling-header">
+          <span>${ling.title}</span>
+          <span class="ling-badge">${ling.badge}</span>
+        </div>
+        
+        <table class="ling-table">
+          <thead>
+            <tr>
+              <th>Dictionary Word</th>
+              <th>Prefix + Root (பிரித்து எழுதுக)</th>
+              <th>Literal Meaning</th>
+              <th>Actual Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>${ling.word}</b></td>
+              <td><code>${ling.prefix}</code> + <code>${ling.root}</code></td>
+              <td>${ling.literal}</td>
+              <td><b>${ling.actual}</b></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-size:11.5px; margin-top:4px; line-height:1.5;">
+          ${ling.formula}
+        </div>
+        ${ling.tamilInsight ? `<div style="margin-top:5px; padding:4px 8px; background:rgba(185,138,46,0.08); border-radius:4px; font-size:11.5px;">${ling.tamilInsight}</div>` : ''}
+      </div>
+    `;
+  }
+
+  return '';
+}
+
 function renderInfoPanel(card){
   const verbBlock = (card.cat==="v" && card.pr)
     ? `<div class="infoline"><b>Präteritum:</b> ${card.pr} &nbsp;·&nbsp; <b>Perfekt:</b> ${card.pp}</div>` : "";
@@ -2461,6 +2849,7 @@ function renderInfoPanel(card){
   const exBlock = card.ex ? `<div class="example-line">„${card.ex}"</div>` : "";
   const pluralLine = card.p ? `<div class="infoline"><b>Plural:</b> ${card.p}</div>` : "";
   const cheatBlock = renderCheatCodesHTML(card);
+  const lingBlock = renderLinguisticsHTML(card);
   return `
     <div class="revealbox">
       <div class="en-word">${card.en}</div>
@@ -2469,6 +2858,7 @@ function renderInfoPanel(card){
       ${verbBlock}
       ${exBlock}
       ${card.mn ? `<div class="mnemonic">💡 ${card.mn}</div>` : ""}
+      ${lingBlock}
       ${cheatBlock}
       ${familyBlock}
       ${collocBlock}

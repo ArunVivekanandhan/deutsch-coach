@@ -1735,6 +1735,118 @@ function getCheatCodesForWord(w, cat, opt = {}) {
   return hints;
 }
 
+function analyzeGermanLinguistics(w, cat, metadata = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase().replace(/^(der|die|das)\s+/, '').replace(/^sich\s+/, '');
+  const en = metadata.en || '';
+  const ta = metadata.ta || '';
+
+  const sepPrefixes = {
+    "ab": { en: "off / away / down", ta: "விலகி / கீழே" },
+    "an": { en: "at / on / start", ta: "மீது / தொடக்கம்" },
+    "auf": { en: "up / open", ta: "மேலே / திறந்து" },
+    "aus": { en: "out / off / exit", ta: "வெளியே / அணைத்து" },
+    "bei": { en: "by / along / assist", ta: "சேர்த்து / கூட" },
+    "ein": { en: "in / into / start", ta: "உள்ளே / தொடக்கம்" },
+    "fern": { en: "far / distant / TV", ta: "தொலைவில்" },
+    "fest": { en: "firm / fixed", ta: "உறுதியாக" },
+    "kennen": { en: "familiar / know", ta: "அறிமுகமான" },
+    "mit": { en: "with / along", ta: "கூட / உடன்" },
+    "nach": { en: "after / re- / copy", ta: "பின்னால் / மீண்டும்" },
+    "vor": { en: "in front / forward", ta: "முன்னால்" },
+    "weg": { en: "away / gone", ta: "விலகி / தொலைந்து" },
+    "weiter": { en: "further / continue", ta: "தொடர்ந்து" },
+    "zu": { en: "to / close / shut", ta: "நோக்கி / மூடி" },
+    "zurück": { en: "back / return", ta: "மீண்டும் / திரும்பி" },
+    "zusammen": { en: "together", ta: "ஒன்றாக" }
+  };
+
+  const insepPrefixes = {
+    "be": { en: "direct object focus", ta: "நேரடி இலக்கு" },
+    "ge": { en: "collective / result", ta: "விளைவு / சேர்ந்த நிலை" },
+    "er": { en: "achievement / deep outcome", ta: "முயற்சியின் வெற்றி" },
+    "ver": { en: "change / away / mistake", ta: "மாற்றம் / தவறு" },
+    "zer": { en: "destruction / pieces", ta: "உடைத்தல் / அழிவு" },
+    "ent": { en: "removal / escape", ta: "நீக்குதல் / தப்பித்தல்" },
+    "emp": { en: "receive / feel", ta: "உணர்தல் / பெறுதல்" },
+    "miss": { en: "mis- / wrong", ta: "தவறான" }
+  };
+
+  for (const pfx in sepPrefixes) {
+    if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
+      const root = lower.slice(pfx.length);
+      const pfxInfo = sepPrefixes[pfx];
+      return {
+        type: 'separable_verb',
+        word: word,
+        prefix: pfx,
+        root: root,
+        pfxInfo: pfxInfo,
+        title: '🚀 3. Separable Verb (Trennbare Verben / வாக்கியத்தில் பிரியும் வினைகள்)',
+        badge: 'Splits in Sentence',
+        literal: `${pfxInfo.en} + ${root}`,
+        actual: `${en || word} ${ta ? `(${ta})` : ''}`,
+        formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🗣️ <b>Sentence (Präsens):</b> <i>„Ich ${root.replace(/en$/,'e').replace(/n$/,'e')} ... <b style="color:var(--red);">${pfx}</b>.”</i><br>• 📦 <b>Perfekt Sandwich:</b> <i>„${metadata.perfekt || metadata.pp || `hat/ist ${pfx}ge...`}”</i> (<b>-ge-</b> is sandwiched in the middle!)`,
+        tamilInsight: `💡 <b>Tamil Word-Splitting Hack:</b> அகராதியில் ஒன்றாக இருக்கும் சொல், வாக்கியத்தில் இரண்டாகப் பிளந்து, அதன் முதல் பாதி (<b>${pfx}</b>) வாக்கியத்தின் இறுதிக்குச் சென்றுவிடும்!`
+      };
+    }
+  }
+
+  for (const pfx in insepPrefixes) {
+    if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
+      const root = lower.slice(pfx.length);
+      const pfxInfo = insepPrefixes[pfx];
+      return {
+        type: 'inseparable_verb',
+        word: word,
+        prefix: pfx,
+        root: root,
+        pfxInfo: pfxInfo,
+        title: `🛡️ Inseparable Prefix Shield (${pfx.toUpperCase()}- Never Splits)`,
+        badge: 'Inseparable: No ge-',
+        literal: `${pfxInfo.en} + ${root}`,
+        actual: `${en || word} ${ta ? `(${ta})` : ''}`,
+        formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🛡️ <b>Shield Rule:</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> <b>NEVER split</b> in sentences and <b>NEVER take 'ge-' in Perfekt</b> (<i>${metadata.perfekt || metadata.pp || `hat ${lower}t`}</i>).`,
+        tamil: `💡 <b>Memory:</b> இந்த 8 முன்னொட்டுகள் (Prefixes) ஒருபோதும் பிரியாது, Perfekt-ல் 'ge-' எடுக்காது!`
+      };
+    }
+  }
+
+  return null;
+}
+
+function renderLinguisticsHTML(v) {
+  const ling = analyzeGermanLinguistics(v.inf || v.w, 'v', v);
+  if (!ling) return '';
+  return `
+    <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+      <div style="font-weight:700; color:var(--blue); margin-bottom:2px;">${ling.title}:</div>
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-left:3px solid var(--blue); padding:8px 10px; border-radius:4px;">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:6px; font-size:11.5px;">
+          <thead>
+            <tr style="background:rgba(47,92,138,0.1);">
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Dictionary Word</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Prefix + Root (பிரித்து எழுதுக)</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Literal Meaning</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Actual Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><b>${ling.word}</b></td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><code>${ling.prefix}</code> + <code>${ling.root}</code></td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;">${ling.literal}</td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><b>${ling.actual}</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:12px; color:var(--ink);">${ling.formula}</div>
+        ${ling.tamilInsight ? `<div style="margin-top:4px; padding:3px 6px; background:rgba(47,92,138,0.08); border-radius:3px; font-size:11.5px;">${ling.tamilInsight}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
 function renderCheatCodesHTML(v) {
   const codes = getCheatCodesForWord(v.inf || v.w, 'v', v);
   if (!codes || codes.length === 0) return '';
@@ -1934,7 +2046,10 @@ function renderUniversal3StepMemoryHack(v){
         </div>
       </div>
 
-      <!-- 4B. Cheat Codes & Shortcuts -->
+      <!-- 4B. Word Breakdown & Linguistic Secret -->
+      ${renderLinguisticsHTML(v)}
+
+      <!-- 4C. Cheat Codes & Shortcuts -->
       ${renderCheatCodesHTML(v)}
 
       <!-- 5. Muscle Memory Sentences -->

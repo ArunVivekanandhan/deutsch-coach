@@ -1027,6 +1027,144 @@ function getCheatCodesForWord(w, cat, opt = {}) {
   return hints;
 }
 
+function analyzeGermanLinguistics(w, cat, metadata = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase().replace(/^(der|die|das)\s+/, '').replace(/^sich\s+/, '');
+  const en = metadata.en || '';
+  const ta = metadata.ta || '';
+
+  const keys = Object.keys(COMPOUND_ROOTS_DB).sort((a,b) => b.length - a.length);
+  let matchedParts = [];
+
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    if (lower.startsWith(k)) {
+      const rest = lower.slice(k.length);
+      let glue = '';
+      let cleanRest = rest;
+      if (rest.startsWith('s') && rest.length > 2) { glue = 's'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('en') && rest.length > 3) { glue = 'en'; cleanRest = rest.slice(2); }
+      else if (rest.startsWith('n') && rest.length > 2) { glue = 'n'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('e') && rest.length > 2) { glue = 'e'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('er') && rest.length > 3) { glue = 'er'; cleanRest = rest.slice(2); }
+
+      for (let j = 0; j < keys.length; j++) {
+        const k2 = keys[j];
+        if (cleanRest === k2 || cleanRest.startsWith(k2)) {
+          matchedParts = [
+            { raw: k, info: COMPOUND_ROOTS_DB[k] },
+            { glue: glue },
+            { raw: cleanRest, info: COMPOUND_ROOTS_DB[k2] || { de: cleanRest, en: cleanRest, ta: cleanRest } }
+          ];
+          break;
+        }
+      }
+      if (matchedParts.length > 0) break;
+    }
+  }
+
+  if (matchedParts.length === 0) {
+    if (lower === 'handschuh') {
+      matchedParts = [{ raw: 'hand', info: COMPOUND_ROOTS_DB['hand'] }, { glue: '' }, { raw: 'schuh', info: COMPOUND_ROOTS_DB['schuh'] }];
+    } else if (lower === 'kühlschrank') {
+      matchedParts = [{ raw: 'kühl', info: COMPOUND_ROOTS_DB['kühl'] }, { glue: '' }, { raw: 'schrank', info: COMPOUND_ROOTS_DB['schrank'] }];
+    } else if (lower === 'wörterbuch') {
+      matchedParts = [{ raw: 'wörter', info: COMPOUND_ROOTS_DB['wörter'] }, { glue: '' }, { raw: 'buch', info: COMPOUND_ROOTS_DB['buch'] }];
+    } else if (lower === 'arbeitsplatz') {
+      matchedParts = [{ raw: 'arbeit', info: COMPOUND_ROOTS_DB['arbeit'] }, { glue: 's' }, { raw: 'platz', info: COMPOUND_ROOTS_DB['platz'] }];
+    } else if (lower === 'schweinefleisch') {
+      matchedParts = [{ raw: 'schwein', info: COMPOUND_ROOTS_DB['schwein'] }, { glue: 'e' }, { raw: 'fleisch', info: COMPOUND_ROOTS_DB['fleisch'] }];
+    } else if (lower === 'sonnenbrille') {
+      matchedParts = [{ raw: 'sonne', info: COMPOUND_ROOTS_DB['sonne'] }, { glue: 'n' }, { raw: 'brille', info: COMPOUND_ROOTS_DB['brille'] }];
+    } else if (lower === 'krankenhaus') {
+      matchedParts = [{ raw: 'krank', info: COMPOUND_ROOTS_DB['krank'] }, { glue: 'en' }, { raw: 'haus', info: COMPOUND_ROOTS_DB['haus'] }];
+    } else if (lower === 'kindergarten') {
+      matchedParts = [{ raw: 'kind', info: COMPOUND_ROOTS_DB['kind'] }, { glue: 'er' }, { raw: 'garten', info: COMPOUND_ROOTS_DB['garten'] }];
+    }
+  }
+
+  if (matchedParts.length >= 3) {
+    const p1 = matchedParts[0];
+    const glue = matchedParts[1].glue;
+    const p2 = matchedParts[2];
+    const rightBoss = p2.info ? p2.info.de : p2.raw;
+    const rightBossEn = p2.info ? p2.info.en : p2.raw;
+    const rightBossTa = p2.info ? p2.info.ta : '';
+
+    const p1De = p1.info ? p1.info.de : p1.raw;
+    const p1En = p1.info ? p1.info.en : p1.raw;
+    const p1Ta = p1.info ? p1.info.ta : '';
+
+    const splittingStr = glue 
+      ? `${p1De} + <b style="color:var(--stamp-red); background:#fef2f2; padding:0 3px; border-radius:3px;">${glue}</b> (glue) + <b>${rightBoss}</b> 👑` 
+      : `${p1De} + <b>${rightBoss}</b> 👑`;
+    
+    const literalStr = `${p1En} + ${rightBossEn}`;
+    const actualStr = `${en || word} ${ta ? `(${ta})` : ''}`;
+
+    return {
+      type: 'compound_noun',
+      word: word,
+      p1: p1De,
+      p1En: p1En,
+      p1Ta: p1Ta,
+      glue: glue,
+      rightBoss: rightBoss,
+      rightBossEn: rightBossEn,
+      rightBossTa: rightBossTa,
+      splitting: splittingStr,
+      literal: literalStr,
+      actual: actualStr,
+      title: '👑 1. The "Right-Side Boss" Rule & 🔗 Glue Letters (Punarchi)',
+      badge: 'Compound Word Boss',
+      genderReason: `The very last word on the right (<b>${rightBoss}</b> = <i>${rightBossEn}</i>) is the <b>Boss</b>! It dictates the gender (<b>${metadata.art || metadata.a || 'der/die/das'}</b>) and main category. Everything to the left (<b>${p1De}</b>) just describes it.`,
+      punarchiExpl: glue ? `
+        <div style="margin-top:6px; background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+          <b>🔗 2. "Glue Letters" (The German Punarchi / ஜெர்மன் புணர்ச்சி):</b><br>
+          In Tamil, when joining words (புணர்ச்சி), extra letters appear for smooth flow (like <i>க், ச், த், ப்</i> — e.g. <i>தமிழ் + தாய் = தமிழ்த்தாய்</i>).<br>
+          German does the exact same thing by inserting the glue letter <b>„-${glue}-”</b> (Fugenlaut):<br>
+          ↳ <b>${p1De}</b> + <b style="color:var(--stamp-red); background:#fef2f2; padding:1px 4px; border-radius:3px;">-${glue}-</b> + <b>${rightBoss}</b> = <b>${word}</b>!
+        </div>
+      ` : ''
+    };
+  }
+
+  return null;
+}
+
+function renderLinguisticsHTML(v, cat) {
+  const ling = analyzeGermanLinguistics(v.sg || v.w, cat, v);
+  if (!ling) return '';
+
+  return `
+    <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+      <div style="font-weight:700; color:var(--blue); margin-bottom:2px;">${ling.title}:</div>
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-left:3px solid var(--blue); padding:8px 10px; border-radius:4px;">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:6px; font-size:11.5px;">
+          <thead>
+            <tr style="background:rgba(47,92,138,0.1);">
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Joined German Word</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Splitting (பிரித்து எழுதுக)</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Literal Meaning</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Actual Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><b>${ling.word}</b></td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;">${ling.splitting}</td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;">${ling.literal}</td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><b>${ling.actual}</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:12px; color:var(--ink);">${ling.genderReason}</div>
+        ${ling.punarchiExpl || ''}
+      </div>
+    </div>
+  `;
+}
+
 function renderCheatCodesHTML(v, cat) {
   const codes = getCheatCodesForWord(v.sg || v.w, cat, v);
   if (!codes || codes.length === 0) return '';
@@ -1067,7 +1205,10 @@ function renderNounMemoryHack(v){
         </div>
       </div>
 
-      <!-- 1B. Cheat Codes & Shortcuts -->
+      <!-- 1B. Word Breakdown, Right-Side Boss & Punarchi -->
+      ${renderLinguisticsHTML(v, 'n')}
+
+      <!-- 1C. Cheat Codes & Shortcuts -->
       ${renderCheatCodesHTML(v, 'n')}
 
       <!-- 2. Memory Trick -->
