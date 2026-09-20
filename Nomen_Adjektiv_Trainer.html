@@ -894,6 +894,161 @@ function analyzeNoun(v) {
   };
 }
 
+function getCheatCodesForWord(w, cat, opt = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase();
+  const rawWord = lower.replace(/^sich\s+/, '').replace(/^(der|die|das)\s+/, '');
+  const hints = [];
+
+  // NOUN CHEAT CODES
+  if (cat === 'n' || opt.art || ['der', 'die', 'das'].includes(opt.art)) {
+    const art = opt.art || (word.startsWith('der ') ? 'der' : word.startsWith('die ') ? 'die' : word.startsWith('das ') ? 'das' : '');
+    const femSuffixes = ['ung', 'heit', 'keit', 'schaft', 'tion', 'tät', 'in', 'ik', 'ur', 'ei', 'ade', 'anz', 'enz'];
+    const neutSuffixes = ['chen', 'lein', 'ment', 'um', 'tum', 'ma'];
+    const mascSuffixes = ['ismus', 'ist', 'or', 'ling', 'ant', 'ent', 'eur', 'ich', 'ig'];
+
+    const matchedFem = femSuffixes.find(s => rawWord.endsWith(s));
+    const matchedNeut = neutSuffixes.find(s => rawWord.endsWith(s));
+    const matchedMasc = mascSuffixes.find(s => rawWord.endsWith(s));
+
+    if (matchedFem) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🔴 100% Feminine Suffix Lock: -${matchedFem} → DIE`,
+        badge: '100% Accurate DIE',
+        rule: `Nouns ending in <b>-${matchedFem}</b> are <b>100% FEMININE (die)</b>. Plural rule: always adds <b>-${matchedFem === 'in' ? 'nen' : 'en'}</b> (e.g. <i>die ${rawWord} → die ${rawWord}${matchedFem === 'in' ? 'nen' : 'en'}</i>).`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedFem} என முடிந்தால் 100% 'die' (பெண்பால்)! பன்மைக்கு -${matchedFem === 'in' ? 'nen' : 'en'} சேர்க்கவும்.`
+      });
+    } else if (matchedNeut) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🟢 100% Neuter Suffix Lock: -${matchedNeut} → DAS`,
+        badge: '100% Accurate DAS',
+        rule: `Nouns ending in <b>-${matchedNeut}</b> are <b>100% NEUTER (das)</b>. Diminutives like <i>-chen / -lein</i> have NO plural ending change.`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedNeut} என முடிந்தால் 100% 'das' (ஒன்றன்பால்)!`
+      });
+    } else if (matchedMasc) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🔵 95% Masculine Suffix Lock: -${matchedMasc} → DER`,
+        badge: '95% Accurate DER',
+        rule: `Nouns ending in <b>-${matchedMasc}</b> are <b>95% MASCULINE (der)</b>.`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedMasc} என முடிந்தால் 95% 'der' (ஆண்பால்)!`
+      });
+    }
+
+    if (rawWord.length > 8 && !matchedFem && !matchedNeut && !matchedMasc) {
+      hints.push({
+        num: 'Shortcut 12',
+        title: '🧩 The Last-Word Captain Rule (Compound Nouns)',
+        badge: 'Gender Anchor',
+        rule: `In compound nouns, the <b>very last word component</b> determines the gender and plural with 100% authority!`,
+        tamil: '💡 <b>Compound Hack:</b> கூட்டுப் பெயர்களில் கடைசி சொல்லே Article மற்றும் Plural-ஐ தீர்மானிக்கும்!'
+      });
+    }
+
+    if (art === 'die' && !matchedFem) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Feminine Plural Default: -(e)n',
+        badge: '95% Plural Rule',
+        rule: '95% of feminine German nouns take <b>-(e)n</b> in the plural (e.g. <i>die Sprache → die Sprachen, die Frau → die Frauen</i>).',
+        tamil: '💡 <b>Plural Hack:</b> \'die\' பெயர்ச்சொற்கள் 95% பன்மையில் -(e)n பெறும்!'
+      });
+    } else if (art === 'der' && !matchedMasc) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Masculine Plural Default: -e + Umlaut',
+        badge: '80% Plural Rule',
+        rule: 'Most masculine nouns form plurals with <b>-e</b>, often adding an Umlaut on a/o/u (e.g. <i>der Stuhl → die Stühle, der Tag → die Tage</i>). Doer nouns in <i>-er</i> keep the same form (<i>der Lehrer → die Lehrer</i>).',
+        tamil: '💡 <b>Plural Hack:</b> \'der\' பெயர்ச்சொற்கள் பெரும்பாலும் -e மற்றும் Umlaut பெறும்!'
+      });
+    } else if (art === 'das' && !matchedNeut) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Neuter Plural Default: -er + Umlaut or -e',
+        badge: 'Neuter Plural Rule',
+        rule: 'Monosyllabic neuter nouns typically take <b>-er + Umlaut</b> in plural (e.g. <i>das Haus → die Häuser, das Kind → die Kinder, das Buch → die Bücher</i>).',
+        tamil: '💡 <b>Plural Hack:</b> ஓரசை \'das\' சொற்கள் பன்மையில் -er + Umlaut பெறும்!'
+      });
+    }
+  }
+
+  // ADJECTIVE CHEAT CODES
+  if (cat === 'adj') {
+    const umlautAdjs = ['alt', 'jung', 'groß', 'klein', 'warm', 'kalt', 'stark', 'schwach', 'kurz', 'lang', 'klug', 'dumm', 'nah', 'hoch', 'hart', 'arm', 'scharf'];
+    if (umlautAdjs.includes(rawWord)) {
+      hints.push({
+        num: 'Shortcut 27',
+        title: '⚡ 1-Syllable Comparative Umlaut Rule (a, o, u → ä, ö, ü)',
+        badge: 'Comparative Umlaut',
+        rule: `Short 1-syllable adjectives with <b>a, o, u</b> almost always get an <b>Umlaut</b> in Comparative & Superlative (e.g. <i>${rawWord} → ${rawWord.replace('a','ä').replace('o','ö').replace('u','ü')}er</i>).`,
+        tamil: '💡 <b>Adjective Hack:</b> a, o, u உள்ள ஓரசை உரிச்சொற்கள் Comparative-ல் Umlaut (ä, ö, ü) பெறும்!'
+      });
+    }
+
+    if (rawWord.endsWith('el') || rawWord.endsWith('er')) {
+      hints.push({
+        num: 'Shortcut 28',
+        title: '✂️ The -el / -er Stem Contraction Rule',
+        badge: 'Drop the -e-',
+        rule: `Adjectives ending in <b>-el</b> (e.g. <i>dunkel, edel, flexibel</i>) drop the root <b>-e-</b> before adding comparative or adjective declension endings (<i>dunkel → dunkler / ein dunkles Zimmer</i>).`,
+        tamil: '💡 <b>Contraction Hack:</b> -el முடிவடையும் Adjectives-ல் நடுவில் உள்ள \'e\' மறைந்துவிடும் (dunkel → dunkler)!'
+      });
+    }
+
+    if (rawWord.endsWith('bar')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -bar = "-able / Feasible"',
+        badge: 'Word Building',
+        rule: `<b>-bar</b> turns verbs into passive abilities (e.g. <i>machbar = doable, bezahlbar = affordable, sichtbar = visible</i>).`,
+        tamil: '💡 <b>Meaning:</b> -bar = செய்யக்கூடிய (English: -able).'
+      });
+    } else if (rawWord.endsWith('los')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -los = "-less / Without"',
+        badge: 'Word Building',
+        rule: `<b>-los</b> indicates absence of something (e.g. <i>arbeitslos = jobless, kostenlos = free of charge, schlaflos = sleepless</i>).`,
+        tamil: '💡 <b>Meaning:</b> -los = இல்லாத / அற்ற (English: -less).'
+      });
+    } else if (rawWord.endsWith('reich') || rawWord.endsWith('voll')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -reich / -voll = "Full of / Rich in"',
+        badge: 'Word Building',
+        rule: `<b>-reich / -voll</b> indicates abundance (e.g. <i>erfolgreich = successful, wertvoll = valuable, hilfreich = helpful</i>).`,
+        tamil: '💡 <b>Meaning:</b> -reich / -voll = நிறைந்த / மிகுதியான.'
+      });
+    }
+  }
+
+  return hints;
+}
+
+function renderCheatCodesHTML(v, cat) {
+  const codes = getCheatCodesForWord(v.sg || v.w, cat, v);
+  if (!codes || codes.length === 0) return '';
+  return `
+    <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+      <div style="font-weight:700; color:var(--gold); margin-bottom:2px;">⚡ Cheat Codes &amp; Grammar Shortcuts (இலக்கண குறுக்குவழிகள்):</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${codes.map(c => `
+          <div style="background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+              <span style="font-weight:700; color:var(--ink);">${c.title}</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700; background:var(--gold); color:#000; padding:1px 6px; border-radius:10px;">${c.badge || c.num}</span>
+            </div>
+            <div style="font-size:12px; color:var(--ink);">${c.rule}</div>
+            ${c.tamil ? `<div style="margin-top:4px; padding:3px 6px; background:rgba(185,138,46,0.08); border-radius:3px; font-size:11.5px;">${c.tamil}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderNounMemoryHack(v){
   const data = analyzeNoun(v);
   return `
@@ -911,6 +1066,9 @@ function renderNounMemoryHack(v){
           ${data.genderRule}
         </div>
       </div>
+
+      <!-- 1B. Cheat Codes & Shortcuts -->
+      ${renderCheatCodesHTML(v, 'n')}
 
       <!-- 2. Memory Trick -->
       <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
@@ -1025,6 +1183,7 @@ function renderAdjMemoryHack(v){
         ${irregularRule ? `<div style="margin-bottom:6px; color:#991b1b;">${irregularRule}</div>` : ''}
         ${umlautRule ? `<div style="margin-bottom:6px; color:#1e40af;">${umlautRule}</div>` : ''}
         ${suffixRule ? `<div style="margin-bottom:6px; color:#065f46;">${suffixRule}</div>` : ''}
+        ${renderCheatCodesHTML(v, 'adj')}
         <div style="font-size:11.5px; opacity:0.9;">${baseTip}</div>
       </div>
     </div>

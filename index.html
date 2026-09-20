@@ -344,6 +344,52 @@
     margin-bottom:8px;
   }
   .mnemonic b{color:var(--stamp-red-dark);}
+  .cheat-box{
+    background:#fffdf2;
+    border:1.5px solid var(--gold);
+    border-radius:6px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    font-size:12px;
+    line-height:1.55;
+    color:var(--ink);
+    box-shadow:0 2px 6px rgba(185,138,46,0.12);
+    text-align:left;
+  }
+  html.dark-theme .cheat-box{
+    background:#1f2430;
+    border-color:var(--gold);
+    color:var(--ink);
+  }
+  .cheat-box-head{
+    font-family:'Fjalla One',sans-serif;
+    font-size:12.5px;
+    color:var(--gold);
+    text-transform:uppercase;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:6px;
+    border-bottom:1px dashed rgba(185,138,46,0.3);
+    padding-bottom:4px;
+  }
+  .cheat-badge-pill{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    font-weight:700;
+    background:var(--gold);
+    color:#000;
+    padding:1px 6px;
+    border-radius:10px;
+    text-transform:uppercase;
+  }
+  .cheat-tamil-box{
+    margin-top:5px;
+    padding:4px 8px;
+    background:rgba(185,138,46,0.08);
+    border-radius:4px;
+    font-size:11.5px;
+  }
   .familybox, .colloc{
     font-size:12px;
     line-height:1.55;
@@ -2145,6 +2191,266 @@ function pickQType(card){
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
+function getCheatCodesForWord(w, cat, opt = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase();
+  const rawWord = lower.replace(/^sich\s+/, '').replace(/^(der|die|das)\s+/, '');
+  const hints = [];
+
+  // 1. VERB CHEAT CODES
+  if (cat === 'v' || (!cat && (lower.endsWith('en') || lower.endsWith('rn') || lower.endsWith('ln')))) {
+    const mixedVerbs = ['bringen', 'denken', 'kennen', 'wissen', 'nennen', 'brennen', 'rennen', 'senden', 'wenden'];
+    const matchedMixed = mixedVerbs.find(mv => rawWord.endsWith(mv));
+    if (matchedMixed) {
+      hints.push({
+        num: 'Shortcut 06',
+        title: '🧬 The \'Secret 9\' Mixed Verbs Club (Mischverben)',
+        badge: 'Mixed Verb Hybrid',
+        rule: `<b>${word}</b> is one of only 9 core German Mixed Verbs! Stem vowel shifts like a strong verb (<i>e → a / o</i>), BUT takes regular weak endings (<b>-te</b> in Past, <b>ge-...-t</b> in Perfekt).`,
+        tamil: '💡 <b>Tamil Insight:</b> உயிர் எழுத்து மாறும் + பலவீன வினை விகுதி (-te / -t) இணையும்! இந்த 9 வினைகளில் இதுவும் ஒன்று!'
+      });
+    }
+
+    if (rawWord.endsWith('wissen') || rawWord.endsWith('kennen')) {
+      hints.push({
+        num: 'Shortcut 07',
+        title: '🧙‍♂️ wissen vs. kennen: The Wizard & Ken Doll Hack',
+        badge: 'High-Frequency Trap',
+        rule: `<b>wissen (Wizard 🧙‍♂️):</b> Knows facts, info, numbers, secrets. Followed by <i>wie, wo, was, warum</i> or <i>dass</i>.<br><b>kennen (Ken Doll 👱‍♂️):</b> Knows people or places. Followed by a Person or City (<i>Tom, Berlin</i>).`,
+        tamil: '💡 <b>Tamil Brain Hack:</b> kennen = ஆட்கள்/ஊர்கள்; wissen = உண்மைகள்/தகவல்கள்/விடைகள்.'
+      });
+    }
+
+    if (rawWord.endsWith('ieren')) {
+      hints.push({
+        num: 'Shortcut 04',
+        title: '⚡ The \'-ieren\' Auto-Weak Rule (100% Guaranteed)',
+        badge: '100% Guaranteed',
+        rule: `<b>100% of verbs ending in -ieren are WEAK!</b> Präteritum adds regular <b>-te</b> (<i>${rawWord}te</i>). In Perfekt, it <b>NEVER takes \'ge-\'</b> (<i>hat ${rawWord}t</i>).`,
+        tamil: '💡 <b>Golden Rule:</b> -ieren என முடியும் அனைத்து வினைகளும் 100% Weak! Perfekt-ல் \'ge-\' வராது.'
+      });
+    }
+
+    const seinVerbs = ['gehen', 'fahren', 'fliegen', 'laufen', 'schwimmen', 'kommen', 'reisen', 'wandern', 'springen', 'fallen', 'steigen', 'sterben', 'einschlafen', 'aufwachen', 'wachsen', 'sein', 'bleiben', 'passieren', 'gelingen'];
+    const matchedSein = seinVerbs.some(sv => rawWord.endsWith(sv));
+    if (matchedSein || opt.isAuxSein || (opt.pp && opt.pp.startsWith('ist '))) {
+      hints.push({
+        num: 'Shortcut 08 & 10',
+        title: '🚶→🏃 haben vs. sein: The 2-Question Test',
+        badge: 'Auxiliary SEIN',
+        rule: `Takes <b>ist / sein</b> in Perfekt because it indicates: (1) Movement from Point A to B, (2) State Change (awake→asleep, alive→dead), or is one of the 3 special exceptions (<i>sein, bleiben, passieren</i>).`,
+        tamil: '💡 <b>Tamil Hack:</b> இடம் மாறுதல் (A→B) அல்லது நிலை மாறுதல் இருந்தால் SEIN, மற்றவற்றிற்கு HABEN!'
+      });
+    }
+
+    const insepPrefixes = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
+    const matchedInsep = insepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2);
+    if (matchedInsep) {
+      hints.push({
+        num: 'Shortcut 05',
+        title: '🛡️ Inseparable Prefix Shield (Be-Ge-Er-Ver-Zer-Ent-Emp-Miss)',
+        badge: 'No ge- Prefix',
+        rule: `Starts with inseparable <b>${matchedInsep}-</b>. It NEVER detaches in sentences and <b>NEVER takes \'ge-\' in Perfekt</b> (e.g. <i>hat ${rawWord}t / ${rawWord}en</i>, never <i>hat ge${rawWord}</i>).`,
+        tamil: '💡 <b>Memory:</b> இந்த 8 prefixes ஒருபோதும் பிரியாது, Perfekt-ல் \'ge-\' எடுக்காது!'
+      });
+    }
+
+    const sepPrefixes = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'mit', 'nach', 'vor', 'weg', 'zu', 'zurück'];
+    const matchedSep = sepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2 && !matchedInsep);
+    if (matchedSep) {
+      hints.push({
+        num: 'Shortcut 05B',
+        title: '🚀 Separable Prefix Sandwich Rule',
+        badge: 'Splits in Sentence',
+        rule: `Starts with separable <b>${matchedSep}-</b>. In present tense, prefix flies to sentence end (<i>„Ich ... ${matchedSep}.”</i>). In Perfekt, <b>-ge-</b> is sandwiched in the middle (<i>${matchedSep}-ge-...</i>).`,
+        tamil: '💡 <b>Tamil Rule:</b> வாக்கியத்தின் இறுதியில் Prefix பிரியும்! Perfekt-ல் இடையில் \'-ge-\' இணையும்.'
+      });
+    }
+
+    if (rawWord.includes('ei') && !rawWord.endsWith('ieren')) {
+      hints.push({
+        num: 'Shortcut 02',
+        title: '🔍 The Diphthong Scanner (-ei- → ie / i)',
+        badge: '99% Strong Verb',
+        rule: `Verbs containing <b>-ei-</b> in the stem are 99% STRONG verbs! They shift: <i>-ei- → -ie- / -i-</i> in past tenses (e.g. <i>schreiben → schrieb, bleiben → blieb</i>).`,
+        tamil: '💡 <b>Quick Hack:</b> வினையில் -ei- பார்த்தால், அது 99% Strong Verb (ie/i என மாறும்)!'
+      });
+    } else if (rawWord.includes('ie') && !rawWord.endsWith('ieren')) {
+      hints.push({
+        num: 'Shortcut 02',
+        title: '🔍 The Diphthong Scanner (-ie- → o)',
+        badge: '99% Strong Verb',
+        rule: `Verbs containing <b>-ie-</b> in the stem are 99% STRONG verbs! They shift: <i>-ie- → -o-</i> in past tenses (e.g. <i>fliegen → flog, bieten → bot, ziehen → zog</i>).`,
+        tamil: '💡 <b>Quick Hack:</b> வினையில் -ie- பார்த்தால், அது 99% Strong Verb (o என மாறும்)!'
+      });
+    }
+  }
+
+  // 2. NOUN CHEAT CODES
+  if (cat === 'n' || opt.a || ['der', 'die', 'das'].includes(opt.a)) {
+    const art = opt.a || (word.startsWith('der ') ? 'der' : word.startsWith('die ') ? 'die' : word.startsWith('das ') ? 'das' : '');
+    const femSuffixes = ['ung', 'heit', 'keit', 'schaft', 'tion', 'tät', 'in', 'ik', 'ur', 'ei', 'ade', 'anz', 'enz'];
+    const neutSuffixes = ['chen', 'lein', 'ment', 'um', 'tum', 'ma'];
+    const mascSuffixes = ['ismus', 'ist', 'or', 'ling', 'ant', 'ent', 'eur', 'ich', 'ig'];
+
+    const matchedFem = femSuffixes.find(s => rawWord.endsWith(s));
+    const matchedNeut = neutSuffixes.find(s => rawWord.endsWith(s));
+    const matchedMasc = mascSuffixes.find(s => rawWord.endsWith(s));
+
+    if (matchedFem) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🔴 100% Feminine Suffix Lock: -${matchedFem} → DIE`,
+        badge: '100% Accurate DIE',
+        rule: `Nouns ending in <b>-${matchedFem}</b> are <b>100% FEMININE (die)</b>. Plural rule: always adds <b>-${matchedFem === 'in' ? 'nen' : 'en'}</b> (e.g. <i>die ${rawWord} → die ${rawWord}${matchedFem === 'in' ? 'nen' : 'en'}</i>).`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedFem} என முடிந்தால் 100% 'die' (பெண்பால்)! பன்மைக்கு -${matchedFem === 'in' ? 'nen' : 'en'} சேர்க்கவும்.`
+      });
+    } else if (matchedNeut) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🟢 100% Neuter Suffix Lock: -${matchedNeut} → DAS`,
+        badge: '100% Accurate DAS',
+        rule: `Nouns ending in <b>-${matchedNeut}</b> are <b>100% NEUTER (das)</b>. Diminutives like <i>-chen / -lein</i> have NO plural ending change.`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedNeut} என முடிந்தால் 100% 'das' (ஒன்றன்பால்)!`
+      });
+    } else if (matchedMasc) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🔵 95% Masculine Suffix Lock: -${matchedMasc} → DER`,
+        badge: '95% Accurate DER',
+        rule: `Nouns ending in <b>-${matchedMasc}</b> are <b>95% MASCULINE (der)</b>.`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedMasc} என முடிந்தால் 95% 'der' (ஆண்பால்)!`
+      });
+    }
+
+    if (rawWord.length > 8 && !matchedFem && !matchedNeut && !matchedMasc) {
+      hints.push({
+        num: 'Shortcut 12',
+        title: '🧩 The Last-Word Captain Rule (Compound Nouns)',
+        badge: 'Gender Anchor',
+        rule: `In compound nouns, the <b>very last word component</b> determines the gender and plural with 100% authority!`,
+        tamil: '💡 <b>Compound Hack:</b> கூட்டுப் பெயர்களில் கடைசி சொல்லே Article மற்றும் Plural-ஐ தீர்மானிக்கும்!'
+      });
+    }
+
+    if (art === 'die' && !matchedFem) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Feminine Plural Default: -(e)n',
+        badge: '95% Plural Rule',
+        rule: '95% of feminine German nouns take <b>-(e)n</b> in the plural (e.g. <i>die Sprache → die Sprachen, die Frau → die Frauen</i>).',
+        tamil: '💡 <b>Plural Hack:</b> \'die\' பெயர்ச்சொற்கள் 95% பன்மையில் -(e)n பெறும்!'
+      });
+    } else if (art === 'der' && !matchedMasc) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Masculine Plural Default: -e + Umlaut',
+        badge: '80% Plural Rule',
+        rule: 'Most masculine nouns form plurals with <b>-e</b>, often adding an Umlaut on a/o/u (e.g. <i>der Stuhl → die Stühle, der Tag → die Tage</i>). Doer nouns in <i>-er</i> keep the same form (<i>der Lehrer → die Lehrer</i>).',
+        tamil: '💡 <b>Plural Hack:</b> \'der\' பெயர்ச்சொற்கள் பெரும்பாலும் -e மற்றும் Umlaut பெறும்!'
+      });
+    } else if (art === 'das' && !matchedNeut) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Neuter Plural Default: -er + Umlaut or -e',
+        badge: 'Neuter Plural Rule',
+        rule: 'Monosyllabic neuter nouns typically take <b>-er + Umlaut</b> in plural (e.g. <i>das Haus → die Häuser, das Kind → die Kinder, das Buch → die Bücher</i>).',
+        tamil: '💡 <b>Plural Hack:</b> ஓரசை \'das\' சொற்கள் பன்மையில் -er + Umlaut பெறும்!'
+      });
+    }
+  }
+
+  // 3. ADJECTIVE CHEAT CODES
+  if (cat === 'adj') {
+    const umlautAdjs = ['alt', 'jung', 'groß', 'klein', 'warm', 'kalt', 'stark', 'schwach', 'kurz', 'lang', 'klug', 'dumm', 'nah', 'hoch', 'hart', 'arm', 'scharf'];
+    if (umlautAdjs.includes(rawWord)) {
+      hints.push({
+        num: 'Shortcut 27',
+        title: '⚡ 1-Syllable Comparative Umlaut Rule (a, o, u → ä, ö, ü)',
+        badge: 'Comparative Umlaut',
+        rule: `Short 1-syllable adjectives with <b>a, o, u</b> almost always get an <b>Umlaut</b> in Comparative & Superlative (e.g. <i>${rawWord} → ${rawWord.replace('a','ä').replace('o','ö').replace('u','ü')}er</i>).`,
+        tamil: '💡 <b>Adjective Hack:</b> a, o, u உள்ள ஓரசை உரிச்சொற்கள் Comparative-ல் Umlaut (ä, ö, ü) பெறும்!'
+      });
+    }
+
+    if (rawWord.endsWith('el') || rawWord.endsWith('er')) {
+      hints.push({
+        num: 'Shortcut 28',
+        title: '✂️ The -el / -er Stem Contraction Rule',
+        badge: 'Drop the -e-',
+        rule: `Adjectives ending in <b>-el</b> (e.g. <i>dunkel, edel, flexibel</i>) drop the root <b>-e-</b> before adding comparative or adjective declension endings (<i>dunkel → dunkler / ein dunkles Zimmer</i>).`,
+        tamil: '💡 <b>Contraction Hack:</b> -el முடிவடையும் Adjectives-ல் நடுவில் உள்ள \'e\' மறைந்துவிடும் (dunkel → dunkler)!'
+      });
+    }
+
+    if (rawWord.endsWith('bar')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -bar = "-able / Feasible"',
+        badge: 'Word Building',
+        rule: `<b>-bar</b> turns verbs into passive abilities (e.g. <i>machbar = doable, bezahlbar = affordable, sichtbar = visible</i>).`,
+        tamil: '💡 <b>Meaning:</b> -bar = செய்யக்கூடிய (English: -able).'
+      });
+    } else if (rawWord.endsWith('los')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -los = "-less / Without"',
+        badge: 'Word Building',
+        rule: `<b>-los</b> indicates absence of something (e.g. <i>arbeitslos = jobless, kostenlos = free of charge, schlaflos = sleepless</i>).`,
+        tamil: '💡 <b>Meaning:</b> -los = இல்லாத / அற்ற (English: -less).'
+      });
+    } else if (rawWord.endsWith('reich') || rawWord.endsWith('voll')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -reich / -voll = "Full of / Rich in"',
+        badge: 'Word Building',
+        rule: `<b>-reich / -voll</b> indicates abundance (e.g. <i>erfolgreich = successful, wertvoll = valuable, hilfreich = helpful</i>).`,
+        tamil: '💡 <b>Meaning:</b> -reich / -voll = நிறைந்த / மிகுதியான.'
+      });
+    }
+  }
+
+  // 4. PREPOSITIONS
+  if (cat === 'prep' || ['für', 'ohne', 'gegen', 'durch', 'um', 'aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu'].includes(rawWord)) {
+    const akkuDogfu = ['durch', 'ohne', 'gegen', 'für', 'um'];
+    const dativPreps = ['aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu', 'gegenüber'];
+    if (akkuDogfu.includes(rawWord)) {
+      hints.push({
+        num: 'Shortcut 16',
+        title: '🎯 The DOGFU Akkusativ Shortcut (100% Akkusativ)',
+        badge: 'DOGFU Law',
+        rule: `<b>${word.toUpperCase()}</b> belongs to the famous <b>DOGFU</b> family (<i>Durch, Ohne, Gegen, Für, Um</i>). It ALWAYS triggers the <b>Akkusativ case (den / die / das)</b>!`,
+        tamil: '💡 <b>DOGFU Formula:</b> Durch, Ohne, Gegen, Für, Um எப்போதும் 100% Akkusativ மட்டுமே எடுக்கும்!'
+      });
+    } else if (dativPreps.includes(rawWord)) {
+      hints.push({
+        num: 'Shortcut 17',
+        title: '🎯 The Aus-Bei-Mit-Nach Dativ Anthem (100% Dativ)',
+        badge: 'Dativ Law',
+        rule: `<b>${word.toUpperCase()}</b> belongs to the <b>Aus-Bei-Mit-Nach, Seit-Von-Zu</b> family. It ALWAYS triggers the <b>Dativ case (dem / der / dem / den + n)</b>!`,
+        tamil: '💡 <b>Dativ Anthem:</b> Aus, bei, mit, nach, seit, von, zu வந்தால் எப்போதும் 100% Dativ!'
+      });
+    }
+  }
+
+  return hints;
+}
+
+function renderCheatCodesHTML(card) {
+  const codes = getCheatCodeForWord(card.w, card.cat, card);
+  if (!codes || codes.length === 0) return '';
+  return codes.map(c => `
+    <div class="cheat-box">
+      <div class="cheat-box-head">
+        <span>⚡ ${c.title}</span>
+        <span class="cheat-badge-pill">${c.badge || c.num}</span>
+      </div>
+      <div>${c.rule}</div>
+      ${c.tamil ? `<div class="cheat-tamil-box">${c.tamil}</div>` : ''}
+    </div>
+  `).join('');
+}
+
 function renderInfoPanel(card){
   const verbBlock = (card.cat==="v" && card.pr)
     ? `<div class="infoline"><b>Präteritum:</b> ${card.pr} &nbsp;·&nbsp; <b>Perfekt:</b> ${card.pp}</div>` : "";
@@ -2154,6 +2460,7 @@ function renderInfoPanel(card){
   const collocBlock = colloc ? `<div class="colloc">💬 <b>Kollokationen:</b> ${colloc.join(" · ")}</div>` : "";
   const exBlock = card.ex ? `<div class="example-line">„${card.ex}"</div>` : "";
   const pluralLine = card.p ? `<div class="infoline"><b>Plural:</b> ${card.p}</div>` : "";
+  const cheatBlock = renderCheatCodesHTML(card);
   return `
     <div class="revealbox">
       <div class="en-word">${card.en}</div>
@@ -2162,6 +2469,7 @@ function renderInfoPanel(card){
       ${verbBlock}
       ${exBlock}
       ${card.mn ? `<div class="mnemonic">💡 ${card.mn}</div>` : ""}
+      ${cheatBlock}
       ${familyBlock}
       ${collocBlock}
     </div>`;

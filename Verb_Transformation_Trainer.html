@@ -1639,6 +1639,124 @@ const PREFIX_METAPHORS = {
   "miss": { dir: "wrong / mis- / failure", icon: "❌", hint: "incorrect execution or erroneous state (inseparable: no ge-)" }
 };
 
+function getCheatCodesForWord(w, cat, opt = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase();
+  const rawWord = lower.replace(/^sich\s+/, '').replace(/^(der|die|das)\s+/, '');
+  const hints = [];
+
+  // VERB CHEAT CODES
+  const mixedVerbs = ['bringen', 'denken', 'kennen', 'wissen', 'nennen', 'brennen', 'rennen', 'senden', 'wenden'];
+  const matchedMixed = mixedVerbs.find(mv => rawWord.endsWith(mv));
+  if (matchedMixed) {
+    hints.push({
+      num: 'Shortcut 06',
+      title: '🧬 The \'Secret 9\' Mixed Verbs Club (Mischverben)',
+      badge: 'Mixed Verb Hybrid',
+      rule: `<b>${word}</b> is one of only 9 core German Mixed Verbs! Stem vowel shifts like a strong verb (<i>e → a / o</i>), BUT takes regular weak endings (<b>-te</b> in Past, <b>ge-...-t</b> in Perfekt).`,
+      tamil: '💡 <b>Tamil Insight:</b> உயிர் எழுத்து மாறும் + பலவீன வினை விகுதி (-te / -t) இணையும்! இந்த 9 வினைகளில் இதுவும் ஒன்று!'
+    });
+  }
+
+  if (rawWord.endsWith('wissen') || rawWord.endsWith('kennen')) {
+    hints.push({
+      num: 'Shortcut 07',
+      title: '🧙‍♂️ wissen vs. kennen: The Wizard & Ken Doll Hack',
+      badge: 'High-Frequency Trap',
+      rule: `<b>wissen (Wizard 🧙‍♂️):</b> Knows facts, info, numbers, secrets. Followed by <i>wie, wo, was, warum</i> or <i>dass</i>.<br><b>kennen (Ken Doll 👱‍♂️):</b> Knows people or places. Followed by a Person or City (<i>Tom, Berlin</i>).`,
+      tamil: '💡 <b>Tamil Brain Hack:</b> kennen = ஆட்கள்/ஊர்கள்; wissen = உண்மைகள்/தகவல்கள்/விடைகள்.'
+    });
+  }
+
+  if (rawWord.endsWith('ieren')) {
+    hints.push({
+      num: 'Shortcut 04',
+      title: '⚡ The \'-ieren\' Auto-Weak Rule (100% Guaranteed)',
+      badge: '100% Guaranteed',
+      rule: `<b>100% of verbs ending in -ieren are WEAK!</b> Präteritum adds regular <b>-te</b> (<i>${rawWord}te</i>). In Perfekt, it <b>NEVER takes \'ge-\'</b> (<i>hat ${rawWord}t</i>).`,
+      tamil: '💡 <b>Golden Rule:</b> -ieren என முடியும் அனைத்து வினைகளும் 100% Weak! Perfekt-ல் \'ge-\' வராது.'
+    });
+  }
+
+  const seinVerbs = ['gehen', 'fahren', 'fliegen', 'laufen', 'schwimmen', 'kommen', 'reisen', 'wandern', 'springen', 'fallen', 'steigen', 'sterben', 'einschlafen', 'aufwachen', 'wachsen', 'sein', 'bleiben', 'passieren', 'gelingen'];
+  const matchedSein = seinVerbs.some(sv => rawWord.endsWith(sv));
+  if (matchedSein || opt.isAuxSein || (opt.perfekt && opt.perfekt.startsWith('ist '))) {
+    hints.push({
+      num: 'Shortcut 08 & 10',
+      title: '🚶→🏃 haben vs. sein: The 2-Question Test',
+      badge: 'Auxiliary SEIN',
+      rule: `Takes <b>ist / sein</b> in Perfekt because it indicates: (1) Movement from Point A to B, (2) State Change (awake→asleep, alive→dead), or is one of the 3 special exceptions (<i>sein, bleiben, passieren</i>).`,
+      tamil: '💡 <b>Tamil Hack:</b> இடம் மாறுதல் (A→B) அல்லது நிலை மாறுதல் இருந்தால் SEIN, மற்றவற்றிற்கு HABEN!'
+    });
+  }
+
+  const insepPrefixes = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
+  const matchedInsep = insepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2);
+  if (matchedInsep) {
+    hints.push({
+      num: 'Shortcut 05',
+      title: '🛡️ Inseparable Prefix Shield (Be-Ge-Er-Ver-Zer-Ent-Emp-Miss)',
+      badge: 'No ge- Prefix',
+      rule: `Starts with inseparable <b>${matchedInsep}-</b>. It NEVER detaches in sentences and <b>NEVER takes \'ge-\' in Perfekt</b> (e.g. <i>hat ${rawWord}t / ${rawWord}en</i>, never <i>hat ge${rawWord}</i>).`,
+      tamil: '💡 <b>Memory:</b> இந்த 8 prefixes ஒருபோதும் பிரியாது, Perfekt-ல் \'ge-\' எடுக்காது!'
+    });
+  }
+
+  const sepPrefixes = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'mit', 'nach', 'vor', 'weg', 'zu', 'zurück'];
+  const matchedSep = sepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2 && !matchedInsep);
+  if (matchedSep) {
+    hints.push({
+      num: 'Shortcut 05B',
+      title: '🚀 Separable Prefix Sandwich Rule',
+      badge: 'Splits in Sentence',
+      rule: `Starts with separable <b>${matchedSep}-</b>. In present tense, prefix flies to sentence end (<i>„Ich ... ${matchedSep}.”</i>). In Perfekt, <b>-ge-</b> is sandwiched in the middle (<i>${matchedSep}-ge-...</i>).`,
+      tamil: '💡 <b>Tamil Rule:</b> வாக்கியத்தின் இறுதியில் Prefix பிரியும்! Perfekt-ல் இடையில் \'-ge-\' இணையும்.'
+    });
+  }
+
+  if (rawWord.includes('ei') && !rawWord.endsWith('ieren')) {
+    hints.push({
+      num: 'Shortcut 02',
+      title: '🔍 The Diphthong Scanner (-ei- → ie / i)',
+      badge: '99% Strong Verb',
+      rule: `Verbs containing <b>-ei-</b> in the stem are 99% STRONG verbs! They shift: <i>-ei- → -ie- / -i-</i> in past tenses (e.g. <i>schreiben → schrieb, bleiben → blieb</i>).`,
+      tamil: '💡 <b>Quick Hack:</b> வினையில் -ei- பார்த்தால், அது 99% Strong Verb (ie/i என மாறும்)!'
+    });
+  } else if (rawWord.includes('ie') && !rawWord.endsWith('ieren')) {
+    hints.push({
+      num: 'Shortcut 02',
+      title: '🔍 The Diphthong Scanner (-ie- → o)',
+      badge: '99% Strong Verb',
+      rule: `Verbs containing <b>-ie-</b> in the stem are 99% STRONG verbs! They shift: <i>-ie- → -o-</i> in past tenses (e.g. <i>fliegen → flog, bieten → bot, ziehen → zog</i>).`,
+      tamil: '💡 <b>Quick Hack:</b> வினையில் -ie- பார்த்தால், அது 99% Strong Verb (o என மாறும்)!'
+    });
+  }
+
+  return hints;
+}
+
+function renderCheatCodesHTML(v) {
+  const codes = getCheatCodesForWord(v.inf || v.w, 'v', v);
+  if (!codes || codes.length === 0) return '';
+  return `
+    <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+      <div style="font-weight:700; color:var(--gold); margin-bottom:2px;">⚡ Cheat Codes &amp; Grammar Shortcuts (இலக்கண குறுக்குவழிகள்):</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${codes.map(c => `
+          <div style="background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+              <span style="font-weight:700; color:var(--ink);">${c.title}</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700; background:var(--gold); color:#000; padding:1px 6px; border-radius:10px;">${c.badge || c.num}</span>
+            </div>
+            <div style="font-size:12px; color:var(--ink);">${c.rule}</div>
+            ${c.tamil ? `<div style="margin-top:4px; padding:3px 6px; background:rgba(185,138,46,0.08); border-radius:3px; font-size:11.5px;">${c.tamil}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderUniversal3StepMemoryHack(v){
   const inf = (v.inf || '').toLowerCase().trim();
   const en = v.en || 'action';
@@ -1815,6 +1933,9 @@ function renderUniversal3StepMemoryHack(v){
           ${prep ? `<div style="margin-top:2px; color:var(--purple);">🎯 <b>Preposition / Case:</b> <b>${prep}</b></div>` : ''}
         </div>
       </div>
+
+      <!-- 4B. Cheat Codes & Shortcuts -->
+      ${renderCheatCodesHTML(v)}
 
       <!-- 5. Muscle Memory Sentences -->
       <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
