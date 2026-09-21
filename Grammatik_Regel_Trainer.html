@@ -2556,22 +2556,37 @@ if (document.readyState === 'loading') {
 <script>
 
 function showGrammarVault() {
-  const vault = JSON.parse(localStorage.getItem('de_grammar_vault') || '[]');
+  let vault = [];
+  try {
+    vault = JSON.parse(localStorage.getItem('de_grammar_vault') || '[]');
+    if (!Array.isArray(vault)) vault = [];
+  } catch(e) {
+    console.error("Corrupted vault JSON", e);
+  }
+  
   const content = document.getElementById('grammarVaultContent');
   if (vault.length === 0) {
     content.innerHTML = '<p>No weaknesses recorded yet. Keep practicing!</p>';
   } else {
-    content.innerHTML = vault.reverse().map(v => `
+    content.innerHTML = [...vault].reverse().map(v => {
+      const dateStr = v.date ? new Date(v.date).toLocaleString() : 'Unknown Date';
+      const promptStr = escapeQuotes(v.prompt || '');
+      const wrongStr = escapeQuotes(v.wrong || '');
+      const correctStr = escapeQuotes(v.correct || '');
+      const expStr = (v.explanation || '').replace(/\n/g, '<br>');
+      
+      return `
       <div style="background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px; margin-bottom:12px;">
-        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">${new Date(v.date).toLocaleString()}</div>
-        <div style="font-weight:bold; margin-bottom:4px;">Prompt: ${v.prompt}</div>
-        <div style="color:var(--red); margin-bottom:2px;">Your Answer: ${v.wrong}</div>
-        <div style="color:var(--green); margin-bottom:8px;">Correct: ${v.correct}</div>
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">${dateStr}</div>
+        <div style="font-weight:bold; margin-bottom:4px;">Prompt: ${promptStr}</div>
+        <div style="color:var(--red); margin-bottom:2px;">Your Answer: ${wrongStr}</div>
+        <div style="color:var(--green); margin-bottom:8px;">Correct: ${correctStr}</div>
         <div style="background:#fff; padding:8px; border-left:3px solid var(--gold); font-size:13px; line-height:1.4;">
-          ${v.explanation.replace(/\n/g, '<br>')}
+          ${expStr}
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
   }
   document.getElementById('grammarVaultModal').style.display = 'flex';
 }
