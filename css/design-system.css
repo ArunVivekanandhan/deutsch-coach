@@ -306,3 +306,137 @@ p { margin: 0 0 var(--space-md) 0; color: var(--color-ink-soft); }
 .actbtn.check:hover {
   background-color: var(--color-primary-hover);
 }
+
+/* =========================================================================
+   NEW DASHBOARD COMPONENTS
+   ========================================================================= */
+
+/* Progress Bars */
+.level-progress-container {
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-xs);
+}
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #60a5fa);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* Header SRS Metrics */
+.header-srs-metrics {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+.srs-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.srs-val {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-ink);
+}
+.srs-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.srs-metric.due .srs-val { color: var(--color-warning); }
+.srs-metric.hard .srs-val { color: var(--color-error); }
+.srs-metric.new .srs-val { color: var(--color-primary); }
+.srs-metric.mastered .srs-val { color: var(--color-success); }
+
+/* Details Drawer */
+.details-drawer {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background-color: var(--color-surface);
+  box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+  border-left: 1px solid var(--color-border);
+  z-index: 200;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+.details-drawer.open {
+  right: 0;
+}
+.drawer-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.drawer-content {
+  padding: var(--space-lg);
+  overflow-y: auto;
+  flex: 1;
+}
+.close-drawer-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+  padding: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+.close-drawer-btn:hover {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+}
+.keyboard-hint {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  background: var(--color-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  margin-left: 8px;
+}
+
+/* Responsive adjustments for header and drawer */
+@media (max-width: 768px) {
+  .header-srs-metrics {
+    display: none; /* Hide detailed metrics on small mobile to save space, or make them compact */
+  }
+  .app-header {
+    padding: 0 var(--space-md);
+  }
+  .ds-btn-primary span {
+    display: none; /* Icon only or compact text */
+  }
+  .details-drawer {
+    width: 100%;
+    right: -100%;
+  }
+}
+

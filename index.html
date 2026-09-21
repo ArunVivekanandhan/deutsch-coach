@@ -9,14 +9,10 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/design-system.css">
+<!-- Using Lucide Icons via unpkg -->
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
   .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
-  .dash-hero { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: white; border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-xl); display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); }
-  .dash-hero h1 { color: white; font-size: 28px; margin-bottom: var(--space-sm); }
-  .dash-hero p { color: rgba(255,255,255,0.9); margin: 0; font-size: 16px; }
-  .progress-card { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-lg); border: 1px solid var(--color-border); flex: 0 0 250px; text-align: center; }
-  .streak-fire { font-size: 32px; margin-bottom: var(--space-sm); }
-  .progress-stat { font-size: 24px; font-weight: 700; color: var(--color-ink); }
   .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-ink-soft); font-weight: 600; margin-bottom: var(--space-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
   .module-card { display: flex; flex-direction: column; text-decoration: none; color: var(--color-ink); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg); transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
   .module-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--color-primary); }
@@ -31,105 +27,256 @@
   .tool-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-md); }
   .tool-item { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-ink); font-size: 14px; font-weight: 500; transition: background 0.2s; }
   .tool-item:hover { background: var(--color-bg); }
+  .tool-icon { width: 20px; height: 20px; opacity: 0.7; }
 </style>
 </head>
 <body>
-  
-  <div class="dash-hero">
-    <div>
-      <h1>Willkommen zurück!</h1>
-      <p>Setze dein B1-Training fort und erreiche dein Ziel.</p>
+  <div class="app-layout">
+    
+    <!-- Sidebar / Mobile Drawer Menu -->
+    <aside class="app-sidebar" id="sidebar">
+      <div class="app-sidebar-header">
+        <i data-lucide="graduation-cap" style="margin-right: 8px; color: var(--color-primary);"></i> Deutsch Coach
+      </div>
+      <nav class="app-sidebar-nav">
+        
+        <div class="nav-group">
+          <div class="nav-group-title">Navigation</div>
+          <a href="#lernen" class="nav-link active"><i data-lucide="book-open" class="nav-icon"></i> Lernen</a>
+          <a href="#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon"></i> Prüfung</a>
+          <a href="#coach" class="nav-link"><i data-lucide="bot" class="nav-icon"></i> AI Coach</a>
+          <a href="#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon"></i> Tools</a>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">Level Progress</div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>A1 Foundation</span><span>100%</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 100%;"></div></div>
+          </div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>A2 Basics</span><span>85%</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 85%;"></div></div>
+          </div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>B1.1 Intermediate</span><span>40%</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 40%;"></div></div>
+          </div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>B1.2 Advanced</span><span>5%</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 5%;"></div></div>
+          </div>
+        </div>
+
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Actionable Header -->
+      <header class="app-header">
+        <div style="display: flex; align-items: center; gap: var(--space-md);">
+          <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
+            <i data-lucide="menu"></i>
+          </button>
+          
+          <div class="header-srs-metrics">
+            <div class="srs-metric due">
+              <div class="srs-val" id="dueToday">12</div>
+              <div class="srs-label">Due Today</div>
+            </div>
+            <div class="srs-metric hard">
+              <div class="srs-val" id="diffCount">4</div>
+              <div class="srs-label">Difficult</div>
+            </div>
+            <div class="srs-metric new">
+              <div class="srs-val" id="newCount">20</div>
+              <div class="srs-label">New</div>
+            </div>
+            <div class="srs-metric mastered">
+              <div class="srs-val" id="masteredCount">450</div>
+              <div class="srs-label">Mastered</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="ds-btn ds-btn-primary" id="startReviewBtn" onclick="window.location.href='deutsch-coach.html'">
+          <i data-lucide="play" style="width: 18px;"></i> <span>Start Daily Review</span>
+        </button>
+      </header>
+      
+      <div class="app-content">
+        <!-- LERNEN -->
+        <section id="lernen">
+          <div class="section-title">Lernen (Core Learning)</div>
+          <div class="dash-grid">
+            <a href="Wortschatz_Master_Grid.html" class="module-card module-vocab">
+              <div class="module-icon"><i data-lucide="library"></i></div>
+              <div class="module-title">Wortschatz</div>
+              <div class="module-desc">Lerne neue Wörter und übe mit KI-generierten Geschichten.</div>
+            </a>
+            <a href="Grammatik_Regel_Trainer.html" class="module-card module-grammar">
+              <div class="module-icon"><i data-lucide="puzzle"></i></div>
+              <div class="module-title">Grammatik</div>
+              <div class="module-desc">Trainiere Regeln, Satzbau und analysiere Fehler.</div>
+            </a>
+            <a href="Hoerverstehen_Diktat_Trainer.html" class="module-card module-speak">
+              <div class="module-icon"><i data-lucide="headphones"></i></div>
+              <div class="module-title">Hörverstehen</div>
+              <div class="module-desc">Trainiere dein Gehör mit Diktaten und Endlos-Audio.</div>
+            </a>
+          </div>
+        </section>
+
+        <!-- PRÜFUNG -->
+        <section id="pruefung">
+          <div class="section-title">Prüfung (Exam Prep)</div>
+          <div class="dash-grid">
+            <a href="German_B1_Practice_Studio.html" class="module-card module-exam">
+              <div class="module-icon"><i data-lucide="graduation-cap"></i></div>
+              <div class="module-title">B1 Prüfung</div>
+              <div class="module-desc">Bereite dich gezielt auf das telc/Goethe Zertifikat vor.</div>
+            </a>
+            <a href="Sprech_Pruefungs_Simulator.html" class="module-card module-speak">
+              <div class="module-icon"><i data-lucide="mic"></i></div>
+              <div class="module-title">Sprechen</div>
+              <div class="module-desc">Simuliere mündliche Prüfungen und Dialoge.</div>
+            </a>
+            <a href="Brief_Schreiben_Trainer.html" class="module-card module-write">
+              <div class="module-icon"><i data-lucide="pen-tool"></i></div>
+              <div class="module-title">Schreiben</div>
+              <div class="module-desc">Verfasse B1-Briefe und lass sie von der KI korrigieren.</div>
+            </a>
+          </div>
+        </section>
+
+        <!-- COACH -->
+        <section id="coach">
+          <div class="section-title">Coach (AI Practice)</div>
+          <div class="dash-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <a href="KI_German_Coach.html" class="module-card module-vocab">
+              <div class="module-icon"><i data-lucide="message-square"></i></div>
+              <div class="module-title">KI Text Coach</div>
+              <div class="module-desc">Chatte auf Deutsch und erhalte sofortige Korrekturen.</div>
+            </a>
+            <a href="KI_Human_Partner.html" class="module-card module-vocab">
+              <div class="module-icon"><i data-lucide="users"></i></div>
+              <div class="module-title">Live Video Partner</div>
+              <div class="module-desc">Führe echte Gespräche mit einem KI-Avatar.</div>
+            </a>
+            <a href="Dialog_Schatten_Trainer.html" class="module-card module-speak">
+              <div class="module-icon"><i data-lucide="mic-2"></i></div>
+              <div class="module-title">Dialog Schatten</div>
+              <div class="module-desc">Lies Dialoge laut vor und verbessere deine Aussprache.</div>
+            </a>
+          </div>
+        </section>
+
+        <!-- TOOLS -->
+        <section id="tools">
+          <div class="section-title">Tools (Quick Access)</div>
+          <div class="tool-list">
+            <a href="Satzbau_Trainer.html" class="tool-item"><i data-lucide="construction" class="tool-icon"></i> Satzbau Trainer</a>
+            <a href="Verb_Transformation_Trainer.html" class="tool-item"><i data-lucide="zap" class="tool-icon"></i> Verben Flashcards</a>
+            <a href="Nomen_Adjektiv_Trainer.html" class="tool-item"><i data-lucide="box" class="tool-icon"></i> Nomen & Adjektive</a>
+            <a href="German_Grammar_Cheat_Codes.html" class="tool-item"><i data-lucide="lightbulb" class="tool-icon"></i> Cheat Codes</a>
+            <a href="konnektoren_referenz.html" class="tool-item"><i data-lucide="link" class="tool-icon"></i> Konnektoren</a>
+            <a href="Deutsch_Wortschatz_Excel_Sheet.html" class="tool-item"><i data-lucide="table" class="tool-icon"></i> Excel Sheet</a>
+            <a href="Verben_Hoeren_EN_DE.html" class="tool-item"><i data-lucide="volume-2" class="tool-icon"></i> Audio Coach</a>
+            <a href="Continuous_Verb_Speaker.html" class="tool-item"><i data-lucide="play-circle" class="tool-icon"></i> Auto-Play Speaker</a>
+            <a href="German_A2_Practice_Studio.html" class="tool-item"><i data-lucide="award" class="tool-icon"></i> A2 Studio</a>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Details Drawer (Deep Mode) -->
+    <div class="details-drawer" id="detailsDrawer">
+      <div class="drawer-header">
+        <h3 style="margin:0; font-size: 16px;">Deep Mode Details</h3>
+        <button class="close-drawer-btn" id="closeDrawerBtn"><i data-lucide="x"></i></button>
+      </div>
+      <div class="drawer-content">
+        <p style="font-size: 14px;"><strong>Memory Tricks:</strong> Use visualization to remember difficult genders.</p>
+        <p style="font-size: 14px;"><strong>Gender Locks:</strong> (der) = 🔵, (die) = 🔴, (das) = 🟢</p>
+        <p style="font-size: 14px;"><strong>Plurals:</strong> Watch out for umlaut changes.</p>
+        
+        <div style="margin-top: 32px; border-top: 1px solid var(--color-border); padding-top: 16px;">
+          <h4 style="font-size: 12px; text-transform: uppercase; color: var(--color-ink-soft);">Keyboard Shortcuts</h4>
+          <ul style="list-style:none; padding:0; margin:0; font-size:13px; color:var(--color-ink);">
+            <li style="margin-bottom: 8px;">Toggle Drawer <span class="keyboard-hint">M</span></li>
+            <li style="margin-bottom: 8px;">Close Drawer <span class="keyboard-hint">Esc</span></li>
+            <li style="margin-bottom: 8px;">Fast Mode Sequence <span class="keyboard-hint">Enter</span> / <span class="keyboard-hint">N</span></li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <div class="progress-card">
-      <div class="streak-fire">🔥</div>
-      <div class="progress-stat" id="streakNumDisplay">0 Tage Streak</div>
-      <div style="font-size:13px; color:var(--color-ink-soft); margin-top:4px;"><span id="wordsDueDisplay">0</span> Wörter heute fällig</div>
-    </div>
-  </div>
 
-  <div class="section-title">Hauptbereiche (Core Learning)</div>
-  <div class="dash-grid">
-    <a href="deutsch-coach.html" class="module-card module-vocab">
-      <div class="module-icon">🧠</div>
-      <div class="module-title">Smart Learn (SRS)</div>
-      <div class="module-desc">Tägliches Vokabeltraining mit Spaced Repetition.</div>
-    </a>
-    <a href="Wortschatz_Master_Grid.html" class="module-card module-vocab">
-      <div class="module-icon">📝</div>
-      <div class="module-title">Wortschatz</div>
-      <div class="module-desc">Lerne neue Wörter und übe mit KI-generierten Geschichten.</div>
-    </a>
-    <a href="Grammatik_Regel_Trainer.html" class="module-card module-grammar">
-      <div class="module-icon">🧩</div>
-      <div class="module-title">Grammatik</div>
-      <div class="module-desc">Trainiere Regeln, Satzbau und analysiere Fehler.</div>
-    </a>
-    <a href="Sprech_Pruefungs_Simulator.html" class="module-card module-speak">
-      <div class="module-icon">🗣️</div>
-      <div class="module-title">Sprechen</div>
-      <div class="module-desc">Simuliere mündliche Prüfungen und Dialoge.</div>
-    </a>
-    <a href="Hoerverstehen_Diktat_Trainer.html" class="module-card module-speak">
-      <div class="module-icon">🎧</div>
-      <div class="module-title">Hörverstehen</div>
-      <div class="module-desc">Trainiere dein Gehör mit Diktaten und Endlos-Audio.</div>
-    </a>
-    <a href="Brief_Schreiben_Trainer.html" class="module-card module-write">
-      <div class="module-icon">✉️</div>
-      <div class="module-title">Schreiben</div>
-      <div class="module-desc">Verfasse B1-Briefe und lass sie von der KI korrigieren.</div>
-    </a>
-    <a href="German_B1_Practice_Studio.html" class="module-card module-exam">
-      <div class="module-icon">🎓</div>
-      <div class="module-title">B1 Prüfung</div>
-      <div class="module-desc">Bereite dich gezielt auf das telc/Goethe Zertifikat vor.</div>
-    </a>
-  </div>
-
-  <div class="section-title">KI Coaches (AI Practice)</div>
-  <div class="dash-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-    <a href="KI_German_Coach.html" class="module-card">
-      <div class="module-icon">🤖</div>
-      <div class="module-title">KI Text Coach</div>
-      <div class="module-desc">Chatte auf Deutsch und erhalte sofortige Korrekturen.</div>
-    </a>
-    <a href="KI_Human_Partner.html" class="module-card">
-      <div class="module-icon">👥</div>
-      <div class="module-title">Live Video Partner</div>
-      <div class="module-desc">Führe echte Gespräche mit einem KI-Avatar.</div>
-    </a>
-    <a href="Dialog_Schatten_Trainer.html" class="module-card">
-      <div class="module-icon">🎭</div>
-      <div class="module-title">Dialog Schatten</div>
-      <div class="module-desc">Lies Dialoge laut vor und verbessere deine Aussprache.</div>
-    </a>
-  </div>
-
-  <div class="section-title">Werkzeuge & Tools (Quick Access)</div>
-  <div class="tool-list">
-    <a href="Satzbau_Trainer.html" class="tool-item"><span>🏗️</span> Satzbau Trainer</a>
-    <a href="Verb_Transformation_Trainer.html" class="tool-item"><span>⚡</span> Verben Flashcards</a>
-    <a href="Nomen_Adjektiv_Trainer.html" class="tool-item"><span>📦</span> Nomen & Adjektive</a>
-    <a href="German_Grammar_Cheat_Codes.html" class="tool-item"><span>💡</span> Cheat Codes</a>
-    <a href="konnektoren_referenz.html" class="tool-item"><span>🔗</span> Konnektoren</a>
-    <a href="Deutsch_Wortschatz_Excel_Sheet.html" class="tool-item"><span>📊</span> Excel Sheet</a>
-    <a href="Verben_Hoeren_EN_DE.html" class="tool-item"><span>🔊</span> Audio Coach</a>
-    <a href="Continuous_Verb_Speaker.html" class="tool-item"><span>▶️</span> Auto-Play Speaker</a>
-    <a href="German_A2_Practice_Studio.html" class="tool-item"><span>🎓</span> A2 Studio</a>
   </div>
 
   <script src="js/app-shell.js"></script>
   <script>
-    // Load simple stats
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Drawer and Menu Logic
     document.addEventListener('DOMContentLoaded', () => {
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const detailsDrawer = document.getElementById('detailsDrawer');
+        const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+        if (menuBtn && sidebar) {
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+        }
+
+        // Toggle drawer function
+        const toggleDrawer = () => {
+            if (detailsDrawer) detailsDrawer.classList.toggle('open');
+        };
+
+        if (closeDrawerBtn) {
+            closeDrawerBtn.addEventListener('click', () => {
+                detailsDrawer.classList.remove('open');
+            });
+        }
+
+        // Keyboard Navigation (M for drawer, Esc for close, Enter/N for Fast Mode placeholder)
+        window.addEventListener('keydown', (e) => {
+            // Avoid triggering when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.key.toLowerCase() === 'm') {
+                toggleDrawer();
+            } else if (e.key === 'Escape') {
+                if (detailsDrawer.classList.contains('open')) {
+                    detailsDrawer.classList.remove('open');
+                }
+            } else if (e.key === 'Enter' || e.key.toLowerCase() === 'n') {
+                // Placeholder for Fast Mode next action
+                console.log('Fast Mode action triggered via ' + e.key);
+                const reviewBtn = document.getElementById('startReviewBtn');
+                if (reviewBtn) reviewBtn.click();
+            }
+        });
+
+        // Load simple stats
         const meta = JSON.parse(localStorage.getItem('dc_meta_v1') || '{"currentStreak":0}');
-        document.getElementById('streakNumDisplay').textContent = meta.currentStreak + " Tage Streak";
-        
+        // Update header metrics (using placeholder stats if empty)
         const prog = JSON.parse(localStorage.getItem('dc_progress_v1') || '{}');
-        let due = 0;
+        let due = 0, hard = 0, newCount = 0, mastered = 0;
         const now = Date.now();
-        for(let k in prog) { if(prog[k].nextReview && prog[k].nextReview < now) due++; }
-        document.getElementById('wordsDueDisplay').textContent = due;
+        for(let k in prog) { 
+            if(prog[k].nextReview && prog[k].nextReview < now) due++;
+            // Calculate other mock stats if possible
+        }
+        
+        // Populate DOM elements if they exist
+        const eDue = document.getElementById('dueToday');
+        if(eDue && due > 0) eDue.textContent = due;
     });
   </script>
 </body>
