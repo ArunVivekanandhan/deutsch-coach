@@ -423,63 +423,110 @@ p { margin: 0 0 var(--space-md) 0; color: var(--color-ink-soft); }
   margin-left: 8px;
 }
 
-/* Responsive adjustments for header and drawer */
+/* Mobile Specific Header Classes */
+.header-title.mobile-only {
+  display: none;
+}
+.drawer-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 900; /* below drawer (1000) but above everything else */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Responsive adjustments for header, drawer, and layout */
 @media (max-width: 768px) {
   .ds-mobile-menu-btn { display: inline-flex; }
+  
   .app-sidebar { 
     transform: translateX(-100%); 
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    transition: transform 0.3s ease; 
     width: 280px; 
+    z-index: 1000;
   }
   .app-sidebar.open { 
     transform: translateX(0); 
-    box-shadow: 0 0 0 100vw rgba(0,0,0,0.5), var(--shadow-lg); /* Creates an overlay effect */
   }
   .app-main { margin-left: 0; }
   .app-content { padding: var(--space-md); }
   
-  /* Restructure Header for Mobile */
+  /* Restructure Header for Mobile using Flex Order */
   .app-header {
     height: auto;
-    flex-direction: column;
+    flex-wrap: wrap;
     padding: var(--space-md);
     gap: var(--space-md);
-    align-items: stretch;
+    /* By default app-header is display: flex, justify-content: space-between, align-items: center */
   }
   
-  .app-header > div:first-child {
-    flex-direction: column;
-    align-items: stretch !important;
-    gap: var(--space-md) !important;
+  .ds-mobile-menu-btn { order: 1; }
+  
+  .header-title.mobile-only {
+    display: block;
+    order: 2;
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 var(--space-sm);
   }
+  
+  #startReviewBtn { order: 3; padding: 10px; }
+  #startReviewBtn .btn-text { display: none; } /* Show only icon for perfect alignment */
 
   .header-srs-metrics {
-    display: flex;
-    justify-content: space-between;
+    order: 4;
     width: 100%;
-    padding-top: var(--space-sm);
-    border-top: 1px solid var(--color-border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    background: var(--color-surface);
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-top: 0; /* Reset previous margin */
   }
   
   .srs-metric {
-    flex: 1;
-  }
-  
-  .srs-val { font-size: 18px; }
-  .srs-label { font-size: 9px; letter-spacing: 0.5px; }
-  
-  .ds-btn-primary {
+    padding: var(--space-sm);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
     width: 100%;
-    padding: 14px; /* Larger tap target */
   }
-  
-  .ds-btn-primary span {
-    display: inline;
+  .srs-val { font-size: 16px; }
+  .srs-label { font-size: 10px; }
+
+  /* True Off-Canvas Drawer */
+  .details-drawer {
+    width: 85%;
+    right: -100%;
+    z-index: 1000; /* Ensure drawer is on top */
+  }
+  .details-drawer.open {
+    right: 0;
   }
 
-  .details-drawer {
+  /* Hide Keyboard Shortcuts on Mobile */
+  .keyboard-shortcuts {
+    display: none !important;
+  }
+  
+  /* Card Spacing */
+  .module-card, .ds-card, .exercisecard {
     width: 100%;
-    right: -100%;
+    margin-bottom: var(--space-md);
+  }
+  
+  body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
   }
 }
 

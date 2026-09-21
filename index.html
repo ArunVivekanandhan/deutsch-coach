@@ -75,33 +75,33 @@
     <main class="app-main">
       <!-- Actionable Header -->
       <header class="app-header">
-        <div style="display: flex; align-items: center; gap: var(--space-md);">
-          <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
-            <i data-lucide="menu"></i>
-          </button>
-          
-          <div class="header-srs-metrics">
-            <div class="srs-metric due">
-              <div class="srs-val" id="dueToday">12</div>
-              <div class="srs-label">Due Today</div>
-            </div>
-            <div class="srs-metric hard">
-              <div class="srs-val" id="diffCount">4</div>
-              <div class="srs-label">Difficult</div>
-            </div>
-            <div class="srs-metric new">
-              <div class="srs-val" id="newCount">20</div>
-              <div class="srs-label">New</div>
-            </div>
-            <div class="srs-metric mastered">
-              <div class="srs-val" id="masteredCount">450</div>
-              <div class="srs-label">Mastered</div>
-            </div>
+        <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
+          <i data-lucide="menu"></i>
+        </button>
+        
+        <div class="header-title mobile-only">Deutsch Coach</div>
+        
+        <div class="header-srs-metrics">
+          <div class="srs-metric due">
+            <div class="srs-val" id="dueToday">12</div>
+            <div class="srs-label">Due Today</div>
+          </div>
+          <div class="srs-metric hard">
+            <div class="srs-val" id="diffCount">4</div>
+            <div class="srs-label">Difficult</div>
+          </div>
+          <div class="srs-metric new">
+            <div class="srs-val" id="newCount">20</div>
+            <div class="srs-label">New</div>
+          </div>
+          <div class="srs-metric mastered">
+            <div class="srs-val" id="masteredCount">450</div>
+            <div class="srs-label">Mastered</div>
           </div>
         </div>
 
         <button class="ds-btn ds-btn-primary" id="startReviewBtn" onclick="window.location.href='deutsch-coach.html'">
-          <i data-lucide="play" style="width: 18px;"></i> <span>Start Daily Review</span>
+          <i data-lucide="play" style="width: 18px;"></i> <span class="btn-text">Start Daily Review</span>
         </button>
       </header>
       
@@ -191,6 +191,9 @@
       </div>
     </main>
 
+    <!-- Overlay for mobile drawer -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
     <!-- Details Drawer (Deep Mode) -->
     <div class="details-drawer" id="detailsDrawer">
       <div class="drawer-header">
@@ -202,7 +205,7 @@
         <p style="font-size: 14px;"><strong>Gender Locks:</strong> (der) = 🔵, (die) = 🔴, (das) = 🟢</p>
         <p style="font-size: 14px;"><strong>Plurals:</strong> Watch out for umlaut changes.</p>
         
-        <div style="margin-top: 32px; border-top: 1px solid var(--color-border); padding-top: 16px;">
+        <div class="keyboard-shortcuts" style="margin-top: 32px; border-top: 1px solid var(--color-border); padding-top: 16px;">
           <h4 style="font-size: 12px; text-transform: uppercase; color: var(--color-ink-soft);">Keyboard Shortcuts</h4>
           <ul style="list-style:none; padding:0; margin:0; font-size:13px; color:var(--color-ink);">
             <li style="margin-bottom: 8px;">Toggle Drawer <span class="keyboard-hint">M</span></li>
@@ -226,21 +229,33 @@
         const sidebar = document.getElementById('sidebar');
         const detailsDrawer = document.getElementById('detailsDrawer');
         const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+        const drawerOverlay = document.getElementById('drawerOverlay');
 
         if (menuBtn && sidebar) {
             menuBtn.addEventListener('click', () => {
                 sidebar.classList.toggle('open');
+                if (drawerOverlay) drawerOverlay.classList.toggle('open');
             });
         }
 
         // Toggle drawer function
-        const toggleDrawer = () => {
+        window.toggleDrawer = () => {
             if (detailsDrawer) detailsDrawer.classList.toggle('open');
+            if (drawerOverlay) drawerOverlay.classList.toggle('open');
         };
+        const toggleDrawer = window.toggleDrawer;
 
         if (closeDrawerBtn) {
             closeDrawerBtn.addEventListener('click', () => {
                 detailsDrawer.classList.remove('open');
+                if (drawerOverlay) drawerOverlay.classList.remove('open');
+            });
+        }
+        if (drawerOverlay) {
+            drawerOverlay.addEventListener('click', () => {
+                if (sidebar) sidebar.classList.remove('open');
+                if (detailsDrawer) detailsDrawer.classList.remove('open');
+                drawerOverlay.classList.remove('open');
             });
         }
 

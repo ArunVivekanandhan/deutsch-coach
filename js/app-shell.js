@@ -98,19 +98,18 @@ function renderAppShell() {
         const header = document.createElement('header');
         header.className = 'app-header';
         header.innerHTML = `
-            <div style="display: flex; align-items: center; gap: var(--space-md);">
-                <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
-                    <i data-lucide="menu"></i>
-                </button>
-                <div class="header-srs-metrics">
-                    <div class="srs-metric due"><div class="srs-val">${due}</div><div class="srs-label">Due Today</div></div>
-                    <div class="srs-metric hard"><div class="srs-val">${hard}</div><div class="srs-label">Difficult</div></div>
-                    <div class="srs-metric new"><div class="srs-val">${newCount}</div><div class="srs-label">New</div></div>
-                    <div class="srs-metric mastered"><div class="srs-val">${mastered}</div><div class="srs-label">Mastered</div></div>
-                </div>
+            <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
+                <i data-lucide="menu"></i>
+            </button>
+            <div class="header-title mobile-only">Deutsch Coach</div>
+            <div class="header-srs-metrics">
+                <div class="srs-metric due"><div class="srs-val">${due}</div><div class="srs-label">Due Today</div></div>
+                <div class="srs-metric hard"><div class="srs-val">${hard}</div><div class="srs-label">Difficult</div></div>
+                <div class="srs-metric new"><div class="srs-val">${newCount}</div><div class="srs-label">New</div></div>
+                <div class="srs-metric mastered"><div class="srs-val">${mastered}</div><div class="srs-label">Mastered</div></div>
             </div>
             <button class="ds-btn ds-btn-primary" id="startReviewBtn" onclick="window.location.href='deutsch-coach.html'">
-                <i data-lucide="play" style="width: 18px;"></i> <span>Start Daily Review</span>
+                <i data-lucide="play" style="width: 18px;"></i> <span class="btn-text">Start Daily Review</span>
             </button>
         `;
         main.appendChild(header);
@@ -135,6 +134,12 @@ function renderAppShell() {
         main.appendChild(content);
         layout.appendChild(main);
         
+        // Overlay for mobile drawer
+        const drawerOverlay = document.createElement('div');
+        drawerOverlay.className = 'drawer-overlay';
+        drawerOverlay.id = 'drawerOverlay';
+        layout.appendChild(drawerOverlay);
+
         // 3. Details Drawer
         const detailsDrawer = document.createElement('div');
         detailsDrawer.className = 'details-drawer';
@@ -148,7 +153,7 @@ function renderAppShell() {
                 <p style="font-size: 14px;"><strong>Memory Tricks:</strong> Use visualization to remember difficult genders.</p>
                 <p style="font-size: 14px;"><strong>Gender Locks:</strong> (der) = 🔵, (die) = 🔴, (das) = 🟢</p>
                 <p style="font-size: 14px;"><strong>Plurals:</strong> Watch out for umlaut changes.</p>
-                <div style="margin-top: 32px; border-top: 1px solid var(--color-border); padding-top: 16px;">
+                <div class="keyboard-shortcuts" style="margin-top: 32px; border-top: 1px solid var(--color-border); padding-top: 16px;">
                     <h4 style="font-size: 12px; text-transform: uppercase; color: var(--color-ink-soft);">Keyboard Shortcuts</h4>
                     <ul style="list-style:none; padding:0; margin:0; font-size:13px; color:var(--color-ink);">
                         <li style="margin-bottom: 8px;">Toggle Drawer <span class="keyboard-hint">M</span></li>
@@ -166,12 +171,33 @@ function renderAppShell() {
         const menuBtn = document.getElementById('menuBtn');
         const sidebarNode = document.getElementById('sidebar');
         if (menuBtn && sidebarNode) {
-            menuBtn.addEventListener('click', () => sidebarNode.classList.toggle('open'));
+            menuBtn.addEventListener('click', () => {
+                sidebarNode.classList.toggle('open');
+                drawerOverlay.classList.toggle('open');
+            });
         }
 
-        const toggleDrawer = () => { if (detailsDrawer) detailsDrawer.classList.toggle('open'); };
+        window.toggleDrawer = () => { 
+            if (detailsDrawer) detailsDrawer.classList.toggle('open'); 
+            if (drawerOverlay) drawerOverlay.classList.toggle('open'); 
+        };
+        const toggleDrawer = window.toggleDrawer;
+
         const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-        if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', () => detailsDrawer.classList.remove('open'));
+        if (closeDrawerBtn) {
+            closeDrawerBtn.addEventListener('click', () => {
+                detailsDrawer.classList.remove('open');
+                drawerOverlay.classList.remove('open');
+            });
+        }
+        
+        if (drawerOverlay) {
+            drawerOverlay.addEventListener('click', () => {
+                if (sidebarNode) sidebarNode.classList.remove('open');
+                if (detailsDrawer) detailsDrawer.classList.remove('open');
+                drawerOverlay.classList.remove('open');
+            });
+        }
 
         window.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
