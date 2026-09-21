@@ -107,25 +107,25 @@ function renderAppShell() {
             <div class="app-sidebar-header">
                 <i data-lucide="graduation-cap" style="margin-right: 8px; color: var(--color-primary);"></i> Deutsch Coach
             </div>
-            <nav class="app-sidebar-nav">
+            <nav class="app-sidebar-nav" aria-label="Primary">
                 <div class="nav-group">
-                    <div class="nav-group-title">Navigation</div>
-                    <a href="index.html" class="nav-link"><i data-lucide="home" class="nav-icon"></i> Home</a>
-                    <a href="index.html#lernen" class="nav-link"><i data-lucide="book-open" class="nav-icon"></i> Lernen</a>
-                    <a href="index.html#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon"></i> Prüfung</a>
-                    <a href="index.html#coach" class="nav-link"><i data-lucide="bot" class="nav-icon"></i> AI Coach</a>
-                    <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon"></i> Tools</a>
-                    <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon"></i> AI Config & Settings</a>
+                    <div class="nav-group-title" id="primary-nav-title">Navigation</div>
+                    <a href="index.html" class="nav-link"><i data-lucide="home" class="nav-icon" aria-hidden="true"></i> Home</a>
+                    <a href="index.html#lernen" class="nav-link"><i data-lucide="book-open" class="nav-icon" aria-hidden="true"></i> Lernen</a>
+                    <a href="index.html#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon" aria-hidden="true"></i> Prüfung</a>
+                    <a href="index.html#coach" class="nav-link"><i data-lucide="bot" class="nav-icon" aria-hidden="true"></i> AI Coach</a>
+                    <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i> Tools</a>
+                    <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon" aria-hidden="true"></i> AI Config & Settings</a>
                 </div>
-                <div class="nav-group">
-                    <div class="nav-group-title">Your Progress</div>
+                <div class="nav-group" aria-labelledby="progress-nav-title">
+                    <div class="nav-group-title" id="progress-nav-title">Your Progress</div>
                     <div class="level-progress-container">
-                        <div class="progress-label"><span>Words mastered</span><span>${vocabStats.mastered}</span></div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${vocabStats.reviewed > 0 ? Math.round(vocabStats.mastered / vocabStats.reviewed * 100) : 0}%;"></div></div>
+                        <div class="progress-label"><span id="mastered-label">Words mastered</span><span aria-hidden="true">${vocabStats.mastered}</span></div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${vocabStats.reviewed > 0 ? Math.round(vocabStats.mastered / vocabStats.reviewed * 100) : 0}%;" role="progressbar" aria-labelledby="mastered-label" aria-valuenow="${vocabStats.mastered}" aria-valuemin="0" aria-valuemax="${vocabStats.reviewed}"></div></div>
                         <div class="progress-label" style="margin-top: 4px; font-size: 11px; opacity: 0.75;"><span>${vocabStats.reviewed} words studied so far</span></div>
                     </div>
                     <div class="level-progress-container" style="display:flex; justify-content:space-between; font-size:12px; color:var(--color-ink-soft);">
-                        <span>🔥 ${streak}-day streak</span>
+                        <span><span aria-hidden="true">🔥</span> ${streak}-day streak</span>
                         <span>${lessonsCompleted} lessons done</span>
                     </div>
                 </div>
@@ -136,7 +136,8 @@ function renderAppShell() {
         // 2. Main Area
         const main = document.createElement('main');
         main.className = 'app-main';
-        
+        main.setAttribute('role', 'main');
+
         // Header stats reuse the same real aggregate computed above - no
         // separate re-count, no fabricated "New" estimate.
         const due = vocabStats.due, hard = vocabStats.difficult, mastered = vocabStats.mastered;
@@ -146,11 +147,11 @@ function renderAppShell() {
         header.className = 'app-header';
         header.innerHTML = `
             <div style="display: flex; gap: var(--space-sm); align-items: center;">
-                <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
-                    <i data-lucide="menu"></i>
+                <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+                    <i data-lucide="menu" aria-hidden="true"></i>
                 </button>
-                <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode">
-                    <i data-lucide="moon"></i>
+                <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode" aria-label="Toggle dark mode">
+                    <i data-lucide="moon" aria-hidden="true"></i>
                 </button>
                 <div class="streakbox" style="margin-left: var(--space-sm);"></div>
             </div>
@@ -222,11 +223,12 @@ function renderAppShell() {
 
         // Bind Events for newly created DOM
         const menuBtn = document.getElementById('menuBtn');
-        const sidebarNode = document.getElementById('app-sidebar');
+        const sidebarNode = document.getElementById('sidebar');
         if (menuBtn && sidebarNode) {
             menuBtn.addEventListener('click', () => {
-                sidebarNode.classList.toggle('open');
+                const isOpen = sidebarNode.classList.toggle('open');
                 drawerOverlay.classList.toggle('open');
+                menuBtn.setAttribute('aria-expanded', String(isOpen));
             });
         }
 
