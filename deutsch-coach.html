@@ -2502,7 +2502,7 @@ const dcEngine = new SRSEngine.Engine("dc_progress_v1", "dc_meta_v1");
 let PROGRESS = dcEngine.db;
 let META = dcEngine.meta;
 
-const todayISO = SRSEngine.todayISO;
+const dcTodayISO = SRSEngine.todayISO; // renamed: gamification.js already declares a global todayISO()
 const addDaysISO = SRSEngine.addDaysISO;
 const BOX_SCHEDULE = {1:0, 2:1, 3:3, 4:7, 5:14};
 const BOX_NAME = {1:"Neu", 2:"Lernt", 3:"Vertraut", 4:"Stark", 5:"Gemeistert"};
@@ -2516,8 +2516,8 @@ function isDue(uid) { return dcEngine.isDue(uid); }
 function recordAnswer(uid, correct, qType) {
   const p = getProgress(uid);
   p.timesSeen++;
-  if(!p.firstSeen) p.firstSeen = todayISO();
-  p.lastReviewed = todayISO();
+  if(!p.firstSeen) p.firstSeen = dcTodayISO();
+  p.lastReviewed = dcTodayISO();
   if(qType) p.lastQType = qType;
   
   if(correct){
@@ -3408,7 +3408,6 @@ function renderRecallMeaning(card, advanceFn){
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
-      const skipBtn
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
     }
@@ -3450,7 +3449,6 @@ function renderRecallDe2En(card, advanceFn){
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
-      const skipBtn
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
     }
@@ -3611,7 +3609,6 @@ function renderPlural(card, advanceFn){
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
-      const skipBtn
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
     }
@@ -3649,7 +3646,6 @@ function renderVerbTense(card, advanceFn){
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
-      const skipBtn
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
     }
@@ -3693,7 +3689,6 @@ function renderFillGap(card, advanceFn){
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
-      const skipBtn
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
     }
