@@ -2135,28 +2135,6 @@ const VERB_ADD_DATA = [
 
 /* Simple original line-icon set (no external images / no copyright risk,
    works fully offline) shown on cards where a fitting icon exists. */
-const ICON_SVGS = {
-  briefcase:'<svg viewBox="0 0 48 48"><rect x="8" y="16" width="32" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M18 16v-4a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v4" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="8" y1="26" x2="40" y2="26" stroke="currentColor" stroke-width="2.5"/></svg>',
-  document:'<svg viewBox="0 0 48 48"><path d="M14 6h14l8 8v28a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M28 6v8h8" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="2"/><line x1="16" y1="30" x2="32" y2="30" stroke="currentColor" stroke-width="2"/><line x1="16" y1="36" x2="26" y2="36" stroke="currentColor" stroke-width="2"/></svg>',
-  graduation:'<svg viewBox="0 0 48 48"><polygon points="24,10 44,18 24,26 4,18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M14 22v9c0 3 5 5 10 5s10-2 10-5v-9" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="44" y1="18" x2="44" y2="30" stroke="currentColor" stroke-width="2.5"/></svg>',
-  handshake:'<svg viewBox="0 0 48 48"><path d="M4 22l9-8 7 5 4-3 8 6-6 8-4-3-4 4-9-6z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M22 26l6 6" stroke="currentColor" stroke-width="2.5"/></svg>',
-  "chart-up":'<svg viewBox="0 0 48 48"><line x1="6" y1="42" x2="42" y2="42" stroke="currentColor" stroke-width="2.5"/><rect x="10" y="30" width="6" height="12" fill="currentColor"/><rect x="20" y="22" width="6" height="20" fill="currentColor"/><rect x="30" y="12" width="6" height="30" fill="currentColor"/><path d="M10 20l8-8 6 5 12-12" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
-  building:'<svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="34" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="16" y1="16" x2="20" y2="16" stroke="currentColor" stroke-width="2"/><line x1="24" y1="16" x2="28" y2="16" stroke="currentColor" stroke-width="2"/><line x1="32" y1="16" x2="36" y2="16" stroke="currentColor" stroke-width="2"/><line x1="16" y1="24" x2="20" y2="24" stroke="currentColor" stroke-width="2"/><line x1="24" y1="24" x2="28" y2="24" stroke="currentColor" stroke-width="2"/><line x1="32" y1="24" x2="36" y2="24" stroke="currentColor" stroke-width="2"/><rect x="20" y="32" width="8" height="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
-  search:'<svg viewBox="0 0 48 48"><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="29" y1="29" x2="42" y2="42" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
-  email:'<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M6 12l18 14L42 12" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
-  megaphone:'<svg viewBox="0 0 48 48"><path d="M6 20v8h6l14 8V12l-14 8Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M26 16a8 8 0 0 1 0 16" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="10" y1="28" x2="12" y2="38" stroke="currentColor" stroke-width="2.5"/></svg>',
-  video:'<svg viewBox="0 0 48 48"><rect x="4" y="12" width="26" height="24" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M30 20l14-8v24l-14-8Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>',
-  target:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="9" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="2.5" fill="currentColor"/></svg>',
-  team:'<svg viewBox="0 0 48 48"><circle cx="16" cy="14" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="32" cy="14" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M6 40v-4c0-6 5-9 10-9s10 3 10 9v4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M22 40v-4c0-6 5-9 10-9s10 3 10 9v4" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
-  clock:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="24" y1="24" x2="24" y2="13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="24" y1="24" x2="32" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
-  house:'<svg viewBox="0 0 48 48"><path d="M6 22 24 8l18 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M10 20v18h28V20" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="20" y="28" width="8" height="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
-  money:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><text x="24" y="31" font-size="18" text-anchor="middle" fill="currentColor" font-family="sans-serif">€</text></svg>',
-  "id-card":'<svg viewBox="0 0 48 48"><rect x="5" y="10" width="38" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="22" r="5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="25" y1="19" x2="37" y2="19" stroke="currentColor" stroke-width="2"/><line x1="25" y1="25" x2="37" y2="25" stroke="currentColor" stroke-width="2"/><line x1="10" y1="32" x2="22" y2="32" stroke="currentColor" stroke-width="2"/></svg>',
-  balance:'<svg viewBox="0 0 48 48"><line x1="24" y1="6" x2="24" y2="38" stroke="currentColor" stroke-width="2.5"/><line x1="10" y1="14" x2="38" y2="14" stroke="currentColor" stroke-width="2.5"/><path d="M4 14l6 12h-12z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M44 14l-6 12h12z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16" y1="40" x2="32" y2="40" stroke="currentColor" stroke-width="2.5"/></svg>',
-  smile:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="18" cy="20" r="2" fill="currentColor"/><circle cx="30" cy="20" r="2" fill="currentColor"/><path d="M16 29c3 4 13 4 16 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>',
-  calendar:'<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="30" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="6" y1="18" x2="42" y2="18" stroke="currentColor" stroke-width="2.5"/><line x1="14" y1="6" x2="14" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="34" y1="6" x2="34" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><rect x="13" y="24" width="6" height="6" fill="currentColor"/><rect x="21" y="24" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="29" y="24" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
-  phone:'<svg viewBox="0 0 48 48"><path d="M12 6h6l3 8-4 3c2 5 6 9 11 11l3-4 8 3v6c0 2-2 4-4 4C20 37 11 28 8 13c0-2 2-6 4-7Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>'
-};
 function getGenderClass(card) {
   if (card.cat !== "n" || !card.a) return "";
   if (card.a === "der") return "gender-der";
@@ -2515,94 +2493,44 @@ const CAT_LABEL = {n:"Nomen", v:"Verb", adj:"Adjektiv", p:"Ausdruck"};
 /* =========================================================
    PERSISTENCE (localStorage)
 ========================================================= */
-const LS_PROGRESS_KEY = "dc_progress_v1";
-const LS_META_KEY = "dc_meta_v1";
+const dcEngine = new SRSEngine.Engine("dc_progress_v1", "dc_meta_v1");
+let PROGRESS = dcEngine.db;
+let META = dcEngine.meta;
 
-function loadProgress(){
-  try{
-    const raw = localStorage.getItem(LS_PROGRESS_KEY);
-    return raw ? JSON.parse(raw) : {};
-  }catch(e){ return {}; }
-}
-function saveProgress(p){
-  try{ localStorage.setItem(LS_PROGRESS_KEY, JSON.stringify(p)); }catch(e){}
-}
-function loadMeta(){
-  try{
-    const raw = localStorage.getItem(LS_META_KEY);
-    return raw ? JSON.parse(raw) : {streak:0, lastStudyDate:null, totalReviewed:0};
-  }catch(e){ return {streak:0, lastStudyDate:null, totalReviewed:0}; }
-}
-function saveMeta(m){
-  try{ localStorage.setItem(LS_META_KEY, JSON.stringify(m)); }catch(e){}
-}
-
-let PROGRESS = loadProgress();
-let META = loadMeta();
-
-function todayISO(){
-  const d = new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-function addDaysISO(days){
-  const d = new Date();
-  d.setDate(d.getDate()+days);
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
-
-/* Box -> days-until-next-review schedule (Leitner + spaced repetition) */
+const todayISO = SRSEngine.todayISO;
+const addDaysISO = SRSEngine.addDaysISO;
 const BOX_SCHEDULE = {1:0, 2:1, 3:3, 4:7, 5:14};
 const BOX_NAME = {1:"Neu", 2:"Lernt", 3:"Vertraut", 4:"Stark", 5:"Gemeistert"};
 
-function getProgress(uid){
-  if(!PROGRESS[uid]){
-    PROGRESS[uid] = {box:1, nextDue: todayISO(), timesSeen:0, timesCorrect:0, timesWrong:0,
-                      lastResult:null, firstSeen:null, lastReviewed:null, lastQType:null};
-  }
-  return PROGRESS[uid];
-}
+function getProgress(uid) { return dcEngine.getProg(uid); }
+function saveProgress() { dcEngine.save(); }
+function saveMeta() { dcEngine.saveMeta(); }
+function bumpStreak() { dcEngine.bumpStreak(); }
+function isDue(uid) { return dcEngine.isDue(uid); }
 
-function recordAnswer(uid, correct, qType){
+function recordAnswer(uid, correct, qType) {
   const p = getProgress(uid);
   p.timesSeen++;
   if(!p.firstSeen) p.firstSeen = todayISO();
   p.lastReviewed = todayISO();
   if(qType) p.lastQType = qType;
+  
   if(correct){
     p.box = Math.min(5, p.box+1);
     p.timesCorrect = (p.timesCorrect||0)+1;
     p.lastResult = "correct";
-  }else{
+  } else {
     p.box = 1;
-    p.timesWrong++;
+    p.timesWrong = (p.timesWrong||0)+1;
     p.lastResult = "wrong";
   }
   const days = BOX_SCHEDULE[p.box] !== undefined ? BOX_SCHEDULE[p.box] : 30;
   p.nextDue = addDaysISO(days === 0 ? 0 : days);
-  PROGRESS[uid] = p;
-  saveProgress(PROGRESS);
-  bumpStreak();
+  
+  dcEngine.save();
+  dcEngine.bumpStreak();
   META.totalReviewed = (META.totalReviewed||0)+1;
-  saveMeta(META);
-}
-
-function bumpStreak(){
-  const today = todayISO();
-  if(META.lastStudyDate === today) return;
-  const yesterday = addDaysISO(-1);
-  if(META.lastStudyDate === yesterday){
-    META.streak = (META.streak||0)+1;
-  } else {
-    META.streak = 1;
-  }
-  META.lastStudyDate = today;
-  saveMeta(META);
-}
-
-function isDue(uid){
-  const p = PROGRESS[uid];
-  if(!p) return true; // never seen = due (new)
-  return p.nextDue <= todayISO();
+  dcEngine.saveMeta();
 }
 function isNew(uid){
   return !PROGRESS[uid] || PROGRESS[uid].timesSeen===0;
@@ -4695,6 +4623,8 @@ window.addMistakeToSRS = function(text, event) {
 </script>
 
   <script src="./assets/js/gamification.js"></script>
+  <script src="js/icon-svgs.js"></script>
+  <script src="js/srs-engine.js"></script>
   <script src="js/app-shell.js"></script>
 </body>
 </html>
