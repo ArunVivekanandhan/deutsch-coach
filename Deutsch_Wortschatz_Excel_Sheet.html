@@ -602,40 +602,40 @@
         <!-- Excel Column Letters (A, B, C, ...) -->
         <tr>
           <th class="col-row-num">#</th>
-          <th class="col-word">A</th>
-          <th class="col-pos">B</th>
-          <th class="col-level">C</th>
-          <th class="col-gender">D</th>
-          <th class="col-noun">E</th>
-          <th class="col-verb">F</th>
-          <th class="col-praesens">G</th>
-          <th class="col-praet">H</th>
-          <th class="col-perfekt">I</th>
-          <th class="col-adj">J</th>
-          <th class="col-sisters">K</th>
-          <th class="col-en">L</th>
-          <th class="col-ta">M</th>
-          <th class="col-topic">N</th>
-          <th class="col-mnemonic">O</th>
+          <th class="col-en">A</th>
+          <th class="col-word">B</th>
+          <th class="col-noun">C</th>
+          <th class="col-praet">D</th>
+          <th class="col-perfekt">E</th>
+          <th class="col-adj">F</th>
+          <th class="col-sisters">G</th>
+          <th class="col-ta">H</th>
+          <th class="col-topic">I</th>
+          <th class="col-mnemonic">J</th>
+          <th class="col-pos">K</th>
+          <th class="col-level">L</th>
+          <th class="col-gender">M</th>
+          <th class="col-verb">N</th>
+          <th class="col-praesens">O</th>
         </tr>
         <!-- Actual Column Headers with Sort Actions -->
         <tr>
           <th class="col-row-num">#</th>
+          <th class="col-en" onclick="sortBy('en')">🇬🇧 English Meaning <span class="sort-indicator" id="sort_en"></span></th>
           <th class="col-word" onclick="sortBy('word')">Deutsches Wort <span class="sort-indicator" id="sort_word"></span></th>
-          <th class="col-pos" onclick="sortBy('pos')">Wortart <span class="sort-indicator" id="sort_pos"></span></th>
-          <th class="col-level" onclick="sortBy('level')">Level <span class="sort-indicator" id="sort_level"></span></th>
-          <th class="col-gender" onclick="sortBy('gender')">Artikel <span class="sort-indicator" id="sort_gender"></span></th>
           <th class="col-noun" onclick="sortBy('noun')">Nomen (Sg. & Pl.) <span class="sort-indicator" id="sort_noun"></span></th>
-          <th class="col-verb" onclick="sortBy('verb')">Verb (Infinitiv) <span class="sort-indicator" id="sort_verb"></span></th>
-          <th class="col-praesens" onclick="sortBy('praesens')">Präsens (3. P.) <span class="sort-indicator" id="sort_praesens"></span></th>
           <th class="col-praet" onclick="sortBy('praet')">Präteritum <span class="sort-indicator" id="sort_praet"></span></th>
           <th class="col-perfekt" onclick="sortBy('perfekt')">Perfekt <span class="sort-indicator" id="sort_perfekt"></span></th>
           <th class="col-adj" onclick="sortBy('adj')">Adjektiv (-bar / -end) <span class="sort-indicator" id="sort_adj"></span></th>
           <th class="col-sisters" onclick="sortBy('sisters')">Sister Verbs & Bedeutungen <span class="sort-indicator" id="sort_sisters"></span></th>
-          <th class="col-en" onclick="sortBy('en')">🇬🇧 English Meaning <span class="sort-indicator" id="sort_en"></span></th>
           <th class="col-ta" onclick="sortBy('ta')">🇮🇳 தமிழ் Meaning <span class="sort-indicator" id="sort_ta"></span></th>
           <th class="col-topic" onclick="sortBy('topic')">Thema <span class="sort-indicator" id="sort_topic"></span></th>
           <th class="col-mnemonic" onclick="sortBy('mnemonic')">Merkhilfe & Punarchi <span class="sort-indicator" id="sort_mnemonic"></span></th>
+          <th class="col-pos" onclick="sortBy('pos')">Wortart <span class="sort-indicator" id="sort_pos"></span></th>
+          <th class="col-level" onclick="sortBy('level')">Level <span class="sort-indicator" id="sort_level"></span></th>
+          <th class="col-gender" onclick="sortBy('gender')">Artikel <span class="sort-indicator" id="sort_gender"></span></th>
+          <th class="col-verb" onclick="sortBy('verb')">Verb (Infinitiv) <span class="sort-indicator" id="sort_verb"></span></th>
+          <th class="col-praesens" onclick="sortBy('praesens')">Präsens (3. P.) <span class="sort-indicator" id="sort_praesens"></span></th>
         </tr>
       </thead>
       <tbody id="excelTableBody">
@@ -1925,9 +1925,9 @@ if (document.readyState === 'loading') {
   // Export to Excel CSV (UTF-8 with BOM for German Umlauts & Tamil characters)
   function exportToCSV() {
     const headers = [
-      '#', 'Deutsches Wort', 'Wortart', 'Level', 'Artikel', 'Nomen', 'Verb Infinitiv', 
-      'Praesens', 'Praeteritum', 'Perfekt', 'Adjektiv Form', 'Sister Verbs', 
-      'English Meaning', 'Tamil Meaning', 'Tamil Translit', 'Thema', 'Merkhilfe'
+      '#', 'English Meaning', 'Deutsches Wort', 'Nomen', 'Praeteritum', 'Perfekt', 'Adjektiv Form',
+      'Sister Verbs', 'Tamil Meaning', 'Tamil Translit', 'Thema', 'Merkhilfe',
+      'Wortart', 'Level', 'Artikel', 'Verb Infinitiv', 'Praesens'
     ];
 
     let csvContent = '\uFEFF'; // UTF-8 BOM
@@ -1936,22 +1936,22 @@ if (document.readyState === 'loading') {
     FILTERED_ROWS.forEach((r, idx) => {
       const row = [
         idx + 1,
+        r.en,
         r.word,
-        r.pos,
-        r.level,
-        r.gender,
         r.noun,
-        r.verb,
-        r.praesens,
         r.praet,
         r.perfekt,
         r.adj,
         r.sisters,
-        r.en,
         r.ta,
         r.ta_translit,
         r.topic,
-        r.mnemonic
+        r.mnemonic,
+        r.pos,
+        r.level,
+        r.gender,
+        r.verb,
+        r.praesens
       ];
       csvContent += row.map(v => '"' + (v || '').toString().replace(/"/g, '""') + '"').join(',') + '\r\n';
     });
@@ -1970,31 +1970,31 @@ if (document.readyState === 'loading') {
   // Copy as TSV (Direct Paste into Excel / Google Sheets)
   function copyToClipboardTSV() {
     const headers = [
-      '#', 'Deutsches Wort', 'Wortart', 'Level', 'Artikel', 'Nomen', 'Verb Infinitiv', 
-      'Praesens', 'Praeteritum', 'Perfekt', 'Adjektiv Form', 'Sister Verbs', 
-      'English Meaning', 'Tamil Meaning', 'Tamil Translit', 'Thema', 'Merkhilfe'
+      '#', 'English Meaning', 'Deutsches Wort', 'Nomen', 'Praeteritum', 'Perfekt', 'Adjektiv Form',
+      'Sister Verbs', 'Tamil Meaning', 'Tamil Translit', 'Thema', 'Merkhilfe',
+      'Wortart', 'Level', 'Artikel', 'Verb Infinitiv', 'Praesens'
     ];
 
     let tsv = headers.join('\t') + '\n';
     FILTERED_ROWS.forEach((r, idx) => {
       const row = [
         idx + 1,
+        r.en,
         r.word,
-        r.pos,
-        r.level,
-        r.gender,
         r.noun,
-        r.verb,
-        r.praesens,
         r.praet,
         r.perfekt,
         r.adj,
         r.sisters,
-        r.en,
         r.ta,
         r.ta_translit,
         r.topic,
-        r.mnemonic
+        r.mnemonic,
+        r.pos,
+        r.level,
+        r.gender,
+        r.verb,
+        r.praesens
       ];
       tsv += row.map(v => (v || '').toString().replace(/\t/g, ' ').replace(/\n/g, ' ')).join('\t') + '\n';
     });
