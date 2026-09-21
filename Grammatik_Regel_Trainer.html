@@ -1207,7 +1207,7 @@ async function callAIGrammarExplanation(promptText, callback) {
     endpoint = 'https://api.openai.com/v1/chat/completions';
     model = 'gpt-4o-mini';
   } else if (provider === 'ollama') {
-    endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+    endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions';
     model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
   }
   
