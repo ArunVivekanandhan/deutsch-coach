@@ -1178,11 +1178,26 @@ function toggleWeaknessVault() {
   drillWeaknessesOnly = !drillWeaknessesOnly;
   const btn = document.getElementById("btnWeakness");
   if(drillWeaknessesOnly) {
+    const weakRules = Object.keys(DYNAMIC_GENERATORS).filter(key => {
+      const p = PROGRESS[key] || { box: 1 };
+      return p.box <= 2;
+    });
+    
+    if (weakRules.length === 0) {
+      alert("Du hast keine schwachen Grammatikregeln! Alles ist in Box 3 oder höher. (No weaknesses found!)");
+      drillWeaknessesOnly = false;
+      return;
+    }
+    
     btn.style.boxShadow = "0 0 8px var(--red)";
-    btn.innerText = "🏋️ Drilling Weaknesses Only";
+    btn.innerText = "🔥 Drilling Weaknesses Only";
+    
+    // Auto-start drill
+    if (typeof selectRule === 'function') selectRule('alle');
+    if (typeof switchMode === 'function') switchMode('drill');
   } else {
     btn.style.boxShadow = "none";
-    btn.innerText = "🏋️ Drill Weaknesses (Box 1-2)";
+    btn.innerText = "🔥 Drill Weaknesses (Box 1-2)";
   }
 }
 
@@ -1933,7 +1948,18 @@ const BUILD_GENERATORS = {
 
 function generateInfiniteQuestion(ruleId) {
   let targetRule = ruleId;
-  if (ruleId === 'alle' || !DYNAMIC_GENERATORS[ruleId]) {
+  
+  if (drillWeaknessesOnly) {
+    const weakRules = Object.keys(DYNAMIC_GENERATORS).filter(key => {
+      const p = PROGRESS[key] || { box: 1 };
+      return p.box <= 2;
+    });
+    if (weakRules.length > 0) {
+      targetRule = weakRules[Math.floor(Math.random() * weakRules.length)];
+    }
+  }
+
+  if (targetRule === 'alle' || !DYNAMIC_GENERATORS[targetRule]) {
     const keys = Object.keys(DYNAMIC_GENERATORS);
     targetRule = keys[Math.floor(Math.random() * keys.length)];
   }
