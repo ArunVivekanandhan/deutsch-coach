@@ -468,6 +468,7 @@ html.dark-theme, body.dark {
   <script src="js/icon-svgs.js"></script>
   <script src="js/srs-engine.js"></script>
   <script src="js/tamil-dict.js"></script>
+  <script src="js/tts-engine.js"></script>
   <script src="js/app-shell.js"></script>
 </head>
 <body>
@@ -1558,6 +1559,49 @@ function isDue(uid) { return dcEngine.isDue(uid); }
 function isNew(uid) { const p = dcEngine.db[uid]; return !p || !p.timesSeen; }
 function isDifficult(uid){ const p = PROGRESS[uid]; return p && p.timesWrong>=2; }
 function isMastered(uid){ const p = PROGRESS[uid]; return p && p.box>=4; }
+
+/* ---- Transformation diff (highlights exactly what changes) ---- */
+const SEP_PREFIXES = ['zurück','zusammen','überein','vorbei','wieder','weiter','dazu','durch',
+  'statt','fest','wohl','über','unter','herunter','herauf','heraus','herein','hinunter','hinauf',
+  'an','auf','aus','ein','mit','vor','weg','zu','her','hin','ab','um'];
+function stripAffixes(s){
+  return s.replace(/^(hat|ist)\s+/,'').replace(/\/(hat|ist)/,'').replace('sich ','').trim();
+}
+function commonPrefixLen(a,b){ let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++; return i; }
+function bestSepStrip(word, compareTarget){
+  let best = word, bestScore = commonPrefixLen(word, compareTarget);
+  for(const p of SEP_PREFIXES){
+    if(word.startsWith(p) && word.length > p.length+2){
+      const stripped = word.slice(p.length);
+      const score = commonPrefixLen(stripped, compareTarget);
+      if(score > bestScore){ best = stripped; bestScore = score; }
+    }
+  }
+  return best;
+}
+function longestWord(s){
+  const clean = stripAffixes(s);
+  const words = clean.split(' ');
+  return words.reduce((a,b)=> b.replace(/^ge/,'').length>a.replace(/^ge/,'').length?b:a, '');
+}
+function stripEn(w){ if(w.endsWith('en')) return w.slice(0,-2); if(w.endsWith('n')) return w.slice(0,-1); return w; }
+function diffHighlight(a, b){
+  let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i && j<b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+  const aMid=a.slice(i,a.length-j), bMid=b.slice(i,b.length-j);
+  const wrap = (s)=> s ? `<span class="diffchar">${s}</span>` : '';
+  return {
+    a: a.slice(0,i) + wrap(aMid) + a.slice(a.length-j),
+    b: b.slice(0,i) + wrap(bMid) + b.slice(b.length-j)
+  };
+}
+function transformDiagram(v){
+  const prWord = longestWord(v.praeteritum);
+  let infStem = stripEn(longestWord(v.inf));
+  infStem = bestSepStrip(infStem, prWord);
+  const d1 = diffHighlight(infStem, prWord);
+  return `<div class="transdiagram">${d1.a}<span class="arrow">→</span>${d1.b}</div>`;
+}
 
 /* ---- filtering & UI ---- */
 function pool(){

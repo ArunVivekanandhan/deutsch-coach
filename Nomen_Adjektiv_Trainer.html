@@ -372,6 +372,7 @@ html.dark-theme, body.dark {
   <script src="./assets/js/gamification.js"></script>
   <script src="js/icon-svgs.js"></script>
   <script src="js/srs-engine.js"></script>
+  <script src="js/tts-engine.js"></script>
   <script src="js/app-shell.js"></script>
 </head>
 <body>
@@ -1247,6 +1248,15 @@ function isDue(uid) { return dcEngine.isDue(uid); }
 function isNew(uid) { const p = dcEngine.db[uid]; return !p || !p.timesSeen; }
 function isDifficult(uid){ const p = PROGRESS[uid]; return p && p.timesWrong>=2; }
 function isMastered(uid){ const p = PROGRESS[uid]; return p && p.box>=4; }
+
+/* ---- diff highlight ---- */
+function diffHighlight(a, b){
+  let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i && j<b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+  const aMid=a.slice(i,a.length-j), bMid=b.slice(i,b.length-j);
+  const wrap=(s)=> s?`<span class="diffchar">${s}</span>`:'';
+  return { a: a.slice(0,i)+wrap(aMid)+a.slice(a.length-j), b: b.slice(0,i)+wrap(bMid)+b.slice(b.length-j) };
+}
 
 /* ---- filtering & UI ---- */
 function pool(){

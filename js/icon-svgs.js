@@ -20,3 +20,44 @@ const ICON_SVGS = {
   calendar:'<svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="30" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="6" y1="18" x2="42" y2="18" stroke="currentColor" stroke-width="2.5"/><line x1="14" y1="6" x2="14" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="34" y1="6" x2="34" y2="14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><rect x="13" y="24" width="6" height="6" fill="currentColor"/><rect x="21" y="24" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="29" y="24" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
   phone:'<svg viewBox="0 0 48 48"><path d="M12 6h6l3 8-4 3c2 5 6 9 11 11l3-4 8 3v6c0 2-2 4-4 4C20 37 11 28 8 13c0-2 2-6 4-7Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>'
 };
+
+
+function getIcon(v) {
+    if (!v) return ICON_SVGS['abstract'];
+    if (v.inf && v.inf.toLowerCase() === 'betreten') {
+      return `
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="doorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fdfbf7;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#e5e0d5;stop-opacity:1" />
+          </linearGradient>
+          <radialGradient id="clayLight" cx="40%" cy="30%" r="70%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#d1d1d1;stop-opacity:1" />
+          </radialGradient>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+            <feOffset dx="1" dy="2" result="offsetblur" />
+            <feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer>
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <!-- Doorway Depth -->
+        <path d="M20 40 L32 25 L44 40" fill="none" stroke="#B98A2E" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+        <rect x="22" y="20" width="20" height="24" fill="url(#doorGrad)" stroke="#B98A2E" stroke-width="1.5" filter="url(#softShadow)"/>
+        <rect x="24" y="22" width="16" height="20" fill="#fcfaf5" />
+        <!-- Clay Figure (Entering) -->
+        <g transform="translate(0, 2)">
+          <rect x="28" y="32" width="8" height="12" rx="4" fill="url(#clayLight)" filter="url(#softShadow)" />
+          <circle cx="32" cy="28" r="4" fill="url(#clayLight)" filter="url(#softShadow)" />
+          <rect x="30" y="42" width="4" height="3" rx="1.5" fill="#B98A2E" />
+          <rect x="36" y="38" width="4" height="3" rx="1.5" fill="url(#clayLight)" filter="url(#softShadow)" transform="rotate(-10, 38, 40)" />
+        </g>
+      </svg>`;
+    }
+    return ICON_SVGS[v.icon] || ICON_SVGS['abstract'];
+}
