@@ -28,9 +28,12 @@ function populateVoices(){
 }
 function pollForVoices(){
   voicePollAttempts++;
-  if(deVoices.length > 0) return;
   populateVoices();
-  if(deVoices.length === 0 && voicePollAttempts < 15) setTimeout(pollForVoices, 200);
+  // Keep polling and re-rendering for the full attempt budget rather than
+  // stopping the instant we see any voice at all - on some systems (notably
+  // Windows) getVoices() returns a single default voice immediately and only
+  // reveals the rest of the installed voices a bit later.
+  if(voicePollAttempts < 15) setTimeout(pollForVoices, 200);
 }
 function initVoicePolling(){
   if('speechSynthesis' in window){
