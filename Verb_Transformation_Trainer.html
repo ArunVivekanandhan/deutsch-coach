@@ -1539,6 +1539,22 @@ let session = [];
 let sessionIdx = 0;
 
 
+
+/* ---- persistence & SRS ---- */
+const dcEngine = new SRSEngine.Engine("vt_progress_v1", null);
+let PROGRESS = dcEngine.db;
+
+const todayISO = SRSEngine.todayISO;
+const addDays = SRSEngine.addDaysISO;
+const BOX_SCHEDULE = {1:0,2:1,3:3,4:7,5:14};
+
+function getProg(uid) { return dcEngine.getProg(uid); }
+function saveProgress() { dcEngine.save(); }
+function isDue(uid) { return dcEngine.isDue(uid); }
+function isNew(uid) { const p = dcEngine.db[uid]; return !p || !p.timesSeen; }
+function isDifficult(uid){ const p = PROGRESS[uid]; return p && p.timesWrong>=2; }
+function isMastered(uid){ const p = PROGRESS[uid]; return p && p.box>=4; }
+
 /* ---- filtering & UI ---- */
 function pool(){
   return VERBS.filter(v=>
@@ -1564,8 +1580,8 @@ function renderChips(){
   tc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curType=el.dataset.type; refreshAll(); });
 
   const gc = document.getElementById('langChips');
-  gc.innerHTML = LANGS.map(o=> `<div class="chip ${meaningLang===o.k?'active':''}" data-lang="${o.k}">${o.l}</div>`).join('');
-  gc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ meaningLang=el.dataset.lang; refreshAll(); });
+  if(gc) gc.innerHTML = LANGS.map(o=> `<div class="chip ${meaningLang===o.k?'active':''}" data-lang="${o.k}">${o.l}</div>`).join('');
+  if(gc) gc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ meaningLang=el.dataset.lang; refreshAll(); });
 
   const dc = document.getElementById('dirChips');
   dc.innerHTML = DIRS.map(o=> `<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
