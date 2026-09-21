@@ -1,0 +1,37 @@
+
+/* ==========================================================================
+   SIMPLE MODE (ZEN UI)
+   Hides advanced tools and bloat for an easier, less intimidating experience
+   ========================================================================== */
+body.simple-mode .quick-tool-btn,
+body.simple-mode .advanced-filter,
+body.simple-mode .diagram,
+body.simple-mode .subtext,
+body.simple-mode .peek-translation-box,
+body.simple-mode .rule-hint,
+body.simple-mode .qlabel,
+body.simple-mode .srs-metric.hard,
+body.simple-mode .srs-metric.new {
+  display: none !important;
+}
+
+body.simple-mode .bigbtn {
+  padding: 24px 16px !important;
+  font-size: 20px !important;
+  border-radius: 12px !important;
+}
+
+body.simple-mode .word {
+  font-size: 32px !important;
+  margin: 12px 0 !important;
+}
+
+body.simple-mode .actbtn {
+  padding: 16px 8px !important;
+  font-size: 16px !important;
+}
+
+body.simple-mode .thinkbtn {
+  padding: 20px 8px !important;
+  font-size: 18px !important;
+}

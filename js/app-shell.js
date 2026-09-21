@@ -65,6 +65,11 @@ function injectDependencies() {
 }
 
 function renderAppShell() {
+
+    // Apply Simple Mode globally
+    if (localStorage.getItem('de_simple_mode') === 'true') {
+        document.body.classList.add('simple-mode');
+    }
     // Inject dependencies on every page
     injectDependencies();
 

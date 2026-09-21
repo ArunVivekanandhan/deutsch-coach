@@ -1657,6 +1657,11 @@ function renderCard(){
     </div>
   `;
 
+  
+  if (localStorage.getItem('de_auto_audio') === 'true') {
+      setTimeout(() => { if (typeof playTTS === 'function') playTTS(v.w || v.inf || v.base || v.sg); }, 300);
+  }
+
   document.getElementById('revealBtn').onclick = ()=>{
     document.getElementById('revealArea').innerHTML = revealCoreHTML + `
       <div class="answerbtns" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; padding:0 0 14px;">

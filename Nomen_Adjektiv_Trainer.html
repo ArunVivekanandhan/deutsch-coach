@@ -1370,6 +1370,11 @@ function renderCard(){
       <div class="shortcuts-hint">⌨️ Shortcuts: <b>Space / Enter</b> = Check · <b>N</b> = Next · <b>T</b> = Peek Translation · <b>1</b> = Again · <b>2</b> = Knew it · <b>3</b> = Master</div>
     </div>`;
 
+  
+  if (localStorage.getItem('de_auto_audio') === 'true') {
+      setTimeout(() => { if (typeof playTTS === 'function') playTTS(v.w || v.inf || v.base || v.sg); }, 300);
+  }
+
   document.getElementById('revealBtn').onclick = ()=>{
     document.getElementById('revealArea').innerHTML = revealCoreHTML + `
       <div class="answerbtns" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; padding:0 0 14px;">
