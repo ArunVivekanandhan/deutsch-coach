@@ -952,16 +952,9 @@
         <div>
           <h1>Dein Deutsch-Coach <span style="font-size:13px; font-weight:400; color:var(--ink-soft); display:block;">Your German Practice Coach</span></h1>
           <div class="sub" id="subtitleLine">A1 · A2 · B1.1 · B1.2</div>
-
-  
         </div>
       </div>
-      
-      
       <div class="streakbox" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;; text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak · Days Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig · Words Due</div>
-      <div class="levelbar" id="levelBar"></div>
-      <div class="togglebar" id="catBar" style="margin-bottom:12px;"></div>
-      <div class="navbar" id="navBar"></div>
     </div>
     <div class="maincol">
       <div class="hero-banner" style="width:100%; max-width:700px; margin-bottom:24px; border-radius:var(--radius-lg); overflow:hidden; position:relative; box-shadow:var(--shadow-md); background:linear-gradient(135deg, var(--blue), var(--purple)); color:white; padding: 24px; display:flex; align-items:center; gap:20px;; padding: 0; display: flex; align-items: stretch;">
@@ -998,6 +991,10 @@
           </a>
         </div>
       </div>
+
+      <div class="levelbar" id="levelBar" style="max-width: 600px;"></div>
+      <div class="togglebar" id="catBar" style="margin-bottom:12px;"></div>
+      <div class="navbar" id="navBar"></div>
 
       <div class="stage" id="stage"></div>
       <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Wortschatz stammt aus echten telc-Quellen: B1.1/B1.2 aus „Auf jeden Fall!" B1.1/B1.2, A2 (Thema Arbeit) aus dem „Auf jeden Fall! A2.1"-Probekapitel (Lektion 5, Lernwortschatz). A1 hat bisher nur ein Beispielwort; weitere Niveaus/Themen lassen sich jederzeit ergänzen, es wird nichts erfunden. Wort-Icons sind selbst gezeichnete, einfache Symbole (keine Fotos) — copyright-frei und offline nutzbar. Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
@@ -3095,6 +3092,8 @@ function renderLinguisticsHTML(card) {
   return '';
 }
 
+window.langPref = localStorage.getItem('dc_langPref') || 'en';
+
 function renderInfoPanel(card){
   const verbBlock = (card.cat==="v" && card.pr)
     ? `<div class="infoline"><b>Präteritum:</b> ${card.pr} &nbsp;·&nbsp; <b>Perfekt:</b> ${card.pp}</div>` : "";
@@ -3106,9 +3105,12 @@ function renderInfoPanel(card){
   const pluralLine = card.p ? `<div class="infoline"><b>Plural:</b> ${card.p}</div>` : "";
   const cheatBlock = renderCheatCodesHTML(card);
   const lingBlock = renderLinguisticsHTML(card);
+  
+  const displayMeaning = window.langPref === 'ta' && card.ta ? card.ta : card.en;
+
   return `
     <div class="revealbox">
-      <div class="en-word">${card.en}</div>
+      <div class="en-word">${displayMeaning}</div>
       ${card.a ? `<div class="infoline"><b>Artikel:</b> ${card.a}</div>` : ""}
       ${pluralLine}
       ${verbBlock}
@@ -3174,7 +3176,7 @@ function renderRecallMeaning(card, advanceFn){
       <div class="prompt">
         ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Was bedeutet das? · What does this mean? (Think first…)</div>
       </div>
       <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
@@ -3209,7 +3211,7 @@ function renderMcDe2En(card, advanceFn){
       <div class="prompt">
         ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
       </div>
       <div style="padding:8px 18px 4px;">
         ${opts.map(o=>`<button class="mcopt" data-val="${o.replace(/"/g,'&quot;')}">${o}</button>`).join("")}
@@ -3289,7 +3291,7 @@ function renderArticle(card, advanceFn){
       <div class="qlabel">Artikel</div>
       <div class="prompt">
         ${promptIconHTML(card)}
-        <div class="word">___ ${card.w}</div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">___ ${card.w}</div>
         <div class="subq">Welcher Artikel?</div>
       </div>
       <div style="padding:8px 18px 4px; display:flex; gap:8px;">
@@ -3329,7 +3331,7 @@ function renderPlural(card, advanceFn){
       <div class="prompt">
         ${promptIconHTML(card)}
         ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Wie lautet der Plural?</div>
       </div>
       <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
@@ -3363,7 +3365,7 @@ function renderVerbTense(card, advanceFn){
       <div class="qlabel">Verbformen</div>
       <div class="prompt">
         ${promptIconHTML(card)}
-        <div class="word">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
         <div class="subq">Präteritum? Perfekt?</div>
       </div>
       <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
@@ -4109,8 +4111,39 @@ function setView(view){
   renderView();
 }
 
+function renderLangToggle() {
+  return `<button class="togglebtn" id="langToggleBtn" style="margin-left: auto; border-color: var(--gold); color: var(--gold); font-weight: bold;">
+            ${window.langPref === 'en' ? '🇺🇸 EN' : '🇮🇳 TA'}
+          </button>`;
+}
+
+function bindLangToggle() {
+  const btn = document.getElementById("langToggleBtn");
+  if(btn) {
+    btn.onclick = () => {
+      window.langPref = window.langPref === 'en' ? 'ta' : 'en';
+      localStorage.setItem('dc_langPref', window.langPref);
+      renderView(); // re-render the view
+    };
+  }
+}
+
 function renderView(){
   updateHeaderStats();
+  renderLevelBar();
+  renderCatBar();
+  renderNavBar();
+
+  const catBar = document.getElementById("catBar");
+  if(catBar) {
+    if (!document.getElementById("langToggleBtn")) {
+        catBar.insertAdjacentHTML('beforeend', renderLangToggle());
+        bindLangToggle();
+    } else {
+        document.getElementById("langToggleBtn").innerHTML = window.langPref === 'en' ? '🇺🇸 EN' : '🇮🇳 TA';
+    }
+  }
+
   switch(currentView){
     case "dashboard": renderDashboard(); break;
     case "lernen": renderLernen(); break;
