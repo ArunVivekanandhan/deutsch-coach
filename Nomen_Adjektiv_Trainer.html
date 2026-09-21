@@ -369,6 +369,10 @@ html.dark-theme, body.dark {
 
 </style>
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/icon-svgs.js"></script>
+  <script src="js/srs-engine.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -1235,8 +1239,6 @@ let sessionIdx = 0;
 const dcEngine = new SRSEngine.Engine("na_progress_v1", null);
 let PROGRESS = dcEngine.db;
 
-const todayISO = SRSEngine.todayISO;
-const addDays = SRSEngine.addDaysISO;
 const BOX_SCHEDULE = {1:0,2:1,3:3,4:7,5:14};
 
 function getProg(uid) { return dcEngine.getProg(uid); }
@@ -1546,7 +1548,7 @@ add(diff); }
     document.getElementById('frontActions').style.display = 'none';
     document.getElementById('btnNochmal').onclick = ()=>{ recordAnswer(v.uid,false); advance(); };
     document.getElementById('btnGewusst').onclick = ()=>{ recordAnswer(v.uid,true); advance(); };
-    document.getElementById('btnEasy').onclick = ()=>{ const p=getProg(v.uid); p.box=5; p.nextDue=addDays(30); saveProgress(PROGRESS); advance(); };
+    document.getElementById('btnEasy').onclick = ()=>{ const p=getProg(v.uid); p.box=5; p.nextDue=SRSEngine.addDaysISO(30); saveProgress(PROGRESS); advance(); };
   };
 }
 
@@ -1878,9 +1880,5 @@ function processSwipe(answer, isSimulated = false) {
   });
 </script>
 
-  <script src="./assets/js/gamification.js"></script>
-  <script src="js/icon-svgs.js"></script>
-  <script src="js/srs-engine.js"></script>
-  <script src="js/app-shell.js"></script>
-</body>
+        </body>
 </html>

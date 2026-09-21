@@ -504,6 +504,8 @@
     }
   </style>
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="js/tamil-dict.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 
@@ -1256,13 +1258,13 @@ if (document.readyState === 'loading') {
           </td>
 
           <!-- D: PrÃ¤teritum -->
-          <td class="col-praet" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--excel-green);">${r.praet || '—'}</td>
+          <td class="col-praet" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--excel-green);">${r.praet || ''}</td>
 
           <!-- E: Perfekt -->
-          <td class="col-perfekt" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--purple);">${r.perfekt || '—'}</td>
+          <td class="col-perfekt" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--purple);">${r.perfekt || ''}</td>
 
           <!-- F: Adjektiv -->
-          <td class="col-adj">${r.adj || '—'}</td>
+          <td class="col-adj">${r.adj || ''}</td>
 
 <!-- G: Mnemonic -->
           <td class="col-mnemonic" style="font-size:11px; color:var(--ink-muted);" title="${r.mnemonic}">${r.mnemonic}</td>
@@ -1272,7 +1274,7 @@ if (document.readyState === 'loading') {
 
           <!-- I: Sister Verbs -->
           <td class="col-sisters" style="font-size:11px; color:var(--ink-soft);" title="${r.sisters}">
-            ${r.sisters || '—'}
+            ${r.sisters || ''}
           </td>
 
           <!-- J: Tamil -->
@@ -1464,7 +1466,5 @@ if (document.readyState === 'loading') {
     buildSpreadsheetData();
   });
   </script>
-  <script src="js/tamil-dict.js"></script>
-  <script src="js/app-shell.js"></script>
-</body>
+    </body>
 </html>
