@@ -18,13 +18,50 @@ single-file HTML apps** plus two supporting reference/data-generation deliverabl
 an audio player + transcript). Each HTML app embeds its own vocabulary as inline JSON; there is no
 shared backend, build system, or database.
 
-## 2. Current Status
+## 2. Current Status (rewritten — most of this section was severely stale)
 
-All 5 apps and both Excel-generation pipelines are functionally complete and have been manually tested
-(via headless jsdom simulation during development, not a real test suite — see Section 17). The most
-recently modified file, `Verb_Transformation_Trainer.html`, has an English-language UI; all other apps
-still have German-language UI chrome (see Section 24 "UI language inconsistency" and Section 19).
-There is no deployment pipeline: files exist as local downloads. The project was previously developed in a Linux sandbox (`/mnt/user-data/outputs/`) and is currently located in a Windows local folder (`C:\Users\arunr\OneDrive\Documents\Projects\AIDrive\Deutsch_Coach_Project`). **No `.git` repository exists in the current project directory** (`git status` reports fatal: not a git repository). A remote GitHub repository (`github.com/ArunVivekanandhan/deutsch-coach`) was mentioned previously, but the local workspace is not currently linked to any git remote.
+**This entire section, and much of Sections 3-5 below, described a pre-git, 5-file, no-shared-code
+snapshot of the project that stopped being true a long time before this rewrite. If you are an AI
+agent reading this file: verify claims against the actual source before trusting them, per the header
+above — this file has drifted from reality before and will again.**
+
+As of this rewrite (branch `feature/production-learning-platform`, off `main`), the real state is:
+
+- **26 HTML pages** (`ls *.html`), git-tracked, hosted on GitHub Pages from `main`
+  (`github.com/ArunVivekanandhan/deutsch-coach`, live at
+  `https://arunvivekanandhan.github.io/deutsch-coach/`).
+- **A real git history** with three lines of work that converged: `main` (the deployed branch),
+  `master` (an older, now-orphaned line with a different, pre-refactor architecture — not deployed,
+  do not assume it reflects current reality), and feature branches. Multiple AI sessions (this one and
+  at least one other working directly on `main` in parallel) have touched this repo; expect to find
+  work that looks unfamiliar and verify before assuming it's broken or correct.
+- **A shared-code layer now exists** and is loaded on nearly every page: `css/design-system.css`,
+  `js/app-shell.js` (sidebar/header shell, injected at runtime — see Section 5), `js/srs-engine.js`
+  (the `SRSEngine.Engine` class — a real, shared spaced-repetition engine), `js/icon-svgs.js`,
+  `js/tamil-dict.js`, `js/tts-engine.js` (shared text-to-speech), `js/progress-aggregator.js` (added
+  this session — see Section 14). This directly supersedes the old "no shared code, everything
+  copy-pasted" claim in the original Section 25 below (kept below for historical context but no
+  longer accurate as a blanket statement).
+- **The vocabulary/grammar/practice content is still NOT unified.** Content still lives in
+  page-specific inline JSON arrays (`VERBS`, `NOUNS`, `ADJS`, `LEGACY_DATA` — see Section 7), each
+  page's own copy, not one canonical source. A `data/*.json` + `scripts/sync_data.py` consolidation
+  was started (by another session) but nothing reads from `data/*.json` yet — it's a stale, disconnected
+  snapshot (503/378/337 words vs. the live pages' current 553/483/347+ after this session's A1
+  additions). Do not treat `data/*.json` as authoritative; treat the individual HTML pages' inline
+  arrays as the actual live data until that consolidation is finished and verified.
+- **Progress storage is genuinely fragmented across 9 localStorage keys with 4 incompatible shapes**
+  (real vocabulary SRS data vs. streak counters vs. completion counters vs. dead/unused keys) — see
+  Section 14 for the full breakdown and why `js/progress-aggregator.js` only aggregates 3 of the 9.
+- **Repository hygiene**: `/archive` holds ~70 one-off scripts and dead file duplicates moved out of
+  the production surface this session (see `archive/README.md` for what and why — none were deleted).
+  `/scripts` holds the two still-useful maintenance tools (`build.py` regenerates `sw.js`'s cache list
+  and runs a basic smoke test; `sync_data.py` is the unfinished data-consolidation tool).
+- **A real, if partial, UX/IA transformation is in progress** (this session, per an explicit product
+  brief) — see the changelog entry in Section 28 for exactly what was and wasn't completed. The
+  honest summary: bug fixes, progress unification, and an accessibility/mobile pass are done and
+  verified; the larger "unify 21 tools into Vocabulary/Grammar/Practice sections" navigation rebuild
+  is NOT done — `deutsch-coach.html` already has a reasonably capable dashboard/session UI, and the
+  shared sidebar nav exists, but the tools remain 21 separate pages, not one coherent flow.
 
 ## 3. Technology Stack
 
@@ -374,21 +411,44 @@ resync the DOM. There is no single "re-render everything" entry point in most ap
 which specific render functions to call after a given state change (e.g. `setLevel()` explicitly calls
 `renderLevelBar(); renderCatBar(); updateHeaderStats(); renderView();` — miss one and the UI goes stale).
 
-## 14. Storage and Persistence
+## 14. Storage and Persistence (rewritten — verified against actual source, not assumed)
 
 - **`localStorage` only** — no backend, no IndexedDB, no cookies, no server-side storage anywhere.
-- Each app that has spaced repetition uses its **own, differently-named** localStorage key:
-  - Main app: `LS_PROGRESS_KEY = "dc_progress_v1"` and `LS_META_KEY = "dc_meta_v1"` (verified in `index.html` lines 1798-1799).
-  - `Verb_Transformation_Trainer.html`: `'vt_progress_v1'` (verified in lines 242-248).
-  - `Nomen_Adjektiv_Trainer.html`: `LS_KEY = 'na_progress_v1'` (verified in line 173).
-  - `German_A2_Practice_Studio.html`: `LS_STUDIO_KEY = 'a2_studio_progress_v1'`.
-  - `Satzbau_Trainer.html` and `Verben_Hoeren_EN_DE.html`: **no persistence at all.**
-- **These stores are completely independent.** Progress made in the main app's vocabulary drills does
-  NOT carry over to `Verb_Transformation_Trainer.html` even for the exact same verb, because they are
-  different localStorage keys with different `uid` schemes. A learner using multiple apps is tracked as
-  multiple unrelated learners from the software's point of view.
+- **9 known progress-related keys exist, in 4 incompatible shapes.** The authoritative list is
+  `deutsch-coach.html`'s own "reset all data" feature (`grep -n "const keys = \['dc_progress_v1'" deutsch-coach.html`),
+  which is the closest thing this app has to a canonical inventory of its own learning data:
+
+  | Key | Shape | Owner page | Real vocabulary SRS data? |
+  |---|---|---|---|
+  | `dc_progress_v1` + `dc_meta_v1` | `{uid: {box, nextDue, timesSeen, timesWrong}}` via `SRSEngine.Engine`; meta = `{streak, lastStudyDate, totalReviewed}` | `deutsch-coach.html` | **Yes** |
+  | `na_progress_v1` | same SRS shape, via `SRSEngine.Engine` | `Nomen_Adjektiv_Trainer.html` | **Yes** |
+  | `vt_progress_v1` | same SRS shape, via `SRSEngine.Engine` | `Verb_Transformation_Trainer.html` | **Yes** |
+  | `gp_progress_v1` | `{currentStreak, bestStreak}` — a grammar-quiz streak counter, NOT vocabulary data | `Grammatik_Regel_Trainer.html` | No |
+  | `sb_progress_v1` | `{sentenceKey: count}` — a sentence-building completion counter | `Satzbau_Trainer.html` | No |
+  | `a2_studio_progress_v2` | `{completed: {moduleId: true}}` — module-completion flags | `German_A2_Practice_Studio.html` | No |
+  | `b1_studio_progress_v1` | same completion-flag shape | `German_B1_Practice_Studio.html` | No |
+  | `wmg_progress_v1` | referenced (read) by `index.html`'s old dashboard code | **nothing ever writes it — always empty** | N/A, dead key |
+  | `sps_progress_v1` | referenced only in the reset-list array | **nothing ever reads or writes it — dead key** | N/A, dead key |
+
+- **These stores are independent and were never designed as one system.** Progress made in one
+  vocabulary trainer does not carry over to another, even for the same word, because they're
+  different keys with different `uid` schemes (`level|topic|word` in `dc_progress_v1`,
+  `level|inf` in `vt_progress_v1`, `n|level|sg` / `a|w` in `na_progress_v1` — see each page's
+  `.forEach(v => v.uid = ...)` line for the exact scheme).
+- **`js/progress-aggregator.js` (added this session)** provides a safe, read-only unified view: it
+  only aggregates the 3 genuine SRS stores (`dc`/`na`/`vt`) for due/difficult/mastered/reviewed
+  counts — reusing `SRSEngine.Engine`, no schema changes, no writes of its own — and separately
+  surfaces lesson-completion (`a2`/`b1` studio) and streak (`dc_meta_v1`) as distinct, honestly
+  labeled figures. It deliberately does NOT blend `gp`/`sb` progress into the vocabulary numbers,
+  since they measure fundamentally different things; doing so would misrepresent the data. See
+  `js/progress-aggregator.js`'s own header comment for the full reasoning. This is loaded on every
+  page that loads `js/app-shell.js` (23 of 26) and powers the shared header/sidebar stats.
+  **If you add a new progress-tracking page, add its key to `VOCAB_STORES` in that file only if it
+  genuinely uses the same `{uid: {box, nextDue, timesWrong}}` shape — otherwise you will produce
+  fake statistics, which this codebase has a documented history of shipping (see Section 28).**
 - All persistence is best-effort (`try{...}catch(e){}` around every localStorage call) — a
   quota-exceeded or privacy-mode-blocked browser silently loses progress with no user-facing error.
+  This was not changed this session; still a known gap.
 
 ## 15. External APIs and Dependencies
 
@@ -416,10 +476,31 @@ with the project; any future AI wanting the same confidence must rebuild equival
 scratch. There is no CI configuration (no `.github/workflows`, no `Makefile`, no `package.json` test
 script) anywhere in the repository.
 
-## 18. Known Bugs
+## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
-None currently known to be **open**. Bugs found and fixed *during* development (documented for
-historical awareness, not because they still exist):
+**Open, discovered this session, not yet fixed:**
+- `js/app-shell.js` orphaned CSS: ~13 pages still carry unused `.suite-hub`/`.hub-links`/`.hub-banner`
+  CSS rules in their `<style>` blocks even though the actual HTML elements were already removed by an
+  earlier pass. Cosmetic dead weight, not a functional bug — deliberately left alone this session to
+  avoid the regression risk of touching 13 files' CSS without visually verifying each one.
+- `Nomen_Adjektiv_Trainer.html`'s `ADJS` array has ~101 of 337 entries (30%) that either aren't real
+  adjectives (verbs/nouns like "entschuldigen", "Chef", "Freund" got mixed in) or are missing the
+  `komp` field the comparative/superlative practice mode needs. `diffHighlight()` and its caller were
+  hardened against this (see the merge-conflict-resolution changelog entry below) so it no longer
+  crashes, but the underlying data contamination itself is unfixed — a content-cleanup task, not a
+  code bug.
+- Streak (`dc_meta_v1`) only advances when studying through `deutsch-coach.html` — no other trainer
+  bumps it, even though `js/progress-aggregator.js` now surfaces it app-wide. A learner who only uses
+  e.g. `Verb_Transformation_Trainer.html` will see a streak stuck at 0 despite real daily practice.
+  Not fixed this session — changing what bumps the streak is a real behavior change to existing users'
+  data and needs a deliberate decision, not a silent patch.
+- The mobile hamburger menu button (`#menuBtn`) never worked on any page, on any viewport, because its
+  click handler looked up the sidebar via the wrong id (`app-sidebar`, actually its CSS class — the
+  real id is `sidebar`). **Fixed this session** (see changelog) — listed here so future agents know
+  this class of bug (wrong id used in `getElementById`) has precedent in this codebase and is worth
+  double-checking elsewhere.
+
+**Bugs found and fixed during earlier development** (kept for historical awareness):
 - Satzbau_Trainer: an early version independently rolled each sentence slot rather than picking whole
   pre-verified sentences, which could produce ungrammatical output (e.g. `*"Du kaufe"`); fixed before
   shipping by switching to whole-variant selection (Section 25).
@@ -527,20 +608,55 @@ detected with `'speechSynthesis' in window` etc.) rather than throwing when unsu
   graceful degradation, not a bug, but worth knowing before assuming "coverage" numbers are commitments
   rather than best-effort snapshots.
 
-## 26. Future Work
+## 26. Future Work (rewritten — prioritized backlog for the "premium platform" transformation)
 
-Recorded as open/pending as of this document's creation (not verified against the very latest state of
-the conversation beyond what was inspected this pass):
-- Extend the English-UI translation pass (done for `Verb_Transformation_Trainer.html`) to
-  `Nomen_Adjektiv_Trainer.html`, `Satzbau_Trainer.html`, and possibly the main app — offered to the user,
-  not yet confirmed/actioned as of this document's creation.
-- Audio coverage for verbs 51+ (only verbs 1–50 have a recorded MP3 companion).
-- A2-level content depth in the main app beyond what currently exists (flagged in-source as thin).
-- No mechanism currently exists (and none is planned in visible source comments) to reconcile the Excel
-  workbooks with the HTML apps' embedded data — if this is ever desired, it would need to be built from
-  scratch.
-- Getting the local `.git` repository connected to an actual remote (e.g. GitHub), if the user wants
-  real version control instead of relying on chat history.
+The product brief this session worked from asked for a full transformation of 26 disconnected pages
+into one coherent Home/Learn/Vocabulary/Grammar/Practice/Progress product. This session completed
+stabilization, progress unification, and repo cleanup (see the Section 28 changelog entry) but not
+the larger IA/content-unification work. In priority order for whoever picks this up next:
+
+**P0 (do first — small, no design decisions required):**
+- Clean the ~13 pages' orphaned `.suite-hub`/`.hub-links`/`.hub-banner` CSS rules (dead, unused, but
+  touching 13 files' `<style>` blocks needs visual verification per page — deliberately skipped this
+  session, see Section 18).
+- Decide what to do about the `ADJS` data contamination (~30% non-adjective/incomplete entries) in
+  `Nomen_Adjektiv_Trainer.html` — a content cleanup, not a code fix.
+
+**P1 (the actual product transformation — each is a real multi-page rebuild, not a small patch):**
+- Rebuild the primary navigation around Home/Learn/Vocabulary/Grammar/Practice/Progress instead of the
+  current flat "Navigation" list in `js/app-shell.js`'s sidebar (Home/Lernen/Prüfung/AI Coach/Tools).
+  `deutsch-coach.html` already has a genuinely reasonable dashboard + session UI (level breakdown,
+  Smart Learn CTA, multiple-choice cards) — the strongest starting point for "Home"/"Learn" rather than
+  building from scratch.
+- Unify the vocabulary experience: one entry point over `Verb_Transformation_Trainer.html` +
+  `Nomen_Adjektiv_Trainer.html` + `Wortschatz_Master_Grid.html`'s separate due/new/mastered/search UIs,
+  in learner-friendly language (no "SRS boxes," no localStorage key names visible).
+- Consolidate grammar: `Grammatik_Regel_Trainer.html`, `Satzbau_Trainer.html`,
+  `konnektoren_referenz.html`, `German_Grammar_Cheat_Codes.html` into one coherent flow instead of 4
+  separate link destinations.
+- Consolidate practice: `Sprech_Pruefungs_Simulator.html`, `Hoerverstehen_Diktat_Trainer.html`,
+  `Brief_Schreiben_Trainer.html`, `Dialog_Schatten_Trainer.html`, the audio players, and the AI coach
+  pages into one Practice section (speaking/listening/writing/dialogues/exam-prep/AI-assisted), with
+  AI positioned as part of practice rather than a standalone "AI Coach" nav item.
+- Finish (or abandon and remove) the `data/*.json` + `scripts/sync_data.py` consolidation — it's
+  currently a stale, disconnected snapshot (see Section 2) that risks misleading whoever finds it next
+  if left as-is.
+
+**P2 (polish, after P1 exists to polish):**
+- Full accessibility pass across the 21 individual trainer pages (only the shared shell got one this
+  session).
+- Full responsive verification at mobile/tablet/laptop/large-desktop for every page, not just the
+  shared shell (which was verified at 375px this session).
+- UI language consistency — still split arbitrarily by page (English-only in
+  `Verb_Transformation_Trainer.html`, German-only elsewhere).
+
+**P3 (only after the above; do not start here):**
+- Streak should arguably advance from any trainer, not only `deutsch-coach.html` — a real behavior
+  change to think through carefully (see Section 18), not a quick patch.
+- Audio coverage for verbs 51+ (only verbs 1–50 have a recorded MP3 companion) — unchanged from the
+  previous version of this document.
+- Reconciling the `.xlsx` workbooks with the HTML apps' embedded vocabulary data — no mechanism exists;
+  would need to be built from scratch if ever wanted.
 
 ## 27. AI Development Rules
 
@@ -871,6 +987,122 @@ memory of earlier sessions.
 #### Remaining Issues
 All items in Sections 18, 19, and 26 remain open. The "UNKNOWN — requires verification" items listed
 above are the most actionable next steps for whichever AI next touches the affected files.
+
+---
+
+### 2026-09-21/22 — AI: Claude Sonnet 5, branch `feature/production-learning-platform`
+
+#### Task
+A long multi-part session: (1) a series of live bug reports from the user working through the app
+(voice dropdown, dashboard stats, several crash-broken pages), fixed one at a time with headless-
+browser verification each time; (2) a merge of a large parallel refactor happening on `main` at the
+same time (another AI session extracting shared `js/*.js` files, which repeatedly dropped code in the
+process); (3) an explicit, large product brief asking for a full "premium learning platform"
+transformation, worked as far as this session's budget allowed rather than attempted in full.
+
+#### Files Changed (all verified in a real headless Chromium browser, not just read)
+`Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html`, `Wortschatz_Master_Grid.html`,
+`German_Grammar_Cheat_Codes.html`, `Sprech_Pruefungs_Simulator.html`, `Continuous_Verb_Speaker.html`,
+`Verben_Hoeren_EN_DE.html`, `deutsch-coach.html`, `index.html`, `js/tts-engine.js`, `js/app-shell.js`,
+`js/srs-engine.js` (added by the parallel session, consumed here), `js/progress-aggregator.js` (new),
+`sw.js`, `scripts/build.py` (moved + fixed), `PROJECT_KNOWLEDGE.md`. ~70 dead/one-off files moved to
+`/archive` (see `archive/README.md`); none deleted.
+
+#### Changes — bug fixes (each verified with a headless browser, console errors captured before/after)
+- Restored ~8 functions/data blocks the parallel refactor dropped while extracting shared files
+  (`meaningHTML`, `typLabel`/`typLabelNoun`/`typLabelAdj`, `PREFIX_DB`, `onVoiceChanged`,
+  `testPronunciation`, `escapeQuotes`, the `.forEach(v => v.uid = ...)` uid-assignment lines whose
+  absence silently collapsed every practice session to 1 card because every item shared
+  `uid: undefined`) across `Verb_Transformation_Trainer.html` and `Nomen_Adjektiv_Trainer.html`.
+- Fixed the voice-selection system in `js/tts-engine.js`: the `#voiceSelect` dropdown was never
+  actually populated with `<option>` elements (even when voices existed), `#voiceWarn` polled forever
+  with no timeout/fallback message, and — found via a mocked incremental-voice-list test — polling
+  stopped the instant it saw *any* voice, which on some systems (Windows especially) means it locks
+  onto a single default voice before the rest of the installed list loads.
+- Fixed `deutsch-coach.html` (the main app): a `const todayISO` collided with `gamification.js`'s
+  global `function todayISO()` (different, UTC-vs-local semantics — kept the correct local-time one
+  under a new name rather than falling back to the colliding UTC version), and 5 copies of a stray
+  incomplete `const skipBtn` line (no initializer) were silently killing the surrounding `<script>`
+  block, which is also why `poolForLevel` looked "not defined" (declared in that same dead block).
+- Fixed `Continuous_Verb_Speaker.html`/`Verben_Hoeren_EN_DE.html`: both declare their own richer
+  dual-language (`deVoices`/`enVoices`) voice picker that collided with `js/tts-engine.js`'s own
+  `let deVoices` (a hard `SyntaxError`, not a warning) — renamed the page-local variable rather than
+  removing either implementation, since the pages' own logic is more capable than the shared one.
+- Fixed `Sprech_Pruefungs_Simulator.html`/`German_Grammar_Cheat_Codes.html`: both had
+  `document.addEventListener('DOMContentLoaded', function(){ ... };` — a `};` where `});` was needed,
+  killing the whole script.
+- Fixed `Wortschatz_Master_Grid.html`: a stray `` `r`n `` literal (Windows/PowerShell find-replace
+  artifact) inside a template literal broke the script at parse time; underneath that, the code
+  reading `NOUNS`/`ADJS` used field names (`n.singular`/`n.article`/`n.plural`/`a.word`/`a.super`)
+  that don't match the real schema (`n.sg`/`n.a`/`n.pl`/`a.w`/`a.sup`), so every noun/adjective got
+  `primaryWord: undefined` and crashed the sort. Also found and fixed a real regression from the
+  refactor: `KNOWN_SISTER_VERBS` entries became `{v, en, ta}` objects but search/render/
+  `getSisterMeaning` still expected plain strings — crashed the search box on every keystroke and
+  printed "[object Object]" for two of three sister-verb meanings.
+- **The mobile hamburger menu never worked, anywhere**, discovered while adding ARIA labels:
+  `js/app-shell.js` looked up the sidebar via `document.getElementById('app-sidebar')`, but the
+  sidebar's actual `id` is `'sidebar'` (`app-sidebar` is its CSS *class*). Fixed; verified the drawer
+  actually opens at a 375px viewport.
+
+#### Changes — progress unification (Section 14 has the full, verified breakdown)
+Added `js/progress-aggregator.js`: aggregates only the 3 genuinely SRS-shaped progress stores
+(`dc`/`na`/`vt`) into real due/difficult/mastered/reviewed counts, reusing the already-tested
+`SRSEngine.Engine` class (read-only, no schema changes, no writes). Deliberately does NOT blend in
+`gp_progress_v1`/`sb_progress_v1`/studio-completion data, since those measure different things and
+mixing them would itself be a form of fake statistics. Replaced three separate instances of fabricated
+numbers with this real data: (1) the shared sidebar's "Level Progress" bars, which cascaded one
+combined mastered-count through arbitrary invented per-level thresholds (150/250/300/300 words) with
+no basis in real per-level vocabulary size; (2) the shared header's "New" tile, which was
+`ESTIMATED_TOTAL = 1500; new = 1500 - seen` — a hardcoded guess that also never counted
+`vt_progress_v1` at all; (3) `index.html`'s own separate header, which had hardcoded placeholder
+numbers (12/4/20/450) that only got overwritten when real due-count was nonzero — the very first bug
+identified at the start of this session, never actually fixed until now. Wired `js/srs-engine.js` +
+`js/progress-aggregator.js` into all 23 pages that load `js/app-shell.js` (previously only 3 did).
+Verified: seeded realistic progress data and confirmed the header/sidebar numbers are mathematically
+correct against it; confirmed a zero-data "new user" now shows honest zeros instead of fake numbers.
+
+#### Changes — repository cleanup
+Moved ~70 files (one-off `patch_*.py`/`fix_*.py`/`restore_*.py` scripts from earlier sessions, ad hoc
+test scripts, 4 dead HTML duplicates never linked from any nav/README/manifest, a stray 2.9MB source
+`.docx`, stray diff dumps) to `/archive` after confirming via `grep` that nothing references them —
+see `archive/README.md`. Nothing was deleted. Moved the two still-useful maintenance scripts
+(`build.py`, `sync_data.py`) to `/scripts`; fixed `build.py` to `os.chdir` to the repo root on startup
+so it still works from its new location, and added the two shared JS files it was missing from its
+own asset list. Re-ran it to regenerate `sw.js`'s cache list (now only lists real, live files).
+
+#### Changes — accessibility / mobile
+Basic, targeted ARIA pass on the shared shell (used on every page; previously zero `aria-*` attributes
+anywhere in the codebase): labels on icon-only buttons, `aria-expanded`/`aria-controls` on the mobile
+menu button reflecting real state, `aria-hidden` on decorative icons, a named nav landmark,
+`role="progressbar"` with real `aria-valuenow`/min/max on the mastery bar.
+
+#### Testing
+Every fix in this entry was verified by loading the actual file in a headless Chromium browser
+(`/opt/pw-browsers/chromium-1194`) via Playwright, capturing `pageerror`/console events, and — for the
+functional fixes — actually clicking through the relevant flow (building a practice session, revealing
+and rating cards, searching, opening the mobile drawer) rather than just checking for a clean load. A
+full-suite sweep (`for f in *.html: load, wait, capture errors`) was re-run after every batch of
+changes; the session ended with **zero console errors across all 26 real pages** (confirmed
+immediately before this changelog entry was written).
+
+#### What was explicitly requested but NOT completed this session (honest accounting)
+The user's brief asked for a full product transformation: a rebuilt Home/Learn/Vocabulary/Grammar/
+Practice/Progress information architecture, a unified vocabulary experience replacing 3+ separate
+trainer pages, a consolidated grammar experience replacing 4+ separate pages, a consolidated practice
+experience replacing 6+ separate pages, full responsive testing at 4 breakpoints, a complete
+accessibility pass across all 26 pages (only the shared shell got one), and AI features woven into the
+learning flow rather than living as a separate nav item. **None of the above IA/content-unification
+work was done.** What exists today is still 21 separate tool pages behind a shared sidebar, not one
+coherent Vocabulary/Grammar/Practice flow — `deutsch-coach.html` already has a reasonably capable
+dashboard and session UI (level breakdown, Smart Learn, multiple-choice cards) that could plausibly
+become the real "Learn" surface, but that decision and the actual consolidation work were not made
+this session. This was a deliberate scoping choice given the realistic size of "rebuild the IA and
+unify 21 tools" (genuinely multiple further sessions of work, not something to rush for the sake of
+claiming completion) rather than an oversight — see Section 26 for the prioritized remaining backlog.
+
+#### Remaining Issues
+See the rewritten Sections 2, 14, 18 above for the current accurate state. Section 26 below has the
+prioritized backlog for the IA/vocabulary/grammar/practice unification work that was not attempted.
 
 ---
 
