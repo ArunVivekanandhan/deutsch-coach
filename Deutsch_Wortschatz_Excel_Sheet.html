@@ -1819,63 +1819,63 @@ if (document.readyState === 'loading') {
         <tr id="${r.id}" onclick="selectRow(this, '${r.word}')">
           <td class="row-hdr-cell col-row-num">${idx + 1}</td>
           
-          <!-- Wort + Audio -->
+          <!-- A: English -->
+          <td class="col-en" style="font-weight:600;">${r.en}</td>
+          
+          <!-- B: Wort + Audio -->
           <td class="col-word" style="font-weight:700;">
             ${r.word}
             <button class="audio-btn-mini" onclick="event.stopPropagation(); speakWord('${r.word}')" title="Aussprache">🔊</button>
           </td>
 
-          <!-- Wortart -->
-          <td class="col-pos"><span class="badge ${posBadgeClass}">${r.pos}</span></td>
-
-          <!-- Level -->
-          <td class="col-level" style="font-family:'IBM Plex Mono',monospace; font-weight:600;">${r.level}</td>
-
-          <!-- Artikel -->
-          <td class="col-gender">${genderHTML}</td>
-
-          <!-- Nomen -->
+          <!-- C: Nomen -->
           <td class="col-noun">
             ${r.noun}
             <button class="audio-btn-mini" onclick="event.stopPropagation(); speakWord('${r.noun}')" title="Aussprache">🔊</button>
           </td>
 
-          <!-- Verb -->
+          <!-- D: Präteritum -->
+          <td class="col-praet" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--excel-green);">${r.praet || '�'}</td>
+
+          <!-- E: Perfekt -->
+          <td class="col-perfekt" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--purple);">${r.perfekt || '�'}</td>
+
+          <!-- F: Adjektiv -->
+          <td class="col-adj">${r.adj || '�'}</td>
+
+          <!-- G: Sister Verbs -->
+          <td class="col-sisters" style="font-size:11px; color:var(--ink-soft);" title="${r.sisters}">
+            ${r.sisters || '�'}
+          </td>
+
+          <!-- H: Tamil -->
+          <td class="col-ta" style="color:var(--gold); font-weight:600;">
+            ${r.ta} ${r.ta_translit ? `<small style="font-weight:normal; opacity:0.8;">(${r.ta_translit})</small>` : ''}
+          </td>
+
+          <!-- I: Thema -->
+          <td class="col-topic" style="font-size:11px; color:var(--ink-muted);">${r.topic}</td>
+
+          <!-- J: Mnemonic -->
+          <td class="col-mnemonic" style="font-size:11px; color:var(--ink-muted);" title="${r.mnemonic}">${r.mnemonic}</td>
+
+          <!-- K: Wortart -->
+          <td class="col-pos"><span class="badge ${posBadgeClass}">${r.pos}</span></td>
+
+          <!-- L: Level -->
+          <td class="col-level" style="font-family:'IBM Plex Mono',monospace; font-weight:600;">${r.level}</td>
+
+          <!-- M: Artikel -->
+          <td class="col-gender">${genderHTML}</td>
+
+          <!-- N: Verb -->
           <td class="col-verb">
             ${r.verb}
             <button class="audio-btn-mini" onclick="event.stopPropagation(); speakWord('${r.verb}')" title="Aussprache">🔊</button>
           </td>
 
-          <!-- Präsens -->
+          <!-- O: Präsens -->
           <td class="col-praesens" style="font-family:'IBM Plex Mono',monospace;">${r.praesens}</td>
-
-          <!-- Präteritum -->
-          <td class="col-praet" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--excel-green);">${r.praet || '—'}</td>
-
-          <!-- Perfekt -->
-          <td class="col-perfekt" style="font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--purple);">${r.perfekt || '—'}</td>
-
-          <!-- Adjektiv -->
-          <td class="col-adj">${r.adj || '—'}</td>
-
-          <!-- Sister Verbs -->
-          <td class="col-sisters" style="font-size:11px; color:var(--ink-soft);" title="${r.sisters}">
-            ${r.sisters || '—'}
-          </td>
-
-          <!-- English -->
-          <td class="col-en" style="font-weight:600;">${r.en}</td>
-
-          <!-- Tamil -->
-          <td class="col-ta" style="color:var(--gold); font-weight:600;">
-            ${r.ta} ${r.ta_translit ? `<small style="font-weight:normal; opacity:0.8;">(${r.ta_translit})</small>` : ''}
-          </td>
-
-          <!-- Thema -->
-          <td class="col-topic" style="font-size:11px; color:var(--ink-muted);">${r.topic}</td>
-
-          <!-- Mnemonic -->
-          <td class="col-mnemonic" style="font-size:11px; color:var(--ink-muted);" title="${r.mnemonic}">${r.mnemonic}</td>
         </tr>`;
     });
 
