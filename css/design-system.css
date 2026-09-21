@@ -543,3 +543,9 @@ p { margin: 0 0 var(--space-md) 0; color: var(--color-ink-soft); }
   }
 }
 
+
+
+/* Hide AI Features if API Key not configured */
+body:not(.ai-enabled) .ai-feature {
+    display: none !important;
+}

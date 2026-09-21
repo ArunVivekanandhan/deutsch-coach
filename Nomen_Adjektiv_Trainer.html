@@ -1415,7 +1415,7 @@ function renderNounMemoryHack(v){
       <div id="aiMnemonicBox_${v.sg}" style="display:${JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? 'block' : 'none'}; background:#fff; padding:8px; border-left:3px solid var(--gold); border-radius:4px; font-size:13px; margin-bottom:8px;">
         ${JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? '<strong>💡 KI Eselsbrücke:</strong><br>' + JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg].replace(/\n/g, '<br>') : ''}
       </div>
-      ${!JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? `<button id="btnAiMnemonic_${v.sg}" class="quick-tool-btn" style="margin-bottom:8px; display:inline-block;" onclick="requestMnemonicAI('${v.sg}', '${v.a}', '${escapeQuotes(v.en)}', 'btnAiMnemonic_${v.sg}', 'aiMnemonicBox_${v.sg}')">💡 Eselsbrücke (Mnemonic) KI</button>` : ''}
+      ${!JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? `<button id="btnAiMnemonic_${v.sg}" class="quick-tool-btn ai-feature" style="margin-bottom:8px; display:inline-block;" onclick="requestMnemonicAI('${v.sg}', '${v.a}', '${escapeQuotes(v.en)}', 'btnAiMnemonic_${v.sg}', 'aiMnemonicBox_${v.sg}')">💡 Eselsbrücke (Mnemonic) KI</button>` : ''}
 
       <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
         <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧠 2. NOUN MEMORY TRICK (நினைவாற்றல் உத்தி):</div>
