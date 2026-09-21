@@ -608,11 +608,11 @@
           <th class="col-praet">D</th>
           <th class="col-perfekt">E</th>
           <th class="col-adj">F</th>
-          <th class="col-sisters">G</th>
-          <th class="col-ta">H</th>
-          <th class="col-topic">I</th>
-          <th class="col-mnemonic">J</th>
-          <th class="col-pos">K</th>
+          <th class="col-mnemonic">G</th>
+          <th class="col-pos">H</th>
+          <th class="col-sisters">I</th>
+          <th class="col-ta">J</th>
+          <th class="col-topic">K</th>
           <th class="col-level">L</th>
           <th class="col-gender">M</th>
           <th class="col-verb">N</th>
@@ -627,11 +627,11 @@
           <th class="col-praet" onclick="sortBy('praet')">Präteritum <span class="sort-indicator" id="sort_praet"></span></th>
           <th class="col-perfekt" onclick="sortBy('perfekt')">Perfekt <span class="sort-indicator" id="sort_perfekt"></span></th>
           <th class="col-adj" onclick="sortBy('adj')">Adjektiv (-bar / -end) <span class="sort-indicator" id="sort_adj"></span></th>
+          <th class="col-mnemonic" onclick="sortBy('mnemonic')">Merkhilfe & Punarchi <span class="sort-indicator" id="sort_mnemonic"></span></th>
+          <th class="col-pos" onclick="sortBy('pos')">Wortart <span class="sort-indicator" id="sort_pos"></span></th>
           <th class="col-sisters" onclick="sortBy('sisters')">Sister Verbs & Bedeutungen <span class="sort-indicator" id="sort_sisters"></span></th>
           <th class="col-ta" onclick="sortBy('ta')">🇮🇳 தமிழ் Meaning <span class="sort-indicator" id="sort_ta"></span></th>
           <th class="col-topic" onclick="sortBy('topic')">Thema <span class="sort-indicator" id="sort_topic"></span></th>
-          <th class="col-mnemonic" onclick="sortBy('mnemonic')">Merkhilfe & Punarchi <span class="sort-indicator" id="sort_mnemonic"></span></th>
-          <th class="col-pos" onclick="sortBy('pos')">Wortart <span class="sort-indicator" id="sort_pos"></span></th>
           <th class="col-level" onclick="sortBy('level')">Level <span class="sort-indicator" id="sort_level"></span></th>
           <th class="col-gender" onclick="sortBy('gender')">Artikel <span class="sort-indicator" id="sort_gender"></span></th>
           <th class="col-verb" onclick="sortBy('verb')">Verb (Infinitiv) <span class="sort-indicator" id="sort_verb"></span></th>
@@ -1264,26 +1264,26 @@ if (document.readyState === 'loading') {
           <!-- F: Adjektiv -->
           <td class="col-adj">${r.adj || '�'}</td>
 
-          <!-- G: Sister Verbs -->
+<!-- G: Mnemonic -->
+          <td class="col-mnemonic" style="font-size:11px; color:var(--ink-muted);" title="${r.mnemonic}">${r.mnemonic}</td>
+
+          <!-- H: Wortart -->
+          <td class="col-pos"><span class="badge ${posBadgeClass}">${r.pos}</span></td>
+
+          <!-- I: Sister Verbs -->
           <td class="col-sisters" style="font-size:11px; color:var(--ink-soft);" title="${r.sisters}">
             ${r.sisters || '�'}
           </td>
 
-          <!-- H: Tamil -->
+          <!-- J: Tamil -->
           <td class="col-ta" style="color:var(--gold); font-weight:600;">
             ${r.ta} ${r.ta_translit ? `<small style="font-weight:normal; opacity:0.8;">(${r.ta_translit})</small>` : ''}
           </td>
 
-          <!-- I: Thema -->
+          <!-- K: Thema -->
           <td class="col-topic" style="font-size:11px; color:var(--ink-muted);">${r.topic}</td>
 
-          <!-- J: Mnemonic -->
-          <td class="col-mnemonic" style="font-size:11px; color:var(--ink-muted);" title="${r.mnemonic}">${r.mnemonic}</td>
-
-          <!-- K: Wortart -->
-          <td class="col-pos"><span class="badge ${posBadgeClass}">${r.pos}</span></td>
-
-          <!-- L: Level -->
+                    <!-- L: Level -->
           <td class="col-level" style="font-family:'IBM Plex Mono',monospace; font-weight:600;">${r.level}</td>
 
           <!-- M: Artikel -->
