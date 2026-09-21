@@ -419,7 +419,11 @@
     }
   });
 
-  window.onload = init;
+  if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
   <script src="js/app-shell.js"></script>
 </body>

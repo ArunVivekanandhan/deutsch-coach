@@ -373,7 +373,11 @@
     }
   }
 
-  window.onload = loadSettings;
+  if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadSettings);
+} else {
+  loadSettings();
+}
 </script>
   <script src="js/app-shell.js"></script>
 </body>
