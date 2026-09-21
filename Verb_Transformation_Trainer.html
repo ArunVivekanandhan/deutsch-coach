@@ -1524,6 +1524,21 @@ function meaningPromptText(v){
   return v.en || '';
 }
 
+const LEVELS = [{k:'alle',l:'All'},{k:'A2',l:'A2'},{k:'B1',l:'B1'}];
+const TYPES = [{k:'alle',l:'All',dot:null},{k:'weak',l:'Weak',dot:'dot-weak'},{k:'strong',l:'Strong',dot:'dot-strong'},{k:'mixed',l:'Mixed',dot:'dot-mixed'}];
+
+let curLevel = 'alle';
+let curType = 'alle';
+let curDir = 'de2en';   // 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
+let nounMode = false;
+let meaningLang = 'en';
+const LANGS = [{k:'en',l:'English'},{k:'ta',l:'தமிழ்'},{k:'both',l:'Both'}];
+const DIRS = [{k:'de2en',l:'German → Meaning'},{k:'en2de',l:'Meaning → German'}];
+
+let session = [];
+let sessionIdx = 0;
+
+
 /* ---- filtering & UI ---- */
 function pool(){
   return VERBS.filter(v=>
@@ -1601,13 +1616,13 @@ function buildQueue(p, limit){
   return shuffleArr(out);
 }
 
-document.getElementById('startBtn').addEventListener('click', ()=>{
+function startPractice(){
   const p = pool();
   if(p.length===0){ alert('Keine Verben in dieser Auswahl.'); return; }
   session = buildQueue(p, Math.min(20, p.length));
   sessionIdx = 0;
   renderCard();
-});
+}
 
 function renderCard(){
   const stage = document.getElementById('stage');

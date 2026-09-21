@@ -1218,6 +1218,18 @@ function meaningPromptText(v){
   return v.en || '';
 }
 
+let curMode = 'nomen';       // 'nomen' | 'adj'
+let curFilt1 = 'alle';       // level (nomen) or source (adj)
+let curFilt2 = 'alle';       // plural-typ (nomen) or comparison-typ (adj)
+let curDir = 'de2en';        // 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
+let meaningLang = 'en';
+const LANGS = [{k:'en',l:'English'},{k:'ta',l:'தமிழ்'},{k:'both',l:'Beide'}];
+const DIRS = [{k:'de2en',l:'Deutsch → Bedeutung'},{k:'en2de',l:'Bedeutung → Deutsch'}];
+
+let session = [];
+let sessionIdx = 0;
+
+
 /* ---- filtering & UI ---- */
 function pool(){
     if(curMode==='nomen'){
@@ -1336,13 +1348,13 @@ add(diff); }
     return shuffleArr(out);
   }
   
-  document.getElementById('startBtn').addEventListener('click', ()=>{
+  function startPractice(){
     const p = pool();
     if(p.length===0){ alert('Keine Wörter in dieser Auswahl.'); return; }
     session = buildQueue(p, Math.min(20, p.length));
     sessionIdx = 0;
     renderCard();
-  });
+}
   
   function renderCard(){
   const stage = document.getElementById('stage');
