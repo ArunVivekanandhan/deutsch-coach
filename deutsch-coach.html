@@ -3110,7 +3110,8 @@ function renderInfoPanel(card){
 
   return `
     <div class="revealbox">
-      <div class="en-word">${displayMeaning}</div>
+      <div class="de-word" style="font-size:28px; font-weight:bold; color:var(--ink); margin-bottom:4px;">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
+      <div class="en-word" style="margin-bottom:12px;">${displayMeaning}</div>
       ${card.a ? `<div class="infoline"><b>Artikel:</b> ${card.a}</div>` : ""}
       ${pluralLine}
       ${verbBlock}
@@ -3166,18 +3167,18 @@ function difficultBanner(card){
 function renderRecallMeaning(card, advanceFn){
   const stripe = `<div class="stripe ${card.cat}"></div>`;
   const box = PROGRESS[card.uid] ? BOX_NAME[PROGRESS[card.uid].box] : "Neu";
+  const displayMeaning = window.langPref === 'ta' && card.ta ? card.ta : card.en;
   return {
     html: `
     ${difficultBanner(card)}
     <div class="studycard">
       ${stripe}
       ${metaHTML(card)}
-      <div class="qlabel">Deutsch → Englisch &nbsp;·&nbsp; 📦 ${box}</div>
+      <div class="qlabel">Englisch → Deutsch &nbsp;·&nbsp; 📦 ${box}</div>
       <div class="prompt">
         ${promptIconHTML(card)}
-        ${card.a?`<div class="artikel-tag">${card.a}</div>`:""}
-        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${card.w} <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
-        <div class="subq">Was bedeutet das? · What does this mean? (Think first…)</div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${displayMeaning}</div>
+        <div class="subq">Was ist das auf Deutsch? · What is this in German?</div>
       </div>
       <div id="cardBtnGroup" style="display:flex; gap:8px; padding:0 18px 14px;">
         <button class="thinkbtn" id="revealBtn" style="flex:2; margin:0;">Antwort zeigen 🔎 · Reveal</button>

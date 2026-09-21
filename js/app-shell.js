@@ -132,8 +132,8 @@ function renderAppShell() {
             legacyWrapper.appendChild(child);
         });
         
-        // Hide all old suite-hubs automatically
-        const oldHubs = legacyWrapper.querySelectorAll('.suite-hub, .appshell > .sidebar, .hub-links, .hub-banner');
+        // Hide old redundant sidebars automatically, but keep .suite-hub for cross-navigation
+        const oldHubs = legacyWrapper.querySelectorAll('.appshell > .sidebar, .hub-links, .hub-banner');
         oldHubs.forEach(h => h.style.display = 'none');
         
         content.appendChild(legacyWrapper);
@@ -229,10 +229,12 @@ function renderAppShell() {
                 const isDark = document.body.getAttribute('data-theme') === 'dark';
                 if (isDark) {
                     document.body.removeAttribute('data-theme');
+                    document.body.classList.remove('dark');
                     localStorage.setItem('de_theme', 'light');
                     themeBtn.innerHTML = '<i data-lucide="moon"></i>';
                 } else {
                     document.body.setAttribute('data-theme', 'dark');
+                    document.body.classList.add('dark');
                     localStorage.setItem('de_theme', 'dark');
                     themeBtn.innerHTML = '<i data-lucide="sun"></i>';
                 }
@@ -241,6 +243,7 @@ function renderAppShell() {
             // Initial setup for theme icon
             if (localStorage.getItem('de_theme') === 'dark') {
                 themeBtn.innerHTML = '<i data-lucide="sun"></i>';
+                document.body.classList.add('dark');
             }
         }
 
@@ -260,4 +263,5 @@ if (document.readyState === 'loading') {
 const savedTheme = localStorage.getItem('de_theme');
 if (savedTheme === 'dark') {
     document.body.setAttribute('data-theme', 'dark');
+    document.body.classList.add('dark');
 }
