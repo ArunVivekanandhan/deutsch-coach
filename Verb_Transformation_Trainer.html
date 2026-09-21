@@ -1524,6 +1524,91 @@ function meaningPromptText(v){
   return v.en || '';
 }
 
+/* ---- filtering & UI ---- */
+function pool(){
+  return VERBS.filter(v=>
+    (curLevel==='alle' || v.level===curLevel) &&
+    (curType==='alle' || v.typ===curType)
+  );
+}
+
+/* ---- UI: chips ---- */
+function renderChips(){
+  const lc = document.getElementById('levelChips');
+  lc.innerHTML = LEVELS.map(o=>{
+    const cnt = VERBS.filter(v=>(o.k==='alle'||v.level===o.k) && (curType==='alle'||v.typ===curType)).length;
+    return `<div class="chip ${curLevel===o.k?'active':''}" data-level="${o.k}">${o.l} (${cnt})</div>`;
+  }).join('');
+  lc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curLevel=el.dataset.level; refreshAll(); });
+
+  const tc = document.getElementById('typeChips');
+  tc.innerHTML = TYPES.map(o=>{
+    const cnt = VERBS.filter(v=>(curLevel==='alle'||v.level===curLevel) && (o.k==='alle'||v.typ===o.k)).length;
+    return `<div class="chip ${curType===o.k?'active':''}" data-type="${o.k}">${o.dot?`<span class="dot ${o.dot}"></span>`:''}${o.l} (${cnt})</div>`;
+  }).join('');
+  tc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curType=el.dataset.type; refreshAll(); });
+
+  const gc = document.getElementById('langChips');
+  gc.innerHTML = LANGS.map(o=> `<div class="chip ${meaningLang===o.k?'active':''}" data-lang="${o.k}">${o.l}</div>`).join('');
+  gc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ meaningLang=el.dataset.lang; refreshAll(); });
+
+  const dc = document.getElementById('dirChips');
+  dc.innerHTML = DIRS.map(o=> `<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
+  dc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curDir=el.dataset.dir; refreshAll(); });
+}
+
+function renderDash(){
+  const p = pool();
+  const due = p.filter(v=>isDue(v.uid)).length;
+  const fresh = p.filter(v=>isNew(v.uid)).length;
+  const diff = p.filter(v=>isDifficult(v.uid)).length;
+  const mastered = p.filter(v=>isMastered(v.uid)).length;
+  document.getElementById('poolCount').textContent = `${p.length} verbs in this selection`;
+  document.getElementById('dashGrid').innerHTML = `
+    <div class="dashcard"><div class="num">${due}</div><div class="lbl">DUE</div></div>
+    <div class="dashcard"><div class="num">${diff}</div><div class="lbl">DIFFICULT</div></div>
+    <div class="dashcard"><div class="num">${fresh}</div><div class="lbl">NEW</div></div>
+    <div class="dashcard"><div class="num">${mastered}</div><div class="lbl">MASTERED</div></div>
+  `;
+}
+
+function refreshAll(){ renderChips(); renderDash(); }
+
+document.getElementById('nounToggle').addEventListener('change', e=>{ nounMode = e.target.checked; });
+
+/* ---- Smart queue ---- */
+function shuffleArr(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function buildQueue(p, limit){
+  limit = limit || 20;
+  const used = {}; const out = [];
+  function add(list, cap){
+    let n=0;
+    for(const v of list){
+      if(used[v.uid]) continue;
+      if(cap!==undefined && n>=cap) break;
+      out.push(v); used[v.uid]=true; n++;
+      if(out.length>=limit) return;
+    }
+  }
+  const overdue = p.filter(v=>!isNew(v.uid) && isDue(v.uid)).sort((a,b)=>(PROGRESS[a.uid].nextDue).localeCompare(PROGRESS[b.uid].nextDue));
+  add(overdue);
+  if(out.length<limit){ const diff = p.filter(v=>isDifficult(v.uid)).sort((a,b)=>PROGRESS[b.uid].timesWrong-PROGRESS[a.uid].timesWrong); add(diff); }
+  if(out.length<limit){ const recent = p.filter(v=>!isNew(v.uid) && PROGRESS[v.uid].box<=2); add(recent); }
+  if(out.length<limit){ add(shuffleArr(p.filter(v=>isNew(v.uid))), Math.max(4, Math.floor(limit*0.5))); }
+  if(out.length<limit){ add(shuffleArr(p.filter(v=>isMastered(v.uid))), 3); }
+  if(out.length<limit){ add(shuffleArr(p)); }
+  return shuffleArr(out);
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  const p = pool();
+  if(p.length===0){ alert('Keine Verben in dieser Auswahl.'); return; }
+  session = buildQueue(p, Math.min(20, p.length));
+  sessionIdx = 0;
+  renderCard();
+});
+
 function renderCard(){
   const stage = document.getElementById('stage');
   if(sessionIdx >= session.length){

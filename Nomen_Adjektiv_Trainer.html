@@ -1218,7 +1218,133 @@ function meaningPromptText(v){
   return v.en || '';
 }
 
-function renderCard(){
+/* ---- filtering & UI ---- */
+function pool(){
+    if(curMode==='nomen'){
+      return NOUNS.filter(v=> (curFilt1==='alle'||v.level===curFilt1) && (curFilt2==='alle'||v.typ===curFilt2));
+    } else {
+      return ADJS.filter(v=> (curFilt1==='alle'||v.source===curFilt1) && (curFilt2==='alle'||v.typ===curFilt2));
+    }
+  }
+  
+  function renderChips(){
+    const levels = curMode==='nomen' ? NOUN_LEVELS : ADJ_SOURCES;
+    const types = curMode==='nomen' ? NOUN_TYPES : ADJ_TYPES;
+    document.getElementById('filt1Label').textContent = curMode==='nomen' ? 'Niveau' : 'Quelle';
+    document.getElementById('filt2Label').textContent = curMode==='nomen' ? 'Plural-Typ (Schwierigkeit)' : 'Steigerungs-Typ (Schwierigkeit)';
+  
+    const c1 = document.getElementById('filt1Chips');
+    c1.innerHTML = levels.map(o=>{
+      const cnt = (curMode==='nomen'?NOUNS:ADJS).filter(v=>{
+        const f1ok = o.k==='alle' || (curMode==='nomen'?v.level:v.source)===o.k;
+        const f2ok = curFilt2==='alle' || v.typ===curFilt2;
+        return f1ok && f2ok;
+      }).length;
+      return `<div class="chip ${curFilt1===o.k?'active':''}" data-f1="${o.k}">${o.l} (${cnt})</div>`;
+    }).join('');
+    c1.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curFilt1=el.dataset.f1; refreshAll(); });
+  
+    const c2 = document.getElementById('filt2Chips');
+    c2.innerHTML = types.map(o=>{
+      const cnt = (curMode==='nomen'?NOUNS:ADJS).filter(v=>{
+        const f1ok = curFilt1==='alle' || (curMode==='nomen'?v.level:v.source)===curFilt1;
+        const f2ok = o.k==='alle' || v.typ===o.k;
+        return f1ok && f2ok;
+      }).length;
+      return `<div class="chip ${curFilt2===o.k?'active':''}" data-f2="${o.k}">${o.dot?`<span class="dot ${o.dot}"></span>`:''}${o.l} 
+(${cnt})</div>`;
+    }).join('');
+    c2.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curFilt2=el.dataset.f2; refreshAll(); });
+  
+    const gc = document.getElementById('langChips');
+    gc.innerHTML = LANGS.map(o=>`<div class="chip ${meaningLang===o.k?'active':''}" data-lang="${o.k}">${o.l}</div>`).join('');
+    gc.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ meaningLang=el.dataset.lang; refreshAll(); });
+  
+    const dc = document.getElementById('dirChips');
+    dc.innerHTML = DIRS.map(o=>`<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
+    dc.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curDir=el.dataset.dir; refreshAll(); });
+  }
+  
+  function renderDash(){
+    const p = pool();
+    const due = p.filter(v=>isDue(v.uid)).length;
+    const fresh = p.filter(v=>isNew(v.uid)).length;
+    const diff = p.filter(v=>isDifficult(v.uid)).length;
+    const mastered = p.filter(v=>isMastered(v.uid)).length;
+    document.getElementById('poolCount').textContent = `${p.length} Wörter in dieser Auswahl`;
+    document.getElementById('dashGrid').innerHTML = `
+      <div class="dashcard"><div class="num">${due}</div><div class="lbl">FÄLLIG</div></div>
+      <div class="dashcard"><div class="num">${diff}</div><div class="lbl">SCHWIERIG</div></div>
+      <div class="dashcard"><div class="num">${fresh}</div><div class="lbl">NEU</div></div>
+      <div class="dashcard"><div class="num">${mastered}</div><div class="lbl">GEMEISTERT</div></div>`;
+  }
+  
+  function renderRuleRef(){
+    const ref = document.getElementById('ruleRef');
+    if(curMode==='nomen'){
+      ref.innerHTML = `<div class="filterbox" style="margin-top:6px;">
+        <div class="filterlabel">Die Plural-Typen kurz erklärt</div>
+        <div style="font-size:12px; line-height:1.7;">
+        <b>-en/-n:</b> meist feminine Nomen (die Frau → die Frauen)<br>
+        <b>-e:</b> viele maskuline/neutrale Nomen, oft mit Umlaut (der Sohn → die Söhne)<br>
+        <b>-er:</b> meist neutrale Nomen, fast immer mit Umlaut (das Kind → die Kinder)<br>
+        <b>-s:</b> Fremdwörter/Anglizismen (das Auto → die Autos)<br>
+        <b>unverändert:</b> maskulin/neutral auf -er/-en/-el/-chen (der Lehrer → die Lehrer)<br>
+        <b>nur Umlaut:</b> keine Endung, nur Vokaländerung (der Vogel → die Vögel)</div></div>`;
+    } else {
+      ref.innerHTML = `<div class="filterbox" style="margin-top:6px;">
+        <div class="filterlabel">Steigerung kurz erklärt</div>
+        <div style="font-size:12px; line-height:1.7;">
+        <b>Regelmäßig:</b> Stamm + -er (Komparativ), am + Stamm + -(e)sten (Superlativ)<br>
+        <b>Umlaut:</b> kurze einsilbige Adjektive mit a/o/u umlauten (alt → älter → am ältesten)<br>
+        <b>Unregelmäßig:</b> völlig eigene Formen (nah → näher → am nächsten)</div></div>`;
+    }
+  }
+  
+  function refreshAll(){ renderChips(); renderDash(); renderRuleRef(); }
+  
+  document.getElementById('modeNomen').onclick = ()=>{ curMode='nomen'; curFilt1='alle'; curFilt2='alle';
+    document.getElementById('modeNomen').classList.add('active'); document.getElementById('modeAdj').classList.remove('active');
+    document.getElementById('stage').innerHTML=''; refreshAll(); };
+  document.getElementById('modeAdj').onclick = ()=>{ curMode='adj'; curFilt1='alle'; curFilt2='alle';
+    document.getElementById('modeAdj').classList.add('active'); document.getElementById('modeNomen').classList.remove('active');
+    document.getElementById('stage').innerHTML=''; refreshAll(); };
+  
+  /* ---- Smart queue ---- */
+  function shuffleArr(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} 
+return a; }
+  function buildQueue(p, limit){
+    limit = limit || 20;
+    const used = {}; const out = [];
+    function add(list, cap){
+      let n=0;
+      for(const v of list){
+        if(used[v.uid]) continue;
+        if(cap!==undefined && n>=cap) break;
+        out.push(v); used[v.uid]=true; n++;
+        if(out.length>=limit) return;
+      }
+    }
+    const overdue = p.filter(v=>!isNew(v.uid) && isDue(v.uid)).sort((a,b)=>(PROGRESS[a.uid].nextDue).localeCompare(PROGRESS[b.uid].nextDue));
+    add(overdue);
+    if(out.length<limit){ const diff = p.filter(v=>isDifficult(v.uid)).sort((a,b)=>PROGRESS[b.uid].timesWrong-PROGRESS[a.uid].timesWrong); 
+add(diff); }
+    if(out.length<limit){ const recent = p.filter(v=>!isNew(v.uid) && PROGRESS[v.uid].box<=2); add(recent); }
+    if(out.length<limit){ add(shuffleArr(p.filter(v=>isNew(v.uid))), Math.max(4, Math.floor(limit*0.5))); }
+    if(out.length<limit){ add(shuffleArr(p.filter(v=>isMastered(v.uid))), 3); }
+    if(out.length<limit){ add(shuffleArr(p)); }
+    return shuffleArr(out);
+  }
+  
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    const p = pool();
+    if(p.length===0){ alert('Keine Wörter in dieser Auswahl.'); return; }
+    session = buildQueue(p, Math.min(20, p.length));
+    sessionIdx = 0;
+    renderCard();
+  });
+  
+  function renderCard(){
   const stage = document.getElementById('stage');
   if(sessionIdx >= session.length){
     stage.innerHTML = `<div class="empty">🎉 <b>Done!</b><br>${session.length} words practiced in this round.</div>`;
