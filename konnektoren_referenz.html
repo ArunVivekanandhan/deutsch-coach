@@ -854,6 +854,141 @@ function nextQuestion() {
   showQuestion();
 }
 
+
+// --- AI BUILDER LOGIC ---
+let currentTask = null;
+
+async function generateBuildTask() {
+  const konnektor = document.getElementById('builderKonnektor').value;
+  document.getElementById('builderTask').style.display = 'none';
+  document.getElementById('bldFeedback').innerHTML = '';
+  document.getElementById('bldAnswer').value = '';
+  document.getElementById('builderLoading').style.display = 'block';
+
+  const prompt = `Generate a B1 level practice sentence for the German connector "${konnektor}".
+Output strictly valid JSON with this schema:
+{
+  "en": "English sentence that naturally requires ${konnektor} when translated to German",
+  "ta": "Tamil translation of the sentence",
+  "de": "The correct German translation using ${konnektor}"
+}
+No other text outside JSON.`;
+
+  const provider = localStorage.getItem('de_ai_provider') || 'groq';
+  let apiUrl, headers, bodyData, getResponseText;
+
+  if (provider === 'openai' || provider === 'openrouter' || provider === 'groq') {
+    const apiKey = localStorage.getItem('de_ai_key_' + provider);
+    if (!apiKey) {
+      document.getElementById('builderLoading').style.display = 'none';
+      return alert(`API Key für ${provider} fehlt! Bitte in der Startseite konfigurieren.`);
+    }
+    if (provider === 'openai') apiUrl = 'https://api.openai.com/v1/chat/completions';
+    else if (provider === 'groq') apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    else apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
+    
+    const model = localStorage.getItem('de_ai_model_' + provider) || (provider === 'groq' ? 'llama3-8b-8192' : 'gpt-4o-mini');
+    headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+    bodyData = JSON.stringify({ model: model, response_format: { type: "json_object" }, messages: [{ role: 'user', content: prompt }] });
+    getResponseText = (data) => data.choices[0].message.content;
+  } else {
+    apiUrl = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/api/chat';
+    const model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+    headers = { 'Content-Type': 'application/json' };
+    bodyData = JSON.stringify({ model: model, format: 'json', stream: false, messages: [{ role: 'user', content: prompt }] });
+    getResponseText = (data) => data.message.content;
+  }
+
+  try {
+    const response = await fetch(apiUrl, { method: 'POST', headers, body: bodyData });
+    if (!response.ok) throw new Error('API Error');
+    const data = await response.json();
+    const rawText = getResponseText(data);
+    const jsonStr = rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1);
+    currentTask = JSON.parse(jsonStr);
+    
+    document.getElementById('bldTarget').textContent = konnektor;
+    document.getElementById('bldEn').textContent = currentTask.en;
+    document.getElementById('bldTa').textContent = currentTask.ta;
+    document.getElementById('builderTask').style.display = 'block';
+  } catch (err) {
+    alert('Fehler beim Generieren. Bitte überprüfe deine AI Einstellungen.');
+    console.error(err);
+  } finally {
+    document.getElementById('builderLoading').style.display = 'none';
+  }
+}
+
+async function checkBuildTask() {
+  if(!currentTask) return;
+  const ans = document.getElementById('bldAnswer').value.trim();
+  if(!ans) return alert('Bitte schreibe einen Satz!');
+  
+  const konnektor = document.getElementById('builderKonnektor').value;
+  const prompt = `The user is practicing the German connector "${konnektor}".
+Target German translation: "${currentTask.de}"
+User's input: "${ans}"
+
+Evaluate the user's input. Is it grammatically correct and does it properly use the connector "${konnektor}" with the correct word order? (Group 1 = Verb am Ende, Group 2 = Inversion, Group 3 = ADUSO normal). 
+Output strictly valid JSON:
+{
+  "correct": boolean,
+  "feedback": "Short feedback in English explaining if they got the word order/verb position right, and how to fix it if wrong."
+}
+No other text outside JSON.`;
+
+  document.getElementById('checkBtn').textContent = 'Prüfe...';
+  
+  const provider = localStorage.getItem('de_ai_provider') || 'groq';
+  let apiUrl, headers, bodyData, getResponseText;
+
+  if (provider === 'openai' || provider === 'openrouter' || provider === 'groq') {
+    const apiKey = localStorage.getItem('de_ai_key_' + provider);
+    apiUrl = provider === 'openai' ? 'https://api.openai.com/v1/chat/completions' : (provider === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions');
+    const model = localStorage.getItem('de_ai_model_' + provider) || (provider === 'groq' ? 'llama3-8b-8192' : 'gpt-4o-mini');
+    headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
+    bodyData = JSON.stringify({ model: model, response_format: { type: "json_object" }, messages: [{ role: 'user', content: prompt }] });
+    getResponseText = (data) => data.choices[0].message.content;
+  } else {
+    apiUrl = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/api/chat';
+    const model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+    headers = { 'Content-Type': 'application/json' };
+    bodyData = JSON.stringify({ model: model, format: 'json', stream: false, messages: [{ role: 'user', content: prompt }] });
+    getResponseText = (data) => data.message.content;
+  }
+
+  try {
+    const response = await fetch(apiUrl, { method: 'POST', headers, body: bodyData });
+    const data = await response.json();
+    const rawText = getResponseText(data);
+    const eval = JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+    
+    const fbDiv = document.getElementById('bldFeedback');
+    if(eval.correct) {
+      fbDiv.innerHTML = `<div style="padding:12px; border-radius:6px; background:#dcfce7; color:var(--green); border:1px solid #bbf7d0;">
+        <b>✅ Perfekt!</b><br>${eval.feedback}<br><br><span style="color:var(--ink-soft);font-size:13px;">KI Lösungsvorschlag: ${currentTask.de}</span>
+      </div>`;
+    } else {
+      fbDiv.innerHTML = `<div style="padding:12px; border-radius:6px; background:#fee2e2; color:var(--red); border:1px solid #fecaca;">
+        <b>❌ Fast!</b><br>${eval.feedback}<br><br><span style="color:var(--ink-soft);font-size:13px;">KI Lösungsvorschlag: ${currentTask.de}</span>
+      </div>`;
+    }
+  } catch(err) {
+    alert('Fehler bei der AI Prüfung.');
+  } finally {
+    document.getElementById('checkBtn').textContent = 'Lösung prüfen';
+  }
+}
+
+function playBuildAudio() {
+  if(!currentTask || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(currentTask.de);
+  u.lang = "de-DE";
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration:', err));
