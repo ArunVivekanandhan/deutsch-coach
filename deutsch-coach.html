@@ -4206,9 +4206,15 @@ function renderView(){
   const catBar = document.getElementById("catBar");
   if(catBar) {
     if (!document.getElementById("langToggleBtn")) {
-        catBar.insertAdjacentHTML('beforeend', renderLangToggle());
+        catBar.insertAdjacentHTML('beforeend', renderDirToggle()); bindDirToggle(); catBar.insertAdjacentHTML('beforeend', renderLangToggle());
         bindLangToggle();
-    } else {
+        } else {
+        let dLabel = "🔀 MIXED";
+        if(window.cardDir === 'en2de') dLabel = "🇬🇧 EN→DE";
+        if(window.cardDir === 'de2en') dLabel = "🇩🇪 DE→EN";
+        if(document.getElementById("dirToggleBtn")) {
+            document.getElementById("dirToggleBtn").innerHTML = dLabel;
+        }
         document.getElementById("langToggleBtn").innerHTML = window.langPref === 'en' ? '🇺🇸 EN' : '🇮🇳 TA';
     }
   }
