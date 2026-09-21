@@ -507,12 +507,12 @@ let filteredVerbs = [...VERBS];
 let currentIndex = 0;
 let isPlaying = false;
 let isPaused = false;
-let deVoices = [];
+let pageDeVoices = [];
 let enVoices = [];
 
 function populateVoiceList() {
   const voices = window.speechSynthesis.getVoices();
-  deVoices = voices.filter(v => v.lang.startsWith('de'));
+  pageDeVoices = voices.filter(v => v.lang.startsWith('de'));
   enVoices = voices.filter(v => v.lang.startsWith('en'));
 
   const deSelect = document.getElementById('deVoiceSelect');
@@ -520,7 +520,7 @@ function populateVoiceList() {
   deSelect.innerHTML = '';
   enSelect.innerHTML = '';
 
-  deVoices.forEach((v, i) => {
+  pageDeVoices.forEach((v, i) => {
     const opt = document.createElement('option');
     opt.value = i;
     opt.textContent = `${v.name} (${v.lang})`;
@@ -535,7 +535,7 @@ function populateVoiceList() {
   });
 
   const warn = document.getElementById('voiceWarn');
-  if (deVoices.length > 0) {
+  if (pageDeVoices.length > 0) {
     warn.style.display = 'none';
   } else {
     warn.style.display = 'block';
@@ -627,9 +627,9 @@ function playSingle(idx, ev) {
   const deUtterance = new SpeechSynthesisUtterance(`${v.inf}. Präteritum: ${v.praeteritum}. Perfekt: ${v.perfekt}.`);
   deUtterance.lang = 'de-DE';
   deUtterance.rate = rate;
-  if (deVoices.length > 0) {
+  if (pageDeVoices.length > 0) {
     const selIdx = document.getElementById('deVoiceSelect').value;
-    deUtterance.voice = deVoices[selIdx] || deVoices[0];
+    deUtterance.voice = pageDeVoices[selIdx] || pageDeVoices[0];
   }
 
   window.speechSynthesis.speak(deUtterance);
@@ -724,9 +724,9 @@ function playNextVerb() {
       const deUtterance = new SpeechSynthesisUtterance(`${v.inf}. ${v.praeteritum}. ${v.perfekt}.`);
       deUtterance.lang = 'de-DE';
       deUtterance.rate = rate;
-      if (deVoices.length > 0) {
+      if (pageDeVoices.length > 0) {
         const deSel = document.getElementById('deVoiceSelect').value;
-        deUtterance.voice = deVoices[deSel] || deVoices[0];
+        deUtterance.voice = pageDeVoices[deSel] || pageDeVoices[0];
       }
 
       deUtterance.onend = () => {

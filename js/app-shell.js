@@ -365,6 +365,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// Shared string-escaping helper for building onclick="..." attributes safely.
+// Several pages call this but never defined it locally - defining it once
+// here (loaded on nearly every page) instead of re-patching it per page.
+// A page's own function escapeQuotes(){} (if any) safely redeclares this.
+function escapeQuotes(s) { return String(s || '').replace(/'/g, "\\'"); }
+
 // Check AI Status globally
 function checkAIStatus() {
     const provider = localStorage.getItem('de_ai_provider') || 'groq';

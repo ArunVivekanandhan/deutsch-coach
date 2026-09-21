@@ -884,7 +884,7 @@ let deSpeechRate = 0.95;
 let enSpeechRate = 0.95;
 let searchQuery = '';
 
-let deVoices = [];
+let pageDeVoices = [];
 let enVoices = [];
 let selectedDeVoiceURI = localStorage.getItem('dc_preferred_de_voice_uri') || '';
 let selectedEnVoiceURI = localStorage.getItem('dc_preferred_en_voice_uri') || '';
@@ -902,7 +902,7 @@ function populateVoices() {
   if (!('speechSynthesis' in window)) return;
   const all = speechSynthesis.getVoices() || [];
   
-  deVoices = all.filter(v => {
+  pageDeVoices = all.filter(v => {
     const l = (v.lang||'').toLowerCase().replace('_','-');
     const n = (v.name||'').toLowerCase();
     return l.startsWith('de') || n.includes('german') || n.includes('deutsch');
@@ -915,8 +915,8 @@ function populateVoices() {
   });
 
   const deSel = document.getElementById('deVoiceSelect');
-  if (deSel && deVoices.length > 0) {
-    deSel.innerHTML = deVoices.map(v => {
+  if (deSel && pageDeVoices.length > 0) {
+    deSel.innerHTML = pageDeVoices.map(v => {
       const isSel = selectedDeVoiceURI ? (v.voiceURI === selectedDeVoiceURI) : false;
       return '<option value="' + v.voiceURI + '" ' + (isSel ? 'selected' : '') + '>' + v.name + ' (' + v.lang + ')</option>';
     }).join('');
@@ -952,21 +952,21 @@ function onEnVoiceSelect(uri) {
 }
 
 function getBestDeVoice() {
-  if (!deVoices || deVoices.length === 0) return null;
+  if (!pageDeVoices || pageDeVoices.length === 0) return null;
   if (selectedDeVoiceURI) {
-    const userChoice = deVoices.find(v => v.voiceURI === selectedDeVoiceURI);
+    const userChoice = pageDeVoices.find(v => v.voiceURI === selectedDeVoiceURI);
     if (userChoice) return userChoice;
   }
-  const natural = deVoices.find(v => {
+  const natural = pageDeVoices.find(v => {
     const n = v.name.toLowerCase();
     return n.includes('natural') || n.includes('neural') || n.includes('online');
   });
   if (natural) return natural;
-  const google = deVoices.find(v => v.name.toLowerCase().includes('google'));
+  const google = pageDeVoices.find(v => v.name.toLowerCase().includes('google'));
   if (google) return google;
-  const deDE = deVoices.find(v => (v.lang||'').toLowerCase().startsWith('de-de') || (v.lang||'').toLowerCase() === 'de');
+  const deDE = pageDeVoices.find(v => (v.lang||'').toLowerCase().startsWith('de-de') || (v.lang||'').toLowerCase() === 'de');
   if (deDE) return deDE;
-  return deVoices[0];
+  return pageDeVoices[0];
 }
 
 function getBestEnVoice() {
