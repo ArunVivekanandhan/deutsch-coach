@@ -44,8 +44,9 @@
           <div class="nav-group-title">Navigation</div>
           <a href="#lernen" class="nav-link active"><i data-lucide="book-open" class="nav-icon"></i> Lernen</a>
           <a href="#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon"></i> Prüfung</a>
-          <a href="#coach" class="nav-link"><i data-lucide="bot" class="nav-icon"></i> AI Coach</a>
+          <a href="#coach" class="nav-link" id="navCoachLink"><i data-lucide="bot" class="nav-icon"></i> AI Coach</a>
           <a href="#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon"></i> Tools</a>
+          <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon"></i> AI Config & Settings</a>
         </div>
 
         <div class="nav-group">
@@ -75,9 +76,14 @@
     <main class="app-main">
       <!-- Actionable Header -->
       <header class="app-header">
-        <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
-          <i data-lucide="menu"></i>
-        </button>
+        <div style="display: flex; gap: var(--space-sm); align-items: center;">
+          <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
+            <i data-lucide="menu"></i>
+          </button>
+          <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode">
+            <i data-lucide="moon"></i>
+          </button>
+        </div>
         
         <div class="header-title mobile-only">Deutsch Coach</div>
         
@@ -153,7 +159,8 @@
         <!-- COACH -->
         <section id="coach">
           <div class="section-title">Coach (AI Practice)</div>
-          <div class="dash-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+          <div class="dash-grid" id="aiCoachGrid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <!-- This will be populated/hidden by JS depending on AI setup -->
             <a href="KI_German_Coach.html" class="module-card module-vocab">
               <div class="module-icon"><i data-lucide="message-square"></i></div>
               <div class="module-title">KI Text Coach</div>
@@ -170,6 +177,12 @@
               <div class="module-desc">Lies Dialoge laut vor und verbessere deine Aussprache.</div>
             </a>
           </div>
+          <div id="aiSetupPrompt" style="display: none; padding: var(--space-lg); background: rgba(37, 99, 235, 0.05); border: 1px dashed var(--color-primary); border-radius: var(--radius-lg); text-align: center; margin-bottom: var(--space-2xl);">
+             <i data-lucide="bot" style="width: 48px; height: 48px; color: var(--color-primary); margin-bottom: var(--space-sm);"></i>
+             <h3 style="margin-top: 0;">AI Not Configured</h3>
+             <p style="font-size: 14px;">Unlock the powerful interactive AI coaches by configuring your API key.</p>
+             <button class="ds-btn ds-btn-primary" onclick="window.location.href='Einstellungen_Setup.html'">Configure AI Settings</button>
+          </div>
         </section>
 
         <!-- TOOLS -->
@@ -179,6 +192,7 @@
             <a href="Satzbau_Trainer.html" class="tool-item"><i data-lucide="construction" class="tool-icon"></i> Satzbau Trainer</a>
             <a href="Verb_Transformation_Trainer.html" class="tool-item"><i data-lucide="zap" class="tool-icon"></i> Verben Flashcards</a>
             <a href="Nomen_Adjektiv_Trainer.html" class="tool-item"><i data-lucide="box" class="tool-icon"></i> Nomen & Adjektive</a>
+            <a href="Wortfamilien_Explorer.html" class="tool-item"><i data-lucide="network" class="tool-icon"></i> Wortfamilien</a>
             <a href="German_Grammar_Cheat_Codes.html" class="tool-item"><i data-lucide="lightbulb" class="tool-icon"></i> Cheat Codes</a>
             <a href="konnektoren_referenz.html" class="tool-item"><i data-lucide="link" class="tool-icon"></i> Konnektoren</a>
             <a href="Deutsch_Wortschatz_Excel_Sheet.html" class="tool-item"><i data-lucide="table" class="tool-icon"></i> Excel Sheet</a>
@@ -286,12 +300,49 @@
         const now = Date.now();
         for(let k in prog) { 
             if(prog[k].nextReview && prog[k].nextReview < now) due++;
-            // Calculate other mock stats if possible
         }
         
         // Populate DOM elements if they exist
         const eDue = document.getElementById('dueToday');
         if(eDue && due > 0) eDue.textContent = due;
+        
+        // Theme Toggle Logic
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.body.removeAttribute('data-theme');
+                    localStorage.setItem('de_theme', 'light');
+                    themeBtn.innerHTML = '<i data-lucide="moon"></i>';
+                } else {
+                    document.body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('de_theme', 'dark');
+                    themeBtn.innerHTML = '<i data-lucide="sun"></i>';
+                }
+                if (window.lucide) window.lucide.createIcons();
+            });
+        }
+        // Initial setup for theme icon
+        if (localStorage.getItem('de_theme') === 'dark') {
+            if (themeBtn) themeBtn.innerHTML = '<i data-lucide="sun"></i>';
+            document.body.setAttribute('data-theme', 'dark');
+        }
+        
+        // AI Conditional Logic
+        const provider = localStorage.getItem('de_ai_provider') || 'groq';
+        const apiKey = localStorage.getItem('de_ai_key_' + provider);
+        const ollamaEndpoint = localStorage.getItem('de_ai_endpoint_ollama');
+        
+        // If they have an API key OR they are using ollama, they can use AI
+        const hasAI = (apiKey && apiKey.length > 0) || (provider === 'ollama' && ollamaEndpoint);
+        
+        if (!hasAI) {
+            const aiGrid = document.getElementById('aiCoachGrid');
+            const aiPrompt = document.getElementById('aiSetupPrompt');
+            if (aiGrid) aiGrid.style.display = 'none';
+            if (aiPrompt) aiPrompt.style.display = 'block';
+        }
     });
   </script>
 </body>

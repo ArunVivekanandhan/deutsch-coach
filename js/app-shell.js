@@ -53,6 +53,7 @@ function renderAppShell() {
                     <a href="index.html#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon"></i> Prüfung</a>
                     <a href="index.html#coach" class="nav-link"><i data-lucide="bot" class="nav-icon"></i> AI Coach</a>
                     <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon"></i> Tools</a>
+                    <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon"></i> AI Config & Settings</a>
                 </div>
                 <div class="nav-group">
                     <div class="nav-group-title">Level Progress</div>
@@ -98,9 +99,14 @@ function renderAppShell() {
         const header = document.createElement('header');
         header.className = 'app-header';
         header.innerHTML = `
-            <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
-                <i data-lucide="menu"></i>
-            </button>
+            <div style="display: flex; gap: var(--space-sm); align-items: center;">
+                <button class="ds-mobile-menu-btn ds-btn ds-btn-secondary" id="menuBtn" style="padding: 8px;">
+                    <i data-lucide="menu"></i>
+                </button>
+                <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode">
+                    <i data-lucide="moon"></i>
+                </button>
+            </div>
             <div class="header-title mobile-only">Deutsch Coach</div>
             <div class="header-srs-metrics">
                 <div class="srs-metric due"><div class="srs-val">${due}</div><div class="srs-label">Due Today</div></div>
@@ -216,6 +222,28 @@ function renderAppShell() {
             }
         });
 
+        // Theme Toggle Logic for legacy pages
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.body.removeAttribute('data-theme');
+                    localStorage.setItem('de_theme', 'light');
+                    themeBtn.innerHTML = '<i data-lucide="moon"></i>';
+                } else {
+                    document.body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('de_theme', 'dark');
+                    themeBtn.innerHTML = '<i data-lucide="sun"></i>';
+                }
+                if (window.lucide) window.lucide.createIcons();
+            });
+            // Initial setup for theme icon
+            if (localStorage.getItem('de_theme') === 'dark') {
+                themeBtn.innerHTML = '<i data-lucide="sun"></i>';
+            }
+        }
+
         // Initialize icons for the newly injected shell
         if (window.lucide) window.lucide.createIcons();
     }
@@ -228,8 +256,8 @@ if (document.readyState === 'loading') {
     renderAppShell();
 }
 
-// Auto-load theme
+// Auto-load theme globally
 const savedTheme = localStorage.getItem('de_theme');
 if (savedTheme === 'dark') {
-    document.body.classList.add('dark');
+    document.body.setAttribute('data-theme', 'dark');
 }
