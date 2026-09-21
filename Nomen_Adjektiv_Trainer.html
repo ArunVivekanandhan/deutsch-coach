@@ -37,7 +37,7 @@
   .dot-regular{background:var(--blue);} .dot-umlaut{background:var(--red);} .dot-irregular{background:var(--gold);}
 
   .countline{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:2px;}
-  .dashgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:12px 0;}
+  .dashgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:12px 0;} @media (max-width: 480px) { .dashgrid { grid-template-columns:repeat(2,1fr); } }
   .dashcard{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 4px; text-align:center;}
   .dashcard .num{font-family:'Fjalla One',sans-serif; font-size:19px; color:var(--red);}
   .dashcard .lbl{font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:var(--ink-soft); margin-top:1px;}
