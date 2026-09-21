@@ -356,13 +356,13 @@ if (document.readyState === 'loading') {
 }
 
 // Auto-load theme globally
-{
+document.addEventListener('DOMContentLoaded', () => {
     const theme = localStorage.getItem('de_theme');
     if (theme === 'dark') {
         document.body.setAttribute('data-theme', 'dark');
         document.body.classList.add('dark');
     }
-}
+});
 
 
 // Check AI Status globally
@@ -381,4 +381,4 @@ function checkAIStatus() {
         document.body.classList.remove('ai-enabled');
     }
 }
-checkAIStatus();
+document.addEventListener('DOMContentLoaded', checkAIStatus);
