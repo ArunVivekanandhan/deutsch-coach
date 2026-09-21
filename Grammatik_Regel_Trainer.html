@@ -1254,8 +1254,7 @@ Briefly explain EXACTLY why my answer is wrong and why the correct answer is rig
   callAIGrammarExplanation(promptTxt, (exp) => {
     const fbBox = document.getElementById("aiExplainBox");
     if(fbBox) {
-      fbBox.innerHTML = `<strong>🤖 KI-Erklärung:</strong><br>${exp.replace(/
-/g, '<br>')}`;
+      fbBox.innerHTML = `<strong>🤖 KI-Erklärung:</strong><br>${exp.replace(/\n/g, '<br>')}`;
       fbBox.style.display = "block";
     }
     if(fbBtn) fbBtn.style.display = "none";
