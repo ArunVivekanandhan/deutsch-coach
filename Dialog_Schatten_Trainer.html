@@ -37,7 +37,7 @@
   .nav-link { display: inline-block; margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-decoration: none; color: var(--green); font-weight: bold; }
   
   .generator { background: var(--card); padding: 16px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow); }
-  input { width: 100%; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; padding: 12px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  input, select { width: 100%; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; padding: 12px; margin-bottom: 12px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
   button { font-family: 'IBM Plex Mono', monospace; font-weight: bold; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; color: #fff; }
   .btn-gen { background: var(--green); width: 100%; }
   
@@ -67,7 +67,18 @@
 
   <div id="mainView">
     <div class="generator">
-      <input type="text" id="scenarioInput" placeholder="Szenario (z.B. 'Beim Bäcker' oder 'At the bakery')">
+      <select id="scenarioInput">
+        <option value="" disabled selected>-- Wähle ein Szenario --</option>
+        <option value="Beim Bäcker (At the bakery)">Beim Bäcker (At the bakery)</option>
+        <option value="Im Supermarkt (At the supermarket)">Im Supermarkt (At the supermarket)</option>
+        <option value="Im Restaurant (At the restaurant)">Im Restaurant (At the restaurant)</option>
+        <option value="Am Bahnhof (At the train station)">Am Bahnhof (At the train station)</option>
+        <option value="Beim Arzt (At the doctor)">Beim Arzt (At the doctor)</option>
+        <option value="Im Hotel einchecken (Checking into a hotel)">Im Hotel einchecken (Checking into a hotel)</option>
+        <option value="Nach dem Weg fragen (Asking for directions)">Nach dem Weg fragen (Asking for directions)</option>
+        <option value="Smalltalk mit Nachbarn (Small talk with neighbors)">Smalltalk mit Nachbarn (Small talk with neighbors)</option>
+        <option value="Ein Vorstellungsgespräch (Job interview)">Ein Vorstellungsgespräch (Job interview)</option>
+      </select>
       <button class="btn-gen" onclick="generateScript()">🪄 Generate Dialogue</button>
       <div id="loading">⏳ KI schreibt Dialog... (Bitte warten)</div>
     </div>
@@ -100,7 +111,7 @@
 
   async function generateScript() {
     const scenario = document.getElementById('scenarioInput').value.trim();
-    if (!scenario) return alert('Bitte gib ein Szenario ein.');
+    if (!scenario) return alert('Bitte wähle ein Szenario aus.');
 
     const prompt = `Write a short B1 level German dialogue for the scenario: "${scenario}".
 Output strictly valid JSON with this schema:
@@ -115,22 +126,29 @@ No other text outside JSON.`;
 
     document.getElementById('loading').style.display = 'block';
 
-    const provider = localStorage.getItem('de_ai_provider') || 'ollama';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     let apiUrl, headers, bodyData, getResponseText;
 
-    if (provider === 'openai' || provider === 'openrouter') {
-      const apiKey = localStorage.getItem(provider === 'openai' ? 'de_ai_key_openai' : 'de_ai_key_openrouter');
-      apiUrl = provider === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
-      const model = localStorage.getItem(provider === 'openai' ? 'de_ai_model_openai' : 'de_ai_model_openrouter') || 'gpt-4o-mini';
+    if (provider === 'openai' || provider === 'openrouter' || provider === 'groq') {
+      const apiKey = localStorage.getItem('de_ai_key_' + provider);
+      if (!apiKey) {
+        document.getElementById('loading').style.display = 'none';
+        return alert(`API Key für ${provider} fehlt! Bitte in der Startseite konfigurieren.`);
+      }
+      if (provider === 'openai') apiUrl = 'https://api.openai.com/v1/chat/completions';
+      else if (provider === 'groq') apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      else apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
+      
+      const model = localStorage.getItem('de_ai_model_' + provider) || (provider === 'groq' ? 'llama3-8b-8192' : 'gpt-4o-mini');
       headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey };
       bodyData = JSON.stringify({ model: model, response_format: { type: "json_object" }, messages: [{ role: 'user', content: prompt }] });
       getResponseText = (data) => data.choices[0].message.content;
     } else {
-      apiUrl = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+      apiUrl = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/api/chat';
       const model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
       headers = { 'Content-Type': 'application/json' };
-      bodyData = JSON.stringify({ model: model, format: 'json', messages: [{ role: 'user', content: prompt }] });
-      getResponseText = (data) => data.choices[0].message.content;
+      bodyData = JSON.stringify({ model: model, format: 'json', stream: false, messages: [{ role: 'user', content: prompt }] });
+      getResponseText = (data) => data.message.content;
     }
 
     try {
