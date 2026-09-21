@@ -1975,8 +1975,8 @@
 
     // 2. Process Nouns
     NOUNS.forEach(n => {
-      const mn = NOUN_MNEMONIC_DB[n.singular] || '';
-      const rootInfo = COMPOUND_ROOTS_DB[n.singular] || null;
+      const mn = NOUN_MNEMONIC_DB[n.sg] || '';
+      const rootInfo = COMPOUND_ROOTS_DB[n.sg] || null;
       let breakdown = '';
       if (rootInfo) {
         breakdown = `${rootInfo.parts.join(' + ')} (${rootInfo.lit})`;
@@ -1984,7 +1984,7 @@
 
       allMasterEntries.push({
         type: 'noun',
-        primaryWord: n.singular,
+        primaryWord: n.sg,
         meaningEn: n.en || '',
         meaningTa: n.ta || '',
         meaningTaTranslit: n.ta_translit || '',
@@ -1994,9 +1994,9 @@
         aux: '',
         isTrennbar: false,
         isUntrennbar: false,
-        noun: `${n.article} ${n.singular}`,
-        plural: n.plural || '',
-        article: n.article || '',
+        noun: `${n.a} ${n.sg}`,
+        plural: n.pl || '',
+        article: n.a || '',
         adjective: '',
         adjComparative: '',
         adjSuperlative: '',
@@ -2011,7 +2011,7 @@
     ADJS.forEach(a => {
       allMasterEntries.push({
         type: 'adj',
-        primaryWord: a.word,
+        primaryWord: a.w,
         meaningEn: a.en || '',
         meaningTa: a.ta || '',
         meaningTaTranslit: a.ta_translit || '',
@@ -2024,9 +2024,9 @@
         noun: '',
         plural: '',
         article: '',
-        adjective: a.word,
+        adjective: a.w,
         adjComparative: a.comp || '',
-        adjSuperlative: a.super || '',
+        adjSuperlative: a.sup || '',
         sisterVerbs: [],
         mnemonic: a.rule || '',
         root: '',
@@ -2165,7 +2165,8 @@
   function renderGridCardHTML(item) {
     // 1. Meaning Column
     const meaningHTML = `
-      <div class="col-meaning">`r`n        <div style="position:absolute; top:8px; right:8px;"><input type="checkbox" class="story-vocab-checkbox" value="${item.primaryWord}" style="cursor:pointer; width:18px; height:18px;" title="Select for Story Generator"></div>
+      <div class="col-meaning">
+        <div style="position:absolute; top:8px; right:8px;"><input type="checkbox" class="story-vocab-checkbox" value="${item.primaryWord}" style="cursor:pointer; width:18px; height:18px;" title="Select for Story Generator"></div>
         <div class="col-title">🇬🇧 / 🇮🇳 Meaning</div>
         <div class="meaning-en">
           ${item.meaningEn || '—'}
