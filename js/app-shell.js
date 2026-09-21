@@ -74,29 +74,20 @@ function renderAppShell() {
     injectDependencies();
 
 
-    // --- Dynamic Level Progress Calculation ---
-    const dcProg = JSON.parse(localStorage.getItem('dc_progress_v1') || '{}');
-    const naProg = JSON.parse(localStorage.getItem('na_progress_v1') || '{}');
-    const wmgProg = JSON.parse(localStorage.getItem('wmg_progress_v1') || '{}');
-    
-    let totalMastered = 0;
-    // Count items that are in box 4 or 5 (Mastered/Known well)
-    for (let k in dcProg) { if (dcProg[k].box >= 4) totalMastered++; }
-    for (let k in naProg) { if (naProg[k].box >= 4) totalMastered++; }
-    for (let k in wmgProg) { if (wmgProg[k].box >= 4) totalMastered++; }
-    
-    // Cascading progression thresholds
-    const A1_MAX = 150;
-    const A2_MAX = 250;
-    const B11_MAX = 300;
-    const B12_MAX = 300;
-    
-    let rem = totalMastered;
-    let a1Pct = Math.min(100, Math.round((rem / A1_MAX) * 100)); rem -= A1_MAX; if (rem < 0) rem = 0;
-    let a2Pct = Math.min(100, Math.round((rem / A2_MAX) * 100)); rem -= A2_MAX; if (rem < 0) rem = 0;
-    let b11Pct = Math.min(100, Math.round((rem / B11_MAX) * 100)); rem -= B11_MAX; if (rem < 0) rem = 0;
-    let b12Pct = Math.min(100, Math.round((rem / B12_MAX) * 100));
-    // ------------------------------------------
+    // --- Real, aggregated progress (see js/progress-aggregator.js) ---
+    // Previously this cascaded a single combined mastered-count through
+    // arbitrary made-up per-level thresholds (150/250/300/300), which could
+    // show an A1 progress bar filling from B1 mastery and had no basis in
+    // actual per-level word counts. That's exactly the "fake precision"
+    // problem - replaced with a real, honestly-labeled total below instead
+    // of a number dressed up as per-level completion we can't actually back.
+    const vocabStats = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getVocabularyStats()
+        : { due: 0, difficult: 0, mastered: 0, reviewed: 0 };
+    const lessonsCompleted = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getLessonsCompleted() : 0;
+    const streak = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getStreak() : 0;
 
     const body = document.body;
     
@@ -127,22 +118,15 @@ function renderAppShell() {
                     <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon"></i> AI Config & Settings</a>
                 </div>
                 <div class="nav-group">
-                    <div class="nav-group-title">Level Progress</div>
+                    <div class="nav-group-title">Your Progress</div>
                     <div class="level-progress-container">
-                        <div class="progress-label"><span>A1 Foundation</span><span>${a1Pct}%</span></div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${a1Pct}%;"></div></div>
+                        <div class="progress-label"><span>Words mastered</span><span>${vocabStats.mastered}</span></div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${vocabStats.reviewed > 0 ? Math.round(vocabStats.mastered / vocabStats.reviewed * 100) : 0}%;"></div></div>
+                        <div class="progress-label" style="margin-top: 4px; font-size: 11px; opacity: 0.75;"><span>${vocabStats.reviewed} words studied so far</span></div>
                     </div>
-                    <div class="level-progress-container">
-                        <div class="progress-label"><span>A2 Basics</span><span>${a2Pct}%</span></div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${a2Pct}%;"></div></div>
-                    </div>
-                    <div class="level-progress-container">
-                        <div class="progress-label"><span>B1.1 Intermediate</span><span>${b11Pct}%</span></div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${b11Pct}%;"></div></div>
-                    </div>
-                    <div class="level-progress-container">
-                        <div class="progress-label"><span>B1.2 Advanced</span><span>${b12Pct}%</span></div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${b12Pct}%;"></div></div>
+                    <div class="level-progress-container" style="display:flex; justify-content:space-between; font-size:12px; color:var(--color-ink-soft);">
+                        <span>🔥 ${streak}-day streak</span>
+                        <span>${lessonsCompleted} lessons done</span>
                     </div>
                 </div>
             </nav>
@@ -153,44 +137,11 @@ function renderAppShell() {
         const main = document.createElement('main');
         main.className = 'app-main';
         
-        // Calculate actual stats for the header
-        let due = 0, hard = 0, newCount = 0;
-        let mastered = totalMastered; // reusing totalMastered calculated above
-        const now = Date.now();
-        
-        // Helper to count stats across DBs
-        const countStats = (prog) => {
-            const today = new Date();
-            const todayStr = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
-            
-            for(let k in prog) {
-                const p = prog[k];
-                // Support both date formats that exist across the old apps
-                if (p.nextDue && p.nextDue <= todayStr) {
-                    due++;
-                } else if (p.nextReview && p.nextReview < now) {
-                    due++;
-                }
-                
-                if (p.box <= 1) hard++;
-            }
-        };
-        
-        countStats(dcProg);
-        countStats(naProg);
-        countStats(wmgProg);
-        
-        // Estimate new count: Assume total DB size ~ 1500 (A1+A2+B1). New = Total - Seen
-        const totalSeen = Object.keys(dcProg).length + Object.keys(naProg).length + Object.keys(wmgProg).length;
-        const ESTIMATED_TOTAL = 1500;
-        newCount = Math.max(0, ESTIMATED_TOTAL - totalSeen);
-        
-        // Use placeholders if 0
-        
-        
-        
-        
-        
+        // Header stats reuse the same real aggregate computed above - no
+        // separate re-count, no fabricated "New" estimate.
+        const due = vocabStats.due, hard = vocabStats.difficult, mastered = vocabStats.mastered;
+        const reviewedCount = vocabStats.reviewed;
+
         const header = document.createElement('header');
         header.className = 'app-header';
         header.innerHTML = `
@@ -207,7 +158,7 @@ function renderAppShell() {
             <div class="header-srs-metrics">
                 <div class="srs-metric due"><div class="srs-val">${due}</div><div class="srs-label">Due Today</div></div>
                 <div class="srs-metric hard"><div class="srs-val">${hard}</div><div class="srs-label">Difficult</div></div>
-                <div class="srs-metric new"><div class="srs-val">${newCount}</div><div class="srs-label">New</div></div>
+                <div class="srs-metric new"><div class="srs-val">${reviewedCount}</div><div class="srs-label">Reviewed</div></div>
                 <div class="srs-metric mastered"><div class="srs-val">${mastered}</div><div class="srs-label">Mastered</div></div>
             </div>
             <button class="ds-btn ds-btn-primary" id="startReviewBtn" onclick="window.location.href='deutsch-coach.html'">

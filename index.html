@@ -30,6 +30,8 @@
   .tool-icon { width: 20px; height: 20px; opacity: 0.7; }
 </style>
   <script src="js/tts-engine.js"></script>
+    <script src="js/srs-engine.js"></script>
+  <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
   <script src="js/lucide.min.js"></script>
 </head>
@@ -53,22 +55,15 @@
         </div>
 
         <div class="nav-group">
-          <div class="nav-group-title">Level Progress</div>
+          <div class="nav-group-title">Your Progress</div>
           <div class="level-progress-container">
-            <div class="progress-label"><span>A1 Foundation</span><span id="a1-pct-txt">0%</span></div>
-            <div class="progress-bar-bg"><div id="a1-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+            <div class="progress-label"><span>Words mastered</span><span id="mastered-txt">0</span></div>
+            <div class="progress-bar-bg"><div id="mastered-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+            <div class="progress-label" style="margin-top: 4px; font-size: 11px; opacity: 0.75;"><span id="reviewed-txt">0 words studied so far</span></div>
           </div>
-          <div class="level-progress-container">
-            <div class="progress-label"><span>A2 Basics</span><span id="a2-pct-txt">0%</span></div>
-            <div class="progress-bar-bg"><div id="a2-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
-          </div>
-          <div class="level-progress-container">
-            <div class="progress-label"><span>B1.1 Intermediate</span><span id="b11-pct-txt">0%</span></div>
-            <div class="progress-bar-bg"><div id="b11-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
-          </div>
-          <div class="level-progress-container">
-            <div class="progress-label"><span>B1.2 Advanced</span><span id="b12-pct-txt">0%</span></div>
-            <div class="progress-bar-bg"><div id="b12-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+          <div class="level-progress-container" style="display:flex; justify-content:space-between; font-size:12px; color:var(--color-ink-soft);">
+            <span id="streak-txt">🔥 0-day streak</span>
+            <span id="lessons-txt">0 lessons done</span>
           </div>
         </div>
 
@@ -93,19 +88,19 @@
         
         <div class="header-srs-metrics">
           <div class="srs-metric due">
-            <div class="srs-val" id="dueToday">12</div>
+            <div class="srs-val" id="dueToday">0</div>
             <div class="srs-label">Due Today</div>
           </div>
           <div class="srs-metric hard">
-            <div class="srs-val" id="diffCount">4</div>
+            <div class="srs-val" id="diffCount">0</div>
             <div class="srs-label">Difficult</div>
           </div>
           <div class="srs-metric new">
-            <div class="srs-val" id="newCount">20</div>
-            <div class="srs-label">New</div>
+            <div class="srs-val" id="newCount">0</div>
+            <div class="srs-label">Reviewed</div>
           </div>
           <div class="srs-metric mastered">
-            <div class="srs-val" id="masteredCount">450</div>
+            <div class="srs-val" id="masteredCount">0</div>
             <div class="srs-label">Mastered</div>
           </div>
         </div>
@@ -295,19 +290,18 @@
             }
         });
 
-        // Load simple stats
-        const meta = JSON.parse(localStorage.getItem('dc_meta_v1') || '{"currentStreak":0}');
-        // Update header metrics (using placeholder stats if empty)
-        const prog = JSON.parse(localStorage.getItem('dc_progress_v1') || '{}');
-        let due = 0, hard = 0, newCount = 0, mastered = 0;
-        const now = Date.now();
-        for(let k in prog) { 
-            if(prog[k].nextReview && prog[k].nextReview < now) due++;
-        }
-        
-        // Populate DOM elements if they exist
-        const eDue = document.getElementById('dueToday');
-        if(eDue && due > 0) eDue.textContent = due;
+        // Real, aggregated header stats - see js/progress-aggregator.js.
+        // This used to leave hardcoded placeholder numbers (12/4/20/450) in
+        // place whenever real data was 0, so a brand-new user with nothing
+        // studied yet saw fabricated progress. Now it always shows the real
+        // (possibly zero) count.
+        const headerStats = (typeof ProgressAggregator !== 'undefined')
+            ? ProgressAggregator.getVocabularyStats() : { due: 0, difficult: 0, mastered: 0, reviewed: 0 };
+        const setStat = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setStat('dueToday', headerStats.due);
+        setStat('diffCount', headerStats.difficult);
+        setStat('newCount', headerStats.reviewed);
+        setStat('masteredCount', headerStats.mastered);
         
         // Theme Toggle Logic
         const themeBtn = document.getElementById('themeToggleBtn');
@@ -360,34 +354,27 @@ if("serviceWorker" in navigator && (location.protocol==="https:" || location.hos
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const dcProg = JSON.parse(localStorage.getItem('dc_progress_v1') || '{}');
-    const naProg = JSON.parse(localStorage.getItem('na_progress_v1') || '{}');
-    const wmgProg = JSON.parse(localStorage.getItem('wmg_progress_v1') || '{}');
-    
-    let totalMastered = 0;
-    for (let k in dcProg) { if (dcProg[k].box >= 4) totalMastered++; }
-    for (let k in naProg) { if (naProg[k].box >= 4) totalMastered++; }
-    for (let k in wmgProg) { if (wmgProg[k].box >= 4) totalMastered++; }
-    
-    const A1_MAX = 150, A2_MAX = 250, B11_MAX = 300, B12_MAX = 300;
-    
-    let rem = totalMastered;
-    let a1Pct = Math.min(100, Math.round((rem / A1_MAX) * 100)); rem -= A1_MAX; if (rem < 0) rem = 0;
-    let a2Pct = Math.min(100, Math.round((rem / A2_MAX) * 100)); rem -= A2_MAX; if (rem < 0) rem = 0;
-    let b11Pct = Math.min(100, Math.round((rem / B11_MAX) * 100)); rem -= B11_MAX; if (rem < 0) rem = 0;
-    let b12Pct = Math.min(100, Math.round((rem / B12_MAX) * 100));
-    
-    const update = (idPct, idBar, val) => {
-        const txt = document.getElementById(idPct);
-        const bar = document.getElementById(idBar);
-        if (txt) txt.textContent = val + "%";
-        if (bar) bar.style.width = val + "%";
-    };
-    
-    update("a1-pct-txt", "a1-pct-bar", a1Pct);
-    update("a2-pct-txt", "a2-pct-bar", a2Pct);
-    update("b11-pct-txt", "b11-pct-bar", b11Pct);
-    update("b12-pct-txt", "b12-pct-bar", b12Pct);
+    // Real, honestly-labeled progress - see js/progress-aggregator.js. This
+    // used to cascade a combined mastered-count through arbitrary made-up
+    // per-level thresholds (150/250/300/300 words), which could show an A1
+    // bar filling up from B1 mastery and had no basis in real per-level
+    // word counts - replaced with real totals instead.
+    const stats = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getVocabularyStats() : { due: 0, difficult: 0, mastered: 0, reviewed: 0 };
+    const lessonsCompleted = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getLessonsCompleted() : 0;
+    const streak = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getStreak() : 0;
+
+    const masteredPct = stats.reviewed > 0 ? Math.round(stats.mastered / stats.reviewed * 100) : 0;
+    const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+
+    setText("mastered-txt", stats.mastered);
+    const bar = document.getElementById("mastered-bar");
+    if (bar) bar.style.width = masteredPct + "%";
+    setText("reviewed-txt", stats.reviewed + " word" + (stats.reviewed === 1 ? "" : "s") + " studied so far");
+    setText("streak-txt", "🔥 " + streak + "-day streak");
+    setText("lessons-txt", lessonsCompleted + " lesson" + (lessonsCompleted === 1 ? "" : "s") + " done");
 });
 </script>
 </body>
