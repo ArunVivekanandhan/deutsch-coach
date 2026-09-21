@@ -75,6 +75,7 @@ window.addXP = function(amount, source) {
         state.lastActiveDate = today;
     }
     
+    checkBadges(state, getAnalyticsState());
     saveGamificationState(state);
 };
 
@@ -149,4 +150,22 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', updateHUD);
 } else {
     updateHUD();
+}
+
+function checkBadges(state, aState) {
+    let newBadges = [];
+    if (aState.totalCardsStudied >= 50 && !state.badges.includes("First 50 Cards")) newBadges.push("First 50 Cards");
+    if (aState.totalCardsStudied >= 500 && !state.badges.includes("500 Cards")) newBadges.push("500 Cards");
+    if (state.streak >= 3 && !state.badges.includes("3-Day Streak")) newBadges.push("3-Day Streak");
+    if (state.streak >= 7 && !state.badges.includes("7-Day Streak")) newBadges.push("7-Day Streak");
+    if (state.streak >= 30 && !state.badges.includes("30-Day Streak")) newBadges.push("30-Day Streak");
+    if (state.level >= 5 && !state.badges.includes("Level 5 Scholar")) newBadges.push("Level 5 Scholar");
+
+    if (newBadges.length > 0) {
+        state.badges.push(...newBadges);
+        newBadges.forEach(b => {
+            if(window.showNotification) window.showNotification(`🏆 Badge Earned: ${b}!`);
+            else alert(`🏆 Badge Earned: ${b}!`);
+        });
+    }
 }

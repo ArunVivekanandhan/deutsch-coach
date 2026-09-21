@@ -1817,7 +1817,7 @@ async function generateStory() {
     return;
   }
 
-  const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+  const provider = localStorage.getItem('de_ai_provider') || 'groq';
   let apiKey = localStorage.getItem('de_ai_key_' + provider) || '';
   let endpoint = '';
   if(provider === 'deepseek') endpoint = 'https://api.deepseek.com/v1/chat/completions';

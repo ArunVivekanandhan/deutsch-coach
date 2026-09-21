@@ -3757,7 +3757,7 @@ let recognizing = false;
 const SHARED_DEEPSEEK_KEY = "";
 
 async function callAI(systemPrompt, userPrompt) {
-  const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+  const provider = localStorage.getItem('de_ai_provider') || 'groq';
   const key = localStorage.getItem(`de_ai_key_${provider}`) || (provider === 'deepseek' ? SHARED_DEEPSEEK_KEY : '');
   const model = localStorage.getItem(`de_ai_model_${provider}`) || (provider === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini');
   
@@ -4307,7 +4307,7 @@ function initAiSettings() {
         </div>`;
     });
     const provSelect = document.getElementById('aiProvider');
-    provSelect.value = localStorage.getItem('de_ai_provider') || 'deepseek';
+    provSelect.value = localStorage.getItem('de_ai_provider') || 'groq';
     provSelect.addEventListener('change', (e) => {
         document.querySelectorAll('.provider-settings').forEach(el => el.style.display = 'none');
         const sel = document.getElementById('settings_' + e.target.value);
@@ -4736,7 +4736,7 @@ if (savedTheme === 'dark') {
 
 // Check AI Status globally
 function checkAIStatus() {
-    const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     let enabled = false;
     if (provider === 'ollama') {
         enabled = true;

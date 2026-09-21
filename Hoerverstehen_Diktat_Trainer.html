@@ -203,7 +203,7 @@
     document.getElementById('dictationInput').value = "🤖 KI generiert neuen Satz... (AI is generating...)";
     document.getElementById('nextBtn').disabled = true;
     
-    const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     const config = AI_PROVIDERS[provider];
     let apiKey = localStorage.getItem('de_ai_key_' + provider) || '';
     const model = localStorage.getItem('de_ai_model_' + provider) || (provider==='deepseek'?'deepseek-chat':'gpt-4o-mini');

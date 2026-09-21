@@ -236,7 +236,7 @@
     document.getElementById('aiEnabledToggle').checked = aiEnabled;
     toggleAiSettingsBlock();
     document.getElementById('aiEnabledToggle').addEventListener('change', toggleAiSettingsBlock);
-    const prov = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const prov = localStorage.getItem('de_ai_provider') || 'groq';
     document.getElementById('aiProvider').value = prov;
     
     document.getElementById('userName').value = localStorage.getItem('de_user_name') || '';

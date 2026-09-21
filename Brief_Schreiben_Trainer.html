@@ -120,7 +120,7 @@ Provide feedback on 1) Task fulfillment, 2) Grammar, 3) Vocabulary. Then provide
 
     document.getElementById('loading').style.display = 'block';
 
-    const provider = localStorage.getItem('de_ai_provider') || 'ollama';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     let apiUrl, headers, bodyData, getResponseText;
 
     if (provider === 'openai' || provider === 'openrouter') {

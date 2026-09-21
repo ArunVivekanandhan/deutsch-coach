@@ -1321,7 +1321,7 @@ let currentUtterance = null;
 
 // Initialize settings from localStorage or defaults
 let appSettings = {
-  provider: localStorage.getItem('de_ai_provider') || 'deepseek',
+  provider: localStorage.getItem('de_ai_provider') || 'groq',
   keys: {
     deepseek: localStorage.getItem('de_ai_key_deepseek') || DEFAULT_DEEPSEEK_KEY,
     openai: localStorage.getItem('de_ai_key_openai') || '',

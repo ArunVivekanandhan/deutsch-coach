@@ -196,6 +196,7 @@ function renderAppShell() {
                 <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode">
                     <i data-lucide="moon"></i>
                 </button>
+                <div class="streakbox" style="margin-left: var(--space-sm);"></div>
             </div>
             <div class="header-title mobile-only">Deutsch Coach</div>
             <div class="header-srs-metrics">
@@ -361,7 +362,7 @@ if (document.readyState === 'loading') {
 
 // Check AI Status globally
 function checkAIStatus() {
-    const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     let enabled = false;
     if (provider === 'ollama') {
         enabled = true;
