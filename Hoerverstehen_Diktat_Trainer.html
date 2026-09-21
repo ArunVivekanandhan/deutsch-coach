@@ -97,6 +97,8 @@
 </style>
 <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="js/tts-engine.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -203,7 +205,7 @@
     document.getElementById('dictationInput').value = "🤖 KI generiert neuen Satz... (AI is generating...)";
     document.getElementById('nextBtn').disabled = true;
     
-    const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     const config = AI_PROVIDERS[provider];
     let apiKey = localStorage.getItem('de_ai_key_' + provider) || '';
     const model = localStorage.getItem('de_ai_model_' + provider) || (provider==='deepseek'?'deepseek-chat':'gpt-4o-mini');
@@ -431,6 +433,5 @@
   init();
 }
 </script>
-  <script src="js/app-shell.js"></script>
-</body>
+  </body>
 </html>

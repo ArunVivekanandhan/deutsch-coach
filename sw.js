@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v18';
+const CACHE_NAME = 'deutsch-coach-v25';
 const urlsToCache = [
   './',
   './index.html',
@@ -25,6 +25,10 @@ const urlsToCache = [
   './WMG_remote.html',
   './Wortfamilien_Explorer.html',
   './Wortschatz_Master_Grid.html',
+  './js/srs-engine.js',
+  './js/icon-svgs.js',
+  './js/tamil-dict.js',
+  './js/tts-engine.js',
   './css/design-system.css',
   './js/app-shell.js',
   './js/lucide.min.js',

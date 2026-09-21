@@ -18,7 +18,7 @@ function injectDependencies() {
         if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
         const cspMeta = document.createElement('meta');
         cspMeta.httpEquiv = "Content-Security-Policy";
-        cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com; img-src 'self' data:; media-src 'self' data: blob:;";
+        cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com https://api.deepseek.com https://api.groq.com https://openrouter.ai http://localhost:11434; img-src 'self' data:; media-src 'self' data: blob:;";
         document.head.appendChild(cspMeta);
     }
 
@@ -65,6 +65,11 @@ function injectDependencies() {
 }
 
 function renderAppShell() {
+
+    // Apply Simple Mode globally
+    if (localStorage.getItem('de_simple_mode') === 'true') {
+        document.body.classList.add('simple-mode');
+    }
     // Inject dependencies on every page
     injectDependencies();
 
@@ -155,9 +160,19 @@ function renderAppShell() {
         
         // Helper to count stats across DBs
         const countStats = (prog) => {
+            const today = new Date();
+            const todayStr = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+            
             for(let k in prog) {
-                if (prog[k].nextReview && prog[k].nextReview < now) due++;
-                if (prog[k].box <= 1) hard++;
+                const p = prog[k];
+                // Support both date formats that exist across the old apps
+                if (p.nextDue && p.nextDue <= todayStr) {
+                    due++;
+                } else if (p.nextReview && p.nextReview < now) {
+                    due++;
+                }
+                
+                if (p.box <= 1) hard++;
             }
         };
         
@@ -186,6 +201,7 @@ function renderAppShell() {
                 <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode">
                     <i data-lucide="moon"></i>
                 </button>
+                <div class="streakbox" style="margin-left: var(--space-sm);"></div>
             </div>
             <div class="header-title mobile-only">Deutsch Coach</div>
             <div class="header-srs-metrics">
@@ -340,18 +356,18 @@ if (document.readyState === 'loading') {
 }
 
 // Auto-load theme globally
-{
+document.addEventListener('DOMContentLoaded', () => {
     const theme = localStorage.getItem('de_theme');
     if (theme === 'dark') {
         document.body.setAttribute('data-theme', 'dark');
         document.body.classList.add('dark');
     }
-}
+});
 
 
 // Check AI Status globally
 function checkAIStatus() {
-    const provider = localStorage.getItem('de_ai_provider') || 'deepseek';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     let enabled = false;
     if (provider === 'ollama') {
         enabled = true;
@@ -365,4 +381,4 @@ function checkAIStatus() {
         document.body.classList.remove('ai-enabled');
     }
 }
-checkAIStatus();
+document.addEventListener('DOMContentLoaded', checkAIStatus);

@@ -53,6 +53,8 @@
   #loading { display: none; margin-top: 10px; font-size: 14px; color: var(--gold); font-weight: bold; }
 </style>
   <link rel="stylesheet" href="css/design-system.css">
+    <script src="js/tts-engine.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -120,7 +122,7 @@ Provide feedback on 1) Task fulfillment, 2) Grammar, 3) Vocabulary. Then provide
 
     document.getElementById('loading').style.display = 'block';
 
-    const provider = localStorage.getItem('de_ai_provider') || 'ollama';
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
     let apiUrl, headers, bodyData, getResponseText;
 
     if (provider === 'openai' || provider === 'openrouter') {
@@ -161,6 +163,5 @@ Provide feedback on 1) Task fulfillment, 2) Grammar, 3) Vocabulary. Then provide
   if(localStorage.getItem('de_theme') === 'dark') document.body.classList.add('dark');
   renderOutbox();
 </script>
-  <script src="js/app-shell.js"></script>
-</body>
+  </body>
 </html>

@@ -610,6 +610,9 @@ if (document.readyState === 'loading') {
 </script>
 
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/tts-engine.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 
@@ -1285,7 +1288,7 @@ function replayCurrentVoice() {
    AI MULTI-PROVIDER INTEGRATION & LIVE GRAMMAR CORRECTION
    ========================================================================= */
 
-let activeProvider = localStorage.getItem('de_ai_provider') || 'deepseek';
+let activeProvider = localStorage.getItem('de_ai_provider') || 'groq';
 let conversationHistory = JSON.parse(localStorage.getItem('de_human_partner_history_v1') || '[]');
 
 const AI_PROVIDERS = {
@@ -1555,7 +1558,5 @@ function escapeHtml(str) {
 }
 </script>
 
-  <script src="./assets/js/gamification.js"></script>
-  <script src="js/app-shell.js"></script>
-</body>
+    </body>
 </html>

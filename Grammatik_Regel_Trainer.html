@@ -357,6 +357,9 @@ html.dark-theme, body.dark {
 
 </style>
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/tts-engine.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -1207,7 +1210,7 @@ async function callAIGrammarExplanation(promptText, callback) {
     endpoint = 'https://api.openai.com/v1/chat/completions';
     model = 'gpt-4o-mini';
   } else if (provider === 'ollama') {
-    endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:8080/v1/chat/completions';
+    endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions';
     model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
   }
   
@@ -2546,8 +2549,7 @@ function getGenderClass(article) {
   return "";
 }
 </script>
-  <script src="./assets/js/gamification.js"></script>
-
+  
 <!-- Grammar Vault Modal -->
 <div id="grammarVaultModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
   <div style="background:var(--paper); width:100%; max-width:600px; max-height:80vh; overflow-y:auto; border-radius:8px; padding:20px; position:relative;">
@@ -2596,6 +2598,5 @@ function showGrammarVault() {
 }
 
 </script>
-  <script src="js/app-shell.js"></script>
-</body>
+  </body>
 </html>

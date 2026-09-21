@@ -958,6 +958,9 @@ if (document.readyState === 'loading') {
 </script>
 
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/tts-engine.js"></script>
+  <script src="js/app-shell.js"></script>
 </head>
 <body>
 
@@ -1321,7 +1324,7 @@ let currentUtterance = null;
 
 // Initialize settings from localStorage or defaults
 let appSettings = {
-  provider: localStorage.getItem('de_ai_provider') || 'deepseek',
+  provider: localStorage.getItem('de_ai_provider') || 'groq',
   keys: {
     deepseek: localStorage.getItem('de_ai_key_deepseek') || DEFAULT_DEEPSEEK_KEY,
     openai: localStorage.getItem('de_ai_key_openai') || '',
@@ -2185,7 +2188,5 @@ function escapeForAttr(str) {
 }
 </script>
 
-  <script src="./assets/js/gamification.js"></script>
-  <script src="js/app-shell.js"></script>
-</body>
+    </body>
 </html>
