@@ -10,7 +10,7 @@
   :root{
     --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
     --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
-    --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+    --purple:#6B4A8A; --der:#2563eb; --die:#dc2626; --das:#16a34a; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
   }
   *{box-sizing:border-box;}
   /* legacy body removed */
@@ -1611,9 +1611,9 @@ function renderCard(){
       <div class="qlabel">Artikel (der/die/das) · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
-        <div class="wordline">
+        <div class="wordline ${v.a ? getGenderClass(v.a) : ''}">
           <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
-            ___ ${v.sg} <span style="font-size:13px; opacity:0.7;">👁️</span>
+            ___ <span class="${getGenderClass(v.a)}">${v.sg}</span> <span style="font-size:13px; opacity:0.7;">👁️</span>
           </div>
           ${speakBtn(v.a+' '+v.sg,'Listen to word')}
         </div>
@@ -1650,7 +1650,7 @@ function renderCard(){
         <div class="qlabel">${meaningLang==='ta'?'🇩🇪 Noun → 🇮🇳 தமிழ்':meaningLang==='both'?'🇩🇪 Noun → 🌐 EN + தமிழ்':'🇩🇪 Noun → 🇬🇧 English'} · 📦 ${boxNames[box]}</div>
         <div class="prompt">
           <div class="wordicon">${getIcon(v)}</div>
-          <div class="wordline">
+          <div class="wordline ${v.a ? getGenderClass(v.a) : ''}">
             <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
               ${wordDisp} <span style="font-size:13px; opacity:0.7;">👁️</span>
             </div>
@@ -1692,7 +1692,7 @@ function renderCard(){
       <div class="qlabel">${meaningLang==='ta'?'🇩🇪 Adjective → 🇮🇳 தமிழ்':meaningLang==='both'?'🇩🇪 Adjective → 🌐 EN + தமிழ்':'🇩🇪 Adjective → 🇬🇧 English'} · 📦 ${boxNames[box]}</div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
-        <div class="wordline">
+        <div class="wordline ${v.a ? getGenderClass(v.a) : ''}">
           <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
             ${v.w} <span style="font-size:13px; opacity:0.7;">👁️</span>
           </div>
@@ -1891,6 +1891,174 @@ function handleSwipe(cardElement) {
     const btn = document.getElementById('btn-gewusst') || document.querySelector('.btn-pass');
     if(btn && !btn.disabled) btn.click();
   }
+}
+
+function getGenderClass(article) {
+  if (article === "der") return "gender-der";
+  if (article === "die") return "gender-die";
+  if (article === "das") return "gender-das";
+  return "";
+}
+
+// --- SWIPE GAME LOGIC ---
+let swipeQueue = [];
+let swipeScore = 0;
+let currentCardEl = null;
+let currentWordObj = null;
+let isDragging = false;
+let startX = 0, startY = 0, currentX = 0, currentY = 0;
+
+function startSwipeGame() {
+  document.getElementById('dashboardUI').style.display = 'none';
+  document.getElementById('stageUI').style.display = 'none';
+  document.getElementById('swipeGameUI').style.display = 'flex';
+  
+  swipeScore = 0;
+  document.getElementById('swipeScore').textContent = swipeScore;
+  
+  // Prepare queue
+  swipeQueue = [...NOUNS].filter(n => n.a).sort(() => Math.random() - 0.5);
+  
+  renderNextSwipeCard();
+}
+
+function exitSwipeGame() {
+  document.getElementById('swipeGameUI').style.display = 'none';
+  document.getElementById('dashboardUI').style.display = 'block';
+}
+
+function renderNextSwipeCard() {
+  const container = document.getElementById('swipeCardContainer');
+  container.innerHTML = '';
+  
+  if (swipeQueue.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding-top:100px; font-weight:bold; font-size:24px;">Game Over!<br>Score: ${swipeScore}</div>`;
+    return;
+  }
+  
+  currentWordObj = swipeQueue.pop();
+  
+  const card = document.createElement('div');
+  card.className = 'swipe-card';
+  card.style.cssText = `
+    position: absolute; width: 100%; height: 100%; background: var(--card);
+    border: 2px solid var(--ink); border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: grab; user-select: none; transition: transform 0.1s; transform-origin: 50% 100%;
+  `;
+  
+  card.innerHTML = `
+    <div style="font-size:42px; font-weight:bold; color:var(--ink); margin-bottom:12px; text-align:center;">${currentWordObj.sg}</div>
+    <div style="font-size:18px; color:var(--ink-soft);">${currentWordObj.en || ""}</div>
+    <div id="swipeFeedback" style="position:absolute; top:20px; font-weight:bold; font-size:24px; opacity:0; text-transform:uppercase; border:3px solid; padding:4px 12px; border-radius:8px;"></div>
+  `;
+  
+  container.appendChild(card);
+  currentCardEl = card;
+  
+  // Touch / Mouse Events
+  card.addEventListener('mousedown', dragStart);
+  card.addEventListener('touchstart', dragStart, {passive:false});
+  
+  window.addEventListener('mousemove', dragMove);
+  window.addEventListener('touchmove', dragMove, {passive:false});
+  
+  window.addEventListener('mouseup', dragEnd);
+  window.addEventListener('touchend', dragEnd);
+}
+
+function dragStart(e) {
+  if (e.type === 'touchstart') {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  } else {
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+  isDragging = true;
+  currentCardEl.style.transition = 'none';
+}
+
+function dragMove(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+  
+  let clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+  let clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+  
+  currentX = clientX - startX;
+  currentY = clientY - startY;
+  
+  let rotate = currentX * 0.05;
+  currentCardEl.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${rotate}deg)`;
+  
+  // Feedback
+  const fb = document.getElementById('swipeFeedback');
+  if (currentX < -50) { fb.textContent = "DIE"; fb.style.color = "var(--die)"; fb.style.borderColor = "var(--die)"; fb.style.opacity = Math.min(1, Math.abs(currentX)/100); }
+  else if (currentX > 50) { fb.textContent = "DER"; fb.style.color = "var(--der)"; fb.style.borderColor = "var(--der)"; fb.style.opacity = Math.min(1, currentX/100); }
+  else if (currentY < -50) { fb.textContent = "DAS"; fb.style.color = "var(--das)"; fb.style.borderColor = "var(--das)"; fb.style.opacity = Math.min(1, Math.abs(currentY)/100); }
+  else { fb.style.opacity = 0; }
+}
+
+function dragEnd(e) {
+  if (!isDragging) return;
+  isDragging = false;
+  
+  window.removeEventListener('mousemove', dragMove);
+  window.removeEventListener('touchmove', dragMove);
+  window.removeEventListener('mouseup', dragEnd);
+  window.removeEventListener('touchend', dragEnd);
+  
+  const threshold = 80;
+  let answer = null;
+  
+  if (currentX < -threshold) answer = 'die';
+  else if (currentX > threshold) answer = 'der';
+  else if (currentY < -threshold) answer = 'das';
+  
+  if (answer) {
+    processSwipe(answer);
+  } else {
+    // Reset
+    currentCardEl.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    currentCardEl.style.transform = `translate(0px, 0px) rotate(0deg)`;
+    document.getElementById('swipeFeedback').style.opacity = 0;
+  }
+  currentX = 0; currentY = 0;
+}
+
+function simulateSwipe(dir) {
+  if(!currentCardEl) return;
+  processSwipe(dir, true);
+}
+
+function processSwipe(answer, isSimulated = false) {
+  const correct = currentWordObj.a === answer;
+  
+  currentCardEl.style.transition = 'transform 0.4s ease-out, opacity 0.4s';
+  
+  let endX = 0, endY = 0;
+  if(answer === 'die') endX = -500;
+  else if(answer === 'der') endX = 500;
+  else if(answer === 'das') endY = -500;
+  
+  currentCardEl.style.transform = `translate(${endX}px, ${endY}px) rotate(${endX*0.1}deg)`;
+  currentCardEl.style.opacity = 0;
+  
+  if(correct) {
+    swipeScore++;
+    document.getElementById('swipeScore').textContent = swipeScore;
+    // Tiny confetti effect could go here
+  } else {
+    // Flash red or show error briefly
+    swipeScore = Math.max(0, swipeScore - 1);
+    document.getElementById('swipeScore').textContent = swipeScore;
+    alert(`Falsch! Es ist: ${currentWordObj.a} ${currentWordObj.sg}`);
+  }
+  
+  setTimeout(() => {
+    renderNextSwipeCard();
+  }, 400);
 }
 
 </script>

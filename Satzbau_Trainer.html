@@ -731,6 +731,12 @@ if (document.readyState === 'loading') {
   initSuiteTheme();
 }
 
+function getGenderClass(article) {
+  if (article === "der") return "gender-der";
+  if (article === "die") return "gender-die";
+  if (article === "das") return "gender-das";
+  return "";
+}
 </script>
 
 <script>

@@ -13,6 +13,14 @@
   --color-warning: #d97706;       /* Amber-600 */
   --color-error: #dc2626;         /* Red-600 */
   
+  /* Gender Memory Anchor Colors */
+  --color-der: #2563eb;       /* Masculine (Blue) */
+  --color-die: #dc2626;         /* Feminine (Red) */
+  --color-das: #16a34a;       /* Neutral (Green) */
+  --color-der-bg: rgba(37, 99, 235, 0.1);
+  --color-die-bg: rgba(220, 38, 38, 0.1);
+  --color-das-bg: rgba(22, 163, 74, 0.1);
+  
   /* Neutral / Layout Colors */
   --color-bg: #f8fafc;            /* Slate-50 - App Background */
   --color-surface: #ffffff;       /* Card Background */
@@ -549,3 +557,11 @@ p { margin: 0 0 var(--space-md) 0; color: var(--color-ink-soft); }
 body:not(.ai-enabled) .ai-feature {
     display: none !important;
 }
+
+/* --- Gender Memory Anchor Classes --- */
+.gender-der { color: var(--color-der) !important; }
+.gender-die { color: var(--color-die) !important; }
+.gender-das { color: var(--color-das) !important; }
+.gender-bg-der { background-color: var(--color-der-bg) !important; border-color: var(--color-der) !important; color: var(--color-der) !important; }
+.gender-bg-die { background-color: var(--color-die-bg) !important; border-color: var(--color-die) !important; color: var(--color-die) !important; }
+.gender-bg-das { background-color: var(--color-das-bg) !important; border-color: var(--color-das) !important; color: var(--color-das) !important; }
