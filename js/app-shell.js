@@ -7,13 +7,20 @@ function injectDependencies() {
     // Inject Lucide script if not present
     if (!document.querySelector('script[src*="lucide"]')) {
         const script = document.createElement('script');
-        script.src = "https://unpkg.com/lucide@latest";
+        script.src = "js/lucide.min.js";
         script.onload = () => {
             if (window.lucide) window.lucide.createIcons();
         };
         document.head.appendChild(script);
     }
 
+
+        if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
+        const cspMeta = document.createElement('meta');
+        cspMeta.httpEquiv = "Content-Security-Policy";
+        cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com; img-src 'self' data:; media-src 'self' data: blob:;";
+        document.head.appendChild(cspMeta);
+    }
 
     // Inject Mobile & PWA tags if not present
     if (!document.querySelector('link[rel="manifest"]')) {
@@ -141,19 +148,33 @@ function renderAppShell() {
         const main = document.createElement('main');
         main.className = 'app-main';
         
-        // Calculate mock stats (or actual stats) for the header
-        const prog = JSON.parse(localStorage.getItem('dc_progress_v1') || '{}');
-        let due = 0, hard = 0, newCount = 0, mastered = 0;
+        // Calculate actual stats for the header
+        let due = 0, hard = 0, newCount = 0;
+        let mastered = totalMastered; // reusing totalMastered calculated above
         const now = Date.now();
-        for(let k in prog) { 
-            if(prog[k].nextReview && prog[k].nextReview < now) due++;
-        }
+        
+        // Helper to count stats across DBs
+        const countStats = (prog) => {
+            for(let k in prog) {
+                if (prog[k].nextReview && prog[k].nextReview < now) due++;
+                if (prog[k].box <= 1) hard++;
+            }
+        };
+        
+        countStats(dcProg);
+        countStats(naProg);
+        countStats(wmgProg);
+        
+        // Estimate new count: Assume total DB size ~ 1500 (A1+A2+B1). New = Total - Seen
+        const totalSeen = Object.keys(dcProg).length + Object.keys(naProg).length + Object.keys(wmgProg).length;
+        const ESTIMATED_TOTAL = 1500;
+        newCount = Math.max(0, ESTIMATED_TOTAL - totalSeen);
         
         // Use placeholders if 0
-        if (due === 0) due = 12;
-        if (hard === 0) hard = 4;
-        if (newCount === 0) newCount = 20;
-        if (mastered === 0) mastered = 450;
+        
+        
+        
+        
         
         const header = document.createElement('header');
         header.className = 'app-header';

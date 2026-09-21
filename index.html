@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com; img-src 'self' data:; media-src 'self' data: blob:;">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Deutsch Coach Dashboard</title>
@@ -10,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/design-system.css">
 <!-- Using Lucide Icons via unpkg -->
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="js/lucide.min.js"></script>
 <style>
   .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
   .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-ink-soft); font-weight: 600; margin-bottom: var(--space-md); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
@@ -52,20 +53,20 @@
         <div class="nav-group">
           <div class="nav-group-title">Level Progress</div>
           <div class="level-progress-container">
-            <div class="progress-label"><span>A1 Foundation</span><span>100%</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 100%;"></div></div>
+            <div class="progress-label"><span>A1 Foundation</span><span id="a1-pct-txt">0%</span></div>
+            <div class="progress-bar-bg"><div id="a1-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
           </div>
           <div class="level-progress-container">
-            <div class="progress-label"><span>A2 Basics</span><span>85%</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 85%;"></div></div>
+            <div class="progress-label"><span>A2 Basics</span><span id="a2-pct-txt">0%</span></div>
+            <div class="progress-bar-bg"><div id="a2-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
           </div>
           <div class="level-progress-container">
-            <div class="progress-label"><span>B1.1 Intermediate</span><span>40%</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 40%;"></div></div>
+            <div class="progress-label"><span>B1.1 Intermediate</span><span id="b11-pct-txt">0%</span></div>
+            <div class="progress-bar-bg"><div id="b11-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
           </div>
           <div class="level-progress-container">
-            <div class="progress-label"><span>B1.2 Advanced</span><span>5%</span></div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 5%;"></div></div>
+            <div class="progress-label"><span>B1.2 Advanced</span><span id="b12-pct-txt">0%</span></div>
+            <div class="progress-bar-bg"><div id="b12-pct-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
           </div>
         </div>
 

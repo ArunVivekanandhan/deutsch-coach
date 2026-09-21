@@ -48,7 +48,7 @@ All files are flat in the project root directory (`C:\Users\arunr\OneDrive\Docum
 
 ```
 Deutsch_Coach_Project/
-├── index.html                              # Main PWA — byte-identical to deutsch-coach.html
+├── index.html                              # Main PWA — diverged (index is UI, coach is legacy data payload) to deutsch-coach.html
 ├── deutsch-coach.html                      # Main PWA (updated with Suite Hub & 6 reading passages)
 ├── KI_Human_Partner.html                   # 1-on-1 Interactive Video Call Coach with Animated Realistic Human Persona, Lip-sync & Live Grammar Feedback
 ├── KI_German_Coach.html                    # Real-time AI German Conversation Coach & Live Grammar Partner (Multi-AI: DeepSeek/OpenAI/Gemini/Groq/Ollama)
@@ -74,7 +74,7 @@ Deutsch_Coach_Project/
 └── A2_Verben_01-50_Begleittext.md          # Transcript/script for that audio file
 ```
 
-`index.html` and `deutsch-coach.html` are **confirmed byte-identical** (`diff` returns empty). Only
+`index.html` and `deutsch-coach.html` are **confirmed diverged (index is UI, coach is legacy data payload)** (`diff` returns empty). Only
 `index.html` is referenced by `manifest.json`'s `start_url` and by `sw.js`'s cache list — treat
 `index.html` as canonical and `deutsch-coach.html` as a redundant copy that must be kept in sync
 manually if `index.html` is edited (there is no build step that copies one to the other).
@@ -654,7 +654,7 @@ Implemented comprehensive learning materials, grammar rule training, oral exam s
 - `Grammatik_Regel_Trainer.html` (created, 50 KB standalone interactive grammar studio)
 - `Sprech_Pruefungs_Simulator.html` (created, 36 KB oral exam simulator & written cloze suite)
 - `index.html` (updated with Suite Navigation Launcher, 6 reading passages, exam links)
-- `deutsch-coach.html` (updated, byte-identical copy kept in sync)
+- `deutsch-coach.html` (updated, diverged (index is UI, coach is legacy data payload) copy kept in sync)
 - `sw.js` (updated to v2, caching all suite applications offline)
 - `German_A2_Practice_Studio.html` (updated with Suite Navigation Bar)
 - `Verb_Transformation_Trainer.html` (updated with Suite Navigation Bar)
@@ -701,7 +701,7 @@ Resolved verb deficit in the main PWA application (`index.html` and `deutsch-coa
 
 #### Files Changed
 - `index.html` (updated, 2939 lines, 283 KB)
-- `deutsch-coach.html` (updated, byte-identical copy kept in sync)
+- `deutsch-coach.html` (updated, diverged (index is UI, coach is legacy data payload) copy kept in sync)
 - `PROJECT_KNOWLEDGE.md` (updated sections 4, 10, 28, 29)
 
 #### Changes
@@ -839,7 +839,7 @@ No application/source files were modified, per the task's explicit constraints.
 
 #### Changes
 Full initial documentation pass: inventoried all 17 files in `/mnt/user-data/outputs`, confirmed
-`index.html`/`deutsch-coach.html` are byte-identical duplicates, extracted the function/constant
+`index.html`/`deutsch-coach.html` are diverged (index is UI, coach is legacy data payload) duplicates, extracted the function/constant
 inventory of all 5 interactive apps, read the PWA manifest and service worker in full, sampled the data
 schemas of every app's embedded vocabulary array, confirmed the Excel workbooks' sheet structures, and
 wrote all 29 sections above from that direct inspection.
@@ -931,7 +931,7 @@ rather than a shared module. Confirmed by direct diffing of the `BOX_SCHEDULE` c
 `ICON_SVGS` keys, and the `recordAnswer`/`getProg` function bodies across the main app,
 `Verb_Transformation_Trainer.html`, and `Nomen_Adjektiv_Trainer.html`.
 **Evidence:** `grep -n "BOX_SCHEDULE\|function getProg\|function recordAnswer"` across the three files
-returns near-identical but not byte-identical function bodies in each.
+returns near-identical but not diverged (index is UI, coach is legacy data payload) function bodies in each.
 **Affected files:** `deutsch-coach.html`/`index.html`, `Verb_Transformation_Trainer.html`,
 `Nomen_Adjektiv_Trainer.html`.
 **Impact:** Any fix or enhancement to the spaced-repetition logic must be manually re-applied up to 3

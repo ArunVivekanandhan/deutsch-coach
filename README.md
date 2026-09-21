@@ -6,6 +6,13 @@
 👤 **Live Human Coach:** [https://arunvivekanandhan.github.io/deutsch-coach/KI_Human_Partner.html](https://arunvivekanandhan.github.io/deutsch-coach/KI_Human_Partner.html)  
 🤖 **Live AI Text Coach:** [https://arunvivekanandhan.github.io/deutsch-coach/KI_German_Coach.html](https://arunvivekanandhan.github.io/deutsch-coach/KI_German_Coach.html)
 
+| 📝 **Brief Schreiben Trainer** | [Open Brief Schreiben](https://arunvivekanandhan.github.io/deutsch-coach/Brief_Schreiben_Trainer.html) | Interactive letter and email writing simulator for A1-B1 exams. |
+| 🗣️ **Dialog Schatten Trainer** | [Open Dialog Schatten](https://arunvivekanandhan.github.io/deutsch-coach/Dialog_Schatten_Trainer.html) | Shadowing practice for conversations and pronunciation. |
+| 🎧 **Hörverstehen & Diktat** | [Open Hörverstehen](https://arunvivekanandhan.github.io/deutsch-coach/Hoerverstehen_Diktat_Trainer.html) | Listening comprehension and dictation exercises. |
+| ⚙️ **AI Config & Setup** | [Open AI Setup](https://arunvivekanandhan.github.io/deutsch-coach/Einstellungen_Setup.html) | Centralized API key management and application settings. |
+| 📊 **Wortschatz Master Grid** | [Open Master Grid](https://arunvivekanandhan.github.io/deutsch-coach/Wortschatz_Master_Grid.html) | Comprehensive vocabulary grid view. |
+| 📗 **Excel Master Sheet** | [Open Excel Sheet](https://arunvivekanandhan.github.io/deutsch-coach/Deutsch_Wortschatz_Excel_Sheet.html) | Complete vocabulary dataset in a familiar spreadsheet interface. |
+
 ---
 
 ## 🧭 Application Suite Overview
