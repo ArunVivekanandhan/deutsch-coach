@@ -363,44 +363,31 @@ html.dark-theme, body.dark {
 <body>
 <div class="wrap">
 
-  <!-- Suite Navigation Hub -->
-  
-  <!-- UNIFIED DEUTSCH-COACH SUITE HUB -->
-
-    <div class="hub-links">
-      <a href="./index.html" class="hub-link">🏠 Main Hub</a>
-      <a href="./KI_German_Coach.html" class="hub-link">🤖 KI Coach</a>
-      <a href="./Grammatik_Regel_Trainer.html" class="hub-link active">📚 Grammar</a>
-      <a href="./Sprech_Pruefungs_Simulator.html" class="hub-link">🗣️ Speaking</a>
-      <a href="./Continuous_Verb_Speaker.html" class="hub-link">🎧 Audio Speaker</a>
-      <a href="./Verben_Hoeren_EN_DE.html" class="hub-link">📻 Audio Coach</a>
-      <a href="./German_A2_Practice_Studio.html" class="hub-link">🔬 A2 Studio</a>
-      <a href="./German_B1_Practice_Studio.html" class="hub-link">🔬 B1 Studio</a>
-      <a href="./Verb_Transformation_Trainer.html" class="hub-link">⚡ Verbs</a>
-      <a href="./Nomen_Adjektiv_Trainer.html" class="hub-link">📦 Nouns/Adj</a>
-      <a href="./Satzbau_Trainer.html" class="hub-link">🧩 Satzbau</a>
-      <a href="./konnektoren_referenz.html" class="hub-link">📋 Konnektoren</a>
-    </div>
-    <button onclick="toggleDarkMode()" style="cursor:pointer; background:none; border:1px solid var(--line); border-radius:4px; padding:4px 8px; color:var(--ink);" class="ds-btn ds-btn-secondary">🌓</button>
-  </div>
-
-
   <h1>German Grammar &amp; Rules Trainer</h1>
   <div class="sub">16 Essential Grammar Pillars for Fluent Speaking &amp; B1 Exam Success</div>
 
   <!-- Mode Tabs -->
-  <div class="modetabs">
-    <div class="modetab active" id="tabStudy" onclick="switchMode('study')">📖 Rule Guide &amp; Tables</div>
-    <div class="modetab" id="tabDrill" onclick="switchMode('drill')">⚡ Interactive Practice Drill</div>
-    <div class="modetab" id="tabStats" onclick="switchMode('stats')">📊 Mastery &amp; Progress</div>
+  <div class="ds-tabs" style="margin-bottom: var(--space-lg); display: flex; gap: 8px; flex-wrap: wrap;">
+    <div class="ds-tab active" id="tabStudy" onclick="switchMode('study')" style="cursor:pointer; padding: 12px 24px; font-weight: 600; border-radius: var(--radius-md); transition: all 0.2s; background: var(--color-surface); border: 1px solid var(--color-border);">📘 Rule Guide &amp; Tables</div>
+    <div class="ds-tab" id="tabDrill" onclick="switchMode('drill')" style="cursor:pointer; padding: 12px 24px; font-weight: 600; border-radius: var(--radius-md); transition: all 0.2s; background: var(--color-surface); border: 1px solid var(--color-border);">⚡ Interactive Practice Drill</div>
+    <div class="ds-tab" id="tabStats" onclick="switchMode('stats')" style="cursor:pointer; padding: 12px 24px; font-weight: 600; border-radius: var(--radius-md); transition: all 0.2s; background: var(--color-surface); border: 1px solid var(--color-border);">📈 Mastery &amp; Progress</div>
   </div>
+  
+  <style>
+    .ds-tab.active { background: var(--color-primary) !important; color: white !important; border-color: var(--color-primary) !important; }
+    .ds-tab:not(.active):hover { border-color: var(--color-primary); color: var(--color-primary); }
+  </style>
 
   <!-- Rule Filter Chips -->
-  <div class="filterbox">
+  <div class="filterbox" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg); margin-bottom: var(--space-xl); box-shadow: var(--shadow-sm);">
     
-    <div class="filterlabel">Select German Grammar Pillar:</div>
-    <div style="margin-bottom:8px;"><button onclick="toggleWeaknessVault()" id="btnWeakness" class="subtab" style="background:var(--red); color:#fff; border-color:var(--red-dark);">🏋️ Drill Weaknesses (Box 1-2)</button> <button onclick="showGrammarVault()" class="subtab" style="background:var(--ink); color:#fff;">📖 View My Grammar Weaknesses</button></div>
-    <div class="chiprow" id="ruleChips"></div>
+    <div class="filterlabel" style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-ink-soft); font-weight: 600; margin-bottom: var(--space-md);">Select German Grammar Pillar:</div>
+    <div style="margin-bottom:var(--space-md); display:flex; gap:8px;">
+        <button onclick="toggleWeaknessVault()" id="btnWeakness" class="ds-btn ds-btn-primary" style="background: #ef4444; border-color: #ef4444; font-size:13px;">🔥 Drill Weaknesses (Box 1-2)</button> 
+        <button onclick="showGrammarVault()" class="ds-btn ds-btn-secondary" style="font-size:13px;">📚 View My Grammar Weaknesses</button>
+    </div>
+    
+    <div class="chiprow" id="ruleChips" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px;"></div>
 
   </div>
 
@@ -1162,12 +1149,7 @@ const GRAMMAR_RULES = [
 /* =========================================================================
    NEW LOGIC: Persistence, AI Explanations, Dark Mode, Mistake Filter
    ========================================================================= */
-function toggleDarkMode() {
-  const isDark = document.body.getAttribute("data-theme") === "dark";
-  document.body.setAttribute("data-theme", isDark ? "light" : "dark");
-  localStorage.setItem('de_theme', isDark ? "light" : "dark");
-}
-if(localStorage.getItem('de_theme') === 'dark') document.body.setAttribute("data-theme", "dark");
+
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed', err));
@@ -2034,10 +2016,14 @@ function selectRule(ruleId){
 
 function switchMode(mode){
   currentMode = mode;
-  document.getElementById("tabStudy").className = "modetab " + (mode==='study' ? 'active' : '');
-  document.getElementById("tabDrill").className = "modetab " + (mode==='drill' ? 'active' : '');
-  document.getElementById("tabStats").className = "modetab " + (mode==='stats' ? 'active' : '');
-
+  const tStudy = document.getElementById("tabStudy");
+  const tDrill = document.getElementById("tabDrill");
+  const tStats = document.getElementById("tabStats");
+  
+  if (mode === 'study') tStudy.classList.add('active'); else tStudy.classList.remove('active');
+  if (mode === 'drill') tDrill.classList.add('active'); else tDrill.classList.remove('active');
+  if (mode === 'stats') tStats.classList.add('active'); else tStats.classList.remove('active');
+  
   if(mode === 'drill'){
     startDrillForRule(selectedRuleId);
   } else {
@@ -2520,7 +2506,11 @@ function escapeQuotes(str){
 }
 
 // Initial boot
-window.onload = init;
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 // UNIFIED SUITE THEME SYSTEM
 function initSuiteTheme() {
