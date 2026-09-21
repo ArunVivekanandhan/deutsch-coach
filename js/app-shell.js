@@ -285,10 +285,12 @@ if (document.readyState === 'loading') {
 }
 
 // Auto-load theme globally
-const savedTheme = localStorage.getItem('de_theme');
-if (savedTheme === 'dark') {
-    document.body.setAttribute('data-theme', 'dark');
-    document.body.classList.add('dark');
+{
+    const theme = localStorage.getItem('de_theme');
+    if (theme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark');
+    }
 }
 
 
