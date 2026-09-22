@@ -1855,10 +1855,11 @@ Write ONE natural German example sentence using this exact word, followed by its
 /* ---- Keyboard Shortcuts for Fast Learning ---- */
 document.addEventListener('keydown', (e) => {
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
-  
+
   if (!session || session.length === 0) {
     if (e.code === 'Space' || e.code === 'Enter') {
       e.preventDefault();
+      e.stopPropagation();
       const startBtn = document.getElementById('startBtn');
       if (startBtn) startBtn.click();
     }
@@ -1874,6 +1875,7 @@ document.addEventListener('keydown', (e) => {
   // T key: Toggle translation peek
   if (e.key === 't' || e.key === 'T') {
     e.preventDefault();
+    e.stopPropagation();
     toggleInlinePeek();
     return;
   }
@@ -1881,19 +1883,27 @@ document.addEventListener('keydown', (e) => {
   // L key: Cycle language
   if (e.key === 'l' || e.key === 'L') {
     e.preventDefault();
+    e.stopPropagation();
     cycleMeaningLang();
     return;
   }
 
-  // N key: Next card immediately
+  // N key: Next card immediately. Must stop propagation here - js/app-shell.js
+  // also has a global window-level 'n' handler (shared across pages) that
+  // looks for a ".actbtn.check"/".actbtn.next" button and, finding none on
+  // this page (this page uses "next-bold" instead), falls back to clicking
+  // #startReviewBtn and navigating away to deutsch-coach.html. Without
+  // stopPropagation, BOTH handlers fired on every single "N" press.
   if (e.key === 'n' || e.key === 'N') {
     e.preventDefault();
+    e.stopPropagation();
     advance();
     return;
   }
 
   if (e.code === 'Space' || e.code === 'Enter') {
     e.preventDefault();
+    e.stopPropagation();
     if (revealBtn && revealBtn.style.display !== 'none' && revealBtn.offsetParent !== null) {
       revealBtn.click();
     } else if (btnGewusst && btnGewusst.offsetParent !== null) {
@@ -1903,17 +1913,18 @@ document.addEventListener('keydown', (e) => {
   }
 
   if (e.key === '1' && btnNochmal && btnNochmal.offsetParent !== null) {
-    e.preventDefault(); btnNochmal.click(); return;
+    e.preventDefault(); e.stopPropagation(); btnNochmal.click(); return;
   }
   if (e.key === '2' && btnGewusst && btnGewusst.offsetParent !== null) {
-    e.preventDefault(); btnGewusst.click(); return;
+    e.preventDefault(); e.stopPropagation(); btnGewusst.click(); return;
   }
   if (e.key === '3' && btnEasy && btnEasy.offsetParent !== null) {
-    e.preventDefault(); btnEasy.click(); return;
+    e.preventDefault(); e.stopPropagation(); btnEasy.click(); return;
   }
   if (e.code === 'KeyS') {
     if (v) {
       e.preventDefault();
+      e.stopPropagation();
       const txt = curMode === 'nomen' ? `${v.a} ${v.sg}` : v.w;
       speak(txt);
     }
