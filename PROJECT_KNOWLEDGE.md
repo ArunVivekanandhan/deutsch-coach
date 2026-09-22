@@ -485,6 +485,15 @@ script) anywhere in the repository.
 ## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
 **Open, discovered this session, not yet fixed:**
+- **Misplaced noun sitting in the `ADJS` array, duplicated.** `Nomen_Adjektiv_Trainer.html`'s `ADJS`
+  array (and its two copies in `Deutsch_Wortschatz_Excel_Sheet.html` / `Wortschatz_Master_Grid.html`,
+  identically) has two entries `{w:'Garten', en:'garden', cat:'n'}` — "Garten" (garden) is a noun, not
+  an adjective, and the entry's shape doesn't even match the other adjective entries (no
+  `comp`/`sup`/`komp`/`level`/`source`/`ta`/`typ`, just a stray `cat:'n'` field instead). Pre-existing
+  in all 3 copies identically (confirmed this session while investigating a different, now-fixed gap —
+  see Section 28's 2026-09-22 "same richer-source gap for NOUNS/ADJS" entry), so it isn't something
+  recently introduced. Left alone since removing/relocating it is a content-quality fix, not a
+  missing-data one, and touching it means editing 3 files' worth of duplicated data for one bad entry.
 - **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
   has its own `applyTheme()` that sets `document.body.classList.add('dark')`, and (not independently
   re-verified, but built from the same template) `Sprech_Pruefungs_Simulator.html` likely has the same
@@ -742,6 +751,32 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-22 (Task 10) — Fix: same "richer source exists elsewhere" gap for NOUNS/ADJS
+
+#### Task
+"Check the other pages too for anything similar" — after 3 rounds of fixing the same missing-A1/B2-verbs bug on different pages, asked to proactively check the rest of the app for the same class of bug (a page keeping its own duplicated copy of shared vocabulary data that has silently fallen behind a richer copy living on another page), rather than fixing them one report at a time.
+
+#### What was checked
+- **`VERBS`**: confirmed (via `grep -lE "(const|let|var)\s+VERBS\s*=\s*\["`) that only 4 pages have their own copy: `Verb_Transformation_Trainer.html` (581/540 deduped, source of truth) and the 3 already fixed in Tasks 7-9. No other page has this gap.
+- **`NOUNS` / `ADJS`**: found via the same grep pattern that 3 pages carry these — `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`, and `Nomen_Adjektiv_Trainer.html`. The first two were both stuck at 378 nouns / 337 adjectives; `Nomen_Adjektiv_Trainer.html` had 522 nouns / 347 adjectives — the same richer-source pattern as `VERBS`, just not yet reported by the user for this data. Scripted diff (by `sg` for nouns, `w` for adjectives) confirmed zero content differences for every entry present in both the smaller and larger sets, and zero duplicate keys in the source other than one pre-existing, already-shared data-quality quirk (see below) — safe to append the difference.
+  - **NOUNS**: 144 missing (105 A1 + 39 B2 — an entire missing level for nouns too, same shape as the VERBS gap).
+  - **ADJS**: 10 missing (all A1).
+  - Appended both missing sets to `Deutsch_Wortschatz_Excel_Sheet.html` and `Wortschatz_Master_Grid.html` (NOUNS 378→522, ADJS 337→347 on both), and updated every hardcoded count label that had already been corrected once in Tasks 8-9 (they needed a second correction now that NOUNS/ADJS also grew): stats badge/hero subtitle, "Wortart" pos-filter chips, and the status-bar/results-count placeholder text on both pages. New combined total: 540 verbs + 522 nouns + 347 adjectives = 1,409 (was 1,255, was 1,117 before Task 8).
+  - Noted but deliberately NOT touched: `Nomen_Adjektiv_Trainer.html`'s `ADJS` array has a pre-existing, already-identically-shared data-quality quirk — two duplicate `{w:'Garten', en:'garden', cat:'n'}` entries that are clearly a misplaced noun (wrong shape entirely: no `comp`/`sup`/`level`/etc., just `cat:'n'`) sitting in the adjectives array. This same quirk already exists identically in `Deutsch_Wortschatz_Excel_Sheet.html` and `Wortschatz_Master_Grid.html` too (verified), so it isn't something this fix introduced or made worse — flagging it in Known Bugs rather than silently "fixing" content quality that's out of scope for a missing-data pass.
+- **`KNOWN_SISTER_VERBS` / `PREFIX_MEANINGS`**: also duplicated across the same 3 files. An initial raw-text-length comparison looked alarming (`Verb_Transformation_Trainer.html`'s copy was 4-10x longer in raw characters than the other two), but a proper balanced-brace extraction + `eval` + per-key `JSON.stringify` comparison (Node.js, not naive regex/JSON.parse, since these are JS object literals with unquoted keys) showed **byte-for-byte identical content** across all three files for every key — the raw-length difference was an artifact of an imprecise regex capturing extra trailing text in one file, not an actual data gap. No fix needed; recorded here so a future pass doesn't have to redo this investigation.
+- **`GRAMMAR_RULES`**: confirmed unique to `Grammatik_Regel_Trainer.html` only — not duplicated anywhere, no drift possible.
+
+#### Testing
+- Headless-browser check on both fixed pages: `VERBS.length===540`, `NOUNS.length===522`, `ADJS.length===347` confirmed live via `page.evaluate` on both `Deutsch_Wortschatz_Excel_Sheet.html` and `Wortschatz_Master_Grid.html`, zero `pageerror` events.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Deutsch_Wortschatz_Excel_Sheet.html`
+- `Wortschatz_Master_Grid.html`
+- `PROJECT_KNOWLEDGE.md` (this entry; Known Bugs section)
+
+---
 
 ### 2026-09-22 (Task 9) — Fix: Deutsch_Wortschatz_Excel_Sheet.html missing A1 and B2 verbs
 
