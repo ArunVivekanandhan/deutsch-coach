@@ -485,15 +485,6 @@ script) anywhere in the repository.
 ## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
 **Open, discovered this session, not yet fixed:**
-- **Misplaced noun sitting in the `ADJS` array, duplicated.** `Nomen_Adjektiv_Trainer.html`'s `ADJS`
-  array (and its two copies in `Deutsch_Wortschatz_Excel_Sheet.html` / `Wortschatz_Master_Grid.html`,
-  identically) has two entries `{w:'Garten', en:'garden', cat:'n'}` — "Garten" (garden) is a noun, not
-  an adjective, and the entry's shape doesn't even match the other adjective entries (no
-  `comp`/`sup`/`komp`/`level`/`source`/`ta`/`typ`, just a stray `cat:'n'` field instead). Pre-existing
-  in all 3 copies identically (confirmed this session while investigating a different, now-fixed gap —
-  see Section 28's 2026-09-22 "same richer-source gap for NOUNS/ADJS" entry), so it isn't something
-  recently introduced. Left alone since removing/relocating it is a content-quality fix, not a
-  missing-data one, and touching it means editing 3 files' worth of duplicated data for one bad entry.
 - **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
   has its own `applyTheme()` that sets `document.body.classList.add('dark')`, and (not independently
   re-verified, but built from the same template) `Sprech_Pruefungs_Simulator.html` likely has the same
@@ -751,6 +742,27 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-22 (Task 11) — Fix: remove misplaced "Garten" entries from ADJS
+
+#### Task
+"Fix the Garten entry too" — following up on the Known Bugs entry from Task 10 that flagged, but deliberately didn't fix, two malformed `{w:'Garten', en:'garden', cat:'n'}` entries sitting in the `ADJS` array (a noun, wrong shape, duplicated) on all 3 pages that carry that data.
+
+#### Decision and fix
+Checked first whether "Garten" already exists properly in any of the 3 pages' `NOUNS` arrays — it doesn't, anywhere. Building a correct noun entry from scratch would mean fabricating fields the real entries all have (`ta`/`ta_translit` Tamil translation, `icon`, `level`, `topic`, `typ`) with no source to verify them against (checked `js/tamil-dict.js` too — no "Garten" entry there either), which conflicts with this project's standing "never fabricate content" rule. Removing the two malformed entries outright doesn't require inventing anything, so that's what was done: deleted both `{w:'Garten', en:'garden', cat:'n'}` entries from `ADJS` in `Nomen_Adjektiv_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, and `Wortschatz_Master_Grid.html` (347 → 345 in each). Updated the same count labels touched in Task 10 (stats badge/hero subtitle, "Adjektive"/"Alle" filter chips, status-bar placeholder) on the two pages that hardcode them; `Nomen_Adjektiv_Trainer.html` has no hardcoded counts to fix (computes them live).
+If the user wants "Garten" added back as a real noun entry later, it needs a real Tamil translation and level/topic assignment from them (or another verified source) first — not guessed.
+
+#### Testing
+- Headless-browser check on all 3 pages: `ADJS.length === 345` and no entry with `w === 'Garten'` remains, confirmed live via `page.evaluate`; zero `pageerror` events.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Nomen_Adjektiv_Trainer.html`
+- `Deutsch_Wortschatz_Excel_Sheet.html`
+- `Wortschatz_Master_Grid.html`
+- `PROJECT_KNOWLEDGE.md` (this entry; removes the Known Bugs entry this task fixes)
+
+---
 
 ### 2026-09-22 (Task 10) — Fix: same "richer source exists elsewhere" gap for NOUNS/ADJS
 
