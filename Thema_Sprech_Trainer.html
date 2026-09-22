@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Themen-Sprechtrainer — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
+    --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  }
+  html.dark-theme, body[data-theme="dark"] {
+    --paper:#0f172a; --paper-dark:#1e293b; --card:#1e293b; --ink:#f8fafc; --ink-soft:#94a3b8;
+    --red:#f87171; --red-dark:#ef4444; --gold:#fbbf24; --green:#4ade80; --blue:#38bdf8;
+    --purple:#c084fc; --line:#334155; --shadow:rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;}
+  .wrap{width:100%; max-width:900px;}
+  h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:16px;}
+
+  .thema-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:10px; margin-bottom:18px;}
+  .thema-card{
+    background:var(--card); border:1.5px solid var(--line); border-radius:10px; padding:14px;
+    cursor:pointer; transition:all .15s; text-align:center;
+  }
+  .thema-card:hover{border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 14px var(--shadow);}
+  .thema-card.active{border-color:var(--ink); background:var(--ink); color:#fff;}
+  .thema-icon{width:36px; height:36px; margin:0 auto 8px; color:var(--gold);}
+  .thema-card.active .thema-icon{color:#fff;}
+  .thema-title{font-family:'Fjalla One',sans-serif; font-size:15px;}
+  .thema-progress{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-top:4px;}
+  .thema-card.active .thema-progress{color:#e5e0d0;}
+
+  .backbtn{
+    background:none; border:none; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;
+    font-size:12px; cursor:pointer; padding:6px 0; margin-bottom:10px; font-weight:600;
+  }
+  .backbtn:hover{color:var(--ink);}
+
+  .verb-list{display:flex; flex-direction:column; gap:10px;}
+  .verb-card{
+    background:var(--card); border:1.5px solid var(--line); border-radius:10px; overflow:hidden;
+  }
+  .verb-head{
+    display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer;
+    gap:10px;
+  }
+  .verb-head:hover{background:var(--paper-dark);}
+  .verb-icon{width:26px; height:26px; color:var(--blue); flex-shrink:0;}
+  .verb-titlewrap{flex:1;}
+  .verb-inf{font-family:'Fjalla One',sans-serif; font-size:17px; color:var(--ink);}
+  .verb-en{font-size:11.5px; color:var(--ink-soft); font-style:italic;}
+  .verb-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 8px;
+    border-radius:10px; background:var(--paper); border:1px solid var(--line); color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .verb-badge.done{background:var(--green); color:#fff; border-color:var(--green);}
+  .chevron{transition:transform .2s; color:var(--ink-soft); flex-shrink:0;}
+  .verb-card.open .chevron{transform:rotate(180deg);}
+
+  .verb-body{display:none; padding:0 16px 16px;}
+  .verb-card.open .verb-body{display:block;}
+
+  .allplay-row{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
+  .allplay-btn{
+    font-family:'Fjalla One',sans-serif; font-size:13px; padding:8px 14px; border-radius:6px;
+    border:1.5px solid var(--ink); background:var(--ink); color:#fff; cursor:pointer;
+  }
+  .allplay-btn.stop{background:var(--red); border-color:var(--red-dark);}
+  .markdone-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:8px 12px; border-radius:6px;
+    border:1.5px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; font-weight:600;
+  }
+  .markdone-btn.done{background:var(--green); color:#fff; border-color:var(--green);}
+
+  .sent-row{
+    background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:8px;
+  }
+  .sent-row.active-playing{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold) inset;}
+  .sent-person{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--purple);
+    text-transform:uppercase; margin-bottom:3px;
+  }
+  .sent-de{font-size:14.5px; font-weight:600; color:var(--ink); line-height:1.4;}
+  .sent-de b{color:var(--red);}
+  .sent-en{font-size:11.5px; color:var(--ink-soft); font-style:italic; margin-top:2px;}
+  .sent-actions{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;}
+  .icon-btn{
+    background:none; border:1.5px solid var(--line); border-radius:50%; width:30px; height:30px;
+    display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .icon-btn:hover{background:var(--paper); border-color:var(--ink);}
+  .icon-btn.loop-on{background:var(--gold); border-color:var(--gold); color:#fff;}
+  .icon-btn.rec-on{background:var(--red); border-color:var(--red); color:#fff; animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%{opacity:1;}50%{opacity:.55;}100%{opacity:1;}}
+
+  .transcript-box{
+    display:none; margin-top:8px; padding:8px 10px; background:var(--paper); border-radius:6px;
+    font-size:12.5px; line-height:1.5;
+  }
+  .transcript-box.visible{display:block;}
+  .transcript-label{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase;
+    color:var(--ink-soft); font-weight:700; display:block; margin-bottom:3px;
+  }
+  .diffchar{background:#fff3a0; padding:0 2px; border-radius:3px; font-weight:700; color:var(--red-dark);}
+
+  .rate-row{display:flex; gap:6px; align-items:center; margin-bottom:14px; flex-wrap:wrap;}
+  .rate-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:5px 10px; border-radius:16px;
+    border:1.5px solid var(--line); background:var(--card); cursor:pointer; color:var(--ink-soft); font-weight:600;
+  }
+  .rate-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13px;}
+</style>
+  <link rel="stylesheet" href="css/design-system.css">
+  <script src="js/icon-svgs.js"></script>
+  <script src="js/tts-engine.js"></script>
+  <script src="js/srs-engine.js"></script>
+  <script src="js/progress-aggregator.js"></script>
+  <script src="js/app-shell.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🗣️ Themen-Sprechtrainer</h1>
+  <div class="sub">Wähle ein Thema, klicke ein Verb, und übe ich/du/er/wir/ihr/sie im Perfekt (Vergangenheit).</div>
+
+  <div id="mainView"></div>
+
+</div>
+
+<script>
+/* =========================================================================
+   DATA: 7 topics x 5 topic-relevant verbs x 6 persons (ich/du/er/wir/ihr/sie),
+   real Perfekt (spoken past tense) sentences - hand-checked for correct
+   haben/sein auxiliary choice, separable-verb Partizip II forms, and
+   reflexive pronoun agreement. General everyday A2/B1 vocabulary, not
+   attributed to any specific textbook.
+   ========================================================================= */
+const THEMEN = [
+  { id:'familie', title:'Familie', icon:'handshake', verbs:[
+    { inf:'besuchen', en:'to visit', icon:'house', sentences:[
+      {p:'ich', de:'Ich habe meine Großeltern <b>besucht</b>.', en:'I visited my grandparents.'},
+      {p:'du', de:'Du hast deine Tante <b>besucht</b>.', en:'You visited your aunt.'},
+      {p:'er/sie/es', de:'Er hat seinen Bruder <b>besucht</b>.', en:'He visited his brother.'},
+      {p:'wir', de:'Wir haben unsere Familie <b>besucht</b>.', en:'We visited our family.'},
+      {p:'ihr', de:'Ihr habt eure Cousins <b>besucht</b>.', en:'You all visited your cousins.'},
+      {p:'sie (Pl.)', de:'Sie haben ihre Eltern <b>besucht</b>.', en:'They visited their parents.'}
+    ]},
+    { inf:'helfen', en:'to help', icon:'handshake', sentences:[
+      {p:'ich', de:'Ich habe meiner Mutter <b>geholfen</b>.', en:'I helped my mother.'},
+      {p:'du', de:'Du hast deinem Vater <b>geholfen</b>.', en:'You helped your father.'},
+      {p:'er/sie/es', de:'Er hat seiner Schwester <b>geholfen</b>.', en:'He helped his sister.'},
+      {p:'wir', de:'Wir haben unseren Großeltern <b>geholfen</b>.', en:'We helped our grandparents.'},
+      {p:'ihr', de:'Ihr habt euren Eltern <b>geholfen</b>.', en:'You all helped your parents.'},
+      {p:'sie (Pl.)', de:'Sie haben ihrem Onkel <b>geholfen</b>.', en:'They helped their uncle.'}
+    ]},
+    { inf:'lieben', en:'to love', icon:'smile', sentences:[
+      {p:'ich', de:'Ich habe meine Familie immer <b>geliebt</b>.', en:'I have always loved my family.'},
+      {p:'du', de:'Du hast deine Kinder sehr <b>geliebt</b>.', en:'You loved your children very much.'},
+      {p:'er/sie/es', de:'Er hat seine Frau <b>geliebt</b>.', en:'He loved his wife.'},
+      {p:'wir', de:'Wir haben unsere Großmutter <b>geliebt</b>.', en:'We loved our grandmother.'},
+      {p:'ihr', de:'Ihr habt eure Familie <b>geliebt</b>.', en:'You all loved your family.'},
+      {p:'sie (Pl.)', de:'Sie haben ihre Kinder <b>geliebt</b>.', en:'They loved their children.'}
+    ]},
+    { inf:'verbringen', en:'to spend (time)', icon:'clock', sentences:[
+      {p:'ich', de:'Ich habe den Sommer bei meiner Familie <b>verbracht</b>.', en:'I spent the summer with my family.'},
+      {p:'du', de:'Du hast das Wochenende mit deinen Eltern <b>verbracht</b>.', en:'You spent the weekend with your parents.'},
+      {p:'er/sie/es', de:'Er hat viel Zeit mit seinem Sohn <b>verbracht</b>.', en:'He spent a lot of time with his son.'},
+      {p:'wir', de:'Wir haben Weihnachten zusammen <b>verbracht</b>.', en:'We spent Christmas together.'},
+      {p:'ihr', de:'Ihr habt die Ferien bei euren Großeltern <b>verbracht</b>.', en:"You all spent the holidays at your grandparents'."},
+      {p:'sie (Pl.)', de:'Sie haben den Urlaub mit der Familie <b>verbracht</b>.', en:'They spent the vacation with the family.'}
+    ]},
+    { inf:'anrufen', en:'to call', icon:'phone', sentences:[
+      {p:'ich', de:'Ich habe meine Schwester <b>angerufen</b>.', en:'I called my sister.'},
+      {p:'du', de:'Du hast deinen Bruder <b>angerufen</b>.', en:'You called your brother.'},
+      {p:'er/sie/es', de:'Er hat seine Mutter <b>angerufen</b>.', en:'He called his mother.'},
+      {p:'wir', de:'Wir haben unsere Eltern <b>angerufen</b>.', en:'We called our parents.'},
+      {p:'ihr', de:'Ihr habt eure Oma <b>angerufen</b>.', en:'You all called your grandma.'},
+      {p:'sie (Pl.)', de:'Sie haben ihre Verwandten <b>angerufen</b>.', en:'They called their relatives.'}
+    ]}
+  ]},
+  { id:'arbeit', title:'Arbeit', icon:'briefcase', verbs:[
+    { inf:'arbeiten', en:'to work', icon:'briefcase', sentences:[
+      {p:'ich', de:'Ich habe gestern bis spät <b>gearbeitet</b>.', en:'I worked late yesterday.'},
+      {p:'du', de:'Du hast im Büro <b>gearbeitet</b>.', en:'You worked in the office.'},
+      {p:'er/sie/es', de:'Er hat in einer großen Firma <b>gearbeitet</b>.', en:'He worked at a large company.'},
+      {p:'wir', de:'Wir haben zusammen an dem Projekt <b>gearbeitet</b>.', en:'We worked together on the project.'},
+      {p:'ihr', de:'Ihr habt die ganze Woche hart <b>gearbeitet</b>.', en:'You all worked hard all week.'},
+      {p:'sie (Pl.)', de:'Sie haben von zu Hause aus <b>gearbeitet</b>.', en:'They worked from home.'}
+    ]},
+    { inf:'anfangen', en:'to start', icon:'clock', sentences:[
+      {p:'ich', de:'Ich habe pünktlich um acht Uhr <b>angefangen</b>.', en:'I started right at eight o’clock.'},
+      {p:'du', de:'Du hast deine neue Stelle letzten Montag <b>angefangen</b>.', en:'You started your new job last Monday.'},
+      {p:'er/sie/es', de:'Er hat mit dem Projekt <b>angefangen</b>.', en:'He started the project.'},
+      {p:'wir', de:'Wir haben die Besprechung <b>angefangen</b>.', en:'We started the meeting.'},
+      {p:'ihr', de:'Ihr habt früh mit der Arbeit <b>angefangen</b>.', en:'You all started work early.'},
+      {p:'sie (Pl.)', de:'Sie haben die neue Aufgabe <b>angefangen</b>.', en:'They started the new task.'}
+    ]},
+    { inf:'organisieren', en:'to organize', icon:'document', sentences:[
+      {p:'ich', de:'Ich habe das Meeting <b>organisiert</b>.', en:'I organized the meeting.'},
+      {p:'du', de:'Du hast die Präsentation gut <b>organisiert</b>.', en:'You organized the presentation well.'},
+      {p:'er/sie/es', de:'Er hat das ganze Event <b>organisiert</b>.', en:'He organized the whole event.'},
+      {p:'wir', de:'Wir haben die Konferenz gemeinsam <b>organisiert</b>.', en:'We organized the conference together.'},
+      {p:'ihr', de:'Ihr habt die Unterlagen <b>organisiert</b>.', en:'You all organized the documents.'},
+      {p:'sie (Pl.)', de:'Sie haben das Team <b>organisiert</b>.', en:'They organized the team.'}
+    ]},
+    { inf:'verdienen', en:'to earn', icon:'money', sentences:[
+      {p:'ich', de:'Ich habe letzten Monat gut <b>verdient</b>.', en:'I earned well last month.'},
+      {p:'du', de:'Du hast mehr Geld <b>verdient</b> als ich.', en:'You earned more money than me.'},
+      {p:'er/sie/es', de:'Er hat sein erstes Gehalt <b>verdient</b>.', en:'He earned his first salary.'},
+      {p:'wir', de:'Wir haben genug Geld für den Urlaub <b>verdient</b>.', en:'We earned enough money for the vacation.'},
+      {p:'ihr', de:'Ihr habt euer Gehalt <b>verdient</b>.', en:'You all earned your salary.'},
+      {p:'sie (Pl.)', de:'Sie haben viel Geld <b>verdient</b>.', en:'They earned a lot of money.'}
+    ]},
+    { inf:'kündigen', en:'to resign / quit', icon:'document', sentences:[
+      {p:'ich', de:'Ich habe meinen Job <b>gekündigt</b>.', en:'I quit my job.'},
+      {p:'du', de:'Du hast überraschend <b>gekündigt</b>.', en:'You resigned unexpectedly.'},
+      {p:'er/sie/es', de:'Er hat nach zehn Jahren <b>gekündigt</b>.', en:'He quit after ten years.'},
+      {p:'wir', de:'Wir haben unsere Verträge <b>gekündigt</b>.', en:'We terminated our contracts.'},
+      {p:'ihr', de:'Ihr habt eure Stellen <b>gekündigt</b>.', en:'You all quit your jobs.'},
+      {p:'sie (Pl.)', de:'Sie haben ihre Jobs <b>gekündigt</b>.', en:'They quit their jobs.'}
+    ]}
+  ]},
+  { id:'einkaufen', title:'Einkaufen', icon:'money', verbs:[
+    { inf:'kaufen', en:'to buy', icon:'money', sentences:[
+      {p:'ich', de:'Ich habe ein neues Hemd <b>gekauft</b>.', en:'I bought a new shirt.'},
+      {p:'du', de:'Du hast frisches Brot <b>gekauft</b>.', en:'You bought fresh bread.'},
+      {p:'er/sie/es', de:'Er hat ein Geschenk für seine Frau <b>gekauft</b>.', en:'He bought a gift for his wife.'},
+      {p:'wir', de:'Wir haben Gemüse auf dem Markt <b>gekauft</b>.', en:'We bought vegetables at the market.'},
+      {p:'ihr', de:'Ihr habt neue Schuhe <b>gekauft</b>.', en:'You all bought new shoes.'},
+      {p:'sie (Pl.)', de:'Sie haben viele Lebensmittel <b>gekauft</b>.', en:'They bought a lot of groceries.'}
+    ]},
+    { inf:'bezahlen', en:'to pay', icon:'money', sentences:[
+      {p:'ich', de:'Ich habe die Rechnung sofort <b>bezahlt</b>.', en:'I paid the bill immediately.'},
+      {p:'du', de:'Du hast mit Karte <b>bezahlt</b>.', en:'You paid by card.'},
+      {p:'er/sie/es', de:'Er hat für uns alle <b>bezahlt</b>.', en:'He paid for all of us.'},
+      {p:'wir', de:'Wir haben die Miete pünktlich <b>bezahlt</b>.', en:'We paid the rent on time.'},
+      {p:'ihr', de:'Ihr habt zu viel <b>bezahlt</b>.', en:'You all paid too much.'},
+      {p:'sie (Pl.)', de:'Sie haben bar <b>bezahlt</b>.', en:'They paid in cash.'}
+    ]},
+    { inf:'brauchen', en:'to need', icon:'search', sentences:[
+      {p:'ich', de:'Ich habe mehr Zeit zum Einkaufen <b>gebraucht</b>.', en:'I needed more time for shopping.'},
+      {p:'du', de:'Du hast eine neue Jacke <b>gebraucht</b>.', en:'You needed a new jacket.'},
+      {p:'er/sie/es', de:'Er hat dringend einen neuen Laptop <b>gebraucht</b>.', en:'He urgently needed a new laptop.'},
+      {p:'wir', de:'Wir haben frisches Obst <b>gebraucht</b>.', en:'We needed fresh fruit.'},
+      {p:'ihr', de:'Ihr habt Hilfe beim Tragen <b>gebraucht</b>.', en:'You all needed help carrying things.'},
+      {p:'sie (Pl.)', de:'Sie haben mehr Geld <b>gebraucht</b>.', en:'They needed more money.'}
+    ]},
+    { inf:'suchen', en:'to look for', icon:'search', sentences:[
+      {p:'ich', de:'Ich habe lange nach den Schlüsseln <b>gesucht</b>.', en:'I searched for the keys for a long time.'},
+      {p:'du', de:'Du hast ein günstiges Angebot <b>gesucht</b>.', en:'You looked for a cheap deal.'},
+      {p:'er/sie/es', de:'Er hat im ganzen Laden <b>gesucht</b>.', en:'He searched the whole store.'},
+      {p:'wir', de:'Wir haben ein passendes Geschenk <b>gesucht</b>.', en:'We looked for a suitable gift.'},
+      {p:'ihr', de:'Ihr habt die beste Qualität <b>gesucht</b>.', en:'You all looked for the best quality.'},
+      {p:'sie (Pl.)', de:'Sie haben ein günstiges Restaurant <b>gesucht</b>.', en:'They searched for an affordable restaurant.'}
+    ]},
+    { inf:'zurückgeben', en:'to return (an item)', icon:'document', sentences:[
+      {p:'ich', de:'Ich habe die kaputte Jacke <b>zurückgegeben</b>.', en:'I returned the broken jacket.'},
+      {p:'du', de:'Du hast das Buch der Bibliothek <b>zurückgegeben</b>.', en:'You returned the book to the library.'},
+      {p:'er/sie/es', de:'Er hat den falschen Artikel <b>zurückgegeben</b>.', en:'He returned the wrong item.'},
+      {p:'wir', de:'Wir haben die Schuhe <b>zurückgegeben</b>.', en:'We returned the shoes.'},
+      {p:'ihr', de:'Ihr habt das Geschenk <b>zurückgegeben</b>.', en:'You all returned the gift.'},
+      {p:'sie (Pl.)', de:'Sie haben die Ware <b>zurückgegeben</b>.', en:'They returned the goods.'}
+    ]}
+  ]},
+  { id:'freizeit', title:'Freizeit', icon:'target', verbs:[
+    { inf:'spielen', en:'to play', icon:'target', sentences:[
+      {p:'ich', de:'Ich habe mit meinen Freunden Fußball <b>gespielt</b>.', en:'I played football with my friends.'},
+      {p:'du', de:'Du hast Klavier <b>gespielt</b>.', en:'You played the piano.'},
+      {p:'er/sie/es', de:'Er hat den ganzen Abend Videospiele <b>gespielt</b>.', en:'He played video games all evening.'},
+      {p:'wir', de:'Wir haben Karten <b>gespielt</b>.', en:'We played cards.'},
+      {p:'ihr', de:'Ihr habt im Park Basketball <b>gespielt</b>.', en:'You all played basketball in the park.'},
+      {p:'sie (Pl.)', de:'Sie haben zusammen Schach <b>gespielt</b>.', en:'They played chess together.'}
+    ]},
+    { inf:'lesen', en:'to read', icon:'document', sentences:[
+      {p:'ich', de:'Ich habe ein spannendes Buch <b>gelesen</b>.', en:'I read an exciting book.'},
+      {p:'du', de:'Du hast die Zeitung <b>gelesen</b>.', en:'You read the newspaper.'},
+      {p:'er/sie/es', de:'Er hat einen langen Roman <b>gelesen</b>.', en:'He read a long novel.'},
+      {p:'wir', de:'Wir haben gemeinsam eine Geschichte <b>gelesen</b>.', en:'We read a story together.'},
+      {p:'ihr', de:'Ihr habt die Nachrichten <b>gelesen</b>.', en:'You all read the news.'},
+      {p:'sie (Pl.)', de:'Sie haben ein Comic-Heft <b>gelesen</b>.', en:'They read a comic book.'}
+    ]},
+    { inf:'schwimmen', en:'to swim', icon:'target', sentences:[
+      {p:'ich', de:'Ich bin im See <b>geschwommen</b>.', en:'I swam in the lake.'},
+      {p:'du', de:'Du bist im Meer <b>geschwommen</b>.', en:'You swam in the sea.'},
+      {p:'er/sie/es', de:'Er ist jeden Morgen <b>geschwommen</b>.', en:'He swam every morning.'},
+      {p:'wir', de:'Wir sind im Schwimmbad <b>geschwommen</b>.', en:'We swam at the pool.'},
+      {p:'ihr', de:'Ihr seid im kalten Wasser <b>geschwommen</b>.', en:'You all swam in the cold water.'},
+      {p:'sie (Pl.)', de:'Sie sind zusammen <b>geschwommen</b>.', en:'They swam together.'}
+    ]},
+    { inf:'wandern', en:'to hike', icon:'target', sentences:[
+      {p:'ich', de:'Ich bin am Wochenende in den Bergen <b>gewandert</b>.', en:'I hiked in the mountains on the weekend.'},
+      {p:'du', de:'Du bist durch den Wald <b>gewandert</b>.', en:'You hiked through the forest.'},
+      {p:'er/sie/es', de:'Er ist stundenlang <b>gewandert</b>.', en:'He hiked for hours.'},
+      {p:'wir', de:'Wir sind zusammen auf einen hohen Berg <b>gewandert</b>.', en:'We hiked up a tall mountain together.'},
+      {p:'ihr', de:'Ihr seid entlang des Flusses <b>gewandert</b>.', en:'You all hiked along the river.'},
+      {p:'sie (Pl.)', de:'Sie sind bei Sonnenschein <b>gewandert</b>.', en:'They hiked in the sunshine.'}
+    ]},
+    { inf:'fernsehen', en:'to watch TV', icon:'video', sentences:[
+      {p:'ich', de:'Ich habe gestern Abend <b>ferngesehen</b>.', en:'I watched TV yesterday evening.'},
+      {p:'du', de:'Du hast bis spät in die Nacht <b>ferngesehen</b>.', en:'You watched TV until late at night.'},
+      {p:'er/sie/es', de:'Er hat den ganzen Nachmittag <b>ferngesehen</b>.', en:'He watched TV all afternoon.'},
+      {p:'wir', de:'Wir haben zusammen <b>ferngesehen</b>.', en:'We watched TV together.'},
+      {p:'ihr', de:'Ihr habt zu lange <b>ferngesehen</b>.', en:'You all watched TV too long.'},
+      {p:'sie (Pl.)', de:'Sie haben nach dem Essen <b>ferngesehen</b>.', en:'They watched TV after dinner.'}
+    ]}
+  ]},
+  { id:'essen', title:'Essen & Trinken', icon:'smile', verbs:[
+    { inf:'essen', en:'to eat', icon:'smile', sentences:[
+      {p:'ich', de:'Ich habe zu Mittag Pasta <b>gegessen</b>.', en:'I ate pasta for lunch.'},
+      {p:'du', de:'Du hast einen leckeren Kuchen <b>gegessen</b>.', en:'You ate a delicious cake.'},
+      {p:'er/sie/es', de:'Er hat sein Frühstück schnell <b>gegessen</b>.', en:'He ate his breakfast quickly.'},
+      {p:'wir', de:'Wir haben zusammen zu Abend <b>gegessen</b>.', en:'We had dinner together.'},
+      {p:'ihr', de:'Ihr habt im Restaurant <b>gegessen</b>.', en:'You all ate at the restaurant.'},
+      {p:'sie (Pl.)', de:'Sie haben nichts <b>gegessen</b>.', en:'They ate nothing.'}
+    ]},
+    { inf:'trinken', en:'to drink', icon:'smile', sentences:[
+      {p:'ich', de:'Ich habe einen Kaffee <b>getrunken</b>.', en:'I drank a coffee.'},
+      {p:'du', de:'Du hast ein Glas Wasser <b>getrunken</b>.', en:'You drank a glass of water.'},
+      {p:'er/sie/es', de:'Er hat zu viel Kaffee <b>getrunken</b>.', en:'He drank too much coffee.'},
+      {p:'wir', de:'Wir haben Tee zusammen <b>getrunken</b>.', en:'We drank tea together.'},
+      {p:'ihr', de:'Ihr habt frischen Orangensaft <b>getrunken</b>.', en:'You all drank fresh orange juice.'},
+      {p:'sie (Pl.)', de:'Sie haben ein Glas Wein <b>getrunken</b>.', en:'They drank a glass of wine.'}
+    ]},
+    { inf:'kochen', en:'to cook', icon:'smile', sentences:[
+      {p:'ich', de:'Ich habe heute Abend Suppe <b>gekocht</b>.', en:'I cooked soup tonight.'},
+      {p:'du', de:'Du hast ein tolles Gericht <b>gekocht</b>.', en:'You cooked a great dish.'},
+      {p:'er/sie/es', de:'Er hat für seine Familie <b>gekocht</b>.', en:'He cooked for his family.'},
+      {p:'wir', de:'Wir haben zusammen Nudeln <b>gekocht</b>.', en:'We cooked noodles together.'},
+      {p:'ihr', de:'Ihr habt ein leckeres Essen <b>gekocht</b>.', en:'You all cooked a delicious meal.'},
+      {p:'sie (Pl.)', de:'Sie haben traditionelle Gerichte <b>gekocht</b>.', en:'They cooked traditional dishes.'}
+    ]},
+    { inf:'bestellen', en:'to order', icon:'document', sentences:[
+      {p:'ich', de:'Ich habe eine Pizza <b>bestellt</b>.', en:'I ordered a pizza.'},
+      {p:'du', de:'Du hast einen Salat <b>bestellt</b>.', en:'You ordered a salad.'},
+      {p:'er/sie/es', de:'Er hat das Menü des Tages <b>bestellt</b>.', en:'He ordered the menu of the day.'},
+      {p:'wir', de:'Wir haben zwei Kaffee <b>bestellt</b>.', en:'We ordered two coffees.'},
+      {p:'ihr', de:'Ihr habt viel zu viel Essen <b>bestellt</b>.', en:'You all ordered way too much food.'},
+      {p:'sie (Pl.)', de:'Sie haben etwas zu trinken <b>bestellt</b>.', en:'They ordered something to drink.'}
+    ]},
+    { inf:'probieren', en:'to try (food)', icon:'smile', sentences:[
+      {p:'ich', de:'Ich habe das neue Gericht <b>probiert</b>.', en:'I tried the new dish.'},
+      {p:'du', de:'Du hast den frischen Kuchen <b>probiert</b>.', en:'You tried the fresh cake.'},
+      {p:'er/sie/es', de:'Er hat ein exotisches Essen <b>probiert</b>.', en:'He tried an exotic dish.'},
+      {p:'wir', de:'Wir haben verschiedene Käsesorten <b>probiert</b>.', en:'We tried different types of cheese.'},
+      {p:'ihr', de:'Ihr habt den hausgemachten Wein <b>probiert</b>.', en:'You all tried the homemade wine.'},
+      {p:'sie (Pl.)', de:'Sie haben alle Spezialitäten <b>probiert</b>.', en:'They tried all the specialties.'}
+    ]}
+  ]},
+  { id:'reisen', title:'Reisen', icon:'building', verbs:[
+    { inf:'fliegen', en:'to fly', icon:'building', sentences:[
+      {p:'ich', de:'Ich bin letztes Jahr nach Berlin <b>geflogen</b>.', en:'I flew to Berlin last year.'},
+      {p:'du', de:'Du bist zum ersten Mal nach Deutschland <b>geflogen</b>.', en:'You flew to Germany for the first time.'},
+      {p:'er/sie/es', de:'Er ist geschäftlich nach München <b>geflogen</b>.', en:'He flew to Munich on business.'},
+      {p:'wir', de:'Wir sind zusammen nach Spanien <b>geflogen</b>.', en:'We flew to Spain together.'},
+      {p:'ihr', de:'Ihr seid direkt nach Rom <b>geflogen</b>.', en:'You all flew directly to Rome.'},
+      {p:'sie (Pl.)', de:'Sie sind über Frankfurt <b>geflogen</b>.', en:'They flew via Frankfurt.'}
+    ]},
+    { inf:'fahren', en:'to drive / travel', icon:'building', sentences:[
+      {p:'ich', de:'Ich bin mit dem Zug nach Hamburg <b>gefahren</b>.', en:'I traveled to Hamburg by train.'},
+      {p:'du', de:'Du bist mit dem Auto in den Urlaub <b>gefahren</b>.', en:'You drove to your vacation by car.'},
+      {p:'er/sie/es', de:'Er ist jeden Tag zur Arbeit <b>gefahren</b>.', en:'He drove to work every day.'},
+      {p:'wir', de:'Wir sind gemeinsam an die Küste <b>gefahren</b>.', en:'We drove to the coast together.'},
+      {p:'ihr', de:'Ihr seid mit dem Bus in die Stadt <b>gefahren</b>.', en:'You all went to the city by bus.'},
+      {p:'sie (Pl.)', de:'Sie sind über die Grenze <b>gefahren</b>.', en:'They drove across the border.'}
+    ]},
+    { inf:'buchen', en:'to book', icon:'document', sentences:[
+      {p:'ich', de:'Ich habe ein Hotelzimmer <b>gebucht</b>.', en:'I booked a hotel room.'},
+      {p:'du', de:'Du hast einen billigen Flug <b>gebucht</b>.', en:'You booked a cheap flight.'},
+      {p:'er/sie/es', de:'Er hat die Reise online <b>gebucht</b>.', en:'He booked the trip online.'},
+      {p:'wir', de:'Wir haben eine Ferienwohnung <b>gebucht</b>.', en:'We booked a vacation apartment.'},
+      {p:'ihr', de:'Ihr habt die Tickets früh <b>gebucht</b>.', en:'You all booked the tickets early.'},
+      {p:'sie (Pl.)', de:'Sie haben einen Tisch im Restaurant <b>gebucht</b>.', en:'They booked a table at the restaurant.'}
+    ]},
+    { inf:'ankommen', en:'to arrive', icon:'building', sentences:[
+      {p:'ich', de:'Ich bin gestern Abend am Flughafen <b>angekommen</b>.', en:'I arrived at the airport yesterday evening.'},
+      {p:'du', de:'Du bist pünktlich <b>angekommen</b>.', en:'You arrived on time.'},
+      {p:'er/sie/es', de:'Er ist mit Verspätung <b>angekommen</b>.', en:'He arrived late.'},
+      {p:'wir', de:'Wir sind sicher am Zielort <b>angekommen</b>.', en:'We arrived safely at our destination.'},
+      {p:'ihr', de:'Ihr seid früh am Morgen <b>angekommen</b>.', en:'You all arrived early in the morning.'},
+      {p:'sie (Pl.)', de:'Sie sind nach einer langen Reise <b>angekommen</b>.', en:'They arrived after a long journey.'}
+    ]},
+    { inf:'übernachten', en:'to stay overnight', icon:'house', sentences:[
+      {p:'ich', de:'Ich habe in einem kleinen Hotel <b>übernachtet</b>.', en:'I stayed overnight in a small hotel.'},
+      {p:'du', de:'Du hast bei Freunden <b>übernachtet</b>.', en:'You stayed overnight with friends.'},
+      {p:'er/sie/es', de:'Er hat im Zelt <b>übernachtet</b>.', en:'He stayed overnight in a tent.'},
+      {p:'wir', de:'Wir haben in einer Jugendherberge <b>übernachtet</b>.', en:'We stayed overnight in a youth hostel.'},
+      {p:'ihr', de:'Ihr habt am Flughafen <b>übernachtet</b>.', en:'You all stayed overnight at the airport.'},
+      {p:'sie (Pl.)', de:'Sie haben in einer Pension <b>übernachtet</b>.', en:'They stayed overnight in a guesthouse.'}
+    ]}
+  ]},
+  { id:'gesundheit', title:'Gesundheit', icon:'calendar', verbs:[
+    { inf:'schlafen', en:'to sleep', icon:'calendar', sentences:[
+      {p:'ich', de:'Ich habe letzte Nacht schlecht <b>geschlafen</b>.', en:'I slept badly last night.'},
+      {p:'du', de:'Du hast acht Stunden <b>geschlafen</b>.', en:'You slept eight hours.'},
+      {p:'er/sie/es', de:'Er hat den ganzen Tag <b>geschlafen</b>.', en:'He slept all day.'},
+      {p:'wir', de:'Wir haben im Zelt <b>geschlafen</b>.', en:'We slept in the tent.'},
+      {p:'ihr', de:'Ihr habt zu wenig <b>geschlafen</b>.', en:'You all slept too little.'},
+      {p:'sie (Pl.)', de:'Sie haben tief und fest <b>geschlafen</b>.', en:'They slept deeply and soundly.'}
+    ]},
+    { inf:'husten', en:'to cough', icon:'calendar', sentences:[
+      {p:'ich', de:'Ich habe die ganze Nacht <b>gehustet</b>.', en:'I coughed all night.'},
+      {p:'du', de:'Du hast stark <b>gehustet</b>.', en:'You coughed a lot.'},
+      {p:'er/sie/es', de:'Er hat seit Tagen <b>gehustet</b>.', en:'He has been coughing for days.'},
+      {p:'wir', de:'Wir haben beide <b>gehustet</b>.', en:'We both coughed.'},
+      {p:'ihr', de:'Ihr habt im Büro <b>gehustet</b>.', en:'You all coughed at the office.'},
+      {p:'sie (Pl.)', de:'Sie haben wegen der Erkältung <b>gehustet</b>.', en:'They coughed because of the cold.'}
+    ]},
+    { inf:'aufwachen', en:'to wake up', icon:'calendar', sentences:[
+      {p:'ich', de:'Ich bin früh am Morgen <b>aufgewacht</b>.', en:'I woke up early in the morning.'},
+      {p:'du', de:'Du bist mit Kopfschmerzen <b>aufgewacht</b>.', en:'You woke up with a headache.'},
+      {p:'er/sie/es', de:'Er ist mitten in der Nacht <b>aufgewacht</b>.', en:'He woke up in the middle of the night.'},
+      {p:'wir', de:'Wir sind gleichzeitig <b>aufgewacht</b>.', en:'We woke up at the same time.'},
+      {p:'ihr', de:'Ihr seid spät <b>aufgewacht</b>.', en:'You all woke up late.'},
+      {p:'sie (Pl.)', de:'Sie sind vom Lärm <b>aufgewacht</b>.', en:'They woke up from the noise.'}
+    ]},
+    { inf:'sich erkälten', en:'to catch a cold', icon:'calendar', sentences:[
+      {p:'ich', de:'Ich habe mich letzte Woche <b>erkältet</b>.', en:'I caught a cold last week.'},
+      {p:'du', de:'Du hast dich im Regen <b>erkältet</b>.', en:'You caught a cold in the rain.'},
+      {p:'er/sie/es', de:'Er hat sich stark <b>erkältet</b>.', en:'He caught a bad cold.'},
+      {p:'wir', de:'Wir haben uns beide <b>erkältet</b>.', en:'We both caught a cold.'},
+      {p:'ihr', de:'Ihr habt euch im Winter <b>erkältet</b>.', en:'You all caught a cold in winter.'},
+      {p:'sie (Pl.)', de:'Sie haben sich schnell <b>erkältet</b>.', en:'They caught a cold quickly.'}
+    ]},
+    { inf:'gehen (zum Arzt)', en:'to go (to the doctor)', icon:'building', sentences:[
+      {p:'ich', de:'Ich bin zum Arzt <b>gegangen</b>.', en:'I went to the doctor.'},
+      {p:'du', de:'Du bist ins Krankenhaus <b>gegangen</b>.', en:'You went to the hospital.'},
+      {p:'er/sie/es', de:'Er ist zur Apotheke <b>gegangen</b>.', en:'He went to the pharmacy.'},
+      {p:'wir', de:'Wir sind gemeinsam zum Arzt <b>gegangen</b>.', en:'We went to the doctor together.'},
+      {p:'ihr', de:'Ihr seid zur Untersuchung <b>gegangen</b>.', en:'You all went for the check-up.'},
+      {p:'sie (Pl.)', de:'Sie sind zum Zahnarzt <b>gegangen</b>.', en:'They went to the dentist.'}
+    ]}
+  ]}
+];
+
+/* =========================================================================
+   PROGRESS (simple per-verb "practiced" tracker - honest about what this
+   is: a completion flag, not a full SRSEngine spaced-repetition item, since
+   each entry here is a set of 6 sentences, not a single flashcard).
+   ========================================================================= */
+const PROG_KEY = 'thema_sprech_progress_v1';
+let PROGRESS = JSON.parse(localStorage.getItem(PROG_KEY) || '{}');
+function saveProgress(){ localStorage.setItem(PROG_KEY, JSON.stringify(PROGRESS)); }
+function verbKey(themaId, inf){ return themaId + '|' + inf; }
+function isVerbDone(themaId, inf){ return !!PROGRESS[verbKey(themaId, inf)]; }
+function toggleVerbDone(themaId, inf){
+  const k = verbKey(themaId, inf);
+  PROGRESS[k] = !PROGRESS[k];
+  saveProgress();
+}
+function themaDoneCount(thema){
+  return thema.verbs.filter(v => isVerbDone(thema.id, v.inf)).length;
+}
+
+/* =========================================================================
+   STATE & NAVIGATION
+   ========================================================================= */
+let curThemaId = null;
+let openVerbInf = null;
+
+function init(){
+  renderThemaGrid();
+}
+
+function renderThemaGrid(){
+  const view = document.getElementById('mainView');
+  view.innerHTML = `
+    <div class="thema-grid">
+      ${THEMEN.map(t => `
+        <div class="thema-card" onclick="openThema('${t.id}')">
+          <div class="thema-icon">${ICON_SVGS[t.icon] || ICON_SVGS['abstract']}</div>
+          <div class="thema-title">${t.title}</div>
+          <div class="thema-progress">${themaDoneCount(t)} / ${t.verbs.length} geübt</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function openThema(themaId){
+  curThemaId = themaId;
+  openVerbInf = null;
+  renderVerbList();
+}
+
+function backToThemen(){
+  curThemaId = null;
+  stopAllAudio();
+  renderThemaGrid();
+}
+
+function renderVerbList(){
+  const thema = THEMEN.find(t => t.id === curThemaId);
+  const view = document.getElementById('mainView');
+  if(!thema){ renderThemaGrid(); return; }
+
+  view.innerHTML = `
+    <button class="backbtn" onclick="backToThemen()">← Zurück zu den Themen</button>
+    <h2 style="font-family:'Fjalla One',sans-serif; font-size:20px; margin:0 0 4px;">${thema.title}</h2>
+    <div class="sub" style="margin-bottom:14px;">Klicke ein Verb, um alle 6 Personen im Perfekt zu hören und zu üben.</div>
+    <div class="verb-list" id="verbList">
+      ${thema.verbs.map(v => renderVerbCardHTML(thema, v)).join('')}
+    </div>
+  `;
+}
+
+function renderVerbCardHTML(thema, v){
+  const isOpen = (openVerbInf === v.inf);
+  const done = isVerbDone(thema.id, v.inf);
+  return `
+    <div class="verb-card ${isOpen ? 'open' : ''}" id="verbcard_${cssId(v.inf)}">
+      <div class="verb-head" onclick="toggleVerb('${thema.id}','${escapeQ(v.inf)}')">
+        <div class="verb-icon">${ICON_SVGS[v.icon] || ICON_SVGS['abstract']}</div>
+        <div class="verb-titlewrap">
+          <div class="verb-inf">${v.inf}</div>
+          <div class="verb-en">${v.en}</div>
+        </div>
+        <span class="verb-badge ${done ? 'done' : ''}">${done ? '✓ Geübt' : '6 Sätze'}</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="verb-body">
+        ${isOpen ? renderVerbBodyHTML(thema, v) : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderVerbBodyHTML(thema, v){
+  return `
+    <div class="allplay-row">
+      <button class="allplay-btn" id="allplayBtn_${cssId(v.inf)}" onclick="toggleAllPlay('${thema.id}','${escapeQ(v.inf)}')">▶️ Alle 6 nacheinander abspielen</button>
+      <button class="markdone-btn ${isVerbDone(thema.id, v.inf) ? 'done' : ''}" id="markdoneBtn_${cssId(v.inf)}" onclick="toggleDoneBtn('${thema.id}','${escapeQ(v.inf)}')">${isVerbDone(thema.id, v.inf) ? '✓ Als geübt markiert' : 'Als geübt markieren'}</button>
+    </div>
+    <div id="sentList_${cssId(v.inf)}">
+      ${v.sentences.map((s,i) => renderSentenceRowHTML(v.inf, i, s)).join('')}
+    </div>
+  `;
+}
+
+function renderSentenceRowHTML(inf, idx, s){
+  const rowId = sentRowId(inf, idx);
+  return `
+    <div class="sent-row" id="${rowId}">
+      <div class="sent-person">${s.p}</div>
+      <div class="sent-de">${s.de}</div>
+      <div class="sent-en">${s.en}</div>
+      <div class="sent-actions">
+        <button class="icon-btn" title="Anhören" onclick="playSentence('${escapeQ(inf)}', ${idx})">🔊</button>
+        <button class="icon-btn" id="loopBtn_${cssId(inf)}_${idx}" title="Wiederholen (Loop)" onclick="toggleLoopSentence('${escapeQ(inf)}', ${idx})">🔁</button>
+        <button class="icon-btn" id="recBtn_${cssId(inf)}_${idx}" title="Nachsprechen & vergleichen" onclick="toggleRecordSentence('${escapeQ(inf)}', ${idx})">🎙️</button>
+      </div>
+      <div class="transcript-box" id="transcript_${cssId(inf)}_${idx}"></div>
+    </div>
+  `;
+}
+
+function cssId(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+function escapeQ(s){ return String(s||'').replace(/'/g, "\\'"); }
+function sentRowId(inf, idx){ return `sentrow_${cssId(inf)}_${idx}`; }
+function stripHTML(s){ return String(s||'').replace(/<[^>]+>/g,''); }
+
+function toggleVerb(themaId, inf){
+  openVerbInf = (openVerbInf === inf) ? null : inf;
+  stopAllAudio();
+  renderVerbList();
+}
+
+function toggleDoneBtn(themaId, inf){
+  toggleVerbDone(themaId, inf);
+  renderVerbList();
+}
+
+/* =========================================================================
+   AUDIO: play / loop / play-all, and record-and-compare
+   ========================================================================= */
+let loopingSentenceKey = null; // "inf|idx" of the sentence currently looping
+let loopTimeout = null;
+let allPlayState = null; // { inf, idx, timeout } while "play all" is running
+
+function findSentence(inf, idx){
+  const thema = THEMEN.find(t => t.id === curThemaId);
+  if(!thema) return null;
+  const v = thema.verbs.find(x => x.inf === inf);
+  if(!v) return null;
+  return v.sentences[idx];
+}
+
+function speakDE(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'de-DE';
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+  return u;
+}
+
+function stopAllAudio(){
+  window.speechSynthesis.cancel();
+  clearTimeout(loopTimeout);
+  loopingSentenceKey = null;
+  if(allPlayState){ clearTimeout(allPlayState.timeout); allPlayState = null; }
+  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+  document.querySelectorAll('.icon-btn.loop-on').forEach(el => el.classList.remove('loop-on'));
+  document.querySelectorAll('.allplay-btn.stop').forEach(el => { el.classList.remove('stop'); el.textContent = '▶️ Alle 6 nacheinander abspielen'; });
+}
+
+function playSentence(inf, idx){
+  const s = findSentence(inf, idx);
+  if(!s) return;
+  window.speechSynthesis.cancel();
+  clearTimeout(loopTimeout);
+  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+  const row = document.getElementById(sentRowId(inf, idx));
+  if(row) row.classList.add('active-playing');
+  speakDE(stripHTML(s.de));
+}
+
+function toggleLoopSentence(inf, idx){
+  const key = inf + '|' + idx;
+  const btn = document.getElementById(`loopBtn_${cssId(inf)}_${idx}`);
+  if(loopingSentenceKey === key){
+    // stop looping this one
+    loopingSentenceKey = null;
+    clearTimeout(loopTimeout);
+    window.speechSynthesis.cancel();
+    if(btn) btn.classList.remove('loop-on');
+    const row = document.getElementById(sentRowId(inf, idx));
+    if(row) row.classList.remove('active-playing');
+    return;
+  }
+  // stop any other loop/playback first
+  document.querySelectorAll('.icon-btn.loop-on').forEach(el => el.classList.remove('loop-on'));
+  window.speechSynthesis.cancel();
+  clearTimeout(loopTimeout);
+  loopingSentenceKey = key;
+  if(btn) btn.classList.add('loop-on');
+  runLoopStep(inf, idx, key);
+}
+
+function runLoopStep(inf, idx, key){
+  if(loopingSentenceKey !== key) return;
+  const s = findSentence(inf, idx);
+  if(!s) return;
+  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+  const row = document.getElementById(sentRowId(inf, idx));
+  if(row) row.classList.add('active-playing');
+  const u = speakDE(stripHTML(s.de));
+  if(u){
+    u.onend = () => {
+      if(loopingSentenceKey !== key) return;
+      loopTimeout = setTimeout(() => runLoopStep(inf, idx, key), 1200);
+    };
+  }
+}
+
+function toggleAllPlay(themaId, inf){
+  const btn = document.getElementById(`allplayBtn_${cssId(inf)}`);
+  if(allPlayState && allPlayState.inf === inf){
+    clearTimeout(allPlayState.timeout);
+    window.speechSynthesis.cancel();
+    allPlayState = null;
+    document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+    if(btn){ btn.classList.remove('stop'); btn.textContent = '▶️ Alle 6 nacheinander abspielen'; }
+    return;
+  }
+  stopAllAudio();
+  allPlayState = { inf, idx: 0, timeout: null };
+  if(btn){ btn.classList.add('stop'); btn.textContent = '⏹ Stopp'; }
+  runAllPlayStep(inf);
+}
+
+function runAllPlayStep(inf){
+  if(!allPlayState || allPlayState.inf !== inf) return;
+  const v = THEMEN.find(t => t.id === curThemaId)?.verbs.find(x => x.inf === inf);
+  if(!v || allPlayState.idx >= v.sentences.length){
+    const btn = document.getElementById(`allplayBtn_${cssId(inf)}`);
+    if(btn){ btn.classList.remove('stop'); btn.textContent = '▶️ Alle 6 nacheinander abspielen'; }
+    document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+    allPlayState = null;
+    return;
+  }
+  const idx = allPlayState.idx;
+  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+  const row = document.getElementById(sentRowId(inf, idx));
+  if(row) row.classList.add('active-playing');
+  const u = speakDE(stripHTML(v.sentences[idx].de));
+  if(u){
+    u.onend = () => {
+      if(!allPlayState || allPlayState.inf !== inf) return;
+      allPlayState.idx++;
+      allPlayState.timeout = setTimeout(() => runAllPlayStep(inf), 900);
+    };
+  }
+}
+
+/* ---- Record & compare (Web Speech Recognition, same diff-highlight
+   pattern used in the exam simulators) ---- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let activeRecInf = null, activeRecIdx = null, recObj = null;
+
+function diffHighlight(a, b){
+  let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i && j<b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+  const aMid=a.slice(i,a.length-j), bMid=b.slice(i,b.length-j);
+  const wrap=(s)=> s?`<span class="diffchar">${s}</span>`:'';
+  return { a: a.slice(0,i)+wrap(aMid)+a.slice(a.length-j), b: b.slice(0,i)+wrap(bMid)+b.slice(b.length-j) };
+}
+
+function toggleRecordSentence(inf, idx){
+  if(!SR){
+    alert('Spracherkennung wird in diesem Browser nicht unterstützt. Bitte Chrome oder Edge verwenden.\n(Speech recognition not supported. Please use Chrome or Edge.)');
+    return;
+  }
+  const btn = document.getElementById(`recBtn_${cssId(inf)}_${idx}`);
+  if(activeRecInf === inf && activeRecIdx === idx){
+    if(recObj) recObj.stop();
+    return;
+  }
+  stopAllAudio();
+  activeRecInf = inf; activeRecIdx = idx;
+  if(btn) btn.classList.add('rec-on');
+
+  recObj = new SR();
+  recObj.lang = 'de-DE';
+  recObj.interimResults = false;
+
+  recObj.onresult = (ev) => {
+    const transcript = ev.results[0][0].transcript;
+    const s = findSentence(inf, idx);
+    const target = stripHTML(s.de).toLowerCase().trim();
+    const spoken = transcript.toLowerCase().trim();
+    const diff = diffHighlight(target, spoken);
+    const box = document.getElementById(`transcript_${cssId(inf)}_${idx}`);
+    if(box){
+      box.innerHTML = `
+        <span class="transcript-label">Du hast gesagt:</span>
+        <div style="margin-bottom:6px;">${diff.b}</div>
+        <span class="transcript-label">Ziel:</span>
+        <div>${diff.a}</div>
+      `;
+      box.classList.add('visible');
+    }
+  };
+  recObj.onerror = () => stopRecording(btn);
+  recObj.onend = () => stopRecording(btn);
+  recObj.start();
+}
+
+function stopRecording(btn){
+  if(btn) btn.classList.remove('rec-on');
+  activeRecInf = null; activeRecIdx = null;
+  recObj = null;
+}
+
+/* =========================================================================
+   SW (theme is handled globally by js/app-shell.js via data-theme on body)
+   ========================================================================= */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  init();
+});
+</script>
+</body>
+</html>

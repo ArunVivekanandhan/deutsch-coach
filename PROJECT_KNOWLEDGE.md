@@ -485,6 +485,18 @@ script) anywhere in the repository.
 ## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
 **Open, discovered this session, not yet fixed:**
+- **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
+  has its own `applyTheme()` that sets `document.body.classList.add('dark')`, and (not independently
+  re-verified, but built from the same template) `Sprech_Pruefungs_Simulator.html` likely has the same
+  pattern. `css/design-system.css` never reads a `.dark` class — the real, shared theme button
+  (injected by `js/app-shell.js`) sets `data-theme="dark"` on `<body>` instead. Net effect: the real
+  theme toggle correctly darkens the shared shell/body, but every one of these pages' own
+  custom-styled elements stays light-themed. The identical bug was found and fixed in the new
+  `Thema_Sprech_Trainer.html` this session (see Section 28's 2026-09-22 changelog entry) by making the
+  page's own dark-mode CSS respond to `body[data-theme="dark"]` and deleting the now-redundant
+  page-local theme-init code — the same fix (add `body[data-theme="dark"]` to whatever selector gates
+  each page's dark CSS variables, then delete the dead local toggle/init functions) would apply to
+  these two files but was not done, since they weren't otherwise touched this session.
 - `js/app-shell.js` orphaned CSS: ~13 pages still carry unused `.suite-hub`/`.hub-links`/`.hub-banner`
   CSS rules in their `<style>` blocks even though the actual HTML elements were already removed by an
   earlier pass. Cosmetic dead weight, not a functional bug — deliberately left alone this session to
@@ -730,6 +742,38 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-22 — New page: Thema_Sprech_Trainer.html (Themen-Sprechtrainer)
+
+#### Task
+User request: "need to create the page that contain basic german speaking based on thema selection. there i click the word it contain example of communication using ich, er, sie, .. past sensentence. Audio option read the senstence and loop it." — a new topic-based speaking-practice page, plus an open invitation to add worthwhile extra features.
+
+#### What was built
+- New file `Thema_Sprech_Trainer.html`, linked from `index.html`'s dashboard under "Lernen (Core Learning)" (card uses the existing `module-speak` accent class).
+- 7 topics (`familie`, `arbeit`, `einkaufen`, `freizeit`, `essen`, `reisen`, `gesundheit`) × 5 verbs each × 6 persons (ich/du/er-sie-es/wir/ihr/sie-Pl.) = 210 hand-written Perfekt-tense example sentences, each with the conjugated verb form bolded and an English translation. haben/sein selection, separable-verb Partizip II placement, and reflexive-pronoun agreement were manually checked per sentence.
+- Per-sentence actions: single play (Web Speech `SpeechSynthesisUtterance`, `de-DE`), loop play (repeats with a pause, matches the existing Hörverstehen-page loop pattern), and record-and-compare ("shadow speaking" — `SpeechRecognition` + the app's existing `diffHighlight()` word-diff, showing exactly where the user's spoken attempt diverges from the target sentence).
+- Added feature beyond the literal request: a "▶️ Alle 6 nacheinander abspielen" (Play All) button per verb that plays all 6 person-sentences back to back with the currently-playing row highlighted, and a stop/resume toggle.
+- Simple per-verb progress tracking (`thema_sprech_progress_v1` in localStorage; "geübt" checkmark + a per-topic "X / 5 geübt" counter on the topic grid). Deliberately NOT wired into SRSEngine's box-schedule — these are one-off completion flags, not spaced-repetition items, and forcing them into that shape would have been dishonest about what the feature actually does.
+- Page has no own `.app-layout`, so it is auto-wrapped by `js/app-shell.js`'s shared sidebar/header/theme-toggle (`renderAppShell()`).
+
+#### Bug found and fixed: page-local dark-theme mismatch
+While testing the new page's dark mode, found its own inline `<style>` block used a page-local `html.dark-theme { --card:...; --ink:...; }` override block, populated by a page-local `initTheme()`/`toggleTheme()` pair (`document.documentElement.classList.toggle('dark-theme')`). This class is never set by the *real* theme button — that one is injected by `js/app-shell.js`'s shared shell and instead sets `data-theme="dark"` on `<body>` (the mechanism `css/design-system.css` actually reads). Result: clicking the real, visible theme toggle correctly darkened the shared shell and page background, but every one of the page's own custom-styled elements (topic cards, verb cards, sentence rows, buttons) stayed light-themed.
+- **Fix**: changed the selector to `html.dark-theme, body[data-theme="dark"]` so the page's custom CSS variables respond to the attribute the real toggle sets. Removed the now-fully-dead `toggleTheme()`/`initTheme()` functions entirely — `js/app-shell.js` already applies `data-theme` globally from `localStorage['de_theme']` on every page load (confirmed at `js/app-shell.js:330-337`), so the page needed no theme init code of its own.
+- Verified via headless browser: after clicking `#themeToggleBtn`, `body[data-theme]` is `"dark"`, body background is `rgb(15,23,42)`, and `.thema-card` background is `rgb(30,41,59)` (the intended dark card color) — confirms the fix.
+- **The same underlying bug pattern (a page-local theme class the real shared toggle never sets) also exists, unfixed, in `A1_Sprech_Pruefungs_Simulator.html`** (its own `applyTheme()` sets `document.body.classList.add('dark')`, a class `css/design-system.css` never reads either) and likely `Sprech_Pruefungs_Simulator.html` (built from the same template, not independently re-verified). Left unfixed there — out of scope for this task, since those pages were not touched otherwise — and logged below in Known Bugs.
+
+#### Testing
+- Headless-browser (`Playwright` + local `chromium`) smoke test: opened a topic, expanded a verb card, confirmed the "Play All" and "Als geübt markieren" buttons render, no `pageerror` events fired.
+- Full-site sweep across all 24 `*.html` pages after the change (including the new page and the `index.html`/`sw.js` edits): zero `pageerror` events.
+- `scripts/build.py` re-run to regenerate `sw.js` (bumped `CACHE_NAME` to `v43`, added `./Thema_Sprech_Trainer.html` to `urlsToCache`).
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html` (new)
+- `index.html` (new dashboard card)
+- `sw.js` (regenerated via `scripts/build.py`)
+- `PROJECT_KNOWLEDGE.md` (this entry; Known Bugs section)
+
+---
 
 ### 2026-09-19 (Task 7) — AI: Gemini 3.8 Flash
 
