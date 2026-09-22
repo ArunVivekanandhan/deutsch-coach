@@ -743,6 +743,41 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 16) — Swipe navigation + "show answer by default" on all real flashcards
+
+#### Task
+"In all flash card enable the swipe option (left and right) previous and next. And also option to show the answer my default."
+
+#### Scoping
+Used a background Explore agent to survey all 23 root `*.html` pages for genuine flashcard-style UIs before touching anything, since "all flash card" is ambiguous across an app with many different quiz/drill formats. This narrowed the true scope to 3 files: `deutsch-coach.html` (the main SRS review flow), `Verb_Transformation_Trainer.html`, and `Nomen_Adjektiv_Trainer.html` (both share a `practiceMode` architecture where only the `medium`/"Flip Card" mode is a real flip-flashcard; `easy` is multiple-choice and `hard` is typed production, so neither of those two modes got the swipe/reveal treatment). The agent's report also claimed `deutsch-coach.html`'s `renderArticle` renderer used the same reveal-flashcard pattern as the others — direct code reading showed this was wrong: `renderArticle` is genuinely multiple-choice (`.mcopt` der/die/das buttons) with a stray `onclick` referencing a nonexistent `revealBtn` id that silently no-ops. It (and `renderMcDe2En`/`renderMcEn2De`) were correctly excluded. `deutsch-coach.html` has 5 true reveal-flashcard question types out of its 8: `recall_meaning`, `recall_de2en`, `plural`, `verbtense`, `fillgap`.
+
+All 3 files already contained dead swipe-gesture scaffolding from earlier work — targeting a nonexistent `.flashcard`/`.card` CSS class (the real class is `.studycard`) and wired to mismatched grading-button ids (`#btn-nochmal`/`#btn-gewusst` vs. the actual `btnNochmal`/`btnGewusst`), so it never fired, and even working would have graded the card rather than navigating. This was replaced, not "enabled."
+
+#### What was built
+- **Swipe navigation**: `document`-level delegated `touchstart`/`touchend` listeners (not per-card, since cards are destroyed/recreated on every render), filtered to only fire when the touch target is inside `.studycard` and isn't an `input`/`textarea` (so it doesn't interfere with the "Hard"/typed-production mode's text field). A `handleSwipe(dx, dy)` function requires `|dx| >= 50` and `|dx| >= |dy| * 1.5` (rejects short taps and mostly-vertical scroll gestures) before treating it as a swipe. **Convention: swipe left = next card, swipe right = previous card.**
+  - `Verb_Transformation_Trainer.html` / `Nomen_Adjektiv_Trainer.html`: reused each file's existing "← Prev"/"→ Next" button handlers (`prevCard()`/`nextCardWithoutAnswer()` or `advance()`). `Nomen_Adjektiv_Trainer.html` didn't have a `prevCard()` function before this — added one, mirroring the pattern already present in `Verb_Transformation_Trainer.html`.
+  - `deutsch-coach.html`'s main SRS session runner (`renderSessionCard`) had **no "go back" capability at all** before this change — added a new `prevSession()` function and a conditionally-rendered "← Zurück" button (shown only when `sessionIdx > 0`). This carries the same accepted tradeoff the other 2 files' pre-existing Prev buttons already had: swiping/clicking back to an already-graded card and grading it again is a pre-existing pattern in this app, not a new risk introduced here.
+  - `Nomen_Adjektiv_Trainer.html` also has a wholly separate der/die/das gender-guessing "Swipe Game" (`startSwipeGame()`/`dragStart`/`dragEnd`, `.swipe-card`) where swipe direction *is* the answer, not deck navigation — left untouched and confirmed unmodified.
+- **"Show answer by default"**: a shared `localStorage` flag (`de_show_answer_default`, `'true'`/`'false'`) with `getShowAnswerDefault()`/`setShowAnswerDefault()`/`toggleShowAnswerDefault()` helpers and a checkbox (`showAnswerToggleHTML()`) rendered above the card, but only for genuine reveal-flashcard modes/types (the `medium` practice mode in the 2 trainer files; the 5 `FLASHCARD_QTYPES` in `deutsch-coach.html` — the 3 multiple-choice question types never show this checkbox). Implemented by reusing each renderer's own existing `revealBtn.onclick` handler rather than duplicating reveal logic: the handler is assigned as before, then immediately invoked once (`if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();`) right after.
+  - `deutsch-coach.html`'s `renderRecallMeaning` has a separate "progressive hints" mechanic (`de_progressive_hints`) that normally reveals the answer over 2 extra clicks before full reveal on click 3. Changed its gate to `localStorage.getItem('de_progressive_hints') === 'true' && !getShowAnswerDefault()` so "show answer by default" always means an immediate full reveal, bypassing progressive hints rather than fighting them.
+
+#### Testing
+- Syntax-checked all 3 files (`node --check` on every extracted `<script>` block) — clean.
+- Headless-browser (Playwright, touch-enabled context) testing on all 3 files: toggling the checkbox correctly sets `localStorage['de_show_answer_default']` and populates `#revealArea` immediately; the setting persists across card navigation; the checkbox is present for flashcard modes/types and absent for multiple-choice ones; the "← Zurück"/"← Prev" button appears only when not on the first card.
+- **Testing-methodology caveat (disclosed)**: synthetic `TouchEvent`/`Touch` construction dispatched via `page.evaluate()` did not reliably trigger the real `touchstart`/`touchend` DOM listeners in headless Chromium (no errors, but no effect). Worked around this by calling `handleSwipe(dx, dy)` directly to verify the swipe *logic* (confirmed `sessionIdx`/card position moves correctly in both directions, and that short/mostly-vertical gestures are correctly ignored, in all 3 files). This confirms the swipe-handling logic is correct but does **not** independently confirm real-touchscreen event delivery end-to-end — that part relies on the listener registration being standard/correct DOM API usage, not on a full physical-device test.
+- For `deutsch-coach.html` specifically, also verified: the progressive-hints bypass (full reveal with grading buttons shown immediately, no intermediate hint text, when show-answer-default is on) and that the previously-nonexistent "go back" capability doesn't crash at `sessionIdx === 0`.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `deutsch-coach.html`
+- `Verb_Transformation_Trainer.html`
+- `Nomen_Adjektiv_Trainer.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 15) — "Alle 3" tense-comparison mode
 
 #### Task

@@ -1348,6 +1348,22 @@ function modeSelectorHTML(){
   </div>`;
 }
 
+/* ---- "Show answer by default" preference (Flip Card / medium mode) ---- */
+function getShowAnswerDefault(){ return localStorage.getItem('de_show_answer_default') === 'true'; }
+function setShowAnswerDefault(val){ localStorage.setItem('de_show_answer_default', val ? 'true' : 'false'); }
+function toggleShowAnswerDefault(){
+  setShowAnswerDefault(!getShowAnswerDefault());
+  renderCard();
+}
+function showAnswerToggleHTML(){
+  if(practiceMode !== 'medium') return ''; // only the Flip Card mode has an answer to auto-reveal
+  const on = getShowAnswerDefault();
+  return `<label style="display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; margin-bottom:8px;">
+    <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleShowAnswerDefault()" style="cursor:pointer;">
+    🔎 Antwort automatisch zeigen (Flip Card) · Show answer by default
+  </label>`;
+}
+
 
 
 /* ---- persistence & SRS ---- */
@@ -1635,12 +1651,13 @@ add(diff); }
 
   stage.innerHTML = `
     ${modeSelectorHTML()}
+    ${showAnswerToggleHTML()}
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
       <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
       <div class="quick-card-tools">
         <button class="quick-tool-btn" onclick="cycleMeaningLang()" title="Switch Language">🌐 ${langLabel}</button>
         <button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button>
-        ${sessionIdx > 0 ? `<button class="quick-tool-btn" onclick="sessionIdx--; renderCard();">← Prev</button>` : ''}
+        ${sessionIdx > 0 ? `<button class="quick-tool-btn" onclick="prevCard()">← Prev</button>` : ''}
         <button class="quick-tool-btn" onclick="advance()" style="background:var(--ink); color:#fff;">→ Next (N)</button>
       </div>
     </div>
@@ -1680,9 +1697,18 @@ add(diff); }
     document.getElementById('btnGewusst').onclick = ()=>{ recordAnswer(v.uid,true); advance(); };
     document.getElementById('btnEasy').onclick = ()=>{ const p=getProg(v.uid); p.box=5; p.nextDue=SRSEngine.addDaysISO(30); saveProgress(PROGRESS); advance(); };
   };
+
+  if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
 }
 
 function advance(){ sessionIdx++; renderDash(); renderCard(); }
+
+function prevCard(){
+  if(sessionIdx > 0){
+    sessionIdx--;
+    renderCard();
+  }
+}
 
 /* ---- EASY MODE: multiple-choice recognition ---- */
 function pickDistractors(v, count){
@@ -1716,6 +1742,7 @@ function renderEasyMC(v){
 
   stage.innerHTML = `
     ${modeSelectorHTML()}
+    ${showAnswerToggleHTML()}
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
       <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
       ${!isGenderMode ? `<div class="quick-card-tools"><button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button></div>` : ''}
@@ -1774,6 +1801,7 @@ function renderHardProduction(v){
 
   stage.innerHTML = `
     ${modeSelectorHTML()}
+    ${showAnswerToggleHTML()}
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
       <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
     </div>
@@ -1964,31 +1992,25 @@ if (document.readyState === 'loading') {
 }
 
 
-// --- Swipe Gestures for Flashcards ---
-let touchStartX = 0;
-let touchEndX = 0;
+// --- Swipe Gestures for Flashcards: swipe left = next card, swipe right = previous card ---
+// (Not to be confused with the separate der/die/das "Swipe Game" further below, which uses
+// swipe direction as the answer itself, not deck navigation.)
+let touchStartX = 0, touchStartY = 0;
 document.addEventListener('touchstart', e => {
-  if (e.target.closest('.flashcard') || e.target.closest('.card')) {
-    touchStartX = e.changedTouches[0].screenX;
-  }
+  if (!e.target.closest('.studycard') || e.target.closest('input, textarea')) return;
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
 }, {passive: true});
 document.addEventListener('touchend', e => {
-  const card = e.target.closest('.flashcard') || e.target.closest('.card');
-  if (card) {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe(card);
-  }
+  if (!e.target.closest('.studycard') || e.target.closest('input, textarea')) return;
+  handleSwipe(e.changedTouches[0].screenX - touchStartX, e.changedTouches[0].screenY - touchStartY);
 }, {passive: true});
-function handleSwipe(cardElement) {
+function handleSwipe(dx, dy) {
   const swipeThreshold = 50;
-  if (touchEndX < touchStartX - swipeThreshold) {
-    const btn = document.getElementById('btn-nochmal') || document.querySelector('.btn-fail');
-    if(btn && !btn.disabled) btn.click();
-  }
-  if (touchEndX > touchStartX + swipeThreshold) {
-    const btn = document.getElementById('btn-gewusst') || document.querySelector('.btn-pass');
-    if(btn && !btn.disabled) btn.click();
-  }
+  if (Math.abs(dx) < swipeThreshold || Math.abs(dx) < Math.abs(dy) * 1.5) return; // too short, or mostly vertical scroll
+  if (!session || session.length === 0) return;
+  if (dx < 0) advance();
+  else prevCard();
 }
 
 function getGenderClass(article) {

@@ -1128,36 +1128,26 @@ function getCollocFor(word){
   return COLLOCATIONS[w] || null;
 }
 
-// --- Swipe Gestures for Flashcards ---
-let touchStartX = 0;
-let touchEndX = 0;
+// --- Swipe Gestures for Flashcards: swipe left = next card, swipe right = previous card ---
+let touchStartX = 0, touchStartY = 0;
 
 document.addEventListener('touchstart', e => {
-  if (e.target.closest('.flashcard')) {
-    touchStartX = e.changedTouches[0].screenX;
-  }
+  if (!e.target.closest('.studycard') || e.target.closest('input, textarea')) return;
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
 }, {passive: true});
 
 document.addEventListener('touchend', e => {
-  const card = e.target.closest('.flashcard');
-  if (card) {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe(card);
-  }
+  if (!e.target.closest('.studycard') || e.target.closest('input, textarea')) return;
+  handleSwipe(e.changedTouches[0].screenX - touchStartX, e.changedTouches[0].screenY - touchStartY);
 }, {passive: true});
 
-function handleSwipe(cardElement) {
+function handleSwipe(dx, dy) {
   const swipeThreshold = 50;
-  if (touchEndX < touchStartX - swipeThreshold) {
-    // Swiped left - Nochmal (Fail)
-    const btn = document.getElementById('btn-nochmal') || document.querySelector('.btn-fail');
-    if(btn && !btn.disabled) btn.click();
-  }
-  if (touchEndX > touchStartX + swipeThreshold) {
-    // Swiped right - Gewusst (Pass)
-    const btn = document.getElementById('btn-gewusst') || document.querySelector('.btn-pass');
-    if(btn && !btn.disabled) btn.click();
-  }
+  if (Math.abs(dx) < swipeThreshold || Math.abs(dx) < Math.abs(dy) * 1.5) return; // too short, or mostly vertical scroll
+  if (typeof session === 'undefined' || !session || session.length === 0) return;
+  if (dx < 0) { if (typeof advanceSession === 'function') advanceSession(); }
+  else { if (typeof prevSession === 'function') prevSession(); }
 }
 
 </script>
@@ -3364,7 +3354,7 @@ function renderRecallMeaning(card, advanceFn){
     afterRender(){
       let hintState = 0;
       document.getElementById("revealBtn").onclick = ()=>{
-        const isProgressive = localStorage.getItem('de_progressive_hints') === 'true';
+        const isProgressive = localStorage.getItem('de_progressive_hints') === 'true' && !getShowAnswerDefault();
         if (isProgressive && hintState < 2) {
           hintState++;
           const btn = document.getElementById("revealBtn");
@@ -3399,18 +3389,19 @@ function renderRecallMeaning(card, advanceFn){
         
         wireAnswerButtons(card, advanceFn, "recall_de2en");
       };
-      
+
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => {
             if (window.playTTS) window.playTTS(card.w);
          }, 300);
       }
-      
+
       if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
+      if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
     }
   };
 }
@@ -3452,6 +3443,7 @@ function renderRecallDe2En(card, advanceFn){
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
+      if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
     }
   };
 }
@@ -3612,6 +3604,7 @@ function renderPlural(card, advanceFn){
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
+      if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
     }
   };
 }
@@ -3649,6 +3642,7 @@ function renderVerbTense(card, advanceFn){
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
+      if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
     }
   };
 }
@@ -3692,6 +3686,7 @@ function renderFillGap(card, advanceFn){
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
+      if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
     }
   };
 }
@@ -3717,6 +3712,22 @@ function startSession(cards, label){
   renderSessionCard(label);
 }
 
+const FLASHCARD_QTYPES = ['recall_meaning','recall_de2en','plural','verbtense','fillgap'];
+function getShowAnswerDefault(){ return localStorage.getItem('de_show_answer_default') === 'true'; }
+function setShowAnswerDefault(val){ localStorage.setItem('de_show_answer_default', val ? 'true' : 'false'); }
+function toggleShowAnswerDefault(){
+  setShowAnswerDefault(!getShowAnswerDefault());
+  renderSessionCard();
+}
+function showAnswerToggleHTML(type){
+  if(!FLASHCARD_QTYPES.includes(type)) return ''; // multiple-choice question types have no reveal step
+  const on = getShowAnswerDefault();
+  return `<label style="display:flex; align-items:center; justify-content:center; gap:6px; font-size:11px; color:var(--ink-soft); cursor:pointer; margin:0 0 8px; font-family:'IBM Plex Mono',monospace;">
+    <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleShowAnswerDefault()" style="cursor:pointer;">
+    🔎 Antwort automatisch zeigen · Show answer by default
+  </label>`;
+}
+
 function renderSessionCard(label){
   const stage = document.getElementById("stage");
   if(sessionIdx >= session.length){
@@ -3733,7 +3744,11 @@ function renderSessionCard(label){
   const renderer = TYPE_RENDERERS[type];
   const result = renderer(card, advanceSession);
   stage.innerHTML = `
-    <div class="sessionbar">${label||"Sitzung"} — Karte ${sessionIdx+1} / ${session.length}</div>
+    <div class="sessionbar" style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
+      ${sessionIdx > 0 ? `<button onclick="prevSession()" style="font:inherit; background:none; border:none; color:var(--ink-soft); cursor:pointer; text-decoration:underline; padding:0;">← Zurück</button>` : ''}
+      <span>${label||"Sitzung"} — Karte ${sessionIdx+1} / ${session.length}</span>
+    </div>
+    ${showAnswerToggleHTML(type)}
     ${result.html}
   `;
   if(result.afterRender) result.afterRender();
@@ -3743,6 +3758,13 @@ function advanceSession(){
   sessionStats.reviewed++;
   sessionIdx++;
   renderSessionCard();
+}
+
+function prevSession(){
+  if(sessionIdx > 0){
+    sessionIdx--;
+    renderSessionCard();
+  }
 }
 </script>
 <script>
