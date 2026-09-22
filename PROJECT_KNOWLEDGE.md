@@ -685,16 +685,15 @@ the larger IA/content-unification work. In priority order for whoever picks this
   latest changelog entry (mirroring `German_B1_Practice_Studio.html`'s 7-module shape, or a B2 oral
   exam simulator mirroring `Sprech_Pruefungs_Simulator.html`/`A1_Sprech_Pruefungs_Simulator.html`) —
   deliberately not attempted in that session since the explicit scope was "content foundation first."
-- Extend the difficulty-tiered offline practice + AI weak-spot follow-up pattern (built for
-  `Grammatik_Regel_Trainer.html`, then `Verb_Transformation_Trainer.html` and
-  `Nomen_Adjektiv_Trainer.html` — see Section 28's changelog entries) to the remaining practice pages,
-  per the user's explicitly confirmed "everything" scope: every exam simulator / practice studio page
-  (`Sprech_Pruefungs_Simulator.html`, `A1_Sprech_Pruefungs_Simulator.html`,
-  `German_A2_Practice_Studio.html`, `German_B1_Practice_Studio.html`,
-  `Hoerverstehen_Diktat_Trainer.html`, `Brief_Schreiben_Trainer.html`, `Satzbau_Trainer.html`,
-  `konnektoren_referenz.html`, `Dialog_Schatten_Trainer.html`, `Wortfamilien_Explorer.html`,
-  `Wortschatz_Master_Grid.html`) have not been touched yet. Grammar and both vocabulary trainers are
-  done; this was communicated to the user as installments, not the whole backlog at once.
+**P1.5 (done — kept here only as a pointer to the changelog, per the "don't delete history" convention):**
+The difficulty-tiered offline practice + AI weak-spot follow-up pattern (see Section 28's changelog
+entries, starting with `Grammatik_Regel_Trainer.html`) was extended to every page with a genuine
+right/wrong mechanic: both vocabulary trainers, `Satzbau_Trainer.html`, the A2/B1 Practice Studios'
+drill chapters, `Hoerverstehen_Diktat_Trainer.html`, `konnektoren_referenz.html`'s Drill tab, and the
+graded sub-sections of both exam simulators. `Brief_Schreiben_Trainer.html`, `Dialog_Schatten_Trainer.html`,
+`Wortschatz_Master_Grid.html`, and `Wortfamilien_Explorer.html` were deliberately excluded (checked, not
+skipped — none has a right/wrong mechanic to tier). If future work wants quizzes on those pages, that's
+a new feature to design, not an extension of this pattern.
 
 **P2 (polish, after P1 exists to polish):**
 - Full accessibility pass across the 21 individual trainer pages (only the shared shell got one this
@@ -1401,6 +1400,89 @@ Exam simulators and practice studios (`Sprech_Pruefungs_Simulator.html`,
 `German_B1_Practice_Studio.html`, `Hoerverstehen_Diktat_Trainer.html`, `Brief_Schreiben_Trainer.html`,
 `Satzbau_Trainer.html`, `konnektoren_referenz.html`, `Dialog_Schatten_Trainer.html`,
 `Wortfamilien_Explorer.html`, `Wortschatz_Master_Grid.html`) still have none of this — see Section 26.
+
+---
+
+### Follow-up: practice-depth pattern completed across every page it genuinely fits
+
+Finished the "everything" scope from the user's confirmed answer above. First surveyed all 11
+remaining practice-adjacent pages (via a dedicated read-only investigation) to find out, honestly,
+which ones have a real right/wrong mechanic worth tiering and which don't — rather than forcing a
+difficulty selector onto every page regardless of fit. Result: 7 of the 11 got the treatment (some
+scoped to just their one graded sub-section); 4 were deliberately excluded with reasons, not deferred.
+
+**Got Easy/Medium/Hard (in addition to `Grammatik_Regel_Trainer.html`,
+`Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html` from the entry above):**
+- `Satzbau_Trainer.html` (word-order builder) — Easy: multiple-choice among real-word reorderings of
+  the same tokens (never random word salad, matching the page's own stated philosophy). Medium: the
+  pre-existing tap-token builder, unchanged. Hard: typed free recall.
+- `German_A2_Practice_Studio.html` / `German_B1_Practice_Studio.html` — scoped to just their "drill"
+  chapter (the other 7 chapters are pure reference cards with no grading, left untouched). Easy: the
+  pre-existing 4-option MCQ. Medium (new): self-rate recall. Hard (new): typed free recall. Also fixed
+  a copy-paste bug found in B1's file: its drill chapter's copy literally said "...alle A2-Module..."
+  and "Bereit für den A2-Sprint?" despite being the B1 studio.
+- `Hoerverstehen_Diktat_Trainer.html` — Easy (new): "which sentence did you hear?" multiple choice.
+  Medium (new): gap-fill (hear the sentence, type just 1-2 blanked words). Hard: the pre-existing full
+  typed dictation, unchanged.
+- `konnektoren_referenz.html` — scoped to its Drill tab (the Referenz tab is pure reference). Easy: the
+  pre-existing 10-question fixed MCQ. Medium/Hard (new): the same questions typed instead of clicked,
+  Medium showing the option list as a hint, Hard showing nothing.
+- `Sprech_Pruefungs_Simulator.html` (B1) — scoped to Written > Sprachbausteine Cloze only (Oral and
+  Vault are shadowing/reference with nothing to grade). Easy: the pre-existing `<select>` dropdowns.
+  Medium/Hard (new): typed per-gap, Medium showing the option lists as a hint.
+- `A1_Sprech_Pruefungs_Simulator.html` — scoped to Written > Formular ausfüllen only. Easy (new):
+  multiple-choice per field, distractors drawn from the form's own other real field values. Medium
+  (new): typed with a shuffled "Answer Bank" of all correct values shown. Hard: the pre-existing typed
+  exact-match, unchanged (was already free recall with no hints).
+
+**Deliberately NOT given a difficulty selector (checked, not skipped):** `Brief_Schreiben_Trainer.html`
+(a compose-and-save letter tool with qualitative AI feedback, no right/wrong to tier),
+`Dialog_Schatten_Trainer.html` (AI-generated dialogue + audio shadowing, no grading mechanic),
+`Wortschatz_Master_Grid.html` (a browsable/filterable vocab grid with a peek-to-reveal "study" toggle
+but no score), `Wortfamilien_Explorer.html` (confirmed to be a pure `<meta http-equiv="refresh">`
+redirect stub to `Wortschatz_Master_Grid.html`, not a real page — nothing to change). Forcing a
+selector onto these would have meant building a whole new quiz feature from scratch on each, not
+extending an existing one — a materially different, much larger undertaking than what was asked for.
+
+**Two more real bugs found and fixed along the way** (beyond the `checkAnswer`/`explainWrongAnswerAI`
+crashes in the earlier entry), both flagged by Section 18:
+- `Hoerverstehen_Diktat_Trainer.html` had a hardcoded Deepseek API key embedded directly in the
+  client-side source as a "safe fallback" for when no user key was configured. Since this repo deploys
+  publicly to GitHub Pages, that key was exposed to every visitor via view-source — a real security
+  issue, not a style nit. Removed it; AI generation now honestly requires the user's own key like every
+  other provider/page (verified the "please configure a key" fallback path still works correctly).
+- `Satzbau_Trainer.html`'s "🤖 KI-Satzanalyse" (AI sentence analysis) button on a wrong answer was
+  branded as AI but `analyzeSentenceAIFallback()` was a hardcoded canned response wrapped in a
+  `setTimeout` — it never called any real AI. Now calls the real shared `callAIHelper()` when AI is
+  actually configured, and falls back to the same static content honestly relabeled as a "Word Order
+  Tip" (not claiming to be AI) when it isn't.
+- `konnektoren_referenz.html` had a whole "AI Sentence Builder" feature
+  (`generateBuildTask`/`checkBuildTask`/`playBuildAudio`, a module-level `currentTask`) that was
+  **entirely dead code**: it referenced `#builderKonnektor`/`#builderTask`/`#bldAnswer`/`#bldFeedback`/
+  `#bldTarget`/`#bldEn`/`#bldTa`/`#builderLoading`/`#checkBtn`, none of which exist anywhere in the
+  file's HTML (confirmed via `grep`), and wasn't wired to any button either. Replaced with a real,
+  wired-up AI weak-spot follow-up using the shared `callAIHelper()`.
+
+**AI weak-spot follow-up is now consistent app-wide**: every page in this list that got an AI button
+uses the same shared `callAIHelper()` from `js/app-shell.js` (added in the entry above) and the same
+`ai-enabled` body-class gating, and every one of them explains or generates practice around a REAL word/
+sentence/question already in that page's own verified data — none of them ask the AI to invent new
+vocabulary, grammar rules, or exam content.
+
+#### Testing
+Every file re-verified via headless Chromium after its change: each new mode exercised end to end
+(render → answer → correct/wrong feedback path), AI button gating tested with both no-AI and a mocked
+`callAIHelper` response, and a full 23-page smoke sweep (`pageerror` capture) re-run clean after every
+commit. `German_A2_Practice_Studio.html`/`German_B1_Practice_Studio.html`'s drill chapter is
+gated behind completing the other 7 chapters, so tests force-unlocked them via `PROGRESS.completed`
+rather than skipping that verification.
+
+#### Remaining state
+The confirmed "everything" scope for the difficulty-tiered practice + AI weak-spot pattern is now done:
+every page with a real right/wrong mechanic has it, and every page without one was checked and
+honestly excluded rather than silently skipped. Nothing from this specific request is outstanding.
+(Unrelated, longer-standing backlog items from Section 26 — IA/IA unification, orphaned CSS, etc. —
+are untouched and still open.)
 
 ---
 
