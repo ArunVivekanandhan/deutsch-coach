@@ -743,6 +743,30 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 4) — Thema_Sprech_Trainer.html: add "Häufige Wörter" (Common Words) topic
+
+#### Task
+User request: "Now under common words theme(🗣️ Themen-Sprechtrainer) add all the words based on theme selection like above" — add a new topic to the page, populated the same way as the existing 7 (5 verbs, 6 persons, all 3 tenses), covering high-frequency general-purpose verbs not already represented in the domain-specific topics (Familie, Arbeit, Einkaufen, Freizeit, Essen & Trinken, Reisen, Gesundheit).
+
+#### What was built
+- Added an 8th topic, `id:'haeufig'`, title "Häufige Wörter", icon `megaphone`, with 5 of the most fundamental/highest-frequency German verbs not covered elsewhere in the page: `sein` (to be), `haben` (to have), `machen` (to do/make), `sagen` (to say), `sehen` (to see) — 30 new person-sentences × 3 tenses = 90 new sentence variants, all hand-conjugated and checked like every other verb on this page.
+- `sein` and `haben` needed special care as they're both highly irregular (`sein`: bin/bist/ist/sind/seid/sind, war/warst/war/waren/wart/waren; `haben`: habe/hast/hat/haben/habt/haben, hatte/hattest/hatte/hatten/hattet/hatten) and, unusually, `sein` is its own Perfekt auxiliary (`ich bin ... gewesen`, not `ich habe ... gewesen`). The Perfekt bolding for `sein` was kept consistent with every other verb on the page (only the participle `gewesen` bolded, not the auxiliary) — an early draft bolded the auxiliary too, which was inconsistent with the rest of the file and got corrected before verifying.
+- No new code paths were needed — the topic slots directly into the existing `THEMEN` array and is picked up automatically by the topic grid, tense selector, and all playback/loop/record features added in the previous task.
+
+#### Testing
+- `node --check` on the extracted page script.
+- A Node script parsed the live `THEMEN` array: 8 topics, 40 verbs, 240 person-sentences, all 720 tense-variant fields (240 × 3) present and non-empty.
+- Headless-browser test: confirmed the topic grid now shows 8 cards ending with "Häufige Wörter", opening it shows exactly the 5 expected verbs (sein, haben, machen, sagen, sehen), and switching Perfekt → Präsens → Präteritum on `sein` correctly renders "Ich bin müde gewesen." → "Ich bin müde." → "Ich war müde." with no console errors.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Re-ran `scripts/build.py` to bump the service-worker cache version (content changed, not just the file list, so a bump is needed to bust stale cached copies of this page for returning users).
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html`
+- `sw.js` (regenerated: cache version bump)
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 3) — Thema_Sprech_Trainer.html: add Präsens + Präteritum tenses
 
 #### Task
