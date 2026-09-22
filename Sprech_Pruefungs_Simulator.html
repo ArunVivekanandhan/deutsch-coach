@@ -963,12 +963,27 @@ function renderVault(container){
 }
 
 /* ---------------- CLOZE TEST ---------------- */
+let clozePracticeMode = 'easy'; // 'easy' (dropdown), 'medium' (typed, hints shown), 'hard' (typed, no hints)
+
+function setClozePracticeMode(m){
+  clozePracticeMode = m;
+  renderCloze(document.getElementById('mainView'));
+}
+
+function clozeModeSelectorHTML(){
+  const modes = [{k:'easy',l:'🟢 Easy (Select Dropdown)'},{k:'medium',l:'🟡 Medium (Type It, Hints Shown)'},{k:'hard',l:'🔴 Hard (Type It, No Hints)'}];
+  return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+    ${modes.map(m=>`<button class="hub-link ${clozePracticeMode===m.k?'active':''}" onclick="setClozePracticeMode('${m.k}')">${m.l}</button>`).join('')}
+  </div>`;
+}
+
 function renderCloze(container){
   const cl = WRITTEN_DATA.cloze;
   container.innerHTML = `
     <div class="card">
       <h2 class="card-title">${cl.title}</h2>
       <p class="card-desc">${cl.desc}</p>
+      ${clozeModeSelectorHTML()}
 
       <div class="cloze-text">
         ${cl.text.map(chunk=>{
@@ -976,14 +991,22 @@ function renderCloze(container){
           if(!match) return chunk.replace(/\n/g, '<br>');
           const qNum = parseInt(match[1]);
           const q = cl.questions.find(x=>x.num === qNum);
-          return `
-            <select class="cloze-select" id="clozeSel_${qNum}">
-              <option value="">[(${qNum}) Select...]</option>
-              ${q.options.map(opt=>`<option value="${opt}">${opt}</option>`).join("")}
-            </select>
-          `;
+          if(clozePracticeMode === 'easy'){
+            return `
+              <select class="cloze-select" id="clozeSel_${qNum}">
+                <option value="">[(${qNum}) Select...]</option>
+                ${q.options.map(opt=>`<option value="${opt}">${opt}</option>`).join("")}
+              </select>
+            `;
+          }
+          return `<input type="text" class="cloze-select" id="clozeSel_${qNum}" style="width:90px; display:inline-block;" placeholder="(${qNum})">`;
         }).join("")}
       </div>
+      ${clozePracticeMode === 'medium' ? `
+        <div style="font-size:12px; color:var(--ink-soft); margin-bottom:10px;">
+          ${cl.questions.map(q=>`<b>(${q.num})</b> ${q.options.join(' / ')}`).join(' &nbsp;·&nbsp; ')}
+        </div>
+      ` : ''}
 
       <button class="bigbtn" onclick="checkCloze()">Check Answers &amp; Show Explanations</button>
       <div id="clozeFeedback" style="margin-top:14px; display:none;"></div>
@@ -998,8 +1021,10 @@ function checkCloze(){
 
   cl.questions.forEach(q=>{
     const sel = document.getElementById(`clozeSel_${q.num}`);
-    const chosen = sel ? sel.value : "";
-    const isCorr = chosen === q.options[q.correct];
+    const chosen = sel ? sel.value.trim() : "";
+    const isCorr = clozePracticeMode === 'easy'
+      ? chosen === q.options[q.correct]
+      : chosen.toLowerCase() === q.options[q.correct].toLowerCase();
     if(isCorr) correctCount++;
     if(sel){
       sel.style.background = isCorr ? '#E2EED8' : '#F8E4E3';

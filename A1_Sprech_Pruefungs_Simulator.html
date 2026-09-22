@@ -649,23 +649,70 @@ function renderVault(container){
 }
 
 /* ---------------- FORM FILL-IN ---------------- */
+let formPracticeMode = 'easy'; // 'easy' (multiple choice per field), 'medium' (typed, answer bank shown), 'hard' (typed, no hints)
+
+function setFormPracticeMode(m){
+  formPracticeMode = m;
+  renderForm(document.getElementById('mainView'));
+}
+
+function formModeSelectorHTML(){
+  const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Type It, Answer Bank)'},{k:'hard',l:'🔴 Hard (Type It, No Hints)'}];
+  return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+    ${modes.map(m=>`<button class="hub-link ${formPracticeMode===m.k?'active':''}" onclick="setFormPracticeMode('${m.k}')">${m.l}</button>`).join('')}
+  </div>`;
+}
+
+function shuffleArrA1(arr){
+  const a = arr.slice();
+  for(let i=a.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
 function renderForm(container){
   const f = WRITTEN_DATA.form;
+  const allAnswers = f.fields.map(fl => fl.answer);
+
+  let fieldsHTML;
+  if(formPracticeMode === 'easy'){
+    window._formEasyOptions = f.fields.map((field,i)=>{
+      const distractors = shuffleArrA1(allAnswers.filter(a => a !== field.answer)).slice(0,3);
+      return shuffleArrA1([field.answer, ...distractors]);
+    });
+    fieldsHTML = f.fields.map((field,i)=>`
+      <div class="form-field">
+        <label for="formField_${i}">${field.label}:</label>
+        <select id="formField_${i}" class="cloze-select">
+          <option value="">Select...</option>
+          ${window._formEasyOptions[i].map(opt=>`<option value="${opt}">${opt}</option>`).join('')}
+        </select>
+      </div>
+    `).join("");
+  } else {
+    fieldsHTML = f.fields.map((field,i)=>`
+      <div class="form-field">
+        <label for="formField_${i}">${field.label}:</label>
+        <input type="text" id="formField_${i}" placeholder="...">
+      </div>
+    `).join("");
+  }
+
   container.innerHTML = `
     <div class="card">
       <h2 class="card-title">${f.title}</h2>
       <p class="card-desc">${f.desc}</p>
+      ${formModeSelectorHTML()}
 
       <div class="cloze-text">${f.text}</div>
 
       <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px;">
-        ${f.fields.map((field,i)=>`
-          <div class="form-field">
-            <label for="formField_${i}">${field.label}:</label>
-            <input type="text" id="formField_${i}" placeholder="...">
-          </div>
-        `).join("")}
+        ${fieldsHTML}
       </div>
+      ${formPracticeMode === 'medium' ? `
+        <div style="font-size:12px; color:var(--ink-soft); margin:8px 0;">
+          <b>Answer Bank:</b> ${shuffleArrA1(allAnswers).join(' · ')}
+        </div>
+      ` : ''}
 
       <button class="bigbtn" onclick="checkForm()">Check Answers</button>
       <div id="formFeedback" style="margin-top:14px; display:none;"></div>
