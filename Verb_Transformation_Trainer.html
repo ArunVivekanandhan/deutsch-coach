@@ -1789,6 +1789,11 @@ function startPractice(){
 
 function renderCard(){
   const stage = document.getElementById('stage');
+  // Stop any speech still playing/queued from the card being navigated away from
+  // (swipe, Next/Prev, or a mode change) before rendering the new one - Easy/Hard
+  // mode don't manage speech themselves, so without this a still-speaking Flip
+  // Card's audio could bleed into a following Easy/Hard card.
+  if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
   if(sessionIdx >= session.length){
     const reviewed = session.length;
     stage.innerHTML = `<div class="empty">🎉 <b>Done!</b><br>You practiced ${reviewed} verbs this round.</div>`;
@@ -1929,9 +1934,11 @@ function renderCard(){
 
   
   if (getAutoReadTenses()) {
-      setTimeout(() => { if (typeof speakSequence === 'function') speakSequence([v.inf, v.praeteritum, v.perfekt]); }, 300);
+      if (typeof scheduleSpeakSequence === 'function') scheduleSpeakSequence([v.inf, v.praeteritum, v.perfekt], 300);
   } else if (localStorage.getItem('de_auto_audio') === 'true') {
-      setTimeout(() => { if (typeof speak === 'function') speak(v.inf); }, 300);
+      if (typeof scheduleSpeak === 'function') scheduleSpeak(v.inf, 300);
+  } else if (typeof cancelPendingSpeech === 'function') {
+      cancelPendingSpeech(); // stop any still-playing/pending speech from a card swiped away from
   }
 
   document.getElementById('revealBtn').onclick = ()=>{

@@ -743,6 +743,36 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 18) — Fix: swiping mid-speech spoke the new card over the old one
+
+#### Task
+"In flash card while auto speak if I swipe while during the speak, current word is speaking with previous word" — a bug report on Task 17's auto-read-tenses feature: swiping to a new card while the previous card was still being read aloud caused the two cards' audio to overlap/garble together instead of the old one cleanly stopping.
+
+#### Root cause
+`speakSequence()` (added in Task 17) chains through a list of texts by giving each `SpeechSynthesisUtterance` an `onend` handler that schedules the next word via `setTimeout(playNext, gapMs)`. When a new card rendered mid-sequence, the new `speakSequence()` call correctly called `speechSynthesis.cancel()` to stop whatever was *currently playing* - but that only stops the browser-level speech queue. It does nothing about a `setTimeout` already scheduled on the JS side by the *previous* call's `onend` handler (e.g. the gap between word 1 and word 2). That timer had no way to know a newer call had superseded it, so it fired anyway and spoke the old card's next word - now on top of the new card's audio that had already started. The same defect applied to any two auto-play calls in quick succession, not just within a single tense sequence.
+
+#### What was built
+- Added a shared `ttsGeneration` counter and `pendingSpeakTimer` handle to `js/tts-engine.js`, plus a `cancelPendingSpeech()` function that bumps the counter, clears any pending scheduled call, and stops the browser's speech queue - all three, together, in one place. Both `speak()` and `speakSequence()` now call it before starting. Inside `speakSequence()`'s chain, each step first checks that the generation it captured when it started is still current; if a newer `speak()`/`speakSequence()` call has bumped the counter in the meantime, the stale step silently stops instead of speaking.
+- Added `scheduleSpeak(text, delayMs)` and `scheduleSpeakSequence(texts, delayMs, gapMs)` - the same "wait N ms, then speak" pattern every auto-play call site already used via raw `setTimeout`, but now going through the same generation-tracked cancellation so a second card rendered within that initial delay window cleanly supersedes the first's pending call instead of both eventually firing.
+- Replaced every raw `setTimeout(() => ...(word)..., 300)` auto-play call across both files' flashcard renderers with the new `scheduleSpeak`/`scheduleSpeakSequence` helpers (5 call sites in `deutsch-coach.html`'s `recall_meaning`, `recall_de2en`, `plural`, `verbtense`, `fillgap` renderers; 1 in `Verb_Transformation_Trainer.html`'s Flip Card mode). While doing this, also consolidated a pre-existing duplicate block in `deutsch-coach.html`'s `renderRecallMeaning` (it had the exact same `if (de_auto_audio) {...}` block written twice in a row - harmless but redundant, now a single call) and switched `deutsch-coach.html`'s legacy `de_auto_audio` single-word playback from its local `window.playTTS()` shadow (which doesn't select a preferred German voice, unlike the shared engine) to the shared `speak()`/`scheduleSpeak()`, so it now also respects the user's voice preference and gets the same overlap protection.
+- Added a `cancelPendingSpeech()` call at the very top of `deutsch-coach.html`'s `renderSessionCard()` and `Verb_Transformation_Trainer.html`'s `renderCard()` (before dispatching to any type/mode-specific renderer), so a still-speaking flashcard's audio is stopped cleanly even when the *next* card lands on a type/mode that doesn't manage speech itself - the 3 multiple-choice question types in `deutsch-coach.html`, and Easy/Hard mode in `Verb_Transformation_Trainer.html`, neither of which auto-play audio but could otherwise let a stale flashcard sequence keep talking underneath them.
+
+#### Testing
+- Syntax-checked `js/tts-engine.js`, `deutsch-coach.html`, and `Verb_Transformation_Trainer.html` (`node --check` on every script block) - clean.
+- Re-ran the Task 17 headless-browser regression suite (auto-read fires in order on render/Next/Prev, respects the on/off toggle, correctly scoped checkboxes) - still 17/17 passing, no regression from this refactor.
+- Wrote a new headless-browser test that reproduces the reported bug directly: mocks `speechSynthesis.speak`/`cancel` to record every utterance's actual start/end timestamps (not just what was queued), starts a 3-word auto-read sequence, swipes to the next card ~100ms into the first word (while it's still "speaking" in the mock), then checks the full event timeline. Confirmed, in both files: zero overlapping-utterance events; the old card's 2nd and 3rd words (Präteritum/Perfekt) are never spoken after the swipe; the new card's full 3-word sequence plays correctly in order once its own delay elapses.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `js/tts-engine.js`
+- `deutsch-coach.html`
+- `Verb_Transformation_Trainer.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 17) — Auto-read tenses (Präsens/Präteritum/Perfekt) after swipe/next
 
 #### Task

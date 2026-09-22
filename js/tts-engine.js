@@ -61,9 +61,20 @@ function buildUtterance(text){
   }
   return u;
 }
+// Bumped by every speak/speakSequence call so a chain in progress (waiting on
+// onend to schedule its next word via setTimeout) can tell it's been superseded
+// by a newer call - e.g. the user swiped to another card mid-speech - and stop
+// instead of firing its next word on top of the new card's audio.
+let ttsGeneration = 0;
+let pendingSpeakTimer = null;
+function cancelPendingSpeech(){
+  ttsGeneration++;
+  if(pendingSpeakTimer){ clearTimeout(pendingSpeakTimer); pendingSpeakTimer = null; }
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
 function speak(text){
   if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
+  cancelPendingSpeech();
   speechSynthesis.speak(buildUtterance(text));
 }
 // Speaks a list of texts one after another (e.g. Präsens/Präteritum/Perfekt forms),
@@ -72,9 +83,11 @@ function speakSequence(texts, gapMs){
   if(!('speechSynthesis' in window)) return;
   const queue = (texts||[]).filter(t => t && String(t).trim());
   if(queue.length === 0) return;
-  speechSynthesis.cancel();
+  cancelPendingSpeech();
+  const myGeneration = ttsGeneration;
   let i = 0;
   function playNext(){
+    if(myGeneration !== ttsGeneration) return; // a newer speak/speakSequence call superseded this chain
     if(i >= queue.length) return;
     const u = buildUtterance(queue[i++]);
     u.onend = () => setTimeout(playNext, gapMs || 450);
@@ -82,6 +95,28 @@ function speakSequence(texts, gapMs){
     speechSynthesis.speak(u);
   }
   playNext();
+}
+// Schedules a speak/speakSequence call after `delayMs`, cancelling any
+// previously scheduled-but-not-yet-started call and any currently playing/queued
+// speech right away - so navigating rapidly (repeated swipes) never leaves a
+// stale delayed call to fire later on top of whatever's playing by then.
+function scheduleSpeak(text, delayMs){
+  cancelPendingSpeech();
+  const myGeneration = ttsGeneration;
+  pendingSpeakTimer = setTimeout(() => {
+    pendingSpeakTimer = null;
+    if(myGeneration !== ttsGeneration) return;
+    speak(text);
+  }, delayMs);
+}
+function scheduleSpeakSequence(texts, delayMs, gapMs){
+  cancelPendingSpeech();
+  const myGeneration = ttsGeneration;
+  pendingSpeakTimer = setTimeout(() => {
+    pendingSpeakTimer = null;
+    if(myGeneration !== ttsGeneration) return;
+    speakSequence(texts, gapMs);
+  }, delayMs);
 }
 function speakBtn(text, label){
   const safe = (text||'').replace(/'/g, "\\'");

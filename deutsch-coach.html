@@ -3391,13 +3391,9 @@ function renderRecallMeaning(card, advanceFn){
       };
 
       if (localStorage.getItem('de_auto_audio') === 'true') {
-         setTimeout(() => {
-            if (window.playTTS) window.playTTS(card.w);
-         }, 300);
-      }
-
-      if (localStorage.getItem('de_auto_audio') === 'true') {
-         setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
+         if (typeof scheduleSpeak === 'function') scheduleSpeak(card.w, 300);
+      } else if (typeof cancelPendingSpeech === 'function') {
+         cancelPendingSpeech();
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
@@ -3439,7 +3435,9 @@ function renderRecallDe2En(card, advanceFn){
         wireAnswerButtons(card, advanceFn, "recall_de2en");
       };
       if (localStorage.getItem('de_auto_audio') === 'true') {
-         setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
+         if (typeof scheduleSpeak === 'function') scheduleSpeak(card.w, 300);
+      } else if (typeof cancelPendingSpeech === 'function') {
+         cancelPendingSpeech();
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
@@ -3600,7 +3598,9 @@ function renderPlural(card, advanceFn){
         wireAnswerButtons(card, advanceFn, "plural");
       };
       if (localStorage.getItem('de_auto_audio') === 'true') {
-         setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
+         if (typeof scheduleSpeak === 'function') scheduleSpeak(card.w, 300);
+      } else if (typeof cancelPendingSpeech === 'function') {
+         cancelPendingSpeech();
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
@@ -3638,9 +3638,11 @@ function renderVerbTense(card, advanceFn){
         wireAnswerButtons(card, advanceFn, "verbtense");
       };
       if (getAutoReadTenses()) {
-         setTimeout(() => { if (typeof speakSequence === 'function') speakSequence([card.w, card.pr, card.pp]); }, 300);
+         if (typeof scheduleSpeakSequence === 'function') scheduleSpeakSequence([card.w, card.pr, card.pp], 300);
       } else if (localStorage.getItem('de_auto_audio') === 'true') {
-         setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
+         if (typeof scheduleSpeak === 'function') scheduleSpeak(card.w, 300);
+      } else if (typeof cancelPendingSpeech === 'function') {
+         cancelPendingSpeech(); // stop any still-playing/pending speech from a card swiped away from
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
@@ -3684,7 +3686,9 @@ function renderFillGap(card, advanceFn){
         wireAnswerButtons(card, advanceFn, "fillgap");
       };
       if (localStorage.getItem('de_auto_audio') === 'true') {
-         setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
+         if (typeof scheduleSpeak === 'function') scheduleSpeak(card.w, 300);
+      } else if (typeof cancelPendingSpeech === 'function') {
+         cancelPendingSpeech();
       }
       const skipBtn = document.getElementById("skipCardBtn");
       if(skipBtn) skipBtn.onclick = advanceFn;
@@ -3748,6 +3752,12 @@ function autoReadToggleHTML(type){
 
 function renderSessionCard(label){
   const stage = document.getElementById("stage");
+  // Stop any speech still playing/queued from the card being navigated away from
+  // (swipe, Next/Prev, or a mode change) before rendering the new one, regardless
+  // of which renderer handles it - multiple-choice types don't manage speech
+  // themselves, so without this a still-speaking flashcard's audio could bleed
+  // into a following multiple-choice card.
+  if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
   if(sessionIdx >= session.length){
     stage.innerHTML = `
       <div class="coach-line">🎉 <b>Sitzung abgeschlossen!</b><br>
