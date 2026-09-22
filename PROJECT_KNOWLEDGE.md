@@ -27,9 +27,12 @@ above — this file has drifted from reality before and will again.**
 
 As of this rewrite (branch `feature/production-learning-platform`, off `main`), the real state is:
 
-- **26 HTML pages** (`ls *.html`), git-tracked, hosted on GitHub Pages from `main`
+- **23 HTML pages** (`ls *.html` — this count has drifted before; re-verify rather than trust it),
+  git-tracked, hosted on GitHub Pages from `main`
   (`github.com/ArunVivekanandhan/deutsch-coach`, live at
-  `https://arunvivekanandhan.github.io/deutsch-coach/`).
+  `https://arunvivekanandhan.github.io/deutsch-coach/`). Includes
+  `A1_Sprech_Pruefungs_Simulator.html`, added in a later session (see Section 28) alongside the B1
+  `Sprech_Pruefungs_Simulator.html` it mirrors.
 - **A real git history** with three lines of work that converged: `main` (the deployed branch),
   `master` (an older, now-orphaned line with a different, pre-refactor architecture — not deployed,
   do not assume it reflects current reality), and feature branches. Multiple AI sessions (this one and
@@ -46,9 +49,12 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   page-specific inline JSON arrays (`VERBS`, `NOUNS`, `ADJS`, `LEGACY_DATA` — see Section 7), each
   page's own copy, not one canonical source. A `data/*.json` + `scripts/sync_data.py` consolidation
   was started (by another session) but nothing reads from `data/*.json` yet — it's a stale, disconnected
-  snapshot (503/378/337 words vs. the live pages' current 553/483/347+ after this session's A1
-  additions). Do not treat `data/*.json` as authoritative; treat the individual HTML pages' inline
+  snapshot (503/378/337 words vs. `VERBS`/`NOUNS` now at 581/522 live entries after B2 additions — see
+  Section 28). Do not treat `data/*.json` as authoritative; treat the individual HTML pages' inline
   arrays as the actual live data until that consolidation is finished and verified.
+  **`VERBS` and `NOUNS` now include a real B2 tier** (28 verbs, 39 nouns — `ADJS` still has none), so
+  `level` values across the codebase are `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` depending on the file; always
+  check a given array's actual distinct `level` values before writing level-filtering logic against it.
 - **Progress storage is genuinely fragmented across 9 localStorage keys with 4 incompatible shapes**
   (real vocabulary SRS data vs. streak counters vs. completion counters vs. dead/unused keys) — see
   Section 14 for the full breakdown and why `js/progress-aggregator.js` only aggregates 3 of the 9.
@@ -499,6 +505,17 @@ script) anywhere in the repository.
   real id is `sidebar`). **Fixed this session** (see changelog) — listed here so future agents know
   this class of bug (wrong id used in `getElementById`) has precedent in this codebase and is worth
   double-checking elsewhere.
+- `Sprech_Pruefungs_Simulator.html`'s exam timer bar calls `setExamTimer()`/`toggleTimer()`/
+  `resetTimer()`, but none of those functions are defined anywhere in the file or in `js/app-shell.js`
+  — the timer buttons have silently done nothing since whenever that markup was added. **Not fixed**
+  (out of scope for the session that found it — see Section 28's A1 changelog entry). The new
+  `A1_Sprech_Pruefungs_Simulator.html` has its own working timer implementation and is not affected;
+  only the original B1 file has this bug.
+- `js/icon-svgs.js`'s `getIcon()` has always had a `|| ICON_SVGS['abstract']` fallback, but no
+  `'abstract'` key was ever defined in `ICON_SVGS` — every vocabulary entry tagged `icon:"abstract"`
+  (several hundred, across every level, in both `VERBS` and `NOUNS`) silently rendered `undefined`
+  instead of an icon. **Fixed this session** (see Section 28's B2 changelog entry) — a real `'abstract'`
+  SVG was added.
 
 **Bugs found and fixed during earlier development** (kept for historical awareness):
 - Satzbau_Trainer: an early version independently rolled each sentence slot rather than picking whole
@@ -641,6 +658,10 @@ the larger IA/content-unification work. In priority order for whoever picks this
 - Finish (or abandon and remove) the `data/*.json` + `scripts/sync_data.py` consolidation — it's
   currently a stale, disconnected snapshot (see Section 2) that risks misleading whoever finds it next
   if left as-is.
+- Build a B2 practice/exam-prep studio on top of the B2 vocabulary + grammar added in Section 28's
+  latest changelog entry (mirroring `German_B1_Practice_Studio.html`'s 7-module shape, or a B2 oral
+  exam simulator mirroring `Sprech_Pruefungs_Simulator.html`/`A1_Sprech_Pruefungs_Simulator.html`) —
+  deliberately not attempted in that session since the explicit scope was "content foundation first."
 
 **P2 (polish, after P1 exists to polish):**
 - Full accessibility pass across the 21 individual trainer pages (only the shared shell got one this
@@ -1103,6 +1124,111 @@ claiming completion) rather than an oversight — see Section 26 for the priorit
 #### Remaining Issues
 See the rewritten Sections 2, 14, 18 above for the current accurate state. Section 26 below has the
 prioritized backlog for the IA/vocabulary/grammar/practice unification work that was not attempted.
+
+---
+
+### Session: A1 exam simulator + real B2 vocabulary/grammar foundation
+
+Follow-up work after the changelog entry above, in direct response to the user pointing out two real
+gaps that entry's own "not completed" section didn't fully close: no A1 exam-prep content anywhere
+(the dashboard's Prüfung section only had B1 and A2), and no B2 content of any kind (vocabulary,
+grammar, or otherwise) in the app. Scoped explicitly with the user beforehand: A1 was to get a **full
+exam simulator matching the B1 `Sprech_Pruefungs_Simulator.html`'s structure**, not a lighter practice
+studio; B2 was to get a **real content foundation (vocabulary + grammar) built first**, honestly
+sourced/labeled and non-fabricated, before any B2 practice studio — practice needs something to
+practice with. Developed on `claude/peaceful-dijkstra-7s59dc` (this session's designated branch,
+caught up from `main`/`feature/production-learning-platform`'s shared tip first).
+
+#### Changes — A1 oral/written exam simulator
+Added `A1_Sprech_Pruefungs_Simulator.html`, a new page mirroring `Sprech_Pruefungs_Simulator.html`'s
+exact shape (mode tabs, sub-tabs, card layout, speech synthesis, Web Speech API recording + diff
+comparison) but with content rewritten for the real Goethe "Start Deutsch 1" (A1) format rather than
+reusing B1's tasks at a lower difficulty:
+- **Teil 1** — Sich vorstellen (7-point biographical introduction: Name/Alter/Land/Wohnort/Sprachen/
+  Beruf/Hobby) + spelling + 3 spontaneous examiner questions, matching the real A1 exam's simpler
+  "introduce yourself" format (B1's Teil 1 is the same shape but assumes higher fluency).
+- **Teil 2** — Informationen erfragen und geben: 8 topic/keyword cards (Thema + Stichwort) each with a
+  model question and answer — this is a genuinely different task type from B1's Teil 2 (a 5-step solo
+  presentation), matching real Start Deutsch 1's card-based Q&A format instead of just reusing B1's
+  structure with easier vocabulary.
+- **Teil 3** — Bitten formulieren: 6 short picture-prompt scenarios (open a window, turn down a radio,
+  etc.), each a single polite request + one-line reaction — matching A1's real single-exchange format,
+  not B1's longer multi-turn negotiation dialogues.
+- Spoken Redemittel vault (4 A1-appropriate categories) and a written section reworked to match A1's
+  actual writing exam shape: **Formular ausfüllen** (read a short text, fill in a registration form —
+  built as real text-input fields checked against answers, not reusing B1's multiple-choice cloze
+  mechanic, since Start Deutsch 1's real Teil 1 is free-text form-filling) and **Mitteilung schreiben**
+  (2 short personal-note blueprints, matching A1's actual "short note/SMS" task rather than B1's longer
+  formal letters).
+- Also implemented a real, working exam timer (`setExamTimer`/`toggleTimer`/`resetTimer`) — while
+  investigating the B1 file to copy its structure, discovered its own timer buttons call functions that
+  are never defined anywhere (pre-existing bug, not fixed — see Section 18).
+- Linked from the dashboard's Prüfung section as "Sprechen (A1)"; registered in `sw.js`.
+
+#### Changes — B2 grammar (Grammatik_Regel_Trainer.html)
+Added 5 new grammar rules (`r17`–`r21`) covering real B2-level topics not previously in the trainer's
+16 existing A1–B1 rules: Konjunktiv I & indirekte Rede (reported speech), Partizipialattribute (extended
+participle constructions, e.g. "die steigenden Preise"), Doppelkonjunktionen (je...desto, weder...noch,
+sowohl...als auch), Nominalisierung (verb/adjective → noun, e.g. "wegen des Kostenanstiegs"), and
+formal Genitiv prepositions (trotz/während/aufgrund/innerhalb). Each has the same full structure as
+existing rules (summary, formula, `tableHTML`, examples, static `drills`) **and** a working
+`DYNAMIC_GENERATORS` entry — discovered that the endless-drill mode silently redirects to a random
+*existing* rule if the selected rule has no `DYNAMIC_GENERATORS` entry (`generateInfiniteQuestion()`'s
+`!DYNAMIC_GENERATORS[targetRule]` fallback), so without these entries the new rules would display in
+study mode but never actually be drillable when selected. (Note for future agents: every existing
+rule's per-object `drills` field is itself dead/unused — `DYNAMIC_GENERATORS` is what actually powers
+practice; this was true before this session too, not something introduced here.)
+
+#### Changes — B2 vocabulary
+Added 28 B2-level verbs to `Verb_Transformation_Trainer.html`'s `VERBS` array and 39 B2-level nouns to
+`Nomen_Adjektiv_Trainer.html`'s `NOUNS` array — general CEFR B2 vocabulary (abstract/professional
+register: verbs like `erwägen`, `sich engagieren`, `berücksichtigen`, `gewährleisten`; nouns like
+`Nachhaltigkeit`, `Zusammenhang`, `Entwicklung`, `Klimawandel`, `Lebenslauf`), labeled
+`source: "General B2 Vocabulary"` matching the labeling convention from the earlier A1
+vocabulary additions (Section 28's prior entry). Checked every candidate noun against `NOUNS` before
+writing and dropped/replaced 10 that already existed at B1.1/B1.2 (e.g. `Verantwortung`, `Gesellschaft`,
+`Kompetenz`). **Initially skipped the equivalent check for verbs** — 6 of the first 28 B2 verbs
+(`beeinflussen`, `verzichten`, `vermitteln`, `zunehmen`, `abnehmen`, `gewährleisten`) turned out to
+already exist in `VERBS` at `level: "B1"`, caught by a post-insertion duplicate scan (`VERBS.length` vs.
+unique `inf` count) rather than checked upfront like the nouns were. Replaced all 6 with genuinely new
+B2 verbs (`sich anpassen`, `sich verschlechtern`, `sich verbessern`, `sich einsetzen`,
+`sich vorbereiten`, `abschätzen`) and re-verified zero duplicate infinitives across any B2 entry before
+committing. Registered `B2` in both files' level-filter arrays (`LEVELS` in the verb trainer,
+`NOUN_LEVELS` in the noun trainer). `ADJS` still has no B2 entries — not attempted this session. Note
+for future agents: `VERBS` already had ~40 pre-existing duplicate infinitives across other levels before
+this session (e.g. `haben`, `gehen`, `sprechen` each appear more than once) — that's pre-existing and
+unrelated to this batch, not something this session introduced or fixed.
+
+#### Changes — B2 wired into progress tracking
+`js/progress-aggregator.js`'s `levelFromUid()` and `getVocabularyStatsByLevel()` now recognize `B2`
+uids (previously hardcoded to only A1/A2/B1). `js/app-shell.js`'s shared sidebar and `index.html`'s
+own dashboard now render a real B2 mastered/reviewed row (via the same honest "real counts, not
+fabricated percentages" approach as the A1/A2/B1 rows) instead of the previous static "No B2 content
+yet" label. The dashboard's Prüfung section note was reworded to reflect that B2 vocabulary/grammar now
+exist while still being explicit that no B2 exam-prep studio exists yet (see Section 26).
+
+#### Changes — incidental bug fix
+`js/icon-svgs.js`'s `getIcon()` fallback (`ICON_SVGS[v.icon] || ICON_SVGS['abstract']`) silently
+returned `undefined` for the several hundred existing vocabulary entries tagged `icon:"abstract"`,
+since `'abstract'` was never actually defined in `ICON_SVGS`. Found while choosing icons for the new B2
+nouns (many of which are abstract concepts); added a real `'abstract'` SVG. Fixes icon rendering for
+every existing entry using that tag too, not just the new B2 ones.
+
+#### Testing
+Every change verified with headless Chromium (`/opt/pw-browsers/chromium-1194`) via Playwright: the new
+A1 page's every tab/sub-tab/scenario-switch/form-check/timer interaction was clicked through and
+asserted on; the 5 new grammar rules' `generateInfiniteQuestion()` was called directly per rule id to
+confirm each returns its own question rather than silently falling back to an old rule; the B2 level
+filters in both vocabulary trainers were clicked and their displayed counts (28, 39) confirmed against
+the actual array contents; B2 progress rows were verified by seeding realistic `vt_progress_v1`/
+`na_progress_v1` data and checking the rendered mastered-count and bar-width math by hand. A full
+23-page smoke sweep (load + capture `pageerror`) was re-run after each batch with zero errors.
+
+#### What was explicitly requested but NOT completed this session
+No B2 practice/exam-prep studio was built — this was the explicit, agreed scope boundary ("content
+foundation first," see the opening of this entry), not an oversight. `ADJS` (adjectives) got no B2
+entries. The B1 exam simulator's broken timer functions and the ~13-page orphaned-CSS cleanup from the
+previous changelog entry remain unfixed (out of scope for this entry too).
 
 ---
 
