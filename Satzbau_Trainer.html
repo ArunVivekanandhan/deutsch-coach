@@ -287,12 +287,13 @@ html.dark-theme, body.dark {
       <h2 id="topicTitle"></h2>
       <div id="topicExplain"></div>
     </div>
+    <div id="modeSelectorArea"></div>
     <div class="progressline" id="progressLine"></div>
     <div class="exercisecard">
       <div class="enprompt" id="enPrompt"></div>
       <div class="buildarea" id="buildArea"></div>
       <div class="bankarea" id="bankArea"></div>
-      <div class="actionrow">
+      <div class="actionrow" id="actionRow">
         <button class="actbtn reset" id="resetBtn">↺ Reset (Zurücksetzen)</button>
         <button class="actbtn check" id="checkBtn">✓ Check (Prüfen)</button>
       </div>
@@ -315,6 +316,38 @@ let buildSlots = [];   // words currently placed in build area, in order
 let bankWords = [];    // remaining shuffled words available to pick
 let seenCount = 0;
 let originalPunctuation = "";
+let practiceMode = 'medium'; // 'easy' (multiple choice), 'medium' (tap-token builder), 'hard' (typed)
+
+function setPracticeMode(m){
+  practiceMode = m;
+  renderModeSelector();
+  renderModeBody();
+}
+
+function renderModeSelector(){
+  const el = document.getElementById('modeSelectorArea');
+  if(!el) return;
+  const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Build It)'},{k:'hard',l:'🔴 Hard (Type It)'}];
+  el.innerHTML = `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+    ${modes.map(m=>`<button class="actbtn" style="padding:6px 12px; font-size:11.5px; ${practiceMode===m.k?'background:var(--ink); color:#fff;':'background:#fff;'}" onclick="setPracticeMode('${m.k}')">${m.l}</button>`).join('')}
+  </div>`;
+}
+
+// Dispatches the exercise body to whichever mode is active. Medium reuses the
+// pre-existing tap-token builder UI unchanged (bankArea/actionRow visible);
+// Easy/Hard replace buildArea's contents and hide bankArea/the Reset+Check
+// buttons in favor of their own self-contained UI + action buttons.
+function renderModeBody(){
+  document.getElementById('feedbackArea').innerHTML = '';
+  document.getElementById('nextBtn').style.display = 'none';
+  if(practiceMode === 'easy'){ renderEasyChoice(); return; }
+  if(practiceMode === 'hard'){ renderHardTyped(); return; }
+  document.getElementById('bankArea').style.display = '';
+  document.getElementById('actionRow').style.display = '';
+  document.getElementById('checkBtn').style.display = '';
+  document.getElementById('resetBtn').style.display = '';
+  renderBuild();
+}
 
 // Persistence
 let sb_progress_v1 = JSON.parse(localStorage.getItem('sb_progress_v1') || '{}');
@@ -424,6 +457,7 @@ function openTopic(topic){
     <div style="margin-bottom:6px;">${topic.explanation}</div>
     ${topic.explain_en ? `<div style="font-size:12px; color:var(--ink-soft); background:#fff; padding:8px 10px; border-radius:6px; border:1px solid var(--line); line-height:1.4;">💡 <b>English Rule Guide:</b> ${topic.explain_en}</div>` : ''}
   `;
+  renderModeSelector();
   newSentence();
 }
 
@@ -473,10 +507,7 @@ function newSentence(){
     ${curVariant.ta ? `<div style="font-size:13.5px; color:var(--purple); font-style:italic;">🇮🇳 ${curVariant.ta}</div>` : ''}
   `;
   document.getElementById('progressLine').textContent = `Satz ${seenCount} in diesem Thema`;
-  document.getElementById('feedbackArea').innerHTML = '';
-  document.getElementById('nextBtn').style.display = 'none';
-  document.getElementById('checkBtn').style.display = '';
-  renderBuild();
+  renderModeBody();
 }
 
 function renderBuild(){
@@ -524,6 +555,130 @@ document.getElementById('resetBtn').onclick = ()=>{
   buildSlots = [];
   renderBuild();
 };
+
+/* ---- EASY MODE: multiple-choice full-sentence recognition ----
+   Distractors are real-word reorderings of the SAME correct tokens (swap the
+   first two, swap the last two, or reverse everything after position 0) -
+   never random word salad, matching this page's own stated design
+   philosophy (see the footer note). */
+function buildOrderDistractors(order){
+  const variants = [];
+  if(order.length >= 2){
+    const a = order.slice(); [a[0], a[1]] = [a[1], a[0]]; variants.push(a);
+  }
+  if(order.length >= 4){
+    const b = order.slice(); [b[order.length-1], b[order.length-2]] = [b[order.length-2], b[order.length-1]]; variants.push(b);
+  }
+  if(order.length >= 3){
+    const c = [order[0], ...order.slice(1).reverse()]; variants.push(c);
+  }
+  const seen = new Set([order.join('|')]);
+  const unique = [];
+  for(const v of variants){
+    const key = v.join('|');
+    if(!seen.has(key)){ seen.add(key); unique.push(v); }
+  }
+  return unique;
+}
+
+function renderEasyChoice(){
+  document.getElementById('bankArea').style.display = 'none';
+  document.getElementById('bankArea').innerHTML = '';
+  document.getElementById('actionRow').style.display = 'none';
+
+  const correctText = getFormattedSentence(correctOrder);
+  const distractors = buildOrderDistractors(correctOrder).slice(0, 3).map(d => getFormattedSentence(d));
+  const optionTexts = shuffleArr([correctText, ...distractors]);
+
+  document.getElementById('buildArea').innerHTML = `
+    <div style="display:grid; gap:8px;">
+      ${optionTexts.map((opt,i)=>`
+        <button class="wordchip" id="easyOpt_${i}" style="display:block; width:100%; text-align:left; padding:10px 14px; cursor:pointer;" onclick="checkEasyChoice(${i})">${opt}</button>
+      `).join('')}
+    </div>
+  `;
+  window._sbEasyState = { correctText, optionTexts };
+}
+
+function checkEasyChoice(idx){
+  const { correctText, optionTexts } = window._sbEasyState;
+  const isCorrect = optionTexts[idx] === correctText;
+  document.querySelectorAll('#buildArea .wordchip').forEach((btn,i)=>{
+    btn.onclick = null;
+    btn.style.cursor = 'default';
+    if(optionTexts[i] === correctText) btn.style.cssText += 'background:#E2EED8; border-color:var(--green);';
+    else if(i === idx) btn.style.cssText += 'background:#F8E4E3; border-color:var(--red);';
+  });
+  if(isCorrect) markSentenceDone(curTopic ? curTopic.id : '', correctText);
+  const fb = document.getElementById('feedbackArea');
+  fb.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
+      <span style="font-weight:700; font-size:14px; color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect ? '✓ Richtig!' : '✗ Not quite — correct order:'}</span>
+      <div class="correctsent" style="font-size:15px; margin-top:4px;">${correctText}</div>
+      ${!isCorrect ? aiSentenceHelpButtonHTML() : ''}
+    </div>
+  `;
+  document.getElementById('nextBtn').style.display = '';
+}
+
+/* ---- HARD MODE: typed free recall ---- */
+function renderHardTyped(){
+  document.getElementById('bankArea').style.display = 'none';
+  document.getElementById('bankArea').innerHTML = '';
+  document.getElementById('actionRow').style.display = 'none';
+
+  document.getElementById('buildArea').innerHTML = `
+    <input type="text" id="hardSbInput" class="challenge-input" placeholder="Schreib den ganzen Satz auf Deutsch..." autofocus style="width:100%; padding:10px; border-radius:6px; border:1.5px solid var(--line); font-size:14px; margin-bottom:8px;">
+    <button class="actbtn check" style="width:100%;" onclick="checkHardTyped()">✓ Check (Prüfen)</button>
+  `;
+  document.getElementById('hardSbInput').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); checkHardTyped(); } });
+}
+
+function normalizeForCompare(s){
+  return (s || '').toLowerCase().replace(/[.,!?]/g,'').replace(/\s+/g,' ').trim();
+}
+
+function checkHardTyped(){
+  const input = document.getElementById('hardSbInput');
+  const correctText = getFormattedSentence(correctOrder);
+  const isCorrect = normalizeForCompare(input.value) === normalizeForCompare(correctText);
+  if(isCorrect) markSentenceDone(curTopic ? curTopic.id : '', correctText);
+  const fb = document.getElementById('feedbackArea');
+  fb.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
+      <span style="font-weight:700; font-size:14px; color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect ? '✓ Perfekt!' : '✗ Not quite — correct sentence:'}</span>
+      <div class="correctsent" style="font-size:15px; margin-top:4px;">${correctText}</div>
+      ${!isCorrect ? aiSentenceHelpButtonHTML() : ''}
+    </div>
+  `;
+  input.disabled = true;
+  document.getElementById('nextBtn').style.display = '';
+}
+
+/* ---- AI weak-spot follow-up (real AI when configured, honest fallback
+   otherwise). Reuses js/app-shell.js's shared callAIHelper()/ai-enabled
+   convention - never invents new sentence data, only explains the SAME
+   real, hand-checked sentence the learner just missed. ---- */
+function aiSentenceHelpButtonHTML(){
+  if(!document.body.classList.contains('ai-enabled')) return '';
+  return `<button class="actbtn" style="background:var(--purple); color:#fff; margin-top:8px;" onclick="aiSentenceHelp()">🤖 Why is this the correct order? (AI)</button>`;
+}
+
+function aiSentenceHelp(){
+  if(typeof callAIHelper !== 'function') return;
+  const correctText = getFormattedSentence(correctOrder);
+  const promptTxt = `I am learning German word order. The correct sentence is: "${correctText}" (English: ${curVariant ? curVariant.en : ''}). Briefly explain WHY the words are in this exact order (word-order rule involved), in 2-3 short sentences. Keep it encouraging.`;
+  const btn = event && event.target;
+  if(btn){ btn.disabled = true; btn.innerText = '⏳ ...'; }
+  callAIHelper(promptTxt, (text) => {
+    const fb = document.getElementById('feedbackArea');
+    const ok = text && !text.startsWith('AI Error') && !text.startsWith('Error connecting');
+    const box = document.createElement('div');
+    box.style.cssText = 'margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;';
+    box.innerHTML = ok ? `<strong>🤖</strong> ${text.replace(/\n/g,'<br>')}` : `⚠️ AI isn't available right now (check your AI key in Settings).`;
+    fb.appendChild(box);
+  });
+}
 
 document.addEventListener('keydown', (e) => {
   if (document.getElementById('exerciseView').style.display === 'none') return;
@@ -582,33 +737,40 @@ function retrySameSentence() {
   renderBuild();
 }
 
-window.runKICheck = async function() {
+// Previously this button was labeled "KI-Satzanalyse" (AI sentence analysis)
+// but analyzeSentenceAIFallback() below was a hardcoded canned response
+// wrapped in a setTimeout - it never called any real AI despite the branding.
+// Now: when AI is actually configured (js/app-shell.js's ai-enabled convention),
+// this calls the real shared callAIHelper(). When it isn't, it shows the same
+// static tip as before but honestly labeled as a tip, not "KI-Analyse".
+window.runKICheck = function() {
   const btn = document.getElementById('kiCheckBtn');
   const userSentenceStr = getFormattedSentence(buildSlots.map(w=>w.word));
-  
-  btn.innerHTML = '🤖 Analysiere...';
-  btn.disabled = true;
+  const fb = document.getElementById('feedbackArea');
 
-  try {
-    const analysis = await analyzeSentenceAIFallback(userSentenceStr);
-    const fb = document.getElementById('feedbackArea');
-    const kiDiv = document.createElement('div');
-    kiDiv.style.cssText = "background:#f4f0ff; border-left:3px solid var(--purple); padding:10px; margin-top:10px; border-radius:0 6px 6px 0; font-size:13px; color:var(--ink);";
-    kiDiv.innerHTML = `<b>🤖 KI-Analyse:</b> <br/><div style="margin-top:6px; line-height:1.5;">${analysis}</div>`;
-    fb.appendChild(kiDiv);
+  if(document.body.classList.contains('ai-enabled') && typeof callAIHelper === 'function'){
+    btn.innerHTML = '🤖 Analysiere...';
+    btn.disabled = true;
+    const correctText = getFormattedSentence(correctOrder);
+    const promptTxt = `I am learning German word order. I tried to build this sentence: "${userSentenceStr}". The correct sentence is: "${correctText}". Briefly explain what's different about my word order and why the correct version follows German word-order rules. Keep it short and encouraging.`;
+    callAIHelper(promptTxt, (text) => {
+      const ok = text && !text.startsWith('AI Error') && !text.startsWith('Error connecting');
+      const kiDiv = document.createElement('div');
+      kiDiv.style.cssText = "background:#f4f0ff; border-left:3px solid var(--purple); padding:10px; margin-top:10px; border-radius:0 6px 6px 0; font-size:13px; color:var(--ink);";
+      kiDiv.innerHTML = ok
+        ? `<b>🤖 KI-Analyse:</b><br/><div style="margin-top:6px; line-height:1.5;">${text.replace(/\n/g,'<br>')}</div>`
+        : `⚠️ AI isn't available right now (check your AI key in Settings).`;
+      fb.appendChild(kiDiv);
+      btn.style.display = 'none';
+    });
+  } else {
+    const tipDiv = document.createElement('div');
+    tipDiv.style.cssText = "background:#f4f0ff; border-left:3px solid var(--purple); padding:10px; margin-top:10px; border-radius:0 6px 6px 0; font-size:13px; color:var(--ink);";
+    tipDiv.innerHTML = `<b>💡 Word Order Tip:</b><br/><div style="margin-top:6px; line-height:1.5;">Im Deutschen kann man Satzglieder oft umstellen (Topikalisierung), um sie zu betonen. Solange das konjugierte Verb an Position 2 bleibt (im Hauptsatz), ist der Satz meistens grammatikalisch korrekt! Vergleiche deinen Satz oben genau mit der korrekten Lösung, um zu sehen, welches Wort zu früh oder zu spät steht.<br><br><i>Enable AI in Settings for a personalized explanation of your exact sentence.</i></div>`;
+    fb.appendChild(tipDiv);
     btn.style.display = 'none';
-  } catch(e) {
-    btn.innerHTML = '🤖 Fehler bei KI-Analyse';
   }
 };
-
-async function analyzeSentenceAIFallback(sentence) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(`Dein Satz lautet: <i>"${sentence}"</i>.<br><br>Diese Wortstellung weicht von unserer Standardlösung ab. Im Deutschen kann man Satzglieder oft umstellen (Topikalisierung), um sie zu betonen. Solange das konjugierte Verb an Position 2 bleibt (im Hauptsatz), ist der Satz meistens grammatikalisch korrekt!`);
-    }, 1500);
-  });
-}
 
 document.getElementById('checkBtn').onclick = ()=>{
   const userOrderTokens = buildSlots.map(w=>w.word);
