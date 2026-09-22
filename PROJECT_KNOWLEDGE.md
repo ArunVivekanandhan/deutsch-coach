@@ -485,6 +485,13 @@ script) anywhere in the repository.
 ## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
 **Open, discovered this session, not yet fixed:**
+- **`Wortschatz_Master_Grid.html` has the same missing-A1/B2-verbs gap as `Verben_Hoeren_EN_DE.html`
+  did** (see Section 28's 2026-09-22 "Verben_Hoeren_EN_DE.html missing A1 and B2 verbs" entry for the
+  root cause and fix pattern). Its own `VERBS` array is also stuck at 503 entries (A2+B1 only), but
+  unlike `Verben_Hoeren_EN_DE.html` it has no level-filter UI at all to extend — just a flat/combined
+  grid — so fixing it means appending the same 37 missing verbs to its data AND figuring out how (or
+  whether) to surface a level filter there. Not fixed this session since the user only reported the
+  Verben_Hoeren_EN_DE.html instance; flagging so a future pass doesn't have to rediscover it.
 - **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
   has its own `applyTheme()` that sets `document.body.classList.add('dark')`, and (not independently
   re-verified, but built from the same template) `Sprech_Pruefungs_Simulator.html` likely has the same
@@ -742,6 +749,31 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-22 (Task 7) — Fix: Verben_Hoeren_EN_DE.html missing A1 and B2 verbs
+
+#### Task
+User reported (linking the live GitHub Pages URL): "I can see only a2 and b1" on `Verben_Hoeren_EN_DE.html`.
+
+#### Root cause
+This page keeps its own independent copy of the `VERBS` vocabulary array (same single-file-per-page pattern as the rest of the app), and that copy only ever had 503 entries — all tagged `A2` or `B1`. Its level-filter UI only had "All (503)" / "A2" / "B1" buttons, matching the data exactly (not a broken filter — the underlying data itself was missing every A1 and B2 verb). `Verb_Transformation_Trainer.html`'s `VERBS` array, by contrast, has the full 581 entries across all 4 levels (identical schema, identical content for every verb present in both — confirmed with a scripted diff: 0 field differences across all 503 shared infinitives). `Wortschatz_Master_Grid.html` has the exact same 503-only gap (also checked while investigating this) but has no level-filter UI at all to fix alongside it, and wasn't reported, so it was left alone — flagged in Known Bugs below instead of silently fixed.
+
+#### Fix
+- Deduped `Verb_Transformation_Trainer.html`'s 581 entries down to 540 unique infinitives (keeping the lowest CEFR level per verb, same method used for `Thema_Sprech_Trainer.html`'s Häufige Wörter topics), then computed the 37 entries genuinely absent from `Verben_Hoeren_EN_DE.html`'s 503 (9 A1 + 28 B2 — the other 12 already-present verbs whose canonical level in `Verb_Transformation_Trainer.html` differs are left as this page already had them tagged, to avoid silently reclassifying content the page's own filter counts already depend on).
+- Appended those 37 verbs to this page's `VERBS` array (same JSON object shape: inf/en/perfekt/praeteritum/noun/level/source/typ/icon/ta/ta_translit).
+- Added "A1" and "B2" filter buttons (`fltA1`/`fltB2`) alongside the existing "All"/"A2"/"B1", and the matching `else if` branches in `setVhFilter()`.
+- Updated the two static "503" mentions (subtitle, initial progress-label text) to 540; the real running count (`${filteredVerbs.length} von ${VERBS.length} Verben`) was already computed from `VERBS.length` and needed no change.
+
+#### Testing
+- `node --check` on the extracted page script.
+- Headless-browser check: "All (540)" button and progress label both show 540 on load; clicking A1 shows 9, B2 shows 28, All shows 540 again; body text confirms both a new A1 verb ("sein") and a new B2 verb ("mögen" — actually A1 in this data, general modal) render correctly after filtering.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Verben_Hoeren_EN_DE.html`
+- `PROJECT_KNOWLEDGE.md` (this entry; Known Bugs section)
+
+---
 
 ### 2026-09-22 (Task 6) — Thema_Sprech_Trainer.html: split "Häufige Wörter" into 4 level topics
 
