@@ -743,6 +743,31 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 21) — Fix: Nomen_Adjektiv_Trainer.html's auto-audio was a dead no-op
+
+#### Task
+Follow-up to Task 20: "In happened in verb / And also nouns & adjectives" - the user confirmed the auto-read issue also affects `Nomen_Adjektiv_Trainer.html` (nouns & adjectives), not just the verb trainer.
+
+#### Root cause
+`Verb_Transformation_Trainer.html` had this exact bug and it was fixed in Task 18 - but `Nomen_Adjektiv_Trainer.html` was never checked at the time, since it has no tense data and was out of scope for the auto-read-*tenses* feature specifically. Re-checking it now found the identical latent bug: its "Hands-Free (Auto-Audio)" playback called the **shared** `js/tts-engine.js` `playTTS()` with a word argument - `setTimeout(() => playTTS(v.w || v.inf || v.base || v.sg), 300)` - but that shared function ignores any argument entirely and only reads a `data-audio` attribute off `<body>` that is never set anywhere in this app (confirmed: zero files reference `data-audio`). So every auto-audio call in this file was a complete, silent no-op, for both nouns and adjectives, independent of any TTS-voice-availability issue - a real code bug, not just a device/browser limitation.
+
+#### What was built
+- Replaced the dead `setTimeout(() => playTTS(...), 300)` call with `scheduleSpeak(v.w || v.inf || v.base || v.sg, 300)` (kept the existing fallback chain, since this file's `session` array holds both noun-shaped cards, which use `v.sg`, and adjective-shaped cards, which use `v.w` - unlike `Verb_Transformation_Trainer.html`'s homogeneous verb array, this couldn't be simplified to a single field).
+- Added the same defensive `else if (cancelPendingSpeech) { cancelPendingSpeech(); }` branch, and a `cancelPendingSpeech()` call at the top of `renderCard()` (before the Easy/Hard mode branch), matching the Task 18 pattern already applied to the other two files - so a still-speaking Flip Card doesn't bleed into a following Easy/Hard card here either.
+
+#### Testing
+- Syntax-checked `Nomen_Adjektiv_Trainer.html` (`node --check` on every script block) - clean.
+- Headless-browser (Playwright) test with a mocked `speechSynthesis.speak`: confirmed auto-audio now actually calls `speak()` with the correct word for both a noun card (`v.sg`) and an adjective card (`v.w`), fires again after `advance()`/Next, and stays silent when the setting is off - all previously silent no-ops, now working.
+- Full-site smoke sweep (24 pages): zero `pageerror` events. Confirmed via grep that the separate der/die/das "Swipe Game" (`startSwipeGame`/`dragStart`/`dragEnd`) remains untouched.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Nomen_Adjektiv_Trainer.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 20) — Surface silent TTS failures instead of "nothing happens"
 
 #### Task

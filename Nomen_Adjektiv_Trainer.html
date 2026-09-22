@@ -1517,6 +1517,11 @@ add(diff); }
   
   function renderCard(){
   const stage = document.getElementById('stage');
+  // Stop any speech still playing/queued from the card being navigated away from
+  // (swipe, Next/Prev, or a mode change) before rendering the new one - Easy/Hard
+  // mode don't manage speech themselves, so without this a still-speaking card's
+  // audio could bleed into a following Easy/Hard card.
+  if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
   if(sessionIdx >= session.length){
     stage.innerHTML = `<div class="empty">🎉 <b>Done!</b><br>${session.length} words practiced in this round.</div>`;
     return;
@@ -1675,7 +1680,9 @@ add(diff); }
 
   
   if (localStorage.getItem('de_auto_audio') === 'true') {
-      setTimeout(() => { if (typeof playTTS === 'function') playTTS(v.w || v.inf || v.base || v.sg); }, 300);
+      if (typeof scheduleSpeak === 'function') scheduleSpeak(v.w || v.inf || v.base || v.sg, 300);
+  } else if (typeof cancelPendingSpeech === 'function') {
+      cancelPendingSpeech(); // stop any still-playing/pending speech from a card swiped away from
   }
 
   document.getElementById('revealBtn').onclick = ()=>{
