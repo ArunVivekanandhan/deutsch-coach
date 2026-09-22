@@ -526,6 +526,19 @@ script) anywhere in the repository.
   explainer) referenced a variable `currentRule` that is never declared anywhere in the file — clicking
   that button always threw before the AI call was even made, so this advertised feature never actually
   worked. **Fixed this session** — now looks up the rule from the current question's `ruleId` instead.
+- `Verb_Transformation_Trainer.html` and `Nomen_Adjektiv_Trainer.html` each have their own
+  `document.addEventListener('keydown', ...)` for N/T/L/1/2/3/S, but never called
+  `e.stopPropagation()`, so the event also reached `js/app-shell.js`'s separate window-level keydown
+  handler (loaded on every page). That handler treats N the same as Enter: click a
+  `.actbtn.check`/`.actbtn.next` button if one exists, else fall back to clicking `#startReviewBtn`
+  — which navigates to `deutsch-coach.html`. Both files use a `next-bold` class instead of `next` for
+  their Next button, so the selector never matched and **every single N press silently navigated away**
+  from the trainer, discarding whatever the page's own handler had just done. User-reported ("pressing
+  N moved different pages instead of advancing"); root-caused with a live headless-browser repro rather
+  than guessed. **Fixed this session** — `e.stopPropagation()` added alongside every `e.preventDefault()`
+  in both files' handlers. `Grammatik_Regel_Trainer.html`/`Satzbau_Trainer.html`/`deutsch-coach.html`
+  were unaffected (no local keydown handler of their own, or their buttons already use the exact
+  `.actbtn.check`/`.actbtn.next` classes app-shell.js looks for) — not touched.
 
 **Bugs found and fixed during earlier development** (kept for historical awareness):
 - Satzbau_Trainer: an early version independently rolled each sentence slot rather than picking whole
