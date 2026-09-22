@@ -743,6 +743,32 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 15) — "Alle 3" tense-comparison mode
+
+#### Task
+"In [Thema_Sprech_Trainer.html] have option to switch Präsens/Präteritum/Perfekt... like this need option to select ich er sie .. ihr content example contains all three Präsens/Präteritum/Perfekt" — the existing tense selector picks ONE tense and shows all 6 persons in it; wanted the reverse view too: pick a person and see all 3 tenses side by side for direct comparison.
+
+#### What was built
+- Added a 4th entry to the `TENSES` array/selector: `{k:'all', label:'Alle 3', sub:'(Vergleich)'}`, alongside the existing Präsens/Präteritum/Perfekt buttons — selecting it doesn't replace the per-person layout, it changes what's shown *within* each person's row.
+- `renderSentenceRowHTML()` now branches: in the 3 single-tense modes, each person still gets one `.sent-de`/`.sent-en` line (unchanged from before). In "Alle 3" mode, each person's row instead renders 3 stacked `.tense-line` blocks (new CSS, dashed divider between them, small uppercase tense-name label) — one per tense, each with its own independent 🔊 play / 🔁 loop / 🎙️ record buttons and transcript box, so a user can compare "Ich mache." / "Ich machte." / "Ich habe gemacht." at a glance and interact with any of the three individually.
+- Re-plumbed `playSentence`, `toggleLoopSentence`, `runLoopStep`, and `toggleRecordSentence` to take an optional trailing `tense` argument: called with no tense (the 3 single-tense buttons) they behave exactly as before, using the globally-selected `curTense`; called with an explicit tense (the 3 per-tense-line buttons in compare mode) they target that specific tense's audio/highlight/transcript-box regardless of the global selector. Added a `getPlayTargetId()` helper so the "currently playing" highlight lands on the right element in both modes (the whole `.sent-row` normally, just the one `.tense-line` in compare mode) instead of always highlighting the full row.
+- "▶️ Alle 6 nacheinander abspielen" (Play All) now adapts to the mode too: in compare mode it plays all 18 clips (6 persons × 3 tenses, tense-major-then-person order within each person) and its own label changes to say so; in single-tense mode it's unchanged (still 6 clips). Added `activeRecTense` alongside the existing `activeRecInf`/`activeRecIdx` state so the record button correctly tracks *which* of the (up to) 3 recordings-in-progress belongs to which tense-line.
+- Applies uniformly to every topic on the page, including the auto-conjugated Häufige Wörter (A1-B2) topics from Tasks 5-6/10, since it only touches the shared rendering/playback layer, not the verb data itself.
+
+#### Testing
+- Headless-browser check: selecting "Alle 3" renders 18 `.tense-line` elements (6 persons × 3) for a hand-authored topic verb, each correctly labeled Präsens/Präteritum/Perfekt with the right German text; clicking a specific tense-line's play button speaks exactly that line's text (verified via a `speechSynthesis.speak` spy) and highlights only that line, not the whole row or a different tense.
+- Confirmed switching back to a single tense (e.g. Perfekt) after using compare mode correctly returns to the original 6-row layout with zero `.tense-line` elements, and playback/highlight behavior is unchanged from before this change.
+- Repeated the compare-mode check on a Häufige Wörter (A1) verb (the auto-conjugated data path) — same correct 18-line result.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 14) — Distinct icon + accent color for each Häufige Wörter level card
 
 #### Task

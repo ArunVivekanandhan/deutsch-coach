@@ -105,6 +105,16 @@
     font-size:12.5px; line-height:1.5;
   }
   .transcript-box.visible{display:block;}
+
+  .tense-line{
+    border-top:1px dashed var(--line); padding-top:8px; margin-top:8px;
+  }
+  .tense-line:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+  .tense-line.active-playing{background:rgba(185,138,46,0.08); border-radius:6px; margin-left:-8px; margin-right:-8px; padding-left:8px; padding-right:8px;}
+  .tense-line-label{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700; text-transform:uppercase;
+    color:var(--gold); margin-bottom:2px;
+  }
   .transcript-label{
     font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase;
     color:var(--ink-soft); font-weight:700; display:block; margin-bottom:3px;
@@ -1261,7 +1271,8 @@ let openVerbInf = null;
 const TENSES = [
   { k:'praes', label:'Präsens', sub:'(Gegenwart)' },
   { k:'praet', label:'Präteritum', sub:'(einfache Vergangenheit)' },
-  { k:'perf', label:'Perfekt', sub:'(gesprochene Vergangenheit)' }
+  { k:'perf', label:'Perfekt', sub:'(gesprochene Vergangenheit)' },
+  { k:'all', label:'Alle 3', sub:'(Vergleich)' }
 ];
 let curTense = 'perf';
 
@@ -1361,7 +1372,7 @@ function renderVerbCardHTML(thema, v){
 function renderVerbBodyHTML(thema, v){
   return `
     <div class="allplay-row">
-      <button class="allplay-btn" id="allplayBtn_${cssId(v.inf)}" onclick="toggleAllPlay('${thema.id}','${escapeQ(v.inf)}')">▶️ Alle 6 nacheinander abspielen</button>
+      <button class="allplay-btn" id="allplayBtn_${cssId(v.inf)}" onclick="toggleAllPlay('${thema.id}','${escapeQ(v.inf)}')">${allPlayBtnLabel()}</button>
       <button class="markdone-btn ${isVerbDone(thema.id, v.inf) ? 'done' : ''}" id="markdoneBtn_${cssId(v.inf)}" onclick="toggleDoneBtn('${thema.id}','${escapeQ(v.inf)}')">${isVerbDone(thema.id, v.inf) ? '✓ Als geübt markiert' : 'Als geübt markieren'}</button>
     </div>
     <div id="sentList_${cssId(v.inf)}">
@@ -1372,6 +1383,14 @@ function renderVerbBodyHTML(thema, v){
 
 function renderSentenceRowHTML(inf, idx, s){
   const rowId = sentRowId(inf, idx);
+  if(curTense === 'all'){
+    return `
+      <div class="sent-row" id="${rowId}">
+        <div class="sent-person">${s.p}</div>
+        ${TENSES.filter(t => t.k !== 'all').map(t => renderTenseLineHTML(inf, idx, s, t.k, t.label)).join('')}
+      </div>
+    `;
+  }
   const t = s[curTense];
   return `
     <div class="sent-row" id="${rowId}">
@@ -1387,6 +1406,26 @@ function renderSentenceRowHTML(inf, idx, s){
     </div>
   `;
 }
+
+function renderTenseLineHTML(inf, idx, s, tenseKey, tenseLabel){
+  const t = s[tenseKey];
+  return `
+    <div class="tense-line" id="${tenseLineId(inf, idx, tenseKey)}">
+      <div class="tense-line-label">${tenseLabel}</div>
+      <div class="sent-de">${t.de}</div>
+      <div class="sent-en">${t.en}</div>
+      <div class="sent-actions">
+        <button class="icon-btn" title="Anhören" onclick="playSentence('${escapeQ(inf)}', ${idx}, '${tenseKey}')">🔊</button>
+        <button class="icon-btn" id="loopBtn_${cssId(inf)}_${idx}_${tenseKey}" title="Wiederholen (Loop)" onclick="toggleLoopSentence('${escapeQ(inf)}', ${idx}, '${tenseKey}')">🔁</button>
+        <button class="icon-btn" id="recBtn_${cssId(inf)}_${idx}_${tenseKey}" title="Nachsprechen & vergleichen" onclick="toggleRecordSentence('${escapeQ(inf)}', ${idx}, '${tenseKey}')">🎙️</button>
+      </div>
+      <div class="transcript-box" id="transcript_${cssId(inf)}_${idx}_${tenseKey}"></div>
+    </div>
+  `;
+}
+
+function tenseLineId(inf, idx, tenseKey){ return `tenseline_${cssId(inf)}_${idx}_${tenseKey}`; }
+function getPlayTargetId(inf, idx, tense){ return tense ? tenseLineId(inf, idx, tense) : sentRowId(inf, idx); }
 
 function cssId(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
 function escapeQ(s){ return String(s||'').replace(/'/g, "\\'"); }
@@ -1434,33 +1473,35 @@ function stopAllAudio(){
   clearTimeout(loopTimeout);
   loopingSentenceKey = null;
   if(allPlayState){ clearTimeout(allPlayState.timeout); allPlayState = null; }
-  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+  document.querySelectorAll('.sent-row.active-playing, .tense-line.active-playing').forEach(el => el.classList.remove('active-playing'));
   document.querySelectorAll('.icon-btn.loop-on').forEach(el => el.classList.remove('loop-on'));
-  document.querySelectorAll('.allplay-btn.stop').forEach(el => { el.classList.remove('stop'); el.textContent = '▶️ Alle 6 nacheinander abspielen'; });
+  document.querySelectorAll('.allplay-btn.stop').forEach(el => { el.classList.remove('stop'); el.textContent = allPlayBtnLabel(); });
 }
 
-function playSentence(inf, idx){
+function playSentence(inf, idx, tense){
   const s = findSentence(inf, idx);
   if(!s) return;
+  const tk = tense || curTense;
   window.speechSynthesis.cancel();
   clearTimeout(loopTimeout);
-  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
-  const row = document.getElementById(sentRowId(inf, idx));
-  if(row) row.classList.add('active-playing');
-  speakDE(stripHTML(s[curTense].de));
+  document.querySelectorAll('.sent-row.active-playing, .tense-line.active-playing').forEach(el => el.classList.remove('active-playing'));
+  const el = document.getElementById(getPlayTargetId(inf, idx, tense));
+  if(el) el.classList.add('active-playing');
+  speakDE(stripHTML(s[tk].de));
 }
 
-function toggleLoopSentence(inf, idx){
-  const key = inf + '|' + idx;
-  const btn = document.getElementById(`loopBtn_${cssId(inf)}_${idx}`);
+function toggleLoopSentence(inf, idx, tense){
+  const key = inf + '|' + idx + '|' + (tense || curTense);
+  const btnId = tense ? `loopBtn_${cssId(inf)}_${idx}_${tense}` : `loopBtn_${cssId(inf)}_${idx}`;
+  const btn = document.getElementById(btnId);
   if(loopingSentenceKey === key){
     // stop looping this one
     loopingSentenceKey = null;
     clearTimeout(loopTimeout);
     window.speechSynthesis.cancel();
     if(btn) btn.classList.remove('loop-on');
-    const row = document.getElementById(sentRowId(inf, idx));
-    if(row) row.classList.remove('active-playing');
+    const el = document.getElementById(getPlayTargetId(inf, idx, tense));
+    if(el) el.classList.remove('active-playing');
     return;
   }
   // stop any other loop/playback first
@@ -1469,23 +1510,37 @@ function toggleLoopSentence(inf, idx){
   clearTimeout(loopTimeout);
   loopingSentenceKey = key;
   if(btn) btn.classList.add('loop-on');
-  runLoopStep(inf, idx, key);
+  runLoopStep(inf, idx, key, tense);
 }
 
-function runLoopStep(inf, idx, key){
+function runLoopStep(inf, idx, key, tense){
   if(loopingSentenceKey !== key) return;
   const s = findSentence(inf, idx);
   if(!s) return;
-  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
-  const row = document.getElementById(sentRowId(inf, idx));
-  if(row) row.classList.add('active-playing');
-  const u = speakDE(stripHTML(s[curTense].de));
+  const tk = tense || curTense;
+  document.querySelectorAll('.sent-row.active-playing, .tense-line.active-playing').forEach(el => el.classList.remove('active-playing'));
+  const el = document.getElementById(getPlayTargetId(inf, idx, tense));
+  if(el) el.classList.add('active-playing');
+  const u = speakDE(stripHTML(s[tk].de));
   if(u){
     u.onend = () => {
       if(loopingSentenceKey !== key) return;
-      loopTimeout = setTimeout(() => runLoopStep(inf, idx, key), 1200);
+      loopTimeout = setTimeout(() => runLoopStep(inf, idx, key, tense), 1200);
     };
   }
+}
+
+function allPlayBtnLabel(){
+  return curTense === 'all' ? '▶️ Alle 18 nacheinander abspielen (6 Personen × 3 Zeitformen)' : '▶️ Alle 6 nacheinander abspielen';
+}
+
+function buildAllPlaySteps(v){
+  const steps = [];
+  const tenseKeys = curTense === 'all' ? TENSES.filter(t => t.k !== 'all').map(t => t.k) : [null];
+  for(let idx = 0; idx < v.sentences.length; idx++){
+    for(const tk of tenseKeys) steps.push({ idx, tense: tk });
+  }
+  return steps;
 }
 
 function toggleAllPlay(themaId, inf){
@@ -1494,12 +1549,14 @@ function toggleAllPlay(themaId, inf){
     clearTimeout(allPlayState.timeout);
     window.speechSynthesis.cancel();
     allPlayState = null;
-    document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
-    if(btn){ btn.classList.remove('stop'); btn.textContent = '▶️ Alle 6 nacheinander abspielen'; }
+    document.querySelectorAll('.sent-row.active-playing, .tense-line.active-playing').forEach(el => el.classList.remove('active-playing'));
+    if(btn){ btn.classList.remove('stop'); btn.textContent = allPlayBtnLabel(); }
     return;
   }
   stopAllAudio();
-  allPlayState = { inf, idx: 0, timeout: null };
+  const v = THEMEN.find(t => t.id === curThemaId)?.verbs.find(x => x.inf === inf);
+  if(!v) return;
+  allPlayState = { inf, stepIdx: 0, steps: buildAllPlaySteps(v), timeout: null };
   if(btn){ btn.classList.add('stop'); btn.textContent = '⏹ Stopp'; }
   runAllPlayStep(inf);
 }
@@ -1507,22 +1564,24 @@ function toggleAllPlay(themaId, inf){
 function runAllPlayStep(inf){
   if(!allPlayState || allPlayState.inf !== inf) return;
   const v = THEMEN.find(t => t.id === curThemaId)?.verbs.find(x => x.inf === inf);
-  if(!v || allPlayState.idx >= v.sentences.length){
+  const steps = allPlayState.steps;
+  if(!v || allPlayState.stepIdx >= steps.length){
     const btn = document.getElementById(`allplayBtn_${cssId(inf)}`);
-    if(btn){ btn.classList.remove('stop'); btn.textContent = '▶️ Alle 6 nacheinander abspielen'; }
-    document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
+    if(btn){ btn.classList.remove('stop'); btn.textContent = allPlayBtnLabel(); }
+    document.querySelectorAll('.sent-row.active-playing, .tense-line.active-playing').forEach(el => el.classList.remove('active-playing'));
     allPlayState = null;
     return;
   }
-  const idx = allPlayState.idx;
-  document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
-  const row = document.getElementById(sentRowId(inf, idx));
-  if(row) row.classList.add('active-playing');
-  const u = speakDE(stripHTML(v.sentences[idx][curTense].de));
+  const { idx, tense } = steps[allPlayState.stepIdx];
+  const tk = tense || curTense;
+  document.querySelectorAll('.sent-row.active-playing, .tense-line.active-playing').forEach(el => el.classList.remove('active-playing'));
+  const el = document.getElementById(getPlayTargetId(inf, idx, tense));
+  if(el) el.classList.add('active-playing');
+  const u = speakDE(stripHTML(v.sentences[idx][tk].de));
   if(u){
     u.onend = () => {
       if(!allPlayState || allPlayState.inf !== inf) return;
-      allPlayState.idx++;
+      allPlayState.stepIdx++;
       allPlayState.timeout = setTimeout(() => runAllPlayStep(inf), 900);
     };
   }
@@ -1531,7 +1590,7 @@ function runAllPlayStep(inf){
 /* ---- Record & compare (Web Speech Recognition, same diff-highlight
    pattern used in the exam simulators) ---- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let activeRecInf = null, activeRecIdx = null, recObj = null;
+let activeRecInf = null, activeRecIdx = null, activeRecTense = null, recObj = null;
 
 function diffHighlight(a, b){
   let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
@@ -1541,18 +1600,19 @@ function diffHighlight(a, b){
   return { a: a.slice(0,i)+wrap(aMid)+a.slice(a.length-j), b: b.slice(0,i)+wrap(bMid)+b.slice(b.length-j) };
 }
 
-function toggleRecordSentence(inf, idx){
+function toggleRecordSentence(inf, idx, tense){
   if(!SR){
     alert('Spracherkennung wird in diesem Browser nicht unterstützt. Bitte Chrome oder Edge verwenden.\n(Speech recognition not supported. Please use Chrome or Edge.)');
     return;
   }
-  const btn = document.getElementById(`recBtn_${cssId(inf)}_${idx}`);
-  if(activeRecInf === inf && activeRecIdx === idx){
+  const btnId = tense ? `recBtn_${cssId(inf)}_${idx}_${tense}` : `recBtn_${cssId(inf)}_${idx}`;
+  const btn = document.getElementById(btnId);
+  if(activeRecInf === inf && activeRecIdx === idx && activeRecTense === (tense || null)){
     if(recObj) recObj.stop();
     return;
   }
   stopAllAudio();
-  activeRecInf = inf; activeRecIdx = idx;
+  activeRecInf = inf; activeRecIdx = idx; activeRecTense = tense || null;
   if(btn) btn.classList.add('rec-on');
 
   recObj = new SR();
@@ -1562,10 +1622,12 @@ function toggleRecordSentence(inf, idx){
   recObj.onresult = (ev) => {
     const transcript = ev.results[0][0].transcript;
     const s = findSentence(inf, idx);
-    const target = stripHTML(s[curTense].de).toLowerCase().trim();
+    const tk = tense || curTense;
+    const target = stripHTML(s[tk].de).toLowerCase().trim();
     const spoken = transcript.toLowerCase().trim();
     const diff = diffHighlight(target, spoken);
-    const box = document.getElementById(`transcript_${cssId(inf)}_${idx}`);
+    const boxId = tense ? `transcript_${cssId(inf)}_${idx}_${tense}` : `transcript_${cssId(inf)}_${idx}`;
+    const box = document.getElementById(boxId);
     if(box){
       box.innerHTML = `
         <span class="transcript-label">Du hast gesagt:</span>
@@ -1583,7 +1645,7 @@ function toggleRecordSentence(inf, idx){
 
 function stopRecording(btn){
   if(btn) btn.classList.remove('rec-on');
-  activeRecInf = null; activeRecIdx = null;
+  activeRecInf = null; activeRecIdx = null; activeRecTense = null;
   recObj = null;
 }
 
