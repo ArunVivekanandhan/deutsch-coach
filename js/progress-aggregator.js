@@ -41,6 +41,54 @@ const ProgressAggregator = (function(){
         return { due, difficult, mastered, reviewed };
     }
 
+    // Extracts a CEFR level from a progress-store uid, using each store's own
+    // known uid scheme (see each owner page's `.forEach(v => v.uid = ...)`
+    // line). Returns null if it can't be determined honestly rather than
+    // guessing - e.g. Nomen_Adjektiv_Trainer's adjective entries ('a|word',
+    // no level segment) simply aren't attributable to a level and are
+    // excluded from the by-level breakdown (they still count in the totals
+    // from getVocabularyStats()).
+    //
+    // Verb data (vt_progress_v1) only distinguishes A1/A2/B1 - it has no
+    // B1.1/B1.2 split the way dc_progress_v1/na_progress_v1 do - so B1.1 and
+    // B1.2 are combined into one "B1" bucket here for a consistent, honest
+    // breakdown across all three stores rather than guessing which half a
+    // verb belongs to.
+    function levelFromUid(key, uid){
+        let level = null;
+        if (key === 'dc_progress_v1') {
+            level = uid.split('|')[0]; // "level|topic|word"
+        } else if (key === 'vt_progress_v1') {
+            level = uid.split('|')[0]; // "level|inf"
+        } else if (key === 'na_progress_v1') {
+            const parts = uid.split('|');
+            if (parts[0] === 'n' && parts.length >= 2) level = parts[1]; // "n|level|sg"
+            // 'a|word' (adjectives) has no level segment - stays null
+        }
+        if (!level) return null;
+        if (level === 'B1.1' || level === 'B1.2') return 'B1';
+        if (level === 'A1' || level === 'A2' || level === 'B1') return level;
+        return null;
+    }
+
+    function getVocabularyStatsByLevel(){
+        const byLevel = { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 } };
+        VOCAB_STORES.forEach(key => {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return;
+                const db = JSON.parse(raw);
+                for (const uid in db) {
+                    const level = levelFromUid(key, uid);
+                    if (!level || !byLevel[level]) continue;
+                    byLevel[level].reviewed++;
+                    if ((db[uid].box || 0) >= 4) byLevel[level].mastered++;
+                }
+            } catch(e) { /* a malformed store just contributes 0 for that key */ }
+        });
+        return byLevel;
+    }
+
     function getLessonsCompleted(){
         let completed = 0;
         STUDIO_STORES.forEach(key => {
@@ -67,5 +115,5 @@ const ProgressAggregator = (function(){
         } catch(e) { return 0; }
     }
 
-    return { getVocabularyStats, getLessonsCompleted, getStreak, VOCAB_STORES, STUDIO_STORES };
+    return { getVocabularyStats, getVocabularyStatsByLevel, getLessonsCompleted, getStreak, VOCAB_STORES, STUDIO_STORES };
 })();

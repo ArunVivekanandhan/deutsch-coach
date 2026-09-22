@@ -88,6 +88,18 @@ function renderAppShell() {
         ? ProgressAggregator.getLessonsCompleted() : 0;
     const streak = (typeof ProgressAggregator !== 'undefined')
         ? ProgressAggregator.getStreak() : 0;
+    const byLevel = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getVocabularyStatsByLevel()
+        : { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 } };
+    // Real per-level counts, not percentages - there's no reliable total
+    // vocabulary-per-level figure available from this shared script (each
+    // page only loads its own word list), so showing "X mastered / Y
+    // studied" is what can honestly be shown rather than a fabricated %.
+    const levelRow = (label, s) => `
+                    <div class="level-progress-container">
+                        <div class="progress-label"><span>${label}</span><span>${s.mastered} mastered</span></div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${s.reviewed > 0 ? Math.round(s.mastered / s.reviewed * 100) : 0}%;" role="progressbar" aria-label="${label} mastery" aria-valuenow="${s.mastered}" aria-valuemin="0" aria-valuemax="${s.reviewed}"></div></div>
+                    </div>`;
 
     const body = document.body;
     
@@ -117,10 +129,17 @@ function renderAppShell() {
                     <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i> Tools</a>
                     <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon" aria-hidden="true"></i> AI Config & Settings</a>
                 </div>
+                <div class="nav-group" aria-labelledby="level-nav-title">
+                    <div class="nav-group-title" id="level-nav-title">Your Level Progress</div>
+                    ${levelRow('A1', byLevel.A1)}
+                    ${levelRow('A2', byLevel.A2)}
+                    ${levelRow('B1', byLevel.B1)}
+                    <div class="progress-label" style="font-size: 10px; opacity: 0.6; padding: 0 var(--space-md);"><span>No B2 content yet</span></div>
+                </div>
                 <div class="nav-group" aria-labelledby="progress-nav-title">
                     <div class="nav-group-title" id="progress-nav-title">Your Progress</div>
                     <div class="level-progress-container">
-                        <div class="progress-label"><span id="mastered-label">Words mastered</span><span aria-hidden="true">${vocabStats.mastered}</span></div>
+                        <div class="progress-label"><span id="mastered-label">Words mastered (all levels)</span><span aria-hidden="true">${vocabStats.mastered}</span></div>
                         <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${vocabStats.reviewed > 0 ? Math.round(vocabStats.mastered / vocabStats.reviewed * 100) : 0}%;" role="progressbar" aria-labelledby="mastered-label" aria-valuenow="${vocabStats.mastered}" aria-valuemin="0" aria-valuemax="${vocabStats.reviewed}"></div></div>
                         <div class="progress-label" style="margin-top: 4px; font-size: 11px; opacity: 0.75;"><span>${vocabStats.reviewed} words studied so far</span></div>
                     </div>

@@ -55,9 +55,26 @@
         </div>
 
         <div class="nav-group">
+          <div class="nav-group-title">Your Level Progress</div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>A1</span><span id="a1-txt">0 mastered</span></div>
+            <div class="progress-bar-bg"><div id="a1-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>A2</span><span id="a2-txt">0 mastered</span></div>
+            <div class="progress-bar-bg"><div id="a2-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>B1</span><span id="b1-txt">0 mastered</span></div>
+            <div class="progress-bar-bg"><div id="b1-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+          </div>
+          <div class="progress-label" style="font-size: 10px; opacity: 0.6;"><span>No B2 content yet</span></div>
+        </div>
+
+        <div class="nav-group">
           <div class="nav-group-title">Your Progress</div>
           <div class="level-progress-container">
-            <div class="progress-label"><span>Words mastered</span><span id="mastered-txt">0</span></div>
+            <div class="progress-label"><span>Words mastered (all levels)</span><span id="mastered-txt">0</span></div>
             <div class="progress-bar-bg"><div id="mastered-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
             <div class="progress-label" style="margin-top: 4px; font-size: 11px; opacity: 0.75;"><span id="reviewed-txt">0 words studied so far</span></div>
           </div>
@@ -375,6 +392,18 @@ document.addEventListener("DOMContentLoaded", () => {
     setText("reviewed-txt", stats.reviewed + " word" + (stats.reviewed === 1 ? "" : "s") + " studied so far");
     setText("streak-txt", "🔥 " + streak + "-day streak");
     setText("lessons-txt", lessonsCompleted + " lesson" + (lessonsCompleted === 1 ? "" : "s") + " done");
+
+    // Real per-level breakdown (A1/A2/B1 - see js/progress-aggregator.js for
+    // why B1.1/B1.2 are combined and why there's no B2 row).
+    const byLevel = (typeof ProgressAggregator !== 'undefined')
+        ? ProgressAggregator.getVocabularyStatsByLevel()
+        : { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 } };
+    ["a1", "a2", "b1"].forEach(id => {
+        const s = byLevel[id.toUpperCase()];
+        setText(id + "-txt", s.mastered + " mastered");
+        const b = document.getElementById(id + "-bar");
+        if (b) b.style.width = (s.reviewed > 0 ? Math.round(s.mastered / s.reviewed * 100) : 0) + "%";
+    });
 });
 </script>
 </body>
