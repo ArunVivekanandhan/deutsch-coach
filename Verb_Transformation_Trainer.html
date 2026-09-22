@@ -1598,6 +1598,19 @@ const DIRS = [{k:'de2en',l:'German → Meaning'},{k:'en2de',l:'Meaning → Germa
 
 let session = [];
 let sessionIdx = 0;
+let practiceMode = 'medium'; // 'easy' (multiple choice), 'medium' (flip-card self-rate), 'hard' (typed production)
+
+function setPracticeMode(m){
+  practiceMode = m;
+  renderCard();
+}
+
+function modeSelectorHTML(){
+  const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Flip Card)'},{k:'hard',l:'🔴 Hard (Type It)'}];
+  return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+    ${modes.map(m=>`<button class="quick-tool-btn ${practiceMode===m.k?'active':''}" style="${practiceMode===m.k?'background:var(--ink); color:#fff;':''}" onclick="setPracticeMode('${m.k}')">${m.l}</button>`).join('')}
+  </div>`;
+}
 
 
 
@@ -1751,6 +1764,10 @@ function renderCard(){
   }
   const v = session[sessionIdx];
   updateLiveRuleRef(v);
+
+  if(practiceMode === 'easy'){ renderEasyMC(v); return; }
+  if(practiceMode === 'hard'){ renderHardProduction(v); return; }
+
   const box = PROGRESS[v.uid] ? PROGRESS[v.uid].box : 1;
   const boxNames = {1:'New',2:'Learning',3:'Familiar',4:'Strong',5:'Mastered'};
 
@@ -1847,6 +1864,7 @@ function renderCard(){
   }
 
   stage.innerHTML = `
+    ${modeSelectorHTML()}
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
       <span>Card ${sessionIdx+1} / ${session.length}</span>
       <div class="quick-card-tools">
@@ -1907,6 +1925,147 @@ function renderCard(){
 function advance(){
   sessionIdx++;
   renderCard();
+}
+
+/* ---- EASY MODE: multiple-choice recognition ---- */
+function pickDistractors(v, count){
+  const source = pool().length >= count+1 ? pool() : VERBS;
+  const others = source.filter(x => x.uid !== v.uid);
+  return shuffleArr(others).slice(0, count);
+}
+
+function renderEasyMC(v){
+  const stage = document.getElementById('stage');
+  const reverse = (curDir === 'en2de');
+  const distractors = pickDistractors(v, 3);
+  const correctText = reverse ? v.inf : meaningPromptText(v);
+  const optionTexts = shuffleArr([correctText, ...distractors.map(d => reverse ? d.inf : meaningPromptText(d))]);
+
+  stage.innerHTML = `
+    ${modeSelectorHTML()}
+    <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span>Card ${sessionIdx+1} / ${session.length}</span>
+      <div class="quick-card-tools">
+        <button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button>
+      </div>
+    </div>
+    <div class="studycard">
+      <div class="stripe ${v.typ}"></div>
+      <div class="meta"><span>${v.source}</span><span class="pill level">${v.level}</span></div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="word" style="font-size:22px; font-weight:700;">${reverse ? meaningPromptText(v) : v.inf}</div>
+        <div class="subq" style="margin-top:10px;">${reverse ? 'Pick the correct German verb' : 'Pick the correct meaning'}</div>
+      </div>
+      <div class="opt-grid" style="display:grid; gap:8px; padding:0 18px 18px;">
+        ${optionTexts.map((opt,i)=>`
+          <button class="opt-btn" id="mcOpt_${i}" style="padding:12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; cursor:pointer; text-align:left; font-size:14px;" onclick="checkEasyMC(${i})">${opt}</button>
+        `).join('')}
+      </div>
+      <div id="mcFeedback" style="display:none; padding:0 18px 18px;"></div>
+    </div>
+  `;
+  stage.dataset.correctText = correctText;
+  window._mcState = { v, correctText, optionTexts };
+}
+
+function checkEasyMC(idx){
+  const { v, correctText, optionTexts } = window._mcState;
+  const chosen = optionTexts[idx];
+  const isCorrect = chosen === correctText;
+  document.querySelectorAll('.opt-btn').forEach((btn,i) => {
+    btn.disabled = true;
+    if(optionTexts[i] === correctText) btn.style.cssText += 'background:#E2EED8; border-color:var(--green);';
+    else if(i === idx) btn.style.cssText += 'background:#F8E4E3; border-color:var(--red);';
+  });
+  recordAnswer(v.uid, isCorrect);
+  const fb = document.getElementById('mcFeedback');
+  fb.style.display = 'block';
+  fb.innerHTML = `
+    <div style="padding:10px; border-radius:6px; background:${isCorrect?'#E2EED8':'#F8E4E3'}; margin-bottom:8px;">
+      ${isCorrect ? '✅ Richtig!' : '❌ Not quite — correct answer: <b>' + correctText + '</b>'}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="actbtn next-bold" style="background:var(--ink); color:#fff; padding:8px 14px;" onclick="advance()">→ Next (N)</button>
+      ${!isCorrect ? aiWordHelpButtonHTML(v) : ''}
+    </div>
+    <div id="aiWordHelpBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
+  `;
+}
+
+/* ---- HARD MODE: typed production challenge ---- */
+function renderHardProduction(v){
+  const stage = document.getElementById('stage');
+  stage.innerHTML = `
+    ${modeSelectorHTML()}
+    <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span>Card ${sessionIdx+1} / ${session.length}</span>
+    </div>
+    <div class="studycard">
+      <div class="stripe ${v.typ}"></div>
+      <div class="meta"><span>${v.source}</span><span class="pill level">${v.level}</span></div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="word" style="font-size:22px; font-weight:700;">${v.inf} <span style="font-size:13px; opacity:0.7;">(${meaningPromptText(v)})</span></div>
+        <div class="subq" style="margin-top:10px;">Type a full German sentence using <b>${v.inf}</b> (any tense) from memory — no hints.</div>
+      </div>
+      <div style="padding:0 18px 18px;">
+        <input type="text" id="hardInput" class="challenge-input" placeholder="Schreib einen Satz auf Deutsch..." autofocus style="width:100%; padding:10px; border-radius:6px; border:1.5px solid var(--line); font-size:14px;">
+        <button class="actbtn next-bold" style="margin-top:10px; background:var(--ink); color:#fff; padding:10px 16px;" onclick="checkHardProduction()">Verify ✓</button>
+      </div>
+      <div id="hardFeedback" style="display:none; padding:0 18px 18px;"></div>
+    </div>
+  `;
+  document.getElementById('hardInput').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); checkHardProduction(); } });
+  window._hardState = { v };
+}
+
+function checkHardProduction(){
+  const { v } = window._hardState;
+  const val = document.getElementById('hardInput').value.trim().toLowerCase();
+  const stemCandidates = [v.inf.toLowerCase(), v.inf.toLowerCase().replace(/en$/,''), v.praeteritum.toLowerCase(), stripAffixes(v.perfekt).toLowerCase()];
+  const usesVerb = stemCandidates.some(s => s.length > 2 && val.includes(s));
+  const isCorrect = val.length >= 5 && usesVerb;
+  recordAnswer(v.uid, isCorrect);
+  const fb = document.getElementById('hardFeedback');
+  fb.style.display = 'block';
+  fb.innerHTML = `
+    <div style="padding:10px; border-radius:6px; background:${isCorrect?'#E2EED8':'#F8E4E3'}; margin-bottom:8px;">
+      ${isCorrect ? '✅ Gut gemacht! The sentence uses a form of "' + v.inf + '".' : '❌ Your sentence should clearly use "' + v.inf + '" (Präteritum: ' + v.praeteritum + ', Perfekt: ' + v.perfekt + ').'}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="actbtn next-bold" style="background:var(--ink); color:#fff; padding:8px 14px;" onclick="advance()">→ Next (N)</button>
+      ${!isCorrect ? aiWordHelpButtonHTML(v) : ''}
+    </div>
+    <div id="aiWordHelpBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
+  `;
+}
+
+/* ---- AI weak-spot follow-up: one fresh example sentence for a REAL, already-
+   verified word (never invents new vocabulary — only asks for a usage example
+   of a word already in VERBS). Offline-safe: only shown/used when AI is
+   configured (body.ai-enabled, set by js/app-shell.js's checkAIStatus), and
+   any failure just leaves the button as a no-op retry rather than breaking
+   the page. ---- */
+function aiWordHelpButtonHTML(v){
+  if(!document.body.classList.contains('ai-enabled')) return '';
+  return `<button class="actbtn" style="background:var(--purple, #6B4A8A); color:#fff; padding:8px 14px;" onclick="aiWordHelp('${v.uid.replace(/'/g,"\\'")}')">🤖 More Practice With This Word (AI)</button>`;
+}
+
+function aiWordHelp(uid){
+  const v = VERBS.find(x => x.uid === uid);
+  if(!v || typeof callAIHelper !== 'function') return;
+  const promptTxt = `I am learning German. Help me practice the verb "${v.inf}" (English: ${v.en}; simple past: ${v.praeteritum}; present perfect: ${v.perfekt}).
+Write ONE natural German example sentence using this exact verb (any tense), followed by its English translation on a new line. Keep it short (max 12 words) and encouraging. Do not introduce any other unfamiliar vocabulary.`;
+  callAIHelper(promptTxt, (text) => {
+    const box = document.getElementById('aiWordHelpBox');
+    if(box){
+      box.innerHTML = (text && !text.startsWith('AI Error') && !text.startsWith('Error connecting'))
+        ? `<strong>🤖 Example:</strong><br>${text.replace(/\n/g,'<br>')}`
+        : `⚠️ AI isn't available right now (check your AI key in Settings).`;
+      box.style.display = 'block';
+    }
+  });
 }
 
 function nextCardWithoutAnswer(){

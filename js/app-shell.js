@@ -360,3 +360,44 @@ function checkAIStatus() {
     }
 }
 document.addEventListener('DOMContentLoaded', checkAIStatus);
+
+// Shared AI call helper (same provider/key convention as checkAIStatus above -
+// de_ai_provider + de_ai_key_<provider>, configured on Einstellungen_Setup.html).
+// Any page can call this instead of rolling its own fetch logic. Always calls
+// `callback(text)` - on any failure (no key, network error, bad response) the
+// text starts with "AI Error" / "Error connecting" so callers can detect
+// failure with a simple string check and fall back to offline content.
+async function callAIHelper(promptText, callback) {
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
+    const apiKey = localStorage.getItem('de_ai_key_' + provider);
+
+    let endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+    let model = 'llama3-8b-8192';
+
+    if (provider === 'openai') {
+        endpoint = 'https://api.openai.com/v1/chat/completions';
+        model = 'gpt-4o-mini';
+    } else if (provider === 'ollama') {
+        endpoint = localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions';
+        model = localStorage.getItem('de_ai_model_ollama') || 'llama3';
+    }
+
+    const headers = { "Content-Type": "application/json" };
+    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
+    try {
+        const res = await fetch(endpoint, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({ model: model, messages: [{ role: "user", content: promptText }] })
+        });
+        const data = await res.json();
+        if (data.choices && data.choices.length > 0) {
+            callback(data.choices[0].message.content);
+        } else {
+            callback("AI Error: " + JSON.stringify(data));
+        }
+    } catch (e) {
+        callback("Error connecting to AI: " + e.message);
+    }
+}
