@@ -116,24 +116,30 @@
     <option value="all">Mix All Topics (Zufall)</option>
   </select>
 
+  <div id="modeSelectorArea" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
+
   <div class="stage">
     <button class="audio-giant-btn" id="playBtn" onclick="playCurrentAudio()" title="Play Audio (Spacebar)">🔊</button>
     <div style="font-size:12px; color:var(--ink-soft); margin-bottom: 24px;">Shortcut: Spacebar to play</div>
     <button id="loopToggleBtn" onclick="toggleLoop()" style="background:none; border:none; cursor:pointer; font-size:13px; font-weight:600; margin-bottom:24px; color:var(--accent);" class="ds-btn ds-btn-secondary">🔁 Auto-Repeat: ON</button>
 
-    <textarea id="dictationInput" class="dictation-input" rows="2" placeholder="Schreib, was du hörst... (Type what you hear)"></textarea>
+    <div id="easyMediumBody"></div>
 
-    <div class="controls">
-      <button class="btn btn-secondary" onclick="revealTranscript()">👁️ Text anzeigen (Show Transcript)</button>
-      <button class="btn btn-primary" onclick="checkAnswer()">✔️ Prüfen (Check)</button>
-      <button class="btn btn-accent" id="nextBtn" style="display:inline-flex;" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
-    </div>
+    <div id="hardAnswerArea">
+      <textarea id="dictationInput" class="dictation-input" rows="2" placeholder="Schreib, was du hörst... (Type what you hear)"></textarea>
 
-    <div id="feedbackBox" class="feedback-box">
-      <div id="feedbackTitle" style="font-weight:700; margin-bottom:8px; font-size:16px;"></div>
-      <div id="transcriptDe" class="transcript"></div>
-      <div id="transcriptEn" class="translation"></div>
-      <div id="transcriptTa" class="translation" style="color:var(--ink-soft);"></div>
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="revealTranscript()">👁️ Text anzeigen (Show Transcript)</button>
+        <button class="btn btn-primary" onclick="checkAnswer()">✔️ Prüfen (Check)</button>
+        <button class="btn btn-accent" id="nextBtn" style="display:inline-flex;" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
+      </div>
+
+      <div id="feedbackBox" class="feedback-box">
+        <div id="feedbackTitle" style="font-weight:700; margin-bottom:8px; font-size:16px;"></div>
+        <div id="transcriptDe" class="transcript"></div>
+        <div id="transcriptEn" class="translation"></div>
+        <div id="transcriptTa" class="translation" style="color:var(--ink-soft);"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -162,6 +168,7 @@
       select.appendChild(opt);
     });
 
+    renderModeSelector();
     loadNewSentence();
 
   const isAiEnabled = localStorage.getItem('de_ai_enabled') !== 'false';
@@ -211,9 +218,6 @@
     const config = AI_PROVIDERS[provider];
     let apiKey = localStorage.getItem('de_ai_key_' + provider) || '';
     const model = localStorage.getItem('de_ai_model_' + provider) || (provider==='deepseek'?'deepseek-chat':'gpt-4o-mini');
-    
-    // Default fallback key if none provided for Deepseek
-    if(provider === 'deepseek' && !apiKey) apiKey = 'sk-3f59c8de2c0c4c478a87611dc82bcbfd'; // safe fallback from other files
 
     if (config.requiresKey && !apiKey) {
       alert("Please configure an AI API Key in the KI Coach settings to use AI Generation Mode.");
@@ -269,15 +273,126 @@
   }
 
   function setupSentenceUI() {
-    document.getElementById('dictationInput').value = '';
-    document.getElementById('dictationInput').disabled = false;
-      document.getElementById('nextBtn').disabled = false;
-    document.getElementById('feedbackBox').className = 'feedback-box';
-    // nextBtn always visible
-    document.getElementById('dictationInput').focus();
     autoRepeat = false;
     updateLoopBtnUI();
     playCurrentAudio();
+
+    if(practiceMode === 'easy'){ renderEasyChoice(); return; }
+    if(practiceMode === 'medium'){ renderMediumGapFill(); return; }
+
+    document.getElementById('easyMediumBody').style.display = 'none';
+    document.getElementById('easyMediumBody').innerHTML = '';
+    document.getElementById('hardAnswerArea').style.display = '';
+    document.getElementById('dictationInput').value = '';
+    document.getElementById('dictationInput').disabled = false;
+    document.getElementById('nextBtn').disabled = false;
+    document.getElementById('feedbackBox').className = 'feedback-box';
+    document.getElementById('dictationInput').focus();
+  }
+
+  /* ---- EASY MODE: multiple-choice - which sentence did you hear? ---- */
+  function renderEasyChoice(){
+    document.getElementById('hardAnswerArea').style.display = 'none';
+    const body = document.getElementById('easyMediumBody');
+    body.style.display = '';
+
+    const pool = getFlatSentences().filter(s => s.de !== currentSentenceObj.de);
+    const distractors = shuffleArrHV(pool).slice(0, 3).map(s => s.de);
+    const optionTexts = shuffleArrHV([currentSentenceObj.de, ...distractors]);
+
+    body.innerHTML = `
+      <div style="display:grid; gap:8px; margin-bottom:16px;">
+        ${optionTexts.map((opt,i)=>`<button class="btn btn-secondary" id="hvEasyOpt_${i}" style="text-align:left; width:100%;" onclick="checkEasyChoiceHV(${i})">${opt}</button>`).join('')}
+      </div>
+      <div id="hvFeedback"></div>
+    `;
+    window._hvEasyState = { correctText: currentSentenceObj.de, optionTexts };
+  }
+
+  function shuffleArrHV(arr){
+    const a = arr.slice();
+    for(let i=a.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function checkEasyChoiceHV(idx){
+    const { correctText, optionTexts } = window._hvEasyState;
+    const isCorrect = optionTexts[idx] === correctText;
+    document.querySelectorAll('#easyMediumBody .btn').forEach((btn,i)=>{
+      btn.onclick = null;
+      if(optionTexts[i] === correctText) btn.style.cssText += 'background:#E2EED8; border-color:var(--green, green);';
+      else if(i === idx) btn.style.cssText += 'background:#F8E4E3; border-color:var(--red, red);';
+    });
+    if(isCorrect && window.addXP) window.addXP(10);
+    stopLoop();
+    const fb = document.getElementById('hvFeedback');
+    fb.innerHTML = `
+      <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'}" style="display:block;">
+        <div style="font-weight:700; margin-bottom:6px;">${isCorrect ? '🎉 Richtig! (Correct)' : '❌ Not quite — you heard:'}</div>
+        <div class="transcript">${correctText}</div>
+        <div class="translation">${currentSentenceObj.en}</div>
+      </div>
+      <button class="btn btn-accent" style="margin-top:10px;" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
+    `;
+  }
+
+  /* ---- MEDIUM MODE: gap-fill - type just the missing word(s) ---- */
+  function renderMediumGapFill(){
+    document.getElementById('hardAnswerArea').style.display = 'none';
+    const body = document.getElementById('easyMediumBody');
+    body.style.display = '';
+
+    const words = currentSentenceObj.de.split(' ');
+    const numBlanks = words.length <= 4 ? 1 : 2;
+    const blankIdxs = shuffleArrHV(words.map((_,i)=>i)).slice(0, Math.min(numBlanks, words.length));
+    blankIdxs.sort((a,b)=>a-b);
+    const displayWords = words.map((w,i)=> blankIdxs.includes(i) ? '___' : w);
+    const missingWords = blankIdxs.map(i => words[i]);
+
+    body.innerHTML = `
+      <div style="font-size:16px; font-weight:600; margin-bottom:12px; line-height:1.6;">${displayWords.join(' ')}</div>
+      <input type="text" id="hvGapInput" class="dictation-input" placeholder="Fehlende Wörter, in Reihenfolge (missing words, in order)..." autofocus>
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="revealGapTranscript()">👁️ Text anzeigen (Show Transcript)</button>
+        <button class="btn btn-primary" onclick="checkMediumGapFill()">✔️ Prüfen (Check)</button>
+        <button class="btn btn-accent" onclick="loadNewSentence()">Weiter (Next) ➡️</button>
+      </div>
+      <div id="hvFeedback"></div>
+    `;
+    window._hvGapState = { missingWords };
+    const inp = document.getElementById('hvGapInput');
+    if(inp) inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); checkMediumGapFill(); } });
+  }
+
+  function revealGapTranscript(){
+    stopLoop();
+    const fb = document.getElementById('hvFeedback');
+    if(fb) fb.innerHTML = `
+      <div class="feedback-box" style="display:block; background:var(--paper); border-color:var(--line); color:var(--ink);">
+        <div style="font-weight:700; margin-bottom:6px;">📖 Transcript</div>
+        <div class="transcript">${currentSentenceObj.de}</div>
+        <div class="translation">${currentSentenceObj.en}</div>
+      </div>
+    `;
+  }
+
+  function checkMediumGapFill(){
+    const { missingWords } = window._hvGapState;
+    const input = document.getElementById('hvGapInput');
+    const given = cleanString(input ? input.value : '').split(/\s+/).filter(Boolean);
+    const target = missingWords.map(w => cleanString(w));
+    const isCorrect = given.length === target.length && given.every((w,i) => w === target[i]);
+    if(input) input.disabled = true;
+    if(isCorrect && window.addXP) window.addXP(10);
+    stopLoop();
+    const fb = document.getElementById('hvFeedback');
+    fb.innerHTML = `
+      <div class="feedback-box ${isCorrect ? 'correct' : 'incorrect'}" style="display:block;">
+        <div style="font-weight:700; margin-bottom:6px;">${isCorrect ? '🎉 Richtig! (Correct)' : '❌ Not quite — the full sentence:'}</div>
+        <div class="transcript">${currentSentenceObj.de}</div>
+        <div class="translation">${currentSentenceObj.en}</div>
+      </div>
+    `;
   }
 
 
@@ -305,6 +420,21 @@
     setupSentenceUI();
   }
 
+
+  let practiceMode = 'hard'; // 'easy' (multiple choice), 'medium' (gap-fill), 'hard' (full typed dictation - the original, unchanged mechanic)
+
+  function setPracticeMode(m){
+    practiceMode = m;
+    renderModeSelector();
+    setupSentenceUI();
+  }
+
+  function renderModeSelector(){
+    const el = document.getElementById('modeSelectorArea');
+    if(!el) return;
+    const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Gap Fill)'},{k:'hard',l:'🔴 Hard (Full Dictation)'}];
+    el.innerHTML = modes.map(m=>`<button class="btn ${practiceMode===m.k?'btn-primary':'btn-secondary'}" onclick="setPracticeMode('${m.k}')">${m.l}</button>`).join('');
+  }
 
   let autoRepeat = false;
   let loopTimeout = null;
