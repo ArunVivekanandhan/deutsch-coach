@@ -516,6 +516,16 @@ script) anywhere in the repository.
   (several hundred, across every level, in both `VERBS` and `NOUNS`) silently rendered `undefined`
   instead of an icon. **Fixed this session** (see Section 28's B2 changelog entry) — a real `'abstract'`
   SVG was added.
+- `Grammatik_Regel_Trainer.html`'s `checkAnswer()` (the gap-fill/multiple-choice drill handler)
+  referenced a variable `buildOrder` that only exists in the separate sentence-builder drill mode —
+  answering a gap-fill question INCORRECTLY threw an uncaught `ReferenceError` mid-render, silently
+  breaking the whole feedback box (no explain button, no next-question button appeared). Getting a
+  gap-fill question right worked fine; only the wrong-answer path was broken, which is presumably why
+  this went unnoticed. **Fixed this session** (see Section 28's practice-depth changelog entry).
+- `Grammatik_Regel_Trainer.html`'s `explainWrongAnswerAI()` (the "🤖 KI-Erklärung" wrong-answer AI
+  explainer) referenced a variable `currentRule` that is never declared anywhere in the file — clicking
+  that button always threw before the AI call was even made, so this advertised feature never actually
+  worked. **Fixed this session** — now looks up the rule from the current question's `ruleId` instead.
 
 **Bugs found and fixed during earlier development** (kept for historical awareness):
 - Satzbau_Trainer: an early version independently rolled each sentence slot rather than picking whole
@@ -662,6 +672,13 @@ the larger IA/content-unification work. In priority order for whoever picks this
   latest changelog entry (mirroring `German_B1_Practice_Studio.html`'s 7-module shape, or a B2 oral
   exam simulator mirroring `Sprech_Pruefungs_Simulator.html`/`A1_Sprech_Pruefungs_Simulator.html`) —
   deliberately not attempted in that session since the explicit scope was "content foundation first."
+- Extend the difficulty-tiered offline practice + AI weak-spot follow-up pattern built for
+  `Grammatik_Regel_Trainer.html` (Section 28's latest changelog entry) to the rest of the app, per the
+  user's explicitly confirmed "everything" scope: the vocabulary trainers
+  (`Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html` — add an explicit easy/medium/hard
+  drill-mode selector and AI weak-spot question generation on top of their existing SRS box progression)
+  and every exam simulator / practice studio page. Only the grammar trainer was done so far; this was
+  communicated to the user as the first installment, not the whole backlog.
 
 **P2 (polish, after P1 exists to polish):**
 - Full accessibility pass across the 21 individual trainer pages (only the shared shell got one this
@@ -1254,6 +1271,63 @@ assume this file is parseable as JSON the way `VERBS`/`NOUNS` are.
 Verified via headless Chromium: total card count (38), the new filter chip's count (8), search for a
 new topic ("Futur II") returning exactly 1 result, and an audio button on a new card firing without
 error. Full 23-page smoke sweep re-run with zero errors before committing.
+
+---
+
+### Follow-up: difficulty-tiered practice + AI weak-spot follow-up
+
+The user asked for "lots and lots" of offline practice per topic, easy→difficult, across "everything"
+(explicitly confirmed as the full scope via AskUserQuestion, acknowledged as a genuinely multi-session
+effort) — plus, when AI is enabled, wrong-answer explanations (a feature that already existed, see
+below) and more practice generated for weak spots, offline-bank-first with AI filling gaps when the
+bank runs thin (also explicitly confirmed via AskUserQuestion). Started with
+`Grammatik_Regel_Trainer.html` as the first, highest-leverage installment — **not** all pages; see
+"NOT completed" below.
+
+#### Changes — difficulty-tiered offline question bank
+Added a `diff: 'easy'|'medium'|'hard'` field to a brand-new hand-authored generator function on every
+one of the 21 rules (63 new questions total — roughly doubling the previous ~26-generator pool, which
+itself held 2-14 variants per rule depending on how many generator functions that rule already had).
+Added `let currentDifficulty` global state + a new Easy/Medium/Hard/Mixed filter row in the drill HUD
+(`setDifficulty()`). `generateInfiniteQuestion()` now retries up to 15 times to draw a question matching
+the active difficulty filter before falling back to whatever was drawn — older, untagged generators are
+left completely untouched (zero regression risk) and simply act as unfiltered "mixed bag" fallback
+content. Selecting a specific difficulty also forces `choice` (gap-fill) format, since difficulty tags
+only exist on `choice`-type questions, not the separate sentence-builder (`build`) mode.
+
+#### Changes — AI weak-spot follow-up (offline-first, AI-fills-gap)
+Added a "🤖 More Practice On This (AI)" button next to the existing wrong-answer AI explainer. It asks
+the configured AI provider (Groq/OpenAI/Ollama, same `de_ai_provider`/`de_ai_key_*` localStorage config
+as the pre-existing explain feature) for ONE new question on the exact rule + difficulty just missed,
+in a strict JSON shape; a malformed/failed response (no key configured, network error, bad JSON) always
+falls back to the offline bank for that rule rather than leaving the learner stuck, with a visible
+banner explaining the fallback. AI-generated questions are marked `aiGenerated: true` and show a
+"🤖 AI-GENERATED" badge so learners know which is which.
+
+#### Changes — two pre-existing crashes fixed (found while wiring the above)
+Both documented in Section 18. `checkAnswer()` (gap-fill mode) referenced `buildOrder` (a
+sentence-builder-only variable), throwing on every wrong answer and silently breaking the whole feedback
+box — the AI-explain button never even appeared. `explainWrongAnswerAI()` referenced an undeclared
+`currentRule`, so the AI explanation always threw before making the API call - meaning this
+already-advertised "explain why it's wrong" feature had never actually worked. Both are fixed now: the
+first passes the actually-chosen wrong option, the second looks up the rule via the question's `ruleId`.
+
+#### Testing
+All 21 rules × 3 difficulties (63 draws) verified programmatically to produce well-formed questions
+(non-empty prompt containing `___`, valid options array, correct index resolving to a real option) with
+zero thrown errors. Both AI code paths (`explainWrongAnswerAI`, `generateAIPracticeQuestion`) tested by
+mocking `callAIGrammarExplanation` for both a success case (valid JSON → question object built and used
+correctly, `aiGenerated: true`) and a failure case (error string → offline fallback used, banner shown).
+Full 23-page smoke sweep clean.
+
+#### What was explicitly requested but NOT completed this session
+The user's confirmed scope was "everything" — grammar, vocabulary, and all other practice pages. Only
+`Grammatik_Regel_Trainer.html` was upgraded this session; explicitly communicated to the user as the
+first installment of a larger, honestly-multi-session backlog, not the whole thing. Not yet touched:
+adding easy→hard difficulty tiers or AI weak-spot generation to the vocabulary trainers
+(`Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html` — these already have an inherent
+easy→hard progression via SRS box level, but no explicit difficulty-mode selector or AI weak-spot
+question generation), or to any exam simulator / practice studio page.
 
 ---
 
