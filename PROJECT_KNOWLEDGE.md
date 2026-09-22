@@ -743,6 +743,27 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 9) — Fix: Deutsch_Wortschatz_Excel_Sheet.html missing A1 and B2 verbs
+
+#### Task
+Follow-up to Task 8: "Check Deutsch_Wortschatz_Excel_Sheet.html for the same gap" — the user proactively asked to check a third page for the same issue, rather than waiting for it to be reported live.
+
+#### Finding and fix
+- Same root cause, confirmed independently: this page's own `VERBS` array was also stuck at 503 entries (A2 + B1 only). Appended the same, already-verified 37-verb list (9 A1 + 28 B2) used in Tasks 7 and 8 — identical schema, zero overlap.
+- Notably, this page's UI is AHEAD of the other two: it already has working "Level: Alle / A1 / A2 / B1 / B2" filter chips (`setLevelFilter()`) — they were just silently non-functional for A1/B2 the whole time because there was no A1/B2 data for them to ever show. No UI changes were needed here at all, unlike Task 7 (had to add the missing filter buttons) — the data fix alone made the existing buttons work.
+- This page builds its spreadsheet rows directly from `(VERBS || []).forEach(...)`, so the fix requires no other code changes, same as Task 8.
+- Fixed the same class of stale hardcoded count labels found in Task 8: the stats badge, the "Wortart: Alle/Verben/Nomen/Adjektive" filter chips, and the status-bar row count — all previously showing the old 1,117/503/378/236 total (236 for Adjektive was independently wrong here too, same as Task 8's finding: the real `ADJS.length` is 337). Corrected to 1,255/540/378/337.
+
+#### Testing
+- Headless-browser check: `VERBS.length===540`, `NOUNS.length===378`, `ADJS.length===337`, `ALL_ROWS.length===1255`, all confirmed live via `page.evaluate`. Clicking the (previously dead) "A1" level chip now filters to 361 rows (verbs+nouns+adjectives tagged A1); "B2" filters to exactly 28 (all verbs, since B2 nouns/adjectives don't exist in this data); "Alle" returns to 1,255.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Deutsch_Wortschatz_Excel_Sheet.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 8) — Fix: Wortschatz_Master_Grid.html missing A1 and B2 verbs
 
 #### Task
