@@ -68,7 +68,10 @@
             <div class="progress-label"><span>B1</span><span id="b1-txt">0 mastered</span></div>
             <div class="progress-bar-bg"><div id="b1-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
           </div>
-          <div class="progress-label" style="font-size: 10px; opacity: 0.6;"><span>No B2 content yet</span></div>
+          <div class="level-progress-container">
+            <div class="progress-label"><span>B2</span><span id="b2-txt">0 mastered</span></div>
+            <div class="progress-bar-bg"><div id="b2-bar" class="progress-bar-fill" style="width: 0%;"></div></div>
+          </div>
         </div>
 
         <div class="nav-group">
@@ -181,7 +184,7 @@
             </a>
           </div>
           <div class="progress-label" style="font-size: 11px; opacity: 0.65; margin-top: 8px;">
-            <span>Noch keine B2-Prüfungsvorbereitung verfügbar.</span>
+            <span>B2-Wortschatz und -Grammatik sind jetzt verfügbar (siehe Vokabular &amp; Grammatik). Eine eigene B2-Prüfungsvorbereitung gibt es noch nicht.</span>
           </div>
         </section>
 
@@ -406,12 +409,12 @@ document.addEventListener("DOMContentLoaded", () => {
     setText("streak-txt", "🔥 " + streak + "-day streak");
     setText("lessons-txt", lessonsCompleted + " lesson" + (lessonsCompleted === 1 ? "" : "s") + " done");
 
-    // Real per-level breakdown (A1/A2/B1 - see js/progress-aggregator.js for
-    // why B1.1/B1.2 are combined and why there's no B2 row).
+    // Real per-level breakdown (A1/A2/B1/B2 - see js/progress-aggregator.js
+    // for why B1.1/B1.2 are combined into one B1 bucket).
     const byLevel = (typeof ProgressAggregator !== 'undefined')
         ? ProgressAggregator.getVocabularyStatsByLevel()
-        : { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 } };
-    ["a1", "a2", "b1"].forEach(id => {
+        : { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 }, B2: { mastered: 0, reviewed: 0 } };
+    ["a1", "a2", "b1", "b2"].forEach(id => {
         const s = byLevel[id.toUpperCase()];
         setText(id + "-txt", s.mastered + " mastered");
         const b = document.getElementById(id + "-bar");

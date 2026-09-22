@@ -90,7 +90,7 @@ function renderAppShell() {
         ? ProgressAggregator.getStreak() : 0;
     const byLevel = (typeof ProgressAggregator !== 'undefined')
         ? ProgressAggregator.getVocabularyStatsByLevel()
-        : { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 } };
+        : { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 }, B2: { mastered: 0, reviewed: 0 } };
     // Real per-level counts, not percentages - there's no reliable total
     // vocabulary-per-level figure available from this shared script (each
     // page only loads its own word list), so showing "X mastered / Y
@@ -134,7 +134,7 @@ function renderAppShell() {
                     ${levelRow('A1', byLevel.A1)}
                     ${levelRow('A2', byLevel.A2)}
                     ${levelRow('B1', byLevel.B1)}
-                    <div class="progress-label" style="font-size: 10px; opacity: 0.6; padding: 0 var(--space-md);"><span>No B2 content yet</span></div>
+                    ${levelRow('B2', byLevel.B2)}
                 </div>
                 <div class="nav-group" aria-labelledby="progress-nav-title">
                     <div class="nav-group-title" id="progress-nav-title">Your Progress</div>

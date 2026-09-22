@@ -49,7 +49,7 @@ const ProgressAggregator = (function(){
     // excluded from the by-level breakdown (they still count in the totals
     // from getVocabularyStats()).
     //
-    // Verb data (vt_progress_v1) only distinguishes A1/A2/B1 - it has no
+    // Verb data (vt_progress_v1) only distinguishes A1/A2/B1/B2 - it has no
     // B1.1/B1.2 split the way dc_progress_v1/na_progress_v1 do - so B1.1 and
     // B1.2 are combined into one "B1" bucket here for a consistent, honest
     // breakdown across all three stores rather than guessing which half a
@@ -67,12 +67,12 @@ const ProgressAggregator = (function(){
         }
         if (!level) return null;
         if (level === 'B1.1' || level === 'B1.2') return 'B1';
-        if (level === 'A1' || level === 'A2' || level === 'B1') return level;
+        if (level === 'A1' || level === 'A2' || level === 'B1' || level === 'B2') return level;
         return null;
     }
 
     function getVocabularyStatsByLevel(){
-        const byLevel = { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 } };
+        const byLevel = { A1: { mastered: 0, reviewed: 0 }, A2: { mastered: 0, reviewed: 0 }, B1: { mastered: 0, reviewed: 0 }, B2: { mastered: 0, reviewed: 0 } };
         VOCAB_STORES.forEach(key => {
             try {
                 const raw = localStorage.getItem(key);
