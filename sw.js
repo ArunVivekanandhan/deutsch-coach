@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v39';
+const CACHE_NAME = 'deutsch-coach-v40';
 const urlsToCache = [
   './',
   './index.html',
