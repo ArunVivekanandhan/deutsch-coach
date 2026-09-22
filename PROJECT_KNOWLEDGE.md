@@ -743,6 +743,36 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 13) — Add 24 missing "sister verb" entries
+
+#### Task
+"I can sister verbs and some details of content is missing. Please and add the missing details" — on `Wortschatz_Master_Grid.html` (and `Deutsch_Wortschatz_Excel_Sheet.html`, same feature), the "Sister Verbs" feature suggests related verbs (via `KNOWN_SISTER_VERBS`, e.g. `kommen` → ankommen/mitkommen/zurückkommen) and looks up each one's meaning with `getSisterMeaning()`: it searches `VERBS` for the infinitive and returns `.en`, falling back to a generic `PREFIX_MEANINGS` guess (e.g. "an-" → "to start / target") only if the prefix is recognized, or blank otherwise.
+
+#### Root cause
+Scripted a check of every sister verb listed in `KNOWN_SISTER_VERBS` against `VERBS`: **24 of them don't exist in `VERBS` at all** — einkaufen, abkaufen, ankommen, mitkommen, zurückkommen, aufstehen, abfahren, mitfahren, erfahren, erlernen, fernsehen, aussehen, wiedersehen, zuhören, bearbeiten, ausarbeiten, abgeben, ausgeben, aufgeben, mitnehmen, verschlafen, abfotografieren, befotografieren, verfotografieren. Unlike every earlier gap this session (Tasks 7-12), this wasn't a case of one page falling behind a richer copy elsewhere — checked `Verb_Transformation_Trainer.html` (the richest `VERBS` source in the app) and none of the 24 were there either. This needed genuinely new content, not copying from an existing source.
+
+#### Decision on 2 uncertain entries
+Two of the 24 (`befotografieren`, `verfotografieren`) aren't standard dictionary German as far as could be verified — "fotografieren" doesn't normally take be-/ver- prefixes this way. Asked the user rather than silently guessing or silently omitting; they chose "add all 24, best-effort guess on those 2." Added them with an explicit `(uncertain - not a standard dictionary word, best-effort guess)` suffix on the `en` field and `source: "uncertain / best-effort guess, not verified as standard German"`, so they're discoverable/correctable later rather than presented as equally solid as the other 22.
+
+#### What was added
+Built all 24 as full `VERBS`-schema entries (inf/en/perfekt/praeteritum/noun/level/source/typ/icon/ta/ta_translit), each hand-conjugated and grammar-checked individually (haben/sein auxiliary choice, separable vs. inseparable prefix placement, e→i stem changes for geben/nehmen compounds, e→ie for sehen compounds) — the same care applied to every hand-authored verb set earlier this session. Added identically to all 4 pages that maintain a `VERBS` array: `Verb_Transformation_Trainer.html` (605, was 581), `Verben_Hoeren_EN_DE.html`, `Wortschatz_Master_Grid.html`, `Deutsch_Wortschatz_Excel_Sheet.html` (564 each, was 540) — keeping the source-of-truth pattern established in Tasks 7-10 intact rather than creating a new inconsistency. Updated every hardcoded count label this touches on the 3 pages that have them (`Verb_Transformation_Trainer.html` has none).
+Tamil translations for all 24 are original translations (not sourced from `js/tamil-dict.js`, which doesn't have them either) — same caveat as Task 12's "Garten" entry: real, considered translations from general knowledge, not cross-checked against an in-app source, so worth a native speaker's spot-check.
+Deliberately NOT touched: `Thema_Sprech_Trainer.html`'s own embedded `VERBS_ALL` snapshot (built once from an earlier copy of `Verb_Transformation_Trainer.html`'s data) — that page has no "sister verbs" feature, so it wasn't affected by this gap, and refreshing its snapshot is a separate, unrequested task.
+
+#### Testing
+- Headless-browser check on all 4 pages: `VERBS.length` correct on each (605/564/564/564), zero `pageerror` events.
+- On `Wortschatz_Master_Grid.html`, called `getSisterMeaning()` directly for 4 of the newly-added verbs (`ankommen`, `einkaufen`, `fernsehen`, `befotografieren`) and confirmed each now returns its real (or clearly-flagged-uncertain) meaning instead of a blank/generic prefix guess.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Verb_Transformation_Trainer.html`
+- `Verben_Hoeren_EN_DE.html`
+- `Wortschatz_Master_Grid.html`
+- `Deutsch_Wortschatz_Excel_Sheet.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 12) — Add "Garten" back as a proper noun entry
 
 #### Task
