@@ -485,13 +485,6 @@ script) anywhere in the repository.
 ## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
 **Open, discovered this session, not yet fixed:**
-- **`Wortschatz_Master_Grid.html` has the same missing-A1/B2-verbs gap as `Verben_Hoeren_EN_DE.html`
-  did** (see Section 28's 2026-09-22 "Verben_Hoeren_EN_DE.html missing A1 and B2 verbs" entry for the
-  root cause and fix pattern). Its own `VERBS` array is also stuck at 503 entries (A2+B1 only), but
-  unlike `Verben_Hoeren_EN_DE.html` it has no level-filter UI at all to extend — just a flat/combined
-  grid — so fixing it means appending the same 37 missing verbs to its data AND figuring out how (or
-  whether) to surface a level filter there. Not fixed this session since the user only reported the
-  Verben_Hoeren_EN_DE.html instance; flagging so a future pass doesn't have to rediscover it.
 - **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
   has its own `applyTheme()` that sets `document.body.classList.add('dark')`, and (not independently
   re-verified, but built from the same template) `Sprech_Pruefungs_Simulator.html` likely has the same
@@ -749,6 +742,27 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-22 (Task 8) — Fix: Wortschatz_Master_Grid.html missing A1 and B2 verbs
+
+#### Task
+Follow-up to Task 7: "Fix Wortschatz_Master_Grid.html too" — the same missing-A1/B2-verbs gap flagged as a known bug at the end of Task 7.
+
+#### Fix
+- Same root cause and same fix as `Verben_Hoeren_EN_DE.html`: appended the same 37 verbs (9 A1 + 28 B2) to this page's own `VERBS` array (540 total, identical schema, zero overlap with the existing 503 — reused the exact same verified list from Task 7).
+- This page has no level-filter UI (unlike `Verben_Hoeren_EN_DE.html`) — it builds one combined `allMasterEntries` array from `VERBS`/`NOUNS`/`ADJS` via `initMasterData()`, which iterates the full `VERBS` array directly, so the 37 new verbs are automatically picked up by every existing filter/search/view mode (grid/table/study) with no other code changes needed.
+- Updated the hardcoded count labels that don't self-update: the "🌟 Alle (...)" and "⚡ Nur Verben (...)" pos-filter buttons, and the static hero subtitle text (both only used as pre-JS-load placeholders / button labels — the live `#resultsCount` span is already computed from `allMasterEntries.length` at runtime and needed no change).
+- While fixing these, found the "🎨 Nur Adjektive (236)" label was ALSO stale and wrong independent of this task — the actual `ADJS` array has 337 entries, not 236 (540 + 378 + 337 = 1255, matching the live `allMasterEntries.length`; the old 503+378+236=1117 the page previously showed was wrong on two counts, not just the verb one). Fixed this label too while already touching the surrounding counts, rather than leaving a known-wrong number sitting next to freshly-corrected ones.
+
+#### Testing
+- Headless-browser check: no `pageerror` events; `VERBS.length===540` and `allMasterEntries.length===1255` confirmed live via `page.evaluate`; both `sein` (A1) and `mögen` (A1) found in the live `VERBS` array; clicking "Nur Verben" filters to exactly 540; button/subtitle text all show the corrected numbers.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Wortschatz_Master_Grid.html`
+- `PROJECT_KNOWLEDGE.md` (this entry; removes the Known Bugs entry this task fixes)
+
+---
 
 ### 2026-09-22 (Task 7) — Fix: Verben_Hoeren_EN_DE.html missing A1 and B2 verbs
 
