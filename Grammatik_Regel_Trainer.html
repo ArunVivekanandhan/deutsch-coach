@@ -1453,11 +1453,12 @@ function explainWrongAnswerAI(chosenOpt) {
   if(fbBtn) fbBtn.innerText = "⏳ Loading...";
   
   const q = currentQuestion;
+  const rule = (q && q.ruleId) ? GRAMMAR_RULES.find(r => r.id === q.ruleId) : null;
   const promptTxt = `I am learning German. I answered this grammar question incorrectly.
 Sentence: "${q.prompt}"
 Correct answer: "${q.options ? q.options[q.correct] : q.en}"
 My incorrect answer: "${chosenOpt}"
-Rule context: ${currentRule ? currentRule.summary : ''}
+Rule context: ${rule ? rule.summary : (q.explain || '')}
 
 Briefly explain EXACTLY why my answer is wrong and why the correct answer is right. Keep it short and encouraging.`;
 
@@ -1481,10 +1482,70 @@ Briefly explain EXACTLY why my answer is wrong and why the correct answer is rig
   });
 }
 
+// AI weak-spot follow-up: the offline question bank is the default source for
+// practice (works with no network/AI configured at all). This is an optional
+// extra - when AI is configured, it asks the model for ONE brand-new question
+// on the exact rule+difficulty the learner just got wrong, instead of just
+// re-serving from the same fixed offline bank. If AI isn't configured, errors,
+// or returns something unparseable, this always falls back to the normal
+// offline generator rather than leaving the learner stuck.
+function generateAIPracticeQuestion(){
+  const cur = currentQuestion;
+  const ruleId = cur && cur.ruleId;
+  const rule = ruleId ? GRAMMAR_RULES.find(r => r.id === ruleId) : null;
+  const btn = document.getElementById("aiGenerateBtn");
+
+  if(!rule){
+    drillAnswered = false;
+    currentQuestion = generateInfiniteQuestion(selectedRuleId);
+    currentQuestion.aiFallbackNotice = "Couldn't tell which rule to generate for — showing another offline question instead.";
+    renderContent();
+    return;
+  }
+
+  if(btn){ btn.disabled = true; btn.innerText = "⏳ Generating..."; }
+  const diffLabel = (currentDifficulty === 'mixed') ? 'medium' : currentDifficulty;
+  const promptTxt = `Create ONE new German grammar practice question (multiple choice gap-fill) for a learner studying this exact topic: "${rule.title}".
+Topic summary: ${rule.summary}
+Target difficulty: ${diffLabel}.
+
+Respond with ONLY valid JSON, no markdown formatting, no text outside the JSON, in exactly this shape:
+{"prompt":"German sentence with ___ marking the gap","en":"English translation of the completed sentence","options":["optionA","optionB","optionC","optionD"],"correct":0,"explain":"short English explanation of why the correct option is right"}
+"correct" is the zero-based index into "options" of the single grammatically correct choice. Use real, natural German and make sure exactly one option is correct.`;
+
+  callAIGrammarExplanation(promptTxt, (raw) => {
+    if(btn){ btn.disabled = false; btn.innerText = "🤖 More Practice On This (AI)"; }
+    try {
+      const match = raw.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(match ? match[0] : raw);
+      if(!parsed.prompt || !Array.isArray(parsed.options) || parsed.options.length < 2 || typeof parsed.correct !== 'number' || !parsed.options[parsed.correct]){
+        throw new Error("Malformed AI response");
+      }
+      currentQuestion = {
+        ruleNum: rule.num, ruleTitle: rule.title, prompt: parsed.prompt, en: parsed.en || "",
+        options: parsed.options, correct: parsed.correct, explain: parsed.explain || "",
+        type: 'choice', ruleId: rule.id, diff: currentDifficulty, aiGenerated: true
+      };
+      drillAnswered = false;
+      renderContent();
+    } catch(e) {
+      drillAnswered = false;
+      currentQuestion = generateInfiniteQuestion(rule.id);
+      // The feedback box (and #aiGenStatus inside it) resets on a fresh
+      // unanswered question, so a status message written there would never
+      // be seen - attach the notice to the question itself instead, and
+      // render it as a small banner (see renderDrillView).
+      currentQuestion.aiFallbackNotice = "⚠️ AI question generation isn't available right now (check your AI key in Settings) — showing an offline practice question instead.";
+      renderContent();
+    }
+  });
+}
+
 let currentMode = 'study'; // 'study', 'drill', 'stats'
 let selectedRuleId = 'alle'; // Default to all rules mixed for endless training!
 let endlessMode = true; // TRUE = generate questions indefinitely!
 let drillFormat = 'mixed'; // 'mixed' (alternating), 'choice' (gap-fill), 'build' (sentence builder)
+let currentDifficulty = 'mixed'; // 'easy', 'medium', 'hard', or 'mixed' (no filter)
 let currentStreak = 0;
 let bestStreak = 0;
 let currentQuestion = null;
@@ -1560,6 +1621,15 @@ const DYNAMIC_GENERATORS = {
         prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Ich mag Tee, ___ Kaffee ist mir zu stark.", "en": "I like tea, but coffee is too strong for me.", "o": ["aber", "obwohl", "weil", "deshalb"], "c": 0, "exp": "'aber' is Position 0 and doesn't change word order; the clause after it keeps normal Subject-Verb order."}, {"diff": "medium", "p": "Er hat die Prüfung nicht bestanden, ___ er zu wenig gelernt hatte.", "en": "He didn't pass the exam because he had studied too little.", "o": ["weil", "denn", "deshalb", "trotzdem"], "c": 0, "exp": "'weil' sends the conjugated verb ('hatte') to the very end of the subordinate clause."}, {"diff": "hard", "p": "Die Prüfung war sehr schwer, ___ haben fast alle Studenten bestanden.", "en": "The exam was very hard, nevertheless almost all students passed.", "o": ["trotzdem", "obwohl", "weil", "denn"], "c": 0, "exp": "'trotzdem' is a Position-1 adverb, forcing inversion (verb 'haben' right after it) — 'obwohl' would instead require verb-final order ('...obwohl fast alle bestanden haben')."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 1, ruleTitle: "Verb Position & Connectors", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r2_cases: [
@@ -1609,6 +1679,15 @@ const DYNAMIC_GENERATORS = {
         prompt: dv.p, en: dv.en, options: dv.o, correct: dv.c, explain: dv.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "___ Lehrer erklärt die Aufgabe.", "en": "The teacher explains the task.", "o": ["Der", "Den", "Dem", "Des"], "c": 0, "exp": "Subject = Nominativ → 'der Lehrer'."}, {"diff": "medium", "p": "Das ist das Auto ___ Schwester.", "en": "That is my sister's car.", "o": ["meiner", "meine", "meinem", "meinen"], "c": 0, "exp": "Genitiv feminine possessive is 'meiner' → 'das Auto meiner Schwester'."}, {"diff": "hard", "p": "Der Kellner bringt ___ Kunden die Rechnung.", "en": "The waiter brings the customer the bill.", "o": ["dem", "den", "der", "des"], "c": 0, "exp": "'bringen' + two objects: indirect object (to whom) = Dativ 'dem Kunden'; direct object (what) = Akkusativ 'die Rechnung', already given."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 2, ruleTitle: "Die 4 Fälle", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r3_prepositions: [
@@ -1654,6 +1733,15 @@ const DYNAMIC_GENERATORS = {
         prompt: fp.p, en: fp.en, options: fp.o, correct: fp.c, explain: fp.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Ich gehe ___ Supermarkt.", "en": "I'm going to the supermarket.", "o": ["in den", "in dem", "im", "in der"], "c": 0, "exp": "'gehen' = movement (wohin?) → Akkusativ with the two-way preposition 'in': 'in den Supermarkt'."}, {"diff": "medium", "p": "Das Bild hängt ___ Wand.", "en": "The picture hangs on the wall.", "o": ["an der", "an die", "an dem", "an den"], "c": 0, "exp": "'hängen' (stationary, wo?) + two-way preposition 'an' → Dativ feminine 'an der Wand'."}, {"diff": "hard", "p": "Er stellt das Fahrrad ___ Garage.", "en": "He puts the bike into the garage.", "o": ["in die", "in der", "in dem", "in den"], "c": 0, "exp": "'stellen' (to place/put — an action of movement) always takes Akkusativ, unlike 'stehen' (stationary), which would take Dativ."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 3, ruleTitle: "Präpositionen: Akkusativ, Dativ & Wechselpräpositionen", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r4_adjectives: [
@@ -1671,6 +1759,15 @@ const DYNAMIC_GENERATORS = {
         prompt: ac.p, en: ac.en, options: ac.o, correct: ac.c, explain: ac.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Der ___ Mann arbeitet hier.", "en": "The nice man works here.", "o": ["nette", "netter", "netten", "nettem"], "c": 0, "exp": "After 'der' (definite article), Nominativ Maskulin adjective ending is always '-e'."}, {"diff": "medium", "p": "Ich trinke gern schwarz___ Kaffee.", "en": "I like to drink black coffee.", "o": ["en", "e", "er", "es"], "c": 0, "exp": "No article (Nullartikel) + Akkusativ Maskulin → strong ending '-en': 'schwarzen Kaffee'."}, {"diff": "hard", "p": "Mit ein___ freundlichen Lächeln begrüßte sie die Gäste.", "en": "With a friendly smile, she greeted the guests.", "o": ["einem", "einen", "einer", "eines"], "c": 0, "exp": "'mit' triggers Dativ; 'Lächeln' is neuter, so the ein-word takes '-em': 'einem freundlichen Lächeln'."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 4, ruleTitle: "Adjektiv-Endungen", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r5_konjunktiv: [
@@ -1687,6 +1784,15 @@ const DYNAMIC_GENERATORS = {
         prompt: kj.p, en: kj.en, options: kj.o, correct: kj.c, explain: kj.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "___ du mir bitte helfen?", "en": "Could you please help me?", "o": ["Könntest", "Kannst", "Konntest", "Würdest"], "c": 0, "exp": "'könntest' (Konjunktiv II of können, du-form) is the standard polite request form."}, {"diff": "medium", "p": "Wenn ich Zeit ___, würde ich dich besuchen.", "en": "If I had time, I would visit you.", "o": ["hätte", "habe", "hatte", "haben"], "c": 0, "exp": "An unreal condition (irreal) requires Konjunktiv II 'hätte', not the indicative 'habe'."}, {"diff": "hard", "p": "An deiner Stelle ___ ich das Angebot nicht ablehnen.", "en": "In your place, I would not turn down the offer.", "o": ["würde", "werde", "wurde", "würdest"], "c": 0, "exp": "Giving advice with 'An deiner Stelle' + first person requires 'würde' (Konjunktiv II of werden) + infinitive, not the indicative 'werde'."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 5, ruleTitle: "Konjunktiv II", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r6_passiv: [
@@ -1701,6 +1807,15 @@ const DYNAMIC_GENERATORS = {
         ruleNum: 6, ruleTitle: "Passiv (Vorgangspassiv)",
         prompt: ps.p, en: ps.en, options: ps.o, correct: ps.c, explain: ps.exp
       };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Die Fenster ___ jeden Tag geputzt.", "en": "The windows are cleaned every day.", "o": ["werden", "wird", "sind", "haben"], "c": 0, "exp": "Plural subject + Präsens Passiv → 'werden' + Partizip II."}, {"diff": "medium", "p": "Der Vertrag ___ gestern unterschrieben.", "en": "The contract was signed yesterday.", "o": ["wurde", "wird", "ist", "war"], "c": 0, "exp": "Past narrative passive → 'wurde' + Partizip II (Präteritum Passiv)."}, {"diff": "hard", "p": "Die neuen Regeln müssen von allen Mitarbeitern beachtet ___.", "en": "The new rules must be observed by all employees.", "o": ["werden", "worden", "geworden", "sein"], "c": 0, "exp": "Modal + Passiv: Partizip II + 'werden' at the very end (not 'worden', which only appears in Perfekt Passiv)."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 6, ruleTitle: "Passiv", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ],
 
@@ -1718,6 +1833,15 @@ const DYNAMIC_GENERATORS = {
         prompt: rl.p, en: rl.en, options: rl.o, correct: rl.c, explain: rl.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Das ist die Frau, ___ hier arbeitet.", "en": "That is the woman who works here.", "o": ["die", "der", "den", "deren"], "c": 0, "exp": "Subject of the relative clause (Nominativ), feminine → 'die'."}, {"diff": "medium", "p": "Der Mann, ___ Auto ich geliehen habe, ist mein Nachbar.", "en": "The man whose car I borrowed is my neighbor.", "o": ["dessen", "den", "dem", "deren"], "c": 0, "exp": "Possession inside the relative clause → Genitiv 'dessen' (masculine/neuter)."}, {"diff": "hard", "p": "Die Kollegen, mit ___ ich zusammenarbeite, sind sehr hilfsbereit.", "en": "The colleagues I work with are very helpful.", "o": ["denen", "die", "deren", "den"], "c": 0, "exp": "Preposition 'mit' requires Dativ; the plural Dativ relative pronoun is 'denen', not 'den'."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 7, ruleTitle: "Relativsätze", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r8_infinitiv: [
@@ -1732,6 +1856,15 @@ const DYNAMIC_GENERATORS = {
         ruleNum: 8, ruleTitle: "Infinitiv mit „zu“ & „um ... zu“ vs. „damit“",
         prompt: inf.p, en: inf.en, options: inf.o, correct: inf.c, explain: inf.exp
       };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Ich habe keine Zeit, das Buch ___ lesen.", "en": "I don't have time to read the book.", "o": ["zu", "zu der", "um zu", "damit"], "c": 0, "exp": "An infinitive clause after 'Zeit haben' takes plain 'zu' + infinitive."}, {"diff": "medium", "p": "Ich lerne jeden Tag Deutsch, ___ die Prüfung zu bestehen.", "en": "I study German every day (in order) to pass the exam.", "o": ["um", "damit", "zu", "weil"], "c": 0, "exp": "Same subject in both clauses ('ich' learns, 'ich' passes) → 'um...zu'."}, {"diff": "hard", "p": "Die Lehrerin spricht langsam, ___ die Schüler sie besser verstehen.", "en": "The teacher speaks slowly so that the students understand her better.", "o": ["damit", "um zu", "zu", "dass"], "c": 0, "exp": "Different subjects (Lehrerin vs. Schüler) → 'damit' + Nebensatz, NOT 'um...zu', which requires the same subject."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 8, ruleTitle: "Infinitiv mit zu / um...zu / damit", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ],
 
@@ -1749,6 +1882,15 @@ const DYNAMIC_GENERATORS = {
         prompt: pr.p, en: pr.en, options: pr.o, correct: pr.c, explain: pr.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Entweder gehe ich ins Kino, ___ bleibe ich zu Hause.", "en": "Either I go to the movies, or I stay home.", "o": ["oder", "noch", "aber", "und"], "c": 0, "exp": "'entweder...oder' is a fixed pair — 'entweder' requires 'oder' to complete it."}, {"diff": "medium", "p": "Einerseits möchte ich mehr verdienen, ___ habe ich schon genug Stress.", "en": "On the one hand I want to earn more, on the other hand I already have enough stress.", "o": ["andererseits", "einerseits", "trotzdem", "dennoch"], "c": 0, "exp": "'einerseits...andererseits' (on the one hand...on the other) is a fixed contrastive pair."}, {"diff": "hard", "p": "Er ist ___ müde, aber er arbeitet trotzdem weiter.", "en": "He is indeed tired, but he keeps working anyway.", "o": ["zwar", "obwohl", "trotzdem", "jedoch"], "c": 0, "exp": "'zwar...aber' concedes a point before contradicting it; 'zwar' must be paired with a following 'aber' clause, unlike 'obwohl' (which needs verb-final order instead)."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 9, ruleTitle: "Zweiteilige Konnektoren", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r10_reflexiv: [
@@ -1765,6 +1907,15 @@ const DYNAMIC_GENERATORS = {
         prompt: rf.p, en: rf.en, options: rf.o, correct: rf.c, explain: rf.exp
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Ich freue ___ auf die Ferien.", "en": "I'm looking forward to the holidays.", "o": ["mich", "mir", "mich selbst", "meiner"], "c": 0, "exp": "'sich freuen auf' is a pure reflexive verb taking the Akkusativ reflexive pronoun 'mich'."}, {"diff": "medium", "p": "Ich kaufe ___ ein neues Handy.", "en": "I'm buying myself a new phone.", "o": ["mir", "mich", "mich selbst", "meins"], "c": 0, "exp": "Since there's already a direct object (Handy = Akkusativ), the reflexive pronoun switches to Dativ: 'mir'."}, {"diff": "hard", "p": "Putz ___ bitte die Zähne, bevor du schlafen gehst!", "en": "Brush your teeth before you go to sleep!", "o": ["dir", "dich", "deine", "deiner"], "c": 0, "exp": "With body parts, German uses a Dativ reflexive pronoun instead of a possessive: 'sich die Zähne putzen' → 'dir'."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 10, ruleTitle: "Reflexive Verben", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r11_paragraph: [
@@ -1778,6 +1929,15 @@ const DYNAMIC_GENERATORS = {
       const t = templates[Math.floor(Math.random()*templates.length)];
       return { ruleNum:11, ruleTitle:"Paragraph Making & Cohesion", prompt:t.p, en:t.en, options:t.o, correct:t.c, explain:t.exp };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Zuerst stelle ich mich vor. ___ spreche ich über meine Ausbildung.", "en": "First I introduce myself. Then I talk about my education.", "o": ["Danach", "Trotzdem", "Obwohl", "Weil"], "c": 0, "exp": "'Danach' (afterwards) is a simple sequencing connector linking two steps in a text."}, {"diff": "medium", "p": "Das Thema ist wichtig. ___ möchte ich drei Argumente nennen.", "en": "The topic is important. In this context, I would like to name three arguments.", "o": ["In diesem Zusammenhang", "Trotzdem", "Obwohl", "Weil"], "c": 0, "exp": "'In diesem Zusammenhang' (in this context) is a cohesion phrase linking back to the previous sentence's topic."}, {"diff": "hard", "p": "___ lässt sich sagen, dass die Vorteile überwiegen.", "en": "In summary, it can be said that the advantages outweigh the disadvantages.", "o": ["Zusammenfassend", "Einerseits", "Erstens", "Außerdem"], "c": 0, "exp": "'Zusammenfassend' (in summary) signals a concluding paragraph — 'Einerseits'/'Erstens' would only fit an opening or listing paragraph."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 11, ruleTitle: "Paragraph Making & Text Cohesion", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r12_comma: [
@@ -1790,6 +1950,15 @@ const DYNAMIC_GENERATORS = {
       ];
       const ct = commaTests[Math.floor(Math.random()*commaTests.length)];
       return { ruleNum:12, ruleTitle:"Kommasetzung (German Comma Rules)", prompt:ct.p, en:ct.en, options:ct.o, correct:ct.c, explain:ct.exp };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Ich kaufe Brot, Milch___ und Käse.", "en": "I'm buying bread, milk, and cheese.", "o": ["kein Komma", ", (Komma erforderlich)", "; (Semikolon)", ": (Doppelpunkt)"], "c": 0, "exp": "German does NOT use an Oxford comma — no comma directly before 'und' in a simple list."}, {"diff": "medium", "p": "Ich weiß nicht___ ob ich morgen kommen kann.", "en": "I don't know whether I can come tomorrow.", "o": [", (Komma vor ob-Satz)", "kein Komma", "; (Semikolon)", "- (Bindestrich)"], "c": 0, "exp": "Subordinate clauses introduced by 'ob' (whether) always require a comma, just like 'dass' and 'weil'."}, {"diff": "hard", "p": "Um die Prüfung zu bestehen___ musste sie drei Monate lang jeden Tag lernen.", "en": "To pass the exam, she had to study every day for three months.", "o": [", (Komma nach vorangestelltem Infinitivsatz)", "kein Komma", "; (Semikolon)", ": (Doppelpunkt)"], "c": 0, "exp": "When an 'um...zu' infinitive clause is placed BEFORE the main clause, a comma separates it, and the main verb follows immediately (inversion)."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 12, ruleTitle: "Kommasetzung", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ],
 
@@ -1812,6 +1981,15 @@ const DYNAMIC_GENERATORS = {
         explain: `'${item.nom}' belongs to N-Deklination! In all cases except Nominative singular, it adds -(e)n → '${item.akk.replace("den", "dem")}'.`
       };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "___ Student stellt eine Frage.", "en": "The student asks a question.", "o": ["Der", "Den", "Dem", "Des"], "c": 0, "exp": "Nominativ Singular is the ONE case where N-Deklination nouns do NOT add '-en' — 'der Student', not 'der Studenten'."}, {"diff": "medium", "p": "Ich habe ___ eingeladen.", "en": "I invited the colleague.", "o": ["den Kollegen", "der Kollege", "dem Kollegen", "des Kollegen"], "c": 0, "exp": "Direct object (Akkusativ) of an N-Deklination noun takes '-n': 'den Kollegen'."}, {"diff": "hard", "p": "Die Meinung ___ wurde nicht berücksichtigt.", "en": "The new intern's opinion was not taken into account.", "o": ["des neuen Praktikanten", "der neue Praktikant", "dem neuen Praktikanten", "den neuen Praktikanten"], "c": 0, "exp": "Genitiv of an N-Deklination noun still takes '-en' (not the expected '-s' of a regular masculine Genitiv): 'des Praktikanten', not 'des Praktikants'."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 13, ruleTitle: "N-Deklination", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r14_pronominaladverb: [
@@ -1824,6 +2002,15 @@ const DYNAMIC_GENERATORS = {
       ];
       const pr = prons[Math.floor(Math.random()*prons.length)];
       return { ruleNum:14, ruleTitle:"Da- & Wo-Komposita (Pronominal Adverbs: damit, wofür...)", prompt:pr.p, en:pr.en, options:pr.o, correct:pr.c, explain:pr.exp };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Ich interessiere mich für Musik. Ich interessiere mich sehr ___.", "en": "I'm interested in music. I'm very interested in it.", "o": ["dafür", "für ihn", "davon", "wofür"], "c": 0, "exp": "'Musik' is a thing, so 'für Musik' becomes the pronominal adverb 'dafür', not a preposition + pronoun."}, {"diff": "medium", "p": "Erinnerst du dich an deinen ersten Schultag? — Ja, ich erinnere mich noch gut ___.", "en": "Do you remember your first day of school? — Yes, I still remember it well.", "o": ["daran", "an ihn", "davon", "woran"], "c": 0, "exp": "'der erste Schultag' is a thing/event, not a person, so the pronominal adverb 'daran' is required."}, {"diff": "hard", "p": "Sie hat eine Gehaltserhöhung bekommen. Sie freut sich riesig ___.", "en": "She got a raise. She is thrilled about it.", "o": ["darüber", "über ihn", "damit", "worüber"], "c": 0, "exp": "'eine Gehaltserhöhung' is a thing → 'darüber', not a personal-pronoun construction."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 14, ruleTitle: "Da- & Wo-Komposita", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ],
 
@@ -1838,6 +2025,15 @@ const DYNAMIC_GENERATORS = {
       const tm = temporals[Math.floor(Math.random()*temporals.length)];
       return { ruleNum:15, ruleTitle:"Temporale Konnektoren (Temporal Connectors) (als vs. wenn)", prompt:tm.p, en:tm.en, options:tm.o, correct:tm.c, explain:tm.exp };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "___ ich Kind war, hatte ich einen Hund.", "en": "When I was a child, I had a dog.", "o": ["Als", "Wenn", "Wann", "Ob"], "c": 0, "exp": "A single, extended period in the past ('as a child') uses 'als', not 'wenn'."}, {"diff": "medium", "p": "Ich rufe dich an, ___ ich zu Hause ankomme.", "en": "I'll call you when I get home.", "o": ["wenn", "als", "während", "seitdem"], "c": 0, "exp": "A future/present single event uses 'wenn', not 'als' (reserved for a single completed PAST event)."}, {"diff": "hard", "p": "___ er nach Hause kam, war seine Frau schon eingeschlafen.", "en": "When he came home, his wife was already asleep.", "o": ["Als", "Wenn", "Bevor", "Nachdem"], "c": 0, "exp": "Even though it names one specific moment, this is a single PAST event, so 'als' is required, not 'wenn' (reserved for repeated past or present/future events)."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 15, ruleTitle: "Temporale Konnektoren (als vs. wenn)", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r16_modalverb: [
@@ -1849,6 +2045,15 @@ const DYNAMIC_GENERATORS = {
       ];
       const md = modals[Math.floor(Math.random()*modals.length)];
       return { ruleNum:16, ruleTitle:"Modalverben Nuancen (müssen vs. dürfen)", prompt:md.p, en:md.en, options:md.o, correct:md.c, explain:md.exp };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Kinder unter 18 Jahren ___ keinen Alkohol kaufen.", "en": "Children under 18 are not allowed to buy alcohol.", "o": ["dürfen", "müssen", "können", "wollen"], "c": 0, "exp": "Legal prohibition = 'nicht dürfen' (dürfen + nicht = forbidden)."}, {"diff": "medium", "p": "Du siehst müde aus. Du ___ mehr schlafen.", "en": "You look tired. You should sleep more.", "o": ["solltest", "musst", "darfst", "willst"], "c": 0, "exp": "Friendly advice uses 'sollte(st)' (Konjunktiv II of sollen), softer than the direct command 'musst'."}, {"diff": "hard", "p": "Entschuldigung, ___ ich hier kurz parken?", "en": "Excuse me, may I park here briefly?", "o": ["darf", "kann", "muss", "soll"], "c": 0, "exp": "Asking for PERMISSION uses 'dürfen' ('darf ich...?') — the precise, formal choice, even though 'kann ich...?' is common in casual speech."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 16, ruleTitle: "Modalverben Nuancen", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ],
 
@@ -1862,6 +2067,15 @@ const DYNAMIC_GENERATORS = {
       const it = items[Math.floor(Math.random()*items.length)];
       return { ruleNum:17, ruleTitle:"Konjunktiv I & Indirekte Rede (Reported Speech)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Er sagte, das Wetter ___ heute schlecht.", "en": "He said the weather was bad today.", "o": ["sei", "ist", "war", "wäre"], "c": 0, "exp": "Konjunktiv I of 'sein' is 'sei' — the standard reported-speech form."}, {"diff": "medium", "p": "Der Arzt erklärte, der Patient ___ bald wieder arbeiten.", "en": "The doctor explained the patient could work again soon.", "o": ["könne", "kann", "konnte", "könnte"], "c": 0, "exp": "Konjunktiv I of 'können' (er/sie/es) is 'könne', distinguishable from the indicative 'kann'."}, {"diff": "hard", "p": "Die Zeugen sagten, sie ___ nichts gesehen.", "en": "The witnesses said they had seen nothing.", "o": ["hätten", "haben", "hatten", "habe"], "c": 0, "exp": "For 'sie' (plural), Konjunktiv I of 'haben' is 'haben' — identical to the indicative! To keep the report clearly marked, speakers switch to Konjunktiv II 'hätten' instead."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 17, ruleTitle: "Konjunktiv I & Indirekte Rede", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r18_partizipialattribute: [
@@ -1872,6 +2086,15 @@ const DYNAMIC_GENERATORS = {
       ];
       const it = items[Math.floor(Math.random()*items.length)];
       return { ruleNum:18, ruleTitle:"Partizipialattribute (Extended Participle Constructions)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Die ___ Kinder spielen im Garten.", "en": "The laughing children are playing in the garden.", "o": ["lachenden", "gelachten", "lachten", "lachen"], "c": 0, "exp": "Ongoing action → Partizip I 'lachend' + plural adjective ending '-en'."}, {"diff": "medium", "p": "Der ___ Brief liegt auf dem Tisch.", "en": "The letter written yesterday is on the table.", "o": ["gestern geschriebene", "gestern schreibende", "gestern geschrieben", "gestern schreibt"], "c": 0, "exp": "Completed, passive action → Partizip II 'geschriebene' with the masculine Nominativ adjective ending."}, {"diff": "hard", "p": "Die ___ Firma sucht neue Mitarbeiter.", "en": "The rapidly growing company is looking for new employees.", "o": ["wachsende", "gewachsene", "gewachst", "wächst"], "c": 0, "exp": "'wachsen' describes an ONGOING process here, so Partizip I 'wachsende' is correct, not the completed Partizip II 'gewachsene'."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 18, ruleTitle: "Partizipialattribute", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ],
 
@@ -1884,6 +2107,15 @@ const DYNAMIC_GENERATORS = {
       const it = items[Math.floor(Math.random()*items.length)];
       return { ruleNum:19, ruleTitle:"Doppelkonjunktionen (Correlative Connectors)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Das Restaurant ist ___ gut als auch günstig.", "en": "The restaurant is both good and affordable.", "o": ["sowohl", "weder", "zwar", "nicht"], "c": 0, "exp": "'sowohl...als auch' (both...and) is a fixed positive pair."}, {"diff": "medium", "p": "Sie hat ___ das Studium abgeschlossen, sondern auch schon einen Job gefunden.", "en": "She has not only finished her studies but also already found a job.", "o": ["nicht nur", "weder", "sowohl", "zwar"], "c": 0, "exp": "'nicht nur...sondern auch' (not only...but also) adds emphasis to a second, often more impressive, fact."}, {"diff": "hard", "p": "___ das Wetter schlecht ist, findet das Fest im Freien statt.", "en": "Although the weather is bad, the festival takes place outdoors.", "o": ["Obwohl", "Zwar", "Trotzdem", "Weder"], "c": 0, "exp": "Without a following 'aber'-clause, 'zwar' cannot stand alone as a subordinator — this needs 'obwohl' (which correctly sends 'ist' to the end)."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 19, ruleTitle: "Doppelkonjunktionen", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r20_nominalisierung: [
@@ -1895,6 +2127,15 @@ const DYNAMIC_GENERATORS = {
       const it = items[Math.floor(Math.random()*items.length)];
       return { ruleNum:20, ruleTitle:"Nominalisierung (Turning Verbs & Adjectives into Nouns)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
     }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "Die ___ der Landschaft hat alle beeindruckt.", "en": "The beauty of the landscape impressed everyone.", "o": ["Schönheit", "Schönung", "Schönheiten", "Schöner"], "c": 0, "exp": "Adjectives like 'schön' often nominalize with '-heit': schön → die Schönheit."}, {"diff": "medium", "p": "Die ___ eines Fernstudiums interessiert viele Berufstätige.", "en": "The possibility of distance learning interests many working people.", "o": ["Möglichkeit", "Möglichung", "Möglichheit", "Möglich"], "c": 0, "exp": "'möglich' nominalizes with '-keit': die Möglichkeit."}, {"diff": "hard", "p": "___ der Verhandlungen einigten sich beide Seiten auf einen Kompromiss.", "en": "After the negotiations, both sides agreed on a compromise.", "o": ["Nach", "Nachdem", "Während", "Wegen"], "c": 0, "exp": "A completed prior action ('nachdem verhandelt wurde') nominalizes as 'nach + Genitiv noun', not 'nachdem' (which only introduces a clause, not a noun phrase)."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 20, ruleTitle: "Nominalisierung", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
+    }
   ],
 
   r21_genitivpraepositionen: [
@@ -1905,6 +2146,15 @@ const DYNAMIC_GENERATORS = {
       ];
       const it = items[Math.floor(Math.random()*items.length)];
       return { ruleNum:21, ruleTitle:"Genitivpräpositionen im formellen Stil (Formal Genitive Prepositions)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
+    }
+  ,
+    ()=>{
+      const bank = [{"diff": "easy", "p": "___ des Streiks fielen alle Züge aus.", "en": "Because of the strike, all trains were cancelled.", "o": ["Wegen", "Trotz", "Während", "Innerhalb"], "c": 0, "exp": "'wegen + Genitiv' expresses cause/reason."}, {"diff": "medium", "p": "___ eines Autos kaufte er sich ein Fahrrad.", "en": "Instead of a car, he bought himself a bicycle.", "o": ["Statt", "Wegen", "Trotz", "Während"], "c": 0, "exp": "'(an)statt + Genitiv' expresses substitution — one thing chosen instead of another."}, {"diff": "hard", "p": "___ der Öffnungszeiten können Sie uns jederzeit online erreichen.", "en": "Outside of opening hours, you can reach us online at any time.", "o": ["Außerhalb", "Innerhalb", "Trotz", "Wegen"], "c": 0, "exp": "'außerhalb + Genitiv' (outside of) contrasts with 'innerhalb' (within) — 'jederzeit' (anytime) signals opening hours are the excluded time."}];
+      const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
+        ? bank.filter(v => v.diff === currentDifficulty)
+        : bank;
+      const it = (pool.length ? pool : bank)[Math.floor(Math.random() * (pool.length ? pool.length : bank.length))];
+      return { ruleNum: 21, ruleTitle: "Genitivpräpositionen im formellen Stil", prompt: it.p, en: it.en, options: it.o, correct: it.c, explain: it.exp, diff: it.diff };
     }
   ]
 };
@@ -2212,9 +2462,12 @@ function generateInfiniteQuestion(ruleId) {
   }
 
   // Determine question format:
+  // A specific difficulty (easy/medium/hard) only filters tagged "choice" generators,
+  // so force choice format whenever a difficulty filter is active - otherwise "build"
+  // mode (untagged) would silently ignore the difficulty half the time.
   let chosenFormat = drillFormat;
   if (drillFormat === 'mixed') {
-    chosenFormat = Math.random() < 0.5 ? 'choice' : 'build';
+    chosenFormat = (currentDifficulty !== 'mixed') ? 'choice' : (Math.random() < 0.5 ? 'choice' : 'build');
   }
 
   if (chosenFormat === 'build' && BUILD_GENERATORS[targetRule]) {
@@ -2231,8 +2484,17 @@ function generateInfiniteQuestion(ruleId) {
     };
   } else {
     const generatorList = DYNAMIC_GENERATORS[targetRule];
-    const generatorFn = generatorList[Math.floor(Math.random() * generatorList.length)];
-    const raw = generatorFn();
+    // Retry a few times to find a question matching the active difficulty filter
+    // (only newer generators tag their questions with `diff`; legacy ones don't,
+    // so after enough retries we just accept whatever was drawn rather than loop
+    // forever or leave the drill screen empty).
+    let raw = null;
+    const maxAttempts = currentDifficulty === 'mixed' ? 1 : 15;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const generatorFn = generatorList[Math.floor(Math.random() * generatorList.length)];
+      raw = generatorFn();
+      if (currentDifficulty === 'mixed' || raw.diff === currentDifficulty) break;
+    }
     const correctOpt = raw.options[raw.correct];
     const shuffled = [...raw.options].sort(()=>Math.random() - 0.5);
     return {
@@ -2365,10 +2627,18 @@ function setDrillFormat(fmt){
   renderContent();
 }
 
+function setDifficulty(level){
+  currentDifficulty = level;
+  drillAnswered = false;
+  currentQuestion = generateInfiniteQuestion(selectedRuleId);
+  renderContent();
+}
+
 function renderDrillView(container){
   const cur = currentQuestion || generateInfiniteQuestion(selectedRuleId);
   currentQuestion = cur;
   const accPct = drillStats.total > 0 ? Math.round((drillStats.correct / drillStats.total) * 100) : 100;
+  const diffLabels = { mixed: '🔀 Mixed', easy: '🟢 Easy', medium: '🟡 Medium', hard: '🔴 Hard' };
 
   const headerHUD = `
     <!-- Mode Controls & Real-Time Performance HUD -->
@@ -2384,6 +2654,10 @@ function renderDrillView(container){
       <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);">
         Answered: <b>#${drillStats.total}</b> · Acc: <b>${drillStats.total>0?accPct+'%':'---'}</b> · Streak: <b style="color:var(--red);">${currentStreak} 🔥</b> (Best: ${bestStreak})
       </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Difficulty:</span>
+      ${Object.keys(diffLabels).map(k => `<button class="subtab ${currentDifficulty===k?'active':''}" onclick="setDifficulty('${k}')" title="Practice at ${k} difficulty">${diffLabels[k]}</button>`).join('')}
     </div>
   `;
 
@@ -2430,9 +2704,10 @@ function renderDrillView(container){
   // Otherwise cur.type === 'choice'
   container.innerHTML = `
     ${headerHUD}
+    ${cur.aiFallbackNotice ? `<div style="background:#fff3a0; border:1px solid var(--gold); border-radius:6px; padding:8px 12px; margin-bottom:10px; font-size:12px;">${cur.aiFallbackNotice}</div>` : ''}
     <div class="drill-card">
       <div class="drill-meta">
-        <span>RULE ${cur.ruleNum}: ${cur.ruleTitle.toUpperCase()} · LÜCKENTEXT</span>
+        <span>RULE ${cur.ruleNum}: ${cur.ruleTitle.toUpperCase()} · LÜCKENTEXT ${cur.diff ? `· ${diffLabels[cur.diff] || cur.diff}` : ''}${cur.aiGenerated ? ' · 🤖 AI-GENERATED' : ''}</span>
         <span>${endlessMode ? '♾️ INDEFINITE GENERATION' : `Question ${drillStats.total + 1} of 10`}</span>
       </div>
 
@@ -2610,9 +2885,11 @@ function checkAnswer(chosenIdx){
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <button class="speak-btn" onclick="speakText('${escapeQuotes(cur.prompt.replace('___', cur.options[cur.correct]))}')">🔊 Listen to full sentence</button>
       ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
-      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI-Erklärung (Why is this wrong?)</button>` : ''}
+      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${escapeQuotes(cur.options[chosenIdx])}')">🤖 KI-Erklärung (Why is this wrong?)</button>` : ''}
+      ${!isCorrect ? `<button id="aiGenerateBtn" class="actbtn" style="background:var(--purple, #6B4A8A); color:#fff; padding:6px 12px; font-size:11px;" onclick="generateAIPracticeQuestion()">🤖 More Practice On This (AI)</button>` : ''}
     </div>
     <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
+    <div id="aiGenStatus" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:11.5px; color:var(--ink-soft);"></div>
   `;
 
   document.getElementById("nextDrillBtn").style.display = "block";
