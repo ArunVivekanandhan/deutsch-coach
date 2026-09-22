@@ -2050,6 +2050,8 @@ function renderDrillView(container) {
       <p class="view-desc">Testen Sie Ihr Wissen über alle A2-Module hinweg.</p>
     </div>
 
+    <div id="drillModeSelector" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
+
     <div class="drill-box">
       <div class="drill-scorebar">
         <span>Score: <b id="drillScore">0</b></span>
@@ -2065,6 +2067,7 @@ function renderDrillView(container) {
       <button class="complete-btn" onclick="markModuleComplete('drill')">✅ Gesamtes Studio abgeschlossen!</button>
     </div>
   `;
+  renderDrillModeSelector();
 }
 
 let drillState = {
@@ -2072,6 +2075,20 @@ let drillState = {
   streak: 0,
   currentQuestion: null
 };
+let drillPracticeMode = 'easy'; // 'easy' (multiple choice), 'medium' (self-rate recall), 'hard' (typed)
+
+function setDrillPracticeMode(m){
+  drillPracticeMode = m;
+  renderDrillModeSelector();
+  if(drillState.currentQuestion) renderDrillQuestion(drillState.currentQuestion);
+}
+
+function renderDrillModeSelector(){
+  const el = document.getElementById('drillModeSelector');
+  if(!el) return;
+  const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Self-Rate)'},{k:'hard',l:'🔴 Hard (Type It)'}];
+  el.innerHTML = modes.map(m=>`<button class="pill-btn ${drillPracticeMode===m.k?'active':''}" onclick="setDrillPracticeMode('${m.k}')">${m.l}</button>`).join('');
+}
 
 function startDrill() {
   drillState = { score: 0, streak: 0, currentQuestion: null };
@@ -2118,6 +2135,30 @@ function nextDrillQuestion() {
 function renderDrillQuestion(q) {
   const content = document.getElementById('drillContent');
   if (!content) return;
+
+  if(drillPracticeMode === 'medium'){
+    content.innerHTML = `
+      <div class="drill-prompt-type">${q.type}</div>
+      <div class="drill-prompt-main">${q.prompt}</div>
+      <button class="complete-btn" style="margin-top:10px;" onclick="revealDrillAnswer()">🔎 Show Answer</button>
+      <div id="drillRevealArea"></div>
+      <div class="drill-feedback" id="drillFeedback"></div>
+    `;
+    return;
+  }
+  if(drillPracticeMode === 'hard'){
+    content.innerHTML = `
+      <div class="drill-prompt-type">${q.type}</div>
+      <div class="drill-prompt-main">${q.prompt}</div>
+      <input type="text" id="drillHardInput" class="challenge-input" placeholder="..." autofocus style="width:100%; padding:10px; border-radius:6px; border:1.5px solid var(--line); font-size:14px; margin-top:10px;">
+      <button class="complete-btn" style="margin-top:8px;" onclick="checkDrillHard()">✓ Check</button>
+      <div class="drill-feedback" id="drillFeedback"></div>
+    `;
+    const inp = document.getElementById('drillHardInput');
+    if(inp) inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); checkDrillHard(); } });
+    return;
+  }
+
   content.innerHTML = `
     <div class="drill-prompt-type">${q.type}</div>
     <div class="drill-prompt-main">${q.prompt}</div>
@@ -2126,6 +2167,67 @@ function renderDrillQuestion(q) {
     </div>
     <div class="drill-feedback" id="drillFeedback"></div>
   `;
+}
+
+/* ---- MEDIUM MODE: self-rate recall (see the answer, honestly judge yourself) ---- */
+function revealDrillAnswer(){
+  const q = drillState.currentQuestion;
+  const area = document.getElementById('drillRevealArea');
+  if(!area) return;
+  area.innerHTML = `
+    <div style="background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px; margin-top:10px;">
+      <b>Answer:</b> ${q.correct} <button class="pill-btn active" style="font-size:11px; margin-left:6px;" onclick="speak('${escapeQuotes(q.correct)}')">🔊</button>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="complete-btn" style="background:var(--red, #c0392b);" onclick="selfRateDrill(false)">✗ Wusste ich nicht</button>
+      <button class="complete-btn" onclick="selfRateDrill(true)">✓ Wusste ich!</button>
+    </div>
+  `;
+}
+
+function selfRateDrill(knewIt){
+  drillDrillRecordResult(knewIt);
+}
+
+/* ---- HARD MODE: typed free recall ---- */
+function checkDrillHard(){
+  const q = drillState.currentQuestion;
+  const input = document.getElementById('drillHardInput');
+  const val = (input ? input.value : '').trim().toLowerCase();
+  const isCorrect = val === q.correct.toLowerCase();
+  if(input) input.disabled = true;
+  drillDrillRecordResult(isCorrect, val);
+}
+
+/* ---- Shared feedback renderer for Medium/Hard, matching checkDrillAnswer's style ---- */
+function drillDrillRecordResult(isCorrect, userAnswer){
+  const q = drillState.currentQuestion;
+  const feedback = document.getElementById('drillFeedback');
+  if(isCorrect){
+    drillState.score += 10;
+    drillState.streak++;
+  } else {
+    drillState.streak = 0;
+  }
+  updateDrillHUD();
+  if(feedback){
+    feedback.innerHTML = isCorrect ? `
+      <div style="background:#eaf2ea; border:1.5px solid var(--green); border-radius:8px; padding:10px; margin-top:12px;">
+        <div style="font-weight:700; color:var(--green); font-size:15px; margin-bottom:4px;">✅ Richtig! Correct! (+10 pts)</div>
+        <div style="margin-top:10px;"><button class="complete-btn" style="width:auto; padding:8px 18px;" onclick="nextDrillQuestion()">Next Question (Weiter) ➔</button></div>
+      </div>
+    ` : `
+      <div style="background:#f6e9e7; border:1.5px solid var(--red); border-radius:8px; padding:10px; margin-top:12px;">
+        <div style="font-weight:700; color:var(--red); font-size:15px; margin-bottom:4px;">❌ Not quite right (Nicht ganz)</div>
+        <div style="font-size:13px; margin:4px 0;">${userAnswer !== undefined ? `Your answer: <b style="color:var(--red);">${userAnswer}</b> · ` : ''}Correct answer: <b style="color:var(--green);">${q.correct}</b></div>
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+          <button class="pill-btn active" style="font-size:12px;" onclick="speak('${escapeQuotes(q.correct)}')">🔊 Hear Correct: ${q.correct}</button>
+          <button class="complete-btn" style="width:auto; padding:8px 18px;" onclick="nextDrillQuestion()">Next Question (Weiter) ➔</button>
+        </div>
+      </div>
+    `;
+  }
+  speak(q.correct);
 }
 
 function checkDrillAnswer(ans) {
