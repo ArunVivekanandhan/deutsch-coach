@@ -453,7 +453,10 @@ const THEMEN = [
       {p:'sie (Pl.)', praes:{de:'Sie <b>gehen</b> zum Zahnarzt.', en:'They are going to the dentist.'}, praet:{de:'Sie <b>gingen</b> zum Zahnarzt.', en:'They went to the dentist.'}, perf:{de:'Sie sind zum Zahnarzt <b>gegangen</b>.', en:'They went to the dentist.'}}
     ]}
   ]},
-  { id:'haeufig', title:'Häufige Wörter', icon:'megaphone', verbs:[] } // populated at init() from VERBS_ALL (540 auto-conjugated verbs, A1-B2)
+  { id:'haeufig_a1', title:'Häufige Wörter (A1)', icon:'megaphone', verbs:[] }, // populated at init() from VERBS_ALL, filtered by level
+  { id:'haeufig_a2', title:'Häufige Wörter (A2)', icon:'megaphone', verbs:[] },
+  { id:'haeufig_b1', title:'Häufige Wörter (B1)', icon:'megaphone', verbs:[] },
+  { id:'haeufig_b2', title:'Häufige Wörter (B2)', icon:'megaphone', verbs:[] }
 ];
 
 /* =========================================================================
@@ -1278,8 +1281,11 @@ function tenseSelectorHTML(){
 }
 
 function init(){
-  const haeufigThema = THEMEN.find(t => t.id === 'haeufig');
-  if(haeufigThema) haeufigThema.verbs = VERBS_ALL.map(buildAutoVerbEntry);
+  const levelToThemaId = { 'A1':'haeufig_a1', 'A2':'haeufig_a2', 'B1':'haeufig_b1', 'B2':'haeufig_b2' };
+  VERBS_ALL.forEach(v => {
+    const thema = THEMEN.find(t => t.id === levelToThemaId[v.level]);
+    if(thema) thema.verbs.push(buildAutoVerbEntry(v));
+  });
   renderThemaGrid();
 }
 
@@ -1310,31 +1316,12 @@ function backToThemen(){
   renderThemaGrid();
 }
 
-let haeufigLevel = 'A1';
-function setHaeufigLevel(lvl){
-  haeufigLevel = lvl;
-  openVerbInf = null;
-  stopAllAudio();
-  renderVerbList();
-}
-function haeufigLevelSelectorHTML(){
-  const levels = ['A1','A2','B1','B2','Alle'];
-  return `
-    <div class="tense-row" style="margin-top:-4px;">
-      ${levels.map(l => `<button class="tense-btn ${haeufigLevel===l?'active':''}" onclick="setHaeufigLevel('${l}')">${l}</button>`).join('')}
-    </div>
-  `;
-}
-
 function renderVerbList(){
   const thema = THEMEN.find(t => t.id === curThemaId);
   const view = document.getElementById('mainView');
   if(!thema){ renderThemaGrid(); return; }
 
-  const isHaeufig = (thema.id === 'haeufig');
-  const visibleVerbs = isHaeufig
-    ? thema.verbs.filter(v => haeufigLevel === 'Alle' || v.level === haeufigLevel)
-    : thema.verbs;
+  const isHaeufig = thema.id.indexOf('haeufig_') === 0;
 
   const curTenseInfo = TENSES.find(t => t.k === curTense);
   view.innerHTML = `
@@ -1343,9 +1330,9 @@ function renderVerbList(){
     <div class="sub" style="margin-bottom:8px;">Wähle eine Zeitform, dann klicke ein Verb, um alle 6 Personen zu hören und zu üben.</div>
     ${tenseSelectorHTML()}
     <div class="sub" style="margin-bottom:14px; margin-top:-6px;">Aktuell: <b>${curTenseInfo.label} ${curTenseInfo.sub}</b></div>
-    ${isHaeufig ? `<div class="sub" style="margin-bottom:6px;">Niveau (CEFR): <b>${haeufigLevel}</b> — ${visibleVerbs.length} von ${thema.verbs.length} Verben. Diese Sätze sind automatisch aus der App-Vokabelliste konjugiert (einfaches Muster, keine handgeschriebenen Beispielsätze wie bei den anderen Themen).</div>${haeufigLevelSelectorHTML()}` : ''}
+    ${isHaeufig ? `<div class="sub" style="margin-bottom:6px;">${thema.verbs.length} Verben. Diese Sätze sind automatisch aus der App-Vokabelliste konjugiert (einfaches Muster, keine handgeschriebenen Beispielsätze wie bei den anderen Themen).</div>` : ''}
     <div class="verb-list" id="verbList">
-      ${visibleVerbs.map(v => renderVerbCardHTML(thema, v)).join('')}
+      ${thema.verbs.map(v => renderVerbCardHTML(thema, v)).join('')}
     </div>
   `;
 }

@@ -743,6 +743,30 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 6) — Thema_Sprech_Trainer.html: split "Häufige Wörter" into 4 level topics
+
+#### Task
+Follow-up to Task 5: user feedback was "540 theme are under one. I expect create another group there we can group by theme" — the single "Häufige Wörter" card (with an internal A1/A2/B1/B2/Alle filter) wasn't what they wanted; they wanted separate topic cards on the main grid, one per CEFR level.
+
+#### Change
+- Replaced the single `{id:'haeufig', ...}` topic with four: `haeufig_a1`/`haeufig_a2`/`haeufig_b1`/`haeufig_b2`, titled "Häufige Wörter (A1)" through "(B2)", each still using the `megaphone` icon.
+- `init()` now buckets each `VERBS_ALL` entry into the matching level-topic (`v.level` → `haeufig_a1`/etc.) instead of building one flat 540-verb array.
+- Removed the now-redundant in-topic level filter (`haeufigLevel` state, `setHaeufigLevel()`, `haeufigLevelSelectorHTML()`) added in Task 5, since the grouping now happens at the topic-grid level instead. `renderVerbList()`'s auto-topic disclosure note (explaining these are auto-conjugated, not hand-written) now triggers on any `haeufig_*` topic id and just shows that topic's own verb count.
+- No changes to the conjugation engine or `VERBS_ALL` data itself — this was purely a re-grouping of the same 540 already-verified verbs.
+
+#### Testing
+- Headless-browser check: topic grid now shows 11 cards total (the original 7 plus 4 level cards), with counts "0 / 50", "0 / 178", "0 / 284", "0 / 28" for A1/A2/B1/B2 respectively (sums to 540, matching the total from Task 5).
+- Opening the A1 topic shows exactly 50 verb cards; opening a verb and checking its sentence renders correctly.
+- Re-ran the full live-page structural verification from Task 5 (`generateSentences`/`VERBS_ALL` called via `page.evaluate`, not a copy): all 9,720 sentence-tense combinations still clean, since the underlying data and engine weren't touched.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html`
+- `sw.js` (regenerated: cache version bump)
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 5) — Thema_Sprech_Trainer.html: "Häufige Wörter" now covers all 540 A1–B2 verbs
 
 #### Task
