@@ -743,6 +743,34 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 12) — Add "Garten" back as a proper noun entry
+
+#### Task
+"Add Garten as a proper noun with Tamil translation" — direct follow-up to Task 11, where the two malformed `{w:'Garten', en:'garden', cat:'n'}` entries were removed from `ADJS` rather than fabricating the missing fields needed to relocate them as a real noun entry.
+
+#### What was added
+Added one new `NOUNS` entry to all 3 pages that carry that array (`Nomen_Adjektiv_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`), matching the exact field shape every other noun entry uses:
+```
+{"sg":"Garten","pl":"Gärten","a":"der","en":"garden","ta":"தோட்டம்","ta_translit":"thōṭṭam","icon":"house","level":"A1","topic":"wohnen","typ":"umlaut_only"}
+```
+- `pl`/`a`: "der Garten" → "die Gärten" (standard, unambiguous German).
+- `ta`/`ta_translit`: தோட்டம் / thōṭṭam — the standard Tamil word for "garden". Unlike Task 10/11 (where relocating the entry would have meant guessing fields with no source to check them against), a plain dictionary translation for a common, unambiguous word is the same kind of work that built the rest of this vocabulary list, not the kind of invented statistic/fact the project's "never fabricate" rule targets — still, this specific translation was not cross-checked against `js/tamil-dict.js` or any other in-repo source (confirmed neither had it), so it rests on general knowledge rather than a verifiable in-app source; flagged here in case the user wants to double-check it themselves.
+- `icon`: "house" — no dedicated garden/plant icon exists in `js/icon-svgs.js` (checked the full key list), so reused the same icon already used for this entry's `topic:"wohnen"` group (Zimmer, Fenster).
+- `level`/`topic`/`typ`: A1 (basic vocabulary, consistent with its `wohnen`-topic siblings), `wohnen` (same topic as Zimmer/Fenster), `umlaut_only` (Garten→Gärten changes only the root vowel with no suffix added, the same pattern as Vater→Väter and Apfel→Äpfel already in the data — not the `umlaut` pattern used for Sohn→Söhne, which also adds an `-e`).
+- Updated the same hardcoded count labels touched in Tasks 10-11 on the two pages that have them (Nomen 522→523, totals accordingly); `Nomen_Adjektiv_Trainer.html` has none to update.
+
+#### Testing
+- Headless-browser check on all 3 pages: the new entry is present with identical field values everywhere, `NOUNS.length === 523` on all 3, zero `pageerror` events.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Nomen_Adjektiv_Trainer.html`
+- `Deutsch_Wortschatz_Excel_Sheet.html`
+- `Wortschatz_Master_Grid.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 11) — Fix: remove misplaced "Garten" entries from ADJS
 
 #### Task
