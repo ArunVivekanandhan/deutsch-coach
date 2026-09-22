@@ -672,13 +672,16 @@ the larger IA/content-unification work. In priority order for whoever picks this
   latest changelog entry (mirroring `German_B1_Practice_Studio.html`'s 7-module shape, or a B2 oral
   exam simulator mirroring `Sprech_Pruefungs_Simulator.html`/`A1_Sprech_Pruefungs_Simulator.html`) —
   deliberately not attempted in that session since the explicit scope was "content foundation first."
-- Extend the difficulty-tiered offline practice + AI weak-spot follow-up pattern built for
-  `Grammatik_Regel_Trainer.html` (Section 28's latest changelog entry) to the rest of the app, per the
-  user's explicitly confirmed "everything" scope: the vocabulary trainers
-  (`Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html` — add an explicit easy/medium/hard
-  drill-mode selector and AI weak-spot question generation on top of their existing SRS box progression)
-  and every exam simulator / practice studio page. Only the grammar trainer was done so far; this was
-  communicated to the user as the first installment, not the whole backlog.
+- Extend the difficulty-tiered offline practice + AI weak-spot follow-up pattern (built for
+  `Grammatik_Regel_Trainer.html`, then `Verb_Transformation_Trainer.html` and
+  `Nomen_Adjektiv_Trainer.html` — see Section 28's changelog entries) to the remaining practice pages,
+  per the user's explicitly confirmed "everything" scope: every exam simulator / practice studio page
+  (`Sprech_Pruefungs_Simulator.html`, `A1_Sprech_Pruefungs_Simulator.html`,
+  `German_A2_Practice_Studio.html`, `German_B1_Practice_Studio.html`,
+  `Hoerverstehen_Diktat_Trainer.html`, `Brief_Schreiben_Trainer.html`, `Satzbau_Trainer.html`,
+  `konnektoren_referenz.html`, `Dialog_Schatten_Trainer.html`, `Wortfamilien_Explorer.html`,
+  `Wortschatz_Master_Grid.html`) have not been touched yet. Grammar and both vocabulary trainers are
+  done; this was communicated to the user as installments, not the whole backlog at once.
 
 **P2 (polish, after P1 exists to polish):**
 - Full accessibility pass across the 21 individual trainer pages (only the shared shell got one this
@@ -1328,6 +1331,63 @@ adding easy→hard difficulty tiers or AI weak-spot generation to the vocabulary
 (`Verb_Transformation_Trainer.html`, `Nomen_Adjektiv_Trainer.html` — these already have an inherent
 easy→hard progression via SRS box level, but no explicit difficulty-mode selector or AI weak-spot
 question generation), or to any exam simulator / practice studio page.
+
+---
+
+### Follow-up: same pattern extended to both vocabulary trainers
+
+Continuing the "everything" scope confirmed above, applied the same Easy/Medium/Hard practice-mode +
+AI weak-spot pattern to `Verb_Transformation_Trainer.html` and `Nomen_Adjektiv_Trainer.html`.
+
+#### Changes — Verb_Transformation_Trainer.html
+Added `practiceMode` state ('easy'/'medium'/'hard') + a mode-selector row, wired into `renderCard()`:
+- **Easy** (new): multiple-choice recognition — 4 options (1 correct + 3 distractors sampled from the
+  currently-filtered pool, or the full `VERBS` array if the pool is too small), direction-aware
+  (DE→Meaning or Meaning→DE per the existing `curDir` toggle).
+- **Medium**: the pre-existing flip-card + self-rate flow, completely unchanged.
+- **Hard**: a typed "write a full sentence using this verb from memory" challenge. The file already had
+  a `triggerProductionChallenge()` function written for exactly this, discovered to be **dead code** —
+  defined but never called from anywhere (confirmed via `grep`). Rebuilt as a standalone
+  `renderHardProduction()`/`checkHardProduction()` pair instead of reusing the old function directly,
+  since it assumed DOM elements (`revealArea`, `frontActions`) that only exist in Medium mode's
+  post-reveal state.
+
+#### Changes — Nomen_Adjektiv_Trainer.html
+Same pattern, adapted to this page's two sub-modes and extra drill direction:
+- **Easy**: 4-option recognition for the normal DE↔meaning directions; a focused 3-option der/die/das
+  pick for Nomen's separate "gender" direction.
+- **Medium**: unchanged.
+- **Hard**: typed production scoped to what this page actually tests in Medium mode rather than a
+  generic sentence — nouns require typing article + plural (`der Tisch, die Tische`), adjectives
+  require comparative + superlative (`schneller, am schnellsten`).
+
+#### Changes — shared AI helper extracted
+Added `callAIHelper(promptText, callback)` to `js/app-shell.js` (same `de_ai_provider`/`de_ai_key_*`
+localStorage convention `Grammatik_Regel_Trainer.html` already used and `checkAIStatus()`'s
+`ai-enabled` body class already exposed) so the two vocabulary trainers didn't need to duplicate the
+fetch/provider logic. Deliberately left `Grammatik_Regel_Trainer.html`'s own existing
+`callAIGrammarExplanation()` as-is rather than refactoring it to call the new shared helper — it was
+already tested and working, and a refactor purely to remove ~30 lines of duplication wasn't worth the
+regression risk. Worth doing as a follow-up cleanup, not urgent.
+
+Both vocabulary trainers' AI weak-spot button ("More Practice With This Word") only appears when
+`ai-enabled` is set, and deliberately never asks the AI to invent new vocabulary — only for ONE usage
+example sentence of a word already verified in `VERBS`/`NOUNS`/`ADJS`, to avoid introducing unverified
+content into pages presented as reliable vocabulary data.
+
+#### Testing
+Both pages verified via headless Chromium: all three modes render and call `recordAnswer()`/SRS
+correctly (Verb Trainer's DE→Meaning/Meaning→DE Easy mode, Nomen's Easy mode in both its normal and
+gender directions, Adjektiv's Easy mode, and both pages' Hard mode with valid/invalid input); the AI
+button's `ai-enabled` gating (hidden when not configured, shown + functional with a mocked
+`callAIHelper` when configured) tested on both. Full 23-page smoke sweep clean after each commit.
+
+#### What was explicitly requested but NOT completed this session
+Exam simulators and practice studios (`Sprech_Pruefungs_Simulator.html`,
+`A1_Sprech_Pruefungs_Simulator.html`, `German_A2_Practice_Studio.html`,
+`German_B1_Practice_Studio.html`, `Hoerverstehen_Diktat_Trainer.html`, `Brief_Schreiben_Trainer.html`,
+`Satzbau_Trainer.html`, `konnektoren_referenz.html`, `Dialog_Schatten_Trainer.html`,
+`Wortfamilien_Explorer.html`, `Wortschatz_Master_Grid.html`) still have none of this — see Section 26.
 
 ---
 
