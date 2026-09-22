@@ -118,6 +118,14 @@
   }
   .rate-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
 
+  .tense-row{display:flex; gap:6px; align-items:center; margin-bottom:14px; flex-wrap:wrap;}
+  .tense-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 12px; border-radius:16px;
+    border:1.5px solid var(--line); background:var(--card); cursor:pointer; color:var(--ink-soft); font-weight:600;
+  }
+  .tense-btn:hover{border-color:var(--gold);}
+  .tense-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
   .empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13px;}
 </style>
   <link rel="stylesheet" href="css/design-system.css">
@@ -131,7 +139,7 @@
 <div class="wrap">
 
   <h1>🗣️ Themen-Sprechtrainer</h1>
-  <div class="sub">Wähle ein Thema, klicke ein Verb, und übe ich/du/er/wir/ihr/sie im Perfekt (Vergangenheit).</div>
+  <div class="sub">Wähle ein Thema, wähle eine Zeitform (Präsens, Präteritum oder Perfekt), und übe ich/du/er/wir/ihr/sie.</div>
 
   <div id="mainView"></div>
 
@@ -140,304 +148,309 @@
 <script>
 /* =========================================================================
    DATA: 7 topics x 5 topic-relevant verbs x 6 persons (ich/du/er/wir/ihr/sie),
-   real Perfekt (spoken past tense) sentences - hand-checked for correct
-   haben/sein auxiliary choice, separable-verb Partizip II forms, and
+   each with 3 hand-checked tense variants of the same real-world example
+   sentence: praes (Präsens/present), praet (Präteritum/simple past), and
+   perf (Perfekt/spoken past - the original tense this page shipped with).
+   Checked for correct haben/sein auxiliary choice (Perfekt), correct
+   present-tense stem changes (e.g. helfen->hilfst, lesen->liest,
+   schlafen->schläfst), correct strong-verb Präteritum forms (half, las,
+   schlief, ...), separable-verb prefix placement in all three tenses, and
    reflexive pronoun agreement. General everyday A2/B1 vocabulary, not
    attributed to any specific textbook.
    ========================================================================= */
 const THEMEN = [
   { id:'familie', title:'Familie', icon:'handshake', verbs:[
     { inf:'besuchen', en:'to visit', icon:'house', sentences:[
-      {p:'ich', de:'Ich habe meine Großeltern <b>besucht</b>.', en:'I visited my grandparents.'},
-      {p:'du', de:'Du hast deine Tante <b>besucht</b>.', en:'You visited your aunt.'},
-      {p:'er/sie/es', de:'Er hat seinen Bruder <b>besucht</b>.', en:'He visited his brother.'},
-      {p:'wir', de:'Wir haben unsere Familie <b>besucht</b>.', en:'We visited our family.'},
-      {p:'ihr', de:'Ihr habt eure Cousins <b>besucht</b>.', en:'You all visited your cousins.'},
-      {p:'sie (Pl.)', de:'Sie haben ihre Eltern <b>besucht</b>.', en:'They visited their parents.'}
+      {p:'ich', praes:{de:'Ich <b>besuche</b> meine Großeltern.', en:'I visit my grandparents.'}, praet:{de:'Ich <b>besuchte</b> meine Großeltern.', en:'I visited my grandparents.'}, perf:{de:'Ich habe meine Großeltern <b>besucht</b>.', en:'I visited my grandparents.'}},
+      {p:'du', praes:{de:'Du <b>besuchst</b> deine Tante.', en:'You visit your aunt.'}, praet:{de:'Du <b>besuchtest</b> deine Tante.', en:'You visited your aunt.'}, perf:{de:'Du hast deine Tante <b>besucht</b>.', en:'You visited your aunt.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>besucht</b> seinen Bruder.', en:'He visits his brother.'}, praet:{de:'Er <b>besuchte</b> seinen Bruder.', en:'He visited his brother.'}, perf:{de:'Er hat seinen Bruder <b>besucht</b>.', en:'He visited his brother.'}},
+      {p:'wir', praes:{de:'Wir <b>besuchen</b> unsere Familie.', en:'We visit our family.'}, praet:{de:'Wir <b>besuchten</b> unsere Familie.', en:'We visited our family.'}, perf:{de:'Wir haben unsere Familie <b>besucht</b>.', en:'We visited our family.'}},
+      {p:'ihr', praes:{de:'Ihr <b>besucht</b> eure Cousins.', en:'You all visit your cousins.'}, praet:{de:'Ihr <b>besuchtet</b> eure Cousins.', en:'You all visited your cousins.'}, perf:{de:'Ihr habt eure Cousins <b>besucht</b>.', en:'You all visited your cousins.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>besuchen</b> ihre Eltern.', en:'They visit their parents.'}, praet:{de:'Sie <b>besuchten</b> ihre Eltern.', en:'They visited their parents.'}, perf:{de:'Sie haben ihre Eltern <b>besucht</b>.', en:'They visited their parents.'}}
     ]},
     { inf:'helfen', en:'to help', icon:'handshake', sentences:[
-      {p:'ich', de:'Ich habe meiner Mutter <b>geholfen</b>.', en:'I helped my mother.'},
-      {p:'du', de:'Du hast deinem Vater <b>geholfen</b>.', en:'You helped your father.'},
-      {p:'er/sie/es', de:'Er hat seiner Schwester <b>geholfen</b>.', en:'He helped his sister.'},
-      {p:'wir', de:'Wir haben unseren Großeltern <b>geholfen</b>.', en:'We helped our grandparents.'},
-      {p:'ihr', de:'Ihr habt euren Eltern <b>geholfen</b>.', en:'You all helped your parents.'},
-      {p:'sie (Pl.)', de:'Sie haben ihrem Onkel <b>geholfen</b>.', en:'They helped their uncle.'}
+      {p:'ich', praes:{de:'Ich <b>helfe</b> meiner Mutter.', en:'I help my mother.'}, praet:{de:'Ich <b>half</b> meiner Mutter.', en:'I helped my mother.'}, perf:{de:'Ich habe meiner Mutter <b>geholfen</b>.', en:'I helped my mother.'}},
+      {p:'du', praes:{de:'Du <b>hilfst</b> deinem Vater.', en:'You help your father.'}, praet:{de:'Du <b>halfst</b> deinem Vater.', en:'You helped your father.'}, perf:{de:'Du hast deinem Vater <b>geholfen</b>.', en:'You helped your father.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>hilft</b> seiner Schwester.', en:'He helps his sister.'}, praet:{de:'Er <b>half</b> seiner Schwester.', en:'He helped his sister.'}, perf:{de:'Er hat seiner Schwester <b>geholfen</b>.', en:'He helped his sister.'}},
+      {p:'wir', praes:{de:'Wir <b>helfen</b> unseren Großeltern.', en:'We help our grandparents.'}, praet:{de:'Wir <b>halfen</b> unseren Großeltern.', en:'We helped our grandparents.'}, perf:{de:'Wir haben unseren Großeltern <b>geholfen</b>.', en:'We helped our grandparents.'}},
+      {p:'ihr', praes:{de:'Ihr <b>helft</b> euren Eltern.', en:'You all help your parents.'}, praet:{de:'Ihr <b>halft</b> euren Eltern.', en:'You all helped your parents.'}, perf:{de:'Ihr habt euren Eltern <b>geholfen</b>.', en:'You all helped your parents.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>helfen</b> ihrem Onkel.', en:'They help their uncle.'}, praet:{de:'Sie <b>halfen</b> ihrem Onkel.', en:'They helped their uncle.'}, perf:{de:'Sie haben ihrem Onkel <b>geholfen</b>.', en:'They helped their uncle.'}}
     ]},
     { inf:'lieben', en:'to love', icon:'smile', sentences:[
-      {p:'ich', de:'Ich habe meine Familie immer <b>geliebt</b>.', en:'I have always loved my family.'},
-      {p:'du', de:'Du hast deine Kinder sehr <b>geliebt</b>.', en:'You loved your children very much.'},
-      {p:'er/sie/es', de:'Er hat seine Frau <b>geliebt</b>.', en:'He loved his wife.'},
-      {p:'wir', de:'Wir haben unsere Großmutter <b>geliebt</b>.', en:'We loved our grandmother.'},
-      {p:'ihr', de:'Ihr habt eure Familie <b>geliebt</b>.', en:'You all loved your family.'},
-      {p:'sie (Pl.)', de:'Sie haben ihre Kinder <b>geliebt</b>.', en:'They loved their children.'}
+      {p:'ich', praes:{de:'Ich <b>liebe</b> meine Familie immer.', en:'I always love my family.'}, praet:{de:'Ich <b>liebte</b> meine Familie immer.', en:'I always loved my family.'}, perf:{de:'Ich habe meine Familie immer <b>geliebt</b>.', en:'I have always loved my family.'}},
+      {p:'du', praes:{de:'Du <b>liebst</b> deine Kinder sehr.', en:'You love your children very much.'}, praet:{de:'Du <b>liebtest</b> deine Kinder sehr.', en:'You loved your children very much.'}, perf:{de:'Du hast deine Kinder sehr <b>geliebt</b>.', en:'You loved your children very much.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>liebt</b> seine Frau.', en:'He loves his wife.'}, praet:{de:'Er <b>liebte</b> seine Frau.', en:'He loved his wife.'}, perf:{de:'Er hat seine Frau <b>geliebt</b>.', en:'He loved his wife.'}},
+      {p:'wir', praes:{de:'Wir <b>lieben</b> unsere Großmutter.', en:'We love our grandmother.'}, praet:{de:'Wir <b>liebten</b> unsere Großmutter.', en:'We loved our grandmother.'}, perf:{de:'Wir haben unsere Großmutter <b>geliebt</b>.', en:'We loved our grandmother.'}},
+      {p:'ihr', praes:{de:'Ihr <b>liebt</b> eure Familie.', en:'You all love your family.'}, praet:{de:'Ihr <b>liebtet</b> eure Familie.', en:'You all loved your family.'}, perf:{de:'Ihr habt eure Familie <b>geliebt</b>.', en:'You all loved your family.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>lieben</b> ihre Kinder.', en:'They love their children.'}, praet:{de:'Sie <b>liebten</b> ihre Kinder.', en:'They loved their children.'}, perf:{de:'Sie haben ihre Kinder <b>geliebt</b>.', en:'They loved their children.'}}
     ]},
     { inf:'verbringen', en:'to spend (time)', icon:'clock', sentences:[
-      {p:'ich', de:'Ich habe den Sommer bei meiner Familie <b>verbracht</b>.', en:'I spent the summer with my family.'},
-      {p:'du', de:'Du hast das Wochenende mit deinen Eltern <b>verbracht</b>.', en:'You spent the weekend with your parents.'},
-      {p:'er/sie/es', de:'Er hat viel Zeit mit seinem Sohn <b>verbracht</b>.', en:'He spent a lot of time with his son.'},
-      {p:'wir', de:'Wir haben Weihnachten zusammen <b>verbracht</b>.', en:'We spent Christmas together.'},
-      {p:'ihr', de:'Ihr habt die Ferien bei euren Großeltern <b>verbracht</b>.', en:"You all spent the holidays at your grandparents'."},
-      {p:'sie (Pl.)', de:'Sie haben den Urlaub mit der Familie <b>verbracht</b>.', en:'They spent the vacation with the family.'}
+      {p:'ich', praes:{de:'Ich <b>verbringe</b> den Sommer bei meiner Familie.', en:'I spend the summer with my family.'}, praet:{de:'Ich <b>verbrachte</b> den Sommer bei meiner Familie.', en:'I spent the summer with my family.'}, perf:{de:'Ich habe den Sommer bei meiner Familie <b>verbracht</b>.', en:'I spent the summer with my family.'}},
+      {p:'du', praes:{de:'Du <b>verbringst</b> das Wochenende mit deinen Eltern.', en:'You spend the weekend with your parents.'}, praet:{de:'Du <b>verbrachtest</b> das Wochenende mit deinen Eltern.', en:'You spent the weekend with your parents.'}, perf:{de:'Du hast das Wochenende mit deinen Eltern <b>verbracht</b>.', en:'You spent the weekend with your parents.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>verbringt</b> viel Zeit mit seinem Sohn.', en:'He spends a lot of time with his son.'}, praet:{de:'Er <b>verbrachte</b> viel Zeit mit seinem Sohn.', en:'He spent a lot of time with his son.'}, perf:{de:'Er hat viel Zeit mit seinem Sohn <b>verbracht</b>.', en:'He spent a lot of time with his son.'}},
+      {p:'wir', praes:{de:'Wir <b>verbringen</b> Weihnachten zusammen.', en:'We spend Christmas together.'}, praet:{de:'Wir <b>verbrachten</b> Weihnachten zusammen.', en:'We spent Christmas together.'}, perf:{de:'Wir haben Weihnachten zusammen <b>verbracht</b>.', en:'We spent Christmas together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>verbringt</b> die Ferien bei euren Großeltern.', en:"You all spend the holidays at your grandparents'."}, praet:{de:'Ihr <b>verbrachtet</b> die Ferien bei euren Großeltern.', en:"You all spent the holidays at your grandparents'."}, perf:{de:'Ihr habt die Ferien bei euren Großeltern <b>verbracht</b>.', en:"You all spent the holidays at your grandparents'."}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>verbringen</b> den Urlaub mit der Familie.', en:'They spend the vacation with the family.'}, praet:{de:'Sie <b>verbrachten</b> den Urlaub mit der Familie.', en:'They spent the vacation with the family.'}, perf:{de:'Sie haben den Urlaub mit der Familie <b>verbracht</b>.', en:'They spent the vacation with the family.'}}
     ]},
     { inf:'anrufen', en:'to call', icon:'phone', sentences:[
-      {p:'ich', de:'Ich habe meine Schwester <b>angerufen</b>.', en:'I called my sister.'},
-      {p:'du', de:'Du hast deinen Bruder <b>angerufen</b>.', en:'You called your brother.'},
-      {p:'er/sie/es', de:'Er hat seine Mutter <b>angerufen</b>.', en:'He called his mother.'},
-      {p:'wir', de:'Wir haben unsere Eltern <b>angerufen</b>.', en:'We called our parents.'},
-      {p:'ihr', de:'Ihr habt eure Oma <b>angerufen</b>.', en:'You all called your grandma.'},
-      {p:'sie (Pl.)', de:'Sie haben ihre Verwandten <b>angerufen</b>.', en:'They called their relatives.'}
+      {p:'ich', praes:{de:'Ich <b>rufe</b> meine Schwester <b>an</b>.', en:'I call my sister.'}, praet:{de:'Ich <b>rief</b> meine Schwester <b>an</b>.', en:'I called my sister.'}, perf:{de:'Ich habe meine Schwester <b>angerufen</b>.', en:'I called my sister.'}},
+      {p:'du', praes:{de:'Du <b>rufst</b> deinen Bruder <b>an</b>.', en:'You call your brother.'}, praet:{de:'Du <b>riefst</b> deinen Bruder <b>an</b>.', en:'You called your brother.'}, perf:{de:'Du hast deinen Bruder <b>angerufen</b>.', en:'You called your brother.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>ruft</b> seine Mutter <b>an</b>.', en:'He calls his mother.'}, praet:{de:'Er <b>rief</b> seine Mutter <b>an</b>.', en:'He called his mother.'}, perf:{de:'Er hat seine Mutter <b>angerufen</b>.', en:'He called his mother.'}},
+      {p:'wir', praes:{de:'Wir <b>rufen</b> unsere Eltern <b>an</b>.', en:'We call our parents.'}, praet:{de:'Wir <b>riefen</b> unsere Eltern <b>an</b>.', en:'We called our parents.'}, perf:{de:'Wir haben unsere Eltern <b>angerufen</b>.', en:'We called our parents.'}},
+      {p:'ihr', praes:{de:'Ihr <b>ruft</b> eure Oma <b>an</b>.', en:'You all call your grandma.'}, praet:{de:'Ihr <b>rieft</b> eure Oma <b>an</b>.', en:'You all called your grandma.'}, perf:{de:'Ihr habt eure Oma <b>angerufen</b>.', en:'You all called your grandma.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>rufen</b> ihre Verwandten <b>an</b>.', en:'They call their relatives.'}, praet:{de:'Sie <b>riefen</b> ihre Verwandten <b>an</b>.', en:'They called their relatives.'}, perf:{de:'Sie haben ihre Verwandten <b>angerufen</b>.', en:'They called their relatives.'}}
     ]}
   ]},
   { id:'arbeit', title:'Arbeit', icon:'briefcase', verbs:[
     { inf:'arbeiten', en:'to work', icon:'briefcase', sentences:[
-      {p:'ich', de:'Ich habe gestern bis spät <b>gearbeitet</b>.', en:'I worked late yesterday.'},
-      {p:'du', de:'Du hast im Büro <b>gearbeitet</b>.', en:'You worked in the office.'},
-      {p:'er/sie/es', de:'Er hat in einer großen Firma <b>gearbeitet</b>.', en:'He worked at a large company.'},
-      {p:'wir', de:'Wir haben zusammen an dem Projekt <b>gearbeitet</b>.', en:'We worked together on the project.'},
-      {p:'ihr', de:'Ihr habt die ganze Woche hart <b>gearbeitet</b>.', en:'You all worked hard all week.'},
-      {p:'sie (Pl.)', de:'Sie haben von zu Hause aus <b>gearbeitet</b>.', en:'They worked from home.'}
+      {p:'ich', praes:{de:'Ich <b>arbeite</b> heute bis spät.', en:'I work late today.'}, praet:{de:'Ich <b>arbeitete</b> gestern bis spät.', en:'I worked late yesterday.'}, perf:{de:'Ich habe gestern bis spät <b>gearbeitet</b>.', en:'I worked late yesterday.'}},
+      {p:'du', praes:{de:'Du <b>arbeitest</b> im Büro.', en:'You work in the office.'}, praet:{de:'Du <b>arbeitetest</b> im Büro.', en:'You worked in the office.'}, perf:{de:'Du hast im Büro <b>gearbeitet</b>.', en:'You worked in the office.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>arbeitet</b> in einer großen Firma.', en:'He works at a large company.'}, praet:{de:'Er <b>arbeitete</b> in einer großen Firma.', en:'He worked at a large company.'}, perf:{de:'Er hat in einer großen Firma <b>gearbeitet</b>.', en:'He worked at a large company.'}},
+      {p:'wir', praes:{de:'Wir <b>arbeiten</b> zusammen an dem Projekt.', en:'We work together on the project.'}, praet:{de:'Wir <b>arbeiteten</b> zusammen an dem Projekt.', en:'We worked together on the project.'}, perf:{de:'Wir haben zusammen an dem Projekt <b>gearbeitet</b>.', en:'We worked together on the project.'}},
+      {p:'ihr', praes:{de:'Ihr <b>arbeitet</b> die ganze Woche hart.', en:'You all work hard all week.'}, praet:{de:'Ihr <b>arbeitetet</b> die ganze Woche hart.', en:'You all worked hard all week.'}, perf:{de:'Ihr habt die ganze Woche hart <b>gearbeitet</b>.', en:'You all worked hard all week.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>arbeiten</b> von zu Hause aus.', en:'They work from home.'}, praet:{de:'Sie <b>arbeiteten</b> von zu Hause aus.', en:'They worked from home.'}, perf:{de:'Sie haben von zu Hause aus <b>gearbeitet</b>.', en:'They worked from home.'}}
     ]},
     { inf:'anfangen', en:'to start', icon:'clock', sentences:[
-      {p:'ich', de:'Ich habe pünktlich um acht Uhr <b>angefangen</b>.', en:'I started right at eight o’clock.'},
-      {p:'du', de:'Du hast deine neue Stelle letzten Montag <b>angefangen</b>.', en:'You started your new job last Monday.'},
-      {p:'er/sie/es', de:'Er hat mit dem Projekt <b>angefangen</b>.', en:'He started the project.'},
-      {p:'wir', de:'Wir haben die Besprechung <b>angefangen</b>.', en:'We started the meeting.'},
-      {p:'ihr', de:'Ihr habt früh mit der Arbeit <b>angefangen</b>.', en:'You all started work early.'},
-      {p:'sie (Pl.)', de:'Sie haben die neue Aufgabe <b>angefangen</b>.', en:'They started the new task.'}
+      {p:'ich', praes:{de:'Ich <b>fange</b> pünktlich um acht Uhr <b>an</b>.', en:'I start right at eight o’clock.'}, praet:{de:'Ich <b>fing</b> pünktlich um acht Uhr <b>an</b>.', en:'I started right at eight o’clock.'}, perf:{de:'Ich habe pünktlich um acht Uhr <b>angefangen</b>.', en:'I started right at eight o’clock.'}},
+      {p:'du', praes:{de:'Du <b>fängst</b> deine neue Stelle heute <b>an</b>.', en:'You start your new job today.'}, praet:{de:'Du <b>fingst</b> deine neue Stelle letzten Montag <b>an</b>.', en:'You started your new job last Monday.'}, perf:{de:'Du hast deine neue Stelle letzten Montag <b>angefangen</b>.', en:'You started your new job last Monday.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>fängt</b> mit dem Projekt <b>an</b>.', en:'He starts the project.'}, praet:{de:'Er <b>fing</b> mit dem Projekt <b>an</b>.', en:'He started the project.'}, perf:{de:'Er hat mit dem Projekt <b>angefangen</b>.', en:'He started the project.'}},
+      {p:'wir', praes:{de:'Wir <b>fangen</b> die Besprechung <b>an</b>.', en:'We start the meeting.'}, praet:{de:'Wir <b>fingen</b> die Besprechung <b>an</b>.', en:'We started the meeting.'}, perf:{de:'Wir haben die Besprechung <b>angefangen</b>.', en:'We started the meeting.'}},
+      {p:'ihr', praes:{de:'Ihr <b>fangt</b> früh mit der Arbeit <b>an</b>.', en:'You all start work early.'}, praet:{de:'Ihr <b>fingt</b> früh mit der Arbeit <b>an</b>.', en:'You all started work early.'}, perf:{de:'Ihr habt früh mit der Arbeit <b>angefangen</b>.', en:'You all started work early.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>fangen</b> die neue Aufgabe <b>an</b>.', en:'They start the new task.'}, praet:{de:'Sie <b>fingen</b> die neue Aufgabe <b>an</b>.', en:'They started the new task.'}, perf:{de:'Sie haben die neue Aufgabe <b>angefangen</b>.', en:'They started the new task.'}}
     ]},
     { inf:'organisieren', en:'to organize', icon:'document', sentences:[
-      {p:'ich', de:'Ich habe das Meeting <b>organisiert</b>.', en:'I organized the meeting.'},
-      {p:'du', de:'Du hast die Präsentation gut <b>organisiert</b>.', en:'You organized the presentation well.'},
-      {p:'er/sie/es', de:'Er hat das ganze Event <b>organisiert</b>.', en:'He organized the whole event.'},
-      {p:'wir', de:'Wir haben die Konferenz gemeinsam <b>organisiert</b>.', en:'We organized the conference together.'},
-      {p:'ihr', de:'Ihr habt die Unterlagen <b>organisiert</b>.', en:'You all organized the documents.'},
-      {p:'sie (Pl.)', de:'Sie haben das Team <b>organisiert</b>.', en:'They organized the team.'}
+      {p:'ich', praes:{de:'Ich <b>organisiere</b> das Meeting.', en:'I organize the meeting.'}, praet:{de:'Ich <b>organisierte</b> das Meeting.', en:'I organized the meeting.'}, perf:{de:'Ich habe das Meeting <b>organisiert</b>.', en:'I organized the meeting.'}},
+      {p:'du', praes:{de:'Du <b>organisierst</b> die Präsentation gut.', en:'You organize the presentation well.'}, praet:{de:'Du <b>organisiertest</b> die Präsentation gut.', en:'You organized the presentation well.'}, perf:{de:'Du hast die Präsentation gut <b>organisiert</b>.', en:'You organized the presentation well.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>organisiert</b> das ganze Event.', en:'He organizes the whole event.'}, praet:{de:'Er <b>organisierte</b> das ganze Event.', en:'He organized the whole event.'}, perf:{de:'Er hat das ganze Event <b>organisiert</b>.', en:'He organized the whole event.'}},
+      {p:'wir', praes:{de:'Wir <b>organisieren</b> die Konferenz gemeinsam.', en:'We organize the conference together.'}, praet:{de:'Wir <b>organisierten</b> die Konferenz gemeinsam.', en:'We organized the conference together.'}, perf:{de:'Wir haben die Konferenz gemeinsam <b>organisiert</b>.', en:'We organized the conference together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>organisiert</b> die Unterlagen.', en:'You all organize the documents.'}, praet:{de:'Ihr <b>organisiertet</b> die Unterlagen.', en:'You all organized the documents.'}, perf:{de:'Ihr habt die Unterlagen <b>organisiert</b>.', en:'You all organized the documents.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>organisieren</b> das Team.', en:'They organize the team.'}, praet:{de:'Sie <b>organisierten</b> das Team.', en:'They organized the team.'}, perf:{de:'Sie haben das Team <b>organisiert</b>.', en:'They organized the team.'}}
     ]},
     { inf:'verdienen', en:'to earn', icon:'money', sentences:[
-      {p:'ich', de:'Ich habe letzten Monat gut <b>verdient</b>.', en:'I earned well last month.'},
-      {p:'du', de:'Du hast mehr Geld <b>verdient</b> als ich.', en:'You earned more money than me.'},
-      {p:'er/sie/es', de:'Er hat sein erstes Gehalt <b>verdient</b>.', en:'He earned his first salary.'},
-      {p:'wir', de:'Wir haben genug Geld für den Urlaub <b>verdient</b>.', en:'We earned enough money for the vacation.'},
-      {p:'ihr', de:'Ihr habt euer Gehalt <b>verdient</b>.', en:'You all earned your salary.'},
-      {p:'sie (Pl.)', de:'Sie haben viel Geld <b>verdient</b>.', en:'They earned a lot of money.'}
+      {p:'ich', praes:{de:'Ich <b>verdiene</b> diesen Monat gut.', en:'I earn well this month.'}, praet:{de:'Ich <b>verdiente</b> letzten Monat gut.', en:'I earned well last month.'}, perf:{de:'Ich habe letzten Monat gut <b>verdient</b>.', en:'I earned well last month.'}},
+      {p:'du', praes:{de:'Du <b>verdienst</b> mehr Geld als ich.', en:'You earn more money than me.'}, praet:{de:'Du <b>verdientest</b> mehr Geld als ich.', en:'You earned more money than me.'}, perf:{de:'Du hast mehr Geld <b>verdient</b> als ich.', en:'You earned more money than me.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>verdient</b> sein erstes Gehalt.', en:'He earns his first salary.'}, praet:{de:'Er <b>verdiente</b> sein erstes Gehalt.', en:'He earned his first salary.'}, perf:{de:'Er hat sein erstes Gehalt <b>verdient</b>.', en:'He earned his first salary.'}},
+      {p:'wir', praes:{de:'Wir <b>verdienen</b> genug Geld für den Urlaub.', en:'We earn enough money for the vacation.'}, praet:{de:'Wir <b>verdienten</b> genug Geld für den Urlaub.', en:'We earned enough money for the vacation.'}, perf:{de:'Wir haben genug Geld für den Urlaub <b>verdient</b>.', en:'We earned enough money for the vacation.'}},
+      {p:'ihr', praes:{de:'Ihr <b>verdient</b> euer Gehalt.', en:'You all earn your salary.'}, praet:{de:'Ihr <b>verdientet</b> euer Gehalt.', en:'You all earned your salary.'}, perf:{de:'Ihr habt euer Gehalt <b>verdient</b>.', en:'You all earned your salary.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>verdienen</b> viel Geld.', en:'They earn a lot of money.'}, praet:{de:'Sie <b>verdienten</b> viel Geld.', en:'They earned a lot of money.'}, perf:{de:'Sie haben viel Geld <b>verdient</b>.', en:'They earned a lot of money.'}}
     ]},
     { inf:'kündigen', en:'to resign / quit', icon:'document', sentences:[
-      {p:'ich', de:'Ich habe meinen Job <b>gekündigt</b>.', en:'I quit my job.'},
-      {p:'du', de:'Du hast überraschend <b>gekündigt</b>.', en:'You resigned unexpectedly.'},
-      {p:'er/sie/es', de:'Er hat nach zehn Jahren <b>gekündigt</b>.', en:'He quit after ten years.'},
-      {p:'wir', de:'Wir haben unsere Verträge <b>gekündigt</b>.', en:'We terminated our contracts.'},
-      {p:'ihr', de:'Ihr habt eure Stellen <b>gekündigt</b>.', en:'You all quit your jobs.'},
-      {p:'sie (Pl.)', de:'Sie haben ihre Jobs <b>gekündigt</b>.', en:'They quit their jobs.'}
+      {p:'ich', praes:{de:'Ich <b>kündige</b> meinen Job.', en:'I quit my job.'}, praet:{de:'Ich <b>kündigte</b> meinen Job.', en:'I quit my job.'}, perf:{de:'Ich habe meinen Job <b>gekündigt</b>.', en:'I quit my job.'}},
+      {p:'du', praes:{de:'Du <b>kündigst</b> überraschend.', en:'You resign unexpectedly.'}, praet:{de:'Du <b>kündigtest</b> überraschend.', en:'You resigned unexpectedly.'}, perf:{de:'Du hast überraschend <b>gekündigt</b>.', en:'You resigned unexpectedly.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>kündigt</b> nach zehn Jahren.', en:'He quits after ten years.'}, praet:{de:'Er <b>kündigte</b> nach zehn Jahren.', en:'He quit after ten years.'}, perf:{de:'Er hat nach zehn Jahren <b>gekündigt</b>.', en:'He quit after ten years.'}},
+      {p:'wir', praes:{de:'Wir <b>kündigen</b> unsere Verträge.', en:'We terminate our contracts.'}, praet:{de:'Wir <b>kündigten</b> unsere Verträge.', en:'We terminated our contracts.'}, perf:{de:'Wir haben unsere Verträge <b>gekündigt</b>.', en:'We terminated our contracts.'}},
+      {p:'ihr', praes:{de:'Ihr <b>kündigt</b> eure Stellen.', en:'You all quit your jobs.'}, praet:{de:'Ihr <b>kündigtet</b> eure Stellen.', en:'You all quit your jobs.'}, perf:{de:'Ihr habt eure Stellen <b>gekündigt</b>.', en:'You all quit your jobs.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>kündigen</b> ihre Jobs.', en:'They quit their jobs.'}, praet:{de:'Sie <b>kündigten</b> ihre Jobs.', en:'They quit their jobs.'}, perf:{de:'Sie haben ihre Jobs <b>gekündigt</b>.', en:'They quit their jobs.'}}
     ]}
   ]},
   { id:'einkaufen', title:'Einkaufen', icon:'money', verbs:[
     { inf:'kaufen', en:'to buy', icon:'money', sentences:[
-      {p:'ich', de:'Ich habe ein neues Hemd <b>gekauft</b>.', en:'I bought a new shirt.'},
-      {p:'du', de:'Du hast frisches Brot <b>gekauft</b>.', en:'You bought fresh bread.'},
-      {p:'er/sie/es', de:'Er hat ein Geschenk für seine Frau <b>gekauft</b>.', en:'He bought a gift for his wife.'},
-      {p:'wir', de:'Wir haben Gemüse auf dem Markt <b>gekauft</b>.', en:'We bought vegetables at the market.'},
-      {p:'ihr', de:'Ihr habt neue Schuhe <b>gekauft</b>.', en:'You all bought new shoes.'},
-      {p:'sie (Pl.)', de:'Sie haben viele Lebensmittel <b>gekauft</b>.', en:'They bought a lot of groceries.'}
+      {p:'ich', praes:{de:'Ich <b>kaufe</b> ein neues Hemd.', en:'I buy a new shirt.'}, praet:{de:'Ich <b>kaufte</b> ein neues Hemd.', en:'I bought a new shirt.'}, perf:{de:'Ich habe ein neues Hemd <b>gekauft</b>.', en:'I bought a new shirt.'}},
+      {p:'du', praes:{de:'Du <b>kaufst</b> frisches Brot.', en:'You buy fresh bread.'}, praet:{de:'Du <b>kauftest</b> frisches Brot.', en:'You bought fresh bread.'}, perf:{de:'Du hast frisches Brot <b>gekauft</b>.', en:'You bought fresh bread.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>kauft</b> ein Geschenk für seine Frau.', en:'He buys a gift for his wife.'}, praet:{de:'Er <b>kaufte</b> ein Geschenk für seine Frau.', en:'He bought a gift for his wife.'}, perf:{de:'Er hat ein Geschenk für seine Frau <b>gekauft</b>.', en:'He bought a gift for his wife.'}},
+      {p:'wir', praes:{de:'Wir <b>kaufen</b> Gemüse auf dem Markt.', en:'We buy vegetables at the market.'}, praet:{de:'Wir <b>kauften</b> Gemüse auf dem Markt.', en:'We bought vegetables at the market.'}, perf:{de:'Wir haben Gemüse auf dem Markt <b>gekauft</b>.', en:'We bought vegetables at the market.'}},
+      {p:'ihr', praes:{de:'Ihr <b>kauft</b> neue Schuhe.', en:'You all buy new shoes.'}, praet:{de:'Ihr <b>kauftet</b> neue Schuhe.', en:'You all bought new shoes.'}, perf:{de:'Ihr habt neue Schuhe <b>gekauft</b>.', en:'You all bought new shoes.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>kaufen</b> viele Lebensmittel.', en:'They buy a lot of groceries.'}, praet:{de:'Sie <b>kauften</b> viele Lebensmittel.', en:'They bought a lot of groceries.'}, perf:{de:'Sie haben viele Lebensmittel <b>gekauft</b>.', en:'They bought a lot of groceries.'}}
     ]},
     { inf:'bezahlen', en:'to pay', icon:'money', sentences:[
-      {p:'ich', de:'Ich habe die Rechnung sofort <b>bezahlt</b>.', en:'I paid the bill immediately.'},
-      {p:'du', de:'Du hast mit Karte <b>bezahlt</b>.', en:'You paid by card.'},
-      {p:'er/sie/es', de:'Er hat für uns alle <b>bezahlt</b>.', en:'He paid for all of us.'},
-      {p:'wir', de:'Wir haben die Miete pünktlich <b>bezahlt</b>.', en:'We paid the rent on time.'},
-      {p:'ihr', de:'Ihr habt zu viel <b>bezahlt</b>.', en:'You all paid too much.'},
-      {p:'sie (Pl.)', de:'Sie haben bar <b>bezahlt</b>.', en:'They paid in cash.'}
+      {p:'ich', praes:{de:'Ich <b>bezahle</b> die Rechnung sofort.', en:'I pay the bill immediately.'}, praet:{de:'Ich <b>bezahlte</b> die Rechnung sofort.', en:'I paid the bill immediately.'}, perf:{de:'Ich habe die Rechnung sofort <b>bezahlt</b>.', en:'I paid the bill immediately.'}},
+      {p:'du', praes:{de:'Du <b>bezahlst</b> mit Karte.', en:'You pay by card.'}, praet:{de:'Du <b>bezahltest</b> mit Karte.', en:'You paid by card.'}, perf:{de:'Du hast mit Karte <b>bezahlt</b>.', en:'You paid by card.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>bezahlt</b> für uns alle.', en:'He pays for all of us.'}, praet:{de:'Er <b>bezahlte</b> für uns alle.', en:'He paid for all of us.'}, perf:{de:'Er hat für uns alle <b>bezahlt</b>.', en:'He paid for all of us.'}},
+      {p:'wir', praes:{de:'Wir <b>bezahlen</b> die Miete pünktlich.', en:'We pay the rent on time.'}, praet:{de:'Wir <b>bezahlten</b> die Miete pünktlich.', en:'We paid the rent on time.'}, perf:{de:'Wir haben die Miete pünktlich <b>bezahlt</b>.', en:'We paid the rent on time.'}},
+      {p:'ihr', praes:{de:'Ihr <b>bezahlt</b> zu viel.', en:'You all pay too much.'}, praet:{de:'Ihr <b>bezahltet</b> zu viel.', en:'You all paid too much.'}, perf:{de:'Ihr habt zu viel <b>bezahlt</b>.', en:'You all paid too much.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>bezahlen</b> bar.', en:'They pay in cash.'}, praet:{de:'Sie <b>bezahlten</b> bar.', en:'They paid in cash.'}, perf:{de:'Sie haben bar <b>bezahlt</b>.', en:'They paid in cash.'}}
     ]},
     { inf:'brauchen', en:'to need', icon:'search', sentences:[
-      {p:'ich', de:'Ich habe mehr Zeit zum Einkaufen <b>gebraucht</b>.', en:'I needed more time for shopping.'},
-      {p:'du', de:'Du hast eine neue Jacke <b>gebraucht</b>.', en:'You needed a new jacket.'},
-      {p:'er/sie/es', de:'Er hat dringend einen neuen Laptop <b>gebraucht</b>.', en:'He urgently needed a new laptop.'},
-      {p:'wir', de:'Wir haben frisches Obst <b>gebraucht</b>.', en:'We needed fresh fruit.'},
-      {p:'ihr', de:'Ihr habt Hilfe beim Tragen <b>gebraucht</b>.', en:'You all needed help carrying things.'},
-      {p:'sie (Pl.)', de:'Sie haben mehr Geld <b>gebraucht</b>.', en:'They needed more money.'}
+      {p:'ich', praes:{de:'Ich <b>brauche</b> mehr Zeit zum Einkaufen.', en:'I need more time for shopping.'}, praet:{de:'Ich <b>brauchte</b> mehr Zeit zum Einkaufen.', en:'I needed more time for shopping.'}, perf:{de:'Ich habe mehr Zeit zum Einkaufen <b>gebraucht</b>.', en:'I needed more time for shopping.'}},
+      {p:'du', praes:{de:'Du <b>brauchst</b> eine neue Jacke.', en:'You need a new jacket.'}, praet:{de:'Du <b>brauchtest</b> eine neue Jacke.', en:'You needed a new jacket.'}, perf:{de:'Du hast eine neue Jacke <b>gebraucht</b>.', en:'You needed a new jacket.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>braucht</b> dringend einen neuen Laptop.', en:'He urgently needs a new laptop.'}, praet:{de:'Er <b>brauchte</b> dringend einen neuen Laptop.', en:'He urgently needed a new laptop.'}, perf:{de:'Er hat dringend einen neuen Laptop <b>gebraucht</b>.', en:'He urgently needed a new laptop.'}},
+      {p:'wir', praes:{de:'Wir <b>brauchen</b> frisches Obst.', en:'We need fresh fruit.'}, praet:{de:'Wir <b>brauchten</b> frisches Obst.', en:'We needed fresh fruit.'}, perf:{de:'Wir haben frisches Obst <b>gebraucht</b>.', en:'We needed fresh fruit.'}},
+      {p:'ihr', praes:{de:'Ihr <b>braucht</b> Hilfe beim Tragen.', en:'You all need help carrying things.'}, praet:{de:'Ihr <b>brauchtet</b> Hilfe beim Tragen.', en:'You all needed help carrying things.'}, perf:{de:'Ihr habt Hilfe beim Tragen <b>gebraucht</b>.', en:'You all needed help carrying things.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>brauchen</b> mehr Geld.', en:'They need more money.'}, praet:{de:'Sie <b>brauchten</b> mehr Geld.', en:'They needed more money.'}, perf:{de:'Sie haben mehr Geld <b>gebraucht</b>.', en:'They needed more money.'}}
     ]},
     { inf:'suchen', en:'to look for', icon:'search', sentences:[
-      {p:'ich', de:'Ich habe lange nach den Schlüsseln <b>gesucht</b>.', en:'I searched for the keys for a long time.'},
-      {p:'du', de:'Du hast ein günstiges Angebot <b>gesucht</b>.', en:'You looked for a cheap deal.'},
-      {p:'er/sie/es', de:'Er hat im ganzen Laden <b>gesucht</b>.', en:'He searched the whole store.'},
-      {p:'wir', de:'Wir haben ein passendes Geschenk <b>gesucht</b>.', en:'We looked for a suitable gift.'},
-      {p:'ihr', de:'Ihr habt die beste Qualität <b>gesucht</b>.', en:'You all looked for the best quality.'},
-      {p:'sie (Pl.)', de:'Sie haben ein günstiges Restaurant <b>gesucht</b>.', en:'They searched for an affordable restaurant.'}
+      {p:'ich', praes:{de:'Ich <b>suche</b> lange nach den Schlüsseln.', en:'I search for the keys for a long time.'}, praet:{de:'Ich <b>suchte</b> lange nach den Schlüsseln.', en:'I searched for the keys for a long time.'}, perf:{de:'Ich habe lange nach den Schlüsseln <b>gesucht</b>.', en:'I searched for the keys for a long time.'}},
+      {p:'du', praes:{de:'Du <b>suchst</b> ein günstiges Angebot.', en:'You look for a cheap deal.'}, praet:{de:'Du <b>suchtest</b> ein günstiges Angebot.', en:'You looked for a cheap deal.'}, perf:{de:'Du hast ein günstiges Angebot <b>gesucht</b>.', en:'You looked for a cheap deal.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>sucht</b> im ganzen Laden.', en:'He searches the whole store.'}, praet:{de:'Er <b>suchte</b> im ganzen Laden.', en:'He searched the whole store.'}, perf:{de:'Er hat im ganzen Laden <b>gesucht</b>.', en:'He searched the whole store.'}},
+      {p:'wir', praes:{de:'Wir <b>suchen</b> ein passendes Geschenk.', en:'We look for a suitable gift.'}, praet:{de:'Wir <b>suchten</b> ein passendes Geschenk.', en:'We looked for a suitable gift.'}, perf:{de:'Wir haben ein passendes Geschenk <b>gesucht</b>.', en:'We looked for a suitable gift.'}},
+      {p:'ihr', praes:{de:'Ihr <b>sucht</b> die beste Qualität.', en:'You all look for the best quality.'}, praet:{de:'Ihr <b>suchtet</b> die beste Qualität.', en:'You all looked for the best quality.'}, perf:{de:'Ihr habt die beste Qualität <b>gesucht</b>.', en:'You all looked for the best quality.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>suchen</b> ein günstiges Restaurant.', en:'They search for an affordable restaurant.'}, praet:{de:'Sie <b>suchten</b> ein günstiges Restaurant.', en:'They searched for an affordable restaurant.'}, perf:{de:'Sie haben ein günstiges Restaurant <b>gesucht</b>.', en:'They searched for an affordable restaurant.'}}
     ]},
     { inf:'zurückgeben', en:'to return (an item)', icon:'document', sentences:[
-      {p:'ich', de:'Ich habe die kaputte Jacke <b>zurückgegeben</b>.', en:'I returned the broken jacket.'},
-      {p:'du', de:'Du hast das Buch der Bibliothek <b>zurückgegeben</b>.', en:'You returned the book to the library.'},
-      {p:'er/sie/es', de:'Er hat den falschen Artikel <b>zurückgegeben</b>.', en:'He returned the wrong item.'},
-      {p:'wir', de:'Wir haben die Schuhe <b>zurückgegeben</b>.', en:'We returned the shoes.'},
-      {p:'ihr', de:'Ihr habt das Geschenk <b>zurückgegeben</b>.', en:'You all returned the gift.'},
-      {p:'sie (Pl.)', de:'Sie haben die Ware <b>zurückgegeben</b>.', en:'They returned the goods.'}
+      {p:'ich', praes:{de:'Ich <b>gebe</b> die kaputte Jacke <b>zurück</b>.', en:'I return the broken jacket.'}, praet:{de:'Ich <b>gab</b> die kaputte Jacke <b>zurück</b>.', en:'I returned the broken jacket.'}, perf:{de:'Ich habe die kaputte Jacke <b>zurückgegeben</b>.', en:'I returned the broken jacket.'}},
+      {p:'du', praes:{de:'Du <b>gibst</b> das Buch der Bibliothek <b>zurück</b>.', en:'You return the book to the library.'}, praet:{de:'Du <b>gabst</b> das Buch der Bibliothek <b>zurück</b>.', en:'You returned the book to the library.'}, perf:{de:'Du hast das Buch der Bibliothek <b>zurückgegeben</b>.', en:'You returned the book to the library.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>gibt</b> den falschen Artikel <b>zurück</b>.', en:'He returns the wrong item.'}, praet:{de:'Er <b>gab</b> den falschen Artikel <b>zurück</b>.', en:'He returned the wrong item.'}, perf:{de:'Er hat den falschen Artikel <b>zurückgegeben</b>.', en:'He returned the wrong item.'}},
+      {p:'wir', praes:{de:'Wir <b>geben</b> die Schuhe <b>zurück</b>.', en:'We return the shoes.'}, praet:{de:'Wir <b>gaben</b> die Schuhe <b>zurück</b>.', en:'We returned the shoes.'}, perf:{de:'Wir haben die Schuhe <b>zurückgegeben</b>.', en:'We returned the shoes.'}},
+      {p:'ihr', praes:{de:'Ihr <b>gebt</b> das Geschenk <b>zurück</b>.', en:'You all return the gift.'}, praet:{de:'Ihr <b>gabt</b> das Geschenk <b>zurück</b>.', en:'You all returned the gift.'}, perf:{de:'Ihr habt das Geschenk <b>zurückgegeben</b>.', en:'You all returned the gift.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>geben</b> die Ware <b>zurück</b>.', en:'They return the goods.'}, praet:{de:'Sie <b>gaben</b> die Ware <b>zurück</b>.', en:'They returned the goods.'}, perf:{de:'Sie haben die Ware <b>zurückgegeben</b>.', en:'They returned the goods.'}}
     ]}
   ]},
   { id:'freizeit', title:'Freizeit', icon:'target', verbs:[
     { inf:'spielen', en:'to play', icon:'target', sentences:[
-      {p:'ich', de:'Ich habe mit meinen Freunden Fußball <b>gespielt</b>.', en:'I played football with my friends.'},
-      {p:'du', de:'Du hast Klavier <b>gespielt</b>.', en:'You played the piano.'},
-      {p:'er/sie/es', de:'Er hat den ganzen Abend Videospiele <b>gespielt</b>.', en:'He played video games all evening.'},
-      {p:'wir', de:'Wir haben Karten <b>gespielt</b>.', en:'We played cards.'},
-      {p:'ihr', de:'Ihr habt im Park Basketball <b>gespielt</b>.', en:'You all played basketball in the park.'},
-      {p:'sie (Pl.)', de:'Sie haben zusammen Schach <b>gespielt</b>.', en:'They played chess together.'}
+      {p:'ich', praes:{de:'Ich <b>spiele</b> mit meinen Freunden Fußball.', en:'I play football with my friends.'}, praet:{de:'Ich <b>spielte</b> mit meinen Freunden Fußball.', en:'I played football with my friends.'}, perf:{de:'Ich habe mit meinen Freunden Fußball <b>gespielt</b>.', en:'I played football with my friends.'}},
+      {p:'du', praes:{de:'Du <b>spielst</b> Klavier.', en:'You play the piano.'}, praet:{de:'Du <b>spieltest</b> Klavier.', en:'You played the piano.'}, perf:{de:'Du hast Klavier <b>gespielt</b>.', en:'You played the piano.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>spielt</b> den ganzen Abend Videospiele.', en:'He plays video games all evening.'}, praet:{de:'Er <b>spielte</b> den ganzen Abend Videospiele.', en:'He played video games all evening.'}, perf:{de:'Er hat den ganzen Abend Videospiele <b>gespielt</b>.', en:'He played video games all evening.'}},
+      {p:'wir', praes:{de:'Wir <b>spielen</b> Karten.', en:'We play cards.'}, praet:{de:'Wir <b>spielten</b> Karten.', en:'We played cards.'}, perf:{de:'Wir haben Karten <b>gespielt</b>.', en:'We played cards.'}},
+      {p:'ihr', praes:{de:'Ihr <b>spielt</b> im Park Basketball.', en:'You all play basketball in the park.'}, praet:{de:'Ihr <b>spieltet</b> im Park Basketball.', en:'You all played basketball in the park.'}, perf:{de:'Ihr habt im Park Basketball <b>gespielt</b>.', en:'You all played basketball in the park.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>spielen</b> zusammen Schach.', en:'They play chess together.'}, praet:{de:'Sie <b>spielten</b> zusammen Schach.', en:'They played chess together.'}, perf:{de:'Sie haben zusammen Schach <b>gespielt</b>.', en:'They played chess together.'}}
     ]},
     { inf:'lesen', en:'to read', icon:'document', sentences:[
-      {p:'ich', de:'Ich habe ein spannendes Buch <b>gelesen</b>.', en:'I read an exciting book.'},
-      {p:'du', de:'Du hast die Zeitung <b>gelesen</b>.', en:'You read the newspaper.'},
-      {p:'er/sie/es', de:'Er hat einen langen Roman <b>gelesen</b>.', en:'He read a long novel.'},
-      {p:'wir', de:'Wir haben gemeinsam eine Geschichte <b>gelesen</b>.', en:'We read a story together.'},
-      {p:'ihr', de:'Ihr habt die Nachrichten <b>gelesen</b>.', en:'You all read the news.'},
-      {p:'sie (Pl.)', de:'Sie haben ein Comic-Heft <b>gelesen</b>.', en:'They read a comic book.'}
+      {p:'ich', praes:{de:'Ich <b>lese</b> ein spannendes Buch.', en:'I read an exciting book.'}, praet:{de:'Ich <b>las</b> ein spannendes Buch.', en:'I read an exciting book.'}, perf:{de:'Ich habe ein spannendes Buch <b>gelesen</b>.', en:'I read an exciting book.'}},
+      {p:'du', praes:{de:'Du <b>liest</b> die Zeitung.', en:'You read the newspaper.'}, praet:{de:'Du <b>lasest</b> die Zeitung.', en:'You read the newspaper.'}, perf:{de:'Du hast die Zeitung <b>gelesen</b>.', en:'You read the newspaper.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>liest</b> einen langen Roman.', en:'He reads a long novel.'}, praet:{de:'Er <b>las</b> einen langen Roman.', en:'He read a long novel.'}, perf:{de:'Er hat einen langen Roman <b>gelesen</b>.', en:'He read a long novel.'}},
+      {p:'wir', praes:{de:'Wir <b>lesen</b> gemeinsam eine Geschichte.', en:'We read a story together.'}, praet:{de:'Wir <b>lasen</b> gemeinsam eine Geschichte.', en:'We read a story together.'}, perf:{de:'Wir haben gemeinsam eine Geschichte <b>gelesen</b>.', en:'We read a story together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>lest</b> die Nachrichten.', en:'You all read the news.'}, praet:{de:'Ihr <b>laset</b> die Nachrichten.', en:'You all read the news.'}, perf:{de:'Ihr habt die Nachrichten <b>gelesen</b>.', en:'You all read the news.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>lesen</b> ein Comic-Heft.', en:'They read a comic book.'}, praet:{de:'Sie <b>lasen</b> ein Comic-Heft.', en:'They read a comic book.'}, perf:{de:'Sie haben ein Comic-Heft <b>gelesen</b>.', en:'They read a comic book.'}}
     ]},
     { inf:'schwimmen', en:'to swim', icon:'target', sentences:[
-      {p:'ich', de:'Ich bin im See <b>geschwommen</b>.', en:'I swam in the lake.'},
-      {p:'du', de:'Du bist im Meer <b>geschwommen</b>.', en:'You swam in the sea.'},
-      {p:'er/sie/es', de:'Er ist jeden Morgen <b>geschwommen</b>.', en:'He swam every morning.'},
-      {p:'wir', de:'Wir sind im Schwimmbad <b>geschwommen</b>.', en:'We swam at the pool.'},
-      {p:'ihr', de:'Ihr seid im kalten Wasser <b>geschwommen</b>.', en:'You all swam in the cold water.'},
-      {p:'sie (Pl.)', de:'Sie sind zusammen <b>geschwommen</b>.', en:'They swam together.'}
+      {p:'ich', praes:{de:'Ich <b>schwimme</b> im See.', en:'I swim in the lake.'}, praet:{de:'Ich <b>schwamm</b> im See.', en:'I swam in the lake.'}, perf:{de:'Ich bin im See <b>geschwommen</b>.', en:'I swam in the lake.'}},
+      {p:'du', praes:{de:'Du <b>schwimmst</b> im Meer.', en:'You swim in the sea.'}, praet:{de:'Du <b>schwammst</b> im Meer.', en:'You swam in the sea.'}, perf:{de:'Du bist im Meer <b>geschwommen</b>.', en:'You swam in the sea.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>schwimmt</b> jeden Morgen.', en:'He swims every morning.'}, praet:{de:'Er <b>schwamm</b> jeden Morgen.', en:'He swam every morning.'}, perf:{de:'Er ist jeden Morgen <b>geschwommen</b>.', en:'He swam every morning.'}},
+      {p:'wir', praes:{de:'Wir <b>schwimmen</b> im Schwimmbad.', en:'We swim at the pool.'}, praet:{de:'Wir <b>schwammen</b> im Schwimmbad.', en:'We swam at the pool.'}, perf:{de:'Wir sind im Schwimmbad <b>geschwommen</b>.', en:'We swam at the pool.'}},
+      {p:'ihr', praes:{de:'Ihr <b>schwimmt</b> im kalten Wasser.', en:'You all swim in the cold water.'}, praet:{de:'Ihr <b>schwammt</b> im kalten Wasser.', en:'You all swam in the cold water.'}, perf:{de:'Ihr seid im kalten Wasser <b>geschwommen</b>.', en:'You all swam in the cold water.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>schwimmen</b> zusammen.', en:'They swim together.'}, praet:{de:'Sie <b>schwammen</b> zusammen.', en:'They swam together.'}, perf:{de:'Sie sind zusammen <b>geschwommen</b>.', en:'They swam together.'}}
     ]},
     { inf:'wandern', en:'to hike', icon:'target', sentences:[
-      {p:'ich', de:'Ich bin am Wochenende in den Bergen <b>gewandert</b>.', en:'I hiked in the mountains on the weekend.'},
-      {p:'du', de:'Du bist durch den Wald <b>gewandert</b>.', en:'You hiked through the forest.'},
-      {p:'er/sie/es', de:'Er ist stundenlang <b>gewandert</b>.', en:'He hiked for hours.'},
-      {p:'wir', de:'Wir sind zusammen auf einen hohen Berg <b>gewandert</b>.', en:'We hiked up a tall mountain together.'},
-      {p:'ihr', de:'Ihr seid entlang des Flusses <b>gewandert</b>.', en:'You all hiked along the river.'},
-      {p:'sie (Pl.)', de:'Sie sind bei Sonnenschein <b>gewandert</b>.', en:'They hiked in the sunshine.'}
+      {p:'ich', praes:{de:'Ich <b>wandere</b> am Wochenende in den Bergen.', en:'I hike in the mountains on the weekend.'}, praet:{de:'Ich <b>wanderte</b> am Wochenende in den Bergen.', en:'I hiked in the mountains on the weekend.'}, perf:{de:'Ich bin am Wochenende in den Bergen <b>gewandert</b>.', en:'I hiked in the mountains on the weekend.'}},
+      {p:'du', praes:{de:'Du <b>wanderst</b> durch den Wald.', en:'You hike through the forest.'}, praet:{de:'Du <b>wandertest</b> durch den Wald.', en:'You hiked through the forest.'}, perf:{de:'Du bist durch den Wald <b>gewandert</b>.', en:'You hiked through the forest.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>wandert</b> stundenlang.', en:'He hikes for hours.'}, praet:{de:'Er <b>wanderte</b> stundenlang.', en:'He hiked for hours.'}, perf:{de:'Er ist stundenlang <b>gewandert</b>.', en:'He hiked for hours.'}},
+      {p:'wir', praes:{de:'Wir <b>wandern</b> zusammen auf einen hohen Berg.', en:'We hike up a tall mountain together.'}, praet:{de:'Wir <b>wanderten</b> zusammen auf einen hohen Berg.', en:'We hiked up a tall mountain together.'}, perf:{de:'Wir sind zusammen auf einen hohen Berg <b>gewandert</b>.', en:'We hiked up a tall mountain together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>wandert</b> entlang des Flusses.', en:'You all hike along the river.'}, praet:{de:'Ihr <b>wandertet</b> entlang des Flusses.', en:'You all hiked along the river.'}, perf:{de:'Ihr seid entlang des Flusses <b>gewandert</b>.', en:'You all hiked along the river.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>wandern</b> bei Sonnenschein.', en:'They hike in the sunshine.'}, praet:{de:'Sie <b>wanderten</b> bei Sonnenschein.', en:'They hiked in the sunshine.'}, perf:{de:'Sie sind bei Sonnenschein <b>gewandert</b>.', en:'They hiked in the sunshine.'}}
     ]},
     { inf:'fernsehen', en:'to watch TV', icon:'video', sentences:[
-      {p:'ich', de:'Ich habe gestern Abend <b>ferngesehen</b>.', en:'I watched TV yesterday evening.'},
-      {p:'du', de:'Du hast bis spät in die Nacht <b>ferngesehen</b>.', en:'You watched TV until late at night.'},
-      {p:'er/sie/es', de:'Er hat den ganzen Nachmittag <b>ferngesehen</b>.', en:'He watched TV all afternoon.'},
-      {p:'wir', de:'Wir haben zusammen <b>ferngesehen</b>.', en:'We watched TV together.'},
-      {p:'ihr', de:'Ihr habt zu lange <b>ferngesehen</b>.', en:'You all watched TV too long.'},
-      {p:'sie (Pl.)', de:'Sie haben nach dem Essen <b>ferngesehen</b>.', en:'They watched TV after dinner.'}
+      {p:'ich', praes:{de:'Ich <b>sehe</b> heute Abend <b>fern</b>.', en:'I watch TV this evening.'}, praet:{de:'Ich <b>sah</b> gestern Abend <b>fern</b>.', en:'I watched TV yesterday evening.'}, perf:{de:'Ich habe gestern Abend <b>ferngesehen</b>.', en:'I watched TV yesterday evening.'}},
+      {p:'du', praes:{de:'Du <b>siehst</b> bis spät in die Nacht <b>fern</b>.', en:'You watch TV until late at night.'}, praet:{de:'Du <b>sahst</b> bis spät in die Nacht <b>fern</b>.', en:'You watched TV until late at night.'}, perf:{de:'Du hast bis spät in die Nacht <b>ferngesehen</b>.', en:'You watched TV until late at night.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>sieht</b> den ganzen Nachmittag <b>fern</b>.', en:'He watches TV all afternoon.'}, praet:{de:'Er <b>sah</b> den ganzen Nachmittag <b>fern</b>.', en:'He watched TV all afternoon.'}, perf:{de:'Er hat den ganzen Nachmittag <b>ferngesehen</b>.', en:'He watched TV all afternoon.'}},
+      {p:'wir', praes:{de:'Wir <b>sehen</b> zusammen <b>fern</b>.', en:'We watch TV together.'}, praet:{de:'Wir <b>sahen</b> zusammen <b>fern</b>.', en:'We watched TV together.'}, perf:{de:'Wir haben zusammen <b>ferngesehen</b>.', en:'We watched TV together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>seht</b> zu lange <b>fern</b>.', en:'You all watch TV too long.'}, praet:{de:'Ihr <b>saht</b> zu lange <b>fern</b>.', en:'You all watched TV too long.'}, perf:{de:'Ihr habt zu lange <b>ferngesehen</b>.', en:'You all watched TV too long.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>sehen</b> nach dem Essen <b>fern</b>.', en:'They watch TV after dinner.'}, praet:{de:'Sie <b>sahen</b> nach dem Essen <b>fern</b>.', en:'They watched TV after dinner.'}, perf:{de:'Sie haben nach dem Essen <b>ferngesehen</b>.', en:'They watched TV after dinner.'}}
     ]}
   ]},
   { id:'essen', title:'Essen & Trinken', icon:'smile', verbs:[
     { inf:'essen', en:'to eat', icon:'smile', sentences:[
-      {p:'ich', de:'Ich habe zu Mittag Pasta <b>gegessen</b>.', en:'I ate pasta for lunch.'},
-      {p:'du', de:'Du hast einen leckeren Kuchen <b>gegessen</b>.', en:'You ate a delicious cake.'},
-      {p:'er/sie/es', de:'Er hat sein Frühstück schnell <b>gegessen</b>.', en:'He ate his breakfast quickly.'},
-      {p:'wir', de:'Wir haben zusammen zu Abend <b>gegessen</b>.', en:'We had dinner together.'},
-      {p:'ihr', de:'Ihr habt im Restaurant <b>gegessen</b>.', en:'You all ate at the restaurant.'},
-      {p:'sie (Pl.)', de:'Sie haben nichts <b>gegessen</b>.', en:'They ate nothing.'}
+      {p:'ich', praes:{de:'Ich <b>esse</b> zu Mittag Pasta.', en:'I eat pasta for lunch.'}, praet:{de:'Ich <b>aß</b> zu Mittag Pasta.', en:'I ate pasta for lunch.'}, perf:{de:'Ich habe zu Mittag Pasta <b>gegessen</b>.', en:'I ate pasta for lunch.'}},
+      {p:'du', praes:{de:'Du <b>isst</b> einen leckeren Kuchen.', en:'You eat a delicious cake.'}, praet:{de:'Du <b>aßest</b> einen leckeren Kuchen.', en:'You ate a delicious cake.'}, perf:{de:'Du hast einen leckeren Kuchen <b>gegessen</b>.', en:'You ate a delicious cake.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>isst</b> sein Frühstück schnell.', en:'He eats his breakfast quickly.'}, praet:{de:'Er <b>aß</b> sein Frühstück schnell.', en:'He ate his breakfast quickly.'}, perf:{de:'Er hat sein Frühstück schnell <b>gegessen</b>.', en:'He ate his breakfast quickly.'}},
+      {p:'wir', praes:{de:'Wir <b>essen</b> zusammen zu Abend.', en:'We eat dinner together.'}, praet:{de:'Wir <b>aßen</b> zusammen zu Abend.', en:'We had dinner together.'}, perf:{de:'Wir haben zusammen zu Abend <b>gegessen</b>.', en:'We had dinner together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>esst</b> im Restaurant.', en:'You all eat at the restaurant.'}, praet:{de:'Ihr <b>aßt</b> im Restaurant.', en:'You all ate at the restaurant.'}, perf:{de:'Ihr habt im Restaurant <b>gegessen</b>.', en:'You all ate at the restaurant.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>essen</b> nichts.', en:'They eat nothing.'}, praet:{de:'Sie <b>aßen</b> nichts.', en:'They ate nothing.'}, perf:{de:'Sie haben nichts <b>gegessen</b>.', en:'They ate nothing.'}}
     ]},
     { inf:'trinken', en:'to drink', icon:'smile', sentences:[
-      {p:'ich', de:'Ich habe einen Kaffee <b>getrunken</b>.', en:'I drank a coffee.'},
-      {p:'du', de:'Du hast ein Glas Wasser <b>getrunken</b>.', en:'You drank a glass of water.'},
-      {p:'er/sie/es', de:'Er hat zu viel Kaffee <b>getrunken</b>.', en:'He drank too much coffee.'},
-      {p:'wir', de:'Wir haben Tee zusammen <b>getrunken</b>.', en:'We drank tea together.'},
-      {p:'ihr', de:'Ihr habt frischen Orangensaft <b>getrunken</b>.', en:'You all drank fresh orange juice.'},
-      {p:'sie (Pl.)', de:'Sie haben ein Glas Wein <b>getrunken</b>.', en:'They drank a glass of wine.'}
+      {p:'ich', praes:{de:'Ich <b>trinke</b> einen Kaffee.', en:'I drink a coffee.'}, praet:{de:'Ich <b>trank</b> einen Kaffee.', en:'I drank a coffee.'}, perf:{de:'Ich habe einen Kaffee <b>getrunken</b>.', en:'I drank a coffee.'}},
+      {p:'du', praes:{de:'Du <b>trinkst</b> ein Glas Wasser.', en:'You drink a glass of water.'}, praet:{de:'Du <b>trankst</b> ein Glas Wasser.', en:'You drank a glass of water.'}, perf:{de:'Du hast ein Glas Wasser <b>getrunken</b>.', en:'You drank a glass of water.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>trinkt</b> zu viel Kaffee.', en:'He drinks too much coffee.'}, praet:{de:'Er <b>trank</b> zu viel Kaffee.', en:'He drank too much coffee.'}, perf:{de:'Er hat zu viel Kaffee <b>getrunken</b>.', en:'He drank too much coffee.'}},
+      {p:'wir', praes:{de:'Wir <b>trinken</b> Tee zusammen.', en:'We drink tea together.'}, praet:{de:'Wir <b>tranken</b> Tee zusammen.', en:'We drank tea together.'}, perf:{de:'Wir haben Tee zusammen <b>getrunken</b>.', en:'We drank tea together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>trinkt</b> frischen Orangensaft.', en:'You all drink fresh orange juice.'}, praet:{de:'Ihr <b>trankt</b> frischen Orangensaft.', en:'You all drank fresh orange juice.'}, perf:{de:'Ihr habt frischen Orangensaft <b>getrunken</b>.', en:'You all drank fresh orange juice.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>trinken</b> ein Glas Wein.', en:'They drink a glass of wine.'}, praet:{de:'Sie <b>tranken</b> ein Glas Wein.', en:'They drank a glass of wine.'}, perf:{de:'Sie haben ein Glas Wein <b>getrunken</b>.', en:'They drank a glass of wine.'}}
     ]},
     { inf:'kochen', en:'to cook', icon:'smile', sentences:[
-      {p:'ich', de:'Ich habe heute Abend Suppe <b>gekocht</b>.', en:'I cooked soup tonight.'},
-      {p:'du', de:'Du hast ein tolles Gericht <b>gekocht</b>.', en:'You cooked a great dish.'},
-      {p:'er/sie/es', de:'Er hat für seine Familie <b>gekocht</b>.', en:'He cooked for his family.'},
-      {p:'wir', de:'Wir haben zusammen Nudeln <b>gekocht</b>.', en:'We cooked noodles together.'},
-      {p:'ihr', de:'Ihr habt ein leckeres Essen <b>gekocht</b>.', en:'You all cooked a delicious meal.'},
-      {p:'sie (Pl.)', de:'Sie haben traditionelle Gerichte <b>gekocht</b>.', en:'They cooked traditional dishes.'}
+      {p:'ich', praes:{de:'Ich <b>koche</b> heute Abend Suppe.', en:'I cook soup tonight.'}, praet:{de:'Ich <b>kochte</b> heute Abend Suppe.', en:'I cooked soup tonight.'}, perf:{de:'Ich habe heute Abend Suppe <b>gekocht</b>.', en:'I cooked soup tonight.'}},
+      {p:'du', praes:{de:'Du <b>kochst</b> ein tolles Gericht.', en:'You cook a great dish.'}, praet:{de:'Du <b>kochtest</b> ein tolles Gericht.', en:'You cooked a great dish.'}, perf:{de:'Du hast ein tolles Gericht <b>gekocht</b>.', en:'You cooked a great dish.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>kocht</b> für seine Familie.', en:'He cooks for his family.'}, praet:{de:'Er <b>kochte</b> für seine Familie.', en:'He cooked for his family.'}, perf:{de:'Er hat für seine Familie <b>gekocht</b>.', en:'He cooked for his family.'}},
+      {p:'wir', praes:{de:'Wir <b>kochen</b> zusammen Nudeln.', en:'We cook noodles together.'}, praet:{de:'Wir <b>kochten</b> zusammen Nudeln.', en:'We cooked noodles together.'}, perf:{de:'Wir haben zusammen Nudeln <b>gekocht</b>.', en:'We cooked noodles together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>kocht</b> ein leckeres Essen.', en:'You all cook a delicious meal.'}, praet:{de:'Ihr <b>kochtet</b> ein leckeres Essen.', en:'You all cooked a delicious meal.'}, perf:{de:'Ihr habt ein leckeres Essen <b>gekocht</b>.', en:'You all cooked a delicious meal.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>kochen</b> traditionelle Gerichte.', en:'They cook traditional dishes.'}, praet:{de:'Sie <b>kochten</b> traditionelle Gerichte.', en:'They cooked traditional dishes.'}, perf:{de:'Sie haben traditionelle Gerichte <b>gekocht</b>.', en:'They cooked traditional dishes.'}}
     ]},
     { inf:'bestellen', en:'to order', icon:'document', sentences:[
-      {p:'ich', de:'Ich habe eine Pizza <b>bestellt</b>.', en:'I ordered a pizza.'},
-      {p:'du', de:'Du hast einen Salat <b>bestellt</b>.', en:'You ordered a salad.'},
-      {p:'er/sie/es', de:'Er hat das Menü des Tages <b>bestellt</b>.', en:'He ordered the menu of the day.'},
-      {p:'wir', de:'Wir haben zwei Kaffee <b>bestellt</b>.', en:'We ordered two coffees.'},
-      {p:'ihr', de:'Ihr habt viel zu viel Essen <b>bestellt</b>.', en:'You all ordered way too much food.'},
-      {p:'sie (Pl.)', de:'Sie haben etwas zu trinken <b>bestellt</b>.', en:'They ordered something to drink.'}
+      {p:'ich', praes:{de:'Ich <b>bestelle</b> eine Pizza.', en:'I order a pizza.'}, praet:{de:'Ich <b>bestellte</b> eine Pizza.', en:'I ordered a pizza.'}, perf:{de:'Ich habe eine Pizza <b>bestellt</b>.', en:'I ordered a pizza.'}},
+      {p:'du', praes:{de:'Du <b>bestellst</b> einen Salat.', en:'You order a salad.'}, praet:{de:'Du <b>bestelltest</b> einen Salat.', en:'You ordered a salad.'}, perf:{de:'Du hast einen Salat <b>bestellt</b>.', en:'You ordered a salad.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>bestellt</b> das Menü des Tages.', en:'He orders the menu of the day.'}, praet:{de:'Er <b>bestellte</b> das Menü des Tages.', en:'He ordered the menu of the day.'}, perf:{de:'Er hat das Menü des Tages <b>bestellt</b>.', en:'He ordered the menu of the day.'}},
+      {p:'wir', praes:{de:'Wir <b>bestellen</b> zwei Kaffee.', en:'We order two coffees.'}, praet:{de:'Wir <b>bestellten</b> zwei Kaffee.', en:'We ordered two coffees.'}, perf:{de:'Wir haben zwei Kaffee <b>bestellt</b>.', en:'We ordered two coffees.'}},
+      {p:'ihr', praes:{de:'Ihr <b>bestellt</b> viel zu viel Essen.', en:'You all order way too much food.'}, praet:{de:'Ihr <b>bestelltet</b> viel zu viel Essen.', en:'You all ordered way too much food.'}, perf:{de:'Ihr habt viel zu viel Essen <b>bestellt</b>.', en:'You all ordered way too much food.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>bestellen</b> etwas zu trinken.', en:'They order something to drink.'}, praet:{de:'Sie <b>bestellten</b> etwas zu trinken.', en:'They ordered something to drink.'}, perf:{de:'Sie haben etwas zu trinken <b>bestellt</b>.', en:'They ordered something to drink.'}}
     ]},
     { inf:'probieren', en:'to try (food)', icon:'smile', sentences:[
-      {p:'ich', de:'Ich habe das neue Gericht <b>probiert</b>.', en:'I tried the new dish.'},
-      {p:'du', de:'Du hast den frischen Kuchen <b>probiert</b>.', en:'You tried the fresh cake.'},
-      {p:'er/sie/es', de:'Er hat ein exotisches Essen <b>probiert</b>.', en:'He tried an exotic dish.'},
-      {p:'wir', de:'Wir haben verschiedene Käsesorten <b>probiert</b>.', en:'We tried different types of cheese.'},
-      {p:'ihr', de:'Ihr habt den hausgemachten Wein <b>probiert</b>.', en:'You all tried the homemade wine.'},
-      {p:'sie (Pl.)', de:'Sie haben alle Spezialitäten <b>probiert</b>.', en:'They tried all the specialties.'}
+      {p:'ich', praes:{de:'Ich <b>probiere</b> das neue Gericht.', en:'I try the new dish.'}, praet:{de:'Ich <b>probierte</b> das neue Gericht.', en:'I tried the new dish.'}, perf:{de:'Ich habe das neue Gericht <b>probiert</b>.', en:'I tried the new dish.'}},
+      {p:'du', praes:{de:'Du <b>probierst</b> den frischen Kuchen.', en:'You try the fresh cake.'}, praet:{de:'Du <b>probiertest</b> den frischen Kuchen.', en:'You tried the fresh cake.'}, perf:{de:'Du hast den frischen Kuchen <b>probiert</b>.', en:'You tried the fresh cake.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>probiert</b> ein exotisches Essen.', en:'He tries an exotic dish.'}, praet:{de:'Er <b>probierte</b> ein exotisches Essen.', en:'He tried an exotic dish.'}, perf:{de:'Er hat ein exotisches Essen <b>probiert</b>.', en:'He tried an exotic dish.'}},
+      {p:'wir', praes:{de:'Wir <b>probieren</b> verschiedene Käsesorten.', en:'We try different types of cheese.'}, praet:{de:'Wir <b>probierten</b> verschiedene Käsesorten.', en:'We tried different types of cheese.'}, perf:{de:'Wir haben verschiedene Käsesorten <b>probiert</b>.', en:'We tried different types of cheese.'}},
+      {p:'ihr', praes:{de:'Ihr <b>probiert</b> den hausgemachten Wein.', en:'You all try the homemade wine.'}, praet:{de:'Ihr <b>probiertet</b> den hausgemachten Wein.', en:'You all tried the homemade wine.'}, perf:{de:'Ihr habt den hausgemachten Wein <b>probiert</b>.', en:'You all tried the homemade wine.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>probieren</b> alle Spezialitäten.', en:'They try all the specialties.'}, praet:{de:'Sie <b>probierten</b> alle Spezialitäten.', en:'They tried all the specialties.'}, perf:{de:'Sie haben alle Spezialitäten <b>probiert</b>.', en:'They tried all the specialties.'}}
     ]}
   ]},
   { id:'reisen', title:'Reisen', icon:'building', verbs:[
     { inf:'fliegen', en:'to fly', icon:'building', sentences:[
-      {p:'ich', de:'Ich bin letztes Jahr nach Berlin <b>geflogen</b>.', en:'I flew to Berlin last year.'},
-      {p:'du', de:'Du bist zum ersten Mal nach Deutschland <b>geflogen</b>.', en:'You flew to Germany for the first time.'},
-      {p:'er/sie/es', de:'Er ist geschäftlich nach München <b>geflogen</b>.', en:'He flew to Munich on business.'},
-      {p:'wir', de:'Wir sind zusammen nach Spanien <b>geflogen</b>.', en:'We flew to Spain together.'},
-      {p:'ihr', de:'Ihr seid direkt nach Rom <b>geflogen</b>.', en:'You all flew directly to Rome.'},
-      {p:'sie (Pl.)', de:'Sie sind über Frankfurt <b>geflogen</b>.', en:'They flew via Frankfurt.'}
+      {p:'ich', praes:{de:'Ich <b>fliege</b> dieses Jahr nach Berlin.', en:'I fly to Berlin this year.'}, praet:{de:'Ich <b>flog</b> letztes Jahr nach Berlin.', en:'I flew to Berlin last year.'}, perf:{de:'Ich bin letztes Jahr nach Berlin <b>geflogen</b>.', en:'I flew to Berlin last year.'}},
+      {p:'du', praes:{de:'Du <b>fliegst</b> zum ersten Mal nach Deutschland.', en:'You fly to Germany for the first time.'}, praet:{de:'Du <b>flogst</b> zum ersten Mal nach Deutschland.', en:'You flew to Germany for the first time.'}, perf:{de:'Du bist zum ersten Mal nach Deutschland <b>geflogen</b>.', en:'You flew to Germany for the first time.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>fliegt</b> geschäftlich nach München.', en:'He flies to Munich on business.'}, praet:{de:'Er <b>flog</b> geschäftlich nach München.', en:'He flew to Munich on business.'}, perf:{de:'Er ist geschäftlich nach München <b>geflogen</b>.', en:'He flew to Munich on business.'}},
+      {p:'wir', praes:{de:'Wir <b>fliegen</b> zusammen nach Spanien.', en:'We fly to Spain together.'}, praet:{de:'Wir <b>flogen</b> zusammen nach Spanien.', en:'We flew to Spain together.'}, perf:{de:'Wir sind zusammen nach Spanien <b>geflogen</b>.', en:'We flew to Spain together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>fliegt</b> direkt nach Rom.', en:'You all fly directly to Rome.'}, praet:{de:'Ihr <b>flogt</b> direkt nach Rom.', en:'You all flew directly to Rome.'}, perf:{de:'Ihr seid direkt nach Rom <b>geflogen</b>.', en:'You all flew directly to Rome.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>fliegen</b> über Frankfurt.', en:'They fly via Frankfurt.'}, praet:{de:'Sie <b>flogen</b> über Frankfurt.', en:'They flew via Frankfurt.'}, perf:{de:'Sie sind über Frankfurt <b>geflogen</b>.', en:'They flew via Frankfurt.'}}
     ]},
     { inf:'fahren', en:'to drive / travel', icon:'building', sentences:[
-      {p:'ich', de:'Ich bin mit dem Zug nach Hamburg <b>gefahren</b>.', en:'I traveled to Hamburg by train.'},
-      {p:'du', de:'Du bist mit dem Auto in den Urlaub <b>gefahren</b>.', en:'You drove to your vacation by car.'},
-      {p:'er/sie/es', de:'Er ist jeden Tag zur Arbeit <b>gefahren</b>.', en:'He drove to work every day.'},
-      {p:'wir', de:'Wir sind gemeinsam an die Küste <b>gefahren</b>.', en:'We drove to the coast together.'},
-      {p:'ihr', de:'Ihr seid mit dem Bus in die Stadt <b>gefahren</b>.', en:'You all went to the city by bus.'},
-      {p:'sie (Pl.)', de:'Sie sind über die Grenze <b>gefahren</b>.', en:'They drove across the border.'}
+      {p:'ich', praes:{de:'Ich <b>fahre</b> mit dem Zug nach Hamburg.', en:'I travel to Hamburg by train.'}, praet:{de:'Ich <b>fuhr</b> mit dem Zug nach Hamburg.', en:'I traveled to Hamburg by train.'}, perf:{de:'Ich bin mit dem Zug nach Hamburg <b>gefahren</b>.', en:'I traveled to Hamburg by train.'}},
+      {p:'du', praes:{de:'Du <b>fährst</b> mit dem Auto in den Urlaub.', en:'You drive to your vacation by car.'}, praet:{de:'Du <b>fuhrst</b> mit dem Auto in den Urlaub.', en:'You drove to your vacation by car.'}, perf:{de:'Du bist mit dem Auto in den Urlaub <b>gefahren</b>.', en:'You drove to your vacation by car.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>fährt</b> jeden Tag zur Arbeit.', en:'He drives to work every day.'}, praet:{de:'Er <b>fuhr</b> jeden Tag zur Arbeit.', en:'He drove to work every day.'}, perf:{de:'Er ist jeden Tag zur Arbeit <b>gefahren</b>.', en:'He drove to work every day.'}},
+      {p:'wir', praes:{de:'Wir <b>fahren</b> gemeinsam an die Küste.', en:'We drive to the coast together.'}, praet:{de:'Wir <b>fuhren</b> gemeinsam an die Küste.', en:'We drove to the coast together.'}, perf:{de:'Wir sind gemeinsam an die Küste <b>gefahren</b>.', en:'We drove to the coast together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>fahrt</b> mit dem Bus in die Stadt.', en:'You all go to the city by bus.'}, praet:{de:'Ihr <b>fuhrt</b> mit dem Bus in die Stadt.', en:'You all went to the city by bus.'}, perf:{de:'Ihr seid mit dem Bus in die Stadt <b>gefahren</b>.', en:'You all went to the city by bus.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>fahren</b> über die Grenze.', en:'They drive across the border.'}, praet:{de:'Sie <b>fuhren</b> über die Grenze.', en:'They drove across the border.'}, perf:{de:'Sie sind über die Grenze <b>gefahren</b>.', en:'They drove across the border.'}}
     ]},
     { inf:'buchen', en:'to book', icon:'document', sentences:[
-      {p:'ich', de:'Ich habe ein Hotelzimmer <b>gebucht</b>.', en:'I booked a hotel room.'},
-      {p:'du', de:'Du hast einen billigen Flug <b>gebucht</b>.', en:'You booked a cheap flight.'},
-      {p:'er/sie/es', de:'Er hat die Reise online <b>gebucht</b>.', en:'He booked the trip online.'},
-      {p:'wir', de:'Wir haben eine Ferienwohnung <b>gebucht</b>.', en:'We booked a vacation apartment.'},
-      {p:'ihr', de:'Ihr habt die Tickets früh <b>gebucht</b>.', en:'You all booked the tickets early.'},
-      {p:'sie (Pl.)', de:'Sie haben einen Tisch im Restaurant <b>gebucht</b>.', en:'They booked a table at the restaurant.'}
+      {p:'ich', praes:{de:'Ich <b>buche</b> ein Hotelzimmer.', en:'I book a hotel room.'}, praet:{de:'Ich <b>buchte</b> ein Hotelzimmer.', en:'I booked a hotel room.'}, perf:{de:'Ich habe ein Hotelzimmer <b>gebucht</b>.', en:'I booked a hotel room.'}},
+      {p:'du', praes:{de:'Du <b>buchst</b> einen billigen Flug.', en:'You book a cheap flight.'}, praet:{de:'Du <b>buchtest</b> einen billigen Flug.', en:'You booked a cheap flight.'}, perf:{de:'Du hast einen billigen Flug <b>gebucht</b>.', en:'You booked a cheap flight.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>bucht</b> die Reise online.', en:'He books the trip online.'}, praet:{de:'Er <b>buchte</b> die Reise online.', en:'He booked the trip online.'}, perf:{de:'Er hat die Reise online <b>gebucht</b>.', en:'He booked the trip online.'}},
+      {p:'wir', praes:{de:'Wir <b>buchen</b> eine Ferienwohnung.', en:'We book a vacation apartment.'}, praet:{de:'Wir <b>buchten</b> eine Ferienwohnung.', en:'We booked a vacation apartment.'}, perf:{de:'Wir haben eine Ferienwohnung <b>gebucht</b>.', en:'We booked a vacation apartment.'}},
+      {p:'ihr', praes:{de:'Ihr <b>bucht</b> die Tickets früh.', en:'You all book the tickets early.'}, praet:{de:'Ihr <b>buchtet</b> die Tickets früh.', en:'You all booked the tickets early.'}, perf:{de:'Ihr habt die Tickets früh <b>gebucht</b>.', en:'You all booked the tickets early.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>buchen</b> einen Tisch im Restaurant.', en:'They book a table at the restaurant.'}, praet:{de:'Sie <b>buchten</b> einen Tisch im Restaurant.', en:'They booked a table at the restaurant.'}, perf:{de:'Sie haben einen Tisch im Restaurant <b>gebucht</b>.', en:'They booked a table at the restaurant.'}}
     ]},
     { inf:'ankommen', en:'to arrive', icon:'building', sentences:[
-      {p:'ich', de:'Ich bin gestern Abend am Flughafen <b>angekommen</b>.', en:'I arrived at the airport yesterday evening.'},
-      {p:'du', de:'Du bist pünktlich <b>angekommen</b>.', en:'You arrived on time.'},
-      {p:'er/sie/es', de:'Er ist mit Verspätung <b>angekommen</b>.', en:'He arrived late.'},
-      {p:'wir', de:'Wir sind sicher am Zielort <b>angekommen</b>.', en:'We arrived safely at our destination.'},
-      {p:'ihr', de:'Ihr seid früh am Morgen <b>angekommen</b>.', en:'You all arrived early in the morning.'},
-      {p:'sie (Pl.)', de:'Sie sind nach einer langen Reise <b>angekommen</b>.', en:'They arrived after a long journey.'}
+      {p:'ich', praes:{de:'Ich <b>komme</b> heute Abend am Flughafen <b>an</b>.', en:'I arrive at the airport this evening.'}, praet:{de:'Ich <b>kam</b> gestern Abend am Flughafen <b>an</b>.', en:'I arrived at the airport yesterday evening.'}, perf:{de:'Ich bin gestern Abend am Flughafen <b>angekommen</b>.', en:'I arrived at the airport yesterday evening.'}},
+      {p:'du', praes:{de:'Du <b>kommst</b> pünktlich <b>an</b>.', en:'You arrive on time.'}, praet:{de:'Du <b>kamst</b> pünktlich <b>an</b>.', en:'You arrived on time.'}, perf:{de:'Du bist pünktlich <b>angekommen</b>.', en:'You arrived on time.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>kommt</b> mit Verspätung <b>an</b>.', en:'He arrives late.'}, praet:{de:'Er <b>kam</b> mit Verspätung <b>an</b>.', en:'He arrived late.'}, perf:{de:'Er ist mit Verspätung <b>angekommen</b>.', en:'He arrived late.'}},
+      {p:'wir', praes:{de:'Wir <b>kommen</b> sicher am Zielort <b>an</b>.', en:'We arrive safely at our destination.'}, praet:{de:'Wir <b>kamen</b> sicher am Zielort <b>an</b>.', en:'We arrived safely at our destination.'}, perf:{de:'Wir sind sicher am Zielort <b>angekommen</b>.', en:'We arrived safely at our destination.'}},
+      {p:'ihr', praes:{de:'Ihr <b>kommt</b> früh am Morgen <b>an</b>.', en:'You all arrive early in the morning.'}, praet:{de:'Ihr <b>kamt</b> früh am Morgen <b>an</b>.', en:'You all arrived early in the morning.'}, perf:{de:'Ihr seid früh am Morgen <b>angekommen</b>.', en:'You all arrived early in the morning.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>kommen</b> nach einer langen Reise <b>an</b>.', en:'They arrive after a long journey.'}, praet:{de:'Sie <b>kamen</b> nach einer langen Reise <b>an</b>.', en:'They arrived after a long journey.'}, perf:{de:'Sie sind nach einer langen Reise <b>angekommen</b>.', en:'They arrived after a long journey.'}}
     ]},
     { inf:'übernachten', en:'to stay overnight', icon:'house', sentences:[
-      {p:'ich', de:'Ich habe in einem kleinen Hotel <b>übernachtet</b>.', en:'I stayed overnight in a small hotel.'},
-      {p:'du', de:'Du hast bei Freunden <b>übernachtet</b>.', en:'You stayed overnight with friends.'},
-      {p:'er/sie/es', de:'Er hat im Zelt <b>übernachtet</b>.', en:'He stayed overnight in a tent.'},
-      {p:'wir', de:'Wir haben in einer Jugendherberge <b>übernachtet</b>.', en:'We stayed overnight in a youth hostel.'},
-      {p:'ihr', de:'Ihr habt am Flughafen <b>übernachtet</b>.', en:'You all stayed overnight at the airport.'},
-      {p:'sie (Pl.)', de:'Sie haben in einer Pension <b>übernachtet</b>.', en:'They stayed overnight in a guesthouse.'}
+      {p:'ich', praes:{de:'Ich <b>übernachte</b> in einem kleinen Hotel.', en:'I stay overnight in a small hotel.'}, praet:{de:'Ich <b>übernachtete</b> in einem kleinen Hotel.', en:'I stayed overnight in a small hotel.'}, perf:{de:'Ich habe in einem kleinen Hotel <b>übernachtet</b>.', en:'I stayed overnight in a small hotel.'}},
+      {p:'du', praes:{de:'Du <b>übernachtest</b> bei Freunden.', en:'You stay overnight with friends.'}, praet:{de:'Du <b>übernachtetest</b> bei Freunden.', en:'You stayed overnight with friends.'}, perf:{de:'Du hast bei Freunden <b>übernachtet</b>.', en:'You stayed overnight with friends.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>übernachtet</b> im Zelt.', en:'He stays overnight in a tent.'}, praet:{de:'Er <b>übernachtete</b> im Zelt.', en:'He stayed overnight in a tent.'}, perf:{de:'Er hat im Zelt <b>übernachtet</b>.', en:'He stayed overnight in a tent.'}},
+      {p:'wir', praes:{de:'Wir <b>übernachten</b> in einer Jugendherberge.', en:'We stay overnight in a youth hostel.'}, praet:{de:'Wir <b>übernachteten</b> in einer Jugendherberge.', en:'We stayed overnight in a youth hostel.'}, perf:{de:'Wir haben in einer Jugendherberge <b>übernachtet</b>.', en:'We stayed overnight in a youth hostel.'}},
+      {p:'ihr', praes:{de:'Ihr <b>übernachtet</b> am Flughafen.', en:'You all stay overnight at the airport.'}, praet:{de:'Ihr <b>übernachtetet</b> am Flughafen.', en:'You all stayed overnight at the airport.'}, perf:{de:'Ihr habt am Flughafen <b>übernachtet</b>.', en:'You all stayed overnight at the airport.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>übernachten</b> in einer Pension.', en:'They stay overnight in a guesthouse.'}, praet:{de:'Sie <b>übernachteten</b> in einer Pension.', en:'They stayed overnight in a guesthouse.'}, perf:{de:'Sie haben in einer Pension <b>übernachtet</b>.', en:'They stayed overnight in a guesthouse.'}}
     ]}
   ]},
   { id:'gesundheit', title:'Gesundheit', icon:'calendar', verbs:[
     { inf:'schlafen', en:'to sleep', icon:'calendar', sentences:[
-      {p:'ich', de:'Ich habe letzte Nacht schlecht <b>geschlafen</b>.', en:'I slept badly last night.'},
-      {p:'du', de:'Du hast acht Stunden <b>geschlafen</b>.', en:'You slept eight hours.'},
-      {p:'er/sie/es', de:'Er hat den ganzen Tag <b>geschlafen</b>.', en:'He slept all day.'},
-      {p:'wir', de:'Wir haben im Zelt <b>geschlafen</b>.', en:'We slept in the tent.'},
-      {p:'ihr', de:'Ihr habt zu wenig <b>geschlafen</b>.', en:'You all slept too little.'},
-      {p:'sie (Pl.)', de:'Sie haben tief und fest <b>geschlafen</b>.', en:'They slept deeply and soundly.'}
+      {p:'ich', praes:{de:'Ich <b>schlafe</b> heute Nacht schlecht.', en:'I sleep badly tonight.'}, praet:{de:'Ich <b>schlief</b> letzte Nacht schlecht.', en:'I slept badly last night.'}, perf:{de:'Ich habe letzte Nacht schlecht <b>geschlafen</b>.', en:'I slept badly last night.'}},
+      {p:'du', praes:{de:'Du <b>schläfst</b> acht Stunden.', en:'You sleep eight hours.'}, praet:{de:'Du <b>schliefst</b> acht Stunden.', en:'You slept eight hours.'}, perf:{de:'Du hast acht Stunden <b>geschlafen</b>.', en:'You slept eight hours.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>schläft</b> den ganzen Tag.', en:'He sleeps all day.'}, praet:{de:'Er <b>schlief</b> den ganzen Tag.', en:'He slept all day.'}, perf:{de:'Er hat den ganzen Tag <b>geschlafen</b>.', en:'He slept all day.'}},
+      {p:'wir', praes:{de:'Wir <b>schlafen</b> im Zelt.', en:'We sleep in the tent.'}, praet:{de:'Wir <b>schliefen</b> im Zelt.', en:'We slept in the tent.'}, perf:{de:'Wir haben im Zelt <b>geschlafen</b>.', en:'We slept in the tent.'}},
+      {p:'ihr', praes:{de:'Ihr <b>schlaft</b> zu wenig.', en:'You all sleep too little.'}, praet:{de:'Ihr <b>schlieft</b> zu wenig.', en:'You all slept too little.'}, perf:{de:'Ihr habt zu wenig <b>geschlafen</b>.', en:'You all slept too little.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>schlafen</b> tief und fest.', en:'They sleep deeply and soundly.'}, praet:{de:'Sie <b>schliefen</b> tief und fest.', en:'They slept deeply and soundly.'}, perf:{de:'Sie haben tief und fest <b>geschlafen</b>.', en:'They slept deeply and soundly.'}}
     ]},
     { inf:'husten', en:'to cough', icon:'calendar', sentences:[
-      {p:'ich', de:'Ich habe die ganze Nacht <b>gehustet</b>.', en:'I coughed all night.'},
-      {p:'du', de:'Du hast stark <b>gehustet</b>.', en:'You coughed a lot.'},
-      {p:'er/sie/es', de:'Er hat seit Tagen <b>gehustet</b>.', en:'He has been coughing for days.'},
-      {p:'wir', de:'Wir haben beide <b>gehustet</b>.', en:'We both coughed.'},
-      {p:'ihr', de:'Ihr habt im Büro <b>gehustet</b>.', en:'You all coughed at the office.'},
-      {p:'sie (Pl.)', de:'Sie haben wegen der Erkältung <b>gehustet</b>.', en:'They coughed because of the cold.'}
+      {p:'ich', praes:{de:'Ich <b>huste</b> die ganze Nacht.', en:'I cough all night.'}, praet:{de:'Ich <b>hustete</b> die ganze Nacht.', en:'I coughed all night.'}, perf:{de:'Ich habe die ganze Nacht <b>gehustet</b>.', en:'I coughed all night.'}},
+      {p:'du', praes:{de:'Du <b>hustest</b> stark.', en:'You cough a lot.'}, praet:{de:'Du <b>hustetest</b> stark.', en:'You coughed a lot.'}, perf:{de:'Du hast stark <b>gehustet</b>.', en:'You coughed a lot.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>hustet</b> seit Tagen.', en:'He has been coughing for days.'}, praet:{de:'Er <b>hustete</b> seit Tagen.', en:'He coughed for days.'}, perf:{de:'Er hat seit Tagen <b>gehustet</b>.', en:'He has been coughing for days.'}},
+      {p:'wir', praes:{de:'Wir <b>husten</b> beide.', en:'We both cough.'}, praet:{de:'Wir <b>husteten</b> beide.', en:'We both coughed.'}, perf:{de:'Wir haben beide <b>gehustet</b>.', en:'We both coughed.'}},
+      {p:'ihr', praes:{de:'Ihr <b>hustet</b> im Büro.', en:'You all cough at the office.'}, praet:{de:'Ihr <b>hustetet</b> im Büro.', en:'You all coughed at the office.'}, perf:{de:'Ihr habt im Büro <b>gehustet</b>.', en:'You all coughed at the office.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>husten</b> wegen der Erkältung.', en:'They cough because of the cold.'}, praet:{de:'Sie <b>husteten</b> wegen der Erkältung.', en:'They coughed because of the cold.'}, perf:{de:'Sie haben wegen der Erkältung <b>gehustet</b>.', en:'They coughed because of the cold.'}}
     ]},
     { inf:'aufwachen', en:'to wake up', icon:'calendar', sentences:[
-      {p:'ich', de:'Ich bin früh am Morgen <b>aufgewacht</b>.', en:'I woke up early in the morning.'},
-      {p:'du', de:'Du bist mit Kopfschmerzen <b>aufgewacht</b>.', en:'You woke up with a headache.'},
-      {p:'er/sie/es', de:'Er ist mitten in der Nacht <b>aufgewacht</b>.', en:'He woke up in the middle of the night.'},
-      {p:'wir', de:'Wir sind gleichzeitig <b>aufgewacht</b>.', en:'We woke up at the same time.'},
-      {p:'ihr', de:'Ihr seid spät <b>aufgewacht</b>.', en:'You all woke up late.'},
-      {p:'sie (Pl.)', de:'Sie sind vom Lärm <b>aufgewacht</b>.', en:'They woke up from the noise.'}
+      {p:'ich', praes:{de:'Ich <b>wache</b> früh am Morgen <b>auf</b>.', en:'I wake up early in the morning.'}, praet:{de:'Ich <b>wachte</b> früh am Morgen <b>auf</b>.', en:'I woke up early in the morning.'}, perf:{de:'Ich bin früh am Morgen <b>aufgewacht</b>.', en:'I woke up early in the morning.'}},
+      {p:'du', praes:{de:'Du <b>wachst</b> mit Kopfschmerzen <b>auf</b>.', en:'You wake up with a headache.'}, praet:{de:'Du <b>wachtest</b> mit Kopfschmerzen <b>auf</b>.', en:'You woke up with a headache.'}, perf:{de:'Du bist mit Kopfschmerzen <b>aufgewacht</b>.', en:'You woke up with a headache.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>wacht</b> mitten in der Nacht <b>auf</b>.', en:'He wakes up in the middle of the night.'}, praet:{de:'Er <b>wachte</b> mitten in der Nacht <b>auf</b>.', en:'He woke up in the middle of the night.'}, perf:{de:'Er ist mitten in der Nacht <b>aufgewacht</b>.', en:'He woke up in the middle of the night.'}},
+      {p:'wir', praes:{de:'Wir <b>wachen</b> gleichzeitig <b>auf</b>.', en:'We wake up at the same time.'}, praet:{de:'Wir <b>wachten</b> gleichzeitig <b>auf</b>.', en:'We woke up at the same time.'}, perf:{de:'Wir sind gleichzeitig <b>aufgewacht</b>.', en:'We woke up at the same time.'}},
+      {p:'ihr', praes:{de:'Ihr <b>wacht</b> spät <b>auf</b>.', en:'You all wake up late.'}, praet:{de:'Ihr <b>wachtet</b> spät <b>auf</b>.', en:'You all woke up late.'}, perf:{de:'Ihr seid spät <b>aufgewacht</b>.', en:'You all woke up late.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>wachen</b> vom Lärm <b>auf</b>.', en:'They wake up from the noise.'}, praet:{de:'Sie <b>wachten</b> vom Lärm <b>auf</b>.', en:'They woke up from the noise.'}, perf:{de:'Sie sind vom Lärm <b>aufgewacht</b>.', en:'They woke up from the noise.'}}
     ]},
     { inf:'sich erkälten', en:'to catch a cold', icon:'calendar', sentences:[
-      {p:'ich', de:'Ich habe mich letzte Woche <b>erkältet</b>.', en:'I caught a cold last week.'},
-      {p:'du', de:'Du hast dich im Regen <b>erkältet</b>.', en:'You caught a cold in the rain.'},
-      {p:'er/sie/es', de:'Er hat sich stark <b>erkältet</b>.', en:'He caught a bad cold.'},
-      {p:'wir', de:'Wir haben uns beide <b>erkältet</b>.', en:'We both caught a cold.'},
-      {p:'ihr', de:'Ihr habt euch im Winter <b>erkältet</b>.', en:'You all caught a cold in winter.'},
-      {p:'sie (Pl.)', de:'Sie haben sich schnell <b>erkältet</b>.', en:'They caught a cold quickly.'}
+      {p:'ich', praes:{de:'Ich <b>erkälte</b> mich schon wieder.', en:"I'm catching a cold again."}, praet:{de:'Ich <b>erkältete</b> mich letzte Woche.', en:'I caught a cold last week.'}, perf:{de:'Ich habe mich letzte Woche <b>erkältet</b>.', en:'I caught a cold last week.'}},
+      {p:'du', praes:{de:'Du <b>erkältest</b> dich im Regen.', en:'You catch a cold in the rain.'}, praet:{de:'Du <b>erkältetest</b> dich im Regen.', en:'You caught a cold in the rain.'}, perf:{de:'Du hast dich im Regen <b>erkältet</b>.', en:'You caught a cold in the rain.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>erkältet</b> sich schnell.', en:'He catches a cold quickly.'}, praet:{de:'Er <b>erkältete</b> sich stark.', en:'He caught a bad cold.'}, perf:{de:'Er hat sich stark <b>erkältet</b>.', en:'He caught a bad cold.'}},
+      {p:'wir', praes:{de:'Wir <b>erkälten</b> uns beide.', en:'We are both catching a cold.'}, praet:{de:'Wir <b>erkälteten</b> uns beide.', en:'We both caught a cold.'}, perf:{de:'Wir haben uns beide <b>erkältet</b>.', en:'We both caught a cold.'}},
+      {p:'ihr', praes:{de:'Ihr <b>erkältet</b> euch im Winter.', en:'You all catch a cold in winter.'}, praet:{de:'Ihr <b>erkältetet</b> euch im Winter.', en:'You all caught a cold in winter.'}, perf:{de:'Ihr habt euch im Winter <b>erkältet</b>.', en:'You all caught a cold in winter.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>erkälten</b> sich schnell.', en:'They catch a cold quickly.'}, praet:{de:'Sie <b>erkälteten</b> sich schnell.', en:'They caught a cold quickly.'}, perf:{de:'Sie haben sich schnell <b>erkältet</b>.', en:'They caught a cold quickly.'}}
     ]},
     { inf:'gehen (zum Arzt)', en:'to go (to the doctor)', icon:'building', sentences:[
-      {p:'ich', de:'Ich bin zum Arzt <b>gegangen</b>.', en:'I went to the doctor.'},
-      {p:'du', de:'Du bist ins Krankenhaus <b>gegangen</b>.', en:'You went to the hospital.'},
-      {p:'er/sie/es', de:'Er ist zur Apotheke <b>gegangen</b>.', en:'He went to the pharmacy.'},
-      {p:'wir', de:'Wir sind gemeinsam zum Arzt <b>gegangen</b>.', en:'We went to the doctor together.'},
-      {p:'ihr', de:'Ihr seid zur Untersuchung <b>gegangen</b>.', en:'You all went for the check-up.'},
-      {p:'sie (Pl.)', de:'Sie sind zum Zahnarzt <b>gegangen</b>.', en:'They went to the dentist.'}
+      {p:'ich', praes:{de:'Ich <b>gehe</b> zum Arzt.', en:'I am going to the doctor.'}, praet:{de:'Ich <b>ging</b> zum Arzt.', en:'I went to the doctor.'}, perf:{de:'Ich bin zum Arzt <b>gegangen</b>.', en:'I went to the doctor.'}},
+      {p:'du', praes:{de:'Du <b>gehst</b> ins Krankenhaus.', en:'You are going to the hospital.'}, praet:{de:'Du <b>gingst</b> ins Krankenhaus.', en:'You went to the hospital.'}, perf:{de:'Du bist ins Krankenhaus <b>gegangen</b>.', en:'You went to the hospital.'}},
+      {p:'er/sie/es', praes:{de:'Er <b>geht</b> zur Apotheke.', en:'He is going to the pharmacy.'}, praet:{de:'Er <b>ging</b> zur Apotheke.', en:'He went to the pharmacy.'}, perf:{de:'Er ist zur Apotheke <b>gegangen</b>.', en:'He went to the pharmacy.'}},
+      {p:'wir', praes:{de:'Wir <b>gehen</b> gemeinsam zum Arzt.', en:'We are going to the doctor together.'}, praet:{de:'Wir <b>gingen</b> gemeinsam zum Arzt.', en:'We went to the doctor together.'}, perf:{de:'Wir sind gemeinsam zum Arzt <b>gegangen</b>.', en:'We went to the doctor together.'}},
+      {p:'ihr', praes:{de:'Ihr <b>geht</b> zur Untersuchung.', en:'You all are going for the check-up.'}, praet:{de:'Ihr <b>gingt</b> zur Untersuchung.', en:'You all went for the check-up.'}, perf:{de:'Ihr seid zur Untersuchung <b>gegangen</b>.', en:'You all went for the check-up.'}},
+      {p:'sie (Pl.)', praes:{de:'Sie <b>gehen</b> zum Zahnarzt.', en:'They are going to the dentist.'}, praet:{de:'Sie <b>gingen</b> zum Zahnarzt.', en:'They went to the dentist.'}, perf:{de:'Sie sind zum Zahnarzt <b>gegangen</b>.', en:'They went to the dentist.'}}
     ]}
   ]}
 ];
@@ -466,6 +479,28 @@ function themaDoneCount(thema){
    ========================================================================= */
 let curThemaId = null;
 let openVerbInf = null;
+
+const TENSES = [
+  { k:'praes', label:'Präsens', sub:'(Gegenwart)' },
+  { k:'praet', label:'Präteritum', sub:'(einfache Vergangenheit)' },
+  { k:'perf', label:'Perfekt', sub:'(gesprochene Vergangenheit)' }
+];
+let curTense = 'perf';
+
+function setTense(t){
+  if(curTense === t) return;
+  curTense = t;
+  stopAllAudio();
+  renderVerbList();
+}
+
+function tenseSelectorHTML(){
+  return `
+    <div class="tense-row">
+      ${TENSES.map(t => `<button class="tense-btn ${curTense===t.k?'active':''}" onclick="setTense('${t.k}')">${t.label} <span style="opacity:.7;">${t.sub}</span></button>`).join('')}
+    </div>
+  `;
+}
 
 function init(){
   renderThemaGrid();
@@ -503,10 +538,13 @@ function renderVerbList(){
   const view = document.getElementById('mainView');
   if(!thema){ renderThemaGrid(); return; }
 
+  const curTenseInfo = TENSES.find(t => t.k === curTense);
   view.innerHTML = `
     <button class="backbtn" onclick="backToThemen()">← Zurück zu den Themen</button>
     <h2 style="font-family:'Fjalla One',sans-serif; font-size:20px; margin:0 0 4px;">${thema.title}</h2>
-    <div class="sub" style="margin-bottom:14px;">Klicke ein Verb, um alle 6 Personen im Perfekt zu hören und zu üben.</div>
+    <div class="sub" style="margin-bottom:8px;">Wähle eine Zeitform, dann klicke ein Verb, um alle 6 Personen zu hören und zu üben.</div>
+    ${tenseSelectorHTML()}
+    <div class="sub" style="margin-bottom:14px; margin-top:-6px;">Aktuell: <b>${curTenseInfo.label} ${curTenseInfo.sub}</b></div>
     <div class="verb-list" id="verbList">
       ${thema.verbs.map(v => renderVerbCardHTML(thema, v)).join('')}
     </div>
@@ -548,11 +586,12 @@ function renderVerbBodyHTML(thema, v){
 
 function renderSentenceRowHTML(inf, idx, s){
   const rowId = sentRowId(inf, idx);
+  const t = s[curTense];
   return `
     <div class="sent-row" id="${rowId}">
       <div class="sent-person">${s.p}</div>
-      <div class="sent-de">${s.de}</div>
-      <div class="sent-en">${s.en}</div>
+      <div class="sent-de">${t.de}</div>
+      <div class="sent-en">${t.en}</div>
       <div class="sent-actions">
         <button class="icon-btn" title="Anhören" onclick="playSentence('${escapeQ(inf)}', ${idx})">🔊</button>
         <button class="icon-btn" id="loopBtn_${cssId(inf)}_${idx}" title="Wiederholen (Loop)" onclick="toggleLoopSentence('${escapeQ(inf)}', ${idx})">🔁</button>
@@ -622,7 +661,7 @@ function playSentence(inf, idx){
   document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
   const row = document.getElementById(sentRowId(inf, idx));
   if(row) row.classList.add('active-playing');
-  speakDE(stripHTML(s.de));
+  speakDE(stripHTML(s[curTense].de));
 }
 
 function toggleLoopSentence(inf, idx){
@@ -654,7 +693,7 @@ function runLoopStep(inf, idx, key){
   document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
   const row = document.getElementById(sentRowId(inf, idx));
   if(row) row.classList.add('active-playing');
-  const u = speakDE(stripHTML(s.de));
+  const u = speakDE(stripHTML(s[curTense].de));
   if(u){
     u.onend = () => {
       if(loopingSentenceKey !== key) return;
@@ -693,7 +732,7 @@ function runAllPlayStep(inf){
   document.querySelectorAll('.sent-row.active-playing').forEach(el => el.classList.remove('active-playing'));
   const row = document.getElementById(sentRowId(inf, idx));
   if(row) row.classList.add('active-playing');
-  const u = speakDE(stripHTML(v.sentences[idx].de));
+  const u = speakDE(stripHTML(v.sentences[idx][curTense].de));
   if(u){
     u.onend = () => {
       if(!allPlayState || allPlayState.inf !== inf) return;
@@ -737,7 +776,7 @@ function toggleRecordSentence(inf, idx){
   recObj.onresult = (ev) => {
     const transcript = ev.results[0][0].transcript;
     const s = findSentence(inf, idx);
-    const target = stripHTML(s.de).toLowerCase().trim();
+    const target = stripHTML(s[curTense].de).toLowerCase().trim();
     const spoken = transcript.toLowerCase().trim();
     const diff = diffHighlight(target, spoken);
     const box = document.getElementById(`transcript_${cssId(inf)}_${idx}`);

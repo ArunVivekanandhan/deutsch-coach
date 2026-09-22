@@ -743,6 +743,30 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 3) — Thema_Sprech_Trainer.html: add Präsens + Präteritum tenses
+
+#### Task
+User request: "In Thema_Sprech_Trainer, each word i should need present, past tense lb and la. Ich, er, sie, ... ihr option to select based on that senstence can see play audio" — clarified via follow-up questions to mean: add both Präsens (present) and Präteritum (simple past, e.g. "änderte") alongside the existing Perfekt ("hat geändert"), with a way to select which tense's sentences are shown/played, for all 6 persons per verb.
+
+#### What was built
+- Restructured every sentence entry in the `THEMEN` data (35 verbs × 6 persons = 210 entries) from a single `{p, de, en}` shape to `{p, praes:{de,en}, praet:{de,en}, perf:{de,en}}` — 3 tense variants per person, 630 sentences total. The existing Perfekt sentences were kept as `perf`; Präsens and Präteritum were newly hand-written to match the same real-world content (same object/adverbial) as the existing Perfekt sentence, just re-conjugated.
+- Each verb's conjugation was worked out individually (not templated) to get irregular forms right: stem-vowel changes in Präsens (e.g. `helfen`→`hilfst`, `lesen`→`liest`, `schlafen`→`schläfst`, `essen`→`isst`), strong-verb Präteritum stems (`half`, `las`, `schlief`, `aß`, `trank`, `flog`, `fuhr`, `ging`, `schwamm`, ...), separable-verb prefix placement in all three tenses (e.g. Präsens `Ich rufe meine Schwester an`, Präteritum `Ich rief meine Schwester an`, alongside the existing Perfekt `Ich habe meine Schwester angerufen`), and reflexive pronoun agreement for `sich erkälten` across all three tenses.
+- Added a 3-way tense selector (Präsens / Präteritum / Perfekt, `.tense-row`/`.tense-btn`) shown above the verb list for the open topic; switching tense re-renders all 6 sentence rows for every verb in that topic and updates the subtitle to show which tense is active.
+- Wired the selected tense into every consumer of sentence text: `renderSentenceRowHTML()`, `playSentence()`, `runLoopStep()` (single-sentence loop), `runAllPlayStep()` (the "Play All 6" feature), and the record-and-compare speech-recognition diff target — all now read `s[curTense].de`/`.en` instead of a single hardcoded `s.de`/`.en`.
+
+#### Testing
+- `node --check` on the extracted page script (syntax validation).
+- A Node script parsed the live `THEMEN` array and confirmed all 35 verbs × 6 persons have non-empty `de`/`en` text for all 3 tenses (630/630 present, 0 missing).
+- Headless-browser test: opened a topic, confirmed the default tense is Perfekt (unchanged default), switched to Präsens and Präteritum and confirmed the rendered German sentence text changed correctly each time (verified against the known-correct conjugations above, e.g. `besuchen`: Perfekt "Ich habe meine Großeltern besucht." → Präsens "Ich besuche meine Großeltern." → Präteritum "Ich besuchte meine Großeltern.").
+- Headless-browser test with a `speechSynthesis.speak` spy confirmed the audio-play button speaks the text of the currently selected tense (tested with Präteritum active — spoke "Ich besuchte meine Großeltern.", not the Perfekt text), confirming the loop/play-all/record features aren't silently stuck on the old Perfekt text.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 2) — Fix: missing English translations in konnektoren_referenz.html quiz
 
 #### Task
