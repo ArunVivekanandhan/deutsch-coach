@@ -743,6 +743,29 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 2) — Fix: missing English translations in konnektoren_referenz.html quiz
+
+#### Task
+User reported (with a screenshot showing "FRAGE 1 / 10 — Welcher Konnektor schickt das Verb ans SATZENDE?") that a page's practice quiz shows no English translation of the German example.
+
+#### Root cause
+`konnektoren_referenz.html`'s main reference cards already show German examples with an English translation (styled via the existing `.en` CSS class), but the separate "🎯 Schnell-Quiz & Drill" quiz section (`DRILL_ITEMS` array, `showQuestion()`) never had an `en` field at all — none of its 10 questions had an English translation, on any of the Easy/Medium/Hard modes.
+
+#### Fix
+- Added an `en` field with a real, hand-written English translation/gloss to all 10 `DRILL_ITEMS` entries (fill-in-the-blank items keep the `___` blank and note the relevant grammar point in parentheses, e.g. "(whether)", "(in order to)", "(the ... the)" — without giving away the answer).
+- Added a new `#quizEn` element (styled `.quiz-en`, purple italic, matching the app's existing translation-line convention) between the question and the hint line.
+- `showQuestion()` now sets `quizEn.textContent = item.en`; cleared on the quiz-complete screen.
+
+#### Testing
+- Headless-browser walkthrough of all 10 quiz questions (clicking through the Drill tab, `#tabDrill`) confirmed every question now shows a correct, non-empty English line alongside the German question, with zero `pageerror` events.
+- Full-site sweep (24 pages) after the change: zero `pageerror` events.
+
+#### Files Changed
+- `konnektoren_referenz.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 — New page: Thema_Sprech_Trainer.html (Themen-Sprechtrainer)
 
 #### Task

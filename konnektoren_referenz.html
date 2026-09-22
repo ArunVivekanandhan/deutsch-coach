@@ -353,6 +353,12 @@
     font-weight: 700;
     margin-bottom: 8px;
   }
+  .quiz-en {
+    font-size: 13.5px;
+    color: var(--purple);
+    font-style: italic;
+    margin-bottom: 8px;
+  }
   .quiz-hint {
     font-size: 13.5px;
     color: var(--ink-soft);
@@ -702,6 +708,7 @@
   <div class="quiz-card">
     <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--gold); font-weight:700; margin-bottom:8px;" id="quizBadge">FRAGE 1 / 10</div>
     <div class="quiz-q" id="quizQuestion"></div>
+    <div class="quiz-en" id="quizEn"></div>
     <div class="quiz-hint" id="quizHint"></div>
     <div class="opt-grid" id="optGrid"></div>
     <div id="quizFeedback" style="margin-top:12px; font-weight:700; font-size:14px;"></div>
@@ -790,16 +797,16 @@ function filterContent() {
 
 // Drill Quiz
 const DRILL_ITEMS = [
-  { q: "Welcher Konnektor schickt das Verb ans SATZENDE?", opts: ["weil", "deshalb", "denn", "trotzdem"], c: 0, hint: "Subordinierender Konnektor (Gruppe 1)" },
-  { q: "Was bewirkt 'deshalb' auf die Satzstellung?", opts: ["Verb wandert ans Ende", "Inversion: Verb auf Pos 2, Subjekt dahinter", "Subjekt bleibt Pos 1", "Keine Veränderung"], c: 1, hint: "Position-1-Adverb (Gruppe 2)" },
-  { q: "Welcher Konnektor zählt als Position 0 (ADUSO)?", opts: ["obwohl", "während", "sondern", "deswegen"], c: 2, hint: "Koordinierender Konnektor (Gruppe 3)" },
-  { q: "Er bleibt zu Hause, ___ er krank ist.", opts: ["weil", "denn", "deshalb", "trotzdem"], c: 0, hint: "Achte auf die Verbposition am Satzende ('ist')" },
-  { q: "Er ist krank, ___ bleibt er zu Hause.", opts: ["weil", "denn", "deshalb", "dass"], c: 2, hint: "Verb 'bleibt' steht direkt auf Position 2 nach dem Konnektor" },
-  { q: "Er bleibt zu Hause, ___ er ist krank.", opts: ["weil", "denn", "deshalb", "obwohl"], c: 1, hint: "Subjekt 'er' steht direkt auf Position 1, Verb 'ist' auf Position 2" },
-  { q: "___ es regnete, ging er spazieren.", opts: ["Weil", "Obwohl", "Deshalb", "Trotzdem"], c: 1, hint: "Gegensatz / Einräumung mit Verb am Satzende" },
-  { q: "Ich weiß nicht, ___ er heute kommt.", opts: ["dass", "ob", "deshalb", "sondern"], c: 1, hint: "Indirekte Ja/Nein-Frage (whether)" },
-  { q: "Arun lernt Deutsch, ___ eine gute Arbeit zu finden.", opts: ["um", "damit", "weil", "denn"], c: 0, hint: "Infinitivsatz mit 'um ... zu' (gleiches Subjekt)" },
-  { q: "Je fleißiger du übst, ___ schneller bestehst du B1.", opts: ["desto", "sondern", "weil", "obwohl"], c: 0, hint: "Zweiteiliger Konnektor: je ... desto / umso" }
+  { q: "Welcher Konnektor schickt das Verb ans SATZENDE?", en: "Which connector sends the verb to the END of the clause?", opts: ["weil", "deshalb", "denn", "trotzdem"], c: 0, hint: "Subordinierender Konnektor (Gruppe 1)" },
+  { q: "Was bewirkt 'deshalb' auf die Satzstellung?", en: "What effect does 'deshalb' (therefore) have on word order?", opts: ["Verb wandert ans Ende", "Inversion: Verb auf Pos 2, Subjekt dahinter", "Subjekt bleibt Pos 1", "Keine Veränderung"], c: 1, hint: "Position-1-Adverb (Gruppe 2)" },
+  { q: "Welcher Konnektor zählt als Position 0 (ADUSO)?", en: "Which connector counts as position 0 (ADUSO)?", opts: ["obwohl", "während", "sondern", "deswegen"], c: 2, hint: "Koordinierender Konnektor (Gruppe 3)" },
+  { q: "Er bleibt zu Hause, ___ er krank ist.", en: "He stays home, ___ he is sick. (verb 'ist' at the very end)", opts: ["weil", "denn", "deshalb", "trotzdem"], c: 0, hint: "Achte auf die Verbposition am Satzende ('ist')" },
+  { q: "Er ist krank, ___ bleibt er zu Hause.", en: "He is sick, ___ he stays home. (verb 'bleibt' right after the connector)", opts: ["weil", "denn", "deshalb", "dass"], c: 2, hint: "Verb 'bleibt' steht direkt auf Position 2 nach dem Konnektor" },
+  { q: "Er bleibt zu Hause, ___ er ist krank.", en: "He stays home, ___ he is sick. (subject 'er' right after the connector)", opts: ["weil", "denn", "deshalb", "obwohl"], c: 1, hint: "Subjekt 'er' steht direkt auf Position 1, Verb 'ist' auf Position 2" },
+  { q: "___ es regnete, ging er spazieren.", en: "___ it was raining, he went for a walk.", opts: ["Weil", "Obwohl", "Deshalb", "Trotzdem"], c: 1, hint: "Gegensatz / Einräumung mit Verb am Satzende" },
+  { q: "Ich weiß nicht, ___ er heute kommt.", en: "I don't know ___ he is coming today. (whether)", opts: ["dass", "ob", "deshalb", "sondern"], c: 1, hint: "Indirekte Ja/Nein-Frage (whether)" },
+  { q: "Arun lernt Deutsch, ___ eine gute Arbeit zu finden.", en: "Arun is learning German ___ to find a good job. (in order to)", opts: ["um", "damit", "weil", "denn"], c: 0, hint: "Infinitivsatz mit 'um ... zu' (gleiches Subjekt)" },
+  { q: "Je fleißiger du übst, ___ schneller bestehst du B1.", en: "The harder you practice, ___ faster you pass B1. (the ... the)", opts: ["desto", "sondern", "weil", "obwohl"], c: 0, hint: "Zweiteiliger Konnektor: je ... desto / umso" }
 ];
 
 let qIdx = 0;
@@ -829,6 +836,7 @@ function showQuestion() {
   if (qIdx >= DRILL_ITEMS.length) {
     document.getElementById('quizBadge').textContent = "FERTIG! 🎉";
     document.getElementById('quizQuestion').textContent = `Ergebnis: ${score} von ${DRILL_ITEMS.length} Punkten richtig!`;
+    document.getElementById('quizEn').textContent = '';
     document.getElementById('quizHint').textContent = score >= 8 ? "Hervorragend! Du beherrschst die Konnektoren-Regeln!" : "Übe die Referenz noch einmal durch!";
     document.getElementById('optGrid').innerHTML = '';
     document.getElementById('quizFeedback').innerHTML = '';
@@ -840,6 +848,7 @@ function showQuestion() {
   const item = DRILL_ITEMS[qIdx];
   document.getElementById('quizBadge').textContent = `FRAGE ${qIdx + 1} / ${DRILL_ITEMS.length}`;
   document.getElementById('quizQuestion').textContent = item.q;
+  document.getElementById('quizEn').textContent = item.en || '';
   document.getElementById('quizHint').textContent = item.hint || '';
   document.getElementById('quizFeedback').innerHTML = '';
   document.getElementById('quizNextBtn').style.display = 'none';
