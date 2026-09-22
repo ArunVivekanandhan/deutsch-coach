@@ -743,6 +743,36 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 17) — Auto-read tenses (Präsens/Präteritum/Perfekt) after swipe/next
+
+#### Task
+"In flash card have option to auto read after swipe/next Präsens / Präteritum / Perfekt" — a direct follow-up to Task 16's swipe+show-answer feature, asking for the tense forms to be read aloud automatically each time the user navigates to a new card, not just displayed.
+
+#### Scoping
+Only 2 of the 3 files touched in Task 16 actually contain Präsens/Präteritum/Perfekt tense-form content: `Verb_Transformation_Trainer.html`'s "Flip Card" mode (Infinitive = Präsens, Simple Past = Präteritum, Present Perfect = Perfekt, all shown together in the reveal box) and `deutsch-coach.html`'s `verbtense` question type (`card.w` = Präsens, `card.pr` = Präteritum, `card.pp` = Perfekt). `Nomen_Adjektiv_Trainer.html` has no tense data (articles/adjectives only), so it's out of scope.
+
+While wiring this up, found the existing `de_auto_audio` ("auto-play audio") setting was **silently non-functional** in `Verb_Transformation_Trainer.html`: it called `playTTS(v.inf)`, but the shared `js/tts-engine.js` `playTTS()` function ignores its argument entirely and only reads a `data-audio` attribute off `<body>` that this file never sets — so the call was a no-op every time. (`deutsch-coach.html` was unaffected: it defines its own local `window.playTTS(txt, e)` that shadows the shared one and does speak the given text.) Fixed this incidentally while replacing the block, using the shared `speak(text)` function instead (which is not shadowed and correctly speaks any given text).
+
+#### What was built
+- Added `speakSequence(texts, gapMs)` to the shared `js/tts-engine.js` (loaded by nearly every page in the app), refactoring the existing `speak()` function's voice-selection logic into a shared `buildUtterance(text)` helper so both share it. `speakSequence` plays a list of texts one after another, using each `SpeechSynthesisUtterance`'s `onend`/`onerror` callback to chain to the next (rather than blind `setTimeout` delays, which would either overlap speech or leave awkward gaps depending on utterance length) — with a configurable gap between clips (default 450ms).
+- Added a new `de_auto_read_tenses` localStorage flag with `getAutoReadTenses()`/`setAutoReadTenses()`/`toggleAutoReadTenses()` helpers and an `autoReadToggleHTML()` checkbox, mirroring the Task 16 "show answer by default" pattern, in both files — scoped to only the modes/types that actually have tense forms (`practiceMode === 'medium'` in `Verb_Transformation_Trainer.html`; a new `TENSE_READ_QTYPES = ['verbtense']` allowlist in `deutsch-coach.html`, separate from the existing `FLASHCARD_QTYPES` allowlist since only 1 of the 5 flashcard types has tense data).
+- When the setting is on, each card render (which fires on initial load, after `advance()`/`advanceSession()` — Next button or swipe-left — and after `prevCard()`/`prevSession()` — Prev button or swipe-right, since all of these ultimately call the same render function) triggers `speakSequence([Präsens, Präteritum, Perfekt])` after a 300ms delay (matching the existing auto-audio convention). This runs independently of whether the answer is visually revealed — it's a deliberate design choice so users can practice by listening only, without needing "show answer by default" also enabled, matching a literal reading of "auto read after swipe/next" as its own feature.
+
+#### Testing
+- Syntax-checked `js/tts-engine.js`, `Verb_Transformation_Trainer.html`, and `deutsch-coach.html` (`node --check` on every script block) — clean.
+- Headless-browser (Playwright) testing with a mocked `speechSynthesis.speak`/`cancel` that records what text was queued and fires `onend` asynchronously (so the real chaining logic runs, not just a single call): confirmed, in both files, that toggling the checkbox sets `localStorage` correctly, that the 3 tense forms are spoken **in the correct order** (Präsens → Präteritum → Perfekt) on initial render, that the sequence fires again after simulated Next/swipe-left (`advance()`/`advanceSession()`) and Prev/swipe-right (`prevCard()`/`prevSession()`) with the new card's own forms, that nothing speaks when the setting is off, and that the checkbox only appears where tense data actually exists (absent in `easy`/`hard` modes in the trainer file, absent for all non-`verbtense` question types in `deutsch-coach.html`, including the other 4 flashcard types that don't have tense forms).
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `js/tts-engine.js`
+- `Verb_Transformation_Trainer.html`
+- `deutsch-coach.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 16) — Swipe navigation + "show answer by default" on all real flashcards
 
 #### Task

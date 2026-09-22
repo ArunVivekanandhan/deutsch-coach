@@ -3637,7 +3637,9 @@ function renderVerbTense(card, advanceFn){
         document.getElementById("cardBtnGroup").style.display="none";
         wireAnswerButtons(card, advanceFn, "verbtense");
       };
-      if (localStorage.getItem('de_auto_audio') === 'true') {
+      if (getAutoReadTenses()) {
+         setTimeout(() => { if (typeof speakSequence === 'function') speakSequence([card.w, card.pr, card.pp]); }, 300);
+      } else if (localStorage.getItem('de_auto_audio') === 'true') {
          setTimeout(() => { if (window.playTTS) window.playTTS(card.w); }, 300);
       }
       const skipBtn = document.getElementById("skipCardBtn");
@@ -3728,6 +3730,22 @@ function showAnswerToggleHTML(type){
   </label>`;
 }
 
+const TENSE_READ_QTYPES = ['verbtense'];
+function getAutoReadTenses(){ return localStorage.getItem('de_auto_read_tenses') === 'true'; }
+function setAutoReadTenses(val){ localStorage.setItem('de_auto_read_tenses', val ? 'true' : 'false'); }
+function toggleAutoReadTenses(){
+  setAutoReadTenses(!getAutoReadTenses());
+  renderSessionCard();
+}
+function autoReadToggleHTML(type){
+  if(!TENSE_READ_QTYPES.includes(type)) return '';
+  const on = getAutoReadTenses();
+  return `<label style="display:flex; align-items:center; justify-content:center; gap:6px; font-size:11px; color:var(--ink-soft); cursor:pointer; margin:0 0 8px; font-family:'IBM Plex Mono',monospace;">
+    <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleAutoReadTenses()" style="cursor:pointer;">
+    🔊 Formen automatisch vorlesen (Präsens · Präteritum · Perfekt) · Auto-read after swipe/next
+  </label>`;
+}
+
 function renderSessionCard(label){
   const stage = document.getElementById("stage");
   if(sessionIdx >= session.length){
@@ -3749,6 +3767,7 @@ function renderSessionCard(label){
       <span>${label||"Sitzung"} — Karte ${sessionIdx+1} / ${session.length}</span>
     </div>
     ${showAnswerToggleHTML(type)}
+    ${autoReadToggleHTML(type)}
     ${result.html}
   `;
   if(result.afterRender) result.afterRender();

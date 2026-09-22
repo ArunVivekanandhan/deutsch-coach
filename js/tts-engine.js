@@ -48,9 +48,7 @@ if(document.readyState === 'loading'){
 } else {
   initVoicePolling();
 }
-function speak(text){
-  if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
+function buildUtterance(text){
   const u = new SpeechSynthesisUtterance((text||'').replace(/\(.*?\)/g,'').trim());
   u.lang = 'de-DE';
   u.rate = 0.85; // Slightly slower for more natural, human-like cadence
@@ -61,7 +59,29 @@ function speak(text){
     const google = deVoices.find(v => v.name.toLowerCase().includes('google'));
     u.voice = chosen || premium || google || deVoices[0];
   }
-  speechSynthesis.speak(u);
+  return u;
+}
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(buildUtterance(text));
+}
+// Speaks a list of texts one after another (e.g. Präsens/Präteritum/Perfekt forms),
+// waiting for each to finish before starting the next so they don't cut each other off.
+function speakSequence(texts, gapMs){
+  if(!('speechSynthesis' in window)) return;
+  const queue = (texts||[]).filter(t => t && String(t).trim());
+  if(queue.length === 0) return;
+  speechSynthesis.cancel();
+  let i = 0;
+  function playNext(){
+    if(i >= queue.length) return;
+    const u = buildUtterance(queue[i++]);
+    u.onend = () => setTimeout(playNext, gapMs || 450);
+    u.onerror = () => setTimeout(playNext, gapMs || 450);
+    speechSynthesis.speak(u);
+  }
+  playNext();
 }
 function speakBtn(text, label){
   const safe = (text||'').replace(/'/g, "\\'");
