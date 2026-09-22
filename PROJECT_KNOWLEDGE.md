@@ -743,6 +743,35 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 20) — Surface silent TTS failures instead of "nothing happens"
+
+#### Task
+"Now auto reading is not happening even flag enabled" - a follow-up bug report on Task 17-19's auto-read-tenses feature.
+
+#### Investigation
+Directly verified, with a real (unmocked) `speechSynthesis.speak()` spy in headless Chromium - not internal function calls, but clicking the actual checkbox and calling the actual session-advance functions - that the underlying code is correct: enabling the flag and advancing/swiping through cards **does** call `speechSynthesis.speak()` with the right words in the right order, every time, exactly as designed. So this isn't a logic regression in the auto-read feature itself.
+
+What the same test also revealed: this sandboxed test environment has **no TTS voice backend installed at all**, so every one of those correctly-triggered `speak()` calls fails silently with a `synthesis-failed` error from the browser's Web Speech API - and nothing in the app surfaced that failure anywhere. From a user's perspective, "the code runs but makes no sound" and "the feature is broken" are indistinguishable without some kind of visible error. This exact failure mode - no German (or any) TTS voice available, or the browser blocking synthesis - is a plausible, concrete explanation for "flag enabled, nothing happens," and it was previously invisible everywhere except `Verb_Transformation_Trainer.html`'s dedicated `#voiceWarn` banner (which itself only checks for a *missing German voice specifically*, not a synthesis failure in general, and doesn't exist at all on `deutsch-coach.html` or any other page).
+
+#### What was built
+- Added `notifyTTSFailure(errorCode)` to the shared `js/tts-engine.js`: shows a small, auto-dismissing (9s) toast at the bottom of the screen - "🔇 Text-to-speech isn't working on this device/browser (no voice found, or blocked). Auto-read and 🔊 buttons won't produce sound." - plus a `console.warn` with the specific error code for debugging. Debounced with a `ttsErrorNoticeShown` flag so a failed 3-word auto-read sequence (or repeated failures across several cards) shows the toast once, not once per failed word.
+- Wired it into `buildUtterance()` (the single utterance-construction helper already shared by `speak()`, `speakSequence()`, and therefore `scheduleSpeak()`/`scheduleSpeakSequence()`) via `u.addEventListener('error', ...)`, so every page that loads `js/tts-engine.js` gets this coverage automatically, with no per-page wiring needed - including `deutsch-coach.html`, which had no failure feedback of any kind before this.
+- This is a diagnostic/UX improvement, not a guaranteed fix for this specific report: if the actual cause turns out to be something else (e.g. a stale cached service-worker still serving pre-Task-18 JavaScript in an already-open browser tab - `sw.js`'s cache-first strategy for non-HTML assets like `js/tts-engine.js` means an old cached copy keeps being served until a full reload picks up the newly-installed cache version, though `skipWaiting()`/`clients.claim()` mean a plain refresh should be enough - or a mobile browser's autoplay policy blocking a `speak()` call made from inside a `setTimeout` rather than directly inside a user-gesture handler), the toast at least tells the user *something* failed instead of silence, and the specific error code in the console narrows down which.
+
+#### Testing
+- Syntax-checked `js/tts-engine.js` - clean.
+- Headless-browser (Playwright) test using the environment's genuine lack of a TTS voice (a real failure, not simulated): confirmed the toast appears with the expected text after a real `synthesis-failed` error, the debounce flag is set, and advancing through 2 more cards (each triggering more failed utterances) does not spawn duplicate/stacked toasts - always exactly one at a time.
+- Re-ran the Task 17 auto-read regression suite (17 checks) and the Task 18 overlap-fix reproduction (12 checks) against the current code - all still passing, confirming this change didn't regress the underlying speech-triggering or cancellation logic.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `js/tts-engine.js`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 19) — Surface flashcard settings in the Settings page + add a Reset button
 
 #### Task

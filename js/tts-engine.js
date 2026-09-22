@@ -48,6 +48,23 @@ if(document.readyState === 'loading'){
 } else {
   initVoicePolling();
 }
+// Auto-play calls (auto-audio, auto-read-tenses) happen silently in the background,
+// so if the device/browser can't actually produce speech (no voice installed, or
+// blocked by the browser), a user has no way to tell "nothing is set up" apart from
+// "nothing happened" - which looks identical to the feature being broken. Surface it
+// once per page load instead of failing silently.
+let ttsErrorNoticeShown = false;
+function notifyTTSFailure(errorCode){
+  if(ttsErrorNoticeShown) return;
+  ttsErrorNoticeShown = true;
+  console.warn('Text-to-speech failed (' + errorCode + '). No audio will play on this device/browser.');
+  if(typeof document === 'undefined' || !document.body) return;
+  const el = document.createElement('div');
+  el.textContent = '🔇 Text-to-speech isn\'t working on this device/browser (no voice found, or blocked). Auto-read and 🔊 buttons won\'t produce sound.';
+  el.style.cssText = 'position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:#1e293b; color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; font-family:sans-serif; z-index:99999; max-width:92vw; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 9000);
+}
 function buildUtterance(text){
   const u = new SpeechSynthesisUtterance((text||'').replace(/\(.*?\)/g,'').trim());
   u.lang = 'de-DE';
@@ -59,6 +76,7 @@ function buildUtterance(text){
     const google = deVoices.find(v => v.name.toLowerCase().includes('google'));
     u.voice = chosen || premium || google || deVoices[0];
   }
+  u.addEventListener('error', (e) => notifyTTSFailure(e.error));
   return u;
 }
 // Bumped by every speak/speakSequence call so a chain in progress (waiting on
