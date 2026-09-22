@@ -107,12 +107,32 @@
         <input type="checkbox" id="autoAudioToggle" style="width:24px; height:24px;" onchange="localStorage.setItem('de_auto_audio', this.checked)">
       </div>
 
-      <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper-dark); padding:16px; border-radius:8px; margin-bottom:32px;">
+      <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper-dark); padding:16px; border-radius:8px; margin-bottom:12px;">
         <div>
           <div style="font-weight:700;">Progressive Hints</div>
           <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Tap reveal multiple times to get partial letter hints before showing the answer.</div>
         </div>
         <input type="checkbox" id="progressiveHintsToggle" style="width:24px; height:24px;" onchange="localStorage.setItem('de_progressive_hints', this.checked)">
+      </div>
+
+      <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper-dark); padding:16px; border-radius:8px; margin-bottom:12px;">
+        <div>
+          <div style="font-weight:700;">Show Answer by Default (Flashcards)</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Reveal each flashcard's answer immediately instead of needing a tap - useful for passive review.</div>
+        </div>
+        <input type="checkbox" id="showAnswerDefaultToggle" style="width:24px; height:24px;" onchange="localStorage.setItem('de_show_answer_default', this.checked)">
+      </div>
+
+      <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper-dark); padding:16px; border-radius:8px; margin-bottom:12px;">
+        <div>
+          <div style="font-weight:700;">Auto-read Tenses (Präsens · Präteritum · Perfekt)</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">On verb-tense flashcards, speak all three forms in sequence each time you swipe/advance to a new card.</div>
+        </div>
+        <input type="checkbox" id="autoReadTensesToggle" style="width:24px; height:24px;" onchange="localStorage.setItem('de_auto_read_tenses', this.checked)">
+      </div>
+
+      <div class="action-row" style="margin-top:0; margin-bottom:32px;">
+        <button class="btn btn-secondary" onclick="resetLearningPreferences()">↺ Reset Learning Preferences to Defaults</button>
       </div>
 
       <h2>🤖 AI Engine & API Keys</h2>
@@ -243,6 +263,22 @@
   document.getElementById('simpleModeToggle').checked = localStorage.getItem('de_simple_mode') === 'true';
   document.getElementById('autoAudioToggle').checked = localStorage.getItem('de_auto_audio') === 'true';
   document.getElementById('progressiveHintsToggle').checked = localStorage.getItem('de_progressive_hints') === 'true';
+  document.getElementById('showAnswerDefaultToggle').checked = localStorage.getItem('de_show_answer_default') === 'true';
+  document.getElementById('autoReadTensesToggle').checked = localStorage.getItem('de_auto_read_tenses') === 'true';
+
+  // Resets just the Learning Preferences toggles above (not progress/XP/AI keys -
+  // for that, "Wipe All Data" below is the deliberately more destructive option).
+  function resetLearningPreferences(){
+    const keys = ['de_simple_mode', 'de_auto_audio', 'de_progressive_hints', 'de_show_answer_default', 'de_auto_read_tenses'];
+    keys.forEach(k => localStorage.removeItem(k));
+    document.getElementById('simpleModeToggle').checked = false;
+    document.getElementById('autoAudioToggle').checked = false;
+    document.getElementById('progressiveHintsToggle').checked = false;
+    document.getElementById('showAnswerDefaultToggle').checked = false;
+    document.getElementById('autoReadTensesToggle').checked = false;
+    document.body.classList.remove('simple-mode');
+    alert('✅ Learning Preferences reset to defaults.');
+  }
 
   // Load Settings
   const defaultModels = {

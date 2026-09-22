@@ -743,6 +743,33 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 19) — Surface flashcard settings in the Settings page + add a Reset button
+
+#### Task
+"And if I set some settings need keep it even after refresh or after new changes. Need to set reset have reset" — asking that settings persist across refresh/updates, and that there be a way to reset them.
+
+#### Investigation
+Verified directly (headless browser, a real `page.reload()`, not just a re-render) that `de_show_answer_default` and `de_auto_read_tenses` already persist correctly across a genuine page refresh - this is just normal `localStorage` behavior, and nothing in the app clears it on load or on a service-worker cache update (cache and `localStorage` are separate browser storage mechanisms; bumping `sw.js`'s cache version, as every recent task has done, does not touch `localStorage`). Both new keys already start with the `de_` prefix, so they were already automatically included in `Einstellungen_Setup.html`'s existing "Backup & Export", "Restore from Backup", and "Wipe All Data" functions (all three filter by `de_`/`dc_`/`*_progress_v*` prefixes) without any change needed there.
+
+What was actually missing: the two new toggles (added inline in the flashcard UI in Tasks 16-17) had no presence on the central `Einstellungen_Setup.html` settings page, unlike the existing "Hands-Free (Auto-Audio)" and "Progressive Hints" toggles - so there was no way to see or change them from one place, and no reset option scoped to just these preferences ("Wipe All Data" is the only existing reset, and it's deliberately nuclear - it also erases progress, XP, and saved AI API keys).
+
+#### What was built
+- Added "Show Answer by Default (Flashcards)" and "Auto-read Tenses (Präsens · Präteritum · Perfekt)" checkboxes to `Einstellungen_Setup.html`'s existing "📚 Learning Preferences" card, following the exact same load/save pattern as the 3 toggles already there (`localStorage.getItem(...) === 'true'` on load, `localStorage.setItem(...)` on change).
+- Added a "↺ Reset Learning Preferences to Defaults" button in that same card, scoped to exactly the 5 preference keys in that card (`de_simple_mode`, `de_auto_audio`, `de_progressive_hints`, `de_show_answer_default`, `de_auto_read_tenses`) - removes them from `localStorage`, unchecks all 5 checkboxes, and removes the `simple-mode` body class, without touching AI provider/API keys, user profile, theme, or any progress/XP data (those remain reachable only via the existing, intentionally-separate "Wipe All Data").
+
+#### Testing
+- Syntax-checked `Einstellungen_Setup.html` (`node --check` on every script block) - clean.
+- Headless-browser (Playwright) test covering: settings set from a flashcard page are correctly reflected as checked when the settings page loads; they survive a real `page.reload()`; toggling a checkbox on the settings page correctly updates `localStorage`; the Reset button clears all 5 scoped keys and unchecks all 5 boxes; the Reset button does **not** touch unrelated keys (AI provider, user name); after reset, the flashcard page itself reads the (now off) state correctly via `getShowAnswerDefault()`. All 8 checks passed.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Einstellungen_Setup.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 18) — Fix: swiping mid-speech spoke the new card over the old one
 
 #### Task
