@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v26';
+const CACHE_NAME = 'deutsch-coach-v27';
 const urlsToCache = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const urlsToCache = [
   './deutsch-coach.html',
   './Brief_Schreiben_Trainer.html',
   './Sprech_Pruefungs_Simulator.html',
+  './A1_Sprech_Pruefungs_Simulator.html',
   './Hoerverstehen_Diktat_Trainer.html',
   './Wortschatz_Master_Grid.html',
   './KI_Human_Partner.html',

@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Speaking Coach &amp; A1 Exam Simulator — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
+    --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  }
+  html.dark-theme {
+    --paper:#0f172a; --paper-dark:#1e293b; --card:#1e293b; --ink:#f8fafc; --ink-soft:#94a3b8;
+    --red:#f87171; --red-dark:#ef4444; --gold:#fbbf24; --green:#4ade80; --blue:#38bdf8;
+    --purple:#c084fc; --line:#334155; --shadow:rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;}
+  .wrap{width:100%; max-width:850px;}
+
+  h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
+
+  /* Mode Navigation */
+  .modetabs{display:flex; gap:6px; margin-bottom:14px;}
+  .modetab{
+    flex:1; font-family:'Fjalla One',sans-serif; font-size:14px; padding:10px 4px; text-align:center;
+    border:1.5px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink);
+    cursor:pointer; transition:all .15s;
+  }
+  .modetab.active{background:var(--ink); color:#fff;}
+
+  /* Sub-tabs */
+  .subtabs{display:flex; gap:6px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px;}
+  .subtab{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:6px 12px; border:1.5px solid var(--line);
+    background:var(--card); border-radius:16px; cursor:pointer; color:var(--ink-soft); white-space:nowrap;
+    font-weight:600;
+  }
+  .subtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  /* Content Cards */
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 10px 24px var(--shadow); padding:18px; margin-bottom:16px;
+  }
+  .card-title{font-family:'Fjalla One',sans-serif; font-size:20px; color:var(--ink); margin:0 0 6px;}
+  .card-desc{font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:14px;}
+
+  /* Partner / Examiner Simulation Box */
+  .dialog-stream{display:flex; flex-direction:column; gap:12px; margin-bottom:16px;}
+  .speech-bubble{
+    padding:12px 14px; border-radius:8px; max-width:85%; font-size:14px; line-height:1.5;
+    position:relative;
+  }
+  .speech-bubble.examiner{
+    background:#E2E8F0; border-left:4px solid var(--blue); align-self:flex-start;
+  }
+  .speech-bubble.user{
+    background:#E2EED8; border-right:4px solid var(--green); align-self:flex-end;
+  }
+  .speaker-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase;
+    margin-bottom:4px; font-weight:700; color:var(--ink-soft);
+  }
+  .speaker-audio-btn{
+    background:none; border:none; cursor:pointer; font-size:14px; margin-left:6px;
+  }
+
+  /* Redemittel Grid & Soundboard */
+  .phrase-grid{display:grid; grid-template-columns:1fr; gap:8px;}
+  @media(min-width:600px){ .phrase-grid{grid-template-columns:1fr 1fr;} }
+  .phrase-card{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+  }
+  .phrase-de{font-size:13.5px; font-weight:600; color:var(--ink);}
+  .phrase-en{font-size:11px; color:var(--ink-soft); margin-top:2px; font-style:italic;}
+
+  .audio-btn{
+    background:none; border:1.5px solid var(--line); border-radius:50%; width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .audio-btn:hover{background:var(--paper); border-color:var(--ink);}
+
+  /* Action Buttons */
+  .bigbtn{
+    width:100%; font-family:'Fjalla One',sans-serif; font-size:16px; padding:14px; border:none;
+    border-radius:6px; background:var(--ink); color:#fff; cursor:pointer; text-align:center;
+    box-shadow:0 4px 0 #0d1525; margin-top:10px;
+  }
+  .bigbtn:active{transform:translateY(2px); box-shadow:0 2px 0 #0d1525;}
+  .bigbtn.secondary{background:var(--red); box-shadow:0 4px 0 var(--red-dark);}
+  .bigbtn.green{background:var(--green); box-shadow:0 4px 0 #28442e;}
+
+  @keyframes slideIn { from{opacity:0; transform:translateX(-10px);} to{opacity:1; transform:translateX(0);} }
+
+  .diffchar{background:#fff3a0; padding:0 2px; border-radius:3px; font-weight:700; color:var(--red-dark);}
+  .user-transcript{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px;
+    margin-top:10px; font-size:14px; line-height:1.6; display:none;
+    animation: slideIn 0.3s ease-out;
+  }
+  .user-transcript.visible{display:block;}
+  .transcript-label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft);
+    text-transform:uppercase; margin-bottom:5px; display:block; font-weight:700;
+  }
+  .rec-btn{
+    background:none; border:1.5px solid var(--line); border-radius:50%; width:32px; height:32px;
+    display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .rec-btn:hover{background:var(--paper); border-color:var(--ink);}
+  .rec-btn.recording{background:var(--red); color:#fff; border-color:var(--red); animation: pulse 1.5s infinite;}
+  @keyframes pulse { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
+
+  /* Form / Cloze Styles */
+  .cloze-text{
+    background:#fff; border:1px solid var(--line); border-radius:6px; padding:16px;
+    font-size:14.5px; line-height:2.0; margin-bottom:14px;
+  }
+  .form-field{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:center;
+    padding:8px 0; border-bottom:1px dashed var(--line);
+  }
+  .form-field label{font-size:12.5px; font-weight:600; color:var(--ink-soft);}
+  .form-field input{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; padding:6px 8px;
+    border:1.5px solid var(--ink); border-radius:4px; background:var(--paper); color:var(--ink); width:100%;
+  }
+  .checklist-item{
+    display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line);
+    font-size:13px;
+  }
+  .checklist-item input{margin-top:3px;}
+
+  /* Global Modern UI Additions */
+  body { transition: background-color 0.3s ease, color 0.3s ease; }
+  .stage {
+    background: var(--card); border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    border: 1px solid var(--line); padding: 24px; margin-top: 10px;
+    transition: box-shadow 0.3s ease;
+  }
+  body.dark .stage { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4); }
+  button { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, background-color 0.2s; }
+  button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+  button:active:not(:disabled) { transform: translateY(0); }
+  input[type="text"], textarea, select {
+    border-radius: 8px; border: 1px solid var(--line); padding: 10px 12px;
+    transition: border-color 0.2s, box-shadow 0.2s; background: var(--paper); color: var(--ink);
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+</style>
+  <link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/tts-engine.js"></script>
+  <script src="js/srs-engine.js"></script>
+  <script src="js/progress-aggregator.js"></script>
+  <script src="js/app-shell.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Speaking Coach &amp; A1 Exam Simulator</h1>
+  <div class="sub">Authentic Goethe "Start Deutsch 1" Oral &amp; Written Exam Preparation</div>
+
+  <!-- Mode Navigation -->
+  <div class="modetabs">
+    <div class="modetab active" id="tabOral" onclick="setMode('oral')">🗣️ Oral Exam Simulator</div>
+    <div class="modetab" id="tabVault" onclick="setMode('vault')">🎙️ Spoken Redemittel Vault</div>
+    <div class="modetab" id="tabWritten" onclick="setMode('written')">✍️ Formular &amp; Mitteilung</div>
+  </div>
+
+  <!-- Subtabs -->
+  <div class="subtabs" id="subTabs"></div>
+
+  <!-- Exam Timer Bar -->
+  <div style="background:#fff; border:1.5px solid var(--ink); border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);">
+    <div style="font-family:'Fjalla One',sans-serif; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px;">
+      ⏱️ <span id="timerLabel">Exam Timer</span>: <span id="timerDisplay" style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700; color:var(--red);">15:00</span>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <button onclick="setExamTimer(15*60, '15m Full Exam')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);" class="ds-btn ds-btn-secondary">15m Full</button>
+      <button onclick="setExamTimer(1*60, '1m per Bitte')" style="padding:4px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);" class="ds-btn ds-btn-secondary">1m Teil 3</button>
+      <button id="timerToggleBtn" onclick="toggleTimer()" style="padding:4px 10px; font-size:11px; font-weight:600; font-family:'IBM Plex Mono',monospace; border:1.5px solid var(--ink); border-radius:4px; cursor:pointer; background:var(--ink); color:#fff;" class="ds-btn ds-btn-secondary">▶ Start</button>
+      <button onclick="resetTimer()" style="padding:4px 8px; font-size:11px; font-family:'IBM Plex Mono',monospace; border:1px solid var(--line); border-radius:4px; cursor:pointer; background:var(--paper);" class="ds-btn ds-btn-secondary">↺</button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div id="mainView"></div>
+
+</div>
+
+<script>
+/* =========================================================================
+   SPEAKING COACH & A1 EXAM DATA (Goethe "Start Deutsch 1" format)
+   ========================================================================= */
+let currentMode = 'oral'; // 'oral', 'vault', 'written'
+let currentSub = 'teil1';
+
+const ORAL_MODULES = {
+  teil1: {
+    title: "Teil 1: Sich vorstellen (Personal Introduction)",
+    desc: "In Teil 1 of the Goethe/telc Start Deutsch 1 (A1) exam, you introduce yourself using 7 key points (Name, Alter, Land, Wohnort, Sprachen, Beruf, Hobby). The examiner may then ask you to spell your name and ask 1–2 very simple follow-up questions.",
+    prompts: [
+      { topic: "Name", de: "Ich heiße Arun.", en: "My name is Arun." },
+      { topic: "Alter", de: "Ich bin 29 Jahre alt.", en: "I am 29 years old." },
+      { topic: "Land", de: "Ich komme aus Indien.", en: "I come from India." },
+      { topic: "Wohnort", de: "Ich wohne in Frankfurt.", en: "I live in Frankfurt." },
+      { topic: "Sprachen", de: "Ich spreche Englisch, Tamil und ein bisschen Deutsch.", en: "I speak English, Tamil and a little German." },
+      { topic: "Beruf", de: "Ich bin Software-Entwickler von Beruf.", en: "I am a software developer by profession." },
+      { topic: "Hobby", de: "Mein Hobby ist Fußball.", en: "My hobby is football." }
+    ],
+    examinerQuestions: [
+      {
+        q: "Können Sie bitte Ihren Namen buchstabieren?",
+        en: "Can you please spell your name?",
+        modelAns: "Ja, gern: A-R-U-N.",
+        hint: "Say each letter clearly and slowly: A, B, C, D..."
+      },
+      {
+        q: "Wie ist Ihre Telefonnummer?",
+        en: "What is your phone number?",
+        modelAns: "Meine Telefonnummer ist null-eins-sieben-drei... (say each digit separately).",
+        hint: "German numbers are read digit by digit for phone numbers, not in pairs."
+      },
+      {
+        q: "Was machen Sie am Wochenende?",
+        en: "What do you do on the weekend?",
+        modelAns: "Am Wochenende spiele ich Fußball und treffe meine Freunde.",
+        hint: "Use 'am Wochenende' at the start, verb in position 2."
+      }
+    ]
+  },
+
+  teil2: {
+    title: "Teil 2: Informationen erfragen und geben (Ask & Answer with Topic Cards)",
+    desc: "In Teil 2, the examiner shows you a card with a topic (Thema) and a keyword (Stichwort). You must form a question using the keyword, your partner answers, and then you swap roles. Practice both the question and a model answer for each topic below.",
+    topics: [
+      { name: "Familie", card: "Geschwister", question: { de: "Haben Sie Geschwister?", en: "Do you have siblings?" }, answer: { de: "Ja, ich habe eine Schwester.", en: "Yes, I have a sister." } },
+      { name: "Wohnen", card: "Zimmer", question: { de: "Wie viele Zimmer hat Ihre Wohnung?", en: "How many rooms does your apartment have?" }, answer: { de: "Meine Wohnung hat drei Zimmer.", en: "My apartment has three rooms." } },
+      { name: "Tagesablauf", card: "Aufstehen", question: { de: "Wann stehen Sie auf?", en: "When do you get up?" }, answer: { de: "Ich stehe um sieben Uhr auf.", en: "I get up at seven o'clock." } },
+      { name: "Einkaufen", card: "Supermarkt", question: { de: "Wo kaufen Sie ein?", en: "Where do you go shopping?" }, answer: { de: "Ich kaufe im Supermarkt in der Nähe ein.", en: "I shop at the supermarket nearby." } },
+      { name: "Essen und Trinken", card: "Lieblingsessen", question: { de: "Was ist Ihr Lieblingsessen?", en: "What is your favorite food?" }, answer: { de: "Mein Lieblingsessen ist Pizza.", en: "My favorite food is pizza." } },
+      { name: "Freizeit", card: "Hobby", question: { de: "Was machen Sie in der Freizeit?", en: "What do you do in your free time?" }, answer: { de: "In der Freizeit lese ich gern.", en: "In my free time I like reading." } },
+      { name: "Sprachen", card: "Deutsch lernen", question: { de: "Seit wann lernen Sie Deutsch?", en: "Since when have you been learning German?" }, answer: { de: "Ich lerne seit drei Monaten Deutsch.", en: "I have been learning German for three months." } },
+      { name: "Geburtstag", card: "Datum", question: { de: "Wann haben Sie Geburtstag?", en: "When is your birthday?" }, answer: { de: "Ich habe im Mai Geburtstag.", en: "My birthday is in May." } }
+    ]
+  },
+
+  teil3: {
+    title: "Teil 3: Eine Bitte formulieren (Making a Polite Request)",
+    desc: "In Teil 3, you see a picture showing an object or situation. You must formulate a polite request to your partner (e.g. using 'Können Sie...' or 'Kannst du...'), and your partner reacts. This part is short — usually just one request and one reaction per picture.",
+    scenarios: [
+      {
+        name: "🖼️ Bild: Ein Fenster",
+        dialogue: [
+          { speaker: "You (Bitte)", de: "Können Sie bitte das Fenster öffnen? Es ist sehr warm hier.", en: "Could you please open the window? It's very warm in here." },
+          { speaker: "Examiner / Partner", de: "Ja, natürlich, kein Problem.", en: "Yes, of course, no problem." }
+        ]
+      },
+      {
+        name: "🖼️ Bild: Ein Radio",
+        dialogue: [
+          { speaker: "You (Bitte)", de: "Kannst du bitte das Radio leiser machen? Ich telefoniere gerade.", en: "Can you please turn the radio down? I'm on the phone right now." },
+          { speaker: "Examiner / Partner", de: "Klar, mache ich sofort.", en: "Sure, I'll do it right away." }
+        ]
+      },
+      {
+        name: "🖼️ Bild: Eine Tür",
+        dialogue: [
+          { speaker: "You (Bitte)", de: "Könnten Sie bitte die Tür zumachen? Es ist etwas laut im Flur.", en: "Could you please close the door? It's a bit loud in the hallway." },
+          { speaker: "Examiner / Partner", de: "Ja, mache ich gern.", en: "Yes, I'll gladly do that." }
+        ]
+      },
+      {
+        name: "🖼️ Bild: Ein Kaffee",
+        dialogue: [
+          { speaker: "You (Bitte)", de: "Kannst du mir bitte einen Kaffee machen?", en: "Can you please make me a coffee?" },
+          { speaker: "Examiner / Partner", de: "Ja, gern. Mit Milch und Zucker?", en: "Yes, gladly. With milk and sugar?" }
+        ]
+      },
+      {
+        name: "🖼️ Bild: Ein Stift",
+        dialogue: [
+          { speaker: "You (Bitte)", de: "Entschuldigung, können Sie mir bitte einen Stift geben?", en: "Excuse me, could you please give me a pen?" },
+          { speaker: "Examiner / Partner", de: "Ja, hier bitte.", en: "Yes, here you go." }
+        ]
+      },
+      {
+        name: "🖼️ Bild: Das Licht",
+        dialogue: [
+          { speaker: "You (Bitte)", de: "Könntest du bitte das Licht anmachen? Es ist zu dunkel.", en: "Could you please turn on the light? It's too dark." },
+          { speaker: "Examiner / Partner", de: "Ja, mache ich.", en: "Yes, I'll do that." }
+        ]
+      }
+    ]
+  }
+};
+
+const VAULT_CATEGORIES = [
+  {
+    category: "1. Begrüßung & Vorstellung (Greeting & Introduction)",
+    items: [
+      {de:"Guten Tag, ich heiße...", en:"Hello, my name is..."},
+      {de:"Freut mich, Sie kennenzulernen.", en:"Nice to meet you."},
+      {de:"Wie geht es Ihnen?", en:"How are you?"},
+      {de:"Mir geht es gut, danke.", en:"I'm doing well, thank you."}
+    ]
+  },
+  {
+    category: "2. Nach Wiederholung fragen (Asking for Repetition)",
+    items: [
+      {de:"Wie bitte?", en:"Pardon?"},
+      {de:"Können Sie das bitte wiederholen?", en:"Can you please repeat that?"},
+      {de:"Können Sie das bitte langsamer sagen?", en:"Can you say that more slowly, please?"},
+      {de:"Ich verstehe nicht. Können Sie das erklären?", en:"I don't understand. Can you explain that?"}
+    ]
+  },
+  {
+    category: "3. Bitten formulieren (Making Requests)",
+    items: [
+      {de:"Können Sie mir bitte helfen?", en:"Can you help me, please?"},
+      {de:"Kannst du das bitte machen?", en:"Can you do that, please?"},
+      {de:"Könnten Sie mir das bitte geben?", en:"Could you give me that, please?"},
+      {de:"Entschuldigung, ich habe eine Frage.", en:"Excuse me, I have a question."}
+    ]
+  },
+  {
+    category: "4. Zahlen & Buchstabieren (Numbers & Spelling)",
+    items: [
+      {de:"Eins, zwei, drei, vier, fünf.", en:"One, two, three, four, five."},
+      {de:"Können Sie das buchstabieren?", en:"Can you spell that?"},
+      {de:"Meine Telefonnummer ist...", en:"My phone number is..."},
+      {de:"Meine E-Mail-Adresse ist...", en:"My email address is..."}
+    ]
+  }
+];
+
+const WRITTEN_DATA = {
+  form: {
+    title: "Schreiben Teil 1 (Formular ausfüllen)",
+    desc: "Read the short text below, then fill in the registration form with the correct information — exactly like Start Deutsch 1 Schreiben Teil 1.",
+    text: "Frau Maria Fischer ist 34 Jahre alt und kommt aus Österreich. Sie wohnt jetzt in der Bahnhofstraße 12 in München. Ihre Telefonnummer ist 089 445566. Sie ist von Beruf Krankenschwester und ist verheiratet.",
+    fields: [
+      { label: "Name", answer: "Fischer" },
+      { label: "Vorname", answer: "Maria" },
+      { label: "Alter", answer: "34" },
+      { label: "Land", answer: "Österreich" },
+      { label: "Wohnort", answer: "München" },
+      { label: "Straße", answer: "Bahnhofstraße 12" },
+      { label: "Telefonnummer", answer: "089 445566" },
+      { label: "Beruf", answer: "Krankenschwester" }
+    ]
+  },
+  notes: [
+    {
+      title: "1. Mitteilung an eine Nachbarin (Note to a Neighbor)",
+      scenario: "You are coming home late today. Write a short note (Mitteilung) to your neighbor.",
+      points: [
+        "1. Grund: Warum Sie heute später kommen",
+        "2. Wann Sie ungefähr zu Hause sind",
+        "3. Eine Bitte: z.B. die Blumen gießen"
+      ],
+      template: `Liebe Frau Klein,
+
+ich komme heute leider später nach Hause, weil ich noch arbeiten muss.
+
+Ich bin ungefähr um 20 Uhr zu Hause.
+
+Können Sie bitte meine Blumen gießen? Der Schlüssel ist unter der Matte.
+
+Vielen Dank!
+Arun`
+    },
+    {
+      title: "2. Mitteilung an einen Freund (Note to a Friend)",
+      scenario: "You cannot come to your friend's birthday party. Write a short message explaining why.",
+      points: [
+        "1. Grund: Warum Sie nicht kommen können",
+        "2. Eine Entschuldigung",
+        "3. Ein Wunsch: Alles Gute zum Geburtstag"
+      ],
+      template: `Lieber Tom,
+
+ich kann leider nicht zu deiner Geburtstagsparty kommen, weil ich krank bin.
+
+Das tut mir sehr leid!
+
+Ich wünsche dir alles Gute zum Geburtstag!
+
+Liebe Grüße,
+Arun`
+    }
+  ]
+};
+
+/* =========================================================================
+   UI CONTROLLER
+   ========================================================================= */
+function init(){
+  renderSubTabs();
+  renderView();
+}
+
+function setMode(mode){
+  currentMode = mode;
+  document.getElementById("tabOral").className = "modetab " + (mode==='oral'?'active':'');
+  document.getElementById("tabVault").className = "modetab " + (mode==='vault'?'active':'');
+  document.getElementById("tabWritten").className = "modetab " + (mode==='written'?'active':'');
+
+  if(mode === 'oral') currentSub = 'teil1';
+  else if(mode === 'vault') currentSub = 'vault';
+  else if(mode === 'written') currentSub = 'form';
+
+  renderSubTabs();
+  renderView();
+}
+
+function setSub(sub){
+  currentSub = sub;
+  renderSubTabs();
+  renderView();
+}
+
+function renderSubTabs(){
+  const container = document.getElementById("subTabs");
+  let items = [];
+  if(currentMode === 'oral'){
+    items = [
+      {id:'teil1', label:'Teil 1: Sich vorstellen (Introduce Yourself)'},
+      {id:'teil2', label:'Teil 2: Informationen erfragen (Ask & Answer)'},
+      {id:'teil3', label:'Teil 3: Bitten formulieren (Make a Request)'}
+    ];
+  } else if(currentMode === 'vault'){
+    items = [
+      {id:'vault', label:'All Spoken Phrases'}
+    ];
+  } else if(currentMode === 'written'){
+    items = [
+      {id:'form', label:'Formular ausfüllen (Fill in a Form)'},
+      {id:'notes', label:'Mitteilung schreiben (Write a Note)'}
+    ];
+  }
+
+  container.innerHTML = items.map(it=>`
+    <div class="subtab ${it.id===currentSub?'active':''}" onclick="setSub('${it.id}')">${it.label}</div>
+  `).join("");
+}
+
+function renderView(){
+  const container = document.getElementById("mainView");
+  if(currentMode === 'oral'){
+    if(currentSub === 'teil1') renderTeil1(container);
+    else if(currentSub === 'teil2') renderTeil2(container);
+    else if(currentSub === 'teil3') renderTeil3(container);
+  } else if(currentMode === 'vault'){
+    renderVault(container);
+  } else if(currentMode === 'written'){
+    if(currentSub === 'form') renderForm(container);
+    else if(currentSub === 'notes') renderNotes(container);
+  }
+}
+
+/* ---------------- ORAL TEIL 1 ---------------- */
+function renderTeil1(container){
+  const data = ORAL_MODULES.teil1;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${data.title}</h2>
+      <p class="card-desc">${data.desc}</p>
+
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-bottom:8px;">
+        1. MASTER INTRODUCTORY PROMPTS (Click 🔊 to hear native pronunciation):
+      </div>
+      <div class="phrase-grid" style="margin-bottom:18px;">
+        ${data.prompts.map(p=>`
+          <div class="phrase-card" id="p-teil1-${p.topic.replace(/\s+/g,'_')}">
+            <div style="flex:1">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--gold); font-weight:700;">${p.topic.toUpperCase()}</div>
+              <div class="phrase-de">${p.de}</div>
+              <div class="phrase-en">${p.en}</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="audio-btn" onclick="speak('${escapeQuotes(p.de)}')">🔊</button>
+              <button class="rec-btn" onclick="startRecording('${escapeQuotes(p.de)}', 'p-teil1-${p.topic.replace(/\s+/g,'_')}')">🎙️</button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--red); margin-bottom:8px;">
+        2. SIMULATE EXAMINER SPONTANEOUS QUESTIONS:
+      </div>
+      <div class="dialog-stream">
+        ${data.examinerQuestions.map((q,i)=>`
+          <div class="speech-bubble examiner">
+            <div class="speaker-label">Prüfer (Examiner) #0${i+1}
+              <button class="speaker-audio-btn" onclick="speak('${escapeQuotes(q.q)}')">🔊 Hear question</button>
+            </div>
+            <div style="font-weight:700; font-size:15px; margin-bottom:4px;">„${q.q}”</div>
+            <div style="font-size:12px; color:var(--ink-soft); font-style:italic; margin-bottom:8px;">„${q.en}”</div>
+            <div style="background:#fff; border-left:3px solid var(--green); padding:6px 10px; border-radius:4px; font-size:13px;" id="q-teil1-ans-${i}">
+              <b>Suggested Answer:</b> „${q.modelAns}”
+              <div style="display:inline-flex; align-items:center; gap:6px; vertical-align:middle;">
+                <button class="speaker-audio-btn" onclick="speak('${escapeQuotes(q.modelAns)}')">🔊</button>
+                <button class="rec-btn" style="width:24px; height:24px; font-size:12px;" onclick="startRecording('${escapeQuotes(q.modelAns)}', 'q-teil1-ans-${i}')">🎙️</button>
+              </div>
+              <div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Tip: ${q.hint}</div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="bigbtn green" onclick="setSub('teil2')">Proceed to Teil 2: Informationen erfragen (Ask & Answer) ➡️</button>
+    </div>
+  `;
+}
+
+/* ---------------- ORAL TEIL 2 ---------------- */
+function renderTeil2(container){
+  const data = ORAL_MODULES.teil2;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${data.title}</h2>
+      <p class="card-desc">${data.desc}</p>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        ${data.topics.map((t,i)=>`
+          <div style="background:#fff; border:1.5px solid var(--line); border-radius:8px; padding:14px;" id="teil2-${i}">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="font-family:'Fjalla One',sans-serif; font-size:16px; color:var(--red); margin:0;">📋 Thema: ${t.name}</h3>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--gold); background:var(--paper); padding:3px 8px; border-radius:10px;">Stichwort: ${t.card}</span>
+            </div>
+            <div style="background:var(--card); border-left:3px solid var(--blue); padding:8px 12px; border-radius:0 6px 6px 0; margin-bottom:8px;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--blue);">FRAGE (Question)</div>
+              <div style="font-size:14px; font-weight:600; color:var(--ink); margin:2px 0;">„${t.question.de}”</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:var(--ink-soft); font-style:italic;">${t.question.en}</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="audio-btn" style="width:28px; height:28px;" onclick="speak('${escapeQuotes(t.question.de)}')">🔊</button>
+                  <button class="rec-btn" style="width:28px; height:28px;" onclick="startRecording('${escapeQuotes(t.question.de)}', 'teil2-${i}')">🎙️</button>
+                </div>
+              </div>
+            </div>
+            <div style="background:#fff; border-left:3px solid var(--green); padding:8px 12px; border-radius:0 6px 6px 0;">
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--green);">ANTWORT (Model Answer)</div>
+              <div style="font-size:14px; font-weight:600; color:var(--ink); margin:2px 0;">„${t.answer.de}”</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; color:var(--ink-soft); font-style:italic;">${t.answer.en}</span>
+                <button class="audio-btn" style="width:28px; height:28px;" onclick="speak('${escapeQuotes(t.answer.de)}')">🔊</button>
+              </div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="bigbtn green" onclick="setSub('teil3')">Proceed to Teil 3: Bitten formulieren (Make a Request) ➡️</button>
+    </div>
+  `;
+}
+
+/* ---------------- ORAL TEIL 3 ---------------- */
+let selectedTeil3ScenarioIdx = 0;
+function renderTeil3(container){
+  const data = ORAL_MODULES.teil3;
+  const sc = data.scenarios[selectedTeil3ScenarioIdx] || data.scenarios[0];
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${data.title}</h2>
+      <p class="card-desc">${data.desc}</p>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
+        ${data.scenarios.map((s, idx)=>`
+          <button style="padding:6px 12px; font-family:'Fjalla One',sans-serif; font-size:13px; border-radius:20px; border:1.5px solid var(--ink); background:${idx===selectedTeil3ScenarioIdx?'var(--ink)':'#fff'}; color:${idx===selectedTeil3ScenarioIdx?'#fff':'var(--ink)'}; cursor:pointer;" onclick="selectedTeil3ScenarioIdx=${idx}; renderTeil3(document.getElementById('mainView'));" class="ds-btn ds-btn-secondary">
+            ${idx+1}. ${s.name}
+          </button>
+        `).join('')}
+      </div>
+
+      <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:14px;">
+        <h3 style="font-family:'Fjalla One',sans-serif; font-size:16px; margin:0 0 6px; color:var(--gold);">📍 Aktives Bild: ${sc.name}</h3>
+        <p style="font-size:12.5px; color:var(--ink-soft); margin:0;">
+          Look at the picture, then formulate a polite request out loud before checking the model answer below.
+        </p>
+      </div>
+
+      <div class="dialog-stream">
+        ${sc.dialogue.map((d, i)=>{
+          const isEx = d.speaker.includes("Examiner");
+          const divId = `dlg-teil3-${i}`;
+          return `
+            <div class="speech-bubble ${isEx?'examiner':'user'}" id="${divId}">
+              <div class="speaker-label">${d.speaker}
+                ${!isEx ? `<button class="speaker-audio-btn" onclick="startRecording('${escapeQuotes(d.de)}', '${divId}')">🎙️ Record</button>` : `<button class="speaker-audio-btn" onclick="speak('${escapeQuotes(d.de)}')">🔊 Play</button>`}
+              </div>
+              <div style="font-weight:600; font-size:14px;">„${d.de}”</div>
+              <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; font-style:italic;">„${d.en}”</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <button class="bigbtn" onclick="setMode('vault')">Open Spoken Redemittel Vault 🎙️</button>
+    </div>
+  `;
+}
+
+/* ---------------- VAULT ---------------- */
+function renderVault(container){
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">🎙️ Spoken Redemittel Vault</h2>
+      <p class="card-desc">Click 🔊 next to any phrase to hear natural German intonation. Repeat each phrase aloud 3 times!</p>
+
+      ${VAULT_CATEGORIES.map(cat=>`
+        <div style="margin-bottom:18px;">
+          <h3 style="font-family:'Fjalla One',sans-serif; font-size:17px; color:var(--blue); border-bottom:1px dashed var(--line); padding-bottom:4px; margin:0 0 8px;">
+            ${cat.category}
+          </h3>
+          <div class="phrase-grid">
+            ${cat.items.map(it=>`
+              <div class="phrase-card" id="vault-${cat.category.replace(/\s+/g,'_')}-${it.de.substring(0,10).replace(/\s+/g,'_')}">
+                <div style="flex:1">
+                  <div class="phrase-de">${it.de}</div>
+                  <div class="phrase-en">${it.en}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="audio-btn" onclick="speak('${escapeQuotes(it.de)}')">🔊</button>
+                  <button class="rec-btn" onclick="startRecording('${escapeQuotes(it.de)}', 'vault-${cat.category.replace(/\s+/g,'_')}-${it.de.substring(0,10).replace(/\s+/g,'_')}')">🎙️</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `).join("")}
+
+      <button class="bigbtn secondary" onclick="setMode('written')">Go to Written Exam Practice (Formular &amp; Mitteilung) ✍️</button>
+    </div>
+  `;
+}
+
+/* ---------------- FORM FILL-IN ---------------- */
+function renderForm(container){
+  const f = WRITTEN_DATA.form;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${f.title}</h2>
+      <p class="card-desc">${f.desc}</p>
+
+      <div class="cloze-text">${f.text}</div>
+
+      <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px;">
+        ${f.fields.map((field,i)=>`
+          <div class="form-field">
+            <label for="formField_${i}">${field.label}:</label>
+            <input type="text" id="formField_${i}" placeholder="...">
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="bigbtn" onclick="checkForm()">Check Answers</button>
+      <div id="formFeedback" style="margin-top:14px; display:none;"></div>
+    </div>
+  `;
+}
+
+function checkForm(){
+  const f = WRITTEN_DATA.form;
+  let correctCount = 0;
+  let html = `<div style="background:#fff; border:1px solid var(--line); border-radius:6px; padding:14px;">`;
+
+  f.fields.forEach((field,i)=>{
+    const input = document.getElementById(`formField_${i}`);
+    const given = input ? input.value.trim() : "";
+    const isCorr = given.toLowerCase() === field.answer.toLowerCase();
+    if(isCorr) correctCount++;
+    if(input){
+      input.style.background = isCorr ? '#E2EED8' : '#F8E4E3';
+      input.style.borderColor = isCorr ? 'var(--green)' : 'var(--red)';
+    }
+    html += `
+      <div style="margin-bottom:6px; font-size:13px; border-bottom:1px dashed var(--line); padding-bottom:6px;">
+        <b>${field.label}:</b> Correct answer is <b style="color:var(--green);">${field.answer}</b>.
+        Your answer: <i>${given||'(none)'}</i> ${isCorr?'✅':'❌'}
+      </div>
+    `;
+  });
+
+  html += `
+    <div style="font-family:'Fjalla One',sans-serif; font-size:18px; margin-top:10px; color:${correctCount>=6?'var(--green)':'var(--red)'};">
+      Score: ${correctCount} / ${f.fields.length} (${Math.round((correctCount/f.fields.length)*100)}%)
+    </div>
+  </div>`;
+
+  const fb = document.getElementById("formFeedback");
+  fb.innerHTML = html;
+  fb.style.display = "block";
+}
+
+/* ---------------- NOTES / MITTEILUNG ---------------- */
+function renderNotes(container){
+  const notes = WRITTEN_DATA.notes;
+  container.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">✍️ Mitteilung schreiben (Note Builder)</h2>
+      <p class="card-desc">
+        In the A1 writing exam, <b>addressing all 3 Leitpunkte (key points)</b> in a short, personal note is what earns full marks. Study these 2 blueprint examples.
+      </p>
+
+      ${notes.map((noteObj)=>`
+        <div style="background:#fff; border:1.5px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px;">
+          <h3 style="font-family:'Fjalla One',sans-serif; font-size:18px; color:var(--red); margin:0 0 6px;">${noteObj.title}</h3>
+          <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;"><b>Task:</b> ${noteObj.scenario}</div>
+
+          <div style="background:var(--paper-dark); border-radius:6px; padding:10px 12px; margin-bottom:12px;">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--gold); text-transform:uppercase;">
+              Required 3 Leitpunkte Checklist:
+            </div>
+            ${noteObj.points.map(pt=>`
+              <div class="checklist-item">
+                <input type="checkbox" checked disabled>
+                <span>${pt}</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--blue); margin-bottom:4px; text-transform:uppercase;">
+            High-Score Sample Note:
+          </div>
+          <div style="background:var(--card); border:1px solid var(--line); border-radius:6px; padding:12px; font-size:13px; line-height:1.6; white-space:pre-wrap; font-family:'IBM Plex Sans',sans-serif;">${noteObj.template}</div>
+
+          <button class="bigbtn secondary" style="font-size:13px; padding:8px 12px; width:auto; margin-top:10px;" onclick="speak('${escapeQuotes(noteObj.template)}')">🔊 Listen to full note</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+/* ---------------- AUDIO PLAYBACK ---------------- */
+function speak(txt){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = "de-DE";
+  u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+
+/* ---------------- DIFF HIGHLIGHT ---------------- */
+function diffHighlight(a, b){
+  let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i && j<b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+  const aMid=a.slice(i,a.length-j), bMid=b.slice(i,b.length-j);
+  const wrap=(s)=> s?`<span class="diffchar">${s}</span>`:'';
+  return { a: a.slice(0,i)+wrap(aMid)+a.slice(a.length-j), b: b.slice(0,i)+wrap(bMid)+b.slice(b.length-j) };
+}
+
+/* ---------------- SPEECH RECOGNITION ---------------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recObj = null;
+
+function startRecording(targetText, containerId) {
+  if (!SR) {
+    alert("Speech recognition not supported in this browser. Please use Chrome or Edge.");
+    return;
+  }
+
+  const btn = event.currentTarget;
+  btn.classList.add('recording');
+  btn.innerText = '🛑';
+
+  recObj = new SR();
+  recObj.lang = "de-DE";
+  recObj.interimResults = false;
+
+  recObj.onresult = (ev) => {
+    const transcript = ev.results[0][0].transcript;
+    showComparison(targetText, transcript, containerId);
+    stopRecording(btn);
+  };
+
+  recObj.onerror = (ev) => {
+    console.error("SR Error:", ev.error);
+    stopRecording(btn);
+  };
+
+  recObj.onend = () => {
+    stopRecording(btn);
+  };
+
+  recObj.start();
+}
+
+function stopRecording(btn) {
+  if (recObj) {
+    recObj.stop();
+    recObj = null;
+  }
+  if (btn) {
+    btn.classList.remove('recording');
+    btn.innerText = '🎙️';
+  }
+}
+
+function showComparison(target, spoken, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const diff = diffHighlight(target.toLowerCase().trim(), spoken.toLowerCase().trim());
+
+  const feedbackHtml = `
+    <div class="user-transcript visible" id="transcript_${containerId}">
+      <span class="transcript-label">Your Spoken Version:</span>
+      <div style="margin-bottom:8px;">${diff.b}</div>
+      <span class="transcript-label">Target Version:</span>
+      <div>${diff.a}</div>
+    </div>
+  `;
+
+  const existing = container.querySelector('.user-transcript');
+  if (existing) existing.remove();
+  container.insertAdjacentHTML('beforeend', feedbackHtml);
+}
+
+/* ---------------- EXAM TIMER ---------------- */
+let timerSeconds = 15*60;
+let timerInterval = null;
+let timerRunning = false;
+
+function setExamTimer(seconds, label){
+  timerSeconds = seconds;
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('timerLabel').innerText = label;
+  document.getElementById('timerToggleBtn').innerText = '▶ Start';
+  updateTimerDisplay();
+}
+
+function toggleTimer(){
+  const btn = document.getElementById('timerToggleBtn');
+  if(timerRunning){
+    clearInterval(timerInterval);
+    timerRunning = false;
+    btn.innerText = '▶ Start';
+  } else {
+    timerRunning = true;
+    btn.innerText = '⏸ Pause';
+    timerInterval = setInterval(()=>{
+      if(timerSeconds > 0){
+        timerSeconds--;
+        updateTimerDisplay();
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.innerText = '▶ Start';
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = 15*60;
+  document.getElementById('timerLabel').innerText = 'Exam Timer';
+  document.getElementById('timerToggleBtn').innerText = '▶ Start';
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay(){
+  const m = Math.floor(timerSeconds/60);
+  const s = timerSeconds%60;
+  document.getElementById('timerDisplay').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function toggleTheme(){
+  const isDark = document.documentElement.classList.toggle('dark-theme');
+  localStorage.setItem('de_theme', isDark ? 'dark' : 'light');
+  const btn = document.getElementById('themeToggleBtn');
+  if(btn) btn.innerText = isDark ? '☀️ Theme' : '🌙 Theme';
+}
+
+function initTheme(){
+  const saved = localStorage.getItem('de_theme');
+  if(saved === 'dark'){
+    document.documentElement.classList.add('dark-theme');
+    const btn = document.getElementById('themeToggleBtn');
+    if(btn) btn.innerText = '☀️ Theme';
+  }
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  initTheme();
+  init();
+  updateTimerDisplay();
+});
+
+// UNIFIED SUITE THEME SYSTEM
+function initSuiteTheme() {
+  const saved = localStorage.getItem('de_theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (!saved && prefersDark);
+  applyTheme(isDark);
+}
+function applyTheme(isDark) {
+  if (isDark) {
+    document.documentElement.classList.add('dark-theme');
+    document.body.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark-theme');
+    document.body.classList.remove('dark');
+  }
+  const btn = document.getElementById('themeToggleBtn') || document.getElementById('themeToggle');
+  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+}
+function toggleSuiteTheme() {
+  const isDarkNow = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark');
+  const nextDark = !isDarkNow;
+  localStorage.setItem('de_theme', nextDark ? 'dark' : 'light');
+  applyTheme(nextDark);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSuiteTheme);
+} else {
+  initSuiteTheme();
+}
+
+</script>
+    </body>
+</html>
