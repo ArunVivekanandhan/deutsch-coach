@@ -743,6 +743,29 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 14) — Distinct icon + accent color for each Häufige Wörter level card
+
+#### Task
+"Need theme for Häufige Wörter" — clarified via `AskUserQuestion`: the 4 level cards (A1/A2/B1/B2) on `Thema_Sprech_Trainer.html`'s topic grid all shared the same `megaphone` icon and the same single shared icon color (`.thema-icon{color:var(--gold);}`, one color for every topic card in the app), so they looked identical to each other at a glance. Wanted a distinct icon/color per level card.
+
+#### Fix
+- Gave each of the 4 `haeufig_*` topic entries its own icon (from `js/icon-svgs.js`'s existing key set, picking ones not already used by the 7 domain topics to avoid visual overlap): A1→`abstract`, A2→`document`, B1→`team`, B2→`graduation`.
+- Added a `color` field to those same 4 entries, reusing the app's existing named palette (`--green`/`--blue`/`--purple`/`--red`, already defined in this page's `:root` and dark-mode blocks) in a beginner→advanced progression: A1 green, A2 blue, B1 purple, B2 red — a common convention in language-learning UIs.
+- `renderThemaGrid()` now applies `style="color:${t.color}"` inline on `.thema-icon` only when a topic defines `color` (the other 7 domain topics have no `color` field, so they're untouched and keep the single shared gold color from the CSS rule). Used the CSS variable reference (`var(--green)` etc.) rather than a resolved hex value, so the color still correctly swaps to its dark-mode-redefined value when the shared theme toggle is used.
+- Confirmed the `.thema-card.active .thema-icon{color:#fff;}` CSS rule that could have fought with this inline style is dead code — `active` is never actually toggled onto a `.thema-card` anywhere in the JS — so no conflict in practice.
+
+#### Testing
+- Headless-browser check: each of the 4 cards' `.thema-icon` computed color matches its assigned palette color in light mode; re-checked after clicking the real theme toggle and confirmed the B2 card's icon switches to the dark-mode red variant, not a stale light-mode value.
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html`
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 13) — Add 24 missing "sister verb" entries
 
 #### Task

@@ -453,10 +453,10 @@ const THEMEN = [
       {p:'sie (Pl.)', praes:{de:'Sie <b>gehen</b> zum Zahnarzt.', en:'They are going to the dentist.'}, praet:{de:'Sie <b>gingen</b> zum Zahnarzt.', en:'They went to the dentist.'}, perf:{de:'Sie sind zum Zahnarzt <b>gegangen</b>.', en:'They went to the dentist.'}}
     ]}
   ]},
-  { id:'haeufig_a1', title:'Häufige Wörter (A1)', icon:'megaphone', verbs:[] }, // populated at init() from VERBS_ALL, filtered by level
-  { id:'haeufig_a2', title:'Häufige Wörter (A2)', icon:'megaphone', verbs:[] },
-  { id:'haeufig_b1', title:'Häufige Wörter (B1)', icon:'megaphone', verbs:[] },
-  { id:'haeufig_b2', title:'Häufige Wörter (B2)', icon:'megaphone', verbs:[] }
+  { id:'haeufig_a1', title:'Häufige Wörter (A1)', icon:'abstract', color:'var(--green)', verbs:[] }, // populated at init() from VERBS_ALL, filtered by level
+  { id:'haeufig_a2', title:'Häufige Wörter (A2)', icon:'document', color:'var(--blue)', verbs:[] },
+  { id:'haeufig_b1', title:'Häufige Wörter (B1)', icon:'team', color:'var(--purple)', verbs:[] },
+  { id:'haeufig_b2', title:'Häufige Wörter (B2)', icon:'graduation', color:'var(--red)', verbs:[] }
 ];
 
 /* =========================================================================
@@ -1295,7 +1295,7 @@ function renderThemaGrid(){
     <div class="thema-grid">
       ${THEMEN.map(t => `
         <div class="thema-card" onclick="openThema('${t.id}')">
-          <div class="thema-icon">${ICON_SVGS[t.icon] || ICON_SVGS['abstract']}</div>
+          <div class="thema-icon"${t.color ? ` style="color:${t.color};"` : ''}>${ICON_SVGS[t.icon] || ICON_SVGS['abstract']}</div>
           <div class="thema-title">${t.title}</div>
           <div class="thema-progress">${themaDoneCount(t)} / ${t.verbs.length} geübt</div>
         </div>
