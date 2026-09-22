@@ -1232,6 +1232,31 @@ previous changelog entry remain unfixed (out of scope for this entry too).
 
 ---
 
+### Follow-up: B2 batch for German_Grammar_Cheat_Codes.html
+
+Reviewed `German_Grammar_Cheat_Codes.html` at the user's request (30 mnemonic "shortcut" cards across 8
+categories, 3 live pattern-scanner widgets, search + category filters — distinct from
+`Grammatik_Regel_Trainer.html`'s more formal rule format) and confirmed it had zero B2 content and no
+Genitiv-preposition mnemonic despite covering Akkusativ ("DOGFU") and Dativ ("Blue Danube") ones. Added
+8 new cards (`id: 31`–`38`, `cat: "b2"`, new "🎓 B2 Cheat Codes" filter chip): mnemonic versions of the
+5 B2 grammar topics added to `Grammatik_Regel_Trainer.html` above (Genitiv prepositions, Konjunktiv
+I/reported-speech "sei" detector, Partizipialattribut "unpacking" trick, Doppelkonjunktionen pairs,
+a Nominalisierung writing-upgrade paired with the existing Shortcut 23 B1 connector checklist) **plus**
+3 additional tricks not covered anywhere else in the app yet: Zustandspassiv vs. Vorgangspassiv
+("snapshot vs. movie" — `sein`+Partizip II is a result-state, `werden`+Partizip II is the process),
+Futur II as natives actually use it (assumption about the past, not real future), and N-Deklination's
+"-en Club" (weak masculine nouns like `der Student`/`der Junge` taking `-en` in every case but
+Nominativ Singular). Note for future agents: this file's `CHEAT_CODES` array mixes unquoted-key JS
+object literals (the original 30 entries) with quoted-key JSON-style ones (these 8 new entries) — both
+are valid JS, but a naive `json.loads()` on the array text will fail on the unquoted-key entries; don't
+assume this file is parseable as JSON the way `VERBS`/`NOUNS` are.
+
+Verified via headless Chromium: total card count (38), the new filter chip's count (8), search for a
+new topic ("Futur II") returning exactly 1 result, and an audio button on a new card firing without
+error. Full 23-page smoke sweep re-run with zero errors before committing.
+
+---
+
 ## 29. AI-Discovered Knowledge
 
 ### Discovery: Main app verb collection now unified with the 503-verb master list (522 total verbs)
