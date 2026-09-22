@@ -743,6 +743,44 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-22 (Task 5) — Thema_Sprech_Trainer.html: "Häufige Wörter" now covers all 540 A1–B2 verbs
+
+#### Task
+Follow-up to Task 4: "I mean all the words (a1,a2,b1,b2) verb" — the user wanted the "Häufige Wörter" topic to cover the app's ENTIRE existing verb vocabulary (A1–B2), not just the 5 hand-picked ones from Task 4. Clarified via `AskUserQuestion` (given the scale: 581 verbs) that full coverage with auto-conjugated sentences (simple, consistent template) was preferred over a smaller hand-written subset.
+
+#### Scale problem and why hand-writing was ruled out
+`Verb_Transformation_Trainer.html`'s existing `VERBS` array has 581 entries (A1: 50, A2: 219, B1: 284, B2: 28); after deduping repeated infinitives (41 verbs are re-listed across levels — kept the lowest level) that's 540 unique verbs. Hand-writing a unique, verified example sentence per person per tense (the standard this page's other 7 topics hold) would mean ~9,700 individually-checked sentences — not something that can honestly be hand-verified at this session's scale. Built a tested conjugation engine instead, using the 3 fields the app's own vocabulary data already provides per verb (`en`, `perfekt` = e.g. "hat gemacht"/"ist gegangen", `praeteritum` = the ich/er Präteritum form) to derive all 6 persons across all 3 tenses.
+
+#### How the engine works (all logic lives inline in `Thema_Sprech_Trainer.html`)
+- **Perfekt**: trivial — the data's `perfekt` field is already a complete phrase ("hat gemacht", "hat sich angepasst", "hat eine Verbindung hergestellt"). Split off the aux word (hat/ist → conjugate via a standard HABEN/SEIN table) and keep the rest (participle + any fixed material) verbatim, substituting the reflexive pronoun (mich/dich/sich/uns/euch/sich) for `sich` where present. The participle never changes across persons, so no participle-level conjugation is needed at all.
+- **Präteritum**: the data's `praeteritum` field's first word is already the correct ich/er form (e.g. "nahm ab", "passte sich an", "stellte eine Verbindung her"). Person-endings applied to that first word only, using the standard rule (weak/mixed '-te' stems get -st/-n/-t/-n; bare strong stems get -st/-en/-t/-en with epenthetic -e- for stems ending in d/t/s/ß/z, discovered via testing that epenthesis differs between "du" and "ihr" for sibilant-ending stems e.g. "aßest" vs "aßt"). Any trailing words (separable prefix, fixed idiom material) are kept as-is (with reflexive substitution), since German keeps that material in the same position for every person.
+- **Präsens**: the only tense not directly derivable from the data — has to come from the infinitive. Built from: (1) a hardcoded table of genuinely irregular verbs (sein, haben, werden, wissen, tun, and the 6 modals); (2) a table of ~35 known present-tense stem-changing strong-verb bases (helfen→hilfst, lesen→liest, fahren→fährst, laufen→läufst, etc.), matched against the infinitive by longest suffix so prefixed/compound verbs (aufgeben, vergessen, besprechen, herunterladen) inherit their base verb's pattern automatically; (3) a fully regular fallback (stem + e/st/t/en/t/en, with d/t-epenthesis, s/ß/z/x-ending contraction, and an -eln → -le ich-form drop) for everything else. Whether a separable prefix should stay attached to the conjugated verb (inseparable, e.g. "vergisst") or move to the end as its own word (separable, e.g. "nehme ... ab") is decided by comparing the infinitive's last token against the trailing word already present in the Präteritum field, not by guessing — if the infinitive starts with that same trailing word, it's treated as detachable; the same conjugated form (with the prefix now excluded) is used, and the caller appends the trailing word(s) verbatim, the same as it already does for every other tense.
+
+#### Bugs found and fixed during testing (before this ever reached the page)
+Wrote the engine standalone first and ran it against the full 540-verb dataset plus targeted spot-checks, catching 3 real defects before integration:
+1. Verbs whose Präteritum ich-form happens to end in "-te" (haben→hatte, werden→wurde, wissen→wusste, all 6 modals) were being misrouted into the regular weak-verb derivation path instead of the hardcoded irregular table, producing wrong forms like "Ich hate." and "Ich wusse." — fixed by checking the irregular/modal table before the weak-derivation fallback, not after.
+2. `werden`'s Präteritum "wurde" ends in a bare vowel rather than "-te", which the du/wir/ihr/sie-ending logic didn't anticipate, producing "Wir wurdeen." (extra e) — fixed by broadening the "already-ends-in-a-vowel, no epenthesis needed" branch from specifically "-te" to any trailing "e".
+3. Mixed verbs (denken, bringen, kennen, nennen, senden, and their compounds like verbringen, mitdenken, anerkennen, zurücksenden) have an ablauted Präteritum stem (dacht-, brach-, kannt-, nannt-) that is NOT the Präsens stem (denk-, bring-, kenn-, nenn-) — deriving Präsens from the Präteritum field (as the original design did) produced wrong forms like "Ich dache." instead of "Ich denke." Fixed by re-deriving Präsens from the infinitive for every verb, never from the Präteritum field, which incidentally also fixed a separate separable-prefix double-concatenation bug (e.g. "Ich abnehme ab." / "Ich umziehe um.") that only affected the ich/wir/ihr/sie forms of separable stem-changing verbs, since those persons fell through to a regular-conjugation fallback that wasn't applying the same prefix-detachment logic already used for du/er.
+
+#### Testing
+- Standalone Node.js testing of the engine against all 540 verbs: zero structural issues (no `undefined`, no unbalanced `<b>` tags, no triple-letter typos) across all 9,720 generated sentence-tense combinations.
+- Manual verification of ~80 hand-picked verbs spanning every category (true weak, strong with each of the e→i/e→ie/a→ä/au→äu/o→ö present-tense stem-change groups, mixed, all irregulars/modals, separable, inseparable, reflexive, separable+reflexive combined, and multi-word idiom entries like "Verbindung herstellen"/"recht haben") against my own knowledge of German grammar — all correct after the 3 fixes above.
+- Re-verified the identical checks live in the browser (`page.evaluate` calling the page's own `generateSentences`/`VERBS_ALL`, not a copy) after integrating into `Thema_Sprech_Trainer.html`: 9,720/9,720 checks clean, zero `pageerror` events.
+- Headless-browser UI test: topic grid now shows 8 cards; opening "Häufige Wörter" shows a CEFR level filter (A1/A2/B1/B2/Alle, defaulting to A1 = 50 verbs) in addition to the existing tense selector; switching to "Alle" shows all 540; opening a verb and switching tense (Perfekt→Präsens→Präteritum) on "essen" correctly renders "Ich habe gegessen." → "Ich esse." → "Ich aß.".
+- Full-site smoke sweep (24 pages): zero `pageerror` events.
+
+#### Known limitations (disclosed in-page, not silently hidden)
+- Sentences use a bare "Subject + verb(+prefix)." template with no object — the user explicitly accepted this tradeoff (richer per-verb sentences aren't buildable by rule for 540 verbs without risking transitivity mismatches). The page shows an explanatory note when this topic is open.
+- English translations show only the plain infinitive gloss ("to see") for all 3 tenses rather than a fully re-conjugated English sentence, since English irregular past-tense forms (go→went, see→saw, ...) aren't derivable from the German data and getting ~500 of them right by rule wasn't feasible either.
+- A few entries inherit pre-existing quirks from the source vocabulary data itself (not introduced by this engine): `backen`'s Präteritum is given as the archaic "buk" rather than the modern "backte"; `joggen`'s auxiliary is ambiguously listed as "ist/hat" in the source data, and the engine deterministically picks "ist" for its Perfekt sentence.
+
+#### Files Changed
+- `Thema_Sprech_Trainer.html` (added `VERBS_ALL`, the conjugation engine, a CEFR level filter for this topic, and removed the now-superseded 5 hand-crafted "Häufige Wörter" verbs from Task 4)
+- `sw.js` (regenerated: cache version bump)
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-22 (Task 4) — Thema_Sprech_Trainer.html: add "Häufige Wörter" (Common Words) topic
 
 #### Task
