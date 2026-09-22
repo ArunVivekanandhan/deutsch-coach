@@ -1142,6 +1142,213 @@ const GRAMMAR_RULES = [
         explain: "'nicht müssen' indicates absence of obligation (you don't have to), which fits having Saturday off!"
       }
     ]
+  },
+
+  {
+    id: "r17_indirekte_rede",
+    num: "17",
+    title: "Konjunktiv I & Indirekte Rede (Reported Speech) — B2",
+    category: "Verbs & Mood",
+    color: "var(--purple)",
+    summary: "Konjunktiv I is used to report what someone else said, especially in news, official reports, and formal writing, without confirming whether it is true.",
+    formula: "• Formation: verb stem + -e (ich), -est (du), -e (er/sie/es), -en (wir), -et (ihr), -en (sie). 'sein' is irregular: ich sei, du seist, er sei.\n• When Konjunktiv I looks identical to the indicative (e.g. wir/sie forms), speakers switch to Konjunktiv II instead to keep the report clearly marked as indirect.\n• Reporting verb + dass-clause OR verb-second word order without 'dass': Er sagte, dass er müde sei. / Er sagte, er sei müde.",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Direct Speech</th><th>Indirect Speech (Konjunktiv I)</th></tr>
+        <tr><td>„Ich bin krank.“</td><td>Er sagte, er <b>sei</b> krank.</td></tr>
+        <tr><td>„Wir haben keine Zeit.“</td><td>Sie erklärten, sie <b>hätten</b> keine Zeit. <small>(K1 = K2 here, so K2 is used)</small></td></tr>
+        <tr><td>„Ich werde morgen kommen.“</td><td>Er meinte, er <b>werde</b> morgen kommen.</td></tr>
+        <tr><td>„Können Sie mir helfen?“</td><td>Sie fragte, ob man ihr helfen <b>könne</b>.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Der Minister erklärte, die Reform sei notwendig.", en:"The minister explained that the reform was necessary."},
+      {de:"Die Zeugin sagte aus, sie habe den Unfall selbst gesehen.", en:"The witness testified that she had seen the accident herself."},
+      {de:"Er behauptete, er kenne den Mann nicht.", en:"He claimed he did not know the man."}
+    ],
+    drills: [
+      {
+        prompt: "Die Sprecherin sagte, die Firma ___ im nächsten Jahr neue Stellen schaffen.",
+        en: "The spokesperson said the company would create new jobs next year.",
+        options: ["werde", "wird", "würde", "sei"],
+        correct: 0,
+        explain: "Konjunktiv I of 'werden' is 'werde' — used here for a reported future statement."
+      },
+      {
+        prompt: "Er sagte, er ___ keine Zeit für ein Gespräch.",
+        en: "He said he had no time for a conversation.",
+        options: ["habe", "hat", "hatte", "haben"],
+        correct: 0,
+        explain: "Konjunktiv I of 'haben' in the er/sie/es form is 'habe', clearly distinct from the indicative 'hat'."
+      },
+      {
+        prompt: "Die Wissenschaftler erklärten, das Ergebnis ___ eindeutig.",
+        en: "The scientists explained the result was unambiguous.",
+        options: ["sei", "ist", "war", "wäre"],
+        correct: 0,
+        explain: "'sein' has a distinct Konjunktiv I form 'sei', the standard choice for formal reported speech."
+      }
+    ]
+  },
+
+  {
+    id: "r18_partizipialattribute",
+    num: "18",
+    title: "Partizipialattribute (Extended Participle Constructions) — B2",
+    category: "Adjectives",
+    color: "var(--green)",
+    summary: "Formal written German (news articles, reports, official texts) often compresses a relative clause into a single adjective phrase built from a participle placed before the noun.",
+    formula: "• Partizip I (present participle, = Infinitiv + d) describes an ongoing/active action: der lachende Mann = der Mann, der lacht.\n• Partizip II (past participle) describes a completed/passive action: der reparierte Wagen = der Wagen, der repariert wurde.\n• The whole phrase between article and noun (including extra details) takes normal adjective endings on the participle itself.",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Relative Clause</th><th>Partizipialattribut</th></tr>
+        <tr><td>der Mann, der an der Ecke wartet</td><td>der <b>an der Ecke wartende</b> Mann</td></tr>
+        <tr><td>die Studie, die letztes Jahr veröffentlicht wurde</td><td>die <b>letztes Jahr veröffentlichte</b> Studie</td></tr>
+        <tr><td>das Kind, das laut weint</td><td>das <b>laut weinende</b> Kind</td></tr>
+        <tr><td>die Firma, die stark wächst</td><td>die <b>stark wachsende</b> Firma</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Die steigenden Energiepreise beunruhigen viele Familien.", en:"The rising energy prices worry many families."},
+      {de:"Der 1985 gegründete Verein feiert dieses Jahr sein Jubiläum.", en:"The association, founded in 1985, is celebrating its anniversary this year."},
+      {de:"Das gestern gelieferte Paket war leider beschädigt.", en:"The package delivered yesterday was unfortunately damaged."}
+    ],
+    drills: [
+      {
+        prompt: "Die ___ Zahlen zeigen einen klaren Trend. (die Zahlen, die steigen)",
+        en: "The rising figures show a clear trend.",
+        options: ["steigenden", "gestiegenen", "steigen", "gestiegen"],
+        correct: 0,
+        explain: "An ongoing action ('die Zahlen steigen') uses Partizip I ('steigend') with the plural adjective ending -en."
+      },
+      {
+        prompt: "Das ___ Haus wurde vollständig renoviert. (das Haus, das 1920 gebaut wurde)",
+        en: "The house built in 1920 was fully renovated.",
+        options: ["1920 gebaute", "1920 bauende", "1920 gebaut", "1920 baute"],
+        correct: 0,
+        explain: "A completed, passive action ('das Haus wurde gebaut') uses Partizip II ('gebaute') with the neuter adjective ending."
+      }
+    ]
+  },
+
+  {
+    id: "r19_doppelkonjunktionen",
+    num: "19",
+    title: "Doppelkonjunktionen (Correlative Connectors) — B2",
+    category: "Connectors",
+    color: "var(--blue)",
+    summary: "B2-level writing uses paired connectors to link two ideas more precisely than 'und' or 'aber' — essential for essays, opinion pieces, and formal letters.",
+    formula: "• je ... desto/umso + Komparativ: proportional relationship, verb at the end of the 'je' clause.\n• sowohl ... als auch: both...and (adds emphasis, no negation).\n• weder ... noch: neither...nor (double negation).\n• zwar ... aber: it's true that... but... (conceding a point before contradicting it).\n• nicht nur ... sondern auch: not only... but also.",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Connector</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td>je ... desto</td><td>the more... the more</td><td><b>Je</b> mehr man übt, <b>desto</b> besser wird man.</td></tr>
+        <tr><td>sowohl ... als auch</td><td>both... and</td><td>Sie spricht <b>sowohl</b> Deutsch <b>als auch</b> Französisch.</td></tr>
+        <tr><td>weder ... noch</td><td>neither... nor</td><td>Er hat <b>weder</b> Zeit <b>noch</b> Lust.</td></tr>
+        <tr><td>zwar ... aber</td><td>admittedly... but</td><td>Die Wohnung ist <b>zwar</b> klein, <b>aber</b> zentral gelegen.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Je später es wird, desto müder werde ich.", en:"The later it gets, the more tired I become."},
+      {de:"Das Produkt ist weder billig noch besonders gut.", en:"The product is neither cheap nor particularly good."},
+      {de:"Zwar regnet es, aber wir gehen trotzdem spazieren.", en:"It's true that it's raining, but we're going for a walk anyway."}
+    ],
+    drills: [
+      {
+        prompt: "Je früher du anfängst, ___ mehr Zeit hast du für die Prüfung.",
+        en: "The earlier you start, the more time you'll have for the exam.",
+        options: ["desto", "als", "wie", "dass"],
+        correct: 0,
+        explain: "'je ... desto' is a fixed pair: 'desto' always introduces the second (main) clause."
+      },
+      {
+        prompt: "Der neue Kollege ist ___ freundlich noch besonders kompetent.",
+        en: "The new colleague is neither friendly nor particularly competent.",
+        options: ["weder", "sowohl", "entweder", "nicht"],
+        correct: 0,
+        explain: "'weder ... noch' expresses a double negative — neither one thing nor the other."
+      }
+    ]
+  },
+
+  {
+    id: "r20_nominalisierung",
+    num: "20",
+    title: "Nominalisierung (Turning Verbs & Adjectives into Nouns) — B2",
+    category: "Text Structure",
+    color: "var(--gold)",
+    summary: "Formal written German favors compact noun phrases over full clauses. Being able to convert a verb or adjective into a noun is a core B2 writing skill for essays and reports.",
+    formula: "• Infinitiv → das + Infinitiv: lesen → das Lesen (the reading).\n• Verb stem + -ung → die ...ung: entwickeln → die Entwicklung.\n• Adjective + -heit/-keit → die ...heit/keit: schön → die Schönheit; möglich → die Möglichkeit.\n• A whole subordinate clause can often be replaced by 'Nominalisierung + Präposition': Weil die Preise steigen → Wegen des Preisanstiegs.",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Clause / Verb</th><th>Nominalized Form</th></tr>
+        <tr><td>Weil die Kosten steigen, ...</td><td><b>Wegen</b> des Kostenanstiegs, ...</td></tr>
+        <tr><td>entscheiden</td><td>die Entscheidung</td></tr>
+        <tr><td>sicher</td><td>die Sicherheit</td></tr>
+        <tr><td>Nachdem er angekommen war, ...</td><td><b>Nach</b> seiner Ankunft, ...</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Die Entwicklung neuer Impfstoffe dauert oft mehrere Jahre.", en:"The development of new vaccines often takes several years."},
+      {de:"Wegen des schlechten Wetters wurde das Spiel verschoben.", en:"Because of the bad weather, the game was postponed."},
+      {de:"Die Möglichkeit, von zu Hause zu arbeiten, hat viele Vorteile.", en:"The possibility of working from home has many advantages."}
+    ],
+    drills: [
+      {
+        prompt: "___ des Verkehrsunfalls musste die Straße gesperrt werden. (weil ein Verkehrsunfall passiert ist)",
+        en: "Because of the traffic accident, the street had to be closed.",
+        options: ["Wegen", "Weil", "Trotz", "Während"],
+        correct: 0,
+        explain: "'wegen + Genitiv' is the standard preposition for nominalized causal clauses in formal writing."
+      },
+      {
+        prompt: "Die schnelle ___ des Problems hat alle überrascht. (lösen)",
+        en: "The quick solving of the problem surprised everyone.",
+        options: ["Lösung", "Lösen", "Löser", "Löslichkeit"],
+        correct: 0,
+        explain: "'lösen' nominalizes with the '-ung' suffix: 'die Lösung' (the solution)."
+      }
+    ]
+  },
+
+  {
+    id: "r21_genitivpraepositionen",
+    num: "21",
+    title: "Genitivpräpositionen im formellen Stil (Formal Genitive Prepositions) — B2",
+    category: "Prepositions",
+    color: "var(--red)",
+    summary: "Formal writing and speech prefer a small set of prepositions that take the Genitiv case instead of everyday 'weil/wegen + Dativ' phrasing common in spoken German.",
+    formula: "• trotz + Genitiv: despite (trotz des Regens).\n• während + Genitiv: during (während der Sitzung).\n• wegen + Genitiv: because of (wegen der Verspätung) — Dativ is common in speech but Genitiv is expected in formal writing.\n• aufgrund + Genitiv: due to (aufgrund der Umstände) — typical in official/business German.\n• innerhalb / außerhalb + Genitiv: within / outside of (innerhalb einer Woche).",
+    tableHTML: `
+      <table class="de-table">
+        <tr><th>Preposition</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td>trotz</td><td>despite</td><td><b>Trotz</b> des schlechten Wetters kamen viele Gäste.</td></tr>
+        <tr><td>während</td><td>during</td><td><b>Während</b> der Besprechung klingelte sein Handy.</td></tr>
+        <tr><td>aufgrund</td><td>due to</td><td><b>Aufgrund</b> technischer Probleme fiel der Zug aus.</td></tr>
+        <tr><td>innerhalb</td><td>within</td><td>Bitte antworten Sie <b>innerhalb</b> einer Woche.</td></tr>
+      </table>
+    `,
+    examples: [
+      {de:"Trotz seiner Erfahrung bekam er die Stelle nicht.", en:"Despite his experience, he did not get the position."},
+      {de:"Aufgrund der hohen Nachfrage sind die Tickets bereits ausverkauft.", en:"Due to high demand, the tickets are already sold out."},
+      {de:"Innerhalb der ersten drei Monate gilt eine Probezeit.", en:"A probationary period applies within the first three months."}
+    ],
+    drills: [
+      {
+        prompt: "___ des starken Regens fand das Konzert trotzdem im Freien statt.",
+        en: "Despite the heavy rain, the concert still took place outdoors.",
+        options: ["Trotz", "Wegen", "Während", "Innerhalb"],
+        correct: 0,
+        explain: "'trotz + Genitiv' expresses a contrast — the event happened even though the rain would suggest otherwise."
+      },
+      {
+        prompt: "___ der Ferien bleibt das Büro geschlossen.",
+        en: "During the holidays, the office remains closed.",
+        options: ["Während", "Trotz", "Aufgrund", "Innerhalb"],
+        correct: 0,
+        explain: "'während + Genitiv' describes a time period during which something is the case."
+      }
+    ]
   }
 ];
 
@@ -1642,6 +1849,62 @@ const DYNAMIC_GENERATORS = {
       ];
       const md = modals[Math.floor(Math.random()*modals.length)];
       return { ruleNum:16, ruleTitle:"Modalverben Nuancen (müssen vs. dürfen)", prompt:md.p, en:md.en, options:md.o, correct:md.c, explain:md.exp };
+    }
+  ],
+
+  r17_indirekte_rede: [
+    ()=>{
+      const items = [
+        {p:"Die Sprecherin sagte, die Firma ___ im nächsten Jahr neue Stellen schaffen.", en:"The spokesperson said the company would create new jobs next year.", o:["werde","wird","würde","sei"], c:0, exp:"Konjunktiv I of 'werden' is 'werde' — the standard form for reported future statements."},
+        {p:"Er sagte, er ___ keine Zeit für ein Gespräch.", en:"He said he had no time for a conversation.", o:["habe","hat","hatte","haben"], c:0, exp:"Konjunktiv I of 'haben' (er/sie/es) is 'habe', distinct from the indicative 'hat'."},
+        {p:"Die Wissenschaftler erklärten, das Ergebnis ___ eindeutig.", en:"The scientists explained the result was unambiguous.", o:["sei","ist","war","wäre"], c:0, exp:"'sein' has the distinct Konjunktiv I form 'sei', standard for formal reported speech."}
+      ];
+      const it = items[Math.floor(Math.random()*items.length)];
+      return { ruleNum:17, ruleTitle:"Konjunktiv I & Indirekte Rede (Reported Speech)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
+    }
+  ],
+
+  r18_partizipialattribute: [
+    ()=>{
+      const items = [
+        {p:"Die ___ Zahlen zeigen einen klaren Trend. (die Zahlen, die steigen)", en:"The rising figures show a clear trend.", o:["steigenden","gestiegenen","steigen","gestiegen"], c:0, exp:"An ongoing action uses Partizip I ('steigend') with the plural adjective ending -en."},
+        {p:"Das ___ Haus wurde vollständig renoviert. (das Haus, das 1920 gebaut wurde)", en:"The house built in 1920 was fully renovated.", o:["1920 gebaute","1920 bauende","1920 gebaut","1920 baute"], c:0, exp:"A completed, passive action uses Partizip II ('gebaute') with the neuter adjective ending."}
+      ];
+      const it = items[Math.floor(Math.random()*items.length)];
+      return { ruleNum:18, ruleTitle:"Partizipialattribute (Extended Participle Constructions)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
+    }
+  ],
+
+  r19_doppelkonjunktionen: [
+    ()=>{
+      const items = [
+        {p:"Je früher du anfängst, ___ mehr Zeit hast du für die Prüfung.", en:"The earlier you start, the more time you'll have for the exam.", o:["desto","als","wie","dass"], c:0, exp:"'je ... desto' is a fixed pair: 'desto' always introduces the second (main) clause."},
+        {p:"Der neue Kollege ist ___ freundlich noch besonders kompetent.", en:"The new colleague is neither friendly nor particularly competent.", o:["weder","sowohl","entweder","nicht"], c:0, exp:"'weder ... noch' expresses a double negative — neither one thing nor the other."}
+      ];
+      const it = items[Math.floor(Math.random()*items.length)];
+      return { ruleNum:19, ruleTitle:"Doppelkonjunktionen (Correlative Connectors)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
+    }
+  ],
+
+  r20_nominalisierung: [
+    ()=>{
+      const items = [
+        {p:"___ des Verkehrsunfalls musste die Straße gesperrt werden. (weil ein Verkehrsunfall passiert ist)", en:"Because of the traffic accident, the street had to be closed.", o:["Wegen","Weil","Trotz","Während"], c:0, exp:"'wegen + Genitiv' is the standard preposition for nominalized causal clauses in formal writing."},
+        {p:"Die schnelle ___ des Problems hat alle überrascht. (lösen)", en:"The quick solving of the problem surprised everyone.", o:["Lösung","Lösen","Löser","Löslichkeit"], c:0, exp:"'lösen' nominalizes with the '-ung' suffix: 'die Lösung' (the solution)."}
+      ];
+      const it = items[Math.floor(Math.random()*items.length)];
+      return { ruleNum:20, ruleTitle:"Nominalisierung (Turning Verbs & Adjectives into Nouns)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
+    }
+  ],
+
+  r21_genitivpraepositionen: [
+    ()=>{
+      const items = [
+        {p:"___ des starken Regens fand das Konzert trotzdem im Freien statt.", en:"Despite the heavy rain, the concert still took place outdoors.", o:["Trotz","Wegen","Während","Innerhalb"], c:0, exp:"'trotz + Genitiv' expresses a contrast — the event happened even though the rain would suggest otherwise."},
+        {p:"___ der Ferien bleibt das Büro geschlossen.", en:"During the holidays, the office remains closed.", o:["Während","Trotz","Aufgrund","Innerhalb"], c:0, exp:"'während + Genitiv' describes a time period during which something is the case."}
+      ];
+      const it = items[Math.floor(Math.random()*items.length)];
+      return { ruleNum:21, ruleTitle:"Genitivpräpositionen im formellen Stil (Formal Genitive Prepositions)", prompt:it.p, en:it.en, options:it.o, correct:it.c, explain:it.exp };
     }
   ]
 };
