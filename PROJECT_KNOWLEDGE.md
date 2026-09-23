@@ -751,6 +751,45 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 25) — Fixed the two data-integrity issues flagged at the end of Phase 3: the multi-page sync gap and the 41 duplicate verb infinitives; found and partly fixed two more along the way
+
+#### Task
+User said "Fix those" in response to the two issues flagged after Phase 4 (and originally surfaced after Phase 3): (1) `VERBS`/`ADJS`/`NOUNS` are duplicated as page-local JS arrays across multiple files with no shared module, and 3 pages had drifted behind the richer trainer pages; (2) 41 pre-existing duplicate infinitives in the live `VERBS` array (`haben`, `gehen`, `kommen`, ... each appearing twice).
+
+#### Fix 1: the 41 duplicate infinitives (`Verb_Transformation_Trainer.html`)
+Every one of the 41 pairs followed the exact same shape: one entry tagged `source: "General A1 Vocabulary"` and a second, later-appended entry tagged `source: "your own list"` for the identical infinitive. Verified before touching anything: `perfekt` and `praeteritum` were byte-identical across every single pair (41/41) - the two entries were never in factual conflict, just redundant. The two entries differed only in cosmetic/vestigial fields (`en` phrasing "to go" vs "go", `level` A1 vs A2, `icon` - confirmed in Phase 3 that `icon` isn't rendered anywhere in this file), the mnemonic `noun` field (different but equally valid alternative choices), and in 3 cases the grammatical `typ` classification disagreed between the pair: `haben` (strong vs weak - neither correct; standard German grammar classifies it as a mixed verb alongside `kennen`/`bringen`/`denken`, so fixed to `mixed` while merging), `wollen` and `sollen` (mixed vs weak - `mixed` was already correct on the kept entry, since modal verbs are conventionally mixed). Kept the earlier (`General A1 Vocabulary`) entry in all 41 cases, dropped the duplicate. 759 -> 718 entries.
+
+#### Fix 2: the multi-page sync gap
+Confirmed via `grep -l 'const VERBS/ADJS/NOUNS = \['` which pages actually duplicate each array, and that `Adjektiv_Adverb_Trainer.html`'s empty `NOUNS = []` and `Nomen_Trainer.html`'s empty `ADJS = []` are harmless dead stubs left over from the Task 22 page split (zero entries, not a real gap). The real duplication:
+- `VERBS`: `Deutsch_Wortschatz_Excel_Sheet.html`, `Verben_Hoeren_EN_DE.html`, `Wortschatz_Master_Grid.html` (all stuck at 564) vs. `Verb_Transformation_Trainer.html` (718 after Fix 1).
+- `ADJS`: `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html` (345) vs. `Adjektiv_Adverb_Trainer.html` (671).
+- `NOUNS`: `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html` (523) vs. `Nomen_Trainer.html` (1019).
+
+Followed the same **append-only** approach the prior sync fix (commit `cf3269a`) established, rather than a wholesale array replace: for each lagging page, added only the entries missing by unique key (`inf`/`w`/`sg`) from the richest source, leaving every entry the lagging page already had untouched. This mattered in practice - checked each target file's actual field usage before syncing rather than assuming identical schemas, and found `Wortschatz_Master_Grid.html` reads `a.comp` for adjectives **with no fallback to `a.komp`** (unlike `Deutsch_Wortschatz_Excel_Sheet.html`, which does `a.comp || a.komp || ...`) - so every newly-appended adjective entry across both files was given a `comp` field (duplicate of `komp`) to match, not just the richer source's own `cat`/`komp` schema. Confirmed via `grep` that `NOUNS`/`VERBS`' field sets already matched exactly, no transform needed there. Result: `VERBS` 564->718 (all 3 pages, +154 each), `ADJS` 345->770 (both pages, +425 each - more than the richest source's 671 total, because these two pages' original 345 already contained some adjectives not present in `Adjektiv_Adverb_Trainer.html` itself, which the append-only approach correctly preserved rather than discarding), `NOUNS` 523->1019 (both pages, +496 each, exactly matching Phase 4's growth since these pages' original 523 was an exact subset of `Nomen_Trainer.html`'s pre-Phase-4 baseline).
+
+Also updated every hardcoded word-count label found across these pages that isn't recalculated by JS at runtime (checked each one for a `.textContent =` assignment before deciding to hand-edit vs. leave alone): `Wortschatz_Master_Grid.html`'s hero subtitle and its "Alle/Nur Verben/Nur Nomen/Nur Adjektive" filter-button labels, `Deutsch_Wortschatz_Excel_Sheet.html`'s stats badge and filter-chip labels, `Verben_Hoeren_EN_DE.html`'s subtitle and "All (n)" filter button. Left `statusRowInfo`/`resultsCount`/`progressLabel` alone since those are genuinely recalculated on every render (verified each one's update call).
+
+#### Found in the process, and partly fixed: a pre-existing `comp` field gap on `ADJS` (fixed) and non-adjective contamination in the same array (flagged, not fixed)
+While syncing `ADJS`, found that 324 of the pre-sync 345 entries in both `Deutsch_Wortschatz_Excel_Sheet.html` and `Wortschatz_Master_Grid.html` had no `comp` field at all (only some had it, e.g. `dunkel`/`teuer` did, most didn't) - a pre-existing gap predating this session, invisible on `Deutsch_Wortschatz_Excel_Sheet.html` (which falls back to `komp`) but silently blanking the comparative on `Wortschatz_Master_Grid.html` (no fallback). Backfilled `comp = komp` for every entry that had one but was missing the other (225 of the 324, in both files).
+
+The remaining 99 (324-225) had neither `comp` nor `komp` - because they are **not adjectives at all**: 7 verbs and 92 nouns (`{'w':'sein','en':'to be','cat':'v'}`, `{'w':'Freund','en':'friend','cat':'n'}`, etc.) sitting inside the `ADJS` array in both files, tagged with `cat: 'v'`/`cat: 'n'` - a pre-existing contamination bug distinct from and unrelated to the `comp` gap, confirmed identical (same 99 words) in both files so it predates this session rather than being introduced by this fix. **Not fixed** - triaging 99 misplaced entries (deciding whether each belongs in `VERBS`/`NOUNS` instead, checking for duplicates against those arrays, etc.) is the same kind of careful per-word work as the vocabulary-audit phases and is a separate task from what was asked here; flagging it rather than rushing a fix or silently leaving it undocumented.
+
+#### Testing
+- Syntax-checked (`node --check`) on all 4 touched files - clean.
+- Headless-browser (Playwright) test suite: `Verb_Transformation_Trainer.html` VERBS is exactly 718 with zero duplicate infinitives and `haben` correctly reclassified to `mixed`; all 3 synced pages report the correct new counts (718/770/1019 as applicable); every genuine adjective entry (contaminants excluded) has both `komp` and `comp` on `Deutsch_Wortschatz_Excel_Sheet.html` and `comp` specifically on `Wortschatz_Master_Grid.html`; `Verben_Hoeren_EN_DE.html`'s dynamically-rendered `progressLabel` correctly reflects 718 after render.
+- Full-site smoke sweep (26 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Verb_Transformation_Trainer.html` (VERBS: 759 → 718, deduplicated)
+- `Deutsch_Wortschatz_Excel_Sheet.html` (VERBS 564→718, ADJS 345→770, NOUNS 523→1019, `comp` backfilled, count labels updated)
+- `Verben_Hoeren_EN_DE.html` (VERBS 564→718, count labels updated)
+- `Wortschatz_Master_Grid.html` (VERBS 564→718, ADJS 345→770, NOUNS 523→1019, `comp` backfilled, count labels updated)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 24, Phase 4 of a multi-phase vocabulary audit) — 496 new nouns from the second source, gender/plural supplied from grammar knowledge (source has none); PDF source's remaining nouns/verbs dropped per user instruction
 
 #### Task
