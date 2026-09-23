@@ -751,6 +751,48 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 24, Phase 3 of a multi-phase vocabulary audit) — 154 new verbs from the second source, with principal parts supplied from grammar knowledge (source has none)
+
+#### Task
+Continuation of the audit onto the second source's (`magdalena-trivina/goethe-zertifikat-b2-wortliste`) two remaining slices: 562 noun candidates (no gender data at all) and 245 verb candidates (no principal parts at all). Given the user's request to "map and align the full methodology" onto both, and that this is materially riskier than the adjectives batch (gender and principal parts don't exist anywhere in the source and have to come from general German-grammar knowledge, not from the source), I asked the user how to pace it; they chose **verbs first, full rigor**, nouns to follow as a separate phase.
+
+#### Triage (same shape as the adjective batches, applied to 245 raw verb candidates)
+The raw candidate list had the same contamination pattern as the adjectives, plus new ones specific to verbs:
+- **Inflected/conjugated forms mistaken for infinitives**: past participles (`abgerissen`→`abreißen`, `angeklungen`→`anklingen`, `überwunden`→`überwinden`, `versprochen`→`versprechen`, 20+ more), preterite forms (`berichteten`→`berichten`, `erwähnten`→`erwähnen`, `verweilten`→`verweilen`), a `zu`-infinitive (`vorzubeugen`→`vorbeugen`).
+- **Adjectives/participles-used-as-adjectives mistaken for verbs** (the largest category, ~35 entries): `abschüssigen` (sloping), `altehrwürdigen` (venerable), `angehenden` (prospective), `gewaltsamen` (violent), `umstritten` (controversial), `vollkommen` (perfect/complete), etc. - dropped, these belong to the adjective slice (or were already covered there) if anywhere, not this one.
+- **Nouns mistaken for verbs** (~25 entries), mostly plural nouns that happen to end in a verb-like `-en`: `anschuldigungen` (accusations), `drittstaaten` (third countries), `gräueltaten` (atrocities), `insassen` (inmates), `knochen` (bone), `sklaven` (slaves), etc.
+- **Adverbs/pronouns mistaken for verbs**: `diejenigen` (those), `stattdessen`/`unterdessen`/`währenddessen` (meanwhile), `notgedrungen` (out of necessity), `ungern` (reluctantly).
+- **A literal duplicate typo**: `rechfertigen` sitting right next to the correctly-spelled `rechtfertigen` two rows later - dropped the typo.
+- **Genuinely ambiguous words where the source's own English gloss revealed which reading was captured**, resolved by trusting the gloss over the German spelling: `verfahren` glossed "Procedure" (capitalized, noun reading of *das Verfahren*, not the verb) - dropped; `bescheiden` glossed "modest" (the adjective, not the rare formal verb) - dropped; `gehoben` glossed "sophisticated" (adjectival use of *heben*'s participle, not the verb itself) - dropped.
+- 161 candidates survived triage as real verb infinitives (after correcting inflected forms back to their dictionary infinitive). Cross-checked against the live 605-entry `VERBS` array and found **7 already present** (`berichten`, `berufen`, `bescheinigen`, `erwähnen`, `scheitern`, `versprechen`, `zusammenstoßen` - several only matched *because* de-inflection/typo-correction fixed the surface form first, same pattern as the adjectives). Dropped those, leaving **154 genuinely new verbs**.
+
+#### Principal parts: supplied from grammar knowledge, not the source (disclosed)
+The source is a flat two-column word list - it has no Perfekt, Präteritum, or weak/strong/mixed classification for any entry. For all 154 verbs, `perfekt` (with the correct `haben`/`sein` auxiliary), `praeteritum`, and `typ` were derived from general German-grammar knowledge rather than sourced, the same honesty model already used for the adjectives' comparative/superlative forms. Followed the app's existing separable-verb formatting convention exactly (`perfekt` as one compound word, e.g. `hat abgerissen`; `praeteritum` with the prefix separated, e.g. `riss ab` - confirmed against existing entries like `einkaufen`/`kaufte ein` and `zurückkommen`/`kam zurück`), and the app's existing haben/sein convention for motion verbs (confirmed against `fliegen`/`schwimmen`/`reisen`→`ist`, `tanzen`→`hat`) to pick the right auxiliary for verbs like `flanieren` (→ `ist flaniert`) and `tauchen` (→ `ist getaucht`). Left `level: "?"` and the optional `noun` field empty (the app already renders a graceful nominalized-infinitive fallback when `v.noun` is falsy - confirmed 14 of the existing 605 entries already ship without one).
+
+#### A pre-existing data-architecture issue found, not caused by this phase
+This app has no shared data module - `VERBS`/`NOUNS`/`ADJS` are each duplicated as page-local JS literals across multiple files (`grep -l 'const VERBS = \['` matches `Verb_Transformation_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Verben_Hoeren_EN_DE.html`, `Wortschatz_Master_Grid.html`; the equivalent is true for `ADJS`/`NOUNS`). A prior session in this same project (commit `cf3269a`) already found and fixed one round of this "duplicated page-local copy fell behind a richer source" bug class for NOUNS/ADJS. Checking now: the other 3 verb-array pages are already stuck at 564 entries (41 short of `Verb_Transformation_Trainer.html`'s pre-this-phase count of 605) - a gap that **predates this session** and this phase's 154 new verbs were **only added to `Verb_Transformation_Trainer.html`**, since re-syncing 3 more large duplicated arrays (and the equivalent `ADJS` gap left by Phase 1/2) is a separate decision from "process this source's verbs" - flagged to the user rather than silently expanded into or silently left out of this phase's scope.
+- Also found (incidental, not fixed): 41 pre-existing duplicate infinitives in the live `VERBS` array itself (basic A1 verbs like `haben`, `gehen`, `kommen` each appear twice) - confirmed via `git show HEAD:Verb_Transformation_Trainer.html` that these predate this session and this phase's merge introduced zero new duplicates. Not touched, since fixing it means deciding which of two existing entries to keep/merge and is unrelated to this source's extraction.
+
+#### Testing
+- Syntax-checked (`node --check`) - clean.
+- Headless-browser (Playwright) test suite: entry count exactly 605+154=759; every entry has `inf`/`en`/`perfekt`/`praeteritum`/a valid `typ`; confirmed this merge introduced **zero new duplicate infinitives** (distinguished from the 41 pre-existing ones, which the test explicitly does not flag as a regression); spot-checked several new entries' principal parts (`abreißen`→`hat abgerissen`/`riss ab`/strong, `gelingen`→`ist gelungen`/`gelang`/strong, `umkommen`→`ist umgekommen`/`kam um`/strong, `veranlassen`→`hat veranlasst`/`veranlasste`/weak); explicitly confirmed none of the excluded adjective/noun/adverb/typo/duplicate contaminants leaked in as verb entries; all three `practiceMode`s render with the expanded dataset.
+- Full-site smoke sweep (26 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Explicitly NOT done this phase (remaining work, not silently dropped)
+- **562 noun candidates from this same source** - next phase, not started (highest remaining risk: gender is not reliably rule-derivable in German and will need the same per-word care as the verbs' principal parts, at over 3x the volume).
+- **The multi-page VERBS/ADJS/NOUNS sync gap** described above - flagged, not fixed. Re-syncing `Deutsch_Wortschatz_Excel_Sheet.html`, `Verben_Hoeren_EN_DE.html`, and `Wortschatz_Master_Grid.html` to this phase's 759-entry `VERBS` array (and the other 3 pages carrying `ADJS` to Phase 1/2's 671-entry array) is a real, separate task the user should explicitly decide on.
+- The 41 pre-existing duplicate infinitives noted above - flagged, not fixed.
+- Nouns and verbs from Phase 1's PDF source (857 and 331 candidates respectively) - still not started.
+- No CEFR level assigned to any of the 154 new verbs (left `"?"`, honest given the source isn't exam-verified per word).
+
+#### Files Changed
+- `Verb_Transformation_Trainer.html` (VERBS: 605 → 759)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 24, Phase 2 of a multi-phase vocabulary audit) — 265 more adjectives from a second real source, with a heavy de-inflection correction pass
 
 #### Task
