@@ -751,6 +751,48 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 24, Phase 4 of a multi-phase vocabulary audit) — 496 new nouns from the second source, gender/plural supplied from grammar knowledge (source has none); PDF source's remaining nouns/verbs dropped per user instruction
+
+#### Task
+Final planned slice of the second source (`magdalena-trivina/goethe-zertifikat-b2-wortliste`): the 562 noun candidates, no gender or plural data anywhere in the source. The user also said to drop Phase 1's PDF source's remaining nouns (857) and verbs (331) entirely ("Ignore the pdf. Only focus on git csv") - those are no longer part of this audit's remaining scope.
+
+#### Triage (562 raw candidates -> 496 new nouns)
+Same shape as the verb batch, applied to nouns:
+- **Plural forms captured as if they were the singular/dictionary form** (the largest category, ~140 entries): `Abmachungen`->`Abmachung`, `Ansätze`->`Ansatz`, `Beschwerden`->`Beschwerde`, `Bodenschätze`->`Bodenschatz`, `Vorschriften`->`Vorschrift`, and well over a hundred more - corrected to the singular before assigning gender/plural, same de-inflection principle as the adjective batches.
+- **Verbs/adjectives/adverbs mistaken for nouns**: infinitives (`Beten`, `Ebnen`, `Kapieren`, `Loben`, `Teilnehmen`, `Verraten`, `Übertreiben`, 8 more), conjugated forms (`Bewundere` = "I admire"), adjectives (`Ausgelastet`, `Erheblich`, `Spürbar`, `Untersagt`, `Verfügbar`, 6 more), adverbs (`Massenhaft`, `Zudem`).
+- **Proper nouns / place names**, out of scope for a general-vocabulary gender/plural trainer: `Estland`, `Lettland`, `Venedig`, `Nahost`, `Bundeswehr`.
+- **Nominalized adjectives with ambiguous der/die gender** (`der Verbündete` / `die Verbündete` = "the ally", same word either gender depending on the person's sex) - the app's noun schema has one `a` (article) field per entry, so these can't be represented without picking a gender that would be wrong half the time. Dropped rather than force a choice: `Alleinstehende`, `Beauftragte`, `Böswillige`, `Gravierende`, `Verschleppten`, `Wehrpflichtigen`, and the informal `Azubis`.
+- **Plural-only nouns (plurale tantum) or narrow multi-word/hyphenated compounds too awkward for a singular/plural schema**: `Aktiva`/`Passiva` (Latin-derived accounting plurals with no true singular), `Masern` (measles), `Belange`, `Anschaffungskosten`, `Haushaltsmittel`, `Bundesmittel`, `Streitkräften`, `Reisestrapazen`, `Einkünfte`, `Herz-Kreislauf-Erkrankungen`, `Ost-West-Gefälle`.
+- **Typos corrected rather than dropped** (unlike the ambiguous cases above, these had one clear intended word): `Begrabnis`->`Begräbnis`, `Schiedrichter`->`Schiedsrichter`, `Stadttel`->`Stadtteil`, `Bogenschiessen`->`Bogenschießen`, `Arbeitsengtgelt`->`Arbeitsentgelt`, `Eignungtests`->`Eignungstests`, `Gipfels`(genitive)->`Gipfel`.
+- **A few dropped as too obscure/low-confidence to be worth the risk of a wrong entry**: `Ablenkungskampf`, `Bräsigkeit` (rare Northern German regional word), `Fahrradkolonne`, `Frontverlauf`, `Schufa-Bescheinigung` (a specific German credit agency's brand-name certificate), `Binnenschiffen` (garbled beyond confident repair), `Ansprechpartnerinnen` (gendered plural form, skipped for schema simplicity), `Erachtens` (only exists in the fixed phrase "meines Erachtens").
+- 501 candidates survived triage. Cross-checked against the live 523-entry `NOUNS` array and found **5 already present** (`Gemeinde`, `Lücke`, `Schritt`, `Solaranlage`, `Subvention` - again, several only matched because de-inflection fixed the surface form first). Dropped those, leaving **496 genuinely new nouns**.
+
+#### Gender, plural, and plural-type: supplied from grammar knowledge, not the source (disclosed)
+The source has no `a` (article/gender), `pl` (plural), or `typ` (plural-formation pattern) for any entry - just a German word and an English gloss. All three were supplied from general German-grammar knowledge for all 496 nouns, the same honesty model used for the adjectives' comparative/superlative and the verbs' principal parts. `typ` was assigned by the same classification the live data already uses (`e`, `en`, `er`, `s`, `umlaut`, `umlaut_only`, `unchanged`) based on how each noun's actual plural differs from its singular. For genuinely uncountable/no-natural-plural abstract nouns (`Abwehr`, `Zuversicht`, `Ehrgeiz`, and ~90 more), used the em dash (`—`) the live data already uses for this case (confirmed against the existing number-word and color entries, which use the same convention) rather than fabricate an unnatural plural.
+
+#### Two fields left low-effort on purpose (confirmed unused, unlike the equivalent adjective/verb fields)
+Checked how `Nomen_Trainer.html` actually renders `NOUNS` entries before deciding how much effort each field deserved: `topic` and `icon` are present in every existing entry but are **not referenced anywhere** in the page's filtering or rendering code (`grep` for `.topic` and `ICON_SVGS` inside this file returns nothing - filtering here is actually by `level` and `typ`, not `topic`, unlike the similarly-named `ADJ_CATEGORIES` mechanism on the adjectives page). Given they have zero functional effect today, gave every new entry the same default (`topic: "gesellschaft"`, `icon: "abstract"`) rather than spend per-word effort on a dimension the app doesn't use, and left `level: "?"` as usual.
+
+#### Testing
+- Syntax-checked (`node --check`) - clean.
+- Headless-browser (Playwright) test suite: entry count exactly 523+496=1019; every entry has `sg`/`en`/a valid article/`pl`/a valid `typ`; **zero duplicate singular nouns** in the merged array (unlike the verbs phase, `NOUNS` had no pre-existing duplicate contamination to account for); spot-checked gender/plural/typ on several new entries (`Abschluss`->der/Abschlüsse/umlaut, `Beschwerde`->die/Beschwerden/en, `Gerücht`->das/Gerüchte/e, `Kiefer`->der/Kiefer/unchanged, `Abkehr`->die/—/unchanged); explicitly confirmed none of the excluded verb/adjective/adverb/proper-noun/plural-only/dual-gender contaminants leaked in; all three `practiceMode`s render with the expanded dataset in `nomen` mode.
+- Full-site smoke sweep (26 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Status of this vocabulary-coverage audit after this phase
+This closes out the second source (`magdalena-trivina/goethe-zertifikat-b2-wortliste`): adjectives (Phase 2, 265), verbs (Phase 3, 154), nouns (Phase 4, 496) are all done. Per the user's explicit instruction this phase, the first source's (`Hazrat-Ali9/Deutschland-Vocabulary-A1-B2`) remaining nouns (857 candidates) and verbs (331 candidates) are **out of scope going forward**, not merely deferred.
+
+Still open and unrelated to either vocabulary source (carried over from Phase 3, not touched this phase either):
+- The multi-page `VERBS`/`ADJS`/`NOUNS` duplication gap (`Deutsch_Wortschatz_Excel_Sheet.html`, `Verben_Hoeren_EN_DE.html`, `Wortschatz_Master_Grid.html` still carry the pre-Phase-1/2/3 counts) - flagged twice now, still the user's call.
+- 41 pre-existing duplicate infinitives in the live `VERBS` array - flagged, not fixed.
+
+#### Files Changed
+- `Nomen_Trainer.html` (NOUNS: 523 → 1019)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 24, Phase 3 of a multi-phase vocabulary audit) — 154 new verbs from the second source, with principal parts supplied from grammar knowledge (source has none)
 
 #### Task
