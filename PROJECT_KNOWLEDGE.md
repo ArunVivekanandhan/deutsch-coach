@@ -103,7 +103,8 @@ Deutsch_Coach_Project/
 ├── German_A2_Practice_Studio.html          # Interactive 7-module A2 learning studio with Suite Hub
 ├── German_B1_Practice_Studio.html          # Interactive 7-module B1 learning studio with Suite Hub
 ├── Verb_Transformation_Trainer.html        # Standalone verb Präsens→Vergangenheit trainer with Suite Hub
-├── Nomen_Adjektiv_Trainer.html             # Standalone noun-plural / adj-comparison trainer with Suite Hub
+├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
+├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Satzbau_Trainer.html                    # Standalone sentence-building trainer with Suite Hub
 ├── Continuous_Verb_Speaker.html            # Standalone audio loop verb speaker with Suite Hub
 ├── Verben_Hoeren_EN_DE.html                # Standalone audio listen-and-repeat player with Suite Hub
@@ -189,23 +190,25 @@ themselves feed back into the spaced-repetition queue in the same way.
 503 verbs (100% coverage, added as an explicit fix — see Section 28 history). `uid` is generated as:
 `v.uid = v.level + '|' + v.inf` (verified in `Verb_Transformation_Trainer.html` line 268).
 
-**Nomen_Adjektiv_Trainer.html noun object:**
+**Nomen_Trainer.html noun object** (split from the former `Nomen_Adjektiv_Trainer.html` — see Section 28 Task 22):
 ```
 { sg, pl, a, en, ta, ta_translit, icon, level, topic, typ, uid }
 ```
 `typ` ∈ `{en, e, er, s, unchanged, umlaut_only}` (plural-formation family). `uid` is generated as:
-`v.uid = 'n|' + v.level + '|' + v.sg` (verified in `Nomen_Adjektiv_Trainer.html` line 192).
+`v.uid = 'n|' + v.level + '|' + v.sg`.
 
-**Nomen_Adjektiv_Trainer.html adjective object:**
+**Adjektiv_Adverb_Trainer.html adjective object** (split from the former `Nomen_Adjektiv_Trainer.html` — see Section 28 Task 22; the 99 non-adjective entries the combined page's `ADJS` array previously carried were dropped during the split, not migrated):
 ```
-{ w, komp, sup, en, ta, ta_translit, icon, source, typ, uid }
+{ w, komp, sup, en, ta, ta_translit, icon, source, typ, cat, uid }
 ```
-`typ` ∈ `{regular, umlaut, irregular}` (comparison-formation family). `uid` is generated as:
-`v.uid = 'a|' + v.w` (verified in `Nomen_Adjektiv_Trainer.html` line 193). `komp`/`sup` (Komparativ/
-Superlativ) were **generated programmatically** by a rules engine (regular suffixation + a hand-curated
-umlaut-word list + a tiny irregular-word dict for `nah→näher→am nächsten`), **not sourced from a
-textbook** — treat these forms as good-faith derivations, not verified textbook data (unlike the noun
-plurals, which are sourced from the original glossary).
+`typ` ∈ `{regular, umlaut, irregular}` (comparison-formation family). `cat` ∈ 13 semantic categories
+(e.g. `zeit`, `charakter`, `gefuehle`, `gesundheit` — see `ADJ_CATEGORIES`), added during the Task 22
+split for the category-filter UI; every one of the 246 real entries was hand-classified into exactly one
+category. `uid` is generated as: `v.uid = 'a|' + v.w`. `komp`/`sup` (Komparativ/Superlativ) were
+**generated programmatically** by a rules engine (regular suffixation + a hand-curated umlaut-word list +
+a tiny irregular-word dict for `nah→näher→am nächsten`), **not sourced from a textbook** — treat these
+forms as good-faith derivations, not verified textbook data (unlike the noun plurals, which are sourced
+from the original glossary).
 
 **Satzbau_Trainer.html:** `DATA = { grammar: [...], thematic: [...] }`, each entry a topic with
 `templates[]`, each template with `variants[]` (hand-verified full sentences, word-order-scrambled at
@@ -408,7 +411,7 @@ framework, no state-management library, no event-driven store. Representative st
 |---|---|
 | Main app | `ALL_CARDS`, `PROGRESS`, `META`, `currentLevel`, `currentCat`, `currentView`, `currentTopic`, `session`, `sessionIdx`, `sessionStats`, `currentQType`, `revealed`, `practiceTopic`, `recognitionObj`, `recognizing`, `readingIdx` |
 | Verb_Transformation_Trainer | `VERBS`(const), `curLevel`, `curType`, `curDir`, `nounMode`, `meaningLang`, `PROGRESS`, `session`, `sessionIdx` |
-| Nomen_Adjektiv_Trainer | `curMode`, `curFilt1`, `curFilt2`, `curDir`, `meaningLang`, `PROGRESS`, `session`, `sessionIdx` |
+| Nomen_Trainer / Adjektiv_Adverb_Trainer | `curMode` (fixed per page since the Task 22 split), `curFilt1`, `curFilt2`, `curDir`, `meaningLang`, `PROGRESS`, `session`, `sessionIdx` |
 | Satzbau_Trainer | `curCategory`, `curTopic`, `curTemplate`, `curVariant`, `correctOrder`, `buildSlots`, `bankWords`, `seenCount` |
 | Verben_Hoeren | `VERBS` (data), `deVoices`, `enVoices`, `currentIdx`, `isPlaying`, `isPaused`, `playAllMode`, `voicePollAttempts`, `wakeLock` |
 
@@ -427,7 +430,7 @@ which specific render functions to call after a given state change (e.g. `setLev
   | Key | Shape | Owner page | Real vocabulary SRS data? |
   |---|---|---|---|
   | `dc_progress_v1` + `dc_meta_v1` | `{uid: {box, nextDue, timesSeen, timesWrong}}` via `SRSEngine.Engine`; meta = `{streak, lastStudyDate, totalReviewed}` | `deutsch-coach.html` | **Yes** |
-  | `na_progress_v1` | same SRS shape, via `SRSEngine.Engine` | `Nomen_Adjektiv_Trainer.html` | **Yes** |
+  | `na_progress_v1` | same SRS shape, via `SRSEngine.Engine` | `Nomen_Trainer.html` + `Adjektiv_Adverb_Trainer.html` (shared key since the Task 22 split — `n\|`/`a\|` uid prefixes keep the two pages' entries from colliding, same as when they were one page) | **Yes** |
   | `vt_progress_v1` | same SRS shape, via `SRSEngine.Engine` | `Verb_Transformation_Trainer.html` | **Yes** |
   | `gp_progress_v1` | `{currentStreak, bestStreak}` — a grammar-quiz streak counter, NOT vocabulary data | `Grammatik_Regel_Trainer.html` | No |
   | `sb_progress_v1` | `{sentenceKey: count}` — a sentence-building completion counter | `Satzbau_Trainer.html` | No |
@@ -501,12 +504,15 @@ script) anywhere in the repository.
   CSS rules in their `<style>` blocks even though the actual HTML elements were already removed by an
   earlier pass. Cosmetic dead weight, not a functional bug — deliberately left alone this session to
   avoid the regression risk of touching 13 files' CSS without visually verifying each one.
-- `Nomen_Adjektiv_Trainer.html`'s `ADJS` array has ~101 of 337 entries (30%) that either aren't real
-  adjectives (verbs/nouns like "entschuldigen", "Chef", "Freund" got mixed in) or are missing the
-  `komp` field the comparative/superlative practice mode needs. `diffHighlight()` and its caller were
-  hardened against this (see the merge-conflict-resolution changelog entry below) so it no longer
-  crashes, but the underlying data contamination itself is unfixed — a content-cleanup task, not a
-  code bug.
+- **RESOLVED (Task 22 split, see Section 28):** the former `Nomen_Adjektiv_Trainer.html`'s `ADJS` array
+  had ~99 of 345 entries (~29%) that either weren't real adjectives (verbs/nouns like "entschuldigen"
+  got mixed in) or were missing the `komp` field the comparative/superlative practice mode needs. When
+  the page was split into `Nomen_Trainer.html` + `Adjektiv_Adverb_Trainer.html`, these 99 malformed
+  entries were dropped rather than carried forward — `Adjektiv_Adverb_Trainer.html`'s `ADJS` now has
+  exactly the 246 genuine, complete adjective entries. `diffHighlight()` was separately hardened against
+  malformed input during an earlier merge-conflict resolution (see that changelog entry below), which
+  remains true defensively but is no longer load-bearing for this specific data now that the source data
+  is clean.
 - Streak (`dc_meta_v1`) only advances when studying through `deutsch-coach.html` — no other trainer
   bumps it, even though `js/progress-aggregator.js` now surfaces it app-wide. A learner who only uses
   e.g. `Verb_Transformation_Trainer.html` will see a streak stuck at 0 despite real daily practice.
@@ -671,8 +677,9 @@ the larger IA/content-unification work. In priority order for whoever picks this
 - Clean the ~13 pages' orphaned `.suite-hub`/`.hub-links`/`.hub-banner` CSS rules (dead, unused, but
   touching 13 files' `<style>` blocks needs visual verification per page — deliberately skipped this
   session, see Section 18).
-- Decide what to do about the `ADJS` data contamination (~30% non-adjective/incomplete entries) in
-  `Nomen_Adjektiv_Trainer.html` — a content cleanup, not a code fix.
+- ~~Decide what to do about the `ADJS` data contamination (~30% non-adjective/incomplete entries) in
+  `Nomen_Adjektiv_Trainer.html`~~ — **done, Task 22:** the 99 malformed entries were dropped when the
+  page was split into `Nomen_Trainer.html` + `Adjektiv_Adverb_Trainer.html`.
 
 **P1 (the actual product transformation — each is a real multi-page rebuild, not a small patch):**
 - Rebuild the primary navigation around Home/Learn/Vocabulary/Grammar/Practice/Progress instead of the
@@ -681,7 +688,8 @@ the larger IA/content-unification work. In priority order for whoever picks this
   Smart Learn CTA, multiple-choice cards) — the strongest starting point for "Home"/"Learn" rather than
   building from scratch.
 - Unify the vocabulary experience: one entry point over `Verb_Transformation_Trainer.html` +
-  `Nomen_Adjektiv_Trainer.html` + `Wortschatz_Master_Grid.html`'s separate due/new/mastered/search UIs,
+  `Nomen_Trainer.html` + `Adjektiv_Adverb_Trainer.html` + `Wortschatz_Master_Grid.html`'s separate
+  due/new/mastered/search UIs,
   in learner-friendly language (no "SRS boxes," no localStorage key names visible).
 - Consolidate grammar: `Grammatik_Regel_Trainer.html`, `Satzbau_Trainer.html`,
   `konnektoren_referenz.html`, `German_Grammar_Cheat_Codes.html` into one coherent flow instead of 4
@@ -742,6 +750,42 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-23 (Task 22) — Split Nomen_Adjektiv_Trainer.html into two pages; adjectives grouped by category
+
+#### Task
+"Can you slit noun and adjectives page to two. One of noun and another adjectives(adjectives, adverb). For adjectives group by eg: time, frequency, personality etc..." — split the combined trainer into two standalone pages, and add semantic-category grouping to the adjectives page.
+
+#### Investigation
+Used a background Explore agent to map the 2222-line `Nomen_Adjektiv_Trainer.html` before touching it: the `curMode` ('nomen'/'adj') toggle only accounted for ~27-29% of the file (scattered ternaries + a handful of fully mode-specific functions like `analyzeNoun`, `renderNounMemoryHack`/`renderAdjMemoryHack`); the remaining ~70%+ (SRS progress engine, `practiceMode` easy/medium/hard system, swipe-gesture nav, show-answer/auto-read settings, the AI word-help panel, theme toggle, filter-chip mechanics) is mode-agnostic and identical either way. This shaped the approach: rather than surgically deleting every scattered `curMode==='adj' ? X : Y` ternary (high risk of missing one), each new file keeps the full original logic but has `curMode` **permanently fixed** (never user-changeable — the mode-toggle buttons are removed) and has the *other* mode's giant data array (`NOUNS` is ~101KB, `ADJS` ~57KB of the file's raw bytes) emptied to `[]`, so the unreachable branch's code never executes and carries no data weight.
+
+This surfaced a genuine, pre-existing data-quality bug (already flagged in this file's own Known Bugs/Future Work sections but never fixed): of the 345 entries in the original `ADJS` array, **99 (~29%) weren't adjectives at all** — leftover noun/verb vocabulary (e.g. `{"w":"entschuldigen","en":"excuse/apologize","cat":"v"}`, missing `komp`/`sup`/`ta`/`level`/`source`) that silently rode along in the default "alle" filter and would render broken cards. These were dropped during the split rather than carried forward — `Adjektiv_Adverb_Trainer.html` ships exactly the 246 genuine, complete adjective entries.
+
+No existing category/topic field covered adjectives (confirmed: `NOUNS` entries all have a `topic` field, `ADJS` entries never did — only a `source` field naming the textbook chapter of origin, not a semantic grouping) — grouping by time/frequency/personality/etc. had to be built from scratch by hand-classifying all 246 real adjectives.
+
+#### What was built
+- **Two new files**, replacing `Nomen_Adjektiv_Trainer.html` (deleted): `Nomen_Trainer.html` (nouns only, `curMode` fixed to `'nomen'`, `ADJS = []`) and `Adjektiv_Adverb_Trainer.html` (adjectives only, `curMode` fixed to `'adj'`, `NOUNS = []`). Both keep the shared `na_progress_v1` localStorage key (the pre-existing `n|`/`a|` uid prefixes already keep the two pages' entries from colliding, exactly as they did within the single combined page before), so no user progress is lost or needs migrating.
+- **13-category taxonomy** designed for the 246 real adjectives (Größe & Menge, Zeit & Dauer, Charakter & Persönlichkeit, Gefühle & Emotionen, Aussehen & Zustand, Qualität & Bewertung, Wetter & Temperatur, Gesundheit & Sicherheit, Geschwindigkeit, Technik & Material, Preis & Wirtschaft, Gesellschaft & Kultur, Sonstige) — every entry hand-classified into exactly one category (verified: zero missing, zero invalid category ids) and stored as a new `cat` field. The existing textbook-source filter (`ADJ_SOURCES`, `v.source`) was repurposed into this category filter (`ADJ_CATEGORIES`, `v.cat`) — same chip-filter UI mechanism, new dimension being filtered, filter label changed from "Quelle" to "Kategorie".
+- **Adverbs**: did **not** invent a separate adverb vocabulary dataset — fabricating new German words with English/Tamil translations and no source to verify them against would violate this project's standing "never fabricate content" rule. Instead, since German adjectives are used unchanged as adverbs (no separate inflected form, e.g. "schnell" = both "fast" and "quickly"), the same 246-word set now also serves as the adverb set, with a footer note making this explicit for learners rather than silently implying separate content exists. Flagged clearly to the user as a scoping decision, not a silent substitution.
+- Updated every live navigation reference (`index.html`, `deutsch-coach.html`, `Deutsch_Wortschatz_Excel_Sheet.html`) from the single old link to two new links; updated an informational comment in `js/progress-aggregator.js`; regenerated `sw.js` (auto-discovers the new/removed files, cache version bump).
+
+#### Testing
+- Syntax-checked both new files (`node --check` on every script block) — clean.
+- Headless-browser (Playwright) test suite (17 checks): confirmed mode-toggle buttons are gone and `curMode` is permanently fixed per file; `NOUNS`/`ADJS` are populated/emptied correctly in each file; every adjective has a valid category and none of the 99 junk entries survived; the category filter actually narrows the pool (e.g. "zeit" → 21 entries) and the filter chips show category names, not the old textbook-source labels; both pages render a studycard.
+- A second deeper pass (10 checks) exercised all 3 `practiceMode`s (easy/medium/hard) on both new files, the medium-mode reveal-button flow, and Next/swipe-style navigation — all working on both pages.
+- Full-site smoke sweep (25 pages, up from 24 — net +1 from the 1-file-to-2-file split): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Nomen_Trainer.html` (new)
+- `Adjektiv_Adverb_Trainer.html` (new)
+- `Nomen_Adjektiv_Trainer.html` (deleted)
+- `index.html`, `deutsch-coach.html`, `Deutsch_Wortschatz_Excel_Sheet.html` (navigation updated)
+- `js/progress-aggregator.js` (comment accuracy)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry, plus updates to the file tree, data-structure docs, state/storage tables, Known Bugs, and Future Work sections to reflect the split)
+
+---
 
 ### 2026-09-22 (Task 21) — Fix: Nomen_Adjektiv_Trainer.html's auto-audio was a dead no-op
 

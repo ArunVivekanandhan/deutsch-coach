@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Adjektive &amp; Adverbien — Form Trainer</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
+    --purple:#6B4A8A; --der:#2563eb; --die:#dc2626; --das:#16a34a; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  }
+  *{box-sizing:border-box;}
+  /* legacy body removed */
+  .wrap{width:100%; max-width:640px;}
+  h1{font-family:'Fjalla One',sans-serif; font-size:22px; border-bottom:3px solid var(--ink); padding-bottom:8px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:14px;}
+
+  .modetabs{display:flex; gap:6px; margin-bottom:12px;}
+  .modetab{flex:1; font-family:'Fjalla One',sans-serif; font-size:15px; padding:11px; text-align:center;
+    border:1.5px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink); cursor:pointer;}
+  .modetab.active{background:var(--ink); color:#fff;}
+
+  .filterbox{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px;
+    margin-bottom:14px; box-shadow:0 6px 14px var(--shadow);}
+  .filterlabel{font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase;
+    letter-spacing:0.6px; color:var(--ink-soft); margin:2px 0 6px;}
+  .chiprow{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .chip{font-family:'IBM Plex Mono',monospace; font-size:11px; padding:7px 11px; border:1.5px solid var(--line);
+    background:var(--paper); border-radius:16px; cursor:pointer; color:var(--ink-soft); display:flex; align-items:center; gap:5px;}
+  .chip.active{border-color:var(--ink); color:var(--ink); font-weight:600; background:#fff;}
+  .chip .dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
+  .dot-e{background:var(--blue);} .dot-er{background:var(--red);} .dot-en{background:var(--gold);}
+  .dot-s{background:var(--purple);} .dot-unchanged{background:var(--green);} .dot-umlaut_only{background:#8a6a1e;}
+  .dot-regular{background:var(--blue);} .dot-umlaut{background:var(--red);} .dot-irregular{background:var(--gold);}
+
+  .countline{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:2px;}
+  .dashgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:12px 0;} @media (max-width: 480px) { .dashgrid { grid-template-columns:repeat(2,1fr); } }
+  .dashcard{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 4px; text-align:center;}
+  .dashcard .num{font-family:'Fjalla One',sans-serif; font-size:19px; color:var(--red);}
+  .dashcard .lbl{font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:var(--ink-soft); margin-top:1px;}
+
+  .bigbtn{width:100%; font-family:'Fjalla One',sans-serif; font-size:18px; padding:16px; border:none;
+    border-radius:8px; background:var(--red); color:#fff; cursor:pointer; box-shadow:0 6px 0 var(--red-dark); margin-bottom:8px;}
+  .bigbtn:active{transform:translateY(3px); box-shadow:0 3px 0 var(--red-dark);}
+  .bigbtn .subtext{display:block; font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:400; opacity:0.9; margin-top:3px;}
+
+  .togglerow{display:flex; align-items:center; gap:8px; margin-bottom:2px;}
+  .togglerow label{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);}
+  .switch{position:relative; width:38px; height:20px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; inset:0; background:var(--line); border-radius:20px; cursor:pointer; transition:.2s;}
+  .slider:before{content:""; position:absolute; width:16px; height:16px; left:2px; top:2px; background:#fff; border-radius:50%; transition:.2s;}
+  input:checked + .slider{background:var(--green);}
+  input:checked + .slider:before{transform:translateX(18px);}
+
+  .sessionbar{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:10px;}
+  .studycard{background:var(--card); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 24px var(--shadow);
+    overflow:hidden; margin-bottom:14px;}
+  .stripe{height:6px;}
+  .stripe.e,.stripe.regular{background:var(--blue);} .stripe.er,.stripe.umlaut{background:var(--red);}
+  .stripe.en,.stripe.irregular{background:var(--gold);} .stripe.s{background:var(--purple);}
+  .stripe.unchanged{background:var(--green);} .stripe.umlaut_only{background:#8a6a1e;}
+  .meta{display:flex; justify-content:space-between; align-items:center; padding:10px 16px 0;
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft);}
+  .pill{font-size:9px; text-transform:uppercase; letter-spacing:0.5px; padding:2px 8px; border-radius:10px; color:#fff;}
+  .pill.e,.pill.regular{background:var(--blue);} .pill.er,.pill.umlaut{background:var(--red);}
+  .pill.en,.pill.irregular{background:var(--gold);} .pill.s{background:var(--purple);}
+  .pill.unchanged{background:var(--green);} .pill.umlaut_only{background:#8a6a1e;}
+  .pill.level{background:var(--purple);}
+  .qlabel{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--gold); text-transform:uppercase;
+    letter-spacing:0.5px; padding:12px 18px 0;}
+  .wordicon{width:52px; height:52px; margin:6px auto 4px; color:var(--ink-soft);}
+  .wordicon svg{width:100%; height:100%;}
+  .wordline{display:flex; align-items:center; justify-content:center; gap:2px;}
+  .prompt{padding:0 18px 4px; text-align:center;}
+  .prompt .word{font-family:'Fjalla One',sans-serif; font-size:28px; line-height:1.2; color:var(--ink);}
+  .prompt .subq{font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; color:var(--ink-soft); margin-top:6px;}
+  .speakbtn{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%;
+    border:1.5px solid var(--ink); background:var(--paper); color:var(--ink); cursor:pointer; font-size:14px; margin-left:8px; flex-shrink:0;}
+  .thinkbtn{display:block; width:calc(100% - 36px); margin:14px 18px 18px; font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase; letter-spacing:0.5px; padding:13px; border:1.5px dashed var(--ink); background:transparent;
+    color:var(--ink); border-radius:6px; cursor:pointer;}
+
+  .revealbox{padding:4px 18px 16px;}
+  .meaningbox{text-align:center; margin-bottom:8px;}
+  .meaningbox .en{font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-style:italic; color:var(--ink-soft);}
+  .meaningbox .ta{font-size:16px; color:var(--ink); margin-top:2px;}
+  .meaningbox .ta .translit{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-left:6px;}
+  .formrow{display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono',monospace;
+    font-size:14px; padding:8px 10px; background:var(--paper-dark); border-radius:5px; margin-bottom:6px;}
+  .formrow .flabel{font-size:10px; text-transform:uppercase; color:var(--ink-soft); letter-spacing:0.4px;}
+  .formrow .fval{font-weight:600;}
+  .diffchar{background:#fff3a0; padding:0 2px; border-radius:3px; font-weight:700; color:var(--red-dark);}
+  .transdiagram{font-family:'IBM Plex Mono',monospace; font-size:15px; text-align:center; padding:10px 8px;
+    background:var(--paper-dark); border-radius:6px; margin-bottom:8px; line-height:1.9;}
+  .transdiagram .arrow{color:var(--ink-soft); margin:0 6px; font-size:13px;}
+  .rulebox{font-size:12.5px; line-height:1.55; padding:9px 11px; border-radius:0 5px 5px 0; margin-bottom:8px;}
+  .rulebox.e,.rulebox.regular{background:#eaeef6; border-left:3px solid var(--blue);}
+  .rulebox.er,.rulebox.umlaut{background:#f6e9e7; border-left:3px solid var(--red);}
+  .rulebox.en,.rulebox.irregular{background:#fbf3d8; border-left:3px solid var(--gold);}
+  .rulebox.s{background:#f0eaf5; border-left:3px solid var(--purple);}
+  .rulebox.unchanged{background:#eaf2ea; border-left:3px solid var(--green);}
+  .rulebox.umlaut_only{background:#f5efe0; border-left:3px solid #8a6a1e;}
+  .rulebox b{color:var(--ink);}
+
+  /* Morphological & Memory Trick Box */
+  .morph-box {
+    background: #fff; border: 1.5px solid var(--gold); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(185,138,46,0.1);
+    text-align: left;
+  }
+  .morph-header {
+    font-family: 'Fjalla One', sans-serif; font-size: 13.5px; color: var(--gold);
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .morph-mnemonic {
+    font-size: 12.5px; line-height: 1.55; color: var(--ink);
+    background: #fffdf5; border-left: 3px solid var(--gold); padding: 8px 10px;
+    border-radius: 0 4px 4px 0; margin-bottom: 8px;
+  }
+  .morph-mnemonic b { color: var(--red); }
+  .morph-formula {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    background: var(--paper); padding: 6px 10px; border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; margin-bottom: 8px;
+  }
+  .morph-part { padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+  .morph-part.prefix { background: #e8e0f0; color: var(--purple); }
+  .morph-part.root { background: #dce7f2; color: var(--blue); }
+
+  .answerbtns{display:flex; gap:8px; padding:0 18px 18px;}
+  .actbtn{flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.3px; text-transform:uppercase;
+    padding:13px 2px; border-radius:6px; cursor:pointer; border:1.5px solid var(--ink); background:var(--paper);}
+  .actbtn.nochmal{border-color:var(--red); color:var(--red);}
+  .actbtn.gewusst{border-color:var(--green); color:var(--green);}
+  .actbtn.easy{border-color:var(--blue); color:var(--blue);}
+  .empty{text-align:center; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); font-size:13px; line-height:1.7; padding:26px 10px;}
+  .empty b{color:var(--ink);}
+  .voicewarn{font-size:11px; color:var(--red-dark); background:#f6e9e7; border-left:3px solid var(--red);
+    padding:6px 9px; border-radius:0 5px 5px 0; margin-bottom:10px; display:none;}
+  footer{margin-top:20px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); text-align:center; line-height:1.6;}
+
+  .word-click-reveal {
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    border-bottom: 2px dotted var(--gold);
+    display: inline-block;
+  }
+  .word-click-reveal:hover {
+    background: #fffdf5;
+    color: #b45309;
+    transform: translateY(-1px);
+  }
+  .peek-translation-box {
+    animation: fadeIn 0.2s ease-out;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .quick-card-tools {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .quick-tool-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .quick-tool-btn:hover {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .actbtn.next-bold:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px var(--shadow);
+  }
+  .shortcuts-hint {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft);
+    text-align: center; margin-top: 12px; opacity: 0.9;
+  }
+
+  html.dark-theme {
+    --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
+    --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
+    --gold: #ffcc00; --green: #55cc55; --blue: #5599ff; --purple: #b366ff;
+  }
+
+
+  .hub-banner{
+    background:var(--card); border:1.5px solid var(--ink); border-radius:8px;
+    padding:8px 12px; margin-bottom:12px; display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:8px; box-shadow:0 3px 8px var(--shadow);
+    width:100%; max-width:1100px;
+  }
+  .hub-title{font-family:'Fjalla One',sans-serif; font-size:13.5px; display:flex; align-items:center; gap:6px; color:var(--ink);}
+  .hub-links{display:flex; gap:5px; flex-wrap:wrap; align-items:center;}
+  .hub-link{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 8px; border-radius:4px;
+    text-decoration:none; color:var(--ink); background:var(--paper); border:1px solid var(--line);
+    transition:all .15s; font-weight:600; cursor:pointer;
+  }
+  .hub-link:hover, .hub-link.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+
+/* UNIFIED DEUTSCH-COACH SUITE THEME & HUB */
+:root {
+  --suite-bg: #EDEAE1;
+  --suite-card: #F7F5EE;
+  --suite-card-hover: #ffffff;
+  --suite-ink: #1B2A4A;
+  --suite-ink-soft: #4A5878;
+  --suite-line: #cdc7b2;
+  --suite-gold: #B98A2E;
+  --suite-blue: #2F5C8A;
+  --suite-green: #3F6B4A;
+  --suite-red: #AE3327;
+  --suite-shadow: rgba(27, 42, 74, 0.08);
+}
+
+html.dark-theme, body.dark {
+  --suite-bg: #111827;
+  --suite-card: #1f2937;
+  --suite-card-hover: #374151;
+  --suite-ink: #f9fafb;
+  --suite-ink-soft: #9ca3af;
+  --suite-line: #374151;
+  --suite-gold: #fbbf24;
+  --suite-blue: #60a5fa;
+  --suite-green: #34d399;
+  --suite-red: #f87171;
+  --suite-shadow: rgba(0, 0, 0, 0.4);
+}
+
+.suite-hub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--suite-card, #F7F5EE);
+  border: 1.5px solid var(--suite-ink, #1B2A4A);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px var(--suite-shadow, rgba(27,42,74,0.08));
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+.suite-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fjalla One', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--suite-ink, #1B2A4A);
+}
+.suite-nav-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+}
+.suite-link {
+  text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--suite-line, #cdc7b2);
+  background: var(--suite-bg, #EDEAE1);
+  color: var(--suite-ink, #1B2A4A);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.suite-link:hover {
+  background: var(--suite-card-hover, #fff);
+  border-color: var(--suite-gold, #B98A2E);
+}
+.suite-link.active {
+  background: var(--suite-ink, #1B2A4A) !important;
+  color: #ffffff !important;
+  border-color: var(--suite-ink, #1B2A4A) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.suite-hub-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.suite-btn-theme {
+  background: var(--suite-bg, #EDEAE1);
+  color: var(--suite-ink, #1B2A4A);
+  border: 1.5px solid var(--suite-ink, #1B2A4A);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.suite-btn-theme:active { transform: scale(0.92); }
+
+
+  /* Global Modern UI Additions */
+  body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .stage {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    border: 1px solid var(--line);
+    padding: 24px;
+    margin-top: 10px;
+    transition: box-shadow 0.3s ease;
+  }
+  body.dark .stage {
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4);
+  }
+  button {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, background-color 0.2s;
+  }
+  button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  input[type="text"], input[type="password"], textarea, select {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  /* Modern Flashcards */
+  .flashcard {
+      border-radius: 16px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      transition: transform 0.4s ease;
+  }
+  .flashcard:hover {
+      transform: translateY(-5px);
+  }
+
+</style>
+  <link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/icon-svgs.js"></script>
+  <script src="js/srs-engine.js"></script>
+  <script src="js/tts-engine.js"></script>
+    <script src="js/progress-aggregator.js"></script>
+  <script src="js/app-shell.js"></script>
+</head>
+<body>
+<div class="wrap">
+  
+  <!-- UNIFIED DEUTSCH-COACH SUITE HUB -->
+
+    
+  </div>
+
+
+  <h1>Adjektive &amp; Adverbien — Formen-Trainer</h1>
+  <div class="sub">Positiv → Komparativ → Superlativ · Nach Themen gruppiert</div>
+
+  <div class="filterbox">
+    <div class="filterlabel" id="filt1Label">Level (Niveau)</div>
+    <div class="chiprow" id="filt1Chips"></div>
+    <div class="filterlabel" id="filt2Label">Grammar Rule / Plural Type (Typ)</div>
+    <div class="chiprow" id="filt2Chips"></div>
+    <div class="filterlabel">Practice Direction &amp; Language (Richtung &amp; Sprache)</div>
+    <div class="chiprow" id="dirChips"></div>
+  </div>
+
+  <div class="voicewarn" id="voiceWarn">🔎 Suche nach deutscher Sprachausgabe …</div>
+
+  <div class="countline" id="poolCount"></div>
+  <div class="dashgrid" id="dashGrid"></div>
+
+  <button class="bigbtn" id="startBtn">🧠 Start Practice (Üben starten)<span class="subtext">Prioritizes due & difficult items first</span></button>
+
+  <div id="stage"></div>
+  <div id="ruleRef"></div>
+
+  <footer>Adjektiv-Steigerungsformen wurden nach Standardregeln erzeugt (Umlaut-Liste + Ausnahmen geprüft) — bei sehr seltenen Fällen kann die erzeugte Form ungewöhnlich klingen. Viele dieser Wörter können unverändert auch als Adverb verwendet werden (z. B. „schnell" = fast/quickly, „gut" = well). Fortschritt wird lokal gespeichert.</footer>
+</div>
+
+<script>
+
+/* ---- Restored after shared-file refactor: referenced but never (re)defined ---- */
+const NOUN_LEVELS = [{k:'alle',l:'Alle'},{k:'A1',l:'A1'},{k:'A2',l:'A2'},{k:'B1.1',l:'B1.1'},{k:'B1.2',l:'B1.2'},{k:'B2',l:'B2'}];
+const NOUN_TYPES = [{k:'alle',l:'Alle',dot:null},{k:'en',l:'-en/-n',dot:'dot-en'},{k:'e',l:'-e',dot:'dot-e'},
+  {k:'er',l:'-er',dot:'dot-er'},{k:'s',l:'-s',dot:'dot-s'},{k:'unchanged',l:'unverändert',dot:'dot-unchanged'},
+  {k:'umlaut_only',l:'nur Umlaut',dot:'dot-umlaut_only'}];
+const ADJ_CATEGORIES = [{k:'alle',l:'Alle'},{k:'groesse_menge',l:'Größe & Menge'},{k:'zeit',l:'Zeit & Dauer'},{k:'charakter',l:'Charakter & Persönlichkeit'},{k:'gefuehle',l:'Gefühle & Emotionen'},{k:'aussehen',l:'Aussehen & Zustand'},{k:'qualitaet',l:'Qualität & Bewertung'},{k:'wetter',l:'Wetter & Temperatur'},{k:'gesundheit',l:'Gesundheit & Sicherheit'},{k:'tempo',l:'Geschwindigkeit'},{k:'technik',l:'Technik & Material'},{k:'wirtschaft',l:'Preis & Wirtschaft'},{k:'gesellschaft',l:'Gesellschaft & Kultur'},{k:'sonstige',l:'Sonstige'}];
+const ADJ_TYPES = [{k:'alle',l:'Alle',dot:null},{k:'regular',l:'Regelmäßig',dot:'dot-regular'},
+  {k:'umlaut',l:'Umlaut',dot:'dot-umlaut'},{k:'irregular',l:'Unregelmäßig',dot:'dot-irregular'}];
+
+function meaningHTML(v){
+  if(meaningLang==='ta'){
+    return v.ta ? `<div class="meaningbox"><div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span></div></div>`
+                : `<div class="meaningbox"><div class="en">${v.en}</div></div>`;
+  }
+  if(meaningLang==='both'){
+    return `<div class="meaningbox"><div class="en">${v.en}</div>${v.ta?`<div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span></div>`:''}</div>`;
+  }
+  return `<div class="meaningbox"><div class="en">${v.en}</div></div>`;
+}
+
+function typLabelNoun(t){
+  return {en:'-en/-n', e:'-e', er:'-er', s:'-s', unchanged:'unverändert', umlaut_only:'nur Umlaut'}[t] || t;
+}
+function typLabelAdj(t){
+  return {regular:'Regelmäßig', umlaut:'Umlaut', irregular:'Unregelmäßig'}[t] || t;
+}
+
+const COMPOUND_ROOTS_DB = {
+  "fuß": { de: "Fuß", en: "foot", ta: "பாதம்" },
+  "fuss": { de: "Fuß", en: "foot", ta: "பாதம்" },
+  "gänger": { de: "Gänger", en: "walker", ta: "நடப்பவர்" },
+  "gaenger": { de: "Gänger", en: "walker", ta: "நடப்பவர்" },
+  "zone": { de: "Zone", en: "zone / area", ta: "பகுதி" },
+  "krank": { de: "Krank", en: "sick / ill", ta: "நோய்வாய்ப்பட்ட" },
+  "kranken": { de: "Kranken", en: "sick people / patients", ta: "நோயாளிகள்" },
+  "haus": { de: "Haus", en: "house / building", ta: "வீடு / கட்டிடம்" },
+  "arbeit": { de: "Arbeit", en: "work / job", ta: "வேலை" },
+  "arbeits": { de: "Arbeits", en: "work-related", ta: "வேலை சார்ந்த" },
+  "platz": { de: "Platz", en: "place / square / spot", ta: "இடம்" },
+  "fahr": { de: "Fahr", en: "travel / ride", ta: "பயணம்" },
+  "karte": { de: "Karte", en: "card / ticket", ta: "சீட்டு / அட்டை" },
+  "karten": { de: "Karten", en: "tickets / cards", ta: "டிக்கெட்டுகள்" },
+  "fahrkarte": { de: "Fahrkarte", en: "travel ticket", ta: "பயணச் சீட்டு" },
+  "fahrkarten": { de: "Fahrkarten", en: "travel tickets", ta: "பயணச் சீட்டுகள்" },
+  "automat": { de: "Automat", en: "machine / dispenser", ta: "இயந்திரம்" },
+  "wohn": { de: "Wohn", en: "living / dwelling", ta: "குடியிருப்பு" },
+  "zimmer": { de: "Zimmer", en: "room", ta: "அறை" },
+  "schlaf": { de: "Schlaf", en: "sleep", ta: "தூக்கம்" },
+  "ess": { de: "Ess", en: "eating / dining", ta: "சாப்பாடு" },
+  "küche": { de: "Küche", en: "kitchen", ta: "சமையலறை" },
+  "bad": { de: "Bad", en: "bath / bathroom", ta: "குளியலறை" },
+  "bahn": { de: "Bahn", en: "train / track", ta: "ரயில் / பாதை" },
+  "hof": { de: "Hof", en: "court / yard / station", ta: "நிலையம் / முற்றம்" },
+  "bahnhof": { de: "Bahnhof", en: "train station", ta: "ரயில் நிலையம்" },
+  "haupt": { de: "Haupt", en: "main / central", ta: "முக்கிய" },
+  "hauptbahnhof": { de: "Hauptbahnhof", en: "main train station", ta: "மத்திய ரயில் நிலையம்" },
+  "flug": { de: "Flug", en: "flight", ta: "விமானம் / பறத்தல்" },
+  "hafen": { de: "Hafen", en: "harbor / port", ta: "துறைமுகம்" },
+  "flughafen": { de: "Flughafen", en: "airport", ta: "விமான நிலையம்" },
+  "rad": { de: "Rad", en: "wheel / bike", ta: "சக்கரம்" },
+  "fahrrad": { de: "Fahrrad", en: "bicycle", ta: "மிதிவண்டி" },
+  "auto": { de: "Auto", en: "car", ta: "கார்" },
+  "schrank": { de: "Schrank", en: "closet / cupboard", ta: "அலமாரி" },
+  "kühl": { de: "Kühl", en: "cool / cold", ta: "குளிர்ச்சியான" },
+  "kühlschrank": { de: "Kühlschrank", en: "refrigerator", ta: "குளிர்சாதனப் பெட்டி" },
+  "wörter": { de: "Wörter", en: "words", ta: "வார்த்தைகள்" },
+  "buch": { de: "Buch", en: "book", ta: "புத்தகம்" },
+  "wörterbuch": { de: "Wörterbuch", en: "dictionary", ta: "அகராதி" },
+  "aufgabe": { de: "Aufgabe", en: "task / assignment", ta: "பணி / கடமை" },
+  "hausaufgabe": { de: "Hausaufgabe", en: "homework", ta: "வீட்டுப்பாடம்" },
+  "geburt": { de: "Geburt", en: "birth", ta: "பிறப்பு" },
+  "tag": { de: "Tag", en: "day", ta: "நாள்" },
+  "geburtstag": { de: "Geburtstag", en: "birthday", ta: "பிறந்தநாள்" },
+  "zeit": { de: "Zeit", en: "time", ta: "நேரம்" },
+  "jahr": { de: "Jahr", en: "year", ta: "வருடம்" },
+  "jahreszeit": { de: "Jahreszeit", en: "season", ta: "பருவகாலம்" },
+  "vertrag": { de: "Vertrag", en: "contract", ta: "ஒப்பந்தம்" },
+  "handy": { de: "Handy", en: "mobile phone", ta: "கைப்பேசி" },
+  "handyvertrag": { de: "Handyvertrag", en: "mobile contract", ta: "கைப்பேசி ஒப்பந்தம்" },
+  "tisch": { de: "Tisch", en: "table", ta: "மேசை" },
+  "stuhl": { de: "Stuhl", en: "chair", ta: "நாற்காலி" },
+  "schlüssel": { de: "Schlüssel", en: "key", ta: "சாவி" },
+  "tasche": { de: "Tasche", en: "bag / pocket", ta: "பை" },
+  "geld": { de: "Geld", en: "money", ta: "பணம்" },
+  "schein": { de: "Schein", en: "certificate / banknote", ta: "சான்றிதழ் / நோட்டு" },
+  "geldschein": { de: "Geldschein", en: "banknote", ta: "ரூபாய் நோட்டு" },
+  "brille": { de: "Brille", en: "glasses", ta: "கண்ணாடி" },
+  "sonne": { de: "Sonne", en: "sun", ta: "சூரியன்" },
+  "sonnenbrille": { de: "Sonnenbrille", en: "sunglasses", ta: "சூரியக் கண்ணாடி" }
+};
+
+
+function recordAnswer(uid, correct){ dcEngine.recordResult(uid, correct); }
+function escapeQuotes(s){ return String(s||'').replace(/'/g, "\\'"); }
+
+document.getElementById('startBtn')?.addEventListener('click', startPractice);
+const NOUNS = [];
+const ADJS = [{"w":"klein","sup":"am kleinsten","en":"small","ta":"சிறிய","ta_translit":"siṟiya","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"kleiner","cat":"groesse_menge"},{"w":"schlecht","sup":"am schlechtesten","en":"bad","ta":"கெட்ட","ta_translit":"keṭṭa","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"schlechter","cat":"qualitaet"},{"w":"neu","sup":"am neuesten","en":"new","ta":"புதிய","ta_translit":"putiya","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"neuer","cat":"zeit"},{"w":"schön","sup":"am schönsten","en":"beautiful","ta":"அழகான","ta_translit":"aḻakāṉa","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"schöner","cat":"aussehen"},{"w":"schnell","sup":"am schnellsten","en":"fast","ta":"வேகமான","ta_translit":"vēkamāṉa","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"schneller","cat":"tempo"},{"w":"langsam","sup":"am langsamsten","en":"slow","ta":"மெதுவான","ta_translit":"metuvāṉa","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"langsamer","cat":"tempo"},{"w":"lang","sup":"am längsten","en":"long","ta":"நீளமான","ta_translit":"nīḷamāṉa","level":"A1","typ":"irregular","source":"General A1 Vocabulary","komp":"länger","cat":"groesse_menge"},{"w":"kurz","sup":"am kürzesten","en":"short","ta":"குறுகிய","ta_translit":"kuṟukiya","level":"A1","typ":"irregular","source":"General A1 Vocabulary","komp":"kürzer","cat":"groesse_menge"},{"w":"glücklich","sup":"am glücklichsten","en":"happy","ta":"மகிழ்ச்சியான","ta_translit":"makiḻcciyāṉa","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"glücklicher","cat":"gefuehle"},{"w":"traurig","sup":"am traurigsten","en":"sad","ta":"துக்கமான","ta_translit":"tukkamāṉa","level":"A1","typ":"regular","source":"General A1 Vocabulary","komp":"trauriger","cat":"gefuehle"},{"w":"dunkel","sup":"am dunkelsten","en":"dark","ta":"இருண்ட","ta_translit":"irunda","level":"A2","typ":"regular","source":"Auf jeden Fall!","komp":"dunkler","cat":"aussehen"},{"w":"teuer","sup":"am teuersten","en":"expensive","ta":"விலையுயர்ந்த","ta_translit":"vilaiyuyarntha","level":"A1","typ":"regular","source":"Auf jeden Fall!","komp":"teurer","cat":"wirtschaft"},{"w":"kalt","sup":"am kältesten","en":"cold","ta":"குளிர்ந்த","ta_translit":"kulirntha","level":"A1","typ":"umlaut","source":"Auf jeden Fall!","komp":"kälter","cat":"wetter"},{"w":"warm","sup":"am wärmsten","en":"warm","ta":"சூடான","ta_translit":"soodaana","level":"A1","typ":"umlaut","source":"Auf jeden Fall!","komp":"wärmer","cat":"wetter"},{"w":"jung","sup":"am jüngsten","en":"young","ta":"இளைய","ta_translit":"ilaiya","level":"A1","typ":"umlaut","source":"Auf jeden Fall!","komp":"jünger","cat":"zeit"},{"w":"alt","sup":"am ältesten","en":"old","ta":"பழைய / வயதுடைய","ta_translit":"pazhaiya","level":"A1","typ":"umlaut","source":"Auf jeden Fall!","komp":"älter","cat":"zeit"},{"w":"groß","sup":"am größten","en":"big","ta":"பெரிய","ta_translit":"periya","level":"A1","typ":"umlaut","source":"Auf jeden Fall!","komp":"größer","cat":"groesse_menge"},{"w":"hoch","sup":"am höchsten","en":"high","ta":"உயர்ந்த","ta_translit":"uyarntha","level":"A1","typ":"irregular","source":"Auf jeden Fall!","komp":"höher","cat":"groesse_menge"},{"w":"gern","sup":"am liebsten","en":"gladly","ta":"விருப்பத்துடன்","ta_translit":"viruppathudan","level":"A1","typ":"irregular","source":"Auf jeden Fall!","komp":"lieber","cat":"charakter"},{"w":"viel","sup":"am meisten","en":"much / many","ta":"நிறைய","ta_translit":"niraiya","level":"A1","typ":"irregular","source":"Auf jeden Fall!","komp":"mehr","cat":"groesse_menge"},{"w":"gut","sup":"am besten","en":"good","ta":"நல்ல","ta_translit":"nalla","level":"A1","typ":"irregular","source":"Auf jeden Fall!","komp":"besser","cat":"qualitaet"},{"w":"aktiv","komp":"aktiver","sup":"am aktivsten","en":"active","ta":"செயல்படு","ta_translit":"ceyalpaṭu","icon":"team","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"angenehm","komp":"angenehmer","sup":"am angenehmsten","en":"pleasant","ta":"இனிமையான","ta_translit":"iṉimaiyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"annulliert","komp":"annullierter","sup":"am annulliertesten","en":"cancelled","ta":"ரத்து செய்","ta_translit":"rattu sey","icon":"key","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"historisch","komp":"historischer","sup":"am historischesten","en":"historic","ta":"வரலாற்று சிறப்புமிக்க","ta_translit":"varalāṟṟu ciṟappumikka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"hygienisch","komp":"hygienischer","sup":"am hygienischesten","en":"hygienic","ta":"சுகாதாரமான","ta_translit":"cukātāramāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"komfortabel","komp":"komfortabler","sup":"am komfortabelsten","en":"comfortable","ta":"வசதியான","ta_translit":"vacatiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"lebhaft","komp":"lebhafter","sup":"am lebhaftesten","en":"lively","ta":"வாழ்","ta_translit":"vāḻ","icon":"house","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"neblig","komp":"nebliger","sup":"am nebligsten","en":"foggy","ta":"பனிமூட்டமான","ta_translit":"paṉimūṭṭamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wetter"},{"w":"rechtzeitig","komp":"rechtzeitiger","sup":"am rechtzeitigsten","en":"on time/timely","ta":"சரியான நேரத்தில்","ta_translit":"cariyāṉa nērattil","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"sauber","komp":"sauberer","sup":"am saubersten","en":"clean","ta":"சுத்தம் செய்","ta_translit":"cuttam sey","icon":"broom","source":"Einfach gut! B1","typ":"regular","cat":"aussehen"},{"w":"traumhaft","komp":"traumhafter","sup":"am traumhaftesten","en":"dreamlike/fabulous","ta":"கனவு காண்","ta_translit":"kaṉavu kāṇ","icon":"bed","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"umgehend","komp":"umgehender","sup":"am umgehendesten","en":"immediate","ta":"உடனடியாக","ta_translit":"uṭaṉaṭiyāka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"verärgert","komp":"verärgerter","sup":"am verärgertesten","en":"annoyed","ta":"கோபமடைந்த / எரிச்சலான","ta_translit":"kōpamaṭainta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"ärgerlich","komp":"ärgerlicher","sup":"am ärgerlichsten","en":"annoying","ta":"எரிச்சலூட்டும்","ta_translit":"ericcalūṭṭum","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"berechtigt","komp":"berechtigter","sup":"am berechtigtesten","en":"entitled/justified","ta":"தகுதியுள்ள","ta_translit":"takutiyuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"dumm","komp":"dümmer","sup":"am dümmsten","en":"stupid","ta":"முட்டாள்தனமான","ta_translit":"muṭṭāḷtaṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"umlaut","cat":"charakter"},{"w":"eilig","komp":"eiliger","sup":"am eiligsten","en":"urgent","ta":"அவசரமான","ta_translit":"avacaramāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"entspannend","komp":"entspannender","sup":"am entspannendesten","en":"relaxing","ta":"ஓய்வளிக்கும்","ta_translit":"ōyvaḷikkum","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"exotisch","komp":"exotischer","sup":"am exotischesten","en":"exotic","ta":"விசித்திரமான / அயல்நாட்டு","ta_translit":"ayalnaattu","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"fair","komp":"fairer","sup":"am fairsten","en":"fair","ta":"நியாயமான","ta_translit":"niyāyamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"fristgerecht","komp":"fristgerechter","sup":"am fristgerechtesten","en":"on time/within deadline","ta":"சரியான காலக்கெடுவுக்குள்","ta_translit":"kālakketuvukkuḷ","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"fristlos","komp":"fristloser","sup":"am fristlosesten","en":"without notice","ta":"கவனி","ta_translit":"kavaṉi","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"gesetzlich","komp":"gesetzlicher","sup":"am gesetzlichsten","en":"legal/statutory","ta":"சட்டப்பூர்வமான","ta_translit":"caṭṭappūrvamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"klug","komp":"klüger","sup":"am klügsten","en":"clever","ta":"புத்திசாலியான","ta_translit":"putticāliyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"umlaut","cat":"charakter"},{"w":"massiv","komp":"massiver","sup":"am massivsten","en":"massive/solid","ta":"பெரிய அளவிலான","ta_translit":"periya aḷavilāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"neugierig","komp":"neugieriger","sup":"am neugierigsten","en":"curious","ta":"ஆர்வமுள்ள","ta_translit":"ārvamuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"offenbar","komp":"offenbarer","sup":"am offenbarsten","en":"apparently","ta":"வெளிப்படையான","ta_translit":"veḷippaṭaiyāṉa","icon":"money","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"sauer","komp":"saurer","sup":"am sauersten","en":"sour/annoyed","ta":"புளிப்பான / கோபமான","ta_translit":"puḷippāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"schmutzig","komp":"schmutziger","sup":"am schmutzigsten","en":"dirty","ta":"அழுக்கான","ta_translit":"aḻukkāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"aussehen"},{"w":"selbstverständlich","komp":"selbstverständlicher","sup":"am selbstverständlichsten","en":"of course","ta":"இயற்கையான / நிச்சயமாக","ta_translit":"niccayamāka","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"sinnlos","komp":"sinnloser","sup":"am sinnlosesten","en":"pointless","ta":"அர்த்தமற்ற / வீணான","ta_translit":"arttamaṟṟa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"sinnvoll","komp":"sinnvoller","sup":"am sinnvollsten","en":"sensible","ta":"பயனுள்ள / அர்த்தமுள்ள","ta_translit":"arttamuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"total","komp":"totaler","sup":"am totalsten","en":"total","ta":"மொத்த","ta_translit":"motta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"treu","komp":"treuer","sup":"am treusten","en":"loyal","ta":"விசுவாசமான","ta_translit":"vicuvācamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"üblich","komp":"üblicher","sup":"am üblichsten","en":"usual","ta":"வழக்கமான","ta_translit":"vaḻakkamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"unglaublich","komp":"unglaublicher","sup":"am unglaublichsten","en":"unbelievable","ta":"படு","ta_translit":"paṭu","icon":"house","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"vergleichbar","komp":"vergleichbarer","sup":"am vergleichbarsten","en":"comparable","ta":"ஒப்பிடக்கூடிய","ta_translit":"oppiṭakkūṭiya","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"völlig","komp":"völliger","sup":"am völligsten","en":"complete/total","ta":"விடு","ta_translit":"viṭu","icon":"balance","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"wütend","komp":"wütender","sup":"am wütendesten","en":"furious","ta":"ஆத்திரமடைந்த / கடும் கோபமான","ta_translit":"āttiramaṭainta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"andauernd","komp":"andauernder","sup":"am andauerndesten","en":"continuous","ta":"தொடர்ச்சியான","ta_translit":"toṭarcciyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"biologisch","komp":"biologischer","sup":"am biologischesten","en":"biological/organic","ta":"இயற்கை","ta_translit":"iyaṟkai","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"doof","komp":"doofer","sup":"am doofsten","en":"silly/dumb","ta":"முட்டாள்தனமான","ta_translit":"muṭṭāḷtaṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"giftig","komp":"giftiger","sup":"am giftigsten","en":"poisonous","ta":"நச்சுத்தன்மையுள்ள","ta_translit":"naccuttaṉmaiyuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"schädlich","komp":"schädlicher","sup":"am schädlichsten","en":"harmful","ta":"தீங்கிழை","ta_translit":"tīṅkiḻai","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"sparsam","komp":"sparsamer","sup":"am sparsamsten","en":"economical/thrifty","ta":"சிக்கனமான","ta_translit":"cikkaṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"trüb","komp":"trüber","sup":"am trübsten","en":"cloudy/murky","ta":"மங்கலான","ta_translit":"maṅkalāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"aussehen"},{"w":"umweltfreundlich","komp":"umweltfreundlicher","sup":"am umweltfreundlichsten","en":"environmentally friendly","ta":"முடி","ta_translit":"muṭi","icon":"clock","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"voraussichtlich","komp":"voraussichtlicher","sup":"am voraussichtlichsten","en":"expected/likely","ta":"எதிர்பார்","ta_translit":"etirpār","icon":"heart","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"wahrscheinlich","komp":"wahrscheinlicher","sup":"am wahrscheinlichsten","en":"probable","ta":"சாத்தியமுள்ள / பெரும்பாலும்","ta_translit":"pērumbalum","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"atmungsaktiv","komp":"atmungsaktiver","sup":"am atmungsaktivsten","en":"breathable","ta":"சாப்பிடு","ta_translit":"cāppiṭu","icon":"eat","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"aufmerksam","komp":"aufmerksamer","sup":"am aufmerksamsten","en":"attentive","ta":"கவனமான","ta_translit":"kavaṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"beschädigt","komp":"beschädigter","sup":"am beschädigtesten","en":"damaged","ta":"சேதப்படுத்து","ta_translit":"cētappaṭuttu","icon":"email","source":"Einfach gut! B1","typ":"regular","cat":"aussehen"},{"w":"dicht","komp":"dichter","sup":"am dichtesten","en":"tight/dense","ta":"இறுக்கமான","ta_translit":"iṟukkamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"durchlässig","komp":"durchlässiger","sup":"am durchlässigsten","en":"permeable","ta":"ஊடுருவக்கூடிய","ta_translit":"ūṭuruva","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"erhältlich","komp":"erhältlicher","sup":"am erhältlichsten","en":"available","ta":"கிடைக்கக்கூடிய","ta_translit":"kiṭaikkakkūṭiya","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"eventuell","komp":"eventueller","sup":"am eventuellsten","en":"possible/perhaps","ta":"ஒருவேளை / ஒருபோதும்","ta_translit":"oruvēḷai","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"kundenfreundlich","komp":"kundenfreundlicher","sup":"am kundenfreundlichsten","en":"customer-friendly","ta":"முடி","ta_translit":"muṭi","icon":"clock","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"lieferbar","komp":"lieferbarer","sup":"am lieferbarsten","en":"available for delivery","ta":"வாழ்","ta_translit":"vāḻ","icon":"cart","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"luftdurchlässig","komp":"luftdurchlässiger","sup":"am luftdurchlässigsten","en":"air-permeable","ta":"காற்று புகக்கூடிய","ta_translit":"kāṟṟu pukakkūṭiya","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"portofrei","komp":"portofreier","sup":"am portofreisten","en":"postage-free","ta":"தபால் கட்டணமில்லாத","ta_translit":"portofrei","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"unverbindlich","komp":"unverbindlicher","sup":"am unverbindlichsten","en":"non-binding","ta":"கட்டாயமற்ற / ஒப்புதலற்ற","ta_translit":"kaṭṭāyamaṟṟa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"versandkostenfrei","komp":"versandkostenfreier","sup":"am versandkostenfreisten","en":"free shipping","ta":"இலவச டெலிவரி","ta_translit":"free delivery","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"wasserdicht","komp":"wasserdichter","sup":"am wasserdichtesten","en":"waterproof","ta":"நீர்புகா / நீர்ப்புகாத","ta_translit":"waterproof","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"wetterfest","komp":"wetterfester","sup":"am wetterfestesten","en":"weatherproof","ta":"சாப்பிடு","ta_translit":"cāppiṭu","icon":"eat","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"anstrengend","komp":"anstrengender","sup":"am anstrengendesten","en":"strenuous","ta":"கடினமான","ta_translit":"kaṭiṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"beliebt","komp":"beliebter","sup":"am beliebtesten","en":"popular","ta":"பிரபலமான","ta_translit":"pirapalamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"doppelt","komp":"doppelter","sup":"am doppeltesten","en":"double","ta":"செய்","ta_translit":"sey","icon":"wrench","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"dramatisch","komp":"dramatischer","sup":"am dramatischesten","en":"dramatic","ta":"நாடகத்தனமான / அதிர்ச்சியூட்டும்","ta_translit":"nāṭakattaṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"ehrlich","komp":"ehrlicher","sup":"am ehrlichsten","en":"honest","ta":"நேர்மையான","ta_translit":"nērmaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"erfolgreich","komp":"erfolgreicher","sup":"am erfolgreichsten","en":"successful","ta":"வெற்றிகரமான","ta_translit":"veṟṟikaramāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"motiviert","komp":"motivierter","sup":"am motiviertesten","en":"motivated","ta":"ஊக்குவி","ta_translit":"ūkkuvi","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"objektiv","komp":"objektiver","sup":"am objektivsten","en":"objective","ta":"சார்பற்ற / நடுநிலையான","ta_translit":"naṭunilaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"romantisch","komp":"romantischer","sup":"am romantischesten","en":"romantic","ta":"காதல் உணர்வுமிக்க","ta_translit":"kātal uṇarvumikka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"spannend","komp":"spannender","sup":"am spannendesten","en":"exciting","ta":"விறுவிறுப்பான / பரபரப்பான","ta_translit":"viṟuviṟuppāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"unentschieden","komp":"unentschiedener","sup":"am unentschiedensten","en":"undecided/drawn","ta":"வரை","ta_translit":"varai","icon":"write","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"ungesund","komp":"ungesünder","sup":"am ungesündesten","en":"unhealthy","ta":"ஆரோக்கியமற்ற","ta_translit":"ārōkkiyamaṟṟa","icon":"abstract","source":"Einfach gut! B1","typ":"umlaut","cat":"gesundheit"},{"w":"demokratisch","komp":"demokratischer","sup":"am demokratischesten","en":"democratic","ta":"ஜனநாயக","ta_translit":"jaṉanāyaka","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"ehemalig","komp":"ehemaliger","sup":"am ehemaligsten","en":"former","ta":"முன்னாள்","ta_translit":"muṉṉāḷ","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"emotional","komp":"emotionaler","sup":"am emotionalsten","en":"emotional","ta":"உணர்ச்சிவசப்பட்ட","ta_translit":"uṇarccivacappaṭṭa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"friedlich","komp":"friedlicher","sup":"am friedlichsten","en":"peaceful","ta":"அமைதியான","ta_translit":"amaitiyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"hart","komp":"härter","sup":"am härtesten","en":"hard","ta":"கடினமான","ta_translit":"kaṭiṉamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"umlaut","cat":"aussehen"},{"w":"jahrelang","komp":"jahrelanger","sup":"am jahrelangsten","en":"for years","ta":"பல ஆண்டுகளாக","ta_translit":"pala āṇṭukaḷāka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"musikalisch","komp":"musikalischer","sup":"am musikalischesten","en":"musical","ta":"இசை சார்ந்த","ta_translit":"icai cārnta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"politisch","komp":"politischer","sup":"am politischesten","en":"political","ta":"அரசியல்","ta_translit":"aracial","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"tatsächlich","komp":"tatsächlicher","sup":"am tatsächlichsten","en":"actual","ta":"செயல்படு","ta_translit":"ceyalpaṭu","icon":"team","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"amtlich","komp":"amtlicher","sup":"am amtlichsten","en":"official","ta":"அதிகாரப்பூர்வமான","ta_translit":"atikārappūrvamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"ansteckend","komp":"ansteckender","sup":"am ansteckendesten","en":"contagious","ta":"தொற்றக்கூடிய","ta_translit":"toṟṟakkūṭiya","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"förmlich","komp":"förmlicher","sup":"am förmlichsten","en":"formal","ta":"முறையான","ta_translit":"muṟaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"geduldig","komp":"geduldiger","sup":"am geduldigsten","en":"patient","ta":"பொறுமையான","ta_translit":"poṟumaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"häufig","komp":"häufiger","sup":"am häufigsten","en":"frequent","ta":"அடிக்கடி நடக்கும்","ta_translit":"aṭikkaṭi naṭakkum","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"hilfsbereit","komp":"hilfsbereiter","sup":"am hilfsbereitesten","en":"helpful","ta":"உதவு","ta_translit":"utavu","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"nachdenklich","komp":"nachdenklicher","sup":"am nachdenklichsten","en":"thoughtful","ta":"சிந்தனையுள்ள","ta_translit":"cintaṉaiyuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"überglücklich","komp":"überglücklicher","sup":"am überglücklichsten","en":"overjoyed","ta":"பேரானந்தம் அடைந்த","ta_translit":"pērāṉantam","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"ungeduldig","komp":"ungeduldiger","sup":"am ungeduldigsten","en":"impatient","ta":"பொறுமையற்ற","ta_translit":"poṟumaiyaṟṟa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"wahr","komp":"wahrer","sup":"am wahrsten","en":"true","ta":"உண்மையான","ta_translit":"uṇmaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"zügig","komp":"zügiger","sup":"am zügigsten","en":"swift","ta":"வேகமான / சுறுசுறுப்பான","ta_translit":"vēkamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"abhängig","komp":"abhängiger","sup":"am abhängigsten","en":"dependent","ta":"முடி","ta_translit":"muṭi","icon":"clock","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"abwechslungsreich","komp":"abwechslungsreicher","sup":"am abwechslungsreichsten","en":"varied","ta":"மாறுபட்ட / விதவிதமான","ta_translit":"māṟupaṭṭa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"eigenverantwortlich","komp":"eigenverantwortlicher","sup":"am eigenverantwortlichsten","en":"self-responsible","ta":"சுய பொறுப்புள்ள","ta_translit":"cuya poṟuppuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"englischsprachig","komp":"englischsprachiger","sup":"am englischsprachigsten","en":"English-speaking","ta":"பேசு","ta_translit":"pēcu","icon":"speak","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"finanziell","komp":"finanzieller","sup":"am finanziellsten","en":"financial","ta":"நிதி சார்ந்த / பண ரீதியான","ta_translit":"niti cārnta","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"fließend","komp":"fließender","sup":"am fließendesten","en":"fluent","ta":"சரளமாக / தங்குதடையின்றி","ta_translit":"caraḷamāka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"gleichzeitig","komp":"gleichzeitiger","sup":"am gleichzeitigsten","en":"simultaneous","ta":"ஒரே நேரத்தில் நடக்கும்","ta_translit":"orē nērattil naṭakkum","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"individuell","komp":"individueller","sup":"am individuellsten","en":"individual","ta":"தனிப்பட்ட","ta_translit":"taṉippaṭṭa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"intern","komp":"interner","sup":"am internsten","en":"internal","ta":"உள்ளக","ta_translit":"uḷḷaka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"kommunikativ","komp":"kommunikativer","sup":"am kommunikativsten","en":"communicative","ta":"தொடர்பு கொள்ளும் திறனுள்ள","ta_translit":"toṭarpu koḷḷum tiṟaṉuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"leistungsgerecht","komp":"leistungsgerechter","sup":"am leistungsgerechtesten","en":"performance-based","ta":"செயல்திறன் அடிப்படையிலான","ta_translit":"ceyaltiṟaṉ aṭippaṭaiyilāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"mittelständisch","komp":"mittelständischer","sup":"am mittelständischesten","en":"medium-sized (business)","ta":"நடுத்தர அளவிலான","ta_translit":"naṭuttara aḷavilāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"wirtschaft"},{"w":"traditionsreich","komp":"traditionsreicher","sup":"am traditionsreichsten","en":"steeped in tradition","ta":"பாரம்பரியமிக்க","ta_translit":"pārampariyamikka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"unbefristet","komp":"unbefristeter","sup":"am unbefristetesten","en":"permanent","ta":"நிரந்தரமான","ta_translit":"nirantaramāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"zeit"},{"w":"zeitlich","komp":"zeitlicher","sup":"am zeitlichsten","en":"time-related","ta":"காலம் சார்ந்த","ta_translit":"kālam cārnta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"zusätzlich","komp":"zusätzlicher","sup":"am zusätzlichsten","en":"additional","ta":"கூடுதல் / மேலதிக","ta_translit":"kūṭutal","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"langfristig","komp":"langfristiger","sup":"am langfristigsten","en":"long-term","ta":"நீண்ட கால","ta_translit":"nīṇṭa kāla","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"zeit"},{"w":"offen","komp":"offener","sup":"am offensten","en":"open","ta":"திற","ta_translit":"tiṟa","icon":"key","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"stinksauer (ugs.)","komp":"stinksauerer","sup":"am stinksauersten","en":"really angry (coll.)","ta":"கடும் கோபமான","ta_translit":"kaṭum kōpamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"unnötig","komp":"unnötiger","sup":"am unnötigsten","en":"unnecessary","ta":"தேவையற்ற","ta_translit":"tēvaiyaṟṟa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"sonstige"},{"w":"allergisch","komp":"allergischer","sup":"am allergischesten","en":"allergic","ta":"ஒவ்வாமை உள்ள","ta_translit":"ovvāmai uḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"ausgewogen","komp":"ausgewogener","sup":"am ausgewogensten","en":"balanced","ta":"சமநிலையான","ta_translit":"camanilaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"bedenklich","komp":"bedenklicher","sup":"am bedenklichsten","en":"questionable/worrying","ta":"சந்தேகத்திற்குரிய","ta_translit":"cantēkattiṟkuriya","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"bewusst","komp":"bewusster","sup":"am bewusstesten","en":"conscious","ta":"உணர்வுள்ள","ta_translit":"uṇarvuḷḷa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"bio (=biologisch)","komp":"bioer","sup":"am biosten","en":"organic","ta":"இயற்கை","ta_translit":"iyaṟkai","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"durchschnittlich","komp":"durchschnittlicher","sup":"am durchschnittlichsten","en":"average","ta":"சராசரியான","ta_translit":"carācariyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"groesse_menge"},{"w":"einseitig","komp":"einseitiger","sup":"am einseitigsten","en":"one-sided","ta":"ஒருதலைப்பட்சமான","ta_translit":"orutalaippaṭcamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"fett","komp":"fetter","sup":"am fettesten","en":"fatty","ta":"கொழுப்பான","ta_translit":"koḻuppāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"aussehen"},{"w":"fix","komp":"fixer","sup":"am fixesten","en":"fixed/quick","ta":"நிலையான / விரைவான","ta_translit":"nilaiyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"tempo"},{"w":"fleischfrei","komp":"fleischfreier","sup":"am fleischfreisten","en":"meat-free","ta":"சாப்பிடு","ta_translit":"cāppiṭu","icon":"eat","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"fleischlos","komp":"fleischloser","sup":"am fleischlosesten","en":"meatless","ta":"சாப்பிடு","ta_translit":"cāppiṭu","icon":"eat","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"furchtbar","komp":"furchtbarer","sup":"am furchtbarsten","en":"terrible","ta":"பயங்கரமான","ta_translit":"payaṅkaramāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"glutenfrei","komp":"glutenfreier","sup":"am glutenfreisten","en":"gluten-free","ta":"குளுட்டன் இல்லாத","ta_translit":"gluten free","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"grundsätzlich","komp":"grundsätzlicher","sup":"am grundsätzlichsten","en":"fundamental","ta":"அடிப்படையில் / பொதுவாக","ta_translit":"aṭippaṭaiyil","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"industriell","komp":"industrieller","sup":"am industriellsten","en":"industrial","ta":"தொழில்துறை சார்ந்த","ta_translit":"toḻiltuṟai cārnta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"technik"},{"w":"kulinarisch","komp":"kulinarischer","sup":"am kulinarischesten","en":"culinary","ta":"சமையற்கலை சார்ந்த","ta_translit":"camaiyaṟkalai","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesellschaft"},{"w":"laktosefrei","komp":"laktosefreier","sup":"am laktosefreisten","en":"lactose-free","ta":"செயல்படு","ta_translit":"ceyalpaṭu","icon":"team","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"moralisch","komp":"moralischer","sup":"am moralischesten","en":"morally","ta":"தார்மீக","ta_translit":"tārmīka","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"problemlos","komp":"problemloser","sup":"am problemlosesten","en":"problem-free","ta":"சிக்கல் இல்லாத","ta_translit":"cikkal illāta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"tierisch","komp":"tierischer","sup":"am tierischesten","en":"animal-derived","ta":"விலங்கு சார்ந்த","ta_translit":"vilaṅku cārnta","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"vegan","komp":"veganer","sup":"am vegansten","en":"vegan","ta":"முழு சைவ (பால் அற்ற)","ta_translit":"vegan","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"vereinbar","komp":"vereinbarer","sup":"am vereinbarsten","en":"compatible","ta":"இணக்கமான / பொருந்தக்கூடிய","ta_translit":"poruntakkūṭiya","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"zufällig","komp":"zufälliger","sup":"am zufälligsten","en":"random","ta":"செய்","ta_translit":"sey","icon":"wrench","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"absichtlich","komp":"absichtlicher","sup":"am absichtlichsten","en":"deliberate","ta":"விகிதம்","ta_translit":"vikitam","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"ärztlich","komp":"ärztlicher","sup":"am ärztlichsten","en":"medical","ta":"மருத்துவ ரீதியான","ta_translit":"maruttuva","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gesundheit"},{"w":"betrunken","komp":"betrunkener","sup":"am betrunkensten","en":"drunk","ta":"ஓடு","ta_translit":"ōṭu","icon":"walk","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"frustriert","komp":"frustrierter","sup":"am frustriertesten","en":"frustrated","ta":"விகிதம்","ta_translit":"vikitam","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"gefuehle"},{"w":"korrekt","komp":"korrekter","sup":"am korrektesten","en":"correct","ta":"சரியான","ta_translit":"cariyāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"qualitaet"},{"w":"optimistisch","komp":"optimistischer","sup":"am optimistischesten","en":"optimistic","ta":"நம்பிக்கையுடன்","ta_translit":"nampikkaiyuṭaṉ","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"versehentlich","komp":"versehentlicher","sup":"am versehentlichsten","en":"accidental","ta":"தவறுதலாக / எதிர்பாராமல்","ta_translit":"tavaṟutalāka","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"vorsichtig","komp":"vorsichtiger","sup":"am vorsichtigsten","en":"careful","ta":"கவனமான / எச்சரிக்கையான","ta_translit":"kavaṉamāṉa","icon":"abstract","source":"Einfach gut! B1","typ":"regular","cat":"charakter"},{"w":"ehrenamtlich","komp":"ehrenamtlicher","sup":"am ehrenamtlichsten","en":"voluntary","ta":"தன்னார்வ","ta_translit":"taṉṉārva","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"charakter"},{"w":"einsam","komp":"einsamer","sup":"am einsamsten","en":"lonely","ta":"தனிமையான","ta_translit":"taṉimaiyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gefuehle"},{"w":"schwer","komp":"schwerer","sup":"am schwersten","en":"difficult","ta":"கடினமான / கனமான","ta_translit":"kaṭiṉamāṉa / kaṉamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"sportlich","komp":"sportlicher","sup":"am sportlichsten","en":"athletic","ta":"விடு","ta_translit":"viṭu","icon":"balance","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"leicht","komp":"leichter","sup":"am leichtesten","en":"easy","ta":"எளிதான / இலகுவான","ta_translit":"eḷitāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"letzter/letzte/letztes","komp":"letzterer","sup":"am letztersten","en":"last","ta":"கடைசி","ta_translit":"kaṭaici","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"befristet","komp":"befristeter","sup":"am befristetesten","en":"limited","ta":"குறிப்பிட்ட கால வரம்புக்குட்பட்ட","ta_translit":"kāla varampu","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"zeit"},{"w":"sicher","komp":"sicherer","sup":"am sichersten","en":"secure","ta":"பாதுகாப்பான / நிச்சயமான","ta_translit":"pātukāppāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"unsicher","komp":"unsicherer","sup":"am unsichersten","en":"insecure","ta":"பாதுகாப்பற்ற","ta_translit":"pātukāppaṟṟa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"gleichberechtigt","komp":"gleichberechtigter","sup":"am gleichberechtigtesten","en":"equal","ta":"சமமான","ta_translit":"camamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"unfair","komp":"unfairer","sup":"am unfairsten","en":"unfair","ta":"நியாயமற்ற","ta_translit":"niyāyamaṟṟa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"gleich","komp":"gleicher","sup":"am gleichsten","en":"equal","ta":"சமமான","ta_translit":"camamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"zeit"},{"w":"ungleich","komp":"ungleicher","sup":"am ungleichsten","en":"unequal","ta":"சமமான","ta_translit":"camamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"belastend","komp":"belastender","sup":"am belastendesten","en":"onerous","ta":"சுமையான / மன அழுத்தமளிக்கும்","ta_translit":"cumaiyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"wertvoll","komp":"wertvoller","sup":"am wertvollsten","en":"valuable","ta":"மதிப்புமிக்க","ta_translit":"matippumikka","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"farbig","komp":"farbiger","sup":"am farbigsten","en":"colourful","ta":"வண்ணமயமான","ta_translit":"vaṇṇamayamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"gebraucht","komp":"gebrauchter","sup":"am gebrauchtesten","en":"used","ta":"பயன்படுத்து","ta_translit":"payanpaṭuttu","icon":"briefcase","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"schick","komp":"schicker","sup":"am schicksten","en":"chic","ta":"அழகான / ஸ்டைலான","ta_translit":"stylish","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"weich","komp":"weicher","sup":"am weichsten","en":"soft","ta":"மென்மையான","ta_translit":"meṉmaiyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"ständig","komp":"ständiger","sup":"am ständigsten","en":"constant","ta":"தொடர்ச்சியான / எப்போதும்","ta_translit":"toṭarcciyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"zeit"},{"w":"lebenswert","komp":"lebenswerter","sup":"am lebenswertesten","en":"liveable","ta":"வாழ்","ta_translit":"vāḻ","icon":"house","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"städtisch","komp":"städtischer","sup":"am städtischesten","en":"urban","ta":"நகர்ப்புற","ta_translit":"nakarppuṟa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"aktuell","komp":"aktueller","sup":"am aktuellsten","en":"current","ta":"தற்போதைய / நடப்பு","ta_translit":"taṟpōtaiya","icon":"money","source":"Auf jeden Fall!","typ":"regular","cat":"zeit"},{"w":"ausländisch","komp":"ausländischer","sup":"am ausländischesten","en":"foreign","ta":"வெளிநாட்டு","ta_translit":"veḷinaṭṭu","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"ernsthaft = ernst","komp":"ernsthafter","sup":"am ernsthaftesten","en":"serious","ta":"தீவிரமான","ta_translit":"tīviramāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"kulturell","komp":"kultureller","sup":"am kulturellsten","en":"cultural","ta":"பண்பாட்டு","ta_translit":"paṇpāṭṭu","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"scherzhaft","komp":"scherzhafter","sup":"am scherzhaftesten","en":"joking","ta":"வேடிக்கையான / விளையாட்டுத்தனமான","ta_translit":"vēṭikkaiyāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"ernsthaft","komp":"ernsthafter","sup":"am ernsthaftesten","en":"serious","ta":"தீவிரமான","ta_translit":"tīviramāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"satt","komp":"satter","sup":"am sattesten","en":"full","ta":"வயிறு நிறைந்த / திருப்தியான","ta_translit":"vayiṟu niṟainta","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"hungrig","komp":"hungriger","sup":"am hungrigsten","en":"hungry","ta":"பசியுள்ள","ta_translit":"paciyuḷḷa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"defekt = kaputt","komp":"defekter","sup":"am defektesten","en":"defective/broken","ta":"கெட்டுப்போன","ta_translit":"keṭṭuppōṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"hübsch","komp":"hübscher","sup":"am hübschesten","en":"pretty","ta":"அழகான","ta_translit":"aḻakāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"verpackt","komp":"verpackter","sup":"am verpacktesten","en":"packed","ta":"பொதி","ta_translit":"poti","icon":"wrench","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"unverpackt","komp":"unverpackter","sup":"am unverpacktesten","en":"unpacked","ta":"பொதி","ta_translit":"poti","icon":"wrench","source":"Auf jeden Fall!","typ":"regular","cat":"aussehen"},{"w":"abstrakt","komp":"abstrakter","sup":"am abstraktesten","en":"abstract","ta":"செயல்படு","ta_translit":"ceyalpaṭu","icon":"team","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"effektiv","komp":"effektiver","sup":"am effektivsten","en":"effective","ta":"பயனுள்ள","ta_translit":"payaṉuḷḷa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"intensiv","komp":"intensiver","sup":"am intensivsten","en":"intensive","ta":"தீவிரமான","ta_translit":"tīviramāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"komplex","komp":"komplexer","sup":"am komplexesten","en":"complex","ta":"சிக்கலான","ta_translit":"cikkalāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"groesse_menge"},{"w":"motorisch","komp":"motorischer","sup":"am motorischesten","en":"motor","ta":"இயக்க","ta_translit":"iyakka","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"relevant","komp":"relevanter","sup":"am relevantesten","en":"relevant","ta":"பொருத்தமான","ta_translit":"poruttamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"hilfreich","komp":"hilfreicher","sup":"am hilfreichsten","en":"helpful","ta":"உதவு","ta_translit":"utavu","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"theoretisch","komp":"theoretischer","sup":"am theoretischesten","en":"theoretical","ta":"கோட்பாட்டு","ta_translit":"kōṭpāṭṭu","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"deutlich","komp":"deutlicher","sup":"am deutlichsten","en":"clear","ta":"தெளிவான","ta_translit":"teḷivāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"extrem","komp":"extremer","sup":"am extremsten","en":"extreme","ta":"அளவுகடந்த / தீவிர","ta_translit":"tīvira","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"groesse_menge"},{"w":"nah","komp":"näher","sup":"am nächsten","en":"near","ta":"அருகில் உள்ள","ta_translit":"arukil uḷḷa","icon":"abstract","source":"Auf jeden Fall!","typ":"irregular","cat":"gesellschaft"},{"w":"heilig","komp":"heiliger","sup":"am heiligsten","en":"holy","ta":"புனிதமான","ta_translit":"puṉitamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"regional","komp":"regionaler","sup":"am regionalsten","en":"regional","ta":"பிராந்திய","ta_translit":"pirāntiya","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"unterschiedlich","komp":"unterschiedlicher","sup":"am unterschiedlichsten","en":"different","ta":"வேறுபட்ட","ta_translit":"vēṟupaṭṭa","icon":"money","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"weltweit","komp":"weltweiter","sup":"am weltweitesten","en":"worldwide","ta":"உலகளாவிய","ta_translit":"ulakaḷāviya","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"absolut","komp":"absoluter","sup":"am absolutesten","en":"absolutely","ta":"முழுமையான / முற்றிலும்","ta_translit":"muṟṟilum","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"groesse_menge"},{"w":"autofrei","komp":"autofreier","sup":"am autofreisten","en":"car-free","ta":"காரில்லா / வாகனமற்ற","ta_translit":"kārillā","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"automatisch","komp":"automatischer","sup":"am automatischesten","en":"automatic","ta":"தானியங்கி","ta_translit":"tāṉiyaṅki","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"billig","komp":"billiger","sup":"am billigsten","en":"cheap","ta":"மலிவான","ta_translit":"malivāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"wirtschaft"},{"w":"energieeffizient","komp":"energieeffizienter","sup":"am energieeffizientesten","en":"energy-efficient","ta":"ஆற்றல் சேமிக்கும் திறன் கொண்ட","ta_translit":"āṟṟal cēmikkum","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesundheit"},{"w":"bezahlbar","komp":"bezahlbarer","sup":"am bezahlbarsten","en":"affordable","ta":"வாங்கக்கூடிய விலையில்","ta_translit":"vāṅkakkūṭiya vilaiyil","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"wirtschaft"},{"w":"essbar","komp":"essbarer","sup":"am essbarsten","en":"edible","ta":"சாப்பிடக்கூடிய","ta_translit":"cāppiṭakkūṭiya","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"genießbar","komp":"genießbarer","sup":"am genießbarsten","en":"enjoyable","ta":"உண்ணக்கூடிய / சுவைக்கக்கூடிய","ta_translit":"uṇṇakkūṭiya","icon":"smile","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"lokal","komp":"lokaler","sup":"am lokalsten","en":"local","ta":"உள்ளூர்","ta_translit":"uḷḷūr","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"national","komp":"nationaler","sup":"am nationalsten","en":"national","ta":"தேசிய","ta_translit":"tēciya","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"virtuell","komp":"virtueller","sup":"am virtuellsten","en":"virtual","ta":"மெய்நிகர்","ta_translit":"meynikar","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"gesamt","komp":"gesamter","sup":"am gesamtesten","en":"total","ta":"மொத்த","ta_translit":"motta","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"groesse_menge"},{"w":"allgemein","komp":"allgemeiner","sup":"am allgemeinsten","en":"general","ta":"பொதுவான","ta_translit":"potuvāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"groesse_menge"},{"w":"bekannt","komp":"bekannter","sup":"am bekanntesten","en":"known","ta":"தெரி","ta_translit":"teri","icon":"think","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"egoistisch","komp":"egoistischer","sup":"am egoistischesten","en":"selfish","ta":"சுயநலமான","ta_translit":"cuyanalamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"charakter"},{"w":"gerecht","komp":"gerechter","sup":"am gerechtesten","en":"fair","ta":"நியாயமான","ta_translit":"niyāyamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"ungerecht","komp":"ungerechter","sup":"am ungerechtesten","en":"unfair","ta":"நியாயமற்ற","ta_translit":"niyāyamaṟṟa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"wirtschaftlich","komp":"wirtschaftlicher","sup":"am wirtschaftlichsten","en":"economically","ta":"அழை","ta_translit":"aḻai","icon":"phone","source":"Auf jeden Fall!","typ":"regular","cat":"wirtschaft"},{"w":"bezahlt","komp":"bezahlter","sup":"am bezahltesten","en":"paid","ta":"ஊதியம் பெற்ற","ta_translit":"ūtiyam peṟṟa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"wirtschaft"},{"w":"unbezahlt","komp":"unbezahlter","sup":"am unbezahltesten","en":"unpaid","ta":"ஊதியம் பெற்ற","ta_translit":"ūtiyam peṟṟa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"wirtschaft"},{"w":"(voll)autonom","komp":"autonomer","sup":"am autonomsten","en":"(fully) autonomous","ta":"தானியங்கி / முழு தன்னாட்சி","ta_translit":"tāṉiyaṅki","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"elektrisch","komp":"elektrischer","sup":"am elektrischesten","en":"electrical","ta":"மின்சார","ta_translit":"miṉcāra","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"lebensecht","komp":"lebensechter","sup":"am lebensechtesten","en":"lifelike","ta":"உயிரோட்டமான / தத்ரூபமான","ta_translit":"tatrūpamāṉa","icon":"heart","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"maschinell","komp":"maschineller","sup":"am maschinellsten","en":"automatic","ta":"இயந்திர முறை","ta_translit":"iyantira muṟai","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"menschlich","komp":"menschlicher","sup":"am menschlichsten","en":"human","ta":"மனிதநேயமுள்ள","ta_translit":"maṉitanēyamuḷḷa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"überflüssig","komp":"überflüssiger","sup":"am überflüssigsten","en":"superfluous","ta":"அனாவசியமான / தேவையற்ற","ta_translit":"anāvasiyamāṉa","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"qualitaet"},{"w":"zwischenmenschlich","komp":"zwischenmenschlicher","sup":"am zwischenmenschlichsten","en":"interpersonal","ta":"மனிதர்களுக்கு இடையேயான","ta_translit":"maṉitarkaḷukku iṭaiyē","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gesellschaft"},{"w":"KI-generiert","komp":"KI-generierter","sup":"am KI-generiertesten","en":"AI-generated","ta":"விகிதம்","ta_translit":"vikitam","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"technik"},{"w":"unheimlich","komp":"unheimlicher","sup":"am unheimlichsten","en":"sinister","ta":"பயமுறுத்தும் / மிகுந்த","ta_translit":"payamuṟuttum","icon":"abstract","source":"Auf jeden Fall!","typ":"regular","cat":"gefuehle"}];
+NOUNS.forEach(v=> v.uid = 'n|'+v.level+'|'+v.sg);
+ADJS.forEach(v=> v.uid = 'a|'+v.w);
+
+
+const NOUN_MNEMONIC_DB = {
+  "fußgängerzone": {
+    image: "Imagine a giant, friendly cartoon FOOT walking peacefully down a wide cobblestone street where all cars and traffic are strictly forbidden.",
+    breakdown: ["Fuß (foot)", "Gänger (walker)", "Zone (zone)"],
+    breakdownEn: "FOOT-WALKER ZONE",
+    emojiScene: "🚶🚶🚶 People walking + 🚫🚗 No cars → Fußgängerzone",
+    punch: "DIE + FOOT + WALKER + ZONE → die Fußgängerzone"
+  },
+  "wohnung": {
+    image: "Imagine relaxing in your cozy APARTMENT where you 'WON' (wohn-) ultimate peace, quiet, and independence.",
+    breakdown: ["Wohnen (to live/reside)", "-ung (noun suffix)"],
+    breakdownEn: "LIVING PLACE / FLAT",
+    emojiScene: "🛋️ Cozy home + 🔑 Private key → die Wohnung",
+    punch: "DIE + WOHNEN (-ung) → die Wohnung"
+  },
+  "mädchen": {
+    image: "Imagine a little cheerful girl wearing a red coat. The diminutive suffix '-chen' shrinks everything into cute NEUTER (das)!",
+    breakdown: ["Magd (young maiden/girl)", "-chen (little/diminutive)"],
+    breakdownEn: "LITTLE MAIDEN / GIRL",
+    emojiScene: "👧 Little girl + 🎀 Small diminutive (-chen) → das Mädchen",
+    punch: "DAS + MÄD- + -CHEN → das Mädchen"
+  },
+  "apfel": {
+    image: "Imagine biting into a crisp, juicy red APPLE that makes a loud 'CRUNCH'! The singular 'A' flips into 'Ä' for plural (Äpfel).",
+    breakdown: ["Apfel (Germanic apple)"],
+    breakdownEn: "CRISP RED APPLE",
+    emojiScene: "🍎 Crisp apple + 🌳 Fruit tree → der Apfel",
+    punch: "DER + APPLE (A → Ä) → der Apfel"
+  },
+  "kind": {
+    image: "Imagine a happy young CHILD playing kindly with wooden building blocks.",
+    breakdown: ["Kind (kin / child)"],
+    breakdownEn: "YOUNG CHILD",
+    emojiScene: "👶 Happy child + 🧸 Toys (-er plural) → das Kind",
+    punch: "DAS + KIND (+er) → das Kind"
+  },
+  "auto": {
+    image: "Imagine a sleek, shiny blue sports CAR zooming down the German Autobahn. Ends in '-o' like Kino/Foto → neuter DAS!",
+    breakdown: ["Auto (automobile / self-moving)"],
+    breakdownEn: "MOTOR VEHICLE / CAR",
+    emojiScene: "🚗 Fast car + 🛣️ Autobahn → das Auto",
+    punch: "DAS + AUTO (+s) → das Auto"
+  },
+  "schlüssel": {
+    image: "Imagine turning a solid silver KEY that goes 'CLICK' to close and lock (schließen) your front door safely.",
+    breakdown: ["Schließen (to lock/close)", "-el (tool suffix)"],
+    breakdownEn: "LOCKING TOOL / KEY",
+    emojiScene: "🗝️ Silver key + 🔒 Secure lock → der Schlüssel",
+    punch: "DER + SCHLIESSEN TOOL → der Schlüssel"
+  },
+  "lampe": {
+    image: "Imagine switching on an elegant glowing bedside LAMP that illuminates the whole dark room in warm light.",
+    breakdown: ["Lampe (light fixture)"],
+    breakdownEn: "GLOWING LIGHT LAMP",
+    emojiScene: "💡 Glowing lamp + 🛏️ Bedside table → die Lampe",
+    punch: "DIE + LAMP (-e) → die Lampe"
+  },
+  "buch": {
+    image: "Imagine opening an ancient leather-bound BOOK filled with magical stories and glowing letters. Plural adds umlaut: Bücher!",
+    breakdown: ["Buch (beech wood tablet / book)"],
+    breakdownEn: "BOUND BOOK",
+    emojiScene: "📖 Open book + 📚 Library shelf → das Buch",
+    punch: "DAS + BOOK (u → ü + er) → das Buch"
+  },
+  "möglichkeit": {
+    image: "Imagine a golden master key unlocking multiple glowing doors of endless OPPORTUNITY and possibility. Suffix '-keit' is 100% DIE!",
+    breakdown: ["Möglich (possible)", "-keit (quality / state)"],
+    breakdownEn: "STATE OF POSSIBILITY / OPTION",
+    emojiScene: "🚪 Open doors + ✨ Endless choices → die Möglichkeit",
+    punch: "DIE + MÖGLICH + -KEIT → die Möglichkeit"
+  },
+  "arbeitsplatz": {
+    image: "Imagine walking into your modern office and sitting at your dedicated WORK DESK equipped with monitor, notebook, and coffee.",
+    breakdown: ["Arbeit (work)", "s (connector)", "Platz (place / spot)"],
+    breakdownEn: "WORK PLACE / JOB SPOT",
+    emojiScene: "💼 Work tasks + 🖥️ Office desk → der Arbeitsplatz",
+    punch: "DER + ARBEIT + PLATZ → der Arbeitsplatz"
+  },
+  "fahrkartenautomat": {
+    image: "Imagine standing on the train platform tapping the touchscreen of a tall, red TICKET VENDING MACHINE to buy your train pass.",
+    breakdown: ["Fahrkarte (travel ticket)", "n (connector)", "Automat (vending machine)"],
+    breakdownEn: "TRAVEL-TICKET MACHINE",
+    emojiScene: "🎫 Train ticket + 🤖 Dispenser machine → der Fahrkartenautomat",
+    punch: "DER + FAHRKARTE + AUTOMAT → der Fahrkartenautomat"
+  },
+  "krankenhaus": {
+    image: "Imagine a large, modern hospital building where dedicated doctors and nurses help sick people recover.",
+    breakdown: ["Kranken (sick people/patients)", "Haus (building/house)"],
+    breakdownEn: "SICK-PEOPLE HOUSE / HOSPITAL",
+    emojiScene: "🏥 Hospital building + 🩺 Doctors caring → das Krankenhaus",
+    punch: "DAS + KRANKEN + HAUS → das Krankenhaus"
+  }
+};
+
+function analyzeNoun(v) {
+  const sg = (v.sg || '').trim();
+  const sgLower = sg.toLowerCase();
+  const art = (v.a || '').trim().toLowerCase();
+  const pl = (v.pl || '').trim();
+  const plLower = pl.toLowerCase();
+  const en = v.en || 'noun';
+  const ta = v.ta || '';
+
+  // --- A. GENDER RULE ANALYSIS ---
+  let genderRule = '';
+  let genderClass = art === 'die' ? 'fem' : art === 'der' ? 'masc' : 'neut';
+
+  if (sgLower.endsWith('ung')) {
+    genderRule = '🔴 <b>-ung → DIE:</b> 100% feminine suffix for action/process nouns (e.g. <i>die Wohnung, die Rechnung, die Zeitung</i>).';
+  } else if (sgLower.endsWith('heit')) {
+    genderRule = '🔴 <b>-heit → DIE:</b> 100% feminine suffix for states and qualities (e.g. <i>die Gesundheit, die Freiheit, die Wahrheit</i>).';
+  } else if (sgLower.endsWith('keit')) {
+    genderRule = '🔴 <b>-keit → DIE:</b> 100% feminine suffix for abstract properties and abilities (e.g. <i>die Möglichkeit, die Pünktlichkeit</i>).';
+  } else if (sgLower.endsWith('schaft')) {
+    genderRule = '🔴 <b>-schaft → DIE:</b> 100% feminine suffix for collectives and relations (e.g. <i>die Freundschaft, die Mannschaft</i>).';
+  } else if (sgLower.endsWith('tion') || sgLower.endsWith('sion') || sgLower.endsWith('ion')) {
+    genderRule = '🔴 <b>-ion / -tion → DIE:</b> 100% feminine Latin loan suffix (e.g. <i>die Station, die Information, die Diskussion</i>).';
+  } else if (sgLower.endsWith('tät')) {
+    genderRule = '🔴 <b>-tät → DIE:</b> 100% feminine suffix for qualities and institutions (e.g. <i>die Universität, die Qualität</i>).';
+  } else if (sgLower.endsWith('ik')) {
+    genderRule = '🔴 <b>-ik → DIE:</b> Feminine suffix for fields, arts, and systems (e.g. <i>die Musik, die Politik, die Grammatik</i>).';
+  } else if (sgLower.endsWith('in') && (art === 'die')) {
+    genderRule = '🔴 <b>-in → DIE:</b> Feminine suffix for female professions and persons (e.g. <i>die Kollegin, die Ärztin, die Lehrerin</i>).';
+  } else if (sgLower.endsWith('ei') || sgLower.endsWith('erei')) {
+    genderRule = '🔴 <b>-ei → DIE:</b> Feminine suffix for businesses and workshops (e.g. <i>die Bäckerei, die Bücherei, die Datei</i>).';
+  } else if (sgLower.endsWith('chen')) {
+    genderRule = '🟢 <b>-chen → DAS:</b> 100% neuter diminutive suffix that makes things small/endearing (e.g. <i>das Mädchen, das Brötchen</i>).';
+  } else if (sgLower.endsWith('lein')) {
+    genderRule = '🟢 <b>-lein → DAS:</b> 100% neuter diminutive suffix (e.g. <i>das Fräulein, das Büchlein</i>).';
+  } else if (sgLower.endsWith('ment')) {
+    genderRule = '🟢 <b>-ment → DAS:</b> Neuter suffix for instruments and documents (e.g. <i>das Dokument, das Medikament</i>).';
+  } else if (sgLower.endsWith('um')) {
+    genderRule = '🟢 <b>-um → DAS:</b> 100% neuter Latin suffix for centers, dates, and institutions (e.g. <i>das Zentrum, das Museum, das Datum</i>).';
+  } else if (sgLower.endsWith('tum') && art === 'das') {
+    genderRule = '🟢 <b>-tum → DAS:</b> Neuter suffix for collective states (e.g. <i>das Eigentum, das Wachstum</i>; exceptions: der Reichtum/Irrtum).';
+  } else if (sgLower.endsWith('ma') && art === 'das') {
+    genderRule = '🟢 <b>-ma → DAS:</b> Neuter Greek loan suffix (e.g. <i>das Thema, das Klima, das Drama</i>).';
+  } else if (sgLower.endsWith('o') && art === 'das') {
+    genderRule = '🟢 <b>-o → DAS:</b> Neuter international loan suffix (e.g. <i>das Auto, das Foto, das Kino, das Büro, das Radio</i>).';
+  } else if (sgLower.endsWith('ismus')) {
+    genderRule = '🔵 <b>-ismus → DER:</b> 100% masculine suffix for systems, movements, and concepts (e.g. <i>der Tourismus, der Optimismus</i>).';
+  } else if (sgLower.endsWith('or') && art === 'der') {
+    genderRule = '🔵 <b>-or → DER:</b> 100% masculine Latin suffix for actors and apparatus (e.g. <i>der Motor, der Doktor, der Professor</i>).';
+  } else if (sgLower.endsWith('ling')) {
+    genderRule = '🔵 <b>-ling → DER:</b> 100% masculine suffix for persons and living things (e.g. <i>der Schmetterling, der Lehrling, der Frühling</i>).';
+  } else if (sgLower.endsWith('ist') && art === 'der') {
+    genderRule = '🔵 <b>-ist → DER:</b> 100% masculine person suffix (e.g. <i>der Polizist, der Tourist, der Spezialist</i>).';
+  } else if ((sgLower.endsWith('ant') || sgLower.endsWith('ent')) && art === 'der') {
+    genderRule = '🔵 <b>-ant / -ent → DER:</b> Masculine person suffix (e.g. <i>der Praktikant, der Assistent, der Student</i>).';
+  } else if (art === 'die' && sgLower.endsWith('e')) {
+    genderRule = '🔴 <b>Useful Feminine Rule:</b> Many German nouns ending in <i>-e</i> are feminine, so <b>DIE</b> is a useful first guess (e.g. <i>die Zone, die Straße, die Lampe, die Schule</i>) — though there are exceptions (e.g. <i>der Name, der Junge, das Auge, das Ende</i>).';
+  } else if (art === 'der' && sgLower.endsWith('e')) {
+    genderRule = '🔵 <b>Weak Masculine (N-Deklination):</b> Masculine persons/beings ending in <i>-e</i> are <b>der</b> (e.g. <i>der Kollege, der Junge, der Kunde, der Name</i>).';
+  } else if (art === 'das' && sg[0] === sg[0].toUpperCase() && sgLower.endsWith('en') && !sgLower.endsWith('chen')) {
+    genderRule = '🟢 <b>Nominalized Verb Rule:</b> Verbs converted into capitalized nouns are 100% <b>das</b> (e.g. <i>das Essen, das Lernen, das Leben</i>).';
+  } else if (art === 'der' && (sgLower.endsWith('er') || sgLower.endsWith('el'))) {
+    genderRule = '🔵 <b>-er / -el Agent/Tool Rule:</b> Nouns denoting an active person or mechanical tool ending in <i>-er / -el</i> are usually <b>der</b> (e.g. <i>der Schlüssel, der Fahrer, der Computer</i>).';
+  } else {
+    if (art === 'der') {
+      genderRule = '🔵 <b>Visual Gender Anchor:</b> Picture <b>' + sg + '</b> with a bold <b>blue shield / masculine anchor (DER)</b>.';
+    } else if (art === 'die') {
+      genderRule = '🔴 <b>Visual Gender Anchor:</b> Picture <b>' + sg + '</b> with a vibrant <b>red flower / feminine anchor (DIE)</b>.';
+    } else {
+      genderRule = '🟢 <b>Visual Gender Anchor:</b> Picture <b>' + sg + '</b> with a fresh <b>green gift box / neuter anchor (DAS)</b>.';
+    }
+  }
+
+  // --- B. PLURAL PATTERN & UMLAUT ANALYSIS ---
+  let pluralPattern = '';
+  let pluralTrick = '';
+  let umlautStatus = '🟢 No umlaut';
+
+  const hasUmlautSg = /[äöüÄÖÜ]/.test(sg);
+  const hasUmlautPl = /[äöüÄÖÜ]/.test(pl);
+  const gainsUmlaut = !hasUmlautSg && hasUmlautPl;
+
+  if (plLower === sgLower || plLower === '') {
+    pluralPattern = 'Unchanged (unverändert)';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut alone';
+      pluralTrick = 'Umlaut alone (vowel changes, no ending added): ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Unchanged ending (stem stays intact, only article becomes die): ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('innen') && sgLower.endsWith('in')) {
+    pluralPattern = '+ -nen';
+    umlautStatus = '🟢 No umlaut';
+    pluralTrick = 'Add <b>-nen</b> for female professions: ' + sg + ' → die ' + pl;
+  } else if (plLower.endsWith('en') && !sgLower.endsWith('en')) {
+    pluralPattern = '+ -en';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-en</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-en</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('n') && !sgLower.endsWith('n')) {
+    pluralPattern = '+ -n';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-n</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-n</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('er') && !sgLower.endsWith('er')) {
+    pluralPattern = '+ -er';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-er</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-er</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('e') && !sgLower.endsWith('e')) {
+    pluralPattern = '+ -e';
+    if (gainsUmlaut) {
+      umlautStatus = '🟠 Umlaut + ending';
+      pluralTrick = 'Add <b>-e</b> + Umlaut: ' + sg + ' → die ' + pl;
+    } else {
+      umlautStatus = '🟢 No umlaut';
+      pluralTrick = 'Add <b>-e</b>: ' + sg + ' → die ' + pl;
+    }
+  } else if (plLower.endsWith('s') && !sgLower.endsWith('s')) {
+    pluralPattern = '+ -s';
+    umlautStatus = '🟢 No umlaut';
+    pluralTrick = 'Add <b>-s</b> (international loan pattern): ' + sg + ' → die ' + pl;
+  } else if (gainsUmlaut) {
+    umlautStatus = '🟠 Umlaut alone';
+    pluralTrick = 'Umlaut shift: ' + sg + ' → die ' + pl;
+  } else {
+    pluralPattern = 'Special / Irregular';
+    pluralTrick = 'Plural form: ' + sg + ' → die ' + pl;
+  }
+
+  // --- C. COMPOUND WORD BREAKDOWN ---
+  let wordBreakdown = [];
+  let breakdownEn = '';
+  const directMnemonic = NOUN_MNEMONIC_DB[sgLower];
+
+  if (directMnemonic && directMnemonic.breakdown) {
+    wordBreakdown = directMnemonic.breakdown;
+    breakdownEn = directMnemonic.breakdownEn;
+  } else {
+    const rootsFound = [];
+    let rem = sgLower;
+    const sortedKeys = Object.keys(COMPOUND_ROOTS_DB).sort((a, b) => b.length - a.length);
+
+    for (const k of sortedKeys) {
+      const idx = rem.indexOf(k);
+      if (idx !== -1 && k.length >= 3) {
+        rootsFound.push({ idx: idx, key: k, info: COMPOUND_ROOTS_DB[k] });
+      }
+    }
+
+    rootsFound.sort((a, b) => a.idx - b.idx);
+    if (rootsFound.length >= 2) {
+      wordBreakdown = rootsFound.map(r => r.info.de + ' (' + r.info.en + ')');
+      breakdownEn = rootsFound.map(r => r.info.en.toUpperCase().split('/')[0].trim()).join(' + ');
+    } else if (rootsFound.length === 1 && rootsFound[0].key.length < sgLower.length) {
+      const r = rootsFound[0];
+      const suffix = sgLower.replace(r.key, '');
+      wordBreakdown = [r.info.de + ' (' + r.info.en + ')', (suffix.startsWith('-') ? suffix : '+' + suffix)];
+      breakdownEn = r.info.en.toUpperCase();
+    }
+  }
+
+  // --- D. MNEMONIC IMAGE, EMOJI SCENE & PUNCH FORMULA ---
+  let mentalImage = '';
+  let emojiScene = '';
+  let punch = '';
+
+  if (directMnemonic) {
+    mentalImage = directMnemonic.image;
+    emojiScene = directMnemonic.emojiScene;
+    punch = directMnemonic.punch;
+  } else if (wordBreakdown.length >= 2) {
+    mentalImage = 'Deconstruct the compound: ' + wordBreakdown.join(' + ') + '. Picture the composite concept clearly to reconstruct the word!';
+    emojiScene = '🧩 ' + wordBreakdown.map(b => b.split(' ')[0]).join(' + ') + ' → ' + art.toUpperCase() + ' ' + sg;
+    punch = art.toUpperCase() + ' + ' + (breakdownEn || sg.toUpperCase()) + ' → ' + art + ' ' + sg;
+  } else {
+    mentalImage = 'Picture ' + en + ' (' + ta + ') vividly with ' + (art === 'der' ? 'a blue masculine anchor (DER)' : art === 'die' ? 'a red feminine anchor (DIE)' : 'a green neuter anchor (DAS)') + '.';
+    emojiScene = (art === 'der' ? '🔵' : art === 'die' ? '🔴' : '🟢') + ' ' + sg + ' → ' + en;
+    punch = art.toUpperCase() + ' + ' + sg.toUpperCase() + ' → ' + art + ' ' + sg;
+  }
+
+  return {
+    sg: sg,
+    art: art,
+    artUpper: art.toUpperCase(),
+    pl: pl,
+    en: en,
+    ta: ta,
+    genderClass: genderClass,
+    genderRule: genderRule,
+    pluralPattern: pluralPattern,
+    pluralTrick: pluralTrick,
+    umlautStatus: umlautStatus,
+    wordBreakdown: wordBreakdown,
+    breakdownEn: breakdownEn,
+    mentalImage: mentalImage,
+    emojiScene: emojiScene,
+    punch: punch
+  };
+}
+
+function getCheatCodesForWord(w, cat, opt = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase();
+  const rawWord = lower.replace(/^sich\s+/, '').replace(/^(der|die|das)\s+/, '');
+  const hints = [];
+
+  // NOUN CHEAT CODES
+  if (cat === 'n' || opt.art || ['der', 'die', 'das'].includes(opt.art)) {
+    const art = opt.art || (word.startsWith('der ') ? 'der' : word.startsWith('die ') ? 'die' : word.startsWith('das ') ? 'das' : '');
+    const femSuffixes = ['ung', 'heit', 'keit', 'schaft', 'tion', 'tät', 'in', 'ik', 'ur', 'ei', 'ade', 'anz', 'enz'];
+    const neutSuffixes = ['chen', 'lein', 'ment', 'um', 'tum', 'ma'];
+    const mascSuffixes = ['ismus', 'ist', 'or', 'ling', 'ant', 'ent', 'eur', 'ich', 'ig'];
+
+    const matchedFem = femSuffixes.find(s => rawWord.endsWith(s));
+    const matchedNeut = neutSuffixes.find(s => rawWord.endsWith(s));
+    const matchedMasc = mascSuffixes.find(s => rawWord.endsWith(s));
+
+    if (matchedFem) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🔴 100% Feminine Suffix Lock: -${matchedFem} → DIE`,
+        badge: '100% Accurate DIE',
+        rule: `Nouns ending in <b>-${matchedFem}</b> are <b>100% FEMININE (die)</b>. Plural rule: always adds <b>-${matchedFem === 'in' ? 'nen' : 'en'}</b> (e.g. <i>die ${rawWord} → die ${rawWord}${matchedFem === 'in' ? 'nen' : 'en'}</i>).`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedFem} என முடிந்தால் 100% 'die' (பெண்பால்)! பன்மைக்கு -${matchedFem === 'in' ? 'nen' : 'en'} சேர்க்கவும்.`
+      });
+    } else if (matchedNeut) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🟢 100% Neuter Suffix Lock: -${matchedNeut} → DAS`,
+        badge: '100% Accurate DAS',
+        rule: `Nouns ending in <b>-${matchedNeut}</b> are <b>100% NEUTER (das)</b>. Diminutives like <i>-chen / -lein</i> have NO plural ending change.`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedNeut} என முடிந்தால் 100% 'das' (ஒன்றன்பால்)!`
+      });
+    } else if (matchedMasc) {
+      hints.push({
+        num: 'Shortcut 11',
+        title: `🔵 95% Masculine Suffix Lock: -${matchedMasc} → DER`,
+        badge: '95% Accurate DER',
+        rule: `Nouns ending in <b>-${matchedMasc}</b> are <b>95% MASCULINE (der)</b>.`,
+        tamil: `💡 <b>Suffix Lock:</b> -${matchedMasc} என முடிந்தால் 95% 'der' (ஆண்பால்)!`
+      });
+    }
+
+    if (rawWord.length > 8 && !matchedFem && !matchedNeut && !matchedMasc) {
+      hints.push({
+        num: 'Shortcut 12',
+        title: '🧩 The Last-Word Captain Rule (Compound Nouns)',
+        badge: 'Gender Anchor',
+        rule: `In compound nouns, the <b>very last word component</b> determines the gender and plural with 100% authority!`,
+        tamil: '💡 <b>Compound Hack:</b> கூட்டுப் பெயர்களில் கடைசி சொல்லே Article மற்றும் Plural-ஐ தீர்மானிக்கும்!'
+      });
+    }
+
+    if (art === 'die' && !matchedFem) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Feminine Plural Default: -(e)n',
+        badge: '95% Plural Rule',
+        rule: '95% of feminine German nouns take <b>-(e)n</b> in the plural (e.g. <i>die Sprache → die Sprachen, die Frau → die Frauen</i>).',
+        tamil: '💡 <b>Plural Hack:</b> \'die\' பெயர்ச்சொற்கள் 95% பன்மையில் -(e)n பெறும்!'
+      });
+    } else if (art === 'der' && !matchedMasc) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Masculine Plural Default: -e + Umlaut',
+        badge: '80% Plural Rule',
+        rule: 'Most masculine nouns form plurals with <b>-e</b>, often adding an Umlaut on a/o/u (e.g. <i>der Stuhl → die Stühle, der Tag → die Tage</i>). Doer nouns in <i>-er</i> keep the same form (<i>der Lehrer → die Lehrer</i>).',
+        tamil: '💡 <b>Plural Hack:</b> \'der\' பெயர்ச்சொற்கள் பெரும்பாலும் -e மற்றும் Umlaut பெறும்!'
+      });
+    } else if (art === 'das' && !matchedNeut) {
+      hints.push({
+        num: 'Shortcut 13',
+        title: '📦 Neuter Plural Default: -er + Umlaut or -e',
+        badge: 'Neuter Plural Rule',
+        rule: 'Monosyllabic neuter nouns typically take <b>-er + Umlaut</b> in plural (e.g. <i>das Haus → die Häuser, das Kind → die Kinder, das Buch → die Bücher</i>).',
+        tamil: '💡 <b>Plural Hack:</b> ஓரசை \'das\' சொற்கள் பன்மையில் -er + Umlaut பெறும்!'
+      });
+    }
+  }
+
+  // ADJECTIVE CHEAT CODES
+  if (cat === 'adj') {
+    const umlautAdjs = ['alt', 'jung', 'groß', 'klein', 'warm', 'kalt', 'stark', 'schwach', 'kurz', 'lang', 'klug', 'dumm', 'nah', 'hoch', 'hart', 'arm', 'scharf'];
+    if (umlautAdjs.includes(rawWord)) {
+      hints.push({
+        num: 'Shortcut 27',
+        title: '⚡ 1-Syllable Comparative Umlaut Rule (a, o, u → ä, ö, ü)',
+        badge: 'Comparative Umlaut',
+        rule: `Short 1-syllable adjectives with <b>a, o, u</b> almost always get an <b>Umlaut</b> in Comparative & Superlative (e.g. <i>${rawWord} → ${rawWord.replace('a','ä').replace('o','ö').replace('u','ü')}er</i>).`,
+        tamil: '💡 <b>Adjective Hack:</b> a, o, u உள்ள ஓரசை உரிச்சொற்கள் Comparative-ல் Umlaut (ä, ö, ü) பெறும்!'
+      });
+    }
+
+    if (rawWord.endsWith('el') || rawWord.endsWith('er')) {
+      hints.push({
+        num: 'Shortcut 28',
+        title: '✂️ The -el / -er Stem Contraction Rule',
+        badge: 'Drop the -e-',
+        rule: `Adjectives ending in <b>-el</b> (e.g. <i>dunkel, edel, flexibel</i>) drop the root <b>-e-</b> before adding comparative or adjective declension endings (<i>dunkel → dunkler / ein dunkles Zimmer</i>).`,
+        tamil: '💡 <b>Contraction Hack:</b> -el முடிவடையும் Adjectives-ல் நடுவில் உள்ள \'e\' மறைந்துவிடும் (dunkel → dunkler)!'
+      });
+    }
+
+    if (rawWord.endsWith('bar')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -bar = "-able / Feasible"',
+        badge: 'Word Building',
+        rule: `<b>-bar</b> turns verbs into passive abilities (e.g. <i>machbar = doable, bezahlbar = affordable, sichtbar = visible</i>).`,
+        tamil: '💡 <b>Meaning:</b> -bar = செய்யக்கூடிய (English: -able).'
+      });
+    } else if (rawWord.endsWith('los')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -los = "-less / Without"',
+        badge: 'Word Building',
+        rule: `<b>-los</b> indicates absence of something (e.g. <i>arbeitslos = jobless, kostenlos = free of charge, schlaflos = sleepless</i>).`,
+        tamil: '💡 <b>Meaning:</b> -los = இல்லாத / அற்ற (English: -less).'
+      });
+    } else if (rawWord.endsWith('reich') || rawWord.endsWith('voll')) {
+      hints.push({
+        num: 'Shortcut 29',
+        title: '🧩 Adjective Suffix: -reich / -voll = "Full of / Rich in"',
+        badge: 'Word Building',
+        rule: `<b>-reich / -voll</b> indicates abundance (e.g. <i>erfolgreich = successful, wertvoll = valuable, hilfreich = helpful</i>).`,
+        tamil: '💡 <b>Meaning:</b> -reich / -voll = நிறைந்த / மிகுதியான.'
+      });
+    }
+  }
+
+  return hints;
+}
+
+function analyzeGermanLinguistics(w, cat, metadata = {}) {
+  const word = (w || '').trim();
+  const lower = word.toLowerCase().replace(/^(der|die|das)\s+/, '').replace(/^sich\s+/, '');
+  const en = metadata.en || '';
+  const ta = metadata.ta || '';
+
+  const keys = Object.keys(COMPOUND_ROOTS_DB).sort((a,b) => b.length - a.length);
+  let matchedParts = [];
+
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    if (lower.startsWith(k)) {
+      const rest = lower.slice(k.length);
+      let glue = '';
+      let cleanRest = rest;
+      if (rest.startsWith('s') && rest.length > 2) { glue = 's'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('en') && rest.length > 3) { glue = 'en'; cleanRest = rest.slice(2); }
+      else if (rest.startsWith('n') && rest.length > 2) { glue = 'n'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('e') && rest.length > 2) { glue = 'e'; cleanRest = rest.slice(1); }
+      else if (rest.startsWith('er') && rest.length > 3) { glue = 'er'; cleanRest = rest.slice(2); }
+
+      for (let j = 0; j < keys.length; j++) {
+        const k2 = keys[j];
+        if (cleanRest === k2 || cleanRest.startsWith(k2)) {
+          matchedParts = [
+            { raw: k, info: COMPOUND_ROOTS_DB[k] },
+            { glue: glue },
+            { raw: cleanRest, info: COMPOUND_ROOTS_DB[k2] || { de: cleanRest, en: cleanRest, ta: cleanRest } }
+          ];
+          break;
+        }
+      }
+      if (matchedParts.length > 0) break;
+    }
+  }
+
+  if (matchedParts.length === 0) {
+    if (lower === 'handschuh') {
+      matchedParts = [{ raw: 'hand', info: COMPOUND_ROOTS_DB['hand'] }, { glue: '' }, { raw: 'schuh', info: COMPOUND_ROOTS_DB['schuh'] }];
+    } else if (lower === 'kühlschrank') {
+      matchedParts = [{ raw: 'kühl', info: COMPOUND_ROOTS_DB['kühl'] }, { glue: '' }, { raw: 'schrank', info: COMPOUND_ROOTS_DB['schrank'] }];
+    } else if (lower === 'wörterbuch') {
+      matchedParts = [{ raw: 'wörter', info: COMPOUND_ROOTS_DB['wörter'] }, { glue: '' }, { raw: 'buch', info: COMPOUND_ROOTS_DB['buch'] }];
+    } else if (lower === 'arbeitsplatz') {
+      matchedParts = [{ raw: 'arbeit', info: COMPOUND_ROOTS_DB['arbeit'] }, { glue: 's' }, { raw: 'platz', info: COMPOUND_ROOTS_DB['platz'] }];
+    } else if (lower === 'schweinefleisch') {
+      matchedParts = [{ raw: 'schwein', info: COMPOUND_ROOTS_DB['schwein'] }, { glue: 'e' }, { raw: 'fleisch', info: COMPOUND_ROOTS_DB['fleisch'] }];
+    } else if (lower === 'sonnenbrille') {
+      matchedParts = [{ raw: 'sonne', info: COMPOUND_ROOTS_DB['sonne'] }, { glue: 'n' }, { raw: 'brille', info: COMPOUND_ROOTS_DB['brille'] }];
+    } else if (lower === 'krankenhaus') {
+      matchedParts = [{ raw: 'krank', info: COMPOUND_ROOTS_DB['krank'] }, { glue: 'en' }, { raw: 'haus', info: COMPOUND_ROOTS_DB['haus'] }];
+    } else if (lower === 'kindergarten') {
+      matchedParts = [{ raw: 'kind', info: COMPOUND_ROOTS_DB['kind'] }, { glue: 'er' }, { raw: 'garten', info: COMPOUND_ROOTS_DB['garten'] }];
+    }
+  }
+
+  if (matchedParts.length >= 3) {
+    const p1 = matchedParts[0];
+    const glue = matchedParts[1].glue;
+    const p2 = matchedParts[2];
+    const rightBoss = p2.info ? p2.info.de : p2.raw;
+    const rightBossEn = p2.info ? p2.info.en : p2.raw;
+    const rightBossTa = p2.info ? p2.info.ta : '';
+
+    const p1De = p1.info ? p1.info.de : p1.raw;
+    const p1En = p1.info ? p1.info.en : p1.raw;
+    const p1Ta = p1.info ? p1.info.ta : '';
+
+    const splittingStr = glue 
+      ? `${p1De} + <b style="color:var(--stamp-red); background:#fef2f2; padding:0 3px; border-radius:3px;">${glue}</b> (glue) + <b>${rightBoss}</b> 👑` 
+      : `${p1De} + <b>${rightBoss}</b> 👑`;
+    
+    const literalStr = `${p1En} + ${rightBossEn}`;
+    const actualStr = `${en || word} ${ta ? `(${ta})` : ''}`;
+
+    return {
+      type: 'compound_noun',
+      word: word,
+      p1: p1De,
+      p1En: p1En,
+      p1Ta: p1Ta,
+      glue: glue,
+      rightBoss: rightBoss,
+      rightBossEn: rightBossEn,
+      rightBossTa: rightBossTa,
+      splitting: splittingStr,
+      literal: literalStr,
+      actual: actualStr,
+      title: '👑 1. The "Right-Side Boss" Rule & 🔗 Glue Letters (Punarchi)',
+      badge: 'Compound Word Boss',
+      genderReason: `The very last word on the right (<b>${rightBoss}</b> = <i>${rightBossEn}</i>) is the <b>Boss</b>! It dictates the gender (<b>${metadata.art || metadata.a || 'der/die/das'}</b>) and main category. Everything to the left (<b>${p1De}</b>) just describes it.`,
+      punarchiExpl: glue ? `
+        <div style="margin-top:6px; background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+          <b>🔗 2. "Glue Letters" (The German Punarchi / ஜெர்மன் புணர்ச்சி):</b><br>
+          In Tamil, when joining words (புணர்ச்சி), extra letters appear for smooth flow (like <i>க், ச், த், ப்</i> — e.g. <i>தமிழ் + தாய் = தமிழ்த்தாய்</i>).<br>
+          German does the exact same thing by inserting the glue letter <b>„-${glue}-”</b> (Fugenlaut):<br>
+          ↳ <b>${p1De}</b> + <b style="color:var(--stamp-red); background:#fef2f2; padding:1px 4px; border-radius:3px;">-${glue}-</b> + <b>${rightBoss}</b> = <b>${word}</b>!
+        </div>
+      ` : ''
+    };
+  }
+
+  return null;
+}
+
+function renderLinguisticsHTML(v, cat) {
+  const ling = analyzeGermanLinguistics(v.sg || v.w, cat, v);
+  if (!ling) return '';
+
+  return `
+    <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+      <div style="font-weight:700; color:var(--blue); margin-bottom:2px;">${ling.title}:</div>
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-left:3px solid var(--blue); padding:8px 10px; border-radius:4px;">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:6px; font-size:11.5px;">
+          <thead>
+            <tr style="background:rgba(47,92,138,0.1);">
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Joined German Word</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Splitting (பிரித்து எழுதுக)</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Literal Meaning</th>
+              <th style="border:1px solid #bae6fd; padding:4px 6px; text-align:left;">Actual Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><b>${ling.word}</b></td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;">${ling.splitting}</td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;">${ling.literal}</td>
+              <td style="border:1px solid #bae6fd; padding:4px 6px;"><b>${ling.actual}</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:12px; color:var(--ink);">${ling.genderReason}</div>
+        ${ling.punarchiExpl || ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderCheatCodesHTML(v, cat) {
+  const codes = getCheatCodesForWord(v.sg || v.w, cat, v);
+  if (!codes || codes.length === 0) return '';
+  return `
+    <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+      <div style="font-weight:700; color:var(--gold); margin-bottom:2px;">⚡ Cheat Codes &amp; Grammar Shortcuts (இலக்கண குறுக்குவழிகள்):</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${codes.map(c => `
+          <div style="background:#fff; border:1px solid #fae8b4; border-left:3px solid var(--gold); padding:8px 10px; border-radius:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+              <span style="font-weight:700; color:var(--ink);">${c.title}</span>
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700; background:var(--gold); color:#000; padding:1px 6px; border-radius:10px;">${c.badge || c.num}</span>
+            </div>
+            <div style="font-size:12px; color:var(--ink);">${c.rule}</div>
+            ${c.tamil ? `<div style="margin-top:4px; padding:3px 6px; background:rgba(185,138,46,0.08); border-radius:3px; font-size:11.5px;">${c.tamil}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderNounMemoryHack(v){
+  const data = analyzeNoun(v);
+  return `
+    <div style="background:#fffdf5; border:1.5px solid var(--gold); border-radius:10px; padding:13px 14px; margin-top:12px; box-shadow:0 4px 12px rgba(185,138,46,0.15); text-align:left;">
+      <!-- Header -->
+      <div style="font-family:'Fjalla One',sans-serif; font-size:13.5px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #fae8b4; padding-bottom:6px;">
+        <span>🧠 NOUN MEMORY TRICK &amp; GENDER LOCK · <i>${data.artUpper} ${data.sg}</i></span>
+        <span style="font-size:10px; background:var(--gold); color:#fff; padding:2px 6px; border-radius:4px; font-family:'IBM Plex Mono',monospace;">Noun Lock</span>
+      </div>
+
+      <!-- 1. Gender Lock -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🔒 1. GENDER LOCK: <span style="font-size:14px; color:${data.art==='der'?'var(--blue)':data.art==='die'?'var(--red)':'var(--green)'};">${data.artUpper}</span></div>
+        <div style="background:#fff; border:1px solid #fae8b4; border-left:3px solid ${data.art==='der'?'var(--blue)':data.art==='die'?'var(--red)':'var(--green)'}; padding:8px 10px; border-radius:4px;">
+          ${data.genderRule}
+        </div>
+      </div>
+
+      <!-- 1B. Word Breakdown, Right-Side Boss & Punarchi -->
+      ${renderLinguisticsHTML(v, 'n')}
+
+      <!-- 1C. Cheat Codes & Shortcuts -->
+      ${renderCheatCodesHTML(v, 'n')}
+
+      <!-- 2. Memory Trick -->
+
+      <div id="aiMnemonicBox_${v.sg}" style="display:${JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? 'block' : 'none'}; background:#fff; padding:8px; border-left:3px solid var(--gold); border-radius:4px; font-size:13px; margin-bottom:8px;">
+        ${JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? '<strong>💡 KI Eselsbrücke:</strong><br>' + JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg].replace(/\n/g, '<br>') : ''}
+      </div>
+      ${!JSON.parse(localStorage.getItem('de_nomen_mnemonics') || '{}')[v.sg] ? `<button id="btnAiMnemonic_${v.sg}" class="quick-tool-btn ai-feature" style="margin-bottom:8px; display:inline-block;" onclick="requestMnemonicAI('${v.sg}', '${v.a}', '${escapeQuotes(v.en)}', 'btnAiMnemonic_${v.sg}', 'aiMnemonicBox_${v.sg}')">💡 Eselsbrücke (Mnemonic) KI</button>` : ''}
+
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧠 2. NOUN MEMORY TRICK (நினைவாற்றல் உத்தி):</div>
+        <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px;">
+          • ${data.mentalImage}
+        </div>
+      </div>
+
+      <!-- 3. Plural Trick -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">📦 3. PLURAL TRICK: <code>${data.sg} → die ${data.pl}</code></div>
+        <div style="background:var(--paper); padding:8px 10px; border-radius:4px; font-size:12px;">
+          • ${data.pluralTrick}
+        </div>
+      </div>
+
+      <!-- 4. Umlaut Lock -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🔄 4. UMLAUT LOCK:</div>
+        <div style="background:#fff; border:1px solid #fae8b4; padding:6px 10px; border-radius:4px; font-weight:600; font-size:12px;">
+          ${data.umlautStatus}
+        </div>
+      </div>
+
+      <!-- 5. Word-Building Lock (if compound) -->
+      ${data.wordBreakdown && data.wordBreakdown.length >= 2 ? `
+        <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+          <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">🧩 5. WORD-BUILDING LOCK (வார்த்தை பகுப்பாய்வு):</div>
+          <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px; font-size:12px;">
+            <div>• <b>Components:</b> ${data.wordBreakdown.join(' + ')}</div>
+            <div style="color:var(--ink-soft); font-size:11.5px; margin-top:2px;">↳ Meaning Structure: <b>"${data.breakdownEn}"</b></div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 6. Meaning Lock -->
+      <div style="margin-bottom:10px; font-size:12.5px; line-height:1.55;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:2px;">💡 6. MEANING LOCK:</div>
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 10px; border-radius:4px; font-size:12px; color:#166534;">
+          <div><b>${data.art} ${data.sg}</b> (Plural: <b>die ${data.pl}</b>) = <b>„${data.en}”</b> ${data.ta ? `(${data.ta})` : ''}</div>
+          <div style="margin-top:4px; font-style:italic;">${data.emojiScene}</div>
+        </div>
+      </div>
+
+      <!-- 7. Compact Final Noun Memory Card -->
+      <div style="margin-top:12px; border:2px solid var(--gold); border-radius:8px; background:#fefce8; padding:10px 12px; font-size:12px; line-height:1.6;">
+        <div style="font-family:'Fjalla One',sans-serif; font-size:12.5px; color:var(--gold); text-transform:uppercase; margin-bottom:6px; border-bottom:1px solid #fae8b4; padding-bottom:3px;">
+          🎯 NOUN MEMORY LOCK SUMMARY
+        </div>
+        <div>🔒 <b>Gender:</b> <span style="font-weight:700; color:${data.art==='der'?'var(--blue)':data.art==='die'?'var(--red)':'var(--green)'};">${data.artUpper}</span> (${data.genderRule.replace(/<[^>]+>/g, '').split(':')[0]})</div>
+        <div>🧠 <b>Memory Trick:</b> ${data.mentalImage}</div>
+        <div>📦 <b>Plural:</b> die ${data.pl}</div>
+        <div>➕ <b>Plural Trick:</b> ${data.pluralPattern}</div>
+        <div>⭕ <b>Umlaut:</b> ${data.umlautStatus}</div>
+        <div>💡 <b>Meaning:</b> ${data.en}</div>
+        ${data.wordBreakdown && data.wordBreakdown.length >= 2 ? `<div>🧩 <b>Word Build:</b> ${data.wordBreakdown.map(b => b.split(' ')[0]).join(' + ')}</div>` : ''}
+        <div style="margin-top:6px; background:var(--paper); border:1px solid var(--gold); padding:5px 8px; border-radius:4px; text-align:center; font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink);">
+          ⚡ <b>One-Second Recall:</b> ${data.punch}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAdjMemoryHack(v){
+  const w = (v.w||'').toLowerCase();
+  let umlautRule = '';
+  let irregularRule = '';
+  let suffixRule = '';
+
+  // Irregular Top 5
+  if(w === 'gut'){
+    irregularRule = `⭐ <b>Top Irregular (English Cousin):</b> <i>gut → besser → am besten</i> (Good → Better → Best). Same root pattern as English!`;
+  } else if(w === 'viel'){
+    irregularRule = `⭐ <b>Top Irregular (English Cousin):</b> <i>viel → mehr → am meisten</i> (Much → More → Most). Direct cognate to English!`;
+  } else if(w === 'gern' || w === 'gerne'){
+    irregularRule = `⭐ <b>Top Irregular:</b> <i>gern → lieber → am liebsten</i> (Gladly → Rather → Favorite/Most gladly). Essential for speaking!`;
+  } else if(w === 'hoch'){
+    irregularRule = `⭐ <b>Spelling Shift Trick:</b> <i>hoch → höher → am höchsten</i>. Note: The letter <b>'c' drops out</b> in comparative (<i>höher</i>), but returns in superlative (<i>am höchsten</i>)!`;
+  } else if(w === 'nah'){
+    irregularRule = `⭐ <b>Spelling Shift Trick:</b> <i>nah → näher → am nächsten</i>. Note: 'h' transforms into 'ch' in superlative (<i>nächste Woche</i> = next week)!`;
+  } else if(w === 'teuer' || w === 'dunkel' || w === 'sauer'){
+    irregularRule = `⭐ <b>Vowel Drop Trick:</b> The inner <b>-e-</b> drops out (<i>${w} → ${v.komp}</i>) to keep pronunciation smooth and flowing!`;
+  }
+
+  // Umlaut Rule
+  if(v.typ === 'umlaut'){
+    umlautRule = `⚡ <b>Umlaut Law:</b> Short, 1-syllable adjectives with <b>a, o, u</b> (<i>alt, groß, kurz, jung, kalt, warm, stark, lang</i>) explode with umlaut dots in comparative: <b>${v.w} → ${v.komp} → ${v.sup}</b>!`;
+  }
+
+  // Suffix Decoders
+  if(w.endsWith('bar')){
+    suffixRule = `🔍 <b>Suffix Decoder (-bar):</b> Equals English <b>-able / -ible</b> (e.g. <i>${v.w}</i> = able to be done)!`;
+  } else if(w.endsWith('los')){
+    suffixRule = `🔍 <b>Suffix Decoder (-los):</b> Equals English <b>-less / without</b> (e.g. <i>${v.w}</i> = without)!`;
+  } else if(w.endsWith('reich') || w.endsWith('voll')){
+    suffixRule = `🔍 <b>Suffix Decoder (-reich/-voll):</b> Equals <b>full of / rich in</b>!`;
+  } else if(w.endsWith('lich')){
+    suffixRule = `🔍 <b>Suffix Decoder (-lich):</b> Equals English <b>-ly / -like</b> (manner/frequency)!`;
+  }
+
+  let baseTip = `💡 <b>Comparison Formula:</b> Positive (<i>${v.w}</i>) → Comparative (+<b>-er</b>: <i>${v.komp}</i>) → Superlative (<b>am ...-(e)sten</b>: <i>${v.sup}</i>). Meaning: <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.`;
+
+  return `
+    <div class="morph-box">
+      <div class="morph-header">
+        <span>📐 Adjective Memory Trick &amp; Rules</span>
+        <span style="font-size:10px; font-family:'IBM Plex Mono',monospace; opacity:0.8;">Comparison Hack</span>
+      </div>
+      <div class="morph-mnemonic">
+        ${irregularRule ? `<div style="margin-bottom:6px; color:#991b1b;">${irregularRule}</div>` : ''}
+        ${umlautRule ? `<div style="margin-bottom:6px; color:#1e40af;">${umlautRule}</div>` : ''}
+        ${suffixRule ? `<div style="margin-bottom:6px; color:#065f46;">${suffixRule}</div>` : ''}
+        ${renderCheatCodesHTML(v, 'adj')}
+        <div style="font-size:11.5px; opacity:0.9;">${baseTip}</div>
+      </div>
+    </div>
+  `;
+}
+
+function ruleExplanationNoun(v){
+  const map = {
+    en: `<b>Rule: -en/-n.</b> Very common for feminine nouns. Simply add -en (or just -n after -e), no umlaut.`,
+    e: `<b>Rule: -e.</b> Common for masculine/neuter nouns, often with an additional umlaut on the stem vowel.`,
+    er: `<b>Rule: -er.</b> Mostly neuter nouns; the stem vowel (a/o/u) almost always takes an umlaut.`,
+    s: `<b>Rule: -s.</b> Typical for foreign words/Anglicisms — no ending change, no umlaut, just add -s.`,
+    unchanged: `<b>Rule: unchanged.</b> Masculine/neuter nouns ending in -er, -en, -el, -chen, -lein remain identical in plural (only the article becomes "die").`,
+    umlaut_only: `<b>Rule: umlaut only.</b> No ending — only the stem vowel changes (a→ä, o→ö, u→ü).`,
+  };
+  return `<div class="rulebox ${v.typ}">${map[v.typ]||''}</div>`;
+}
+
+function ruleExplanationAdj(v){
+  const map = {
+    regular: `<b>Rule: Regular.</b> Stem + <b>-er</b> (Comparative), <b>am</b> + Stem + <b>-(e)sten</b> (Superlative) — an -e- is inserted for stems ending in d/t/s/ß/z/sch.`,
+    umlaut: `<b>Rule: Umlaut.</b> Short, single-syllable adjective with a/o/u — the stem vowel umlauts in both comparison forms (a→ä, o→ö, u→ü).`,
+    irregular: `<b>Rule: Irregular.</b> A small closed group with completely unique forms — must be memorized.`,
+  };
+  return `<div class="rulebox ${v.typ}">${map[v.typ]||''}</div>`;
+}
+
+function cycleMeaningLang(){
+  if(meaningLang === 'en') meaningLang = 'ta';
+  else if(meaningLang === 'ta') meaningLang = 'both';
+  else meaningLang = 'en';
+  renderChips();
+  if(session && session.length > 0) renderCard();
+}
+
+function flipDirection(){
+  if(curDir === 'gender') { curDir = 'de2en'; }
+  else { curDir = (curDir === 'de2en') ? 'en2de' : 'de2en'; }
+  renderChips();
+  if(session && session.length > 0) renderCard();
+}
+
+function toggleInlinePeek(){
+  const el = document.getElementById('inlinePeekBox');
+  if(el){
+    el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+  }
+}
+
+function meaningPromptText(v){
+  if(!v) return '';
+  if(meaningLang==='ta') {
+    return v.ta ? `${v.ta}${v.ta_translit ? ` (${v.ta_translit})` : ''}` : (v.en || '');
+  }
+  if(meaningLang==='both') {
+    return v.ta ? `${v.en} · ${v.ta}${v.ta_translit ? ` (${v.ta_translit})` : ''}` : (v.en || '');
+  }
+  return v.en || '';
+}
+
+let curMode = 'nomen';       // 'nomen' | 'adj'
+let curFilt1 = 'alle';       // level (nomen) or source (adj)
+let curFilt2 = 'alle';       // plural-typ (nomen) or comparison-typ (adj)
+let curDir = 'de2en';        // 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
+let meaningLang = 'en';
+const LANGS = [{k:'en',l:'English'},{k:'ta',l:'தமிழ்'},{k:'both',l:'Beide'}];
+const DIRS = [{k:'de2en',l:'Deutsch → Bedeutung'},{k:'en2de',l:'Bedeutung → Deutsch'}];
+
+let session = [];
+let sessionIdx = 0;
+let practiceMode = 'medium'; // 'easy' (multiple choice), 'medium' (flip-card self-rate), 'hard' (typed production)
+
+function setPracticeMode(m){
+  practiceMode = m;
+  renderCard();
+}
+
+function modeSelectorHTML(){
+  const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Flip Card)'},{k:'hard',l:'🔴 Hard (Type It)'}];
+  return `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+    ${modes.map(m=>`<button class="quick-tool-btn ${practiceMode===m.k?'active':''}" style="${practiceMode===m.k?'background:var(--ink); color:#fff;':''}" onclick="setPracticeMode('${m.k}')">${m.l}</button>`).join('')}
+  </div>`;
+}
+
+/* ---- "Show answer by default" preference (Flip Card / medium mode) ---- */
+function getShowAnswerDefault(){ return localStorage.getItem('de_show_answer_default') === 'true'; }
+function setShowAnswerDefault(val){ localStorage.setItem('de_show_answer_default', val ? 'true' : 'false'); }
+function toggleShowAnswerDefault(){
+  setShowAnswerDefault(!getShowAnswerDefault());
+  renderCard();
+}
+function showAnswerToggleHTML(){
+  if(practiceMode !== 'medium') return ''; // only the Flip Card mode has an answer to auto-reveal
+  const on = getShowAnswerDefault();
+  return `<label style="display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; margin-bottom:8px;">
+    <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleShowAnswerDefault()" style="cursor:pointer;">
+    🔎 Antwort automatisch zeigen (Flip Card) · Show answer by default
+  </label>`;
+}
+
+
+
+/* ---- persistence & SRS ---- */
+const dcEngine = new SRSEngine.Engine("na_progress_v1", null);
+let PROGRESS = dcEngine.db;
+
+const BOX_SCHEDULE = {1:0,2:1,3:3,4:7,5:14};
+
+function getProg(uid) { return dcEngine.getProg(uid); }
+function saveProgress() { dcEngine.save(); }
+function isDue(uid) { return dcEngine.isDue(uid); }
+function isNew(uid) { const p = dcEngine.db[uid]; return !p || !p.timesSeen; }
+function isDifficult(uid){ const p = PROGRESS[uid]; return p && p.timesWrong>=2; }
+function isMastered(uid){ const p = PROGRESS[uid]; return p && p.box>=4; }
+
+/* ---- diff highlight ---- */
+function diffHighlight(a, b){
+  a = a || ''; b = b || '';
+  let i=0; while(i<a.length && i<b.length && a[i]===b[i]) i++;
+  let j=0; while(j<a.length-i && j<b.length-i && a[a.length-1-j]===b[b.length-1-j]) j++;
+  const aMid=a.slice(i,a.length-j), bMid=b.slice(i,b.length-j);
+  const wrap=(s)=> s?`<span class="diffchar">${s}</span>`:'';
+  return { a: a.slice(0,i)+wrap(aMid)+a.slice(a.length-j), b: b.slice(0,i)+wrap(bMid)+b.slice(b.length-j) };
+}
+
+/* ---- filtering & UI ---- */
+function pool(){
+    if(curMode==='nomen'){
+      return NOUNS.filter(v=> (curFilt1==='alle'||v.level===curFilt1) && (curFilt2==='alle'||v.typ===curFilt2));
+    } else {
+      return ADJS.filter(v=> (curFilt1==='alle'||v.cat===curFilt1) && (curFilt2==='alle'||v.typ===curFilt2));
+    }
+  }
+  
+  function renderChips(){
+    const levels = curMode==='nomen' ? NOUN_LEVELS : ADJ_CATEGORIES;
+    const types = curMode==='nomen' ? NOUN_TYPES : ADJ_TYPES;
+    document.getElementById('filt1Label').textContent = curMode==='nomen' ? 'Niveau' : 'Kategorie';
+    document.getElementById('filt2Label').textContent = curMode==='nomen' ? 'Plural-Typ (Schwierigkeit)' : 'Steigerungs-Typ (Schwierigkeit)';
+  
+    const c1 = document.getElementById('filt1Chips');
+    c1.innerHTML = levels.map(o=>{
+      const cnt = (curMode==='nomen'?NOUNS:ADJS).filter(v=>{
+        const f1ok = o.k==='alle' || (curMode==='nomen'?v.level:v.cat)===o.k;
+        const f2ok = curFilt2==='alle' || v.typ===curFilt2;
+        return f1ok && f2ok;
+      }).length;
+      return `<div class="chip ${curFilt1===o.k?'active':''}" data-f1="${o.k}">${o.l} (${cnt})</div>`;
+    }).join('');
+    c1.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curFilt1=el.dataset.f1; refreshAll(); });
+  
+    const c2 = document.getElementById('filt2Chips');
+    c2.innerHTML = types.map(o=>{
+      const cnt = (curMode==='nomen'?NOUNS:ADJS).filter(v=>{
+        const f1ok = curFilt1==='alle' || (curMode==='nomen'?v.level:v.cat)===curFilt1;
+        const f2ok = o.k==='alle' || v.typ===o.k;
+        return f1ok && f2ok;
+      }).length;
+      return `<div class="chip ${curFilt2===o.k?'active':''}" data-f2="${o.k}">${o.dot?`<span class="dot ${o.dot}"></span>`:''}${o.l} 
+(${cnt})</div>`;
+    }).join('');
+    c2.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curFilt2=el.dataset.f2; refreshAll(); });
+  
+    const gc = document.getElementById('langChips');
+    if(gc) gc.innerHTML = LANGS.map(o=>`<div class="chip ${meaningLang===o.k?'active':''}" data-lang="${o.k}">${o.l}</div>`).join('');
+    if(gc) gc.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ meaningLang=el.dataset.lang; refreshAll(); });
+  
+    const dc = document.getElementById('dirChips');
+    dc.innerHTML = DIRS.map(o=>`<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
+    dc.querySelectorAll('.chip').forEach(el=> el.onclick=()=>{ curDir=el.dataset.dir; refreshAll(); });
+  }
+  
+  function renderDash(){
+    const p = pool();
+    const due = p.filter(v=>isDue(v.uid)).length;
+    const fresh = p.filter(v=>isNew(v.uid)).length;
+    const diff = p.filter(v=>isDifficult(v.uid)).length;
+    const mastered = p.filter(v=>isMastered(v.uid)).length;
+    document.getElementById('poolCount').textContent = `${p.length} Wörter in dieser Auswahl`;
+    document.getElementById('dashGrid').innerHTML = `
+      <div class="dashcard"><div class="num">${due}</div><div class="lbl">FÄLLIG</div></div>
+      <div class="dashcard"><div class="num">${diff}</div><div class="lbl">SCHWIERIG</div></div>
+      <div class="dashcard"><div class="num">${fresh}</div><div class="lbl">NEU</div></div>
+      <div class="dashcard"><div class="num">${mastered}</div><div class="lbl">GEMEISTERT</div></div>`;
+  }
+  
+  function renderRuleRef(){
+    const ref = document.getElementById('ruleRef');
+    if(curMode==='nomen'){
+      ref.innerHTML = `<div class="filterbox" style="margin-top:6px;">
+        <div class="filterlabel">Die Plural-Typen kurz erklärt</div>
+        <div style="font-size:12px; line-height:1.7;">
+        <b>-en/-n:</b> meist feminine Nomen (die Frau → die Frauen)<br>
+        <b>-e:</b> viele maskuline/neutrale Nomen, oft mit Umlaut (der Sohn → die Söhne)<br>
+        <b>-er:</b> meist neutrale Nomen, fast immer mit Umlaut (das Kind → die Kinder)<br>
+        <b>-s:</b> Fremdwörter/Anglizismen (das Auto → die Autos)<br>
+        <b>unverändert:</b> maskulin/neutral auf -er/-en/-el/-chen (der Lehrer → die Lehrer)<br>
+        <b>nur Umlaut:</b> keine Endung, nur Vokaländerung (der Vogel → die Vögel)</div></div>`;
+    } else {
+      ref.innerHTML = `<div class="filterbox" style="margin-top:6px;">
+        <div class="filterlabel">Steigerung kurz erklärt</div>
+        <div style="font-size:12px; line-height:1.7;">
+        <b>Regelmäßig:</b> Stamm + -er (Komparativ), am + Stamm + -(e)sten (Superlativ)<br>
+        <b>Umlaut:</b> kurze einsilbige Adjektive mit a/o/u umlauten (alt → älter → am ältesten)<br>
+        <b>Unregelmäßig:</b> völlig eigene Formen (nah → näher → am nächsten)</div></div>`;
+    }
+  }
+  
+  function refreshAll(){ renderChips(); renderDash(); renderRuleRef(); }
+  
+  curMode = 'adj';
+  
+  /* ---- Smart queue ---- */
+  function shuffleArr(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} 
+return a; }
+  function buildQueue(p, limit){
+    limit = limit || 20;
+    const used = {}; const out = [];
+    function add(list, cap){
+      let n=0;
+      for(const v of list){
+        if(used[v.uid]) continue;
+        if(cap!==undefined && n>=cap) break;
+        out.push(v); used[v.uid]=true; n++;
+        if(out.length>=limit) return;
+      }
+    }
+    const overdue = p.filter(v=>!isNew(v.uid) && isDue(v.uid)).sort((a,b)=>(PROGRESS[a.uid].nextDue).localeCompare(PROGRESS[b.uid].nextDue));
+    add(overdue);
+    if(out.length<limit){ const diff = p.filter(v=>isDifficult(v.uid)).sort((a,b)=>PROGRESS[b.uid].timesWrong-PROGRESS[a.uid].timesWrong); 
+add(diff); }
+    if(out.length<limit){ const recent = p.filter(v=>!isNew(v.uid) && PROGRESS[v.uid].box<=2); add(recent); }
+    if(out.length<limit){ add(shuffleArr(p.filter(v=>isNew(v.uid))), Math.max(4, Math.floor(limit*0.5))); }
+    if(out.length<limit){ add(shuffleArr(p.filter(v=>isMastered(v.uid))), 3); }
+    if(out.length<limit){ add(shuffleArr(p)); }
+    return shuffleArr(out);
+  }
+  
+  function startPractice(){
+    const p = pool();
+    if(p.length===0){ alert('Keine Wörter in dieser Auswahl.'); return; }
+    session = buildQueue(p, Math.min(20, p.length));
+    sessionIdx = 0;
+    renderCard();
+}
+  
+  function renderCard(){
+  const stage = document.getElementById('stage');
+  // Stop any speech still playing/queued from the card being navigated away from
+  // (swipe, Next/Prev, or a mode change) before rendering the new one - Easy/Hard
+  // mode don't manage speech themselves, so without this a still-speaking card's
+  // audio could bleed into a following Easy/Hard card.
+  if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
+  if(sessionIdx >= session.length){
+    stage.innerHTML = `<div class="empty">🎉 <b>Done!</b><br>${session.length} words practiced in this round.</div>`;
+    return;
+  }
+  const v = session[sessionIdx];
+
+  if(practiceMode === 'easy'){ renderEasyMC(v); return; }
+  if(practiceMode === 'hard'){ renderHardProduction(v); return; }
+
+  const box = PROGRESS[v.uid] ? PROGRESS[v.uid].box : 1;
+  const boxNames = {1:'Neu',2:'Lernt',3:'Vertraut',4:'Stark',5:'Gemeistert'};
+
+  const reverse = (curDir === 'en2de');
+  const langLabel = meaningLang==='ta' ? '🇮🇳 தமிழ்' : meaningLang==='both' ? '🌐 EN + தமிழ்' : '🇬🇧 English';
+
+  let promptHTML, revealCoreHTML;
+  if(curMode==='nomen'){
+    const wordDisp = `${v.a} ${v.sg}`;
+    if (curDir === 'gender') {
+      promptHTML = `
+      <div class="qlabel">Artikel (der/die/das) · 📦 ${boxNames[box]}</div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="wordline ${v.a ? getGenderClass(v.a) : ''}">
+          <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
+            ___ <span class="${getGenderClass(v.a)}">${v.sg}</span> <span style="font-size:13px; opacity:0.7;">👁️</span>
+          </div>
+          ${speakBtn(v.a+' '+v.sg,'Listen to word')}
+        </div>
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
+          👆 <i>Click word (or press T) to peek translation</i>
+        </div>
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+          <b>Meaning:</b> ${meaningPromptText(v)}
+        </div>
+        <div class="subq" style="margin-top:10px;">Welcher Artikel (der, die oder das)?</div>
+      </div>`;
+      revealCoreHTML = `
+      <div class="revealbox">
+        <div class="formrow"><span class="flabel">Artikel + Singular</span><span class="fval">${v.a} ${v.sg}${speakBtn(v.a+' '+v.sg,'Listen to word')}</span></div>
+        <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
+        ${meaningHTML(v)}
+      </div>`;
+    } else {
+      promptHTML = reverse ? `
+        <div class="qlabel">${meaningLang==='ta'?'🇮🇳 தமிழ் → 🇩🇪 Noun':meaningLang==='both'?'🌐 EN + தமிழ் → 🇩🇪 Noun':'🇬🇧 English → 🇩🇪 Noun'} · 📦 ${boxNames[box]}</div>
+        <div class="prompt">
+          <div class="wordicon">${getIcon(v)}</div>
+          <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German noun" style="font-size:24px; font-weight:700;">
+            ${meaningPromptText(v)} <span style="font-size:14px; opacity:0.7;">👁️</span>
+          </div>
+          <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
+            👆 <i>Click meaning (or press T) to peek German noun</i>
+          </div>
+          <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+            <b>German Noun:</b> <span style="color:var(--blue); font-weight:700;">${wordDisp}</span> (die ${v.pl})
+          </div>
+          <div class="subq" style="margin-top:10px;">What is the German noun (with <b>der/die/das</b>) — and its <b>plural</b>?</div>
+        </div>` : `
+        <div class="qlabel">${meaningLang==='ta'?'🇩🇪 Noun → 🇮🇳 தமிழ்':meaningLang==='both'?'🇩🇪 Noun → 🌐 EN + தமிழ்':'🇩🇪 Noun → 🇬🇧 English'} · 📦 ${boxNames[box]}</div>
+        <div class="prompt">
+          <div class="wordicon">${getIcon(v)}</div>
+          <div class="wordline ${v.a ? getGenderClass(v.a) : ''}">
+            <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
+              ${wordDisp} <span style="font-size:13px; opacity:0.7;">👁️</span>
+            </div>
+            ${speakBtn(wordDisp,'Listen to word')}
+          </div>
+          <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
+            👆 <i>Click word (or press T) to peek translation</i>
+          </div>
+          <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+            <b>Meaning:</b> ${meaningPromptText(v)}
+          </div>
+          <div class="subq" style="margin-top:10px;">What is the <b>plural form</b> (die ...)?</div>
+        </div>`;
+      const diag = diffHighlight(v.sg.replace(/\(.*?\)/g,''), v.pl.replace(/\(.*?\)/g,''));
+      revealCoreHTML = `
+        <div class="revealbox">
+          <div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>
+          <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
+          ${meaningHTML(v)}
+          <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
+        </div>`;
+    }
+  } else {
+    promptHTML = reverse ? `
+      <div class="qlabel">${meaningLang==='ta'?'🇮🇳 தமிழ் → 🇩🇪 Adjective':meaningLang==='both'?'🌐 EN + தமிழ் → 🇩🇪 Adjective':'🇬🇧 English → 🇩🇪 Adjective'} · 📦 ${boxNames[box]}</div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German adjective" style="font-size:24px; font-weight:700;">
+          ${meaningPromptText(v)} <span style="font-size:14px; opacity:0.7;">👁️</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
+          👆 <i>Click meaning (or press T) to peek German adjective</i>
+        </div>
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+          <b>German Adjective:</b> <span style="color:var(--blue); font-weight:700;">${v.w}</span> (${v.komp}, am ${v.sup})
+        </div>
+        <div class="subq" style="margin-top:10px;">What is the German adjective — and its <b>Comparative</b> &amp; <b>Superlative</b> forms?</div>
+      </div>` : `
+      <div class="qlabel">${meaningLang==='ta'?'🇩🇪 Adjective → 🇮🇳 தமிழ்':meaningLang==='both'?'🇩🇪 Adjective → 🌐 EN + தமிழ்':'🇩🇪 Adjective → 🇬🇧 English'} · 📦 ${boxNames[box]}</div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="wordline ${v.a ? getGenderClass(v.a) : ''}">
+          <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek translation">
+            ${v.w} <span style="font-size:13px; opacity:0.7;">👁️</span>
+          </div>
+          ${speakBtn(v.w,'Listen to word')}
+        </div>
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
+          👆 <i>Click word (or press T) to peek translation</i>
+        </div>
+        <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
+          <b>Meaning:</b> ${meaningPromptText(v)}
+        </div>
+        <div class="subq" style="margin-top:10px;">What are the <b>Comparative</b> and <b>Superlative</b> forms?</div>
+      </div>`;
+    const diag = diffHighlight((v.w||'').replace(/\(.*?\)/g,''), v.komp);
+    revealCoreHTML = `
+      <div class="revealbox">
+        <div class="formrow"><span class="flabel">Positiv</span><span class="fval">${v.w}${speakBtn(v.w,'Listen to word')}</span></div>
+        <div class="formrow"><span class="flabel">Komparativ</span><span class="fval">${v.komp}${speakBtn(v.komp,'Comparative listen')}</span></div>
+        <div class="formrow"><span class="flabel">Superlativ</span><span class="fval">${v.sup}${speakBtn(v.sup,'Superlative listen')}</span></div>
+        ${meaningHTML(v)}
+        <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
+      </div>`;
+  }
+
+  const typLbl = curMode==='nomen' ? typLabelNoun(v.typ) : typLabelAdj(v.typ);
+  const srcOrLevel = curMode==='nomen' ? v.level : v.source;
+
+  stage.innerHTML = `
+    ${modeSelectorHTML()}
+    ${showAnswerToggleHTML()}
+    <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
+      <div class="quick-card-tools">
+        <button class="quick-tool-btn" onclick="cycleMeaningLang()" title="Switch Language">🌐 ${langLabel}</button>
+        <button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button>
+        ${sessionIdx > 0 ? `<button class="quick-tool-btn" onclick="prevCard()">← Prev</button>` : ''}
+        <button class="quick-tool-btn" onclick="advance()" style="background:var(--ink); color:#fff;">→ Next (N)</button>
+      </div>
+    </div>
+    <div class="studycard">
+      <div class="stripe ${v.typ}"></div>
+      <div class="meta"><span>${srcOrLevel}</span><span style="display:flex; gap:4px;"><span class="pill ${v.typ}">${typLbl}</span></span></div>
+      ${promptHTML}
+      <div id="frontActions" style="display:flex; gap:8px; padding:14px 18px 18px;">
+        <button class="thinkbtn" id="revealBtn" style="margin:0; flex:2; font-weight:700; font-size:14px; padding:14px;">CHECK ANSWER 🔎 (Space / Enter)</button>
+        <button class="actbtn next-bold" id="skipBtn" style="flex:1; background:var(--paper-dark); color:var(--ink); font-weight:700; font-size:13px; border:2px solid var(--line);" onclick="advance()">→ NEXT (N)</button>
+      </div>
+      <div id="revealArea"></div>
+      <div class="shortcuts-hint">⌨️ Shortcuts: <b>Space / Enter</b> = Check · <b>N</b> = Next · <b>T</b> = Peek Translation · <b>1</b> = Again · <b>2</b> = Knew it · <b>3</b> = Master</div>
+    </div>`;
+
+  
+  if (localStorage.getItem('de_auto_audio') === 'true') {
+      if (typeof scheduleSpeak === 'function') scheduleSpeak(v.w || v.inf || v.base || v.sg, 300);
+  } else if (typeof cancelPendingSpeech === 'function') {
+      cancelPendingSpeech(); // stop any still-playing/pending speech from a card swiped away from
+  }
+
+  document.getElementById('revealBtn').onclick = ()=>{
+    document.getElementById('revealArea').innerHTML = revealCoreHTML + `
+      <div class="answerbtns" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; padding:0 0 14px;">
+        <button class="actbtn nochmal" id="btnNochmal" style="flex:1; min-width:90px; padding:13px 4px; font-weight:700; border-width:2px; font-size:13px; border-radius:6px;">↺ Again (1)</button>
+        <button class="actbtn gewusst" id="btnGewusst" style="flex:1; min-width:90px; padding:13px 4px; font-weight:700; border-width:2px; font-size:13px; border-radius:6px;">✓ Knew it (2)</button>
+        <button class="actbtn easy" id="btnEasy" style="flex:1; min-width:90px; padding:13px 4px; font-weight:700; border-width:2px; font-size:13px; border-radius:6px;">🎯 Master (3)</button>
+        <button class="actbtn next-bold" id="btnNextAfterReveal" style="flex:1.2; min-width:110px; padding:13px 6px; background:var(--ink); color:#fff; font-weight:700; border:2px solid var(--ink); font-size:13px; border-radius:6px; cursor:pointer;" onclick="advance()">→ NEXT (N)</button>
+      </div>
+      <div style="margin-top:10px;">
+        ${curMode === 'nomen' ? renderNounMemoryHack(v) : renderAdjMemoryHack(v)}
+        ${curMode === 'nomen' ? ruleExplanationNoun(v) : ruleExplanationAdj(v)}
+      </div>
+    `;
+
+    document.getElementById('frontActions').style.display = 'none';
+    document.getElementById('btnNochmal').onclick = ()=>{ recordAnswer(v.uid,false); advance(); };
+    document.getElementById('btnGewusst').onclick = ()=>{ recordAnswer(v.uid,true); advance(); };
+    document.getElementById('btnEasy').onclick = ()=>{ const p=getProg(v.uid); p.box=5; p.nextDue=SRSEngine.addDaysISO(30); saveProgress(PROGRESS); advance(); };
+  };
+
+  if(getShowAnswerDefault()) document.getElementById('revealBtn').onclick();
+}
+
+function advance(){ sessionIdx++; renderDash(); renderCard(); }
+
+function prevCard(){
+  if(sessionIdx > 0){
+    sessionIdx--;
+    renderCard();
+  }
+}
+
+/* ---- EASY MODE: multiple-choice recognition ---- */
+function pickDistractors(v, count){
+  const source = pool().length >= count+1 ? pool() : (curMode==='nomen' ? NOUNS : ADJS);
+  const others = source.filter(x => x.uid !== v.uid);
+  return shuffleArr(others).slice(0, count);
+}
+
+function renderEasyMC(v){
+  const stage = document.getElementById('stage');
+  const reverse = (curDir === 'en2de');
+  const isGenderMode = (curMode === 'nomen' && curDir === 'gender');
+
+  let promptText, correctText, optionTexts;
+  if(isGenderMode){
+    promptText = v.sg;
+    correctText = v.a;
+    optionTexts = shuffleArr(['der','die','das']);
+  } else {
+    const distractors = pickDistractors(v, 3);
+    if(curMode === 'nomen'){
+      promptText = reverse ? meaningPromptText(v) : `${v.a} ${v.sg}`;
+      correctText = reverse ? `${v.a} ${v.sg}` : meaningPromptText(v);
+      optionTexts = shuffleArr([correctText, ...distractors.map(d => reverse ? `${d.a} ${d.sg}` : meaningPromptText(d))]);
+    } else {
+      promptText = reverse ? meaningPromptText(v) : v.w;
+      correctText = reverse ? v.w : meaningPromptText(v);
+      optionTexts = shuffleArr([correctText, ...distractors.map(d => reverse ? d.w : meaningPromptText(d))]);
+    }
+  }
+
+  stage.innerHTML = `
+    ${modeSelectorHTML()}
+    ${showAnswerToggleHTML()}
+    <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
+      ${!isGenderMode ? `<div class="quick-card-tools"><button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button></div>` : ''}
+    </div>
+    <div class="studycard">
+      <div class="stripe ${v.typ}"></div>
+      <div class="meta"><span>${curMode==='nomen' ? v.level : v.source}</span></div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="word" style="font-size:22px; font-weight:700;">${promptText}</div>
+        <div class="subq" style="margin-top:10px;">${isGenderMode ? 'Welcher Artikel?' : (reverse ? `Pick the correct German ${curMode==='nomen'?'noun':'adjective'}` : 'Pick the correct meaning')}</div>
+      </div>
+      <div class="opt-grid" style="display:grid; gap:8px; padding:0 18px 18px;">
+        ${optionTexts.map((opt,i)=>`
+          <button class="opt-btn" id="mcOpt_${i}" style="padding:12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; cursor:pointer; text-align:left; font-size:14px;" onclick="checkEasyMC(${i})">${opt}</button>
+        `).join('')}
+      </div>
+      <div id="mcFeedback" style="display:none; padding:0 18px 18px;"></div>
+    </div>
+  `;
+  window._mcState = { v, correctText, optionTexts };
+}
+
+function checkEasyMC(idx){
+  const { v, correctText, optionTexts } = window._mcState;
+  const chosen = optionTexts[idx];
+  const isCorrect = chosen === correctText;
+  document.querySelectorAll('.opt-btn').forEach((btn,i) => {
+    btn.disabled = true;
+    if(optionTexts[i] === correctText) btn.style.cssText += 'background:#E2EED8; border-color:var(--green);';
+    else if(i === idx) btn.style.cssText += 'background:#F8E4E3; border-color:var(--red);';
+  });
+  recordAnswer(v.uid, isCorrect);
+  const fb = document.getElementById('mcFeedback');
+  fb.style.display = 'block';
+  fb.innerHTML = `
+    <div style="padding:10px; border-radius:6px; background:${isCorrect?'#E2EED8':'#F8E4E3'}; margin-bottom:8px;">
+      ${isCorrect ? '✅ Richtig!' : '❌ Not quite — correct answer: <b>' + correctText + '</b>'}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="actbtn next-bold" style="background:var(--ink); color:#fff; padding:8px 14px;" onclick="advance()">→ Next (N)</button>
+      ${!isCorrect ? aiWordHelpButtonHTML(v) : ''}
+    </div>
+    <div id="aiWordHelpBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
+  `;
+}
+
+/* ---- HARD MODE: typed production challenge ---- */
+function renderHardProduction(v){
+  const stage = document.getElementById('stage');
+  const isNoun = (curMode === 'nomen');
+  const task = isNoun
+    ? `Type the noun WITH its correct article and plural, e.g. "der Tisch, die Tische".`
+    : `Type the Comparative and Superlative forms, e.g. "schneller, am schnellsten".`;
+  const wordDisp = isNoun ? `${v.a} ${v.sg}` : v.w;
+
+  stage.innerHTML = `
+    ${modeSelectorHTML()}
+    ${showAnswerToggleHTML()}
+    <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+      <span>Practice — Card ${sessionIdx+1} / ${session.length}</span>
+    </div>
+    <div class="studycard">
+      <div class="stripe ${v.typ}"></div>
+      <div class="meta"><span>${isNoun ? v.level : v.source}</span></div>
+      <div class="prompt">
+        <div class="wordicon">${getIcon(v)}</div>
+        <div class="word" style="font-size:22px; font-weight:700;">${wordDisp} <span style="font-size:13px; opacity:0.7;">(${meaningPromptText(v)})</span></div>
+        <div class="subq" style="margin-top:10px;">${task}</div>
+      </div>
+      <div style="padding:0 18px 18px;">
+        <input type="text" id="hardInput" class="challenge-input" placeholder="..." autofocus style="width:100%; padding:10px; border-radius:6px; border:1.5px solid var(--line); font-size:14px;">
+        <button class="actbtn next-bold" style="margin-top:10px; background:var(--ink); color:#fff; padding:10px 16px;" onclick="checkHardProduction()">Verify ✓</button>
+      </div>
+      <div id="hardFeedback" style="display:none; padding:0 18px 18px;"></div>
+    </div>
+  `;
+  document.getElementById('hardInput').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); checkHardProduction(); } });
+  window._hardState = { v };
+}
+
+function checkHardProduction(){
+  const { v } = window._hardState;
+  const val = document.getElementById('hardInput').value.trim().toLowerCase();
+  const isNoun = (curMode === 'nomen');
+  let isCorrect, expectedLabel;
+  if(isNoun){
+    const plStem = (v.pl || '').toLowerCase().replace(/[()]/g,'');
+    isCorrect = val.length >= 3 && val.includes((v.a||'').toLowerCase()) && (plStem === '—' || val.includes(plStem));
+    expectedLabel = `${v.a} ${v.sg}, die ${v.pl}`;
+  } else {
+    const komp = (v.komp || '').toLowerCase();
+    const sup = (v.sup || '').toLowerCase();
+    isCorrect = val.length >= 3 && (!komp || val.includes(komp)) && (!sup || val.includes(sup));
+    expectedLabel = `${v.komp}, am ${v.sup}`;
+  }
+  recordAnswer(v.uid, isCorrect);
+  const fb = document.getElementById('hardFeedback');
+  fb.style.display = 'block';
+  fb.innerHTML = `
+    <div style="padding:10px; border-radius:6px; background:${isCorrect?'#E2EED8':'#F8E4E3'}; margin-bottom:8px;">
+      ${isCorrect ? '✅ Gut gemacht!' : '❌ Not quite — correct: <b>' + expectedLabel + '</b>'}
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="actbtn next-bold" style="background:var(--ink); color:#fff; padding:8px 14px;" onclick="advance()">→ Next (N)</button>
+      ${!isCorrect ? aiWordHelpButtonHTML(v) : ''}
+    </div>
+    <div id="aiWordHelpBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
+  `;
+}
+
+/* ---- AI weak-spot follow-up: one fresh example sentence for a REAL,
+   already-verified word (never invents new vocabulary). Offline-safe: only
+   shown when AI is configured (body.ai-enabled, set by js/app-shell.js). ---- */
+function aiWordHelpButtonHTML(v){
+  if(!document.body.classList.contains('ai-enabled')) return '';
+  return `<button class="actbtn" style="background:var(--purple, #6B4A8A); color:#fff; padding:8px 14px;" onclick="aiWordHelp('${v.uid.replace(/'/g,"\\'")}')">🤖 More Practice With This Word (AI)</button>`;
+}
+
+function aiWordHelp(uid){
+  const isNoun = (curMode === 'nomen');
+  const v = isNoun ? NOUNS.find(x => x.uid === uid) : ADJS.find(x => x.uid === uid);
+  if(!v || typeof callAIHelper !== 'function') return;
+  const wordDesc = isNoun ? `the noun "${v.a} ${v.sg}" (plural: die ${v.pl}; English: ${v.en})` : `the adjective "${v.w}" (comparative: ${v.komp}, superlative: ${v.sup}; English: ${v.en})`;
+  const promptTxt = `I am learning German. Help me practice ${wordDesc}.
+Write ONE natural German example sentence using this exact word, followed by its English translation on a new line. Keep it short (max 12 words) and encouraging. Do not introduce any other unfamiliar vocabulary.`;
+  callAIHelper(promptTxt, (text) => {
+    const box = document.getElementById('aiWordHelpBox');
+    if(box){
+      box.innerHTML = (text && !text.startsWith('AI Error') && !text.startsWith('Error connecting'))
+        ? `<strong>🤖 Example:</strong><br>${text.replace(/\n/g,'<br>')}`
+        : `⚠️ AI isn't available right now (check your AI key in Settings).`;
+      box.style.display = 'block';
+    }
+  });
+}
+
+/* ---- Keyboard Shortcuts for Fast Learning ---- */
+document.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+
+  if (!session || session.length === 0) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      const startBtn = document.getElementById('startBtn');
+      if (startBtn) startBtn.click();
+    }
+    return;
+  }
+
+  const revealBtn = document.getElementById('revealBtn');
+  const btnNochmal = document.getElementById('btnNochmal');
+  const btnGewusst = document.getElementById('btnGewusst');
+  const btnEasy = document.getElementById('btnEasy');
+  const v = session[sessionIdx];
+
+  // T key: Toggle translation peek
+  if (e.key === 't' || e.key === 'T') {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleInlinePeek();
+    return;
+  }
+
+  // L key: Cycle language
+  if (e.key === 'l' || e.key === 'L') {
+    e.preventDefault();
+    e.stopPropagation();
+    cycleMeaningLang();
+    return;
+  }
+
+  // N key: Next card immediately. Must stop propagation here - js/app-shell.js
+  // also has a global window-level 'n' handler (shared across pages) that
+  // looks for a ".actbtn.check"/".actbtn.next" button and, finding none on
+  // this page (this page uses "next-bold" instead), falls back to clicking
+  // #startReviewBtn and navigating away to deutsch-coach.html. Without
+  // stopPropagation, BOTH handlers fired on every single "N" press.
+  if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    e.stopPropagation();
+    advance();
+    return;
+  }
+
+  if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    e.stopPropagation();
+    if (revealBtn && revealBtn.style.display !== 'none' && revealBtn.offsetParent !== null) {
+      revealBtn.click();
+    } else if (btnGewusst && btnGewusst.offsetParent !== null) {
+      btnGewusst.click();
+    }
+    return;
+  }
+
+  if (e.key === '1' && btnNochmal && btnNochmal.offsetParent !== null) {
+    e.preventDefault(); e.stopPropagation(); btnNochmal.click(); return;
+  }
+  if (e.key === '2' && btnGewusst && btnGewusst.offsetParent !== null) {
+    e.preventDefault(); e.stopPropagation(); btnGewusst.click(); return;
+  }
+  if (e.key === '3' && btnEasy && btnEasy.offsetParent !== null) {
+    e.preventDefault(); e.stopPropagation(); btnEasy.click(); return;
+  }
+  if (e.code === 'KeyS') {
+    if (v) {
+      e.preventDefault();
+      e.stopPropagation();
+      const txt = curMode === 'nomen' ? `${v.a} ${v.sg}` : v.w;
+      speak(txt);
+    }
+  }
+});
+
+refreshAll();
+
+// UNIFIED SUITE THEME SYSTEM
+function initSuiteTheme() {
+  const saved = localStorage.getItem('de_theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved === 'dark' || (!saved && prefersDark);
+  applyTheme(isDark);
+}
+function applyTheme(isDark) {
+  if (isDark) {
+    document.documentElement.classList.add('dark-theme');
+    document.body.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark-theme');
+    document.body.classList.remove('dark');
+  }
+  const btn = document.getElementById('themeToggleBtn') || document.getElementById('themeToggle');
+  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+}
+function toggleSuiteTheme() {
+  const isDarkNow = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark');
+  const nextDark = !isDarkNow;
+  localStorage.setItem('de_theme', nextDark ? 'dark' : 'light');
+  applyTheme(nextDark);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSuiteTheme);
+} else {
+  initSuiteTheme();
+}
+
+
+// --- Swipe Gestures for Flashcards: swipe left = next card, swipe right = previous card ---
+// (Not to be confused with the separate der/die/das "Swipe Game" further below, which uses
+// swipe direction as the answer itself, not deck navigation.)
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  if (!e.target.closest('.studycard') || e.target.closest('input, textarea')) return;
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, {passive: true});
+document.addEventListener('touchend', e => {
+  if (!e.target.closest('.studycard') || e.target.closest('input, textarea')) return;
+  handleSwipe(e.changedTouches[0].screenX - touchStartX, e.changedTouches[0].screenY - touchStartY);
+}, {passive: true});
+function handleSwipe(dx, dy) {
+  const swipeThreshold = 50;
+  if (Math.abs(dx) < swipeThreshold || Math.abs(dx) < Math.abs(dy) * 1.5) return; // too short, or mostly vertical scroll
+  if (!session || session.length === 0) return;
+  if (dx < 0) advance();
+  else prevCard();
+}
+
+function getGenderClass(article) {
+  if (article === "der") return "gender-der";
+  if (article === "die") return "gender-die";
+  if (article === "das") return "gender-das";
+  return "";
+}
+
+// --- SWIPE GAME LOGIC ---
+let swipeQueue = [];
+let swipeScore = 0;
+let currentCardEl = null;
+let currentWordObj = null;
+let isDragging = false;
+let startX = 0, startY = 0, currentX = 0, currentY = 0;
+
+function startSwipeGame() {
+  document.getElementById('dashboardUI').style.display = 'none';
+  document.getElementById('stageUI').style.display = 'none';
+  document.getElementById('swipeGameUI').style.display = 'flex';
+  
+  swipeScore = 0;
+  document.getElementById('swipeScore').textContent = swipeScore;
+  
+  // Prepare queue
+  swipeQueue = [...NOUNS].filter(n => n.a).sort(() => Math.random() - 0.5);
+  
+  renderNextSwipeCard();
+}
+
+function exitSwipeGame() {
+  document.getElementById('swipeGameUI').style.display = 'none';
+  document.getElementById('dashboardUI').style.display = 'block';
+}
+
+function renderNextSwipeCard() {
+  const container = document.getElementById('swipeCardContainer');
+  container.innerHTML = '';
+  
+  if (swipeQueue.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding-top:100px; font-weight:bold; font-size:24px;">Game Over!<br>Score: ${swipeScore}</div>`;
+    return;
+  }
+  
+  currentWordObj = swipeQueue.pop();
+  
+  const card = document.createElement('div');
+  card.className = 'swipe-card';
+  card.style.cssText = `
+    position: absolute; width: 100%; height: 100%; background: var(--card);
+    border: 2px solid var(--ink); border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: grab; user-select: none; transition: transform 0.1s; transform-origin: 50% 100%;
+  `;
+  
+  card.innerHTML = `
+    <div style="font-size:42px; font-weight:bold; color:var(--ink); margin-bottom:12px; text-align:center;">${currentWordObj.sg}</div>
+    <div style="font-size:18px; color:var(--ink-soft);">${currentWordObj.en || ""}</div>
+    <div id="swipeFeedback" style="position:absolute; top:20px; font-weight:bold; font-size:24px; opacity:0; text-transform:uppercase; border:3px solid; padding:4px 12px; border-radius:8px;"></div>
+  `;
+  
+  container.appendChild(card);
+  currentCardEl = card;
+  
+  // Touch / Mouse Events
+  card.addEventListener('mousedown', dragStart);
+  card.addEventListener('touchstart', dragStart, {passive:false});
+  
+  window.addEventListener('mousemove', dragMove);
+  window.addEventListener('touchmove', dragMove, {passive:false});
+  
+  window.addEventListener('mouseup', dragEnd);
+  window.addEventListener('touchend', dragEnd);
+}
+
+function dragStart(e) {
+  if (e.type === 'touchstart') {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  } else {
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+  isDragging = true;
+  currentCardEl.style.transition = 'none';
+}
+
+function dragMove(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+  
+  let clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+  let clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+  
+  currentX = clientX - startX;
+  currentY = clientY - startY;
+  
+  let rotate = currentX * 0.05;
+  currentCardEl.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${rotate}deg)`;
+  
+  // Feedback
+  const fb = document.getElementById('swipeFeedback');
+  if (currentX < -50) { fb.textContent = "DIE"; fb.style.color = "var(--die)"; fb.style.borderColor = "var(--die)"; fb.style.opacity = Math.min(1, Math.abs(currentX)/100); }
+  else if (currentX > 50) { fb.textContent = "DER"; fb.style.color = "var(--der)"; fb.style.borderColor = "var(--der)"; fb.style.opacity = Math.min(1, currentX/100); }
+  else if (currentY < -50) { fb.textContent = "DAS"; fb.style.color = "var(--das)"; fb.style.borderColor = "var(--das)"; fb.style.opacity = Math.min(1, Math.abs(currentY)/100); }
+  else { fb.style.opacity = 0; }
+}
+
+function dragEnd(e) {
+  if (!isDragging) return;
+  isDragging = false;
+  
+  window.removeEventListener('mousemove', dragMove);
+  window.removeEventListener('touchmove', dragMove);
+  window.removeEventListener('mouseup', dragEnd);
+  window.removeEventListener('touchend', dragEnd);
+  
+  const threshold = 80;
+  let answer = null;
+  
+  if (currentX < -threshold) answer = 'die';
+  else if (currentX > threshold) answer = 'der';
+  else if (currentY < -threshold) answer = 'das';
+  
+  if (answer) {
+    processSwipe(answer);
+  } else {
+    // Reset
+    currentCardEl.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    currentCardEl.style.transform = `translate(0px, 0px) rotate(0deg)`;
+    document.getElementById('swipeFeedback').style.opacity = 0;
+  }
+  currentX = 0; currentY = 0;
+}
+
+function simulateSwipe(dir) {
+  if(!currentCardEl) return;
+  processSwipe(dir, true);
+}
+
+function processSwipe(answer, isSimulated = false) {
+  const correct = currentWordObj.a === answer;
+  
+  currentCardEl.style.transition = 'transform 0.4s ease-out, opacity 0.4s';
+  
+  let endX = 0, endY = 0;
+  if(answer === 'die') endX = -500;
+  else if(answer === 'der') endX = 500;
+  else if(answer === 'das') endY = -500;
+  
+  currentCardEl.style.transform = `translate(${endX}px, ${endY}px) rotate(${endX*0.1}deg)`;
+  currentCardEl.style.opacity = 0;
+  
+  if(correct) {
+    swipeScore++;
+    document.getElementById('swipeScore').textContent = swipeScore;
+    // Tiny confetti effect could go here
+  } else {
+    // Flash red or show error briefly
+    swipeScore = Math.max(0, swipeScore - 1);
+    document.getElementById('swipeScore').textContent = swipeScore;
+    alert(`Falsch! Es ist: ${currentWordObj.a} ${currentWordObj.sg}`);
+  }
+  
+  setTimeout(() => {
+    renderNextSwipeCard();
+  }, 400);
+}
+
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if(themeToggle) {
+      const currentTheme = localStorage.getItem('de_theme') || 'light';
+      if(currentTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Light Mode';
+      }
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark-theme');
+        if(document.documentElement.classList.contains('dark-theme')){
+          localStorage.setItem('de_theme', 'dark');
+          themeToggle.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('de_theme', 'light');
+          themeToggle.textContent = '🌙 Dark Mode';
+        }
+      });
+    }
+  });
+</script>
+
+        </body>
+</html>

@@ -44,7 +44,7 @@ const ProgressAggregator = (function(){
     // Extracts a CEFR level from a progress-store uid, using each store's own
     // known uid scheme (see each owner page's `.forEach(v => v.uid = ...)`
     // line). Returns null if it can't be determined honestly rather than
-    // guessing - e.g. Nomen_Adjektiv_Trainer's adjective entries ('a|word',
+    // guessing - e.g. Adjektiv_Adverb_Trainer's adjective entries ('a|word',
     // no level segment) simply aren't attributable to a level and are
     // excluded from the by-level breakdown (they still count in the totals
     // from getVocabularyStats()).

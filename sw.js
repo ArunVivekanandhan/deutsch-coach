@@ -1,9 +1,10 @@
-const CACHE_NAME = 'deutsch-coach-v54';
+const CACHE_NAME = 'deutsch-coach-v55';
 const urlsToCache = [
   './',
   './index.html',
   './German_Grammar_Cheat_Codes.html',
   './Verb_Transformation_Trainer.html',
+  './Adjektiv_Adverb_Trainer.html',
   './deutsch-coach.html',
   './Brief_Schreiben_Trainer.html',
   './Sprech_Pruefungs_Simulator.html',
@@ -22,7 +23,7 @@ const urlsToCache = [
   './Continuous_Verb_Speaker.html',
   './Grammatik_Regel_Trainer.html',
   './German_B1_Practice_Studio.html',
-  './Nomen_Adjektiv_Trainer.html',
+  './Nomen_Trainer.html',
   './German_A2_Practice_Studio.html',
   './Wortfamilien_Explorer.html',
   './js/srs-engine.js',
