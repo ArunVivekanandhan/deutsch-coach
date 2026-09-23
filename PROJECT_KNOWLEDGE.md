@@ -751,6 +751,47 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 24, Phase 2 of a multi-phase vocabulary audit) — 265 more adjectives from a second real source, with a heavy de-inflection correction pass
+
+#### Task
+Continuation of the vocabulary-coverage audit. The user pointed at a second real GitHub source, `magdalena-trivina/goethe-zertifikat-b2-wortliste` (a CSV vocabulary list the repo says was compiled from real B2-level German media - Easy German Podcast, Tagesschau, Lage der Nation Podcast, Deutschlandfunk), and asked me to extract from it if it looked good. After evaluating scope (512 candidate adjectives, 562 genderless-candidate nouns, 245 verbs with no principal parts), the user chose to process adjectives from this source next.
+
+#### What the source actually is (disclosed, not oversold)
+- **Not an official Goethe-Institut word list** despite the repo name - a community CSV compiled by scraping/transcribing real media, explicitly not exam-verified per word. Kept the same honest `level: "?"` policy as Phase 1 rather than claim B2 certification the source itself doesn't claim.
+- **Crowdsourced and inconsistently capitalized** - unlike Phase 1's source, nouns in this CSV are not reliably capitalized, so a naive "capitalized = noun" classifier mis-tagged roughly a third of the initial 512 "adjective" candidates as adjectives when they were actually nouns (`adler`=eagle, `ausstrahlung`=charisma, `dschungel`=jungle, etc.).
+- **A scattered subset of rows have German/English reversed** (e.g. `autism,autismus` instead of `autismus,autism`) against the source's own stated column order - caught by manual inspection while saving the fetched CSV, not by an automated detector.
+- **The most serious problem, found only after generating comparative/superlative forms on the first pass**: because the source captured vocabulary from real sentences in media transcripts rather than as dictionary headwords, a large fraction of the "adjectives" were captured already inflected (e.g. `abgelegene` instead of the dictionary base form `abgelegen`, `bevorstehende` instead of `bevorstehend`, `bewachtes`/`bezahlbares` instead of `bewacht`/`bezahlbar`). Blindly generating `komp`/`sup` on these inflected forms produces doubly-wrong output (e.g. the naive engine turned `bewachtes` into `bewachteser`/`am bewachtesesten`). This can't be fixed with an automatic suffix-strip rule, since real German adjectives legitimately end in bare `-e` (`leise`, `müde`, `böse`) - it required per-word manual correction.
+
+#### Triage pipeline (five passes, each catching a distinct contamination type)
+1. Noun-suffix filter (`-ung/-heit/-keit/-schaft/-tum/-nis/-ismus/-tion/-sion/-tät/-ling/-chen/-lein/-sal/-ei/...`) plus a 119-word hand-built manual exclusion list: 512 → 344 confirmed adjective candidates.
+2. Verb-form/garbage filter (conjugated forms like `schwankt`, `umfasst`, `zurückwies` mistaken for adjectives, plus one garbage row): 344 → 327.
+3. Non-gradable filter (adverbs/quantifiers/absolutes like `fast`, `allein`, `mehrere`, `derzeit`, `zumal` that aren't comparable adjectives even though the source tagged them as such): removed at generation time via a `NOT_GRADABLE` set.
+4. **This phase's main work**: went through all 327 remaining candidates individually and (a) corrected ~80 inflected surface forms back to their dictionary base form (`abgelegene`→`abgelegen`, `andersdenkende`→`andersdenkend`, `heikle`→`heikel`, `zartem`→`zart`, etc.), (b) fixed a handful of OCR/typo spellings (`bodenstandlich`→`bodenständig`, `renommmierte`→`renommiert`, `reisserisch`→`reißerisch`, `gelind`→`gelinde`, `ermudend`→`ermüdend`), (c) caught 6 more contaminants the earlier automated passes missed - conjugated verb forms hiding among the "adjectives" (`äußerte`, `besticht`, `durchdreht`, `durchsetzt`, `herrscht`, the bare infinitive `wegschmeißen`) and (d) caught 8 more nouns the capitalization-based filter missed (`einzelfall`, `erbschaftsteuer`, `fördergelder`, `forschende`, `geistlicher`, `getreide`, `sondergesandte`, `verweigerer`), and (e) added 6 more true non-gradable entries to the exclusion set (`angeblich`, `erneut`, `imstande`, `letztendlich`, `stockdunkel`, `tagsüber`) while also correcting a bug in the carried-over exclusion set - `zugig` ("drafty") had been wrongly marked non-gradable, apparently confused with the unrelated word `zügig` ("brisk"); restored it as a normal gradable entry.
+5. Regenerated `komp`/`sup` with the same rules engine as Phase 1 (regular suffixation, umlaut list, irregular dict, `-esten` endings for stems ending in d/t/s/ß/z/sch/x) run against the corrected base forms - this alone fixed the double-inflection bug, since it was purely a symptom of feeding inflected input into the generator, not a bug in the generator itself.
+6. Cross-checked the resulting 276 candidates against the live 671→406 `ADJS` array by exact base-form match: **11 turned out to already be present** (`angemessen`, `bezahlbar`, `eindeutig`, `entsprechend`, `ernsthaft`, `erstaunlich`, `folgenreich`, `heilig`, `renommiert`, `wesentlich`, `zusätzlich`) - several of these only became visible as duplicates *because* the de-inflection pass fixed the surface form (e.g. the source's `angemessene` would have looked like a new word, but the corrected `angemessen` correctly matches what Phase 1 already added). Dropped these 11, leaving **265 genuinely new adjectives**.
+7. Hand-classified all 265 into the existing 13-category taxonomy from Task 22, and also fixed several English glosses that were awkward, mis-capitalized, or in the wrong part of speech (adverb form instead of adjective, e.g. `zunehmend` "increasingly"→"increasing", `zwangsläufig` "inevitably"→"inevitable", `maßgeblich` "significantly"→"significant, decisive").
+8. Tagged every new entry's `source` distinctly: `"goethe-zertifikat-b2-wortliste (GitHub: magdalena-trivina, community list compiled from real German media -- Easy German Podcast, Tagesschau, Lage der Nation, Deutschlandfunk; not an official Goethe-Institut source, level not exam-verified)"`, and left `level: "?"` for the same honesty reasons as Phase 1.
+9. Confirmed `meaningHTML()`'s graceful Tamil-less degradation still applies - shipped without fabricating Tamil translations.
+
+#### Testing
+- Syntax-checked (`node --check`) - clean.
+- Headless-browser (Playwright) test suite: entry count exactly 406+265=671; every entry has `komp`/`sup`; every entry has a valid category; no duplicate words in the merged array; spot-checked de-inflected words for correct `komp`/`sup` (`abgelegen`→`abgelegener`/`am abgelegensten`, `heikel`→`heikler`/`am heikelsten`, `zugig`→`zugiger`/`am zugigsten`); explicitly confirmed none of the known-bad inflected surface forms (`abgelegene`, `bewachtes`, `bezahlbares`, etc.) leaked in as separate headwords; explicitly confirmed none of the excluded verb-form/noun contaminants (`besticht`, `herrscht`, `einzelfall`, `getreide`, etc.) leaked in; the newly-populated `wetter` category filter narrows correctly; all three `practiceMode`s render with the expanded dataset.
+- Full-site smoke sweep (26 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Explicitly NOT done this phase (remaining work, not silently dropped)
+- **Nouns (562 candidates, no gender data at all in the source) and verbs (245 candidates, no participle/Präteritum data)** from this same second source - higher risk than the adjectives were, not started.
+- The 67 phrase/idiom-type entries in this source that aren't single-word vocabulary - set aside, not force-classified.
+- Nouns and verbs from Phase 1's PDF source (857 and 331 candidates respectively) - still not started.
+- No CEFR level assigned to any of the 265 new adjectives (left `"?"`, honest given the source isn't exam-verified per word).
+
+#### Files Changed
+- `Adjektiv_Adverb_Trainer.html` (ADJS: 406 → 671)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 24, Phase 1 of a multi-phase vocabulary audit) — 160 new adjectives from a real, cross-referenced source
 
 #### Task
