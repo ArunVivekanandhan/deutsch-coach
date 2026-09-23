@@ -751,6 +751,43 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 24, Phase 1 of a multi-phase vocabulary audit) — 160 new adjectives from a real, cross-referenced source
+
+#### Task
+Resumption of the full A1-B2 vocabulary-coverage-audit request from earlier in this session (interrupted twice while scoping it). The user supplied a real source: a GitHub-hosted PDF, `Hazrat-Ali9/Deutschland-Vocabulary-A1-B2` ("Full Vocabulary A1 - B2.pdf", 90 pages, ~2,050 numbered German↔English entries). Unlike telc.net/ankiweb.net (both `EGRESS_BLOCKED` in this environment), `raw.githubusercontent.com` was reachable, and the PDF's raw bytes came back from `WebFetch` intact - `pdftotext` (installed via `apt-get`, which worked despite `apt.launchpad.net` mirrors being blocked) extracted the full text.
+
+#### What the source actually is (disclosed, not oversold)
+- **Not an official telc/Goethe list** - a personal/community-compiled GitHub repo. Its own title just says "wichtiger Wortschatz bis zum Niveau B2" (important vocabulary up to B2 level) - no per-word CEFR tag anywhere in the document.
+- **Domain-skewed in its later sections** toward healthcare/nursing vocabulary (*Dauerkatheter, Epilepsie, Psychopharmakon, Überleitungsbogen*, "examiniert" as in registered-nurse-qualified) - looks compiled for a Pflegekräfte (nursing) integration-course audience, not general-purpose learner vocabulary.
+- **Real transcription/OCR quality issues**: found and had to hand-fix outright errors during processing - obsolete/wrong spellings (`Genoßen`/`Gefloßen` instead of post-1996-reform `genossen`/`geflossen`), garbled unrecognizable strings (`airshaft`, `unmerges`), stray PDF page-number digits glued onto English glosses (`"amazing 58"`), and - most importantly - **already-inflected forms mistaken for base words** (`weicher`/`besser`/`beste` are the comparative/superlative of adjectives *already in the app* - `weich`/`gut` - not new base adjectives; importing them as-is would have created nonsensical double-inflected forms like "besserer").
+
+#### Pipeline built (Python, in the scratchpad - not checked into the app)
+1. Parsed all ~2,040 numbered entries (many span wrapped lines in the raw PDF text).
+2. Classified each by POS using the entry's own markup (Der/Die/Das prefix → noun with a plural-type hint; a parenthetical participle-looking word next to an *-en/-n* verb → verb; explicit `(adj)`/`(adv)`/`(prep)`/`(conj)`/`(pron)` tags; everything else set aside as `phrase`/`unknown` rather than guessed at). Handled the source's inconsistent field ordering (`verb (participle) - english` *and* `verb - english (participle)` both occur).
+3. Cross-referenced every classified word (case/whitespace-normalized) against the live `VERBS`/`NOUNS`/`ADJS` arrays to separate already-covered words from genuine gaps: **331 new-candidate verbs, 857 new-candidate nouns, 197 new-candidate adjectives, 63 adverbs, 1 preposition** (no existing app arrays exist for adverbs/prepositions/conjunctions/pronouns to cross-reference against - noted as a structural gap, not solved this phase).
+4. **Phase 1 (this task) processed only the adjective slice** (smallest, and adjectives don't need the plural-type/umlaut guessing nouns would) end-to-end: hand-fixed the typos/garbage/already-inflected entries found above (12 dropped or corrected before generation, 5 more dropped post-generation as duplicates of existing entries once typo-corrected spellings collided with what was already there - down to 162 clean candidates, merged to net +160 after two exact final-stage duplicates), generated `komp`/`sup` with a small rules engine (regular suffixation, a hand-curated short-umlauting-word list for `alt/kalt/warm/...`-type adjectives, a tiny irregular dict for `gut/viel/gern/hoch/nah`, and manual removal of non-gradable entries the source had mistakenly marked as plain adjectives - `fast`/`allein`/`mehrere`/`einzig`), and hand-classified all 162 into the existing 13-category taxonomy from Task 22.
+5. Tagged every new entry's `source` field distinctly (`"Deutschland-Vocabulary-A1-B2 (GitHub: Hazrat-Ali9, community list — level not source-tagged)"`) so its different provenance from the textbook-sourced original 246 stays traceable, and left `level: "?"` (unlabeled) rather than guess a CEFR level with no real basis - consistent with how most of the original 246 were already left unlabeled for the same reason.
+6. Confirmed the app's `meaningHTML()` already degrades gracefully with no Tamil translation (`v.ta` falsy → falls back to English-only display) - so these 160 new entries ship without Tamil rather than risk fabricating Tamil translations, which was flagged as a real concern before starting.
+
+#### Testing
+- Syntax-checked (`node --check`) - clean.
+- Headless-browser (Playwright) test suite (11 checks): entry count is exactly 246+160=406; every new entry has `komp`/`sup`/a valid category; **caught a real bug via automated duplicate-detection** (`schlecht`/`unbefristet` collided with existing entries only *after* the typo-fix step renamed `schlect`→`schlecht` and `unbefristete`→`unbefristet`, past the point where the original against-existing-array dedup check had already run) - fixed by re-deduping the final merged array and re-testing; category filter still narrows correctly at the larger size; all three `practiceMode`s (easy/medium/hard) render correctly with the expanded dataset.
+- Full-site smoke sweep (26 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Explicitly NOT done this phase (remaining work, not silently dropped)
+- **Nouns (857 candidates)** and **verbs (331 candidates)** - the two largest, and structurally harder, slices: nouns need plural-form generation (the source gives only a terse type hint like `(e)`/`(en)`/`(same)`, not the actual inflected plural or umlaut behavior) and verbs need Präteritum generation (the source gives only the participle) - both of these are exactly the kind of "good-faith derivation, not textbook-verified" content the existing adjective komp/sup already models, but at far higher per-word risk (get a plural or a strong-verb Präteritum wrong and it's flatly incorrect, not just "unusual-sounding") and need the same manual-typo/garbage/already-inflected-form triage this phase did for adjectives, at ~5x the volume.
+- **Adverbs (63 found)** and **prepositions (1 found)**: this app has no existing array structure for either - adding them means a new content type, not gap-filling an existing one.
+- No CEFR level was assigned to any of the 160 new adjectives (left `"?"` - honest given the source doesn't provide it).
+- The ~90 entries that didn't cleanly classify into any POS category (full-sentence opinion-phrase collocations like "Meiner Meinung nach...", reflexive-verb formatting variants, a handful of OCR-mangled article prefixes) were set aside entirely, not force-fit.
+
+#### Files Changed
+- `Adjektiv_Adverb_Trainer.html` (ADJS: 246 → 406)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 23) — New page: Geschichte_Trainer.html, a storyline-based dialogue trainer
 
 #### Task
