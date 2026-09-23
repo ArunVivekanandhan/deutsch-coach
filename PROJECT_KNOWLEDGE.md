@@ -751,6 +751,40 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 23) — New page: Geschichte_Trainer.html, a storyline-based dialogue trainer
+
+#### Task
+"Can you create the page like this https://ankiweb.net/shared/info/1698672280" (a shared AnkiWeb trial deck: "Firetongues German," a storyline course following two characters through a city, sentences in frequency order, native-speaker audio, illustrated cards). The linked page itself couldn't be fetched (network egress to `ankiweb.net` is blocked in this environment), so the user pasted a screenshot instead. Clarified via `AskUserQuestion` that the ask was a genuinely new storyline-based course page (not just reusing the card-layout on existing vocab, not a marketing/landing page).
+
+#### Scoping decisions (disclosed, not silent)
+- **Original content, not Firetongues'**: wrote an original 6-scene, 23-line A1 dialogue ("Lektion 1: Ankunft in Hamburg") with two original characters (Lena, arriving in Hamburg; Jonas, a local) — never copied or derived from Firetongues' own characters (Anna & Max) or content, which is a commercial product this project has no license to reproduce.
+- **One lesson, not "2,000+ cards"**: the reference page's *full* course is 2,000+ cards; even its own free trial is 464. Shipping a single well-written, correctly-graded lesson now (with the full page architecture in place to add more later) was chosen over rushing a large volume of dialogue at lower quality.
+- **Browser TTS, not studio recordings**: audio uses this app's existing shared `speak()`/`speakSequence()` (`js/tts-engine.js`), not human voice actors — stated plainly in the page's own footer rather than implying otherwise.
+- **Simple inline-SVG avatars, not illustrated scene art**: no image-generation tool is available in this environment; built small flat-style SVG character avatars (reused per speaker, chat-bubble UI) rather than attempting to fake professional per-scene illustration.
+
+#### What was built
+- New page `Geschichte_Trainer.html`, following this app's established single-file conventions (`css/design-system.css`, `js/tts-engine.js`, `js/srs-engine.js`, `js/app-shell.js` for the shared sidebar/nav — no manual suite-hub markup needed, `renderAppShell()` injects it automatically on `DOMContentLoaded`).
+- **Story mode**: all 6 scenes render as a scrollable chat-style thread (Lena's lines left-aligned, Jonas's right-aligned, each with a small SVG avatar), with a per-line 🔊 listen button, a per-line EN toggle (hidden by default, so the page reads as German-first), an optional "Formen" grammar note on ~40% of lines (one teaching point per note, not every line), and a "▶️ Play whole scene" button that speaks all of a scene's lines in sequence via `speakSequence()`.
+- **Review mode**: a lightweight English→German recall flashcard flow over the same 23 lines, reusing the exact reveal/grade pattern established across this app's other trainers (`revealBtn` → populates answer + Formen note + 🔊 + Nochmal/Gewusst), backed by a new `SRSEngine.Engine('story_progress_v1', null)` progress store — a new, separate key (not reusing `na_progress_v1`/`vt_progress_v1`/etc.), since this is a distinct content set.
+- Wired into navigation (`index.html` tools list, `deutsch-coach.html` suite grid).
+
+#### Bug found and fixed during testing
+Playwright testing caught a real bug before it shipped: the review-mode "Start Practice" button used `id="startReviewBtn"`, which **collides with an id already used by `js/app-shell.js`'s own injected sidebar button** (`<button id="startReviewBtn" onclick="window.location.href='deutsch-coach.html'">`, added by an earlier task). Since `app-shell.js`'s sidebar is injected into the DOM *before* this page's own content, `document.getElementById('startReviewBtn')` resolved to the *sidebar's* button instead of this page's — clicking "Start Practice" silently navigated away to `deutsch-coach.html` instead of starting a review session. Confirmed via `page.on('framenavigated')` during test debugging (no thrown error, no console error — it looked like the button just "did nothing" from the outside). Fixed by renaming this page's button to the unique `id="startStoryReviewBtn"`; grepped `js/app-shell.js` for its full id list (`closeDrawerBtn`, `menuBtn`, `startReviewBtn`, `themeToggleBtn`) to confirm no other collisions. Other existing trainer pages were already safe — they use `id="startBtn"`, not `startReviewBtn`.
+
+#### Testing
+- Syntax-checked all script blocks (`node --check`) — clean.
+- Headless-browser (Playwright) test suite (15 checks): all 6 scenes and 23 bubbles render with avatars; EN toggle works; `playLine`/`playScene` speak the correct bare (un-bolded) text via a TTS spy; tab switching shows/hides the right view; Review mode starts, includes all 23 lines, reveals correctly, grades advance the session, progress persists to `story_progress_v1`, and the completion screen appears after finishing; app-shell navigation is present.
+- Full-site smoke sweep (26 pages, up from 25): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Geschichte_Trainer.html` (new)
+- `index.html`, `deutsch-coach.html` (navigation)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 22) — Split Nomen_Adjektiv_Trainer.html into two pages; adjectives grouped by category
 
 #### Task

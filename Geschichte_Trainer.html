@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Geschichte — Lena &amp; Jonas in Hamburg</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
+    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
+    --purple:#6B4A8A; --lena:#C05B4D; --jonas:#2F5C8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  }
+  html.dark-theme, body[data-theme="dark"] {
+    --paper:#0f172a; --paper-dark:#1e293b; --card:#1e293b; --ink:#f8fafc; --ink-soft:#94a3b8;
+    --red:#f87171; --red-dark:#ef4444; --gold:#fbbf24; --green:#4ade80; --blue:#38bdf8;
+    --purple:#c084fc; --lena:#f0897a; --jonas:#60a5fa; --line:#334155; --shadow:rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;}
+  .wrap{width:100%; max-width:720px;}
+  h1{font-family:'Fjalla One',sans-serif; font-size:24px; border-bottom:3px solid var(--ink); padding-bottom:6px; margin:0 0 4px;}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
+
+  .modetabs{display:flex; gap:6px; margin-bottom:16px;}
+  .modetab{flex:1; font-family:'Fjalla One',sans-serif; font-size:15px; padding:11px; text-align:center;
+    border:1.5px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink); cursor:pointer;}
+  .modetab.active{background:var(--ink); color:#fff;}
+
+  /* ---- Story mode ---- */
+  .scene{margin-bottom:26px;}
+  .scene-head{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .scene-icon{font-size:26px; line-height:1;}
+  .scene-title{font-family:'Fjalla One',sans-serif; font-size:18px; color:var(--ink);}
+  .scene-sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft);}
+
+  .bubble-row{display:flex; gap:10px; margin-bottom:14px; align-items:flex-start;}
+  .bubble-row.jonas{flex-direction:row-reverse;}
+  .avatar{width:40px; height:40px; flex-shrink:0; border-radius:50%; overflow:hidden; border:2px solid var(--line); background:var(--card);}
+  .avatar svg{width:100%; height:100%; display:block;}
+  .bubble{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; max-width:78%;
+    box-shadow:0 4px 10px var(--shadow); position:relative;}
+  .bubble-row.lena .bubble{border-bottom-left-radius:3px;}
+  .bubble-row.jonas .bubble{border-bottom-right-radius:3px; text-align:right;}
+  .speaker{font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.5px;
+    color:var(--ink-soft); margin-bottom:3px;}
+  .bubble-row.lena .speaker{color:var(--lena);}
+  .bubble-row.jonas .speaker{color:var(--jonas);}
+  .de-line{font-family:'IBM Plex Sans',sans-serif; font-size:15.5px; color:var(--ink); line-height:1.4;}
+  .de-line b{color:var(--gold);}
+  .en-line{font-family:'IBM Plex Sans',sans-serif; font-size:12.5px; color:var(--ink-soft); font-style:italic;
+    margin-top:4px; display:none;}
+  .en-line.shown{display:block;}
+  .bubble-actions{display:flex; gap:6px; margin-top:6px; align-items:center;}
+  .bubble-row.jonas .bubble-actions{justify-content:flex-end;}
+  .mini-btn{background:none; border:1px solid var(--line); border-radius:12px; padding:3px 9px; font-size:11px;
+    cursor:pointer; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;}
+  .mini-btn:hover{border-color:var(--ink); color:var(--ink);}
+  .formen-note{font-family:'IBM Plex Sans',sans-serif; font-size:11.5px; color:var(--ink-soft); background:var(--paper-dark);
+    border-left:3px solid var(--gold); border-radius:4px; padding:6px 10px; margin-top:7px;}
+  .formen-note b{color:var(--ink);}
+
+  .scene-play-row{text-align:center; margin:6px 0 20px;}
+  .scene-play-btn{font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:var(--paper); border:1.5px solid var(--ink);
+    border-radius:16px; padding:7px 16px; cursor:pointer; color:var(--ink);}
+
+  /* ---- Review (flashcard) mode ---- */
+  .sessionbar{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:10px;}
+  .studycard{background:var(--card); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 24px var(--shadow);
+    overflow:hidden; margin-bottom:14px;}
+  .stripe{height:6px; background:var(--gold);}
+  .qlabel{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--gold); text-transform:uppercase;
+    letter-spacing:0.5px; padding:12px 18px 0;}
+  .prompt{padding:8px 18px 4px; text-align:center;}
+  .prompt .word{font-family:'IBM Plex Sans',sans-serif; font-size:18px; line-height:1.4; color:var(--ink);}
+  .prompt .subq{font-family:'IBM Plex Sans',sans-serif; font-size:12.5px; color:var(--ink-soft); margin-top:8px;}
+  .thinkbtn{display:block; width:calc(100% - 36px); margin:14px 18px 18px; font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase; letter-spacing:0.5px; padding:13px; border:1.5px dashed var(--ink); background:transparent;
+    color:var(--ink); border-radius:6px; cursor:pointer;}
+  .revealbox{padding:4px 18px 16px; text-align:center;}
+  .revealbox .de-big{font-family:'Fjalla One',sans-serif; font-size:20px; color:var(--ink);}
+  .answerbtns{display:flex; gap:8px; padding:0 18px 18px;}
+  .actbtn{flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:11px 4px; border-radius:6px;
+    border:1.5px solid var(--ink); background:var(--paper); color:var(--ink); cursor:pointer; font-weight:600;}
+  .actbtn.gewusst{border-color:var(--green); color:var(--green);}
+  .actbtn.nochmal{border-color:var(--red); color:var(--red);}
+  .bigbtn{width:100%; font-family:'Fjalla One',sans-serif; font-size:18px; padding:16px; border:none;
+    border-radius:8px; background:var(--red); color:#fff; cursor:pointer; box-shadow:0 6px 0 var(--red-dark); margin-bottom:16px;}
+  .bigbtn:active{transform:translateY(3px); box-shadow:0 3px 0 var(--red-dark);}
+  .bigbtn .subtext{display:block; font-family:'IBM Plex Sans',sans-serif; font-size:11px; font-weight:400; opacity:0.9; margin-top:3px;}
+
+  footer{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); line-height:1.6; margin-top:24px; padding-top:12px; border-top:1px solid var(--line);}
+</style>
+<link rel="stylesheet" href="css/design-system.css">
+  <script src="./assets/js/gamification.js"></script>
+  <script src="js/icon-svgs.js"></script>
+  <script src="js/srs-engine.js"></script>
+  <script src="js/tts-engine.js"></script>
+  <script src="js/progress-aggregator.js"></script>
+  <script src="js/app-shell.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Geschichte: Lena &amp; Jonas in Hamburg</h1>
+  <div class="sub">Lektion 1 · Ankunft — A1 · Original story, browser text-to-speech (not studio audio)</div>
+
+  <div class="modetabs">
+    <div class="modetab active" id="tabStory">📖 Geschichte lesen</div>
+    <div class="modetab" id="tabReview">🎯 Sätze üben</div>
+  </div>
+
+  <div id="storyView"></div>
+  <div id="reviewView" style="display:none;"></div>
+
+  <footer>
+    Original-Geschichte und Figuren (Lena &amp; Jonas), geschrieben für diesen Coach — keine Übernahme aus einem kommerziellen Kurs.
+    Audio wird über die Sprachausgabe deines Geräts erzeugt, nicht von Muttersprachlern eingesprochen.
+    Dies ist Lektion 1 von geplanten weiteren Lektionen. Fortschritt wird lokal gespeichert.
+  </footer>
+</div>
+
+<script>
+/* =========================================================
+   STORY DATA — Lektion 1: Ankunft in Hamburg
+   Original characters (Lena, Jonas) and dialogue written for
+   this app; not derived from any commercial course's content.
+   ========================================================= */
+const SCENES = [
+  { id:'ankunft', icon:'🚉', title:'Ankunft am Bahnhof', sub:'Arrival at the station', lines:[
+    { id:1, sp:'lena', de:'Hallo! Ich <b>heiße</b> Lena.', en:'Hello! My name is Lena.', formen:'heißen = to be called — <i>Ich heiße...</i>' },
+    { id:2, sp:'jonas', de:'Hallo Lena! Ich heiße Jonas.', en:'Hello Lena! My name is Jonas.' },
+    { id:3, sp:'jonas', de:'<b>Wie geht es dir?</b>', en:'How are you?', formen:'Fixed phrase — <i>dir</i> is Dativ, not Akkusativ.' },
+    { id:4, sp:'lena', de:'Mir geht es gut, danke! Und dir?', en:"I'm doing well, thanks! And you?" },
+    { id:5, sp:'jonas', de:'Auch gut, danke!', en:'Also good, thanks!' }
+  ]},
+  { id:'woher', icon:'🗺️', title:'Woher kommst du?', sub:'Where are you from?', lines:[
+    { id:6, sp:'jonas', de:'<b>Woher kommst du?</b>', en:'Where are you from?', formen:'woher = from where (question word + Präsens, verb-second).' },
+    { id:7, sp:'lena', de:'Ich komme aus München. Und du?', en:'I come from Munich. And you?' },
+    { id:8, sp:'jonas', de:'Ich komme aus Hamburg. Ich <b>wohne</b> hier.', en:'I come from Hamburg. I live here.', formen:'wohnen = to reside (a specific place); leben = to live (in general).' },
+    { id:9, sp:'lena', de:'Das ist toll! Hamburg ist schön.', en:"That's great! Hamburg is beautiful." }
+  ]},
+  { id:'wegweisen', icon:'📍', title:'Wo ist die U-Bahn?', sub:'Asking for directions', lines:[
+    { id:10, sp:'lena', de:'<b>Entschuldigung</b>, wo ist die U-Bahn?', en:'Excuse me, where is the subway?', formen:'Entschuldigung = polite way to get someone\'s attention.' },
+    { id:11, sp:'jonas', de:'Die U-Bahn ist da drüben, <b>links</b>.', en:'The subway is over there, to the left.', formen:'links = left, rechts = right, geradeaus = straight ahead.' },
+    { id:12, sp:'lena', de:'Vielen Dank!', en:'Thank you very much!' },
+    { id:13, sp:'jonas', de:'Kein Problem!', en:'No problem!' }
+  ]},
+  { id:'cafe', icon:'☕', title:'Im Café', sub:'At the café', lines:[
+    { id:14, sp:'jonas', de:'<b>Möchtest</b> du einen Kaffee trinken?', en:'Would you like to drink a coffee?', formen:'möchten = polite "would like" — Modalverb, Infinitiv (trinken) ans Ende.' },
+    { id:15, sp:'lena', de:'Ja, gerne! Ich trinke gern Kaffee.', en:'Yes, gladly! I like to drink coffee.' },
+    { id:16, sp:'jonas', de:'Ich nehme einen Tee, bitte.', en:"I'll have a tea, please." },
+    { id:17, sp:'lena', de:'Das Café ist sehr gemütlich.', en:'The café is very cozy.' }
+  ]},
+  { id:'plaene', icon:'🕘', title:'Pläne für morgen', sub:'Plans for tomorrow', lines:[
+    { id:18, sp:'jonas', de:'Was machst du morgen?', en:'What are you doing tomorrow?' },
+    { id:19, sp:'lena', de:'Ich lerne Deutsch. Ich habe eine Deutschstunde <b>um</b> neun Uhr.', en:'I’m learning German. I have a German lesson at nine o’clock.', formen:'Uhrzeit mit "um": um + Uhrzeit = "at" + time.' },
+    { id:20, sp:'jonas', de:'Viel Erfolg!', en:'Good luck!' }
+  ]},
+  { id:'abschied', icon:'👋', title:'Auf Wiedersehen', sub:'Goodbye', lines:[
+    { id:21, sp:'lena', de:'Ich muss jetzt gehen. Tschüss, Jonas!', en:'I have to go now. Bye, Jonas!' },
+    { id:22, sp:'jonas', de:'Tschüss, Lena! <b>Bis bald!</b>', en:'Bye, Lena! See you soon!', formen:'Bis bald! = "See you soon!" — a common casual farewell.' },
+    { id:23, sp:'lena', de:'Bis bald!', en:'See you soon!' }
+  ]}
+];
+
+function bareText(de){ return de.replace(/<\/?b>/g,''); }
+
+const AVATAR = {
+  lena: `<svg viewBox="0 0 40 40"><circle cx="20" cy="40" r="16" fill="var(--lena)"/><circle cx="20" cy="16" r="11" fill="#f2c9a0"/><path d="M9 14 Q20 2 31 14 Q31 6 20 5 Q9 6 9 14Z" fill="#5a3a2a"/><path d="M8 16 Q6 26 9 30" stroke="#5a3a2a" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M32 16 Q34 26 31 30" stroke="#5a3a2a" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+  jonas: `<svg viewBox="0 0 40 40"><circle cx="20" cy="40" r="16" fill="var(--jonas)"/><circle cx="20" cy="16" r="11" fill="#e0ad7d"/><path d="M9 13 Q20 3 31 13 L31 10 Q20 6 9 10Z" fill="#2b2118"/></svg>`
+};
+
+/* ---- Story mode rendering ---- */
+function renderStoryView(){
+  const el = document.getElementById('storyView');
+  el.innerHTML = SCENES.map(scene => `
+    <div class="scene" data-scene="${scene.id}">
+      <div class="scene-head">
+        <div class="scene-icon">${scene.icon}</div>
+        <div>
+          <div class="scene-title">${scene.title}</div>
+          <div class="scene-sub">${scene.sub}</div>
+        </div>
+      </div>
+      ${scene.lines.map(line => `
+        <div class="bubble-row ${line.sp}">
+          <div class="avatar">${AVATAR[line.sp]}</div>
+          <div class="bubble">
+            <div class="speaker">${line.sp === 'lena' ? 'Lena' : 'Jonas'}</div>
+            <div class="de-line">${line.de}</div>
+            <div class="en-line" id="en-${line.id}">${line.en}</div>
+            <div class="bubble-actions">
+              <button class="mini-btn" onclick="playLine(${line.id})">🔊 Anhören</button>
+              <button class="mini-btn" onclick="toggleEn(${line.id})">🇬🇧 EN</button>
+            </div>
+            ${line.formen ? `<div class="formen-note"><b>Formen:</b> ${line.formen}</div>` : ''}
+          </div>
+        </div>
+      `).join('')}
+      <div class="scene-play-row">
+        <button class="scene-play-btn" onclick="playScene('${scene.id}')">▶️ Ganze Szene abspielen (Play whole scene)</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleEn(lineId){
+  const el = document.getElementById('en-' + lineId);
+  if(el) el.classList.toggle('shown');
+}
+
+function allLines(){ return SCENES.flatMap(s => s.lines); }
+function findLine(lineId){ return allLines().find(l => l.id === lineId); }
+
+function playLine(lineId){
+  const line = findLine(lineId);
+  if(!line) return;
+  if(typeof speak === 'function') speak(bareText(line.de));
+}
+
+function playScene(sceneId){
+  const scene = SCENES.find(s => s.id === sceneId);
+  if(!scene) return;
+  const texts = scene.lines.map(l => bareText(l.de));
+  if(typeof speakSequence === 'function') speakSequence(texts, 500);
+}
+
+/* ---- Review mode: simple SRS flashcard recall (EN -> DE) ---- */
+const storyEngine = new SRSEngine.Engine('story_progress_v1', null);
+let reviewSession = [];
+let reviewIdx = 0;
+
+function buildReviewQueue(){
+  return allLines().map(l => ({ ...l, uid: 'story|' + l.id }));
+}
+
+function startReview(){
+  reviewSession = shuffleArr(buildReviewQueue());
+  reviewIdx = 0;
+  renderReviewCard();
+}
+
+function shuffleArr(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderReviewView(){
+  const el = document.getElementById('reviewView');
+  el.innerHTML = `
+    <button class="bigbtn" id="startStoryReviewBtn">🧠 Übung starten (Start Practice)<span class="subtext">${allLines().length} Sätze aus Lektion 1 · English → German recall</span></button>
+    <div id="reviewStage"></div>
+  `;
+  document.getElementById('startStoryReviewBtn').onclick = startReview;
+}
+
+function renderReviewCard(){
+  const stage = document.getElementById('reviewStage');
+  if(typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
+  if(reviewIdx >= reviewSession.length){
+    stage.innerHTML = `<div class="studycard"><div class="revealbox" style="padding-top:20px;">🎉 <b>Fertig!</b> Du hast alle ${reviewSession.length} Sätze aus Lektion 1 geübt.</div></div>`;
+    return;
+  }
+  const line = reviewSession[reviewIdx];
+  stage.innerHTML = `
+    <div class="sessionbar">Satz ${reviewIdx + 1} / ${reviewSession.length}</div>
+    <div class="studycard">
+      <div class="stripe"></div>
+      <div class="qlabel">Englisch → Deutsch</div>
+      <div class="prompt">
+        <div class="word">${line.en}</div>
+        <div class="subq">Wie sagt man das auf Deutsch?</div>
+      </div>
+      <button class="thinkbtn" id="revealBtn">Antwort zeigen 🔎 · Reveal</button>
+      <div id="revealArea"></div>
+    </div>
+  `;
+  document.getElementById('revealBtn').onclick = () => {
+    document.getElementById('revealArea').innerHTML = `
+      <div class="revealbox">
+        <div class="de-big">${line.de} <button class="mini-btn" onclick="playLine(${line.id})">🔊</button></div>
+        ${line.formen ? `<div class="formen-note" style="text-align:left; margin-top:10px;"><b>Formen:</b> ${line.formen}</div>` : ''}
+      </div>
+      <div class="answerbtns">
+        <button class="actbtn nochmal" id="btnNochmal">↺ Nochmal</button>
+        <button class="actbtn gewusst" id="btnGewusst">✓ Gewusst</button>
+      </div>
+    `;
+    document.getElementById('btnNochmal').onclick = () => { storyEngine.recordResult(line.uid, false, 'story_recall'); advanceReview(); };
+    document.getElementById('btnGewusst').onclick = () => { storyEngine.recordResult(line.uid, true, 'story_recall'); advanceReview(); };
+  };
+}
+
+function advanceReview(){
+  reviewIdx++;
+  renderReviewCard();
+}
+
+/* ---- Tabs ---- */
+document.getElementById('tabStory').onclick = () => {
+  document.getElementById('tabStory').classList.add('active');
+  document.getElementById('tabReview').classList.remove('active');
+  document.getElementById('storyView').style.display = '';
+  document.getElementById('reviewView').style.display = 'none';
+  if(typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
+};
+document.getElementById('tabReview').onclick = () => {
+  document.getElementById('tabReview').classList.add('active');
+  document.getElementById('tabStory').classList.remove('active');
+  document.getElementById('reviewView').style.display = '';
+  document.getElementById('storyView').style.display = 'none';
+  if(typeof cancelPendingSpeech === 'function') cancelPendingSpeech();
+};
+
+renderStoryView();
+renderReviewView();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
+    });
+  }
+</script>
+</body>
+</html>
