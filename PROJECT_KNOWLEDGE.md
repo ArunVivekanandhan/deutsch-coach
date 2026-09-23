@@ -751,6 +751,45 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-23 (Task 26) — Fixed the remaining open item from Task 25: 99 non-adjective entries contaminating the `ADJS` array turned out to be 73 genuinely missing words, now correctly homed
+
+#### Task
+User said "Try to fix the open" after Task 25 explicitly flagged but didn't fix one issue: 99 entries (7 tagged `cat:'v'`, 92 tagged `cat:'n'`) sitting inside the `ADJS` array of both `Deutsch_Wortschatz_Excel_Sheet.html` and `Wortschatz_Master_Grid.html`, identical in both files (confirmed pre-dating this session).
+
+#### What the 99 contaminants actually were
+Each contaminant had only `{w, en, cat}` - no grammar data at all, meaning they weren't ever properly added anywhere; they'd been captured (word + gloss) and mis-filed into `ADJS` instead of `VERBS`/`NOUNS`. Checked each of the 99 against both files' own `VERBS`/`NOUNS` arrays by exact key match before deciding anything:
+- **21 already existed correctly elsewhere** (`sein`, `werden`, `waschen`, `Kaffee`, `Schuh`, `Computer`, etc.) - safe to just delete from `ADJS`, no data lost.
+- **73 were genuinely missing everywhere** - not just from `ADJS` (where they never belonged) but from the real `VERBS`/`NOUNS` arrays too, in every file in the project, including the canonical `Verb_Transformation_Trainer.html` and `Nomen_Trainer.html`. These are all basic, unambiguous A1 vocabulary (`Hund`=dog, `Baum`=tree, `Brief`=letter, `entschuldigen`=to apologize, `gucken`=to look, etc.), so reconstructing their grammar data from general knowledge carried the same low risk as similar reconstruction in Phases 3/4, just at native-speaker-obvious confidence rather than needing care.
+
+Of the 73, 3 needed a judgment call rather than a straight add:
+- `Beamte`, `Jugendliche`, `Verwandte` are nominalized adjectives with **ambiguous der/die gender** (`der/die Beamte` = "the official," gender depends on the person) - the `NOUNS` schema has one `a` field per entry and can't represent this, same policy as Phase 4. Deleted from `ADJS`, not added to `NOUNS`.
+- `es gibt` is just the impersonal use of `geben` (which already exists in `VERBS`) - deleted from `ADJS`, no separate `VERBS` entry needed.
+- That leaves 70 nouns + 3 verbs (`entschuldigen`, `gucken`, `wehtun`) genuinely added.
+
+#### Fix
+1. Removed all 99 `cat:'v'`/`cat:'n'` entries from `ADJS` in both `Deutsch_Wortschatz_Excel_Sheet.html` and `Wortschatz_Master_Grid.html` - this alone brought both files' `ADJS` down from 770 to exactly 671, matching `Adjektiv_Adverb_Trainer.html` precisely (no unique content was lost; the count match confirms these two pages now hold exactly the same adjective set as the canonical source).
+2. Added the 3 rescued verbs and 70 rescued nouns to **every page that carries `VERBS`/`NOUNS`** - not just the two pages where the contamination was found. Checked first and confirmed all 73 were missing from `Verb_Transformation_Trainer.html`/`Nomen_Trainer.html` (the canonical sources) too, so adding them only to the two already-fixed pages would have created a new version of the exact sync gap Task 25 just closed. `level: "A1"` (unlike the B2-media-sourced Phase 2-4 additions, these are unambiguously basic vocabulary by inspection), `source` field discloses the reconstruction (contamination bug origin, grammar data supplied from general knowledge not sourced), Tamil fields left empty per the established graceful-degradation policy.
+3. Updated every hardcoded word-count label across `Wortschatz_Master_Grid.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, and `Verben_Hoeren_EN_DE.html` again (same set of labels touched in Task 25, now reflecting the corrected totals).
+
+New sitewide totals, consistent across every page that carries each array: **VERBS 721, ADJS 671, NOUNS 1089**.
+
+#### Testing
+- Syntax-checked (`node --check`) on all 5 touched files - clean.
+- Headless-browser (Playwright) test suite: confirmed the exact expected count on every page for every array it carries; confirmed zero `cat:'v'`/`cat:'n'` contaminants remain in `ADJS` on both previously-contaminated pages; confirmed `wehtun` (a rescued verb) has correct `perfekt`/`praeteritum` on all 4 `VERBS`-carrying pages and `es gibt` was correctly *not* added anywhere; confirmed `Hund` (a rescued noun) has correct `a`/`pl`/`typ` on all 3 `NOUNS`-carrying pages and `Beamte` was correctly *not* added anywhere.
+- Full-site smoke sweep (26 pages): zero `pageerror` events.
+- Regenerated `sw.js` (cache version bump).
+
+#### Files Changed
+- `Verb_Transformation_Trainer.html` (VERBS: 718 → 721)
+- `Verben_Hoeren_EN_DE.html` (VERBS: 718 → 721, count labels updated)
+- `Nomen_Trainer.html` (NOUNS: 1019 → 1089)
+- `Deutsch_Wortschatz_Excel_Sheet.html` (ADJS: 770 → 671, VERBS: 718 → 721, NOUNS: 1019 → 1089, count labels updated)
+- `Wortschatz_Master_Grid.html` (ADJS: 770 → 671, VERBS: 718 → 721, NOUNS: 1019 → 1089, count labels updated)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 25) — Fixed the two data-integrity issues flagged at the end of Phase 3: the multi-page sync gap and the 41 duplicate verb infinitives; found and partly fixed two more along the way
 
 #### Task
