@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rebuild FREQ_RANK in Deutsch_Wortschatz_Excel_Sheet.html.
+"""Write word-frequency ranks and frequency-estimated levels into every word list in the app.
 
 Frequency source: hermitdave/FrequencyWords, OpenSubtitles 2018, German top 50k word forms
 (https://github.com/hermitdave/FrequencyWords, content licensed CC-BY-SA-4.0).
@@ -8,15 +8,20 @@ The list counts word *forms*, so each entry's count is the sum of its real forms
 (verb: infinitive + Präteritum + participle; noun: singular + plural; adjective: base + common
 endings + comparative + superlative). Phrase entries ("fertig sein", "führen zu", "sich bemühen")
 ignore their own preposition/"sich", and are capped at their rarest content word. That total is
-converted to the position it would take in the 50k list. 0 means "not among the 50,000 most
-frequent forms".
+converted to the position it would take in the 50k list.
 
-Run after adding words:  python3 scripts/build_freq_ranks.py
+Every entry gets  freq  (that position; 0 = rarer than the 50,000 most frequent forms).
+Entries with no textbook level ("?"/missing), or a previous estimate, get
+  level     A1 <= 1,000 < A2 <= 2,000 < B1 <= 15,000 < B2 <= 50,000 < C1
+  levelEst  true
+Textbook levels are never changed. Cut-offs were calibrated against the ~1,180 entries that have a
+textbook level (82% same level or one off, 46% exact).
+
+Run after adding or changing words:  python3 scripts/build_freq_ranks.py
 """
 import bisect, json, os, re, sys, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PAGE = os.path.join(ROOT, 'Deutsch_Wortschatz_Excel_Sheet.html')
 URL = 'https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/de/de_50k.txt'
 
 
@@ -29,24 +34,6 @@ def load_counts():
             w, c = line.rsplit(' ', 1)
             counts[w] = int(c)
     return counts
-
-
-def array(html, name):
-    m = f'const {name} = ['
-    s = html.index(m) + len(m) - 1
-    depth, in_str, esc = 0, False, False
-    for i in range(s, len(html)):
-        c = html[i]
-        if in_str:
-            if esc: esc = False
-            elif c == '\\': esc = True
-            elif c == '"': in_str = False
-        elif c == '"': in_str = True
-        elif c == '[': depth += 1
-        elif c == ']':
-            depth -= 1
-            if depth == 0:
-                return json.loads(html[s:i + 1])
 
 
 REFLEXIVE = {'sich'}
@@ -102,23 +89,90 @@ def adj_count(a, count):
     return sum(count(f) for f in forms)
 
 
+FREQ_LEVELS = (('A1', 1000), ('A2', 2000), ('B1', 15000), ('B2', 50000))
+
+# array name -> (kind, key field). SYNCED_WORDS (home flashcards) holds all three kinds, by "cat".
+ARRAYS = {
+    'VERBS': ('v', 'inf'), 'ALL_VERBS': ('v', 'inf'), 'VERBS_ALL': ('v', 'inf'),
+    'NOUNS': ('n', 'sg'), 'ADJS': ('a', 'w'), 'SYNCED_WORDS': (None, 'w'),
+}
+
+
+def level_from_rank(rank):
+    if not rank:
+        return 'C1'
+    for level, limit in FREQ_LEVELS:
+        if rank <= limit:
+            return level
+    return 'C1'
+
+
+def as_standard(entry, kind):
+    """SYNCED_WORDS uses flashcard field names; map them to the list field names."""
+    if kind == 'v' and 'pr' in entry:
+        return {'inf': entry['w'], 'praeteritum': entry.get('pr'), 'perfekt': entry.get('pp')}
+    if kind == 'n' and 'sg' not in entry:
+        return {'sg': entry['w'], 'pl': entry.get('p')}
+    return entry
+
+
+def array_spans(html):
+    for name in ARRAYS:
+        for m in re.finditer(r'(?:const|let|var) ' + name + r' = \[', html):
+            s = m.end() - 1
+            depth, in_str, esc = 0, False, False
+            for i in range(s, len(html)):
+                c = html[i]
+                if in_str:
+                    if esc: esc = False
+                    elif c == '\\': esc = True
+                    elif c == '"': in_str = False
+                elif c == '"': in_str = True
+                elif c == '[': depth += 1
+                elif c == ']':
+                    depth -= 1
+                    if depth == 0:
+                        yield name, s, i + 1
+                        break
+
+
 def main():
     counts = load_counts()
     ascending = sorted(counts.values())
-    html = open(PAGE, encoding='utf-8').read()
     count = lambda w: counts.get(w, 0)
-    ranks = {}
-    for prefix, name, key, fn in (('v', 'VERBS', 'inf', verb_count), ('n', 'NOUNS', 'sg', noun_count), ('a', 'ADJS', 'w', adj_count)):
-        for e in array(html, name):
-            total = fn(e, count)
-            ranks[f'{prefix}|{e[key]}'] = (len(ascending) - bisect.bisect_right(ascending, total) + 1) if total else 0
-    line = 'const FREQ_RANK = ' + json.dumps(ranks, ensure_ascii=False, separators=(',', ':')) + ';'
-    new_html, n = re.subn(r'const FREQ_RANK = \{.*?\};', lambda _: line, html, count=1, flags=re.S)
-    if n != 1:
-        sys.exit('FREQ_RANK declaration not found in page')
-    open(PAGE, 'w', encoding='utf-8').write(new_html)
-    found = sum(1 for r in ranks.values() if r)
-    print(f'FREQ_RANK: {len(ranks)} entries, {found} found in top-50k, {len(ranks) - found} rarer')
+    counters = {'v': verb_count, 'n': noun_count, 'a': adj_count}
+    kind_of_cat = {'v': 'v', 'n': 'n', 'adj': 'a'}
+    report = []
+    for fname in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+        path = os.path.join(ROOT, fname)
+        html = open(path, encoding='utf-8').read()
+        spans = sorted(array_spans(html), key=lambda x: -x[1])   # rewrite from the end backwards
+        changed = False
+        for name, s, e in spans:
+            try:
+                entries = json.loads(html[s:e])
+            except ValueError:
+                continue                                          # not a JSON word list
+            if not entries or not isinstance(entries[0], dict):
+                continue
+            estimated = 0
+            for entry in entries:
+                kind = ARRAYS[name][0] or kind_of_cat.get(entry.get('cat'))
+                if not kind:
+                    continue
+                total = counters[kind](as_standard(entry, kind), count)
+                rank = (len(ascending) - bisect.bisect_right(ascending, total) + 1) if total else 0
+                entry['freq'] = rank
+                if entry.get('levelEst') or entry.get('level') in (None, '', '?'):
+                    entry['level'] = level_from_rank(rank)
+                    entry['levelEst'] = True
+                    estimated += 1
+            html = html[:s] + json.dumps(entries, ensure_ascii=False, separators=(',', ':')) + html[e:]
+            changed = True
+            report.append(f'{fname}: {name} {len(entries)} entries, {estimated} estimated levels')
+        if changed:
+            open(path, 'w', encoding='utf-8').write(html)
+    print('\n'.join(report))
 
 
 if __name__ == '__main__':

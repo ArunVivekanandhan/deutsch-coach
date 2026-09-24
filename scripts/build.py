@@ -47,3 +47,9 @@ if errors == 0:
     print("[SUCCESS] All HTML files passed basic static checks.")
 else:
     sys.exit(1)
+
+# 3. Word lists are copied into several pages -- make sure no copy has drifted.
+import subprocess
+sync = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_vocab_sync.py")])
+if sync.returncode != 0:
+    sys.exit(1)

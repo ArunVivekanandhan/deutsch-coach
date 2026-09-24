@@ -42,7 +42,8 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   `js/app-shell.js` (sidebar/header shell, injected at runtime — see Section 5), `js/srs-engine.js`
   (the `SRSEngine.Engine` class — a real, shared spaced-repetition engine), `js/icon-svgs.js`,
   `js/tamil-dict.js`, `js/tts-engine.js` (shared text-to-speech), `js/progress-aggregator.js` (added
-  this session — see Section 14). This directly supersedes the old "no shared code, everything
+  this session — see Section 14), `js/german-conjugation.js` (Präsens engine + person/auxiliary
+  tables, used by Thema_Sprech_Trainer and the Excel sheet — Task 29). This directly supersedes the old "no shared code, everything
   copy-pasted" claim in the original Section 25 below (kept below for historical context but no
   longer accurate as a blanket statement).
 - **The vocabulary/grammar/practice content is still NOT unified.** Content still lives in
@@ -52,9 +53,17 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   snapshot (503/378/337 words vs. `VERBS`/`NOUNS` now at 581/522 live entries after B2 additions — see
   Section 28). Do not treat `data/*.json` as authoritative; treat the individual HTML pages' inline
   arrays as the actual live data until that consolidation is finished and verified.
-  **`VERBS` and `NOUNS` now include a real B2 tier** (28 verbs, 39 nouns — `ADJS` still has none), so
-  `level` values across the codebase are `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` depending on the file; always
-  check a given array's actual distinct `level` values before writing level-filtering logic against it.
+  **Current state (Task 29):** canonical lists are `VERBS` in `Verb_Transformation_Trainer.html` (721),
+  `NOUNS` in `Nomen_Trainer.html` (1,089), `ADJS` in `Adjektiv_Adverb_Trainer.html` (671). Copies:
+  VERBS → Excel sheet, Master Grid, Verben Hören, `ALL_VERBS` (Continuous_Verb_Speaker), `VERBS_ALL`
+  (Thema_Sprech_Trainer); NOUNS/ADJS → Excel sheet, Master Grid; home flashcards cover every word via
+  their lessons + `SYNCED_WORDS`. **After changing words: update the canonical list and every copy, run
+  `python3 scripts/build_freq_ranks.py`, then `python3 scripts/build.py`** — the build runs
+  `scripts/check_vocab_sync.py` and fails on any drift.
+  **Levels**: `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` from textbooks, plus frequency estimates for entries with
+  no textbook level (`level` A1–C1 with `levelEst: true`; every entry has `freq` = rank in the
+  OpenSubtitles-2018 top-50k list, 0 = rarer). Display estimates with "≈"; check a given array's actual
+  distinct `level` values before writing level-filtering logic against it.
 - **Progress storage is genuinely fragmented across 9 localStorage keys with 4 incompatible shapes**
   (real vocabulary SRS data vs. streak counters vs. completion counters vs. dead/unused keys) — see
   Section 14 for the full breakdown and why `js/progress-aggregator.js` only aggregates 3 of the 9.
@@ -750,6 +759,40 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-24 (Task 29) — Words updated in every page and every form
+
+#### Task
+User: "Make sure words are updated in all form." Covered both readings: every page that shows words has all of them with the same data, and every grammatical form shown is real.
+
+#### Every page now has every word (it didn't)
+Audit of every page that carries its own word list found three pages never received the words added in Tasks 24–26:
+- **`deutsch-coach.html` (home flashcards / spaced repetition — the main learning page)** lacked 209 verbs, 577 nouns and 565 adjectives, including basics like *Familie, lang, kurz, mögen, dürfen*. Added them as one `SYNCED_WORDS` block (1,351 cards; deck 1,583 → 2,934) built from the canonical lists: nouns with article + plural, verbs with Präteritum/Perfekt, adjectives with Steigerung in the mnemonic line. Noun topics mapped to the home topic set where there's a clear equivalent (Alltag→Behörden & Alltag, Körper→Gesundheit, Kleidung→Einkaufen), otherwise left without a topic. **Card uids**: appended after every existing list, and the new cards get a level-independent uid (`M|cat|word`, via a new optional `uidBase`) — verified that all 1,583 existing uids are byte-identical, so saved review progress is untouched, and a later change to a frequency-estimated level can't orphan progress either. Note: the app counts never-seen cards as due/new, so these appear as new words.
+- **`Continuous_Verb_Speaker.html`** had 503 of 721 verbs, and its overlapping entries were the stale "your own list" copies of the 41 duplicate verbs removed in Task 25 (e.g. *bleiben* A2 "stay"). Its other 462 entries were identical to the canonical list, so it now holds the canonical 721.
+- **`Thema_Sprech_Trainer.html`** had 540 verbs in a hand-written literal whose fields all matched the canonical data (0 differences), regenerated as the canonical 721 (same fields). This list feeds its "Häufige Wörter (A1/A2/B1/B2)" themes; they now list verbs **most frequent first**, and there's a new "Seltenere Wörter (C1)" theme.
+- The three pages synced in Task 25 still held the **stale versions of the same 41 verbs** (append-only sync never touched existing entries) — found by a field-by-field comparison, which also confirmed no copy held any data the canonical lists lack. Replaced with the canonical entries.
+- **Guard against this recurring**: new `scripts/check_vocab_sync.py` compares every copy field-by-field with its canonical list (Verb_Transformation_Trainer / Nomen_Trainer / Adjektiv_Adverb_Trainer) and checks the home deck has every word; it exits 1 on any drift and now runs inside `scripts/build.py`. Run against the previous commit it reports every gap listed above; it passes now.
+
+#### Frequency levels in every page (not just the Excel sheet)
+- `scripts/build_freq_ranks.py` now writes `freq` (rank) into every entry of every word list in the app, and for entries without a textbook level `level` + `levelEst: true` (1,300 words: 154 verbs, 496 nouns, 650 adjectives — identical in every copy). The Excel sheet reads these fields; its private `FREQ_RANK` map is gone. Re-run the script after adding words; `check_vocab_sync.py` will flag copies that weren't updated.
+- Level filters extended where estimates introduced new values: C1 in Verb_Transformation_Trainer, Verben_Hören, Continuous_Verb_Speaker (which also lacked B2); B1 and C1 in Nomen_Trainer (its chips were B1.1/B1.2 only); B1/B2/C1 in the home level bar, dashboard progress rows and topic-default order. Estimated levels show "≈" wherever a single word's level is displayed (verb trainer pills, Verben Hören, home card meta). Stale "503 verbs" labels updated.
+
+#### Only real grammatical forms (Excel sheet) + a shared conjugation engine
+- The Excel sheet generated verb forms from every word's stem: nouns got "Präteritum/Perfekt/Präsens/Verb/Adjektiv" (*acht* → "hat geacht", "achthaft, achtlos"), adjectives got "die Dunkelheit / -keit", "erdunkelen", every verb got "<stem>bar / <stem>end" adjectives, and sister verbs were invented by gluing prefixes onto roots ("belernen"). Now: nouns show only article/plural (or "(kein Plural)"), adjectives only their Steigerung, verbs only curated word-family adjectives and curated sister verbs (14 verbs have them); everything else shows "—".
+- Its Präsens column was stem + "t" (*arbeiten* → "arbeitt", *fahren* → "fahrt", *aufstehen* → "aufsteht"). Moved `Thema_Sprech_Trainer.html`'s Präsens engine (irregular tables, 45 stem-changing bases matched by suffix, d/t-epenthesis, separable prefix + "sich" from the Präteritum field) unchanged into **`js/german-conjugation.js`**, loaded by both pages. Verified by regenerating all 12,978 Thema sentences (721 verbs × 6 persons × 3 tenses) before/after: byte-identical.
+- **Bug fixed in that engine** (pre-existing in Thema): for the 9 "verb + preposition" entries it conjugated the preposition — "Er zt zu" (*führen zu*), "Er aut auf", "Er füt sich", "Er (ugs.t weg", "Er etwt". It now strips a trailing governed preposition/"etw."/"(note)" first → "Er führt zu", "achtet auf", "engagiert sich", "schmeißt weg", "denkt nach". Perfekt sentences now bold the participle, not the trailing preposition. Only those 9 verbs' sentences changed.
+
+#### Testing
+- `scripts/check_vocab_sync.py` (in `build.py`): in sync — VERBS 721, NOUNS 1089, ADJS 671 across all copies; home deck has every word.
+- Cross-page Playwright suite (41 checks): home deck size, all old uids unchanged, new uids unique, sample words present with correct article/plural/tenses, B1/B2/C1 levels, ≈ on cards; Excel Präsens for gehen/arbeiten/fahren/aufstehen/sich bemühen/führen zu/sein/nachdenken über, no invented forms for nouns/adjectives, every sister verb curated; C1 filters on all verb pages and Nomen; Thema themes and fixed sentences; zero page errors.
+- Earlier Excel suites (read-aloud, column chooser) re-run and passing; full-site sweep clean; `sw.js` regenerated.
+
+#### Files Changed
+- `deutsch-coach.html`, `Continuous_Verb_Speaker.html`, `Thema_Sprech_Trainer.html`, `Verb_Transformation_Trainer.html`, `Verben_Hoeren_EN_DE.html`, `Nomen_Trainer.html`, `Adjektiv_Adverb_Trainer.html`, `Wortschatz_Master_Grid.html`, `Deutsch_Wortschatz_Excel_Sheet.html`
+- `js/german-conjugation.js` (new), `scripts/check_vocab_sync.py` (new), `scripts/build_freq_ranks.py`, `scripts/build.py`, `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
 
 ### 2026-09-24 (Task 28) — Excel sheet: levels from real word frequency, and read-aloud (one row / all rows)
 
