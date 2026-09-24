@@ -751,6 +751,39 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-24 (Task 28) — Excel sheet: levels from real word frequency, and read-aloud (one row / all rows)
+
+#### Task
+User: "Try it innovative way too. Category those word based on frequency of using. If more frequency A1 like that. Audio reading option also mostly for verb, past tense. Read current line and also option for read all one by one."
+
+#### Frequency → level (estimated, marked ≈)
+- **Source**: `hermitdave/FrequencyWords`, OpenSubtitles 2018, German top-50,000 word forms with counts (https://github.com/hermitdave/FrequencyWords, content **CC-BY-SA-4.0**; attribution in the page source and here). It is film/TV subtitle German, i.e. everyday spoken language — news/political vocabulary ranks lower than a newspaper corpus would put it.
+- The list counts *word forms*, so `scripts/build_freq_ranks.py` sums each entry's real forms from our data (verb: infinitive + Präteritum + participle, skipping split separable Präteritum; noun: singular + plural; adjective: base + -e/-en/-er/-es/-em + comparative + superlative) and converts the total to the position it would take in the 50k list. Phrase entries ("fertig sein", "führen zu", "sich bemühen") ignore their own preposition/"sich" and are capped at their rarest content word — **found by testing**: the first version ranked "führen zu" and "achten auf" as the most common verbs in German because it was counting the prepositions *zu*/*auf*.
+- Result is embedded as `FREQ_RANK` (2,481 entries; 1,995 in the top 50k, 486 rarer). Re-run `python3 scripts/build_freq_ranks.py` after adding words (entries missing from `FREQ_RANK` show "—" and level "?").
+- **Cut-offs** calibrated against the 1,181 words that have a textbook level: A1 ≤ 1,000, A2 ≤ 2,000, B1 ≤ 15,000, B2 ≤ 50,000, rarer = C1. Agreement with textbook levels: **82.4% same level or one off, 45.8% exact** — frequency can't separate A1 from A2 (both are equally common in speech). So it is an estimate, and is labelled as one.
+- **Textbook levels are never overwritten.** Only the 1,300 words with no level get an estimate (A1 48, A2 48, B1 474, B2 339, C1 391), shown as "≈B1" with a tooltip giving the rank. Level filter gained C1 and a "≈ geschätzte" checkbox (untick → estimates go back to "Ohne Level"). New "📊 Häufigkeit" column (5-bar indicator + rank), sortable numerically, exported as "Haeufigkeit Rang".
+- Not propagated to the trainer pages' data (`Nomen_Trainer.html` etc.) — still an open option.
+
+#### Read aloud
+- **▶ on every row** reads that line; the row is highlighted and the cell being spoken is outlined. Only real data is read: verb = Infinitiv · Präteritum · Perfekt (e.g. "gehen · ging · ist gegangen"), noun = "der Hund · die Hunde", adjective = "dunkel · dunkler · am dunkelsten" (never the stem-generated helper columns).
+- **🎧 Vorlesen bar**: ▶ Alle vorlesen (reads the visible rows in the current filter + sort order, starting at the selected row; becomes ⏸ Pause / ▶ Weiter), ⏮ ⏭ ⏹, mode (all three forms / Infinitiv·Präteritum / Infinitiv·Perfekt / word only), "+ Englisch" (meaning in an English voice), tempo, repeat 1–3×, live status "Zeile 3 / 721 · sagen", Escape stops. Settings saved per browser.
+- **🔥 Häufigste Verben hören**: one click → verbs only, sorted most-frequent first, "Verben hören" column layout, starts reading (sein · war · ist gewesen, haben · hatte · hat gehabt, sagen …).
+- Implementation notes: one utterance at a time chained on `onend`, with a length-based watchdog (some browsers drop `onend`); a token invalidates stale callbacks on pause/skip/stop; pause = cancel + resume replays the interrupted part (more reliable than `speechSynthesis.pause()` on Android); filter/sort changes stop a read-through since row positions change. The page's voice dropdown is respected.
+- **Bug fixed**: `speakWord()` used `/^[•·s]+/` instead of `\s`, stripping leading letter **s** — "sein" was spoken as "ein", "sechs" as "echs". Its bracket-stripping regex was also malformed.
+
+#### Testing
+- `node --check` clean.
+- New 42-check Playwright suite with a recording stand-in for `speechSynthesis` (headless Chromium has no voices): estimates present/marked/untouched textbook levels; rank sort numeric with sein/haben first; C1 chip; estimate toggle; exact texts spoken for verb/noun/adjective rows in every mode, with English, repeat 2×, tempo; highlight on/off; read-all order matches the table; pause really stops; resume continues at the interrupted part; ⏭/⏮; filter change stops; start from selected row; Stopp; Escape; 🔥 quick action; export column; phone width and tap. Passed twice in a row.
+- Column-chooser suite (Task 27) updated for the new column and still passes; full-site sweep clean; `sw.js` regenerated.
+
+#### Files Changed
+- `Deutsch_Wortschatz_Excel_Sheet.html`
+- `scripts/build_freq_ranks.py` (new)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-24 (Task 27) — Excel sheet: choose columns + their order, and real filters
 
 #### Task

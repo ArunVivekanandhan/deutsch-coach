@@ -354,7 +354,8 @@
     }
 
     /* Column Widths */
-    .col-row-num { width: 50px; text-align: center !important; }
+    .col-row-num { width: 64px; text-align: center !important; }
+    .col-freq { width: 125px; }
     .col-word { width: 140px; }
     .col-pos { width: 85px; }
     .col-level { width: 65px; }
@@ -550,6 +551,33 @@
     }
     .filter-select.has-value { border-color: var(--ink); font-weight: 700; }
     .filter-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; color: var(--ink-muted); margin-left: 10px; }
+    .est-toggle {
+      font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-soft);
+      display: inline-flex; align-items: center; gap: 4px; cursor: pointer; margin-left: 4px;
+    }
+
+    /* Read-aloud */
+    .reader-bar {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--excel-border);
+    }
+    .reader-btn {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; min-width: 32px; height: 28px; padding: 0 8px;
+      border: 1px solid var(--excel-border); border-radius: 4px; background: var(--card-bg); color: var(--ink); cursor: pointer;
+    }
+    .reader-btn.primary { background: var(--excel-green); border-color: var(--excel-green); color: #fff; font-weight: 700; }
+    .reader-status { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--excel-green); font-weight: 700; }
+    .excel-table tr.reading-row td { background: var(--excel-selected-cell); }
+    .excel-table tr.reading-row td.row-hdr-cell { box-shadow: inset 4px 0 0 var(--excel-green); }
+    .excel-table td.cell-speaking { outline: 2px solid var(--excel-green); outline-offset: -2px; font-weight: 700; }
+    .row-play {
+      border: none; background: transparent; color: var(--excel-green); cursor: pointer;
+      font-size: 10px; padding: 0 3px 0 0; line-height: 1;
+    }
+    .row-play:hover { color: var(--ink); }
+    .freq-bars { font-size: 10px; letter-spacing: -1px; color: var(--excel-green); }
+    .freq-rank { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-muted); }
+    .level-est { font-family: 'IBM Plex Mono', monospace; font-style: italic; color: var(--ink-muted); }
 
     /* Toast */
     #excelToast {
@@ -569,7 +597,7 @@
 
     /* Print Styles */
     @media print {
-      .suite-hub, .excel-ribbon, .excel-statusbar, .audio-btn-mini { display: none !important; }
+      .suite-hub, .excel-ribbon, .excel-statusbar, .audio-btn-mini, .row-play { display: none !important; }
       body, .sheet-viewport { height: auto !important; overflow: visible !important; }
       .excel-table { font-size: 9px; }
       .excel-table td, .excel-table th { padding: 2px 4px; }
@@ -672,6 +700,35 @@
 
       <button class="filter-chip" id="colFilterToggle" onclick="toggleColumnFilters()" style="margin-left:10px;" title="Show a text filter under every column header">🔽 Spaltenfilter</button>
       <button class="filter-chip" onclick="resetAllFilters()" title="Clear every filter and the search">✖ Filter zurücksetzen</button>
+    </div>
+
+    <!-- Read-aloud bar: reads the visible (filtered + sorted) rows -->
+    <div class="reader-bar" id="readerBar">
+      <span class="filter-label" style="margin-left:0;">🎧 Vorlesen:</span>
+      <button class="reader-btn primary" id="readAllBtn" onclick="readAllToggle()" title="Alle sichtbaren Zeilen nacheinander vorlesen (ab markierter Zeile)">▶ Alle vorlesen</button>
+      <button class="reader-btn" onclick="readerStep(-1)" title="Vorherige Zeile" aria-label="Vorherige Zeile">⏮</button>
+      <button class="reader-btn" onclick="readerStep(1)" title="Nächste Zeile" aria-label="Nächste Zeile">⏭</button>
+      <button class="reader-btn" onclick="stopReading()" title="Stopp" aria-label="Stopp">⏹</button>
+      <select id="readMode" class="filter-select" onchange="setReaderOption('mode', this.value)" aria-label="Was vorlesen">
+        <option value="all">Verb: Infinitiv · Präteritum · Perfekt</option>
+        <option value="praet">Verb: Infinitiv · Präteritum</option>
+        <option value="perfekt">Verb: Infinitiv · Perfekt</option>
+        <option value="base">Nur das Wort</option>
+      </select>
+      <label class="est-toggle"><input type="checkbox" id="readEn" onchange="setReaderOption('withEn', this.checked)"> + Englisch</label>
+      <select id="readRate" class="filter-select" onchange="setReaderOption('rate', parseFloat(this.value))" aria-label="Tempo">
+        <option value="0.7">🐢 langsam</option>
+        <option value="0.85">mittel</option>
+        <option value="1">normal</option>
+        <option value="1.15">schnell</option>
+      </select>
+      <select id="readRepeat" class="filter-select" onchange="setReaderOption('repeat', parseInt(this.value, 10))" aria-label="Wiederholen">
+        <option value="1">1×</option>
+        <option value="2">2×</option>
+        <option value="3">3×</option>
+      </select>
+      <button class="filter-chip" onclick="quickListenTopVerbs()" title="Verben nach Häufigkeit sortieren und die häufigsten zuerst vorlesen">🔥 Häufigste Verben hören</button>
+      <span class="reader-status" id="readerStatus" aria-live="polite"></span>
     </div>
   </section>
 
@@ -1002,6 +1059,10 @@ if (document.readyState === 'loading') {
 
   <!-- SPREADSHEET ENGINE SCRIPT -->
   <script>
+  // Frequency rank per entry, generated by scripts/build_freq_ranks.py from
+  // hermitdave/FrequencyWords (OpenSubtitles 2018, German top-50k, CC-BY-SA-4.0).
+  // 0 = rarer than the 50,000 most frequent word forms.
+  const FREQ_RANK = {"v|lernen":470,"v|starten":2051,"v|beginnen":799,"v|antworten":1086,"v|arbeiten":318,"v|putzen":3436,"v|reinigen":4904,"v|husten":5476,"v|verbringen":1025,"v|planen":1277,"v|backen":4360,"v|baden":4085,"v|basteln":10857,"v|bauen":866,"v|bedeuten":396,"v|beenden":992,"v|begründen":13335,"v|bekommen":310,"v|erhalten":1115,"v|benutzen":584,"v|beraten":7290,"v|berichten":2091,"v|beschreiben":2578,"v|besichtigen":14000,"v|besuchen":932,"v|bestätigen":1516,"v|bestehen":1674,"v|bestellen":1481,"v|bezahlen":563,"v|bitten":547,"v|bleiben":238,"v|braten":5524,"v|brauchen":249,"v|bringen":208,"v|buchen":4901,"v|buchstabieren":10575,"v|chatten":40879,"v|dauern":1052,"v|denken":133,"v|danken":1403,"v|diskutieren":3407,"v|drücken":1839,"v|drucken":5562,"v|empfehlen":3493,"v|enden":1723,"v|erklären":594,"v|erlauben":1082,"v|erreichen":784,"v|fallen":324,"v|erzählen":261,"v|essen":238,"v|fehlen":1412,"v|feiern":1185,"v|finden":140,"v|fotografieren":4169,"v|fragen":226,"v|frühstücken":4866,"v|geben":149,"v|gefallen":486,"v|gehen":88,"v|gehören":186,"v|gewinnen":579,"v|glauben":251,"v|gratulieren":5735,"v|grillen":6888,"v|haben":22,"v|halten":272,"v|hängen":1335,"v|heiraten":603,"v|heißen":649,"v|helfen":195,"v|verbindung herstellen":3411,"v|herstellen":3411,"v|herunterladen":22801,"v|hoffen":975,"v|holen":420,"v|hören":127,"v|kaufen":514,"v|kennen":299,"v|kennenlernen":1407,"v|klappen":2061,"v|kochen":1575,"v|kommen":95,"v|kontrollieren":1540,"v|kriegen":521,"v|kosten":1215,"v|kündigen":3070,"v|lassen":144,"v|laufen":449,"v|leben":129,"v|legen":736,"v|leid tun":157,"v|leihen":2490,"v|lesen":538,"v|lieben":432,"v|liefern":1971,"v|liegen":625,"v|lügen":770,"v|machen":73,"v|malen":2553,"v|meinen":151,"v|merken":1250,"v|mieten":4003,"v|nehmen":201,"v|nennen":514,"v|notieren":6656,"v|öffnen":821,"v|organisieren":2859,"v|packen":1689,"v|parken":4087,"v|passen":1213,"v|probieren":1695,"v|prüfen":2348,"v|raten":1268,"v|rauchen":1719,"v|rechnen":2752,"v|recht haben":237,"v|reden":176,"v|regnen":5364,"v|reisen":1577,"v|reiten":2037,"v|renovieren":8154,"v|reparieren":1595,"v|reservieren":4542,"v|riechen":2181,"v|rufen":528,"v|sagen":50,"v|sammeln":2330,"v|schaffen":403,"v|scheinen":1214,"v|schenken":1474,"v|schicken":487,"v|schimpfen":12271,"v|schlafen":411,"v|treiben":1635,"v|schließen":669,"v|schmecken":3104,"v|schneien":14437,"v|schreiben":482,"v|schwimmen":1898,"v|sehen":71,"v|singen":1005,"v|sollen":133,"v|sparen":2548,"v|speichern":8661,"v|spielen":358,"v|stehen":297,"v|stellen":424,"v|sterben":261,"v|stören":1308,"v|studieren":1895,"v|suchen":343,"v|surfen":11432,"v|tanzen":931,"v|widerstehen":2435,"v|teilen":1142,"v|telefonieren":2087,"v|tragen":638,"v|trainieren":2431,"v|träumen":1349,"v|treffen":285,"v|trinken":470,"v|tun":76,"v|übernachten":3949,"v|übersetzen":1948,"v|überweisen":8458,"v|umsteigen":19891,"v|umziehen":2882,"v|unternehmen":1403,"v|unterschreiben":1636,"v|untersuchen":1479,"v|verdienen":641,"v|vereinbaren":5068,"v|verlassen":470,"v|vergessen":342,"v|vergleichen":3530,"v|verkaufen":596,"v|verlieren":297,"v|vermieten":7475,"v|verpassen":1034,"v|vermissen":823,"v|verreisen":4836,"v|drehen":1091,"v|verschieben":3395,"v|verstehen":231,"v|versuchen":249,"v|wandern":4796,"v|wählen":1252,"v|warten":271,"v|üben":2494,"v|wechseln":1988,"v|wecken":2459,"v|wiederholen":2216,"v|wollen":76,"v|zahlen":912,"v|zeichnen":3978,"v|zeigen":411,"v|lachen":770,"v|joggen":11057,"v|sprechen":238,"v|duschen":3411,"v|weinen":1259,"v|wohnen":927,"v|wissen":91,"v|verzeihen":1185,"v|vergeben":2098,"v|betreten":3028,"v|versprechen":623,"v|dabei sein":301,"v|erkältet sein":11612,"v|gültig sein":16693,"v|fit sein":5448,"v|fertig sein":314,"v|bereit sein":396,"v|einverstanden sein":1537,"v|erlaubt sein":1825,"v|unterwegs sein":954,"v|wachsen":1696,"v|überraschen":1034,"v|abdecken":11081,"v|abdrehen":10416,"v|abheften":0,"v|abnehmen":2536,"v|abschicken":12892,"v|absolvieren":18288,"v|absprechen":12892,"v|achten":2696,"v|akzeptieren":1698,"v|anerkennen":8391,"v|anfahren":7710,"v|anfassen":2051,"v|angewöhnen":41197,"v|anheben":13722,"v|ankündigen":9290,"v|anmachen":5629,"v|anprobieren":12997,"v|anrechnen":41197,"v|anschauen":2718,"v|ansehen":823,"v|anstreichen":0,"v|aufdrehen":11961,"v|aufkommen":13708,"v|aufmachen":1994,"v|aufschreiben":5086,"v|aufteilen":7085,"v|auseinandersetzen":27229,"v|ausliefern":4902,"v|ausparken":0,"v|ausprobieren":4249,"v|ausschalten":3028,"v|ausschlafen":12078,"v|ausstellen":6049,"v|befestigen":9859,"v|befragen":2796,"v|begeistern":2605,"v|beglaubigen":39199,"v|behalten":894,"v|behaupten":1492,"v|beherrschen":3419,"v|beilegen":21916,"v|belasten":4861,"v|beleidigen":2559,"v|benötigen":2651,"v|beobachten":1244,"v|berufen":9980,"v|bescheinigen":0,"v|beschimpfen":9497,"v|beschweren":3673,"v|beschädigen":4071,"v|besiegen":1962,"v|beurteilen":4946,"v|bohren":7933,"v|bremsen":5008,"v|einbrechen":3947,"v|einchecken":12414,"v|einfallen":2489,"v|einführen":8629,"v|eingehen":3117,"v|einhalten":7259,"v|einlegen":7194,"v|einparken":41502,"v|einreichen":6303,"v|einschalten":4939,"v|einschlafen":2803,"v|einschreiben":13910,"v|einsetzen":2575,"v|einsperren":2081,"v|einstellen":2058,"v|empfangen":2745,"v|entnehmen":10538,"v|entsprechen":10236,"v|entstehen":3425,"v|enttäuschen":1578,"v|entwickeln":1604,"v|erhöhen":2890,"v|erinnern":542,"v|erkennen":915,"v|erkundigen":8289,"v|erleben":1282,"v|erleichtern":3821,"v|ernähren":4766,"v|erwähnen":1216,"v|eskalieren":16657,"v|festkleben":0,"v|festlegen":7824,"v|fordern":3718,"v|färben":11111,"v|fördern":9637,"v|führen":654,"v|füttern":3587,"v|garantieren":2762,"v|gewährleisten":14880,"v|gründen":2098,"v|heizen":18758,"v|herkommen":1503,"v|hämmern":13612,"v|kippen":7824,"v|klettern":4790,"v|krachen":5670,"v|kuscheln":12284,"v|kümmern":675,"v|landen":1363,"v|leiden":1277,"v|leiten":2380,"v|lenken":6001,"v|lohnen":7843,"v|lüften":12061,"v|meckern":13167,"v|meistern":11356,"v|mitdenken":42408,"v|miterleben":13687,"v|mitreden":30160,"v|nachdenken":951,"v|nachsehen":2707,"v|naschen":27229,"v|produzieren":4360,"v|protestieren":10918,"v|präsentieren":2566,"v|quietschen":4873,"v|rasieren":4662,"v|recyceln":28268,"v|reduzieren":6712,"v|regeln":910,"v|regulieren":22055,"v|retten":424,"v|rutschen":7850,"v|schalten":3325,"v|schießen":725,"v|schneiden":1434,"v|schwingen":7277,"v|schädigen":16014,"v|schützen":1173,"v|senden":2892,"v|senken":8088,"v|siegen":4955,"v|sortieren":11065,"v|spezialisieren":11688,"v|stattfinden":4500,"v|stinken":7850,"v|streiken":14606,"v|streiten":1639,"v|tropfen":4361,"v|umdrehen":2817,"v|umfallen":9336,"v|umgehen":2301,"v|verabreden":3302,"v|verdrängen":8682,"v|vereinigen":10262,"v|verfolgen":1032,"v|verhaften":996,"v|verlaufen":3727,"v|verletzen":655,"v|verlängern":8581,"v|vermischen":10314,"v|verpacken":10503,"v|verpflichten":3854,"v|verschmutzen":20719,"v|verschwenden":2427,"v|versenden":36023,"v|versichern":3167,"v|versorgen":3168,"v|verstoßen":6215,"v|vertragen":4210,"v|verursachen":2006,"v|verurteilen":2178,"v|verwerten":0,"v|verzichten":3771,"v|verändern":861,"v|vorbeigehen":11920,"v|vorhersagen":11233,"v|vorschreiben":13027,"v|wegfahren":5086,"v|wegräumen":15776,"v|wegschmeißen (ugs.)":14213,"v|wegwerfen":3997,"v|weitergehen":3415,"v|weiterhelfen":9171,"v|widerrufen":16321,"v|wiedervereinigen":0,"v|wohlfühlen":14531,"v|zappen":0,"v|zaubern":8315,"v|zerschlagen":10100,"v|zerstören":725,"v|zudrehen":27901,"v|zugeben":2208,"v|zulassen":1762,"v|zumachen":6303,"v|zunehmen":9733,"v|zurückfahren":10538,"v|zurückkehren":2044,"v|zurücklassen":3177,"v|zurückschicken":8386,"v|zurücksenden":0,"v|zurücktreten":6320,"v|zusammenarbeiten":3785,"v|zusammenstellen":10256,"v|zusammenstoßen":43086,"v|zustellen":19836,"v|zustimmen":2976,"v|übereinstimmen":19356,"v|übergeben":2490,"v|überlegen":1107,"v|überzeugen":1135,"v|einleben":17398,"v|pendeln":33858,"v|ummelden":0,"v|unterstützen":1747,"v|einwandern":0,"v|auswandern":25224,"v|ansprechen":4966,"v|ausleihen":5042,"v|begegnen":1847,"v|engagieren für":3523,"v|beschäftigen mit":1082,"v|formulieren":10382,"v|leisten":1190,"v|entlassen":1965,"v|durchsetzen":10894,"v|führen zu":654,"v|betreffen":5113,"v|scheitern":4388,"v|verbessern":3397,"v|verhandeln":2937,"v|steigen":1353,"v|sinken":4674,"v|achten auf":2642,"v|beeinflussen":3314,"v|ablenken":3455,"v|hinsetzen":3514,"v|anbauen":14373,"v|blühen":12486,"v|ernten":9514,"v|gärtnern":40879,"v|mitmachen":3009,"v|fliehen":1608,"v|spinnen":5566,"v|aufwachsen":2964,"v|enthalten":6782,"v|meditieren":15752,"v|umstellen":12963,"v|entscheiden":725,"v|aufhören":632,"v|optimieren":46999,"v|übertreiben":3144,"v|konsumieren":20934,"v|überzeugen von":1135,"v|warnen":1501,"v|nachdenken über":951,"v|umtauschen":22565,"v|einsetzen für":2575,"v|lösen":1325,"v|verarbeiten":6230,"v|vermitteln":6170,"v|vorstellen":691,"v|analysieren":5013,"v|motivieren":9562,"v|verlernen":22714,"v|beten":1957,"v|ehren":1402,"v|unterscheiden":1366,"v|dazugehören":12776,"v|erfüllen":1627,"v|umwandeln":16787,"v|stoppen":1925,"v|exportieren":45360,"v|importieren":17356,"v|abstimmen":7354,"v|handeln":1622,"v|bestrafen":2091,"v|folgen":708,"v|gelten":4228,"v|zwingen zu etw.":1241,"v|erfinden":2045,"v|erwarten":570,"v|kopieren":7169,"v|begrüßen":2792,"v|ersetzen":2608,"v|scannen":7058,"v|weiterentwickeln":15256,"v|beweisen":966,"v|erstellen":5313,"v|existieren":1639,"v|sein":17,"v|werden":52,"v|mögen":674,"v|können":80,"v|müssen":101,"v|dürfen":583,"v|fahren":297,"v|fliegen":715,"v|waschen":2051,"v|erwägen":12322,"v|sich bemühen":4049,"v|sich engagieren":3523,"v|sich anpassen":5750,"v|sich verbessern":3397,"v|nachweisen":10514,"v|sich verschlechtern":13091,"v|berücksichtigen":9135,"v|abschätzen":40879,"v|sich befassen":7925,"v|sich auseinandersetzen":27229,"v|widersprechen":7933,"v|betonen":9503,"v|sich beschweren":3673,"v|verfügen":6087,"v|sich auszeichnen":2590,"v|sich bewähren":19265,"v|beitragen":8738,"v|sich auswirken":21360,"v|anstreben":30589,"v|verzeichnen":15798,"v|sich abzeichnen":0,"v|gefährden":3257,"v|sich distanzieren":13194,"v|veranschaulichen":0,"v|unterstreichen":25224,"v|sich einsetzen":2575,"v|sich vorbereiten":1343,"v|einkaufen":3039,"v|abkaufen":9584,"v|ankommen":1786,"v|mitkommen":1574,"v|zurückkommen":1570,"v|aufstehen":1776,"v|abfahren":4757,"v|mitfahren":5750,"v|erfahren":751,"v|erlernen":14790,"v|fernsehen":1473,"v|aussehen":1066,"v|wiedersehen":596,"v|zuhören":1791,"v|bearbeiten":5283,"v|ausarbeiten":14911,"v|abgeben":2665,"v|ausgeben":2899,"v|aufgeben":1307,"v|mitnehmen":983,"v|verschlafen":11655,"v|abfotografieren":0,"v|befotografieren":0,"v|verfotografieren":0,"v|abdanken":0,"v|abreißen":5490,"v|abziehen":3910,"v|abrechnen":15861,"v|abschaffen":15454,"v|abtreten":11688,"v|abweichen":35573,"v|abwenden":11541,"v|agieren":11178,"v|anklingen":0,"v|animieren":45360,"v|anlegen":3226,"v|anzünden":5544,"v|aufheben":3272,"v|aufrechterhalten":17432,"v|aufrufen":11065,"v|auftreten":4290,"v|aufweichen":0,"v|aufzeichnen":7857,"v|aufpolieren":46999,"v|ausarten":0,"v|ausbeuten":19188,"v|ausbrennen":16167,"v|ausbügeln":40597,"v|ausloten":0,"v|ausrichten":3788,"v|aussagen":2841,"v|ausweichen":8727,"v|auswerten":23637,"v|beauftragen":4833,"v|befähigen":43448,"v|befürchten":3830,"v|begleiten":1722,"v|beharren":25878,"v|bekräftigen":29899,"v|beleben":17044,"v|bemängeln":0,"v|berichtigen":33858,"v|bescheren":10358,"v|beschleunigen":5601,"v|beteuern":45751,"v|betrachten":2210,"v|betragen":3978,"v|beugen":7700,"v|dotieren":0,"v|durchkreuzen":20334,"v|durchleiden":0,"v|durchsickern":17955,"v|einbinden":37160,"v|einstufen":15618,"v|einlenken":44976,"v|einleuchten":0,"v|einordnen":28268,"v|einräumen":21232,"v|einweihen":8998,"v|entflechten":0,"v|entführen":1488,"v|entlohnen":28536,"v|entziffern":19684,"v|entziehen":6964,"v|erbeuten":29764,"v|erbrechen":15016,"v|ergreifen":4029,"v|erhellen":19991,"v|erlegen":11520,"v|ermitteln":3488,"v|erschweren":14853,"v|ertragen":2285,"v|ertrinken":3804,"v|erzeugen":4148,"v|feststellen":3797,"v|flanieren":0,"v|flüstern":5503,"v|gelingen":3021,"v|hinkriegen":5447,"v|hinterfragen":14070,"v|hintergehen":6550,"v|hinzufügen":6748,"v|hüpfen":9802,"v|interagieren":34693,"v|jammern":7539,"v|kapitulieren":14095,"v|kassieren":7418,"v|kiffen":14728,"v|klagen":5418,"v|kollabieren":12140,"v|kramen":0,"v|kratzen":5623,"v|leuchten":6899,"v|mitreißen":19944,"v|nachempfinden":30589,"v|nachvollziehen":13070,"v|plädieren":13551,"v|plaudern":5582,"v|predigen":11907,"v|profilieren":0,"v|quengeln":0,"v|rechtfertigen":5847,"v|referieren":0,"v|schlussfolgern":0,"v|schweben":8434,"v|schweifen":38951,"v|schwitzen":7646,"v|spenden":3919,"v|stornieren":20392,"v|streben":9548,"v|tauchen":3099,"v|tischlern":0,"v|treten":1207,"v|überfallen":3128,"v|überwinden":4819,"v|überzeichnen":0,"v|umdenken":41197,"v|umkommen":8848,"v|umsatteln":0,"v|umtreiben":0,"v|unterlassen":19188,"v|unterstellen":9901,"v|untertauchen":8749,"v|unterwerfen":11961,"v|veranlassen":6558,"v|verbleiben":27678,"v|verdrehen":6663,"v|vererben":14070,"v|verfallen":9769,"v|verhungern":3861,"v|verlagern":19094,"v|verlangen":1073,"v|verlegen":2850,"v|vernichten":1681,"v|versäumen":7600,"v|verschimmeln":0,"v|verschleiern":13298,"v|verständigen":6816,"v|vertreiben":3877,"v|verweilen":21044,"v|verwöhnen":6558,"v|verzehren":12759,"v|verzweifeln":2663,"v|voranbringen":0,"v|vordrängeln":40879,"v|vorsehen":7686,"v|vorherrschen":0,"v|vorrücken":16720,"v|vortragen":13761,"v|vorbeugen":31393,"v|wahrnehmen":10575,"v|weigern":5226,"v|weiterleiten":12027,"v|wiederherstellen":8358,"v|zerbröseln":0,"v|zurückbleiben":8319,"v|zusammenrücken":42408,"v|zustehen":28929,"v|entschuldigen":455,"v|gucken":2153,"v|wehtun":1689,"n|Kollegin":5984,"n|Kollege":1473,"n|Vertrag":1735,"n|Arbeit":194,"n|Vater":177,"n|Mutter":195,"n|Bruder":304,"n|Apfel":3563,"n|Zimmer":513,"n|Fenster":980,"n|Straße":636,"n|Stadt":359,"n|Auto":358,"n|Haus":247,"n|Mann":88,"n|Frau":127,"n|Kind":175,"n|Buch":587,"n|Stuhl":1909,"n|Tisch":894,"n|Anmeldung":18288,"n|(Auslands-)Aufenthalt":6794,"n|Behördengang":0,"n|Deutsche":1106,"n|Ehrenamt":0,"n|Einwohnermeldeamt":0,"n|Elternhaus":20775,"n|Erwachsene":2694,"n|Gegend":1343,"n|Handarbeit":26380,"n|Jahrhundert":2672,"n|Jahrzehnt":8358,"n|Jugendzentrum":48359,"n|Mannschaft":4290,"n|Million":667,"n|Schwierigkeit":1434,"n|Tanz":2214,"n|Verein":10004,"n|Wohnsitz":19579,"n|Gesellschaft":1301,"n|Stimmung":2865,"n|Bereich":2799,"n|Bürgerinitiative":0,"n|Kultur":3610,"n|Kulturschock":0,"n|Phase":3556,"n|Vorurteil":10172,"n|Betrieb":4834,"n|Bezahlung":6579,"n|Chance":489,"n|Digitalisierung":0,"n|Festanstellung":49285,"n|Informatiker":0,"n|Informatikerin":0,"n|Kenntnis":4920,"n|Schichtarbeit":0,"n|Tarif":40879,"n|Tätigkeit":13152,"n|Argument":5109,"n|Behinderung":12486,"n|Branche":7368,"n|Erzieher":34902,"n|Erzieherin":44216,"n|Gleichberechtigung":23490,"n|Ungleichheit":0,"n|Verantwortung":1666,"n|Arbeitnehmer":0,"n|Arbeitnehmerin":0,"n|(Arbeits-)Bedingung":2474,"n|Beschäftigte":18697,"n|Gewerkschaft":6608,"n|Lohn":4457,"n|Streik":8458,"n|Tarifvertrag":0,"n|Verständnis":4241,"n|Art":452,"n|Blick":1175,"n|Fußboden":10140,"n|Hof":2338,"n|Innenstadt":9514,"n|Kissen":4731,"n|Lage":996,"n|Position":1388,"n|Vogel":1283,"n|Wohnungseinrichtung":0,"n|Ablenkung":5597,"n|Badewanne":7234,"n|Dachgeschoss":0,"n|Lieblingsort":39681,"n|Schreibtisch":2975,"n|Spielzeug":3622,"n|Beet":27901,"n|Ernte":4771,"n|Fläche":15921,"n|Kirche":1142,"n|Standort":5914,"n|Arbeitskraft":19223,"n|Ausländer":7528,"n|Ausländerin":34471,"n|Bevölkerung":5032,"n|Bundeskanzler":47442,"n|Bundeskanzlerin":0,"n|Diskriminierung":23267,"n|Einwanderungsland":0,"n|Gastarbeiter":0,"n|Gastarbeiterin":0,"n|Geflüchtete":0,"n|Generation":2949,"n|Heimatland":20334,"n|Migrant":0,"n|Migrantin":0,"n|Migration":0,"n|Migrationserfahrung":0,"n|Migrationshintergrund":0,"n|Regierung":1191,"n|Krieg":411,"n|Bleistift":10113,"n|Gewohnheit":5979,"n|Hälfte":1422,"n|Missverständnis":3790,"n|Scherz":1575,"n|Situation":1235,"n|Trinkgeld":5066,"n|Förderung":25121,"n|Initiative":8461,"n|Staatsangehörigkeit":0,"n|Bewegung":932,"n|Diät":7573,"n|Droge":1140,"n|Gaststätte":0,"n|Kalorie":16014,"n|Kneipe":6717,"n|Limonade":7662,"n|Mahlzeit":4542,"n|Nachtisch":6517,"n|Pflaume":14968,"n|(Nicht-)Raucher":19779,"n|(Nicht-)Raucherin":0,"n|Risiko":1522,"n|Schritt":1000,"n|Steak":4363,"n|Umstellung":27797,"n|Zigarette":1935,"n|Zitrone":7933,"n|Geschmack":2605,"n|Hersteller":17464,"n|Marmelade":10188,"n|Pudding":9676,"n|(Zucker-)Steuer":2080,"n|Würfel":9548,"n|Fortschritt":2896,"n|Maßnahme":6335,"n|Stärke":2324,"n|Schwäche":2792,"n|Alternative":4076,"n|Dienstleistung":24565,"n|Einfluss":3054,"n|Follower":33311,"n|Followerin":0,"n|Gesetz":1128,"n|Influencer":0,"n|Influencerin":0,"n|Konsument":34693,"n|Konsumentin":0,"n|Plakat":10083,"n|Prospekt":31209,"n|Schaufenster":18941,"n|Skandal":5270,"n|Werbeslogan":0,"n|Werbung":4171,"n|Zielgruppe":32761,"n|Empfänger":11961,"n|Empfängerin":0,"n|Kleid":992,"n|Kundenservice":49285,"n|Material":3217,"n|Outfit":6540,"n|Paket":3531,"n|Tasche":961,"n|Verkäufer":7435,"n|Verkäuferin":15892,"n|Ware":170,"n|Frist":11859,"n|Organisation":3308,"n|Verbraucher":35573,"n|Verbraucherin":0,"n|Widerrufsrecht":0,"n|Gehirn":1601,"n|Kapazität":24672,"n|Kompetenz":15827,"n|Lernerfolg":0,"n|Podcast":38384,"n|Soft Skill":22874,"n|Test":1345,"n|Wiederholung":11681,"n|Eigenschaft":5844,"n|Emotion":5102,"n|Ergebnis":2060,"n|Experte":3314,"n|Expertin":12698,"n|Fähigkeit":1867,"n|Hörer":9351,"n|Hörerin":0,"n|Intelligenz":5544,"n|Intelligenzquotient":0,"n|Lernprozess":0,"n|Persönlichkeitsentwicklung":0,"n|Sendung":2547,"n|Studie":4559,"n|Elternteil":11800,"n|Faktor":10829,"n|Motivation":12539,"n|Schulfach":0,"n|Anhänger":5907,"n|Anhängerin":0,"n|Anteil":2685,"n|Christ":4988,"n|Christin":22801,"n|Geschlecht":7038,"n|Gläubige":12585,"n|Gott":163,"n|Herkunft":6836,"n|Jude":2144,"n|Jüdin":13826,"n|Milliarde":3154,"n|Muslim":13885,"n|Muslimin":0,"n|Religion":3956,"n|Teilnehmende":0,"n|Einschränkung":18090,"n|Meisterschaft":10416,"n|Sieger":4867,"n|Siegerin":31045,"n|Sportler":11367,"n|Sportlerin":0,"n|Sportveranstaltung":0,"n|Sportverein":0,"n|Standpunkt":7072,"n|Wettkampf":7843,"n|Zuschauer":4486,"n|Zuschauerin":0,"n|Architekt":7511,"n|Architektin":45360,"n|Aspekt":9312,"n|Bau":3145,"n|Bürgersteig":15953,"n|Emission":0,"n|Energie":1552,"n|Forschung":4099,"n|Fußgänger":25224,"n|Fußgängerin":0,"n|Fußgängerzone":0,"n|Gebäude":1336,"n|Grünfläche":0,"n|Infrastruktur":19048,"n|Kraftwerk":14968,"n|Planet":1114,"n|Ressource":6726,"n|Solaranlage":0,"n|Sonnenenergie":0,"n|Spezialist":7311,"n|Spezialistin":42091,"n|Subvention":39973,"n|Technik":3187,"n|Zone":3788,"n|Zweifel":1976,"n|Bewohner":6125,"n|Bewohnerin":0,"n|Fahrradfahrer":0,"n|Fahrradfahrerin":0,"n|Motto":7681,"n|Naturmaterial":0,"n|Parkplatz":3867,"n|Gewinn":2366,"n|Landwirtschaft":15489,"n|Start-up":0,"n|Teil":514,"n|Export":36256,"n|Import":31209,"n|Besatzungszone":0,"n|Besucher":3773,"n|Besucherin":44976,"n|Bundesland":0,"n|Bundesminister":0,"n|Bundesministerin":0,"n|Bundespräsident":0,"n|Bundespräsidentin":0,"n|Bundesregierung":28136,"n|Demokratie":6879,"n|Demonstration":9386,"n|Diktatur":21232,"n|Grenze":1359,"n|Grundrecht":0,"n|Gründung":22714,"n|Kaiser":2880,"n|Kaiserin":11583,"n|Kaiserreich":30295,"n|König":663,"n|Königin":1317,"n|Mauer":2494,"n|Parlament":10358,"n|Politiker":5015,"n|Politikerin":47883,"n|Revolution":3496,"n|Staat":1530,"n|System":1492,"n|Überzeugung":7058,"n|Zeitpunkt":1653,"n|Zusammenschluss":39973,"n|Abstimmung":8300,"n|Bundesstaat":15752,"n|Funktion":6558,"n|Grundwert":0,"n|Volk":1283,"n|Wahl":725,"n|Wert":674,"n|Wissenschaft":3001,"n|Diskussion":4189,"n|Ebene":3706,"n|Gemeinde":3337,"n|Gemeinschaft":5762,"n|Kanton":39973,"n|Volksabstimmung":0,"n|Währung":16867,"n|Aussage":1512,"n|Fakt":2799,"n|Spielende":37389,"n|Stimme":632,"n|Tragödie":4189,"n|Umschlag":5124,"n|Angeklagte":4454,"n|Beschuldigte":12736,"n|Bombe":1347,"n|Diebstahl":4673,"n|Gefängnis":781,"n|Schuldige":6757,"n|Strafe":2270,"n|Tat":574,"n|Täter":2597,"n|Täterin":44976,"n|Verantwortliche":7758,"n|Verurteilte":11326,"n|Zeuge":1273,"n|Zeugin":5436,"n|Angehörige":6961,"n|Gender-Care-Gap":0,"n|Konsequenz":3846,"n|Lücke":7234,"n|Apparat":4278,"n|Erfindung":4988,"n|Fahrer":2183,"n|Fahrerin":25567,"n|Glühbirne":12633,"n|Grammophon":41791,"n|(Kommunikations-)Technologie":3333,"n|Videotelefon":0,"n|Zeitreise":11416,"n|(Gesundheits-)Avatar":11655,"n|Auswirkung":6834,"n|Diagnose":5835,"n|Psychologe":8752,"n|Psychologin":17086,"n|Therapie":3784,"n|Übersetzer":19991,"n|Übersetzerin":0,"n|Übersetzung":2052,"n|Veränderung":2888,"n|Autor":3684,"n|Autorin":14853,"n|Beweis":756,"n|Dichter":6053,"n|Dichterin":44600,"n|Gefahr":664,"n|Hausarbeit":11057,"n|Künstler":2918,"n|Künstlerin":8671,"n|Poetry-Slam":0,"n|Werk":2452,"n|Sohn":304,"n|Tochter":413,"n|Schwester":397,"n|Familie":289,"n|Freund":176,"n|Freundin":489,"n|Baby":345,"n|Zahl":802,"n|eins":393,"n|zwei":169,"n|drei":258,"n|vier":515,"n|fünf":490,"n|sechs":657,"n|sieben":947,"n|acht":903,"n|neun":1415,"n|zehn":646,"n|Farbe":1482,"n|Rot":1930,"n|Blau":2566,"n|Grün":2943,"n|Gelb":5947,"n|Schwarz":1912,"n|Weiß":70,"n|Brot":2397,"n|Wasser":491,"n|Milch":2028,"n|Kaffee":706,"n|Tee":1306,"n|Ei":1108,"n|Fleisch":1582,"n|Gemüse":4861,"n|Obst":7234,"n|Reis":5128,"n|Zucker":3048,"n|Salz":4451,"n|Käse":2960,"n|Suppe":3106,"n|Wohnung":776,"n|Küche":1331,"n|Bad":1787,"n|Tür":370,"n|Bett":538,"n|Schlüssel":785,"n|Kopf":359,"n|Hand":302,"n|Fuß":838,"n|Auge":313,"n|Ohr":1073,"n|Mund":843,"n|Nase":1190,"n|Herz":429,"n|Hemd":2206,"n|Hose":1277,"n|Schuh":1139,"n|Jacke":2327,"n|Mütze":5041,"n|Tag":163,"n|Woche":311,"n|Monat":578,"n|Jahr":208,"n|Stunde":305,"n|Minute":313,"n|Morgen":176,"n|Abend":253,"n|Nacht":215,"n|Heute":142,"n|Montag":2338,"n|Dienstag":3159,"n|Mittwoch":4087,"n|Donnerstag":3240,"n|Freitag":2097,"n|Samstag":2365,"n|Sonntag":2227,"n|Bus":1537,"n|Zug":995,"n|Land":497,"n|Geld":193,"n|Handy":826,"n|Telefon":624,"n|Computer":1231,"n|Name":229,"n|Adresse":1339,"n|Nummer":594,"n|Schule":544,"n|Lehrer":1745,"n|Lehrerin":3237,"n|Schüler":2250,"n|Beruf":2327,"n|Firma":1048,"n|Arzt":636,"n|Krankenhaus":788,"n|Medikament":2168,"n|Schmerz":908,"n|Freude":1433,"n|Angst":264,"n|Hunger":1132,"n|Durst":3995,"n|Müdigkeit":18213,"n|Sonne":1186,"n|Regen":2163,"n|Schnee":2822,"n|Wind":1496,"n|Wetter":2508,"n|Nachhaltigkeit":0,"n|Wettbewerb":4718,"n|Voraussetzung":12357,"n|Vielfalt":23637,"n|Gerechtigkeit":2350,"n|Chancengleichheit":0,"n|Globalisierung":48359,"n|Wandel":16096,"n|Wirtschaft":6295,"n|Arbeitslosigkeit":21776,"n|Integration":28668,"n|Debatte":7513,"n|Stellungnahme":13845,"n|Toleranz":17667,"n|Innovation":34902,"n|Effizienz":18802,"n|Klimawandel":39446,"n|Umweltschutz":42759,"n|Erderwärmung":42759,"n|Gleichgewicht":6326,"n|Perspektive":7786,"n|Qualifikation":16983,"n|Lebenslauf":7833,"n|Vorstellungsgespräch":9250,"n|Karriere":1917,"n|Selbstständigkeit":0,"n|Erfahrung":1488,"n|Zusammenhang":4825,"n|Entwicklung":4495,"n|Verlässlichkeit":0,"n|Flexibilität":39681,"n|Kritik":6508,"n|Empfehlung":6158,"n|Vorschlag":2053,"n|Begründung":16787,"n|Ausnahme":3717,"n|Bedingung":2474,"n|Rücksicht":8509,"n|Solidarität":19312,"n|Garten":1761,"n|Aberkennung":0,"n|Abgang":10908,"n|Abkehr":0,"n|Abmachung":3276,"n|Abneigung":18843,"n|Abrüstung":0,"n|Abschiebung":47442,"n|Abschluss":3399,"n|Abschreibung":0,"n|Abschwung":0,"n|Abstammungsrecht":0,"n|Absturz":9838,"n|Abtreibung":9809,"n|Abwehr":14657,"n|Abweichung":14935,"n|Abwertung":0,"n|Abzug":5609,"n|Achselzucken":0,"n|Akteneinsicht":0,"n|Aktiengesellschaft":0,"n|Aktienkurs":47442,"n|Aktionär":21984,"n|Albernheit":43448,"n|Alleingang":22283,"n|Altersvorsorge":0,"n|Ältestenrat":44600,"n|Andeutung":16014,"n|Anfeindung":0,"n|Anforderung":16462,"n|Angebot":1430,"n|Angriffspunkt":0,"n|Anlauf":28268,"n|Anlaufstelle":44600,"n|Anleihenmarkt":0,"n|Anordnung":7441,"n|Anpfiff":42408,"n|Anreizwirkung":0,"n|Ansatz":11128,"n|Anschaffungspreis":0,"n|Anspannung":21170,"n|Antike":12486,"n|Anwalt":885,"n|Appell":16622,"n|Arbeitsausbeutung":0,"n|Arbeitsentgelt":0,"n|Armutszeugnis":0,"n|Attentat":7475,"n|Attest":30160,"n|Auffanglager":0,"n|Auffassung":17542,"n|Aufhebung":31718,"n|Aufklärungsdrohne":0,"n|Aufmunterung":24232,"n|Aufrüstung":0,"n|Aufschlag":15077,"n|Auftakt":33858,"n|Auftritt":2968,"n|Aufwand":10725,"n|Aufwandsentschädigung":0,"n|Aufweichung":0,"n|Aufwind":0,"n|Augenbraue":9980,"n|Ausdauer":15041,"n|Auseinandersetzung":11520,"n|Ausfallrisiko":0,"n|Aushilfstätigkeit":0,"n|Auslegung":44600,"n|Auslöser":9603,"n|Ausschnitt":14348,"n|Ausschreibung":44600,"n|Äußerung":22874,"n|Ausweitung":0,"n|Bagatellgrenze":0,"n|Ballungsraum":0,"n|Bauchgefühl":17778,"n|Baukasten":0,"n|Baulastträger":0,"n|Bedenken":4185,"n|Bedrohung":3040,"n|Beeinträchtigung":0,"n|Beerdigung":2328,"n|Befugnis":10382,"n|Befürworter":40597,"n|Begabung":14728,"n|Begegnung":5729,"n|Begräbnis":8107,"n|Beharrlichkeit":30898,"n|Beitritt":36256,"n|Belastbarkeit":0,"n|Belastung":8928,"n|Beleg":12633,"n|Belohnung":3373,"n|Belüftung":41197,"n|Benennung":0,"n|Bereicherung":25224,"n|Berufung":6982,"n|Beschaffungsmethode":0,"n|Beschäftigung":15581,"n|Bescheidenheit":12892,"n|Beschwerde":4782,"n|Bestandsaufnahme":43824,"n|Bestätigung":6703,"n|Bestechung":10743,"n|Beteiligung":10061,"n|Betrag":8787,"n|Bettdecke":28395,"n|Beute":3991,"n|Bevormundung":0,"n|Beweggrund":29219,"n|Bewerbung":9345,"n|Bezug":5091,"n|Bezugsperson":0,"n|Blessur":0,"n|Blickwinkel":16462,"n|Bodenschatz":0,"n|Bogenschießen":32569,"n|Bohne":4885,"n|Bohrplattform":0,"n|Bonität":0,"n|Borreliose":0,"n|Brautkleid":23569,"n|Brennpunkt":0,"n|Brennstoff":34693,"n|Brotzeit":0,"n|Bruch":7007,"n|Buchhalter":7786,"n|Buchungssatz":0,"n|Bürgschaft":44216,"n|Chirurg":5003,"n|Dachfirma":0,"n|Dauerauftrag":0,"n|Dauerbrenner":0,"n|Drohkulisse":0,"n|Düngemittel":0,"n|Dunkelziffer":0,"n|Durchlässigkeit":0,"n|Dürre":12212,"n|Ehrgeiz":8848,"n|Eigenverbrauch":0,"n|Eignungstest":49766,"n|Einbettung":0,"n|Einbeziehung":0,"n|Eingebung":25025,"n|Einhaltung":41791,"n|Einkaufsbummel":45360,"n|Einkommen":10392,"n|Einmischung":16720,"n|Einnahmeausfall":0,"n|Einsatz":1856,"n|Einschnitt":21170,"n|Einsicht":12718,"n|Einweihung":31045,"n|Einzelheit":5487,"n|Eisenbahn":8576,"n|Endlager":0,"n|Energiewende":0,"n|Ente":4354,"n|Enthaltung":0,"n|Entschädigung":12683,"n|Erdkreis":0,"n|Erdnussbutter":12140,"n|Erforschung":22349,"n|Erkenntnisgewinn":0,"n|Erkenntnis":7640,"n|Erlaubnis":2325,"n|Ermessen":21641,"n|Ermittlung":2479,"n|Ernennung":20670,"n|Erpressung":6119,"n|Ersparnis":13194,"n|Erstattung":0,"n|Erwerbsminderung":0,"n|Fachbegriff":0,"n|Fachrichtung":0,"n|Fahne":6364,"n|Fehlbildung":0,"n|Fehlinformation":0,"n|Felsbild":0,"n|Fernbedienung":9740,"n|Fernverkehr":0,"n|Finanzierung":14117,"n|Firmenflotte":0,"n|Fledermaus":8074,"n|Flitterwoche":5767,"n|Flugblatt":15618,"n|Föderalismus":0,"n|Frauenrat":0,"n|Friedensschluss":0,"n|Friedensvertrag":37160,"n|Gebietsabtretung":0,"n|Gebrauchstauglichkeit":0,"n|Gebrechlichkeit":0,"n|Gefieder":0,"n|Gegebenheit":44600,"n|Gehbehinderung":0,"n|Geheimhaltung":15985,"n|Gehweg":26270,"n|Geisel":2541,"n|Genehmigung":5489,"n|Gerichtsverfahren":22172,"n|Gerücht":2474,"n|Geschick":14465,"n|Geschwulst":49285,"n|Gesichtspunkt":0,"n|Gesprächsrunde":0,"n|Gestrüpp":39973,"n|Gesundheitswesen":39446,"n|Gewahrsam":7872,"n|Gewinnspiel":0,"n|Gipfel":7481,"n|Glasfaserleitung":0,"n|Gliederung":0,"n|Gottesdienst":12173,"n|Graben":3395,"n|Gremium":25401,"n|Grenzabgabe":0,"n|Gutachten":11828,"n|Haftbefehl":5827,"n|Haftstrafe":17232,"n|Haftung":37880,"n|Halbleitertechnik":0,"n|Haltung":5969,"n|Handelsbeziehung":0,"n|Hauptaugenmerk":0,"n|Hauptausrichtung":0,"n|Hauptstadt":6329,"n|Haushaltsausschuss":0,"n|Haushaltsführung":0,"n|Haushaltsplan":0,"n|Hebamme":11814,"n|Held":1138,"n|Hemmung":18319,"n|Herausforderung":3686,"n|Herrschaft":3841,"n|Herzstück":37880,"n|Hindernis":6964,"n|Hinrichtung":5866,"n|Hinterhof":14935,"n|Hochspannung":42408,"n|Inhaftierung":34471,"n|Inhaltsstoff":0,"n|Insolvenz":34693,"n|Investitionsrückstand":0,"n|Irrglaube":0,"n|Jahresabschluss":0,"n|Karfreitag":0,"n|Kaserne":13956,"n|Katerstimmung":0,"n|Katzensprung":0,"n|Keuchhusten":0,"n|Kiefer":9472,"n|Kinderlähmung":0,"n|Kindersterblichkeit":0,"n|Knochenjob":0,"n|Knotenpunkt":0,"n|Kohlenstoff":31883,"n|Kompliment":3830,"n|Konjunkturprogramm":0,"n|Körperschaftsteuer":0,"n|Kostenstelle":0,"n|Krankheitserreger":0,"n|Kugelhagel":40293,"n|Kumpelwirtschaft":0,"n|Kunde":1396,"n|Kundgebung":30295,"n|Kunstfälscher":0,"n|Kurtaxe":0,"n|Kürzung":23900,"n|Kutsche":4421,"n|Ladentheke":0,"n|Ladesäule":0,"n|Lastkraftwagen":0,"n|Lebenseinstellung":0,"n|Lebensmittel":6938,"n|Lebensumstand":0,"n|Leistung":3884,"n|Leitzins":0,"n|Machthaber":47442,"n|Machtvakuum":0,"n|Mangelerscheinung":0,"n|Maschinenbau":0,"n|Meerenge":48359,"n|Menschenmenge":17160,"n|Menschenrechtsfrage":0,"n|Menschenwürde":0,"n|Miene":19518,"n|Militärputsch":0,"n|Mindestmaß":0,"n|Missgeschick":20044,"n|Missstand":0,"n|Mitschrift":0,"n|Mittelweg":32569,"n|Mobilfunk":0,"n|Morgenmuffel":0,"n|Motorhaube":18758,"n|Nachholbedarf":0,"n|Nahverkehr":0,"n|Narbe":3716,"n|Niederlassungserlaubnis":0,"n|Notfallsanitäter":0,"n|Obergrenze":0,"n|Ohnmacht":9954,"n|Parkverstoß":0,"n|Persönlichkeit":4360,"n|Problemfeld":0,"n|Prominenz":48850,"n|Protestwelle":0,"n|Prozessauftakt":0,"n|Pulverfass":32761,"n|Rahmen":6712,"n|Randphänomen":0,"n|Raststätte":27797,"n|Razzia":9637,"n|Rechnung":1759,"n|Rechnungsprüfer":0,"n|Rechnungsprüfung":0,"n|Rechtsschutz":0,"n|Rechtsstaat":0,"n|Rechtsstaatlichkeit":0,"n|Referat":22227,"n|Regelung":33858,"n|Rendite":43824,"n|Rückendeckung":12791,"n|Rückforderung":0,"n|Rückgabe":28136,"n|Rückgewinnung":0,"n|Rückgrat":11098,"n|Rückkehr":3343,"n|Rückstand":11031,"n|Ruderverein":0,"n|Sachbuch":0,"n|Sachverstand":0,"n|Saldo":0,"n|Sanierungsfall":0,"n|Sanierungsstau":0,"n|Sattelschlepper":0,"n|Schachfeld":0,"n|Schadenersatzforderung":0,"n|Schadstoffbelästigung":0,"n|Scheibenwischer":39199,"n|Scheinsicherheit":0,"n|Scheinwerfer":10651,"n|Schiedsrichter":11688,"n|Schieflage":0,"n|Schlagzeile":6523,"n|Schlammschlacht":0,"n|Schlauberger":29327,"n|Schließfach":9012,"n|Schlupfloch":26380,"n|Schmiergeld":19467,"n|Schnabel":14070,"n|Schöpfer":8671,"n|Schrecken":5827,"n|Schrott":6617,"n|Schutzschild":13529,"n|Schwachkopf":4988,"n|Schwachstelle":11472,"n|Schweigen":2081,"n|Schwelle":10610,"n|Schwerlast":0,"n|Seelsorger":0,"n|Sehnsucht":6358,"n|Seilbahnunglück":0,"n|Selbstbestimmung":0,"n|Sitzfleisch":0,"n|Söldner":9472,"n|Sondersitzung":0,"n|Sonnenstrom":0,"n|Spaltung":39199,"n|Spannung":5235,"n|Sperrung":0,"n|Spielraum":17464,"n|Spitzenvertreter":0,"n|Sprengstoff":5956,"n|Spüle":8058,"n|Stadtteil":22414,"n|Stausee":0,"n|Stornierung":0,"n|Stoßstange":22801,"n|Strafanzeige":0,"n|Strafbemessung":0,"n|Straffreiheit":42408,"n|Strahlung":7085,"n|Stützpunkt":9024,"n|Suchmaschine":47883,"n|Summe":3146,"n|Symbol":3587,"n|Szene":1714,"n|Taschentuch":6889,"n|Tasse":2649,"n|Tastatur":19126,"n|Tatsache":1788,"n|Tauglichkeit":0,"n|Teamgeist":30023,"n|Tierhaltung":0,"n|Träne":2631,"n|Trauschein":0,"n|Tröpfcheninfektion":0,"n|Übelkeit":14320,"n|Übereinkunft":20290,"n|Übereinstimmung":8973,"n|Überlastung":28929,"n|Überrest":7340,"n|Überschwemmung":21232,"n|Überwachung":6701,"n|Ufer":6171,"n|Umlageverfahren":0,"n|Umleitung":31209,"n|Umrüstung":0,"n|Umsatz":13974,"n|Umschulung":0,"n|Umsicht":0,"n|Umzugskarton":0,"n|Ungehorsam":15921,"n|Unterführung":48850,"n|Unterhaltsvorschuss":0,"n|Unterschlupf":9312,"n|Unterstützung":2273,"n|Untersuchung":1968,"n|Untersuchungshaft":21854,"n|Untier":29469,"n|Unwissenheit":20775,"n|Ursprung":9809,"n|Veranstaltung":7038,"n|Verbrennerverbot":0,"n|Verfall":19991,"n|Verfassungsrang":0,"n|Verfügung":2963,"n|Vergabe":0,"n|Vergleich":3454,"n|Verhaltenskodex":0,"n|Verhandlung":3108,"n|Verlag":14437,"n|Verlegung":22283,"n|Verliebtheit":0,"n|Verlust":2319,"n|Vermögensverteilung":0,"n|Vernehmung":17739,"n|Vernichtung":10226,"n|Versammlung":5786,"n|Verschlechterung":0,"n|Verschwendung":8351,"n|Verschwörungstheorie":22565,"n|Versorgung":12307,"n|Versorgungsengpass":0,"n|Verteilungskampf":0,"n|Vertretung":15016,"n|Verunsicherung":0,"n|Vielseitigkeit":0,"n|Vorfeld":39681,"n|Vorgänger":13167,"n|Vorhaben":4424,"n|Vorhang":4360,"n|Vorrat":4750,"n|Vorreiterfunktion":0,"n|Vorschau":22110,"n|Vorschrift":3740,"n|Vortrag":5789,"n|Vorwahl":17232,"n|Vorwurf":4180,"n|Vorzeichen":43086,"n|Waffenstillstand":10550,"n|Wahlkreis":0,"n|Wahrzeichen":37880,"n|Waise":6794,"n|Wassermangel":0,"n|Wasserstraße":0,"n|Weigerung":30160,"n|Weisheitszahn":0,"n|Werbetafel":0,"n|Werdegang":38384,"n|Wettbewerbsfähigkeit":0,"n|Wettrüsten":0,"n|Wiese":8189,"n|Wirtin":20290,"n|Wirtschaftsberater":0,"n|Wirtschaftswachstum":0,"n|Wohlstand":10948,"n|Wühltisch":0,"n|Wunschvorstellung":0,"n|Zahlenwerk":0,"n|Zeitgeist":0,"n|Zeitraum":14213,"n|Zelle":1928,"n|Zufriedenheit":12867,"n|Zugeständnis":33122,"n|Zulassung":11128,"n|Zulieferbetrieb":0,"n|Zuschuss":21109,"n|Zustand":1807,"n|Zustimmung":6773,"n|Zuversicht":16069,"n|Zuzug":0,"n|Zwilling":3782,"n|Zwischenfall":7471,"n|Zwischenüberschrift":0,"n|Absender":16321,"n|Chef":993,"n|Gast":1137,"n|Großvater":1762,"n|Hausmann":24479,"n|Opa":1963,"n|Student":3045,"n|Ehemann":1350,"n|Herr":246,"n|Junge":219,"n|Mensch":199,"n|Vermieter":10640,"n|Anrufbeantworter":8500,"n|Aufzug":4087,"n|Baum":1288,"n|Brief":866,"n|Buchstabe":5034,"n|Drucker":15200,"n|Esslöffel":0,"n|Fernseher":2589,"n|Kugelschreiber":19836,"n|Schalter":6326,"n|Balkon":7311,"n|Kindergarten":8629,"n|Park":1474,"n|Raum":969,"n|Arbeitsplatz":7018,"n|Bahnsteig":17086,"n|Geburtsort":22283,"n|Laden":827,"n|See":1516,"n|Stock":2036,"n|Fisch":1347,"n|Salat":4574,"n|Wein":1060,"n|Kuchen":1868,"n|Saft":4674,"n|Schinken":6110,"n|Appetit":3389,"n|Dank":346,"n|Film":599,"n|Fußball":4872,"n|Job":417,"n|Moment":286,"n|Plan":545,"n|Preis":1025,"n|Sport":3249,"n|Text":2815,"n|Anfang":995,"n|Anruf":897,"n|Anschluss":8530,"n|Ausflug":4046,"n|Ausgang":3424,"n|Ausweis":2747,"n|Eingang":4090,"n|Eintritt":7686,"n|Fehler":643,"n|Schluss":860,"n|Termin":1686,"n|Urlaub":1735,"n|Zoll":7475,"n|Arm":614,"n|Bauch":2322,"n|Abflug":10256,"n|Unterricht":2943,"n|Familienname":19188,"n|Familienstand":0,"n|Grad":1686,"n|Gruß":3177,"n|Hund":578,"a|dunkel":1047,"a|teuer":1468,"a|kalt":799,"a|warm":1375,"a|jung":179,"a|alt":170,"a|groß":170,"a|hoch":437,"a|gern":155,"a|viel":50,"a|gut":29,"a|aktiv":3678,"a|angenehm":2184,"a|annulliert":30589,"a|historisch":5304,"a|hygienisch":46557,"a|komfortabel":25665,"a|lebhaft":9503,"a|neblig":39973,"a|rechtzeitig":2667,"a|sauber":1052,"a|traumhaft":12585,"a|umgehend":7264,"a|verärgert":3662,"a|ärgerlich":10217,"a|berechtigt":9691,"a|dumm":598,"a|eilig":2735,"a|entspannend":26174,"a|exotisch":9455,"a|fair":1583,"a|fristgerecht":0,"a|fristlos":40597,"a|gesetzlich":12566,"a|klug":1307,"a|massiv":6660,"a|neugierig":2490,"a|offenbar":1556,"a|sauer":1156,"a|schmutzig":2097,"a|selbstverständlich":2022,"a|sinnlos":3071,"a|sinnvoll":7872,"a|total":670,"a|treu":1994,"a|üblich":2149,"a|unglaublich":758,"a|vergleichbar":14911,"a|völlig":671,"a|wütend":1010,"a|andauernd":5068,"a|biologisch":5432,"a|doof":4102,"a|giftig":6392,"a|schädlich":21776,"a|sparsam":18892,"a|trüb":11416,"a|umweltfreundlich":0,"a|voraussichtlich":22641,"a|wahrscheinlich":624,"a|atmungsaktiv":0,"a|aufmerksam":4172,"a|beschädigt":4309,"a|dicht":2005,"a|durchlässig":0,"a|erhältlich":25478,"a|eventuell":4550,"a|kundenfreundlich":0,"a|lieferbar":0,"a|luftdurchlässig":0,"a|portofrei":0,"a|unverbindlich":48850,"a|versandkostenfrei":0,"a|wasserdicht":18892,"a|wetterfest":0,"a|anstrengend":4309,"a|beliebt":3244,"a|doppelt":2017,"a|dramatisch":2731,"a|ehrlich":556,"a|erfolgreich":2036,"a|motiviert":12438,"a|objektiv":11168,"a|romantisch":2050,"a|spannend":1583,"a|unentschieden":11961,"a|ungesund":15921,"a|demokratisch":11554,"a|ehemalig":3083,"a|emotional":2981,"a|friedlich":3026,"a|hart":578,"a|jahrelang":3654,"a|musikalisch":11326,"a|politisch":2439,"a|tatsächlich":902,"a|amtlich":20934,"a|ansteckend":8472,"a|förmlich":9099,"a|geduldig":6889,"a|häufig":4008,"a|hilfsbereit":19223,"a|nachdenklich":16462,"a|überglücklich":14348,"a|ungeduldig":8779,"a|wahr":276,"a|zügig":22055,"a|abhängig":6240,"a|abwechslungsreich":0,"a|eigenverantwortlich":0,"a|englischsprachig":0,"a|finanziell":4109,"a|fließend":13436,"a|gleichzeitig":2651,"a|individuell":17321,"a|intern":5960,"a|kommunikativ":0,"a|leistungsgerecht":0,"a|mittelständisch":0,"a|traditionsreich":0,"a|unbefristet":0,"a|zeitlich":14728,"a|zusätzlich":3826,"a|langfristig":13461,"a|offen":797,"a|stinksauer (ugs.)":13027,"a|unnötig":4177,"a|allergisch":6490,"a|ausgewogen":0,"a|bedenklich":37653,"a|bewusst":2101,"a|bio (=biologisch)":19265,"a|durchschnittlich":9882,"a|einseitig":21699,"a|fett":1533,"a|fix":7758,"a|fleischfrei":0,"a|fleischlos":0,"a|furchtbar":1018,"a|glutenfrei":0,"a|grundsätzlich":14269,"a|industriell":15364,"a|kulinarisch":0,"a|laktosefrei":0,"a|moralisch":4661,"a|problemlos":15167,"a|tierisch":10790,"a|vegan":23637,"a|vereinbar":11065,"a|zufällig":1462,"a|absichtlich":4403,"a|ärztlich":10100,"a|betrunken":1388,"a|frustriert":9954,"a|korrekt":2796,"a|optimistisch":11011,"a|versehentlich":8752,"a|vorsichtig":791,"a|ehrenamtlich":21109,"a|einsam":1619,"a|schwer":376,"a|sportlich":12698,"a|leicht":584,"a|letzter/letzte/letztes":188,"a|befristet":0,"a|sicher":144,"a|unsicher":5073,"a|gleichberechtigt":33653,"a|unfair":4451,"a|gleich":189,"a|ungleich":44600,"a|belastend":16693,"a|wertvoll":2580,"a|farbig":8408,"a|gebraucht":1960,"a|schick":579,"a|weich":2208,"a|ständig":923,"a|lebenswert":26470,"a|städtisch":15016,"a|aktuell":4773,"a|ausländisch":7878,"a|ernsthaft = ernst":1458,"a|kulturell":11703,"a|scherzhaft":0,"a|ernsthaft":1458,"a|satt":2066,"a|hungrig":2385,"a|defekt = kaputt":7580,"a|hübsch":628,"a|verpackt":13414,"a|unverpackt":0,"a|abstrakt":24232,"a|effektiv":7495,"a|intensiv":5599,"a|komplex":5448,"a|motorisch":0,"a|relevant":9691,"a|hilfreich":3844,"a|theoretisch":6592,"a|deutlich":2118,"a|extrem":2514,"a|nah":340,"a|heilig":844,"a|regional":19312,"a|unterschiedlich":4290,"a|weltweit":5387,"a|absolut":838,"a|autofrei":0,"a|automatisch":5109,"a|billig":1963,"a|energieeffizient":0,"a|bezahlbar":0,"a|essbar":17621,"a|genießbar":0,"a|lokal":3736,"a|national":2981,"a|virtuell":16321,"a|gesamt":1557,"a|allgemein":4266,"a|bekannt":838,"a|egoistisch":4350,"a|gerecht":3269,"a|ungerecht":7252,"a|wirtschaftlich":14018,"a|bezahlt":882,"a|unbezahlt":34273,"a|(voll)autonom":0,"a|elektrisch":4473,"a|lebensecht":0,"a|maschinell":0,"a|menschlich":1185,"a|überflüssig":7244,"a|zwischenmenschlich":0,"a|KI-generiert":0,"a|unheimlich":2349,"a|klein":161,"a|schlecht":322,"a|neu":178,"a|schön":142,"a|schnell":220,"a|langsam":585,"a|lang":150,"a|kurz":356,"a|glücklich":505,"a|traurig":897,"a|richtig":177,"a|falsch":370,"a|wichtig":360,"a|gesund":1135,"a|langweilig":1618,"a|abenteuerlich":29764,"a|aggressiv":4805,"a|ähnlich":1359,"a|ahnungslos":15827,"a|ausgesprochen":5933,"a|anpassungsfähig":0,"a|fähig":2730,"a|würdig":4222,"a|sehenswürdig":0,"a|schmerzlich":16524,"a|bedauerlich":7691,"a|klar":171,"a|möglich":524,"a|unmöglich":860,"a|nützlich":2755,"a|persönlich":751,"a|spät":229,"a|früh":338,"a|direkt":643,"a|verrückt":339,"a|physikalisch":25772,"a|gefährlich":736,"a|ruhig":403,"a|nötig":812,"a|folgenreich":0,"a|begeistert":2735,"a|attraktiv":3039,"a|aufgeregt":2045,"a|aufgeschlossen":16234,"a|aufrichtig":4344,"a|begabt":6920,"a|bestimmt":425,"a|bequem":2912,"a|salzig":18601,"a|bitter":5937,"a|lecker":2182,"a|vorstellbar":17464,"a|unvorstellbar":10030,"a|unbegrenzt":13956,"a|gemein":1896,"a|öffentlich":1994,"a|nieder":2685,"a|vergesslich":25401,"a|unvergesslich":16292,"a|vergessbar":0,"a|eifersüchtig":2016,"a|natürlich":219,"a|sicherlich":3002,"a|gewiss":885,"a|wirksam":17321,"a|schwach":1386,"a|gängig":0,"a|krank":633,"a|erstaunlich":2498,"a|dahinter":2559,"a|vollständig":3346,"a|verantwortlich":1266,"a|verpflichtend":0,"a|obligatorisch":0,"a|unvermeidlich":11670,"a|unversiegbar":0,"a|stolz":781,"a|verfügbar":5580,"a|ungeheuer":4922,"a|unverzüglich":7807,"a|bestehend":19356,"a|vorbehaltlos":0,"a|blitzschnell":23490,"a|verwunderlich":29899,"a|wesentlich":4462,"a|wirkungsvoll":29469,"a|angespannt":7085,"a|bedauerlicherweise":13111,"a|zufrieden":1464,"a|unzufrieden":11011,"a|zähligen":0,"a|unzähligen":22801,"a|sorgfältig":6803,"a|erneuerbar":0,"a|skeptisch":14437,"a|süchtig":6339,"a|renommiert":46557,"a|hervorragend":2644,"a|flüssig":8269,"a|hinreichend":46999,"a|behindert":5585,"a|fürchterlich":4931,"a|gültig":12776,"a|herkömmlich":31546,"a|fetthaltig":0,"a|eindeutig":2412,"a|beständig":23350,"a|fettleibig":0,"a|dauernd":2605,"a|chronisch":15167,"a|benutzerfreundlich":0,"a|gelungen":5340,"a|anspruchsvoll":12375,"a|uferlos":0,"a|gelegentlich":6490,"a|zuverlässig":6550,"a|ehrgeizig":8731,"a|machbar":14935,"a|haltbar":0,"a|angemessen":4004,"a|abkömmlich":0,"a|elementar":28783,"a|grundlegend":12907,"a|gesondert":0,"a|übergreifend":0,"a|schmerzstillend":0,"a|handwerklich":47442,"a|frühkindlich":0,"a|kostspielig":29327,"a|fettarm":0,"a|entsprechend":6075,"a|ernst":467,"a|mühsam":19579,"a|uneigennützig":0,"a|preiswert":37389,"a|kräftig":4016,"a|geräuschlos":0,"a|diesbezüglich":16657,"a|unterhaltsam":13461,"a|gemischt":8859,"a|gewaltig":3514,"a|erforderlich":8458,"a|unberechenbar":9917,"a|unbeständig":35802,"a|erforscht":15016,"a|ersetzbar":39973,"a|topisch":0,"a|hochriskant":0,"a|enteral":0,"a|transdermal":0,"a|intramuskulär":0,"a|ausreichend":7199,"a|anaphylaktisch":0,"a|blutig":4522,"a|gehaltvoll":0,"a|selbstständig":14853,"a|unselbständig":0,"a|schmerzhaft":5560,"a|fettig":18504,"a|wohl":187,"a|blass":5235,"a|fiebersenkend":0,"a|püriert":0,"a|salzarm":0,"a|unbedingt":1071,"a|nüchtern":5118,"a|intravenös":32056,"a|orientiert":39199,"a|steril":20243,"a|examiniert":0,"a|abgedreht":15041,"a|abgelegen":13398,"a|absehbar":48359,"a|absetzbar":0,"a|abwegig":26174,"a|abwertend":0,"a|allmählich":6943,"a|amtierend":18556,"a|andersdenkend":0,"a|anfällig":18122,"a|anfechtbar":0,"a|angebaut":30451,"a|angeheuert":6072,"a|angeprangert":0,"a|angerechnet":0,"a|angestrebt":0,"a|angleichend":0,"a|anhaltend":18213,"a|anhängig":0,"a|annektiert":0,"a|anschaulich":0,"a|arglos":0,"a|aufdringlich":13213,"a|auffällig":8985,"a|aufwendig":40879,"a|augenfällig":0,"a|ausbleibend":0,"a|ausführlich":14141,"a|ausgedient":43448,"a|ausgegrenzt":0,"a|ausgelagert":0,"a|ausgelotet":0,"a|ausgerottet":21854,"a|ausgeschöpft":33858,"a|ausgesetzt":4328,"a|auswärtig":25970,"a|baulich":0,"a|beachtlich":18802,"a|bedeutsam":19891,"a|beeinträchtigt":11920,"a|befriedigend":21232,"a|begnadigt":18255,"a|beiläufig":36679,"a|beleuchtet":24232,"a|berufsbezogen":0,"a|bescheuert":2794,"a|beschwerlich":47883,"a|beschworen":36912,"a|besorgniserregend":44216,"a|beurteilt":16462,"a|bevorstehend":14414,"a|bevorzugt":8679,"a|bewacht":4796,"a|bewährt":24050,"a|bilderreich":0,"a|bleibend":22349,"a|bodenständig":39446,"a|brauchbar":12667,"a|dekadent":41502,"a|dichtgemacht":28929,"a|diffamierend":0,"a|drängend":0,"a|dreckig":2144,"a|eigenartig":3866,"a|eingebracht":14018,"a|eingeleitet":13167,"a|einsatzfähig":32205,"a|einschneidend":0,"a|einzigartig":3962,"a|eklatant":0,"a|empfänglich":25121,"a|empört":16829,"a|entgleist":38951,"a|entrüstet":47442,"a|entwendet":17863,"a|erblich":32761,"a|ermüdend":21916,"a|ernüchternd":0,"a|erobert":7384,"a|erschüttert":8848,"a|erschwinglich":0,"a|erträglich":19356,"a|ertragreich":0,"a|erwerbstätig":0,"a|faltenlos":0,"a|feindselig":13551,"a|fettlöslich":0,"a|flapsig":0,"a|fleischlastig":0,"a|fragwürdig":15200,"a|freiberuflich":38951,"a|fulminant":0,"a|fundiert":0,"a|funktionierend":17044,"a|funktionstüchtig":33653,"a|gefühlsmäßig":40879,"a|geklaut":2253,"a|gelinde":28668,"a|gemäßigt":0,"a|gepflastert":38951,"a|gespalten":16787,"a|gesperrt":5938,"a|getauft":12173,"a|gezielt":10811,"a|gezüchtet":21109,"a|glaubwürdig":10878,"a|gleichlautend":0,"a|gleichwertig":43448,"a|grausam":2744,"a|greifbar":30295,"a|großflächig":0,"a|großzügig":2920,"a|gruselig":3939,"a|heikel":7140,"a|herausragend":19684,"a|hinnehmbar":0,"a|hochbetagt":0,"a|hochtrabend":0,"a|horrend":0,"a|jämmerlich":8074,"a|kleingerechnet":0,"a|knifflig":25665,"a|knusprig":19633,"a|kostenpflichtig":0,"a|köstlich":3168,"a|kurzfristig":8033,"a|lahmgelegt":25970,"a|langatmig":0,"a|lebendig":1830,"a|leidenschaftlich":7077,"a|lindgrün":0,"a|linksgerichtet":0,"a|listig":41791,"a|lohnenswert":0,"a|makellos":12810,"a|malerisch":49766,"a|mangelhaft":44216,"a|marode":0,"a|maßgeblich":0,"a|mehrfach":9345,"a|mehrspurig":0,"a|mittellos":24843,"a|mittelmäßig":18173,"a|nachhaltig":41791,"a|nachlassend":0,"a|nachvollziehbar":33122,"a|nachweisbar":39446,"a|neidisch":5735,"a|niedergelassen":31393,"a|parteiübergreifend":0,"a|pausenlos":18034,"a|pflegebedürftig":0,"a|praxisnah":0,"a|prickelnd":0,"a|raffiniert":7959,"a|ratsam":23111,"a|rechtswidrig":0,"a|reibungslos":22714,"a|reißerisch":0,"a|reizvoll":23817,"a|rücksichtslos":10049,"a|salonfähig":0,"a|scheinbar":3462,"a|schillernd":0,"a|schleierhaft":42759,"a|schleppend":48850,"a|schlicht":6906,"a|schlimm":427,"a|schlüssig":32936,"a|schwerwiegend":21854,"a|selbstauferlegt":0,"a|seltsam":788,"a|sesshaft":23192,"a|stellvertretend":6879,"a|stetig":24386,"a|stumm":4674,"a|tiefgreifend":0,"a|übel":1138,"a|überbordend":0,"a|überfrachtet":0,"a|überschüssig":45751,"a|überwältigt":7939,"a|überwiegend":21170,"a|umfangreich":21854,"a|umfassend":15138,"a|umgekehrt":5500,"a|umwerfend":4670,"a|unaufhaltsam":27451,"a|unbegreiflich":23350,"a|unbehaglich":20102,"a|unbeteiligt":39973,"a|unbewaffnet":7435,"a|undurchsichtig":0,"a|unfassbar":5189,"a|ungeschickt":10878,"a|ungewollt":24302,"a|unsachlich":0,"a|unschuldig":1184,"a|unverkennbar":44600,"a|unvollständig":19735,"a|unzutreffend":0,"a|urig":0,"a|veraltet":18941,"a|verankert":28536,"a|verarmt":0,"a|verbindlich":49285,"a|verbreitet":5240,"a|verdächtig":1343,"a|verdrängt":13871,"a|verfasst":12375,"a|verfassungswidrig":0,"a|verführerisch":19579,"a|vergänglich":30295,"a|vergeblich":11948,"a|verhängt":21044,"a|verherrlicht":0,"a|verlockend":9562,"a|vermehrbar":0,"a|vermittelbar":0,"a|vernachlässigt":11416,"a|vernünftig":1984,"a|verpennt":0,"a|verschont":7833,"a|verseucht":14556,"a|verspannt":19891,"a|verstrahlt":37880,"a|verteufelt":49285,"a|vertraglich":43086,"a|verträglich":0,"a|vertraulich":4846,"a|verunglückt":19579,"a|verwandt":2166,"a|verwerflich":36679,"a|verwischt":18065,"a|verwundbar":12791,"a|verwüstet":13234,"a|vorgeschlagen":7513,"a|vorhanden":8379,"a|vorrätig":41197,"a|vorübergehend":4751,"a|waagerecht":48359,"a|wandlungsfähig":0,"a|wegweisend":0,"a|weitreichend":0,"a|weltfremd":0,"a|widerlegt":31393,"a|widersprüchlich":25121,"a|widerstrebend":0,"a|willkürlich":16040,"a|wohltuend":0,"a|wünschenswert":41502,"a|würdevoll":23423,"a|zaghaft":42091,"a|zart":5240,"a|zermürbt":0,"a|zielstrebig":32761,"a|zugespitzt":0,"a|zugig":0,"a|zukunftsfest":0,"a|zulässig":28395,"a|zumutbar":0,"a|zunehmend":16867,"a|zwangsläufig":16829,"a|zwielichtig":18697,"a|zynisch":14935};
   let ALL_ROWS = [];
   let FILTERED_ROWS = [];
   let sortField = 'word';
@@ -1022,6 +1083,31 @@ if (document.readyState === 'loading') {
     zahlen:'Zahlen', zeit:'Zeit'
   };
   const NO_VALUE = '—';
+  let includeEstimatedLevels = true;
+
+  // Frequency rank -> level cut-offs. Calibrated against the ~1,180 words that carry a textbook
+  // level: 82% land on their textbook level or one level off (46% exact; frequency can't split A1/A2).
+  const FREQ_LEVELS = [['A1', 1000], ['A2', 2000], ['B1', 15000], ['B2', 50000]];
+  function levelFromRank(rank) {
+    if (!rank) return 'C1';
+    for (const [lvl, max] of FREQ_LEVELS) if (rank <= max) return lvl;
+    return 'C1';
+  }
+  // Textbook level wins; otherwise estimate from frequency (marked levelEst so the UI shows ≈).
+  function resolveLevel(raw, rank) {
+    if (raw && raw !== '?') return { level: raw, levelEst: false, freqRank: rank };
+    if (rank === undefined) return { level: '?', levelEst: false, freqRank: rank };
+    return { level: levelFromRank(rank), levelEst: true, freqRank: rank };
+  }
+  function freqBars(rank) {
+    const filled = { A1: 5, A2: 4, B1: 3, B2: 2, C1: 1 }[levelFromRank(rank)];
+    return '▮'.repeat(filled) + '▯'.repeat(5 - filled);
+  }
+  function freqTitle(r) {
+    if (r.freqRank === undefined) return 'Keine Häufigkeitsdaten';
+    if (!r.freqRank) return 'Seltener als die 50.000 häufigsten Wortformen (OpenSubtitles 2018)';
+    return `Rang ${r.freqRank.toLocaleString('de-DE')} von 50.000 Wortformen (OpenSubtitles 2018)`;
+  }
 
   function escHTML(s) {
     return String(s == null ? '' : s)
@@ -1071,8 +1157,17 @@ if (document.readyState === 'loading') {
       cell:(r)=>`<td class="col-topic" style="font-size:11px; color:var(--ink-muted);">${escHTML(r.topic)}</td>`,
       exportValues:(r)=>[r.topic] },
     { key:'level', label:'Level', exportLabels:['Level'],
-      cell:(r)=>`<td class="col-level" style="font-family:'IBM Plex Mono',monospace; font-weight:600;">${escHTML(r.level)}</td>`,
-      exportValues:(r)=>[r.level] },
+      cell:(r)=> r.levelEst
+        ? `<td class="col-level level-est" title="Geschätzt aus Worthäufigkeit – ${escHTML(freqTitle(r))}">≈${escHTML(r.level)}</td>`
+        : `<td class="col-level" style="font-family:'IBM Plex Mono',monospace; font-weight:600;" title="Level aus Lehrbuch-/Quellenliste">${escHTML(r.level)}</td>`,
+      exportValues:(r)=>[r.levelEst ? `≈${r.level}` : r.level] },
+    { key:'freq', label:'📊 Häufigkeit', exportLabels:['Haeufigkeit Rang'],
+      cell:(r)=> r.freqRank === undefined
+        ? `<td class="col-freq" title="Keine Häufigkeitsdaten">—</td>`
+        : `<td class="col-freq" title="${escHTML(freqTitle(r))}"><span class="freq-bars">${freqBars(r.freqRank)}</span> <span class="freq-rank">${r.freqRank ? '#' + r.freqRank.toLocaleString('de-DE') : 'selten'}</span></td>`,
+      exportValues:(r)=>[r.freqRank || (r.freqRank === 0 ? 'selten' : '')],
+      filterText:(r)=> r.freqRank ? String(r.freqRank) : 'selten',
+      sortValue:(r)=> r.freqRank || 1e9 },
     { key:'gender', label:'Artikel', exportLabels:['Artikel'],
       cell:(r)=>{
         if (r.gender === NO_VALUE) return `<td class="col-gender"><span style="color:var(--ink-muted);">—</span></td>`;
@@ -1095,6 +1190,7 @@ if (document.readyState === 'loading') {
     { name:'Nomen lernen',  cols: ['en','gender','word','noun','level','topic','ta'] },
     { name:'Adjektive',     cols: ['en','word','adj','level','ta'] },
     { name:'Kompakt',       cols: ['en','word','pos','level'] },
+    { name:'Verben hören',  cols: ['en','word','praet','perfekt','freq','level'] },
   ];
   const COL_LAYOUT_KEY = 'excel_sheet_columns_v1';
 
@@ -1152,7 +1248,7 @@ if (document.readyState === 'loading') {
   function speakWord(text) {
     if (!('speechSynthesis' in window) || !text) return;
     window.speechSynthesis.cancel();
-    const clean = text.replace(/^[•·s]+/, '').replace(/[([{].*?[)]}]/g, '').trim();
+    const clean = text.replace(/^[•·\s]+/, '').replace(/[([{].*?[)\]}]/g, '').trim();
     if (!clean) return;
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = 'de-DE';
@@ -1241,7 +1337,7 @@ if (document.readyState === 'loading') {
         rowNum: ALL_ROWS.length + 1,
         word: inf,
         pos: 'Verb',
-        level: v.level || '?',
+        ...resolveLevel(v.level, FREQ_RANK['v|' + v.inf]),
         gender: NO_VALUE,
         noun: nounStr,
         verb: inf,
@@ -1254,7 +1350,12 @@ if (document.readyState === 'loading') {
         ta: v.ta || '',
         ta_translit: v.ta_translit || '',
         topic: NO_VALUE,
-        mnemonic: direct ? direct.image : `Stem "${stem}..." → ${v.en}`
+        mnemonic: direct ? direct.image : `Stem "${stem}..." → ${v.en}`,
+        read: [
+          { text: inf, col: 'word' },
+          { text: v.praeteritum, col: 'praet' },
+          { text: v.perfekt, col: 'perfekt' }
+        ].filter(p => p.text)
       });
     });
 
@@ -1270,7 +1371,7 @@ if (document.readyState === 'loading') {
         rowNum: ALL_ROWS.length + 1,
         word: fullNoun,
         pos: 'Nomen',
-        level: n.level || '?',
+        ...resolveLevel(n.level, FREQ_RANK['n|' + n.sg]),
         gender: n.a,
         noun: `${n.a} ${n.sg}, die ${n.pl}`,
         verb: `${verbCandidate}`,
@@ -1283,7 +1384,11 @@ if (document.readyState === 'loading') {
         ta: n.ta || '',
         ta_translit: n.ta_translit || '',
         topic: TOPIC_LABELS[n.topic] || n.topic || NO_VALUE,
-        mnemonic: direct ? direct.trick : `Rule: -${n.typ || 'suffix'} gender pattern`
+        mnemonic: direct ? direct.trick : `Rule: -${n.typ || 'suffix'} gender pattern`,
+        read: [
+          { text: fullNoun.trim(), col: 'word' },
+          { text: n.pl && n.pl !== '—' && n.pl !== '-' ? `die ${n.pl}` : '', col: 'noun' }
+        ].filter(p => p.text)
       });
     });
 
@@ -1298,7 +1403,7 @@ if (document.readyState === 'loading') {
         rowNum: ALL_ROWS.length + 1,
         word: a.w,
         pos: 'Adjektiv',
-        level: a.level || '?',
+        ...resolveLevel(a.level, FREQ_RANK['a|' + a.w]),
         gender: NO_VALUE,
         noun: `die ${a.w.charAt(0).toUpperCase() + a.w.slice(1)}heit / -keit`,
         verb: `er${stem}en / ${stem}en`,
@@ -1311,7 +1416,12 @@ if (document.readyState === 'loading') {
         ta: a.ta || '',
         ta_translit: a.ta_translit || '',
         topic: NO_VALUE,
-        mnemonic: `Steigerung: ${a.w} → ${comp} → ${sup}`
+        mnemonic: `Steigerung: ${a.w} → ${comp} → ${sup}`,
+        read: [
+          { text: a.w, col: 'word' },
+          { text: a.comp || a.komp, col: 'adj' },
+          { text: a.sup, col: 'adj' }
+        ].filter(p => p.text)
       });
     });
 
@@ -1327,16 +1437,33 @@ if (document.readyState === 'loading') {
     return level === filter;
   }
 
+  function effectiveLevel(r) {
+    return r.levelEst && !includeEstimatedLevels ? '?' : r.level;
+  }
+
   function renderLevelChips() {
     const opts = [
       { k:'all', l:'Alle' }, { k:'A1', l:'A1' }, { k:'A2', l:'A2' },
-      { k:'B1', l:'B1' }, { k:'B2', l:'B2' }, { k:'?', l:'Ohne Level' }
+      { k:'B1', l:'B1' }, { k:'B2', l:'B2' }, { k:'C1', l:'C1' }, { k:'?', l:'Ohne Level' }
     ];
-    document.getElementById('levelChips').innerHTML = opts.map(o => {
-      const n = o.k === 'all' ? ALL_ROWS.length : ALL_ROWS.filter(r => levelMatches(r.level, o.k)).length;
-      const title = o.k === 'B1' ? ' title="inkl. B1.1 und B1.2"' : o.k === '?' ? ' title="Quelle nennt kein Niveau"' : '';
+    const chips = opts.map(o => {
+      const n = o.k === 'all' ? ALL_ROWS.length : ALL_ROWS.filter(r => levelMatches(effectiveLevel(r), o.k)).length;
+      if (n === 0 && o.k !== filterLevel) return '';
+      const title = o.k === 'B1' ? ' title="inkl. B1.1 und B1.2"'
+        : o.k === 'C1' ? ' title="Nur geschätzt: seltener als die 50.000 häufigsten Wortformen"'
+        : o.k === '?' ? ' title="Kein Level bekannt"' : '';
       return `<button class="filter-chip ${filterLevel === o.k ? 'active' : ''}" data-lvl="${o.k}" onclick="setLevelFilter('${o.k}')"${title}>${o.l} (${n})</button>`;
     }).join('');
+    const estCount = ALL_ROWS.filter(r => r.levelEst).length;
+    document.getElementById('levelChips').innerHTML = chips +
+      `<label class="est-toggle" title="${estCount} Wörter ohne Lehrbuch-Level: Level aus Worthäufigkeit geschätzt (≈)">` +
+      `<input type="checkbox" ${includeEstimatedLevels ? 'checked' : ''} onchange="setIncludeEstimated(this.checked)"> ≈ geschätzte (${estCount})</label>`;
+  }
+
+  function setIncludeEstimated(on) {
+    includeEstimatedLevels = on;
+    renderLevelChips();
+    applyFiltersAndRender();
   }
 
   function renderTopicOptions() {
@@ -1352,6 +1479,9 @@ if (document.readyState === 'loading') {
   }
 
   function applyFiltersAndRender() {
+    // Row indexes change with filters/sort, so a running read-through can't continue safely.
+    if (reader.active) stopReading('Vorlesen gestoppt – Filter/Sortierung geändert');
+    selectedRowIdx = -1;
     const activeColFilters = Object.entries(colFilters)
       .filter(([k, v]) => v && v.trim() && COL_BY_KEY[k])
       .map(([k, v]) => [COL_BY_KEY[k], v.trim().toLowerCase()]);
@@ -1361,7 +1491,7 @@ if (document.readyState === 'loading') {
       if (filterPos === 'noun' && r.pos !== 'Nomen') return false;
       if (filterPos === 'adj' && r.pos !== 'Adjektiv') return false;
 
-      if (!levelMatches(r.level, filterLevel)) return false;
+      if (!levelMatches(effectiveLevel(r), filterLevel)) return false;
       if (filterGender !== 'all' && r.gender !== filterGender) return false;
       if (filterTopic !== 'all' && r.topic !== filterTopic) return false;
 
@@ -1378,9 +1508,10 @@ if (document.readyState === 'loading') {
       return true;
     });
 
+    const sortValue = COL_BY_KEY[sortField] && COL_BY_KEY[sortField].sortValue;
     FILTERED_ROWS.sort((a, b) => {
-      let valA = (a[sortField] || '').toString().toLowerCase();
-      let valB = (b[sortField] || '').toString().toLowerCase();
+      let valA = sortValue ? sortValue(a) : (a[sortField] || '').toString().toLowerCase();
+      let valB = sortValue ? sortValue(b) : (b[sortField] || '').toString().toLowerCase();
       if (sortField === 'rowNum') {
         valA = a.rowNum;
         valB = b.rowNum;
@@ -1445,10 +1576,12 @@ if (document.readyState === 'loading') {
 
     let html = '';
     FILTERED_ROWS.forEach((r, idx) => {
-      html += `<tr onclick="selectRow(this)"><td class="row-hdr-cell col-row-num">${idx + 1}</td>` +
+      html += `<tr data-idx="${idx}" onclick="selectRow(this)"><td class="row-hdr-cell col-row-num">` +
+        `<button class="row-play" onclick="event.stopPropagation(); readSingleRow(${idx})" title="Diese Zeile vorlesen" aria-label="Zeile ${idx + 1} vorlesen">▶</button>${idx + 1}</td>` +
         cols.map(c => c.cell(r, idx)).join('') + `</tr>`;
     });
     tbody.innerHTML = html;
+    if (reader.active) highlightReading(false);
   }
 
   // --- ACTIONS & EXPORTS ---
@@ -1460,6 +1593,7 @@ if (document.readyState === 'loading') {
   function selectRow(rowEl) {
     document.querySelectorAll('.excel-table tr').forEach(r => r.classList.remove('selected-row'));
     rowEl.classList.add('selected-row');
+    selectedRowIdx = parseInt(rowEl.dataset.idx, 10);
     document.getElementById('cellNameBox').textContent = 'Row ' + (rowEl.rowIndex);
   }
 
@@ -1516,6 +1650,7 @@ if (document.readyState === 'loading') {
 
   function resetAllFilters() {
     filterPos = 'all'; filterLevel = 'all'; filterGender = 'all'; filterTopic = 'all';
+    includeEstimatedLevels = true;
     globalSearchTerm = ''; colFilters = {};
     document.getElementById('globalSearchInput').value = '';
     document.querySelectorAll('[data-pos]').forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === 'all'));
@@ -1566,6 +1701,206 @@ if (document.readyState === 'loading') {
     }).catch(err => {
       showToast('Fehler beim Kopieren: ' + err);
     });
+  }
+
+  // --- READ ALOUD (one row, or all visible rows one by one) ---
+  const READER_SETTINGS_KEY = 'excel_sheet_reader_v1';
+  const PART_GAP_MS = 350;
+  const ROW_GAP_MS = 800;
+  let selectedRowIdx = -1;
+  const reader = {
+    active: false, paused: false, single: false,
+    idx: 0, partIdx: 0, token: 0, utterance: null, watchdog: null,
+    mode: 'all', withEn: false, rate: 0.85, repeat: 1
+  };
+
+  function loadReaderSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem(READER_SETTINGS_KEY) || 'null');
+      if (s) ['mode', 'withEn', 'rate', 'repeat'].forEach(k => { if (s[k] !== undefined) reader[k] = s[k]; });
+    } catch (e) { /* storage unavailable: defaults */ }
+    document.getElementById('readMode').value = reader.mode;
+    document.getElementById('readEn').checked = reader.withEn;
+    document.getElementById('readRate').value = String(reader.rate);
+    document.getElementById('readRepeat').value = String(reader.repeat);
+    if (!('speechSynthesis' in window)) {
+      document.querySelectorAll('#readerBar button, #readerBar select, #readerBar input').forEach(el => el.disabled = true);
+      document.getElementById('readerStatus').textContent = 'Dieser Browser unterstützt keine Sprachausgabe.';
+    }
+  }
+
+  function setReaderOption(key, value) {
+    reader[key] = value;
+    try {
+      localStorage.setItem(READER_SETTINGS_KEY, JSON.stringify({ mode: reader.mode, withEn: reader.withEn, rate: reader.rate, repeat: reader.repeat }));
+    } catch (e) { /* storage unavailable */ }
+  }
+
+  // Only real forms from the data are read (never the stem-generated helper columns).
+  function readerParts(r) {
+    let parts = r.read || [];
+    if (reader.mode === 'base') parts = parts.slice(0, 1);
+    else if (r.pos === 'Verb' && reader.mode === 'praet') parts = parts.filter(p => p.col !== 'perfekt');
+    else if (r.pos === 'Verb' && reader.mode === 'perfekt') parts = parts.filter(p => p.col !== 'praet');
+    parts = parts.map(p => ({ text: p.text, col: p.col, lang: 'de-DE' }));
+    if (reader.withEn && r.en && parts.length) {
+      parts.splice(1, 0, { text: r.en.replace(/\s*\/\s*/g, ', '), col: 'en', lang: 'en-US' });
+    }
+    let out = [];
+    for (let i = 0; i < reader.repeat; i++) out = out.concat(parts);
+    return out;
+  }
+
+  function speakPart(part, token, done) {
+    const u = new SpeechSynthesisUtterance(part.text);
+    u.lang = part.lang;
+    u.rate = reader.rate;
+    if (part.lang.startsWith('de') && selectedVoiceURI) {
+      const v = germanVoices.find(x => x.voiceURI === selectedVoiceURI);
+      if (v) u.voice = v;
+    }
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(reader.watchdog);
+      if (token === reader.token) done();
+    };
+    u.onend = finish;
+    u.onerror = finish;
+    // Some browsers occasionally never fire onend; don't let the read-through hang.
+    reader.watchdog = setTimeout(finish, 2500 + part.text.length * 160 / reader.rate);
+    reader.utterance = u; // keep a reference: Chrome can drop onend for garbage-collected utterances
+    window.speechSynthesis.speak(u);
+  }
+
+  function rowEl(idx) {
+    return document.querySelector(`#excelTableBody tr[data-idx="${idx}"]`);
+  }
+
+  function highlightReading(scroll) {
+    document.querySelectorAll('#excelTableBody tr.reading-row').forEach(tr => tr.classList.remove('reading-row'));
+    document.querySelectorAll('#excelTableBody td.cell-speaking').forEach(td => td.classList.remove('cell-speaking'));
+    if (!reader.active) return;
+    const tr = rowEl(reader.idx);
+    if (!tr) return;
+    tr.classList.add('reading-row');
+    const r = FILTERED_ROWS[reader.idx];
+    const part = r ? readerParts(r)[reader.partIdx] : null;
+    if (part) {
+      const td = tr.querySelector('td.col-' + part.col);
+      if (td) td.classList.add('cell-speaking');
+    }
+    if (scroll) {
+      const vp = document.getElementById('sheetViewport');
+      const head = document.getElementById('excelThead').offsetHeight;
+      const top = tr.offsetTop, bottom = top + tr.offsetHeight;
+      if (top < vp.scrollTop + head || bottom > vp.scrollTop + vp.clientHeight) {
+        vp.scrollTo({ top: Math.max(0, top - head - vp.clientHeight / 3), behavior: 'smooth' });
+      }
+    }
+  }
+
+  function updateReaderUI() {
+    const btn = document.getElementById('readAllBtn');
+    const status = document.getElementById('readerStatus');
+    if (!reader.active || reader.single) {
+      btn.textContent = '▶ Alle vorlesen';
+    } else {
+      btn.textContent = reader.paused ? '▶ Weiter' : '⏸ Pause';
+    }
+    const r = FILTERED_ROWS[reader.idx];
+    status.textContent = reader.active && r
+      ? `${reader.paused ? '⏸' : '🔊'} Zeile ${reader.idx + 1} / ${FILTERED_ROWS.length} · ${r.word}`
+      : '';
+  }
+
+  function playCurrent() {
+    const token = reader.token;
+    const r = FILTERED_ROWS[reader.idx];
+    if (!r) { stopReading(reader.single ? '' : '✅ Alle Zeilen vorgelesen'); return; }
+    const parts = readerParts(r);
+    if (reader.partIdx >= parts.length) {
+      if (reader.single) { stopReading(''); return; }
+      reader.idx++;
+      reader.partIdx = 0;
+      setTimeout(() => { if (token === reader.token && !reader.paused) playCurrent(); }, ROW_GAP_MS);
+      return;
+    }
+    highlightReading(reader.partIdx === 0);
+    updateReaderUI();
+    speakPart(parts[reader.partIdx], token, () => {
+      reader.partIdx++;
+      setTimeout(() => { if (token === reader.token && !reader.paused) playCurrent(); }, PART_GAP_MS);
+    });
+  }
+
+  function startReading(fromIdx, single) {
+    if (!('speechSynthesis' in window) || !FILTERED_ROWS.length) return;
+    reader.token++;
+    window.speechSynthesis.cancel();
+    Object.assign(reader, { active: true, paused: false, single, idx: Math.max(0, Math.min(fromIdx, FILTERED_ROWS.length - 1)), partIdx: 0 });
+    playCurrent();
+  }
+
+  function readSingleRow(idx) {
+    startReading(idx, true);
+  }
+
+  function readAllToggle() {
+    if (reader.active && !reader.single) {
+      if (reader.paused) {
+        reader.paused = false;
+        reader.token++;
+        playCurrent(); // repeats the part that was interrupted
+      } else {
+        reader.paused = true;
+        reader.token++;
+        window.speechSynthesis.cancel();
+        clearTimeout(reader.watchdog);
+        updateReaderUI();
+      }
+      return;
+    }
+    startReading(selectedRowIdx >= 0 ? selectedRowIdx : 0, false);
+  }
+
+  function readerStep(delta) {
+    if (!reader.active) { startReading(Math.max(0, (selectedRowIdx >= 0 ? selectedRowIdx : 0) + Math.max(delta, 0)), false); return; }
+    reader.token++;
+    window.speechSynthesis.cancel();
+    clearTimeout(reader.watchdog);
+    reader.idx = Math.max(0, Math.min(reader.idx + delta, FILTERED_ROWS.length - 1));
+    reader.partIdx = 0;
+    if (reader.paused) { highlightReading(true); updateReaderUI(); }
+    else playCurrent();
+  }
+
+  function stopReading(message) {
+    reader.token++;
+    reader.active = false;
+    reader.paused = false;
+    clearTimeout(reader.watchdog);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    highlightReading(false);
+    updateReaderUI();
+    if (message) showToast(message);
+  }
+
+  // Filter to verbs, most frequent first, verb-learning columns, then read them all.
+  function quickListenTopVerbs() {
+    filterPos = 'verb';
+    document.querySelectorAll('[data-pos]').forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === 'verb'));
+    sortField = 'freq';
+    sortDirection = 'asc';
+    const preset = COLUMN_PRESETS.find(p => p.name === 'Verben hören');
+    colOrder = preset.cols.concat(DEFAULT_COL_ORDER.filter(k => !preset.cols.includes(k)));
+    colHidden = new Set(DEFAULT_COL_ORDER.filter(k => !preset.cols.includes(k)));
+    saveColumnLayout();
+    renderHeader();
+    applyFiltersAndRender();
+    document.getElementById('sheetViewport').scrollTop = 0;
+    startReading(0, false);
   }
 
   // --- COLUMN CHOOSER (show/hide + order) ---
@@ -1666,7 +2001,10 @@ if (document.readyState === 'loading') {
   }
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.getElementById('colsModal').classList.remove('open');
+    if (e.key !== 'Escape') return;
+    const m = document.getElementById('colsModal');
+    if (m.classList.contains('open')) m.classList.remove('open');
+    else if (reader.active) stopReading('⏹ Vorlesen gestoppt');
   });
   // Capture phase: row audio buttons call stopPropagation(), which would otherwise
   // stop a click on them from closing the chooser.
@@ -1705,6 +2043,7 @@ if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', () => {
     initTheme();
     loadColumnLayout();
+    loadReaderSettings();
     renderHeader();
     buildSpreadsheetData();
   });
