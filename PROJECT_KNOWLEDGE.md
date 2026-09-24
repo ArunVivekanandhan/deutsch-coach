@@ -751,6 +751,44 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-24 (Task 27) — Excel sheet: choose columns + their order, and real filters
+
+#### Task
+User: "We have excel. Need option for which are field to me display and where are position. Filter also need" — on `Deutsch_Wortschatz_Excel_Sheet.html`.
+
+#### What existed and was broken
+- A "👁️ Spalten wählen" modal only set `style.display='none'` on the cells present at click time. `renderTable()` rebuilds `<tbody>` on every sort/filter/search, so **hidden columns reappeared on the next interaction**. Nothing was saved, there was no way to reorder, and CSV/TSV export always wrote all 17 fields in a fixed order.
+- The Level filter chips were hard-coded `A1/A2/B1/B2`, but nouns use `B1.1`/`B1.2` (358 nouns never matched the "B1" chip) and 1,300 rows have level `?` (no chip at all).
+- The row builder invented values: missing levels became `A1`/`A2` (e.g. 225 adjectives from the *Einfach gut! B1* and *Auf jeden Fall!* textbooks were shown as "A1"), and every verb/adjective got topic "Alltag".
+
+#### What was built
+- **Column chooser ("🧩 Spalten & Reihenfolge")**: every column has a checkbox (show/hide), a drag handle (desktop drag-and-drop) and ▲/▼ buttons (work on touch). Presets: Standard, Verben lernen, Nomen lernen, Adjektive, Kompakt. "Alle anzeigen", "Zurücksetzen". The last visible column can't be hidden. Closes on Fertig/✕/Escape/click outside (capture-phase listener, because row 🔊 buttons call `stopPropagation()`; uses `composedPath()` because ▲/▼ re-render the list mid-click).
+- The table is now driven by one `COLUMN_DEFS` array (label, cell renderer, export labels/values). Header (letter row A,B,C… + label row) is generated from the visible columns in the chosen order; body cells follow the same order. Layout is saved in `localStorage` (`excel_sheet_columns_v1`, try/catch-wrapped — a per-browser convenience, falls back to defaults), merged against `COLUMN_DEFS` so added/removed columns in future don't break saved layouts.
+- **Export CSV / Copy for Excel now write exactly the visible columns in the chosen order** (Tamil column exports as two fields: meaning + transliteration).
+- **Filters**: Level chips generated with counts (B1 includes B1.1/B1.2; new "Ohne Level"); new Thema dropdown (built from data, with counts and "Ohne Thema"); new "🔽 Spaltenfilter" row with a text filter under every visible column (combines with all other filters; Tamil filter also matches transliteration; the header isn't re-rendered while typing, so focus is kept); "✖ Filter zurücksetzen" clears everything.
+- Row builder no longer invents levels/topics: unknown level shows `?`, missing topic shows `—`.
+- Robustness: cell text is HTML-escaped; 🔊 buttons read the word from the row by index instead of inlining it in `onclick` (a word with an apostrophe used to break the handler); the empty-state message spans the visible column count.
+- **Phone layout fix (pre-existing, but it made the new button untappable)**: the shared `.app-main`/`.app-content` flex items defaulted to `min-width:auto`, so the ~2,265px table pushed the whole page to 1,200px wide on a 375px phone, cutting off the ribbon and filters. Added `min-width:0` for this page only, so the table scrolls inside its own frame.
+
+#### Correction to my own earlier work (Task 24 Phase 4 / Task 26)
+Phase 4 gave all 496 new nouns `topic: "gesellschaft"` and Task 26 gave the 70 rescued nouns `topic: "alltag"`, justified as "topic is unused". That was true for `Nomen_Trainer.html`, but **this Excel page displays `topic` as "Thema"** — so a duck (`Ente`) and a cup (`Tasse`) were labelled "Gesellschaft", and a Thema filter would have made that worse. Checked which pages read the nouns' `topic` (only this one), then cleared those 566 placeholder values to `""` in all three `NOUNS` copies (`Nomen_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`). They now show "—" / "Ohne Thema" instead of a wrong category. Real categorisation of those 566 nouns is still open.
+
+#### Known issue, flagged not fixed
+For nouns and adjectives the row builder **generates verb-style fields from the word stem** — e.g. Präteritum "achtte"/Perfekt "hat geacht" for the number *acht*, "achthaft, achtlos, achtreich" as its adjective forms, and similar fake Präsens/Verb/Sister-Verb values. These are not real German. Pre-existing and out of scope for this task, but now that users choose which fields to see it matters more; the "Nomen lernen"/"Adjektive" presets avoid those columns.
+
+#### Testing
+- `node --check` on every script block.
+- 42-check Playwright suite with real clicks/typing/dragging: default layout; hide via checkbox (header + body stay aligned); ▲ move; drag-and-drop to first position; persistence across reload; presets; last-column lock; reset; Escape and click-outside close; export headers + actual downloaded CSV header match the visible order; Level B1 = B1+B1.1+B1.2, "Ohne Level"; Thema filter; column filter keeps focus while typing and combines with chips; Tamil filter matches transliteration; reset restores all 2,481 rows; empty-state colspan; phone (375px): page width 375, chooser fits on screen, ▲ works by tap; zero page errors. Screenshots checked for desktop, phone and dark mode.
+- Full-site sweep: 26 pages, zero page errors. `sw.js` regenerated.
+
+#### Files Changed
+- `Deutsch_Wortschatz_Excel_Sheet.html` (column chooser, filters, export, phone layout, topic/level honesty)
+- `Nomen_Trainer.html`, `Wortschatz_Master_Grid.html` (566 placeholder noun topics cleared — data only)
+- `sw.js`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-23 (Task 26) — Fixed the remaining open item from Task 25: 99 non-adjective entries contaminating the `ADJS` array turned out to be 73 genuinely missing words, now correctly homed
 
 #### Task
