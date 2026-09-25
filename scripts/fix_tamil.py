@@ -16,7 +16,7 @@ Run: python3 scripts/fix_tamil.py            (idempotent)
 import json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_freq_ranks import array_spans, ARRAYS  # noqa: E402
+from build_freq_ranks import ARRAYS, array_spans, data_files, dump_entries  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -116,7 +116,7 @@ KIND = {'VERBS': 'v', 'ALL_VERBS': 'v', 'VERBS_ALL': 'v', 'NOUNS': 'n', 'ADJS': 
 def main():
     check = '--check' in sys.argv
     changed_total, wrong = 0, []
-    for fname in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+    for fname in data_files():
         path = os.path.join(ROOT, fname)
         html = open(path, encoding='utf-8').read()
         spans = sorted(array_spans(html), key=lambda x: -x[1])
@@ -141,7 +141,7 @@ def main():
                     entry['ta_translit'] = translit(fixes[w])
                     n += 1
             if n:
-                html = html[:s] + json.dumps(entries, ensure_ascii=False, separators=(',', ':')) + html[e:]
+                html = html[:s] + dump_entries(entries, html[s:e]) + html[e:]
                 changed = True
                 changed_total += n
                 print(f'{fname}: {name} {n} Tamil values corrected')

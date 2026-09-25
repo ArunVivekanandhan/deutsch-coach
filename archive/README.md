@@ -29,3 +29,5 @@ project policy, in case any contains logic worth referencing later.
 
 Reusable maintenance tooling that's still actually used lives in
 `/scripts` (`build.py`, `sync_data.py`) at the repo root, not here.
+
+- `data_old_json/` + `sync_data_old.py` (archived in Task 38): an old 503-verb JSON copy of the word lists and the script that pasted it into every page. Replaced by `js/word-data.js`; running the old script would have overwritten newer data.

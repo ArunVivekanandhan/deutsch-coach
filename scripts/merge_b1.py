@@ -8,7 +8,7 @@ so every existing key stays byte-identical. Idempotent.   Run: python3 scripts/m
 import json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_freq_ranks import array_spans  # noqa: E402
+from build_freq_ranks import array_spans, data_files, dump_entries  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OLD = ('B1.1', 'B1.2')
@@ -16,7 +16,7 @@ OLD = ('B1.1', 'B1.2')
 
 def main():
     check, found, total = '--check' in sys.argv, [], 0
-    for fname in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+    for fname in data_files():
         path = os.path.join(ROOT, fname)
         html = open(path, encoding='utf-8').read()
         changed = False
@@ -33,7 +33,7 @@ def main():
                     entry['level'] = 'B1'
                     n += 1
             if n and not check:
-                html = html[:s] + json.dumps(entries, ensure_ascii=False, separators=(',', ':')) + html[e:]
+                html = html[:s] + dump_entries(entries, html[s:e]) + html[e:]
                 changed = True
                 total += n
                 print(f'{fname}: {name} {n} entries B1.1/B1.2 -> B1')

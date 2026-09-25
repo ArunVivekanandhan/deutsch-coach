@@ -116,9 +116,21 @@ def as_standard(entry, kind):
     return entry
 
 
+def data_files():
+    """Files holding word arrays: the shared js/word-data.js and the pages (home SYNCED_WORDS …)."""
+    return ['js/word-data.js'] + sorted(f for f in os.listdir(ROOT) if f.endswith('.html'))
+
+
+def dump_entries(entries, old):
+    """JSON for a rewritten array, keeping the file's layout (js/word-data.js has one entry per line)."""
+    if '\n{' in old:
+        return '[\n' + ',\n'.join(json.dumps(e, ensure_ascii=False, separators=(',', ':')) for e in entries) + '\n]'
+    return json.dumps(entries, ensure_ascii=False, separators=(',', ':'))
+
+
 def array_spans(html):
     for name in ARRAYS:
-        for m in re.finditer(r'(?:const|let|var) ' + name + r' = \[', html):
+        for m in re.finditer(r'(?:(?:const|let|var) |DC_WORDS\.)' + name + r' = \[', html):
             s = m.end() - 1
             depth, in_str, esc = 0, False, False
             for i in range(s, len(html)):
@@ -143,7 +155,7 @@ def main():
     counters = {'v': verb_count, 'n': noun_count, 'a': adj_count}
     kind_of_cat = {'v': 'v', 'n': 'n', 'adj': 'a'}
     report = []
-    for fname in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+    for fname in data_files():
         path = os.path.join(ROOT, fname)
         html = open(path, encoding='utf-8').read()
         spans = sorted(array_spans(html), key=lambda x: -x[1])   # rewrite from the end backwards
@@ -167,7 +179,7 @@ def main():
                     entry['level'] = level_from_rank(rank)
                     entry['levelEst'] = True
                     estimated += 1
-            html = html[:s] + json.dumps(entries, ensure_ascii=False, separators=(',', ':')) + html[e:]
+            html = html[:s] + dump_entries(entries, html[s:e]) + html[e:]
             changed = True
             report.append(f'{fname}: {name} {len(entries)} entries, {estimated} estimated levels')
         if changed:

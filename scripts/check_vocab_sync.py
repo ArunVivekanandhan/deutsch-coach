@@ -1,36 +1,31 @@
 # -*- coding: utf-8 -*-
-"""Check that every copy of the word lists matches its canonical trainer list.
+"""Check the shared word lists (js/word-data.js) and that no page carries its own copy again.
 
-The app has no shared data module: VERBS/NOUNS/ADJS are copied into several pages. Canonical:
-  VERBS -> Verb_Transformation_Trainer.html   NOUNS -> Nomen_Trainer.html
-  ADJS  -> Adjektiv_Adverb_Trainer.html
-Each copy must contain exactly the same words with the same field values (a copy may carry
-extra page-specific fields, e.g. ADJS "comp"). The home flashcards must contain every word,
-either in their own lessons or in SYNCED_WORDS.
+Since Task 38 VERBS/NOUNS/ADJS live only in js/word-data.js (DC_WORDS.VERBS / NOUNS / ADJS); every page
+that uses them loads that file. Before, the lists were copied into 8 pages and had to be kept in sync.
+Checks: the three lists parse and have no duplicate words; no page defines a non-empty VERBS / ALL_VERBS /
+VERBS_ALL / NOUNS / ADJS array of its own; every page that reads DC_WORDS loads js/word-data.js; the home
+flashcards contain every word (in their own lessons or in SYNCED_WORDS).
 
-Exit code 1 (with a report) if anything differs.  Run: python3 scripts/check_vocab_sync.py
+Exit code 1 (with a report) if anything is wrong.  Run: python3 scripts/check_vocab_sync.py
 """
 import json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORD_DATA = 'js/word-data.js'
 CANON = {
-    'v': ('Verb_Transformation_Trainer.html', 'VERBS', 'inf'),
-    'n': ('Nomen_Trainer.html', 'NOUNS', 'sg'),
-    'a': ('Adjektiv_Adverb_Trainer.html', 'ADJS', 'w'),
+    'v': (WORD_DATA, 'VERBS', 'inf'),
+    'n': (WORD_DATA, 'NOUNS', 'sg'),
+    'a': (WORD_DATA, 'ADJS', 'w'),
 }
-COPIES = {
-    'v': [('Continuous_Verb_Speaker.html', 'ALL_VERBS'), ('Deutsch_Wortschatz_Excel_Sheet.html', 'VERBS'),
-          ('Verben_Hoeren_EN_DE.html', 'VERBS'), ('Wortschatz_Master_Grid.html', 'VERBS'),
-          ('Thema_Sprech_Trainer.html', 'VERBS_ALL')],
-    'n': [('Deutsch_Wortschatz_Excel_Sheet.html', 'NOUNS'), ('Wortschatz_Master_Grid.html', 'NOUNS')],
-    'a': [('Deutsch_Wortschatz_Excel_Sheet.html', 'ADJS'), ('Wortschatz_Master_Grid.html', 'ADJS')],
-}
+COPIES = {'v': [], 'n': [], 'a': []}   # no copies any more (Task 38)
+PAGE_ARRAYS = ('VERBS', 'ALL_VERBS', 'VERBS_ALL', 'NOUNS', 'ADJS')
 HOME_CAT = {'v': 'v', 'n': 'n', 'a': 'adj'}
 
 
 def load(fname, name):
     html = open(os.path.join(ROOT, fname), encoding='utf-8').read()
-    m = re.search(r'(?:const|let|var) ' + name + r' = \[', html)
+    m = re.search(r'(?:(?:const|let|var) |DC_WORDS\.)' + name + r' = \[', html)
     if not m:
         return None
     s = m.end() - 1
@@ -65,29 +60,29 @@ def main():
     problems = []
     home = home_words()
     for kind, (cfile, cname, key) in CANON.items():
-        canon = {e[key]: e for e in load(cfile, cname)}
-        for fname, name in COPIES[kind]:
-            copy = load(fname, name)
-            if copy is None or copy == 'unparseable':
-                problems.append(f'{fname}: {name} ' + ('not found' if copy is None else 'is not a JSON list'))
-                continue
-            keys = {e[key] for e in copy}
-            missing, extra = set(canon) - keys, keys - set(canon)
-            if missing:
-                problems.append(f'{fname}:{name} missing {len(missing)} words, e.g. {sorted(missing)[:5]}')
-            if extra:
-                problems.append(f'{fname}:{name} has {len(extra)} words not in {cfile}, e.g. {sorted(extra)[:5]}')
-            differ = [e[key] for e in copy if e[key] in canon
-                      and any(canon[e[key]].get(f) != v for f, v in e.items() if f in canon[e[key]])]
-            if differ:
-                problems.append(f'{fname}:{name} {len(differ)} words differ from {cfile}, e.g. {differ[:5]}')
-        lacking = [w for w in canon if re.sub(r'^(der|die|das)\s+', '', w.strip().lower()) not in home]
+        entries = load(cfile, cname)
+        if entries is None or entries == 'unparseable':
+            problems.append(f'{cfile}: {cname} ' + ('not found' if entries is None else 'is not a JSON list'))
+            continue
+        words = [e[key] for e in entries]
+        dup = sorted({w for w in words if words.count(w) > 1})
+        if dup:
+            problems.append(f'{cfile}:{cname} has duplicate words, e.g. {dup[:5]}')
+        lacking = [w for w in words if re.sub(r'^(der|die|das)\s+', '', w.strip().lower()) not in home]
         if lacking:
             problems.append(f'deutsch-coach.html flashcards lack {len(lacking)} {cname} words, e.g. {lacking[:5]}')
+    for fname in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+        html = open(os.path.join(ROOT, fname), encoding='utf-8').read()
+        for name in PAGE_ARRAYS:
+            own = load(fname, name)
+            if isinstance(own, list) and own:
+                problems.append(f'{fname} defines its own {name} ({len(own)} words) - use DC_WORDS.{name} from {WORD_DATA}')
+        if 'DC_WORDS' in html and WORD_DATA not in html:
+            problems.append(f'{fname} reads DC_WORDS but does not load {WORD_DATA}')
     if problems:
-        print('Vocabulary copies are out of sync:\n  ' + '\n  '.join(problems))
+        print('Word lists have problems:\n  ' + '\n  '.join(problems))
         sys.exit(1)
-    print('Vocabulary copies in sync: ' + ', '.join(f'{CANON[k][1]} {len(load(*CANON[k][:2]))}' for k in CANON))
+    print('Word lists OK (' + WORD_DATA + '): ' + ', '.join(f'{CANON[k][1]} {len(load(*CANON[k][:2]))}' for k in CANON))
 
 
 if __name__ == '__main__':
