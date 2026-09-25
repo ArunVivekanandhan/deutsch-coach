@@ -3,7 +3,7 @@
    patterns (pyphen); parts from MemoryTips.wordParts() with all words + Ding roots (TU Chemnitz, GPL-2+) ("ab-" prefix,
    "-ung" suffix, "+s" linking letter, "treiben=meaning@Tamil" root, "~kaufen=meaning@Tamil" related word,
    0 = Grundwort). 3rd field: prefixes with type (u untrennbar, t trennbar, d doppelt, x other). Root meanings + Tamil from scripts/word_parts_meanings.tsv (reviewed; Tamil AI-assisted).
-   2786 words, 1382 split into parts. */
+   2784 words, 1380 split into parts. */
 window.WORD_PARTS = {
 "adj|KI-generiert":["KI-ge·ne·riert",0],
 "adj|abenteuerlich":["aben·teu·er·lich",["Abenteuer=adventure@சாகசம்","-lich"]],
@@ -2152,7 +2152,6 @@ window.WORD_PARTS = {
 "v|beeinflussen":["be·ein·flus·sen",0,["be:u"]],
 "v|beenden":["be·en·den",["be-","enden=to end@முடி"],["be:u"]],
 "v|befestigen":["be·fes·ti·gen",["be-","festigen=to strengthen@உறுதிப்படுத்து"],["be:u"]],
-"v|befotografieren":["be·fo·to·gra·fie·ren",["be-","fotografieren=to photograph@புகைப்படம் எடு"],["be:u"]],
 "v|befragen":["be·fra·gen",["be-","fragen=to ask@கேள்"],["be:u"]],
 "v|befähigen":["be·fä·hi·gen",0,["be:u"]],
 "v|befürchten":["be·fürch·ten",["be-","fürchten=to fear@அஞ்சு"],["be:u"]],
@@ -2647,7 +2646,6 @@ window.WORD_PARTS = {
 "v|vererben":["ver·er·ben",["ver-","erben=to inherit@மரபுரிமையாகப் பெறு"],["ver:u"]],
 "v|verfallen":["ver·fal·len",["ver-","fallen=to fall@விழு"],["ver:u"]],
 "v|verfolgen":["ver·fol·gen",["ver-","folgen=to follow@பின்தொடர்"],["ver:u"]],
-"v|verfotografieren":["ver·fo·to·gra·fie·ren",["ver-","fotografieren=to photograph@புகைப்படம் எடு"],["ver:u"]],
 "v|verfügen":["ver·fü·gen",["ver-","fügen=to fit together; to submit@இணை / அடிபணி"],["ver:u"]],
 "v|vergeben":["ver·ge·ben",["ver-","geben=to give@கொடு"],["ver:u"]],
 "v|vergessen":["ver·ges·sen",0,["ver:u"]],
