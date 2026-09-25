@@ -764,6 +764,23 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 36) — Verb flashcards: prefix row, real verb family, correct generated sentences
+
+#### Task
+User (screenshot of the Verb trainer answer for *streiken*): "Here i don't see Inseparable Prefix".
+
+#### What changed (`Verb_Transformation_Trainer.html`)
+- The answer box has a **Präfix** row under the infinitive: prefix badge(s) (🛡️ untrennbar / 🚀 trennbar / 🔀 doppelt) with the rule in English and Tamil, both prefixes for double ones (anerkennen: an- trennbar + er- untrennbar), or "kein Präfix — einfaches Verb (Perfekt mit ge-: hat gestreikt)". Same classification as every other page (`MemoryTips.prefixInfo`, js/word-parts.js).
+- 9-step memory system, grammar hook: uses that classification too, and says "No prefix" for simple verbs.
+- **Word family** listed invented verbs: prefixes were glued onto the root with invented meanings ("abstreiken — to finish / copy / detach strike", "verstreiken"). Now it lists only verbs **from the verb list** built on the same base verb, each with its real English/Tamil meaning and prefix badge (stehen → bestehen 🛡️, verstehen 🛡️, entstehen 🛡️, aufstehen 🚀, zustehen 🚀 …); if there is none it says so. The invented "-bar / -end" adjectives ("streikbar", "to strike/be on strikeing") are replaced by the Partizip I, which exists for every verb.
+- Generated sentences for verbs without a curated entry were ungrammatical ("Wir haben gestern gestreikt können", "when you hat gestreikt", separable Präteritum labelled Präsens) — a regex written as `\\s` never matched. Now: "Ich möchte heute streiken." · "Gestern habe ich gestreikt." · "Er streikte früher oft." (separable particle at the end: "Er erkannte früher oft an.", reflexive: "Ich möchte mich heute bemühen."). The Perfekt multiple-choice distractor had the same regex bug.
+- Known data issue, not changed: the verb list contains `befotografieren` and `verfotografieren`, marked in their own English as "uncertain - not a standard dictionary word".
+
+#### Testing
+6 verbs (no prefix, untrennbar, trennbar, reflexive, double prefix, -ieren): prefix row, family, grammar hook, sentences and situations checked; UI reveal in a live session; screenshots at phone width; prefix suite, audio suite, `build.py` pass.
+
+---
+
 ### 2026-09-25 (Task 35) — Auto-Audio switch, English/Tamil → Deutsch default, dark mode fix, Übersetzer page
 
 #### Task

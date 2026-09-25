@@ -1054,40 +1054,46 @@ const PREFIX_MEANINGS = {
   "ent": { en: "to escape / originate", ta: "தப்ப / உருவாக" }
 };
 
-function getFamilyRelatedWithMeanings(inf, baseRoot, en, ta) {
-  const lower = (inf || '').toLowerCase().trim();
-  const root = (baseRoot || lower.replace(/^(ab|an|auf|aus|be|ein|er|ge|mit|nach|ver|vor|zer|zu|ent|emp|miss)/, '')).toLowerCase().trim();
-
-  // 1. Direct dictionary match
-  if (KNOWN_SISTER_VERBS[lower]) {
-    return KNOWN_SISTER_VERBS[lower].map(s => `${s.v} (${s.en} - ${s.ta})`).join(' · ');
+/* Verb family from the verb list itself: verbs built on the same base verb (stehen → aufstehen, verstehen,
+   bestehen …), each with its real meaning and its prefix type (untrennbar / trennbar). Nothing is generated:
+   gluing prefixes onto a root used to invent verbs ("abstreiken", "verstreiken"). */
+function verbBare(inf) { return String(inf || '').replace(/^sich\s+/, '').toLowerCase().trim(); }
+function verbPrefixes(inf) { return (typeof MemoryTips !== 'undefined') ? MemoryTips.prefixInfo('v', inf).filter(x => x.type !== 'x') : []; }
+function verbFamily(inf) {
+  const me = verbBare(inf);
+  const byBare = new Map((VERBS || []).map(v => [verbBare(v.inf), v]));
+  let base = me, rest = me;
+  for (const x of verbPrefixes(inf)) {                 // anerkennen → an + er → kennen
+    if (!rest.startsWith(x.p)) break;
+    rest = rest.slice(x.p.length);
+    if (byBare.has(rest)) base = rest;
   }
-  if (KNOWN_SISTER_VERBS[root]) {
-    const list = KNOWN_SISTER_VERBS[root].filter(s => s.v !== lower);
-    if (list.length > 0) {
-      const sisters = list.map(s => `${s.v} (${s.en} - ${s.ta})`);
-      if (root !== lower) sisters.unshift(`Base: ${root} (core verb)`);
-      return sisters.join(' · ');
-    }
+  const out = [];
+  if (base !== me && byBare.has(base)) out.push(byBare.get(base));
+  for (const v of VERBS || []) {
+    const b = verbBare(v.inf);
+    if (b === me || b === base || !b.endsWith(base) || out.includes(v)) continue;
+    const pfx = verbPrefixes(v.inf).map(x => x.p).join('');
+    if (pfx && pfx === b.slice(0, b.length - base.length)) out.push(v);
   }
-
-  // 2. Dynamic generation with prefix meanings
-  const candidatePrefixes = ['ab', 'be', 'ver', 'an', 'auf', 'aus', 'ein', 'er', 'mit'];
-  const generated = [];
-
-  for (const pfx of candidatePrefixes) {
-    if (!lower.startsWith(pfx)) {
-      const verbCandidate = pfx + root;
-      const pInfo = PREFIX_MEANINGS[pfx];
-      const enAction = en ? en.replace(/^to\s+/,'') : 'action';
-      const enMeaning = pInfo ? `${pInfo.en} ${enAction}` : 'related action';
-      const taMeaning = pInfo ? pInfo.ta : 'தொடர்புடைய செயல்';
-      generated.push(`${verbCandidate} (${enMeaning} - ${taMeaning})`);
-      if (generated.length >= 3) break;
-    }
-  }
-
-  return generated.join(' · ');
+  return out.slice(0, 12);
+}
+function verbFamilyHTML(inf) {
+  const fam = verbFamily(inf);
+  if (!fam.length) return `<span style="opacity:.75;">— no other verb with „${verbBare(inf)}“ in the list</span>`;
+  return fam.map(v => {
+    const badges = (typeof MemoryTips !== 'undefined') ? MemoryTips.prefixBadgesFor(verbPrefixes(v.inf)) : '';
+    return `<div style="margin:2px 0;"><b>${v.inf}</b> ${badges}<span style="opacity:.85;">${v.en}${v.ta ? ' · ' + v.ta : ''}</span></div>`;
+  }).join('');
+}
+/* Prefix line for the answer: which prefix, untrennbar / trennbar, and what that means for Präsens and Perfekt. */
+function verbPrefixRowHTML(v) {
+  const list = verbPrefixes(v.inf);
+  const small = 'display:block; font-family:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-weight:400; font-size:11.5px; line-height:1.45; margin-top:2px;';
+  const val = list.length && typeof MemoryTips !== 'undefined'
+    ? MemoryTips.prefixBadgesFor(list) + list.map(x => `<span style="${small}">${x.p}-: ${x.info.rule}<br><span lang="ta" style="opacity:.8;">${x.info.ta}</span></span>`).join('')
+    : `<span style="${small} font-size:12.5px;">kein Präfix — einfaches Verb${/\bge/.test(v.perfekt || '') ? ` (Perfekt mit ge-: ${v.perfekt})` : ''}</span>`;
+  return `<div class="formrow" style="align-items:flex-start;"><span class="flabel">Präfix</span><span class="fval" style="text-align:right; max-width:72%;">${val}</span></div>`;
 }
 
 function renderUniversal3StepMemoryHack(v){
@@ -1141,6 +1147,19 @@ function renderUniversal3StepMemoryHack(v){
     memoryLock = 'Focus on the active verb stem "' + (ana.stem || inf) + '" to lock in the meaning: ' + en + ' (' + ta + ').';
   }
 
+  // Correct sentence building blocks (modal + infinitive at the end, Perfekt with ich, Präteritum with the
+  // separable particle at the end and "sich" after the verb).
+  const enBare = String(en).replace(/^to\s+/, '');
+  const refl = /^sich\s+/.test(v.inf);
+  const partizip = perf.replace(/^(hat|ist)\s+/, '').replace(/^sich\s+/, '');
+  const ichPerfekt = perf ? 'Ich ' + (isAuxSein ? 'bin' : 'habe') + (refl ? ' mich' : '') + ' ' + partizip + '.' : '';
+  const ichModal = 'Ich möchte ' + (refl ? 'mich ' : '') + 'heute ' + verbBare(v.inf) + '.';
+  const praetTokens = praet.split(/\s+/).filter(Boolean);
+  const erPraet = praetTokens.length
+    ? 'Er ' + praetTokens[0] + (praetTokens.includes('sich') ? ' sich' : '') + ' früher oft' +
+      praetTokens.slice(1).filter(t => t !== 'sich').map(t => ' ' + t).join('') + '.'
+    : '';
+
   let situations = [];
   if (direct && direct.situations) {
     situations = direct.situations;
@@ -1152,21 +1171,20 @@ function renderUniversal3StepMemoryHack(v){
     ];
   } else {
     situations = [
-      'Everyday life: Using "' + v.inf + '" when you need to ' + en + ' (' + ta + ').',
-      'Past experience: Talking about when you ' + (perf || 'did this action') + '.',
-      'Future plans: Expressing intentions with "Ich möchte gerne ' + v.inf + '..."'
+      'Everyday life: use „' + v.inf + '“ whenever you mean “' + enBare + '”' + (ta ? ' (' + ta + ')' : '') + '.',
+      'Past experience: „' + ichPerfekt + '“ — ' + (enBare ? 'I have done it (' + enBare + ').' : ''),
+      'Future plans: „' + ichModal + '“'
     ];
   }
 
   let familyNoun = direct && direct.family && direct.family.noun 
     ? direct.family.noun 
     : (v.noun ? `${v.noun} (${en} - ${ta})` : `das ${v.inf.charAt(0).toUpperCase() + v.inf.slice(1)} (act of ${en} - ${ta})`);
-  let familyAdj = direct && direct.family && direct.family.adj 
-    ? direct.family.adj 
-    : `${inf.replace(/en$/, '').replace(/n$/, '')}bar (${en}able / feasible - செய்யக்கூடிய), ${inf.replace(/en$/, '').replace(/n$/, '')}end (active ${en}ing - நிகழ்கால நிலை)`;
-  let familyRelated = (direct && direct.family && direct.family.related && direct.family.related.includes('('))
-    ? direct.family.related
-    : getFamilyRelatedWithMeanings(v.inf, ana.root || ana.stem, en, ta);
+  // Partizip I (infinitive + d) exists for every verb; "-bar" adjectives do not, so none are generated.
+  let familyAdj = direct && direct.family && direct.family.adj
+    ? direct.family.adj
+    : `${verbBare(v.inf)}d (Partizip I, used as adjective: „…-ing“)`;
+  const familyRelatedHTML = verbFamilyHTML(v.inf);
 
   let grammarClassText = '';
   if (typ === 'weak') {
@@ -1181,30 +1199,27 @@ function renderUniversal3StepMemoryHack(v){
     ? '🚶 <b>Auxiliary SEIN (ist):</b> Indicates directional movement from Point A to B, or a fundamental change of state.'
     : '⚡ <b>Auxiliary HABEN (hat):</b> Used for transitive actions with direct object (Akkusativ) or stationary states.';
 
+  // Prefix type from js/word-parts.js (the same classification as every other page).
+  const pfxList = verbPrefixes(v.inf);
   let prefixRuleText = '';
-  if (prefixKey && isSeparable) {
-    prefixRuleText = '🚀 <b>Separable Prefix (' + prefixKey + '-):</b> Splits in Präsens/Präteritum (<i>„Er ... ' + prefixKey + '.”</i>) and puts <b>-ge-</b> in the middle for Perfekt: <i>„' + perf + '”</i>.';
-  } else if (prefixKey && !isSeparable) {
-    prefixRuleText = '🛡️ <b>Inseparable Prefix (' + prefixKey + '-):</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> NEVER separate and NEVER take <i>ge-</i> in Perfekt: <i>„' + perf + '”</i>.';
+  if (pfxList.length) {
+    prefixRuleText = pfxList.map(x => x.info.icon + ' <b>' + x.info.en + ' (' + x.p + '-) · ' + x.info.de + ':</b> ' + x.info.rule).join('<br>') +
+      ' → <i>„' + perf + '”</i>';
   } else if (inf.endsWith('ieren')) {
     prefixRuleText = '⚡ <b>-ieren Verb Law:</b> 100% weak, takes regular <b>-te</b> in Past, and NEVER takes <i>ge-</i> in Perfekt (<i>hat ...-iert</i>).';
+  } else {
+    prefixRuleText = '🧱 <b>No prefix:</b> „' + verbBare(v.inf) + '“ is a simple verb — nothing splits off' + (/\bge/.test(perf) ? ', and the Perfekt has <i>ge-</i>' : '') + ': <i>„' + perf + '”</i>.';
   }
 
   let sentences = [];
   if (direct && direct.sentences) {
     sentences = direct.sentences;
-  } else if (prefixKey && isSeparable) {
-    sentences = [
-      { de: 'Ich ' + (praet ? praet.split(' ')[0] : inf.replace(/en$/,'e')) + ' heute pünktlich ' + prefixKey + '.', en: 'I ' + en + ' on time today [Präsens: prefix splits].' },
-      { de: 'Gestern ' + (isAuxSein ? 'bin' : 'habe') + ' ich ' + perf.replace(/^(hat|ist)\\s+/, '') + '.', en: 'Yesterday I ' + en + 'ed [Perfekt: ' + perf + '].' },
-      { de: 'Er ' + (praet ? praet : inf) + ' früher immer gerne.', en: 'He used to ' + en + ' gladly [Präteritum].' }
-    ];
   } else {
     sentences = [
-      { de: 'Ich ' + inf.replace(/en$/,'e').replace(/n$/,'e') + ' gerne jeden Tag.', en: 'I like to ' + en + ' every day.' },
-      { de: 'Wir haben gestern ' + (perf ? perf.replace(/^(hat|ist)\\s+/, '') : inf) + ' können.', en: 'We were able to ' + en + ' yesterday.' },
-      { de: 'Er ' + (praet ? praet : (inf.replace(/en$/,'te'))) + ' die ganze Zeit.', en: 'He ' + en + 'ed the whole time [Präteritum].' }
-    ];
+      { de: ichModal, en: 'I would like to ' + enBare + ' today. [Modalverb + infinitive at the end]' },
+      ichPerfekt ? { de: 'Gestern ' + ichPerfekt.replace(/^Ich (bin|habe)/, (m, a) => a + ' ich').replace(/\.$/, '') + '.', en: 'Yesterday I … (' + enBare + ') [Perfekt: ' + perf + ']' } : null,
+      erPraet ? { de: erPraet, en: 'He often … (' + enBare + ') in the past. [Präteritum' + (praetTokens.length > 1 ? ', ' + praetTokens.slice(1).join(' ') + ' at the end' : '') + ']' } : null
+    ].filter(Boolean);
   }
 
   let confusionObj = direct && direct.confusion ? direct.confusion : (matchedRoot && matchedRoot.conf ? matchedRoot.conf : null);
@@ -1219,7 +1234,7 @@ function renderUniversal3StepMemoryHack(v){
     cloze: 'Ich möchte heute gerne ___ (' + en + ' - Infinitiv).',
     clozeAns: v.inf,
     mc: 'What is the correct Perfekt form of "' + v.inf + '"?',
-    mcOpts: [perf || ('hat ge' + inf), (isAuxSein ? 'hat' : 'ist') + ' ' + (perf ? perf.replace(/^(hat|ist)\\s+/, '') : inf), 'hat ge' + inf + 't'],
+    mcOpts: [perf || ('hat ge' + inf), (isAuxSein ? 'hat' : 'ist') + ' ' + (perf ? perf.replace(/^(hat|ist)\s+/, '') : inf), 'hat ge' + inf + 't'],
     mcAns: perf || ('hat ge' + inf),
     transform: 'Forms of ' + v.inf + ': ' + (praet || inf) + ' (Past) / ' + (perf || ('hat ge' + inf)) + ' (Perfekt)'
   };
@@ -1257,7 +1272,8 @@ function renderUniversal3StepMemoryHack(v){
         <div style="background:var(--paper); padding:8px 10px; border-radius:4px; font-size:12px; line-height:1.6;">
           <div>🏛️ <b>Noun:</b> <code>${familyNoun}</code></div>
           <div>🎨 <b>Adjective:</b> <code>${familyAdj}</code></div>
-          <div>🌲 <b>Sister / Related:</b> <code>${familyRelated}</code></div>
+          <div>🌲 <b>Same base verb (from the verb list):</b></div>
+          <div style="margin-left:14px; font-family:inherit;">${familyRelatedHTML}</div>
         </div>
       </div>
 
@@ -1705,6 +1721,7 @@ function renderCard(){
     revealCoreHTML = `
       <div class="revealbox">
         <div class="formrow"><span class="flabel">Verb</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>
+        ${verbPrefixRowHTML(v)}
         <div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
@@ -1747,6 +1764,7 @@ function renderCard(){
     revealCoreHTML = `
       <div class="revealbox">
         <div class="formrow"><span class="flabel">Infinitive</span><span class="fval">${v.inf}${speakBtn(v.inf,'Listen to verb')}</span></div>
+        ${verbPrefixRowHTML(v)}
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${v.noun ? `<div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>` : ''}
