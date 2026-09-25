@@ -240,7 +240,9 @@
       font-size: 11px;
       font-weight: 600;
       color: var(--ink-muted);
-      white-space: nowrap;
+      white-space: normal;          /* wraps on phones (a long line widened the whole page) */
+      overflow-wrap: anywhere;
+      min-width: 0;
     }
 
     /* Quick Filter Chips */
@@ -278,7 +280,15 @@
       overflow: auto;
       position: relative;
       background: var(--card-bg);
+      /* The sheet scrolls inside this box (both directions, header row stays on top). Without a height the
+         box grew to all 2,479 rows, the page scrolled instead, and the sideways scrollbar sat below the last
+         row — so only the first columns (A–F) could be reached. */
+      height: calc(100vh - 72px);
+      height: calc(100dvh - 72px);
+      min-height: 360px;
+      overscroll-behavior-x: contain;
     }
+    .sheet-scroll-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-soft); margin-left: 8px; }
 
     /* Excel Table */
     .excel-table {
@@ -1663,7 +1673,9 @@ if (document.readyState === 'loading') {
     const total = FILTERED_ROWS.length;
     const cols = visibleColumns();
 
-    document.getElementById('statsBadge').textContent = `Gefiltert: ${total} von ${ALL_ROWS.length} Zeilen`;
+    const nCols = visibleColumns().length;
+    const lastCol = nCols <= 26 ? String.fromCharCode(64 + nCols) : String(nCols);
+    document.getElementById('statsBadge').textContent = `Gefiltert: ${total} von ${ALL_ROWS.length} Zeilen · ${nCols} Spalten (A–${lastCol}) ↔ seitlich wischen`;
     document.getElementById('statusRowInfo').textContent = `${total} Zeilen angezeigt · ${cols.length} von ${COLUMN_DEFS.length} Spalten`;
 
     document.querySelectorAll('.sort-indicator').forEach(el => el.textContent = '');

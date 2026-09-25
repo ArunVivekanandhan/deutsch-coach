@@ -758,6 +758,19 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 39) — Excel sheet: all columns reachable again
+
+#### Task
+User: "In excel page I can see up to F column. Why it not showing".
+
+#### Cause and fix (`Deutsch_Wortschatz_Excel_Sheet.html`)
+- `.sheet-viewport` is meant to scroll the table inside itself (both directions, sticky header row), but it had no height inside the app layout, so it grew to all 2,479 rows (84,676 px). The page scrolled instead of the sheet, and the sideways scrollbar sat below the last row — only the first columns (A–F on a tablet) were reachable. Now `height: calc(100dvh - 72px)` (min 360 px): the sheet fills the screen and scrolls sideways with the scrollbar / a finger swipe.
+- The status line says how many columns there are: "… · 19 Spalten (A–S) ↔ seitlich wischen" (wraps on phones — a no-wrap version widened the page to 593 px on a 412 px phone).
+- Tested: 360/412/800/1280 px — no page overflow, swipe/scroll reaches column S; Excel suites, column reading, touch and mouse column drag pass. (`test_excel_cols.py` from Task 27 still expects the old 16-column layout — its failures are identical before and after this change.)
+- GitHub checks (Task 38 workflow) passed on the branch and main.
+
+---
+
 ### 2026-09-25 (Task 38) — Everything from the open list: shared word data, Tamil for every word, example sentences, speaking practice, CI
 
 #### Task
