@@ -82,6 +82,11 @@
   .tx-fb.ok { color: #15803d; } .tx-fb.no { color: #b91c1c; }
   [data-theme="dark"] .tx-fb.ok { color: #4ade80; } [data-theme="dark"] .tx-fb.no { color: #f87171; }
   .tx-note { font-size: 11.5px; color: var(--color-ink-soft); margin-top: 6px; }
+  .tx-sayout { margin-top: 8px; font-size: 14px; line-height: 1.6; }
+  .tx-sayout .ok { color: #15803d; font-weight: 700; } .tx-sayout .no { color: #b91c1c; font-weight: 700; text-decoration: underline dotted; }
+  [data-theme="dark"] .tx-sayout .ok { color: #4ade80; } [data-theme="dark"] .tx-sayout .no { color: #f87171; }
+  .tx-saved li { list-style: none; padding: 6px 0; border-bottom: 1px dashed var(--color-border); display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap; }
+  .tx-saved ul { margin: 6px 0 0; padding: 0; }
   @media (max-width: 600px) { .tx-word { font-size: 24px; } .tx-box { padding: 12px; } }
 </style>
 </head>
@@ -100,6 +105,7 @@
       <button class="tx-btn" type="submit">🔎 Suchen / Übersetzen</button>
     </form>
     <div class="tx-chips" id="txHistory"></div>
+    <details class="tx-saved" id="savedBox" hidden><summary style="cursor:pointer; margin-top:10px; font-weight:700;">⭐ Meine Sätze (<span id="savedCount">0</span>)</summary><ul id="savedList"></ul></details>
   </div>
 
   <div id="txResult"></div>
@@ -290,7 +296,12 @@ function wordDetailHTML(e, label) {
       <span class="tx-tag">${esc(CAT_LABEL[e.c] || e.c)}</span>${e.lv ? `<span class="tx-tag">${esc(e.lv)}</span>` : ''}
       ${e.f ? `<span class="tx-tag" title="Rang in einer deutschen Häufigkeitsliste (kleiner = häufiger)">Häufigkeit #${e.f}</span>` : ''}
       ${label && label !== 'Grundform' ? `<span class="tx-muted">gefunden als: ${esc(label)}</span>` : ''}</div>
-    <div class="tx-mean">🇬🇧 ${esc(e.en || '—')}${e.ta ? `<br><span class="ta" lang="ta">🇮🇳 ${esc(e.ta)}</span>${taMark(e)}` : ''}</div>`;
+    <div class="tx-mean">🇬🇧 ${esc(e.en || '—')}${e.ta ? `<br><span class="ta" lang="ta">🇮🇳 ${esc(e.ta)}</span>${taMark(e)}` : ''}</div>
+    <div class="tx-chips">
+      <button class="tx-btn small" type="button" data-review="${LEX.indexOf(e)}" title="Diese Karte wird in den Lernkarten heute fällig">➕ In meine Wiederholungen</button>
+      <button class="tx-btn small ghost" type="button" data-practice="${esc(say)}">🎙️ Nachsprechen</button>
+    </div>
+    <div class="tx-sayout" data-sayout></div>`;
 
   // forms
   let forms = '';
@@ -317,7 +328,7 @@ function wordDetailHTML(e, label) {
   }
   if (e.ex || e.mn) {
     h += `<div class="tx-section"><h3>Beispiel &amp; Notiz</h3>
-      ${e.ex ? `<div class="tx-tip">„${esc(e.ex)}“ ${speakBtnHTML(e.ex)}${e.exen ? `<br><span class="tx-muted">↳ ${esc(e.exen)}</span>` : ''}${e.exta ? `<br><span class="tx-muted" lang="ta">↳ ${esc(e.exta)}</span>` : ''}${e.exai ? `<br><span class="tx-muted" title="AI-drafted example sentence, checked">🤖 KI-Beispiel</span>` : ''}</div>` : ''}
+      ${e.ex ? `<div class="tx-tip">„${esc(e.ex)}“ ${speakBtnHTML(e.ex)} <button class="tx-speak" type="button" data-practice="${esc(e.ex)}" title="Nachsprechen">🎙️</button><div class="tx-sayout" data-sayout></div>${e.exen ? `<br><span class="tx-muted">↳ ${esc(e.exen)}</span>` : ''}${e.exta ? `<br><span class="tx-muted" lang="ta">↳ ${esc(e.exta)}</span>` : ''}${e.exai ? `<br><span class="tx-muted" title="AI-drafted example sentence, checked">🤖 KI-Beispiel</span>` : ''}</div>` : ''}
       ${e.mn ? `<div class="tx-tip">${e.mn}</div>` : ''}</div>`;   // mn: app's own note (may contain <b>)
   }
   const fam = familyOf(e);
@@ -366,6 +377,11 @@ function sentenceHTML(raw) {
   let h = `<div class="tx-box" id="sentBox"><div class="tx-head"><b style="font-size:17px;">📝 Satz</b>
     <span class="tx-tag">${tamil ? 'Tamil → Deutsch' : german ? 'Deutsch → English / தமிழ்' : 'English → Deutsch'}</span></div>
     <div class="tx-mean" style="font-size:18px;">„${esc(raw.trim())}“ ${german ? speakBtnHTML(raw.trim()) : ''}</div>
+    <div class="tx-chips">
+      <button class="tx-btn small" type="button" data-savesent="${esc(raw.trim())}">⭐ Satz speichern</button>
+      ${german ? `<button class="tx-btn small ghost" type="button" data-practice="${esc(raw.trim())}">🎙️ Nachsprechen</button>` : ''}
+    </div>
+    <div class="tx-sayout" data-sayout></div>
     <div class="tx-section"><h3>Übersetzung</h3><div id="sentAI" class="tx-ai-out tx-muted">${dcAIConfigured() ? '⏳ KI übersetzt …' : 'Für eine ganze Übersetzung KI unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> einrichten. Unten: Wort-für-Wort-Hilfe aus der App (keine vollständige Übersetzung).'}</div></div>`;
   if (german && !tamil) {
     const g = toks.map(t => glossToken(t, toks));
@@ -459,6 +475,7 @@ async function translateSentence(raw) {
   try {
     const txt = await dcCallAI([{ role: 'system', content: sys }, { role: 'user', content: raw }], { temperature: 0.2 });
     const j = parseJSON(txt);
+    if (j) lastTranslation[raw.trim()] = j;
     out.style.whiteSpace = 'normal';
     if (j && (j.de || j.en)) {
       out.classList.remove('tx-muted');
@@ -469,6 +486,7 @@ async function translateSentence(raw) {
     } else { out.classList.remove('tx-muted'); out.style.whiteSpace = 'pre-wrap'; out.innerHTML = mdLite(txt) + '<div class="tx-note">🤖 KI-Übersetzung — kann Fehler enthalten.</div>'; }
   } catch (err) { out.textContent = '❌ ' + err.message; }
 }
+const lastTranslation = {};
 function parseJSON(txt) {
   const s = String(txt).replace(/```(?:json)?/g, '');
   const i = s.indexOf('{'), j = s.lastIndexOf('}');
@@ -605,6 +623,75 @@ function run(raw, push) {
   window.scrollTo({ top: 0 });
 }
 
+/* ---------- save to the flashcard reviews (deutsch-coach.html picks them up on its next load) ---------- */
+function requestReview(e) {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('dc_review_requests') || '[]'); } catch (err) {}
+  if (!list.some(x => x.c === e.c && x.w === e.w)) list.push({ c: e.c, w: e.w, a: e.a || '', t: Date.now() });
+  try { localStorage.setItem('dc_review_requests', JSON.stringify(list)); } catch (err) { return false; }
+  return true;
+}
+
+/* ---------- saved sentences (this browser) ---------- */
+function loadSaved() { try { return JSON.parse(localStorage.getItem('dc_tx_saved_sentences') || '[]'); } catch (e) { return []; } }
+function storeSaved(list) { try { localStorage.setItem('dc_tx_saved_sentences', JSON.stringify(list)); } catch (e) {} renderSaved(); }
+function saveSentence(text) {
+  const t = lastTranslation[text] || {};
+  const list = loadSaved().filter(x => x.de !== text);
+  list.unshift({ de: text, en: t.en || '', ta: t.ta || '', fix: t.de && t.de !== text ? t.de : '', d: new Date().toISOString().slice(0, 10) });
+  storeSaved(list.slice(0, 200));
+}
+function renderSaved() {
+  const list = loadSaved();
+  document.getElementById('savedBox').hidden = !list.length;
+  document.getElementById('savedCount').textContent = list.length;
+  document.getElementById('savedList').innerHTML = list.map((x, i) => `<li><div style="flex:1 1 240px;"><b>„${esc(x.de)}“</b>
+      ${x.fix ? `<br><span class="tx-muted">✔ korrigiert: ${esc(x.fix)}</span>` : ''}${x.en ? `<br><span class="tx-muted">🇬🇧 ${esc(x.en)}</span>` : ''}${x.ta ? `<br><span class="tx-muted" lang="ta">🇮🇳 ${esc(x.ta)} 🤖</span>` : ''}
+      <div class="tx-sayout" data-sayout></div></div>
+      <span>${speakBtnHTML(x.fix || x.de)} <button class="tx-speak" type="button" data-practice="${esc(x.fix || x.de)}" title="Nachsprechen">🎙️</button>
+      <button class="tx-speak" type="button" data-hist="${esc(x.de)}" title="Öffnen">🔎</button>
+      <button class="tx-speak" type="button" data-delsaved="${i}" title="Löschen">🗑</button></span></li>`).join('');
+}
+
+/* ---------- speaking practice: say it, the browser listens (de-DE), every word is checked ---------- */
+// Numbers are compared as words: the text may say "7" while the recogniser hears "sieben" (or the other way round).
+const NUM_WORDS = ['null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf',
+  'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn', 'zwanzig'];
+const TENS = { 30: 'dreißig', 40: 'vierzig', 50: 'fünfzig', 60: 'sechzig', 70: 'siebzig', 80: 'achtzig', 90: 'neunzig', 100: 'hundert' };
+function speechWords(s) {
+  return String(s || '').toLowerCase().replace(/[„“"'.,!?;:()…-]/g, ' ').split(/\s+/).filter(Boolean)
+    .map(w => /^\d+$/.test(w) ? (NUM_WORDS[+w] || TENS[+w] || w) : w);
+}
+function speechScore(target, heard) {
+  const a = speechWords(target), b = speechWords(heard);
+  const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));      // longest common subsequence
+  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--)
+    dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const ok = new Array(a.length).fill(false);
+  for (let i = 0, j = 0; i < a.length && j < b.length;) {
+    if (a[i] === b[j]) { ok[i] = true; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++;
+  }
+  return { words: a, ok, score: a.length ? Math.round(100 * ok.filter(Boolean).length / a.length) : 0 };
+}
+function practiceSpeak(target, out) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { out.innerHTML = '<span class="tx-muted">🎙️ Spracherkennung gibt es in diesem Browser nicht (Chrome / Edge / Android-Chrome verwenden).</span>'; return; }
+  let rec;
+  try { rec = new SR(); } catch (e) { out.textContent = '❌ ' + e.message; return; }
+  rec.lang = 'de-DE'; rec.interimResults = false; rec.maxAlternatives = 3;
+  out.innerHTML = `🎙️ <b>Sprich jetzt:</b> „${esc(target)}“ …`;
+  rec.onresult = ev => {
+    const alts = Array.from(ev.results[0]).map(x => x.transcript);
+    const best = alts.map(h => ({ h, r: speechScore(target, h) })).sort((x, y) => y.r.score - x.r.score)[0];
+    const r = best.r;
+    const verdict = r.score >= 90 ? '🌟 Sehr gut!' : r.score >= 70 ? '👍 Gut — fast alles verstanden.' : '🔁 Noch einmal langsam versuchen.';
+    out.innerHTML = `<div>${r.words.map((w, i) => `<span class="${r.ok[i] ? 'ok' : 'no'}">${esc(w)}</span>`).join(' ')}</div>
+      <div><b>${r.score}%</b> ${verdict}</div><div class="tx-muted">Gehört: „${esc(best.h)}“</div>`;
+  };
+  rec.onerror = ev => { out.innerHTML = '❌ ' + (ev.error === 'not-allowed' ? 'Mikrofon nicht erlaubt — im Browser erlauben.' : ev.error === 'no-speech' ? 'Nichts gehört — bitte noch einmal.' : esc(ev.error)); };
+  try { rec.start(); } catch (e) { out.textContent = '❌ ' + e.message; }
+}
+
 /* history (per browser) */
 function loadHistory() { try { return JSON.parse(localStorage.getItem('dc_tx_history') || '[]'); } catch (e) { return []; } }
 function saveHistory(q) {
@@ -624,7 +711,24 @@ document.addEventListener('click', ev => {
   const open = ev.target.closest('[data-open]');
   if (open) { openEntry(+open.dataset.open, open.dataset.label || ''); return; }
   const hist = ev.target.closest('[data-hist]');
-  if (hist) { document.getElementById('txInput').value = hist.dataset.hist; run(hist.dataset.hist, true); }
+  if (hist) { document.getElementById('txInput').value = hist.dataset.hist; run(hist.dataset.hist, true); return; }
+  const rv = ev.target.closest('[data-review]');
+  if (rv) {
+    const ok = requestReview(LEX[+rv.dataset.review]);
+    rv.textContent = ok ? '✓ In den Wiederholungen (Lernkarten → fällig heute)' : '❌ Speichern nicht möglich';
+    rv.disabled = true; return;
+  }
+  const pr = ev.target.closest('[data-practice]');
+  if (pr) {
+    const box = pr.closest('.tx-tip, li, .tx-box');
+    const out = (box && box.querySelector('[data-sayout]')) || pr.parentElement.nextElementSibling;
+    if (out) practiceSpeak(pr.dataset.practice, out);
+    return;
+  }
+  const sv = ev.target.closest('[data-savesent]');
+  if (sv) { saveSentence(sv.dataset.savesent); sv.textContent = '✓ Gespeichert (⭐ Meine Sätze)'; sv.disabled = true; return; }
+  const del = ev.target.closest('[data-delsaved]');
+  if (del) { const l = loadSaved(); l.splice(+del.dataset.delsaved, 1); storeSaved(l); }
 });
 document.getElementById('txForm').onsubmit = ev => { ev.preventDefault(); run(document.getElementById('txInput').value, true); };
 document.getElementById('txInput').addEventListener('keydown', ev => {
@@ -637,6 +741,7 @@ document.getElementById('quizOffline').onclick = () => { const qs = offlineQuest
 document.getElementById('quizAI').onclick = aiQuestions;
 
 renderHistory();
+renderSaved();
 const q0 = new URLSearchParams(location.search).get('q');
 if (q0) { document.getElementById('txInput').value = q0; run(q0, false); }
 </script>

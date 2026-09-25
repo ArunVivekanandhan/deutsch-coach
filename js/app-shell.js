@@ -547,6 +547,17 @@ function dcTaMark(e) {
 function dcTaMarkText(e) { return dcTaIsAI(e) ? (e.ta_src === 'ai?' ? ' 🤖?' : ' 🤖') : ''; }
 window.dcTaIsAI = dcTaIsAI; window.dcTaMark = dcTaMark; window.dcTaMarkText = dcTaMarkText;
 
+// ---- Link from any word to the Übersetzer & Wort-Explorer (all details, AI questions, practice).
+function dcTranslatorLink(word, compact) {
+    const w = String(word || '').replace(/\([^)]*\)/g, '').trim();
+    if (!w) return '';
+    const href = 'Uebersetzer.html?q=' + encodeURIComponent(w);
+    return compact
+        ? `<a class="dc-tx-link" href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Im Übersetzer öffnen: alle Details, KI fragen, üben" style="text-decoration:none; margin-left:4px;">🌐</a>`
+        : `<div class="dc-tx-link" style="margin-top:6px; font-size:12.5px; text-align:center;"><a href="${href}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🌐 Alle Details · KI fragen · üben (Übersetzer)</a></div>`;
+}
+window.dcTranslatorLink = dcTranslatorLink;
+
 // ---- Auto-audio switch for flashcards (home + Verb/Nomen/Adjektiv trainers). One key, de_auto_audio, is
 // shared with the Einstellungen page; switching it off also stops the tense auto-read and any speech in progress.
 function dcAutoAudioOn() { try { return localStorage.getItem('de_auto_audio') === 'true'; } catch (e) { return false; } }

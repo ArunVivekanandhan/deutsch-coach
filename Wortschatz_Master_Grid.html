@@ -1600,7 +1600,7 @@
         <div class="col-title">🇬🇧 / 🇮🇳 Meaning</div>
         <div class="meaning-en">
           ${item.meaningEn || '—'}
-          <button class="speaker-btn" onclick="playGermanAudio('${item.primaryWord}', event)" title="German Audio">🔊</button>
+          <button class="speaker-btn" onclick="playGermanAudio('${item.primaryWord}', event)" title="German Audio">🔊</button>${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(item.primaryWord, true) : ''}
         </div>
         <div class="meaning-ta">${item.meaningTa} ${item.meaningTaTranslit ? '(' + item.meaningTaTranslit + ')' : ''}${typeof dcTaMark === 'function' ? dcTaMark(item) : ''}</div>
       </div>

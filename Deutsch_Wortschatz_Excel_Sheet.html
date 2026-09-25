@@ -526,7 +526,7 @@
     .cols-row.dragging { opacity: 0.4; }
     .cols-row.drag-over { border-color: var(--excel-green); box-shadow: 0 -2px 0 var(--excel-green); }
     .cols-pos { width: 18px; text-align: center; color: var(--ink-muted); font-size: 10px; flex-shrink: 0; }
-    .cols-grip { cursor: grab; color: var(--ink-muted); user-select: none; flex-shrink: 0; font-size: 13px; }
+    .cols-grip { cursor: grab; color: var(--ink-muted); user-select: none; flex-shrink: 0; font-size: 13px; touch-action: none; padding: 6px 4px; }
     .cols-label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; cursor: pointer; }
     .cols-move {
       width: 26px; height: 26px; flex-shrink: 0;
@@ -790,7 +790,7 @@
       <span>🧩 Spalten &amp; Reihenfolge</span>
       <button class="cols-move" onclick="toggleColumnModal()" aria-label="Schließen">✕</button>
     </div>
-    <div class="cols-hint">☑ = anzeigen · ⠿ ziehen oder ▲▼ zum Verschieben.<br>Wird in diesem Browser gespeichert und gilt auch für Export/Kopieren und 🎧 Vorlesen (Modus „Wie die Spalten“).</div>
+    <div class="cols-hint">☑ = anzeigen · ⠿ ziehen (auch mit dem Finger) oder ▲▼ zum Verschieben.<br>Wird in diesem Browser gespeichert und gilt auch für Export/Kopieren und 🎧 Vorlesen (Modus „Wie die Spalten“).</div>
     <div class="cols-presets" id="colsPresets"></div>
     <ul class="cols-list" id="colsList"></ul>
     <div class="cols-actions">
@@ -1147,7 +1147,7 @@ if (document.readyState === 'loading') {
       cell:(r)=>`<td class="col-en" style="font-weight:600;">${escHTML(r.en)}</td>`,
       exportValues:(r)=>[r.en] },
     { key:'word', label:'Deutsches Wort', exportLabels:['Deutsches Wort'],
-      cell:(r,i)=>`<td class="col-word" style="font-weight:700;">${escHTML(r.word)}${audioBtn(i,'word')}</td>`,
+      cell:(r,i)=>`<td class="col-word" style="font-weight:700;">${escHTML(r.word)}${audioBtn(i,'word')}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(r.word, true) : ''}</td>`,
       exportValues:(r)=>[r.word] },
     { key:'prefix', label:'🛡️ Präfix (trennbar / untrennbar)', exportLabels:['Präfix'],
       cell:(r)=>`<td class="col-prefix" title="${escHTML(r.prefix)}">${typeof MemoryTips !== 'undefined' ? MemoryTips.prefixBadgesFor(r.pfx, { all: true }) : escHTML(r.prefix)}</td>`,
@@ -2154,6 +2154,38 @@ if (document.readyState === 'loading') {
         if (li.dataset.key !== dragKey) li.classList.add('drag-over');
       });
       li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+      // Touch screens have no HTML5 drag and drop: drag the ⠿ handle with a finger (pointer events).
+      const grip = li.querySelector('.cols-grip');
+      if (grip) grip.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse') return;               // mouse uses the native drag above
+        e.preventDefault();
+        const key = li.dataset.key;
+        li.classList.add('dragging');
+        let over = null;
+        const move = ev => {
+          const el = document.elementFromPoint(ev.clientX, ev.clientY);
+          const row = el && el.closest('#colsList li');
+          if (over && over !== row) over.classList.remove('drag-over');
+          over = row && row.dataset.key !== key ? row : null;
+          if (over) over.classList.add('drag-over');
+        };
+        const up = () => {
+          document.removeEventListener('pointermove', move);
+          document.removeEventListener('pointerup', up);
+          document.removeEventListener('pointercancel', up);
+          li.classList.remove('dragging');
+          if (over) {
+            over.classList.remove('drag-over');
+            const from = colOrder.indexOf(key), target = over.dataset.key;
+            colOrder.splice(from, 1);
+            colOrder.splice(colOrder.indexOf(target), 0, key);
+            applyColumnLayout();
+          }
+        };
+        document.addEventListener('pointermove', move);
+        document.addEventListener('pointerup', up);
+        document.addEventListener('pointercancel', up);
+      });
       li.addEventListener('drop', e => {
         e.preventDefault();
         const from = colOrder.indexOf(dragKey);

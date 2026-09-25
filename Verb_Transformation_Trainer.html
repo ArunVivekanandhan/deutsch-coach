@@ -1742,7 +1742,7 @@ function renderCard(){
         <div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
-        ${meaningHTML(v)}
+        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
         ${verbExampleHTML(v)}
         ${transformDiagram(v)}
       </div>`;
@@ -1786,7 +1786,7 @@ function renderCard(){
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${v.noun ? `<div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>` : ''}
-        ${meaningHTML(v)}
+        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
         ${verbExampleHTML(v)}
         ${transformDiagram(v)}
       </div>`;

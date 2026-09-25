@@ -1451,7 +1451,7 @@ add(diff); }
       <div class="revealbox">
         <div class="formrow"><span class="flabel">Artikel + Singular</span><span class="fval">${v.a} ${v.sg}${speakBtn(v.a+' '+v.sg,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
-        ${meaningHTML(v)}
+        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
       </div>`;
     } else {
       promptHTML = reverse ? `
@@ -1491,7 +1491,7 @@ add(diff); }
         <div class="revealbox">
           <div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>
           <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
-          ${meaningHTML(v)}
+          ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
           <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
         </div>`;
     }
@@ -1534,7 +1534,7 @@ add(diff); }
         <div class="formrow"><span class="flabel">Positiv</span><span class="fval">${v.w}${speakBtn(v.w,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Komparativ</span><span class="fval">${v.komp}${speakBtn(v.komp,'Comparative listen')}</span></div>
         <div class="formrow"><span class="flabel">Superlativ</span><span class="fval">${v.sup}${speakBtn(v.sup,'Superlative listen')}</span></div>
-        ${meaningHTML(v)}
+        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
         <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
       </div>`;
   }

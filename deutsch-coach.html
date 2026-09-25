@@ -2583,6 +2583,26 @@ function saveMeta() { dcEngine.saveMeta(); }
 function bumpStreak() { dcEngine.bumpStreak(); }
 function isDue(uid) { return dcEngine.isDue(uid); }
 
+/* Words saved with "➕ In meine Wiederholungen" on the Übersetzer page (localStorage dc_review_requests)
+   become due today here; the request list is emptied once they are applied. */
+window.dcAddedReviews = [];
+(function applyReviewRequests(){
+  let req = [];
+  try { req = JSON.parse(localStorage.getItem('dc_review_requests') || '[]'); } catch(e) { return; }
+  if (!req.length) return;
+  const clean = w => String(w || '').replace(/\([^)]*\)/g, '').trim().toLowerCase();
+  const left = [];
+  req.forEach(r => {
+    const card = ALL_CARDS.find(c => c.cat === r.c && clean(c.w) === clean(r.w)) || ALL_CARDS.find(c => clean(c.w) === clean(r.w));
+    if (!card) { left.push(r); return; }
+    const p = getProgress(card.uid);
+    p.nextDue = dcTodayISO();
+    window.dcAddedReviews.push((card.a ? card.a + ' ' : '') + card.w);
+  });
+  saveProgress();
+  try { localStorage.setItem('dc_review_requests', JSON.stringify(left)); } catch(e) {}
+})();
+
 function recordAnswer(uid, correct, qType) {
   const p = getProgress(uid);
   p.timesSeen++;
@@ -3693,6 +3713,8 @@ function renderDashboard(){
   else if(due>10) coachLine = `🎯 ${due} Wörter sind heute fällig — ein guter Moment für eine Runde Smart Learn.`;
   else if(fresh>0) coachLine = `🧠 ${fresh} neue Wörter warten auf dich in diesem Level.`;
   else coachLine = `⭐ Alles im grünen Bereich — Zeit für ein bisschen Wiederholung zur Festigung.`;
+  if (window.dcAddedReviews && window.dcAddedReviews.length)
+    coachLine = `➕ Aus dem Übersetzer zu deinen Wiederholungen hinzugefügt (heute fällig): <b>${window.dcAddedReviews.slice(0, 6).join(', ')}${window.dcAddedReviews.length > 6 ? ' …' : ''}</b>. ` + coachLine;
 
   const levelRows = LEVELS.map(lvl=>{
     const pct = levelMasteryPct(lvl);
