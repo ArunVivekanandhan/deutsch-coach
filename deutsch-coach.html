@@ -977,7 +977,7 @@
       <div class="letterhead">
         <div>
           <h1>Dein Deutsch-Coach <span style="font-size:13px; font-weight:400; color:var(--ink-soft); display:block;">Your German Practice Coach</span></h1>
-          <div class="sub" id="subtitleLine">A1 · A2 · B1.1 · B1.2</div>
+          <div class="sub" id="subtitleLine">A1 · A2 · B1 · B2 · C1</div>
         </div>
       </div>
       <div class="streakbox" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;; text-align:left;">🔥 <b id="streakNum">0</b> Tage Streak · Days Streak<br><span id="dueTodayNum">0</span> Wörter heute fällig · Words Due</div>
@@ -1052,9 +1052,10 @@ const TOPICS = [
 ];
 const TOPIC_BY_KEY = {}; TOPICS.forEach(t=>TOPIC_BY_KEY[t.key]=t);
 
-// B1.1/B1.2 = textbook lessons; B1/B2/C1 come from the master word lists (some ≈ estimated from word frequency).
-const LEVELS = ["A1","A2","B1.1","B1.2","B1","B2","C1"];
-const LEVEL_LABEL = {A1:"A1", A2:"A2", "B1.1":"B1.1", "B1.2":"B1.2", B1:"B1", B2:"B2", C1:"C1"};
+// B1 = the textbook lessons ("Auf jeden Fall!" B1.1 + B1.2, merged — card.srcLevel keeps the part) + the
+// master-list B1 words; B2/C1 come from the master word lists (some ≈ estimated from word frequency).
+const LEVELS = ["A1","A2","B1","B2","C1"];
+const LEVEL_LABEL = {A1:"A1", A2:"A2", B1:"B1", B2:"B2", C1:"C1"};
 /* A1 still has no real source vocabulary beyond one example word.
    A2 now uses the real "Auf jeden Fall! A2.1" Probekapitel Lernwortschatz
    (Lektion 5, topic Arbeit) — see A2_DATA below. We still do not invent
@@ -2530,6 +2531,15 @@ SYNCED_WORDS.forEach(v=>{
    define a *_DATA array in the same {lesson, sections:[{name, items:[...]}]}
    shape and merge it into ALL_CARDS with a loop like the ones above. */
 
+/* B1.1 / B1.2 (textbook parts) are shown as one level B1. Their card id keeps the old level
+   ("B1.1|behoerden|Anmeldung") so saved review progress is untouched. */
+ALL_CARDS.forEach(c=>{
+  if(c.level==="B1.1" || c.level==="B1.2"){
+    if(!c.uidBase) c.uidBase = c.level+"|"+c.topic+"|"+c.w;
+    c.srcLevel = c.level; c.level = "B1";
+  }
+});
+
 /* Stable unique id per card */
 const seenUid = {};
 ALL_CARDS.forEach(c=>{
@@ -3721,7 +3731,8 @@ let practiceTopic = null; // shared with Speaking/Writing views
 ========================================================= */
 const PACK_SIZE = 20;
 function learnOrder(pool){
-  const key = c => c.freq > 0 ? c.freq : (c.uidBase ? 1e7 : -1);
+  const isMaster = c => String(c.uidBase || '').startsWith('M|');     // master-list card (textbook cards keep their old id)
+  const key = c => c.freq > 0 ? c.freq : (isMaster(c) ? 1e7 : -1);
   return pool.map((c, i) => ({ c, i })).sort((x, y) => key(x.c) - key(y.c) || x.i - y.i).map(o => o.c);
 }
 function isLearned(c){ const p = PROGRESS[c.uid]; return !!p && p.timesSeen > 0 && p.box >= 2; }
@@ -3788,10 +3799,7 @@ function renderLernen(){
     stage.innerHTML = `
       <div class="empty">
         <b>📚 Vokabular für ${currentLevel} folgt bald.</b><br><br>
-        Aktuell enthält die App echten Wortschatz für <b>B1.1</b> und <b>B1.2</b>
-        (aus „Auf jeden Fall!") plus ein Beispielwort auf A1-Niveau.<br><br>
-        Sobald A1/A2-Listen vorliegen, tauchen sie hier automatisch auf —
-        es wird kein Wortschatz erfunden.
+        Für dieses Niveau gibt es noch zu wenige Wörter — es wird kein Wortschatz erfunden.
       </div>
       <button class="bigbtn secondary" id="goAlle">Alle Niveaus anzeigen</button>
     `;
@@ -3873,11 +3881,11 @@ function renderLernen(){
 </script>
 <script>
 function getDefaultLevelForTopic(topic){
-  const prefOrder = ["B1.1","B1.2","A2","A1","B1","B2","C1"];
+  const prefOrder = ["B1","A2","A1","B2","C1"];
   for(const lvl of prefOrder){
     if(ALL_CARDS.some(c=>c.topic===topic && c.level===lvl)) return lvl;
   }
-  return "B1.1";
+  return "B1";
 }
 function topicsWithContent(level){
   const own = TOPICS.filter(t=> poolForLevel(level).some(c=>c.topic===t.key));
@@ -4164,11 +4172,8 @@ const READING_PASSAGES = [
 ];
 
 function readinessPct(){
-  const b1 = levelMasteryPct("B1.1");
-  const b2 = levelMasteryPct("B1.2");
-  const vals = [b1,b2].filter(v=>v!==null);
-  if(vals.length===0) return 0;
-  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  const b1 = levelMasteryPct("B1");
+  return b1 === null ? 0 : b1;
 }
 
 function renderPruefung(){
@@ -4180,7 +4185,7 @@ function renderPruefung(){
       <div class="lbl">B1-WORTSCHATZ-BEREITSCHAFT (interner Schätzwert, kein offizielles telc-Ergebnis)</div>
     </div>
 
-    <button class="bigbtn" id="mixedDrill">📝 Gemischte Prüfungsrunde<span class="subtext">Zufällige Fragetypen aus B1.1 + B1.2</span></button>
+    <button class="bigbtn" id="mixedDrill">📝 Gemischte Prüfungsrunde<span class="subtext">Zufällige Fragetypen aus dem B1-Wortschatz</span></button>
 
     <div class="sectionlabel">📚 B1-Prüfungswerkzeuge &amp; Training</div>
     <div style="display:flex; gap:8px; margin-bottom:12px;">
@@ -4205,7 +4210,7 @@ function renderPruefung(){
   `;
 
   document.getElementById("mixedDrill").onclick = ()=>{
-    const pool = ALL_CARDS.filter(c=>(c.level==="B1.1"||c.level==="B1.2") && (currentCat==="alle"||c.cat===currentCat));
+    const pool = ALL_CARDS.filter(c=>c.level==="B1" && (currentCat==="alle"||c.cat===currentCat));
     startSession(buildSmartQueue(pool,15), "📝 Prüfungsmodus");
   };
   document.getElementById("goWrite2").onclick = ()=>{ setView("schreiben"); };

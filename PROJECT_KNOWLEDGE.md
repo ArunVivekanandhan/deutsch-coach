@@ -64,7 +64,7 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   (needs `pip install pyphen`, node, apt access for the Ding package), then `python3 scripts/build.py`** — the build runs
   `scripts/check_vocab_sync.py`, `fill_home_forms.py --check`, `build_word_parts.py --check` and `fix_tamil.py --check`
   and fails on any drift. A new root word used as a word part needs a line (English + Tamil) in `scripts/word_parts_meanings.tsv`.
-  **Levels**: `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` from textbooks, plus frequency estimates for entries with
+  **Levels**: `A1`/`A2`/`B1`/`B2`/`C1` (B1.1/B1.2 were merged into B1 in Task 34; the textbook part is kept as `srcLevel`) from textbooks, plus frequency estimates for entries with
   no textbook level (`level` A1–C1 with `levelEst: true`; every entry has `freq` = rank in the
   OpenSubtitles-2018 top-50k list, 0 = rarer). Display estimates with "≈"; check a given array's actual
   distinct `level` values before writing level-filtering logic against it.
@@ -763,6 +763,28 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 34) — B1.1 and B1.2 merged into B1
+
+#### Task
+User: "I can see b1.1 and b1.2 and also b1. Better keep b1. Remove the b1.1 and 1.2 list".
+
+#### What changed
+- Levels are now **A1 · A2 · B1 · B2 · C1** everywhere (home level bar, dashboard, learning path, Nomen and Adjektiv trainer chips, Excel level chips). No word was removed: the textbook words ("Auf jeden Fall!" B1.1 + B1.2) are part of B1 (home: B1 = 1,407 cards; Nomen trainer: B1 = 513 nouns).
+- Word lists: `scripts/merge_b1.py` moved the 358 B1.1/B1.2 nouns to `level: "B1"` in every copy (Nomen trainer, Excel, Master Grid) and keeps the textbook part as **`srcLevel`**. `build.py` runs `merge_b1.py --check`.
+- **Saved progress is untouched**: the Nomen/Adjektiv trainers key progress as `n|<level>|<word>` — they now use `srcLevel || level`, so all 1,089 keys are byte-identical to before (tested against the previous commit). Home cards keep their old id (`B1.1|behoerden|Anmeldung`) via `uidBase` while showing level B1; the learning path still puts the textbook words first, then the master-list words by frequency.
+- Home: B1 exam readiness and the "Gemischte Prüfungsrunde" now use B1; default level for a topic is B1; outdated "App has only B1.1/B1.2" texts removed; subtitle "A1 · A2 · B1 · B2 · C1".
+- Source names like "Auf jeden Fall! B1.1/B1.2" (book titles) and `progress-aggregator.js` (which already folds old B1.1/B1.2 data into B1) were left as they are.
+
+#### Testing
+New suite (11 checks): no B1.1/B1.2 in level bars/chips/data on home, Nomen, Adjektiv, Excel, Master Grid; B1 contains the textbook words; Anmeldung keeps its id; Nomen progress keys identical to the previous commit; B1 learning path starts with textbook words; exam drill uses B1. All earlier suites (level list updated), 26-page sweep, `build.py` (7 checks) pass.
+
+#### Files Changed
+- `scripts/merge_b1.py` (new), `scripts/build.py`, `sw.js`
+- `deutsch-coach.html`, `Nomen_Trainer.html`, `Adjektiv_Adverb_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
 
 ### 2026-09-25 (Task 33) — Prefix type (untrennbar / trennbar) on every page + Excel prefix filter
 

@@ -68,3 +68,8 @@ if parts.returncode != 0:
 tamil = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "fix_tamil.py"), "--check"])
 if tamil.returncode != 0:
     sys.exit(1)
+
+# 7. Levels B1.1 / B1.2 were merged into B1 (Task 34) — they must not come back in a word list.
+b1 = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "merge_b1.py"), "--check"])
+if b1.returncode != 0:
+    sys.exit(1)
