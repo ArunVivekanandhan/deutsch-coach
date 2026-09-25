@@ -1141,17 +1141,21 @@ function renderUniversal3StepMemoryHack(v){
     soundLinkAnchor = direct.anchor;
     mentalImage = direct.image;
     memoryLock = direct.lock;
-  } else if (prefixKey && matchedRoot) {
-    soundLinkAnchor = prefixKey.toUpperCase() + '- (' + (prefixInfo ? prefixInfo.dir : 'direction') + ') + ' + matchedRoot.anchor;
-    mentalImage = 'Picture the core action "' + matchedRoot.idea + '" directed ' + (prefixInfo ? prefixInfo.dir : 'forward') + ': you ' + en + ' with focus.';
-    memoryLock = 'Whenever you need to say "' + en + '", combine ' + prefixKey + '- (' + (prefixInfo ? prefixInfo.hint : 'prefix') + ') with the root "' + matchedRootKey + '" → ' + v.inf + '!';
+  } else if (typeof MemoryTips !== 'undefined' && MemoryTips.lookupParts('v', v.inf) && MemoryTips.lookupParts('v', v.inf).parts) {
+    // Verb built from parts (prefix + verb, compound): explain it from its real parts (js/word-parts.js), e.g. ver- + stehen (to stand) = understand.
+    const lp = MemoryTips.lookupParts('v', v.inf);
+    const partsTxt = lp.parts.map(p => p.t + (p.m ? ' (' + p.m + ')' : '')).join(' + ');
+    soundLinkAnchor = lp.syl;
+    mentalImage = 'Build it from its parts: ' + partsTxt + ' → <b>' + v.inf + '</b> = “' + en + '”' + (ta ? ' (' + ta + ')' : '') + '.';
+    memoryLock = 'Say the parts, then the whole word: ' + lp.parts.map(p => p.t).join(' + ') + ' → ' + v.inf + '!';
   } else if (matchedRoot) {
     soundLinkAnchor = matchedRoot.anchor;
     mentalImage = 'Picture the action clearly: ' + matchedRoot.idea + ' → you ' + en + ' with intent.';
     memoryLock = 'Link "' + en + '" with ' + matchedRoot.anchor + ' → ' + v.inf + '!';
   } else {
-    const stemCluster = ana.stem ? ana.stem.slice(0, 4) : inf.slice(0, 4);
-    soundLinkAnchor = '"' + stemCluster + '..." → German Action Sound';
+    // Simple verb without a curated image: say it in syllables (js/word-parts.js).
+    const lp = typeof MemoryTips !== 'undefined' ? MemoryTips.lookupParts('v', v.inf) : null;
+    soundLinkAnchor = lp && lp.syl ? lp.syl + ' — say it slowly, syllable by syllable' : v.inf;
     mentalImage = 'Picture performing "' + en + '" (' + ta + ') vividly in a real German daily scene.';
     memoryLock = 'Focus on the active verb stem "' + (ana.stem || inf) + '" to lock in the meaning: ' + en + ' (' + ta + ').';
   }
@@ -1172,12 +1176,6 @@ function renderUniversal3StepMemoryHack(v){
   let situations = [];
   if (direct && direct.situations) {
     situations = direct.situations;
-  } else if (prefixKey && matchedRoot) {
-    situations = [
-      'Daily situation: Expressing the directed action "' + en + '" in everyday tasks.',
-      'Work/Study context: Using "' + v.inf + '" to describe specific procedural actions.',
-      'Conversational trigger: When talking about ' + matchedRoot.idea + (prefixInfo ? ' (' + prefixInfo.dir + ')' : '') + '.'
-    ];
   } else {
     situations = [
       'Everyday life: use „' + v.inf + '“ whenever you mean “' + enBare + '”' + (ta ? ' (' + ta + ')' : '') + '.',
@@ -1579,10 +1577,17 @@ function diffHighlight(a, b){
 }
 function transformDiagram(v){
   const prWord = longestWord(v.praeteritum);
-  let infStem = stripEn(longestWord(v.inf));
-  infStem = bestSepStrip(infStem, prWord);
+  const infWord = longestWord(v.inf);
+  const infStemFull = stripEn(infWord);
+  const infStem = bestSepStrip(infStemFull, prWord);
   const d1 = diffHighlight(infStem, prWord);
-  return `<div class="transdiagram">${d1.a}<span class="arrow">→</span>${d1.b}</div>`;
+  // Separable verbs: the prefix split off in the Präteritum ("erkannte … an") is shown on both sides,
+  // greyed, so the diagram reads anerkenn(en) → erkannte an instead of the misleading erkenn → erkannte.
+  const dim = t => t ? `<span style="opacity:.45;">${t}</span>` : '';
+  const sep = infStemFull.slice(0, infStemFull.length - infStem.length);
+  const rest = String(v.praeteritum || '').split(/\s+/).filter(t => t && t !== prWord && t !== 'sich').join(' ');
+  const ending = infWord.slice(infStemFull.length);
+  return `<div class="transdiagram">${dim(sep)}${d1.a}${dim(ending)}<span class="arrow">→</span>${d1.b}${rest ? dim(' … ' + rest) : ''}</div>`;
 }
 
 /* ---- filtering & UI ---- */
