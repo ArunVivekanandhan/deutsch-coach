@@ -759,6 +759,40 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 47) — KI-Sprechpartner v2: closer to Praktika (video call, animated tutors, guided lessons without AI, learning path)
+
+#### Task
+User: "Can you make similar Praktika ai" (after Task 46).
+
+#### What changed (`KI_Sprechpartner.html` rewritten, new `js/tutor-scripts.js`, new `scripts/check_tutor_scripts.py`)
+- **Video-call screen:** large animated tutor (SVG face: blinks, mouth + head move while the German voice speaks,
+  green glow while listening), live subtitles (🌐 → English + Tamil), mission goals as chips, call timer, control bar
+  (💡 Hilfe · 🌐 Übersetzen · 🎙️ · ⌨️ Tippen · 🇬🇧 Wie sage ich? (AI mode) · 📞 Beenden).
+- **6 tutors:** Lena (teacher, Munich), Priya (nurse from Chennai in Stuttgart — compares with Tamil), Jonas
+  (colleague, Berlin), Herr Weber (official/examiner, Sie), Oma Hilde (Hamburg, slow & warm), Max (student, du).
+- **🎓 Guided lessons — work without any AI key, offline:** `js/tutor-scripts.js` has a dialogue for all 15
+  missions (105 turns; AI-assisted, checked by two agents + validator): tutor line DE/EN/TA, the learner's task
+  (EN/TA), 3 model answers (DE/EN/TA), a tip, goal index, closing line, 8 lesson words. The learner speaks (or types);
+  the answer is compared word by word with the closest model answer (≥ 60 % = accepted, colour-coded words;
+  < 60 % → second try with the nearest model; after 2 tries the model is shown and saved as a mistake). Sample names
+  in model answers (Arun, Priya …) don't count against the learner.
+- **🤖 Free conversation** (AI key): as in Task 46 (+ reply_ta for the subtitles).
+- **Learning path:** first-visit onboarding (goal: Alltag/Arbeit/Prüfung/Reisen/Ämter, level, minutes/day);
+  missions sorted by nearness to the level and the goal; "Heute für dich" card; 🔥 streak (days with practice),
+  minutes today vs. daily goal (`dc_tutor_v1.days`), lessons done.
+- **Report:** pronunciation average, "mit Hilfe" count, goals, mistakes (→ KI-Coach Fehler-Tagebuch), lesson words
+  with "➕ In meine Karteikarten" (loads js/lexicon.js on demand, only words the app knows → `dc_review_requests`,
+  picked up by the home flashcards like the Übersetzer's), AI feedback in AI mode, "▶ Nächste" lesson.
+- build.py runs `check_tutor_scripts.py` (every mission has 6–8 turns, 3 different options with DE/EN/TA, all goals
+  reached, closing line, words); `js/tutor-scripts.js` is in the service-worker cache.
+
+#### Verified
+All 15 guided lessons played end to end in headless Chromium (all goals reached, report shown, no JS errors);
+onboarding, help, retry, flashcard hand-over, name rule, AI mode with a stubbed AI, 390 px + dark mode;
+build.py + smoke_pages 28/28.
+
+---
+
 ### 2026-09-25 (Task 46) — KI-Sprechpartner: Praktika-style voice role-play tutor
 
 #### Task

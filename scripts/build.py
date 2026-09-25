@@ -11,7 +11,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 # 1. Update sw.js automatically
 html_files = glob.glob("*.html")
-assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/word-data.js', './js/lexicon.js', './js/tamil-meanings.js', './js/satzbau-data.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
+assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/word-data.js', './js/lexicon.js', './js/tamil-meanings.js', './js/satzbau-data.js', './js/tutor-scripts.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
 assets += ["./css/fonts.css"] + [f"./fonts/{f}" for f in sorted(os.listdir("fonts")) if f.endswith(".woff2")]  # self-hosted fonts (offline)
 urls_to_cache = ["./", "./index.html"] + [f"./{f}" for f in html_files if f != "index.html"] + assets
 
@@ -83,4 +83,9 @@ if lex.returncode != 0:
 # 9. Satzbau-Trainer sentences (js/satzbau-data.js): every sentence must follow German word order.
 sb = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_satzbau.py")])
 if sb.returncode != 0:
+    sys.exit(1)
+
+# 10. KI-Sprechpartner guided lessons (js/tutor-scripts.js): complete dialogues for every mission.
+tut = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_tutor_scripts.py")])
+if tut.returncode != 0:
     sys.exit(1)

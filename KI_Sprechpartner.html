@@ -12,68 +12,109 @@
 <script src="js/srs-engine.js"></script>
 <script src="js/progress-aggregator.js"></script>
 <script src="js/app-shell.js"></script>
+<script src="js/tutor-scripts.js"></script>
 <style>
-  .kp { max-width: 880px; margin: 0 auto; padding: 4px 0 40px; color: var(--color-ink); }
+  .kp { max-width: 900px; margin: 0 auto; padding: 4px 0 40px; color: var(--color-ink); }
   .kp h1 { font-size: 26px; margin: 0; }
   .kp .sub { color: var(--color-ink-soft); font-size: 14px; margin: 4px 0 12px; line-height: 1.5; }
-  .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-sm); }
+  .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm); }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .note { font-size: 12.5px; color: var(--color-ink-soft); }
-  .chip { font: inherit; font-size: 12.5px; padding: 5px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border);
+  .chip { font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border);
     background: var(--color-surface); color: var(--color-ink); }
   .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
-  .btn { font: inherit; font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-primary);
+  .btn { font: inherit; font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 12px; cursor: pointer; border: 1.5px solid var(--color-primary);
     background: var(--color-primary); color: #fff; }
   .btn.grey { background: var(--color-surface); color: var(--color-ink); border-color: var(--color-border); }
   .btn.ghost { background: transparent; color: var(--color-primary); }
-  .btn:disabled { opacity: .5; cursor: default; }
-  h3.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-ink-soft); margin: 16px 0 8px; }
-  .tutors { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-  .tutor, .mission { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
-    border: 1.5px solid var(--color-border); border-radius: 12px; padding: 12px; }
-  .tutor.active, .mission:hover, .tutor:hover { border-color: var(--color-primary); }
-  .tutor .face { font-size: 34px; line-height: 1; }
-  .tutor b, .mission b { display: block; font-size: 15px; margin-top: 4px; }
-  .tutor small, .mission small { color: var(--color-ink-soft); font-size: 12px; line-height: 1.4; display: block; }
-  .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-  .mission .ic { font-size: 22px; } .mission .lvl { float: right; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-ink-soft); }
-  .mission .done { font-size: 11px; color: #16a34a; font-weight: 700; }
-  /* conversation */
-  .stage { display: grid; grid-template-columns: 200px 1fr; gap: 12px; align-items: start; }
-  @media (max-width: 720px) { .stage { grid-template-columns: 1fr; } }
-  .avatar-card { text-align: center; position: sticky; top: calc(var(--dc-app-header-h, 64px) + 8px); }
-  .avatar { width: 120px; height: 120px; margin: 4px auto 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 64px; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); border: 3px solid var(--color-border); transition: box-shadow .2s; }
-  .avatar.speaking { animation: talk .5s infinite alternate; border-color: var(--color-primary); }
-  .avatar.listening { box-shadow: 0 0 0 6px color-mix(in srgb, #16a34a 35%, transparent); border-color: #16a34a; }
-  @keyframes talk { from { transform: scale(1); } to { transform: scale(1.05); } }
-  @media (max-width: 720px) { .avatar-card { position: static; display: flex; gap: 12px; align-items: center; text-align: left; }
-    .avatar { width: 64px; height: 64px; font-size: 34px; margin: 0; } }
-  .goals { list-style: none; padding: 0; margin: 8px 0 0; text-align: left; font-size: 13px; }
-  .goals li { padding: 4px 0; border-bottom: 1px dashed var(--color-border); }
-  .goals li.ok { color: #16a34a; font-weight: 700; }
-  .chat { display: flex; flex-direction: column; gap: 10px; min-height: 240px; }
-  .msg { max-width: 88%; padding: 10px 12px; border-radius: 14px; line-height: 1.5; font-size: 15px; }
-  .msg.ai { align-self: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-top-left-radius: 4px; }
-  .msg.me { align-self: flex-end; background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface)); border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); border-top-right-radius: 4px; }
-  .msg .tools { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
-  .msg .tools button { font: inherit; font-size: 12px; padding: 2px 8px; border-radius: 8px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
-  .tr { font-size: 13px; color: var(--color-ink-soft); margin-top: 4px; }
-  .corr { align-self: flex-end; max-width: 88%; font-size: 13px; border-radius: 10px; padding: 8px 10px; border: 1px solid; }
-  .corr.bad { border-color: #f59e0b; background: color-mix(in srgb, #f59e0b 12%, var(--color-surface)); }
-  .corr.good { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, var(--color-surface)); }
-  .corr s { color: #dc2626; } .corr .right { color: #15803d; font-weight: 700; }
-  [data-theme="dark"] .corr s { color: #f87171; } [data-theme="dark"] .corr .right { color: #4ade80; }
-  .composer { position: sticky; bottom: 0; background: var(--color-bg, var(--color-surface)); padding: 10px 0 4px; margin-top: 10px; }
-  .composer textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 10px; border-radius: 10px; border: 1px solid var(--color-border);
-    background: var(--color-surface); color: var(--color-ink); resize: none; min-height: 44px; }
-  .mic { width: 58px; height: 58px; border-radius: 50%; font-size: 26px; cursor: pointer; border: 2px solid var(--color-primary); background: var(--color-primary); color: #fff; }
-  .mic.on { background: #dc2626; border-color: #dc2626; animation: talk .6s infinite alternate; }
-  .sugg { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-  .sugg button { font: inherit; font-size: 13.5px; padding: 6px 10px; border-radius: 10px; cursor: pointer; border: 1.5px dashed var(--color-primary); background: var(--color-surface); color: var(--color-ink); }
-  .interim { font-style: italic; color: var(--color-ink-soft); font-size: 14px; min-height: 18px; }
-  .typing { align-self: flex-start; font-size: 13px; color: var(--color-ink-soft); }
-  .score-ok { color: #16a34a; font-weight: 700; } .score-no { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  h3.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-ink-soft); margin: 18px 0 8px; }
+  /* stats + today */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 8px 0 12px; }
+  .stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat b { display: block; font-size: 20px; } .stat span { font-size: 11.5px; color: var(--color-ink-soft); }
+  .dayring { height: 6px; background: var(--color-border); border-radius: 3px; overflow: hidden; margin-top: 6px; } .dayring i { display: block; height: 100%; background: #16a34a; }
+  .today { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 18px; color: #fff;
+    background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: var(--shadow-md, var(--shadow-sm)); }
+  .today .face svg { width: 92px; height: 92px; }
+  .today b { font-size: 19px; display: block; } .today small { opacity: .9; display: block; margin: 2px 0 10px; line-height: 1.4; }
+  .today .btn { background: #fff; color: #1e3a8a; border-color: #fff; }
+  .today .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.6); }
+  /* tutors + path */
+  .tutors { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .tutor { text-align: center; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
+    border: 2px solid var(--color-border); border-radius: 14px; padding: 10px 8px; }
+  .tutor.active { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent); }
+  .tutor svg { width: 74px; height: 74px; } .tutor b { display: block; font-size: 14px; } .tutor small { font-size: 11.5px; color: var(--color-ink-soft); display: block; line-height: 1.35; }
+  .path-level { margin: 14px 0 6px; font-weight: 800; font-size: 14px; }
+  .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .mission { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
+    border: 1.5px solid var(--color-border); border-radius: 14px; padding: 12px; position: relative; }
+  .mission:hover { border-color: var(--color-primary); }
+  .mission .ic { font-size: 24px; } .mission b { display: block; font-size: 14.5px; margin-top: 4px; } .mission small { color: var(--color-ink-soft); font-size: 12px; display: block; }
+  .mission .done { position: absolute; top: 10px; right: 10px; font-size: 12px; color: #16a34a; font-weight: 800; }
+  .modes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .modes button { flex: 1; min-width: 200px; text-align: left; font: inherit; padding: 12px; border-radius: 14px; cursor: pointer; border: 2px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .modes button.active { border-color: var(--color-primary); }
+  .modes b { display: block; } .modes small { color: var(--color-ink-soft); font-size: 12px; }
+  /* onboarding */
+  .onb { max-width: 560px; margin: 10px auto; text-align: center; }
+  .onb .row { justify-content: center; }
+  /* call */
+  .call { border-radius: 22px; overflow: hidden; border: 1px solid var(--color-border); background: var(--color-surface); box-shadow: var(--shadow-md, var(--shadow-sm)); }
+  .screen { position: relative; padding: 16px 14px 14px; text-align: center; color: #fff;
+    background: radial-gradient(circle at 50% 30%, #3b82f6 0%, #1e3a8a 55%, #0f172a 100%); }
+  .screen .top { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; opacity: .95; gap: 8px; }
+  .screen .live { background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 999px; }
+  .bigface svg { width: 190px; height: 190px; filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
+  @media (max-width: 600px) { .bigface svg { width: 140px; height: 140px; } }
+  .state { font-size: 12px; opacity: .85; min-height: 16px; }
+  .subtitle { margin: 8px auto 0; max-width: 620px; background: rgba(0,0,0,.35); border-radius: 12px; padding: 10px 12px; font-size: 17px; line-height: 1.45; min-height: 26px; }
+  .subtitle .tr { font-size: 13.5px; opacity: .85; margin-top: 4px; }
+  .goalchips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
+  .goalchips span { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.14); }
+  .goalchips span.ok { background: #16a34a; }
+  .task { margin: 10px 14px 0; padding: 10px 12px; border-radius: 12px; border: 1.5px dashed var(--color-primary); font-size: 14px; }
+  .task .ta { font-size: 12.5px; color: var(--color-ink-soft); }
+  .log { max-height: 280px; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 88%; padding: 8px 11px; border-radius: 14px; line-height: 1.45; font-size: 14.5px; }
+  .msg.ai { align-self: flex-start; background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface)); border: 1px solid var(--color-border); border-top-left-radius: 4px; }
+  .msg.me { align-self: flex-end; background: color-mix(in srgb, #16a34a 12%, var(--color-surface)); border: 1px solid color-mix(in srgb, #16a34a 35%, var(--color-border)); border-top-right-radius: 4px; }
+  .msg .tools { margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap; }
+  .msg .tools button, .sugg button, .mini { font: inherit; font-size: 12px; padding: 2px 8px; border-radius: 8px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .fbk { align-self: flex-end; max-width: 88%; font-size: 13px; border-radius: 10px; padding: 7px 10px; border: 1px solid; }
+  .fbk.bad { border-color: #f59e0b; background: color-mix(in srgb, #f59e0b 12%, var(--color-surface)); }
+  .fbk.good { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, var(--color-surface)); }
+  .fbk s { color: #dc2626; } .fbk .right { color: #15803d; font-weight: 700; }
+  [data-theme="dark"] .fbk s { color: #f87171; } [data-theme="dark"] .fbk .right { color: #4ade80; }
+  .ok-w { color: #16a34a; font-weight: 700; } .no-w { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
+  [data-theme="dark"] .ok-w { color: #4ade80; } [data-theme="dark"] .no-w { color: #f87171; }
+  .sugg { display: flex; flex-direction: column; gap: 6px; padding: 0 14px 6px; }
+  .sugg .opt { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+  .sugg .opt b { cursor: pointer; border-bottom: 1.5px dashed var(--color-primary); }
+  .interim { font-style: italic; color: var(--color-ink-soft); font-size: 13.5px; min-height: 18px; padding: 0 14px; }
+  .controls { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px 14px 14px; flex-wrap: wrap; border-top: 1px solid var(--color-border); }
+  .ctl { font: inherit; font-size: 12px; width: 64px; padding: 8px 4px; border-radius: 14px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .ctl span { font-size: 20px; }
+  .ctl[hidden] { display: none; }
+  .ctl.end { border-color: #dc2626; color: #dc2626; }
+  .mic { width: 72px; height: 72px; border-radius: 50%; font-size: 30px; cursor: pointer; border: 3px solid #fff; background: #16a34a; color: #fff; box-shadow: 0 6px 18px rgba(22,163,74,.45); }
+  .mic.on { background: #dc2626; box-shadow: 0 0 0 8px rgba(220,38,38,.25); animation: pulse .8s infinite alternate; }
+  .mic:disabled { opacity: .5; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.06); } }
+  .typebar { display: none; gap: 8px; padding: 0 14px 12px; }
+  .typebar.show { display: flex; }
+  .typebar input { flex: 1; font: inherit; font-size: 15px; padding: 10px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  /* avatar animation */
+  .av .mouth { transform-box: fill-box; transform-origin: center; transition: transform .08s; }
+  .av.talking .mouth { animation: mouth .16s infinite alternate; }
+  @keyframes mouth { from { transform: scaleY(.25); } to { transform: scaleY(1.15); } }
+  .av .lids { transform-box: fill-box; transform-origin: center top; animation: blink 4.2s infinite; transform: scaleY(0); }
+  @keyframes blink { 0%, 94%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
+  .av.listening { filter: drop-shadow(0 0 14px rgba(74,222,128,.9)); }
+  .av .head { transform-box: fill-box; transform-origin: center bottom; }
+  .av.talking .head { animation: nod 1.4s infinite ease-in-out; }
+  @keyframes nod { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(1.5deg); } }
   .report li { margin: 6px 0; }
   .ta { font-size: 13px; }
 </style>
@@ -81,145 +122,319 @@
 <body>
 <div class="kp">
   <h1>🎭 KI-Sprechpartner</h1>
-  <p class="sub">Sprich mit einem KI-Tutor in echten Alltagssituationen — per Stimme oder Tastatur. Er antwortet auf deinem Niveau,
-    korrigiert dich sofort (mit Erklärung auf Englisch und Tamil), hilft, wenn dir die Worte fehlen, und gibt dir am Ende einen Lernbericht.</p>
+  <p class="sub">Sprich Deutsch wie in einem Videoanruf mit deinem Tutor — in echten Situationen aus dem Alltag in Deutschland.
+    <b>Geführte Lektionen</b> funktionieren sofort (auch offline); mit KI-Schlüssel kannst du zusätzlich <b>frei sprechen</b> und bekommst persönliche Korrekturen.</p>
 
-  <!-- ============ SETUP ============ -->
-  <div id="setupView">
-    <div class="box" id="noKey" hidden>🔑 Der KI-Sprechpartner braucht einen KI-Schlüssel (z. B. DeepSeek, Groq, Gemini, OpenAI).
-      Trag ihn unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> ein — danach kannst du sofort loslegen.</div>
-    <div class="row" id="statsRow" style="margin:8px 0;"></div>
-    <h3 class="sec">1 · Dein Tutor</h3>
+  <!-- ============ ONBOARDING ============ -->
+  <div id="onbView" hidden>
+    <div class="box onb">
+      <h2 style="margin-top:0;">👋 Willkommen! Lass uns deinen Lernplan machen.</h2>
+      <h3 class="sec">Wofür lernst du Deutsch?</h3>
+      <div class="row" id="onbGoal"></div>
+      <h3 class="sec">Dein Niveau</h3>
+      <div class="row" id="onbLevel"></div>
+      <h3 class="sec">Wie viele Minuten pro Tag?</h3>
+      <div class="row" id="onbMin"></div>
+      <div style="margin-top:18px;"><button type="button" class="btn" id="onbDone">Los geht's →</button></div>
+    </div>
+  </div>
+
+  <!-- ============ HOME / LEARNING PATH ============ -->
+  <div id="homeView" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="today" id="todayCard"></div>
+    <h3 class="sec">Übungsart</h3>
+    <div class="modes" id="modeRow"></div>
+    <div class="note" id="noKey" hidden style="margin-top:6px;">🔑 Für das freie Gespräch einen KI-Schlüssel unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> eintragen. Geführte Lektionen gehen auch ohne.</div>
+    <h3 class="sec">Dein Tutor</h3>
     <div class="tutors" id="tutorList"></div>
-    <h3 class="sec">2 · Dein Niveau</h3>
-    <div class="row" id="levelRow"></div>
-    <h3 class="sec">3 · Deine Mission</h3>
-    <div class="missions" id="missionList"></div>
+    <h3 class="sec">Dein Lernpfad <span class="note" id="profileNote"></span> <button type="button" class="mini" id="editProfile">⚙️ ändern</button></h3>
+    <div id="pathList"></div>
     <h3 class="sec">Optionen</h3>
     <div class="row">
       <label class="chip"><input type="checkbox" id="optHands"> 🎧 Freihändig (Mikro startet automatisch)</label>
-      <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Erklärungen auch auf Tamil</label>
+      <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Tamil-Hilfen</label>
       <label class="chip"><input type="checkbox" id="optVoice" checked> 🔊 Tutor spricht</label>
       <label class="chip">Tempo <select id="optRate"><option value="0.8">langsam</option><option value="0.95" selected>normal</option><option value="1.05">schnell</option></select></label>
     </div>
   </div>
 
-  <!-- ============ CONVERSATION ============ -->
-  <div id="talkView" hidden>
-    <div class="stage">
-      <div class="box avatar-card">
-        <div class="avatar" id="avatar">🙂</div>
-        <div>
-          <b id="tutorName"></b><div class="note" id="missionName"></div>
-          <ul class="goals" id="goalList"></ul>
-          <div class="row" style="margin-top:10px; justify-content:center;">
-            <button type="button" class="btn grey" id="endBtn">🏁 Beenden</button>
-          </div>
-        </div>
+  <!-- ============ CALL ============ -->
+  <div id="callView" hidden>
+    <div class="call">
+      <div class="screen">
+        <div class="top"><span class="live" id="callMode"></span><span id="callTitle"></span><span id="callTimer">00:00</span></div>
+        <div class="bigface" id="bigFace"></div>
+        <div class="state" id="callState"></div>
+        <div class="subtitle" id="subtitle"></div>
+        <div class="goalchips" id="goalChips"></div>
       </div>
-      <div>
-        <div class="box">
-          <div class="chat" id="chat"></div>
-        </div>
-        <div class="composer">
-          <div class="interim" id="interim"></div>
-          <div class="sugg" id="sugg" hidden></div>
-          <div class="row" style="flex-wrap:nowrap;">
-            <button type="button" class="mic" id="micBtn" title="Sprechen (Leertaste)">🎙️</button>
-            <textarea id="input" rows="1" placeholder="Antworte auf Deutsch … (oder 🎙️ drücken)"></textarea>
-            <button type="button" class="btn" id="sendBtn">➤</button>
-          </div>
-          <div class="row" style="margin-top:6px;">
-            <button type="button" class="btn ghost" id="helpBtn">💡 Hilfe — was kann ich sagen?</button>
-            <button type="button" class="btn ghost" id="hintEnBtn" title="Schreib auf Englisch, was du sagen willst — die KI zeigt dir den deutschen Satz">🇬🇧→🇩🇪 Wie sage ich …?</button>
-          </div>
-        </div>
+      <div class="task" id="taskBox" hidden></div>
+      <div class="log" id="log"></div>
+      <div class="sugg" id="sugg" hidden></div>
+      <div class="interim" id="interim"></div>
+      <div class="typebar" id="typebar"><input id="input" placeholder="Auf Deutsch schreiben … (Enter)"><button type="button" class="btn" id="sendBtn">➤</button></div>
+      <div class="controls">
+        <button type="button" class="ctl" id="helpBtn"><span>💡</span>Hilfe</button>
+        <button type="button" class="ctl" id="trBtn"><span>🌐</span>Übersetzen</button>
+        <button type="button" class="mic" id="micBtn" title="Sprechen">🎙️</button>
+        <button type="button" class="ctl" id="typeBtn"><span>⌨️</span>Tippen</button>
+        <button type="button" class="ctl" id="howBtn"><span>🇬🇧</span>Wie sage ich?</button>
+        <button type="button" class="ctl end" id="endBtn"><span>📞</span>Beenden</button>
       </div>
     </div>
   </div>
 
   <!-- ============ REPORT ============ -->
-  <div id="reportView" hidden>
-    <div class="box" id="report"></div>
-  </div>
+  <div id="reportView" hidden><div class="box" id="report"></div></div>
 
-  <p class="note" style="text-align:center; margin-top:18px;">🤖 Alle Antworten, Korrekturen und Übersetzungen kommen von der KI deiner Wahl und können Fehler enthalten.
-    Deine Korrekturen landen im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a>.</p>
+  <p class="note" style="text-align:center; margin-top:18px;">Geführte Lektionen: Dialoge KI-unterstützt geschrieben und geprüft 🤖. Freies Gespräch: Antworten, Korrekturen und
+    Übersetzungen kommen live von der KI deiner Wahl und können Fehler enthalten. Korrekturen landen im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a>.</p>
 </div>
 
 <script>
-/* KI-Sprechpartner (Task 46): voice-first role-play tutor in the style of Praktika — tutor persona, missions with goals,
-   instant corrections (EN + Tamil), help with suggested replies, pronunciation score when repeating a suggestion,
-   hands-free mode and a lesson report. AI calls go through dcCallAI (js/app-shell.js, key from AI Config & Settings). */
+/* KI-Sprechpartner v2 (Tasks 46/47): Praktika-style speaking tutor.
+   - 6 animated tutors (SVG faces that blink and move the mouth while the browser voice speaks)
+   - Guided lessons (js/tutor-scripts.js, no AI needed): tutor line → task → the learner speaks; matched against 3 model
+     answers word by word (pronunciation score); help shows the answers
+   - Free AI conversation (dcCallAI, key from AI Config & Settings): corrections with EN + Tamil, suggestions, goals
+   - Learning path from a short onboarding (goal, level, minutes/day), streak, daily minutes, report, words → flashcards */
 const TUTORS = [
-  { id: 'lena', face: '👩‍🏫', name: 'Lena', de: 'geduldige Lehrerin', en: 'patient teacher — speaks slowly, praises a lot',
+  { id: 'lena', name: 'Lena', role: 'Lehrerin aus München', en: 'patient teacher — slow, clear, lots of praise',
+    look: { skin: '#f2c9a5', hair: '#8b5a2b', style: 'long', shirt: '#2563eb', glasses: true },
     style: 'You are Lena, a warm, patient German teacher from Munich. You speak slowly and clearly, praise effort, and keep things simple.' },
-  { id: 'jonas', face: '🧑‍💻', name: 'Jonas', de: 'lockerer Kollege', en: 'casual colleague — everyday spoken German, humour',
-    style: 'You are Jonas, a friendly, relaxed colleague from Berlin in his late twenties. You use natural everyday spoken German (but correct), a bit of humour.' },
-  { id: 'weber', face: '👨‍💼', name: 'Herr Weber', de: 'formeller Beamter', en: 'formal official — Sie-form, exam style (telc/Goethe)',
-    style: 'You are Herr Weber, a polite but formal German official. You always use the Sie-form and speak like an examiner in a telc/Goethe oral exam.' }
+  { id: 'priya', name: 'Priya', role: 'aus Chennai, lebt in Stuttgart', en: 'nurse from Chennai — knows how Tamil speakers think',
+    look: { skin: '#b07a52', hair: '#1c1c1c', style: 'bun', shirt: '#db2777', bindi: true },
+    style: 'You are Priya, a friendly nurse from Chennai who has lived in Stuttgart for 8 years and learned German herself. You encourage the learner, and in why_ta you compare with Tamil.' },
+  { id: 'jonas', name: 'Jonas', role: 'Kollege aus Berlin', en: 'casual colleague — natural spoken German, humour',
+    look: { skin: '#f5d0b0', hair: '#d4a017', style: 'short', shirt: '#16a34a', beard: true },
+    style: 'You are Jonas, a friendly, relaxed colleague from Berlin in his late twenties. You use natural everyday spoken German (but correct) and a bit of humour.' },
+  { id: 'weber', name: 'Herr Weber', role: 'Beamter / Prüfer', en: 'formal official — Sie-form, exam style (telc/Goethe)',
+    look: { skin: '#eac0a0', hair: '#9ca3af', style: 'side', shirt: '#334155', glasses: true, tie: true },
+    style: 'You are Herr Weber, a polite but formal German official. You always use the Sie-form and speak like an examiner in a telc/Goethe oral exam.' },
+  { id: 'hilde', name: 'Oma Hilde', role: 'Rentnerin aus Hamburg', en: 'kind grandma — slow, warm, everyday sayings',
+    look: { skin: '#f3d3bd', hair: '#e5e7eb', style: 'curly', shirt: '#7c3aed', glasses: true },
+    style: 'You are Hilde, a kind retired grandmother from Hamburg. You speak slowly and warmly, like to use simple everyday sayings and are very patient.' },
+  { id: 'max', name: 'Max', role: 'Student & Barista', en: 'young student — fast, casual, du-form',
+    look: { skin: '#8d5a3c', hair: '#2b1b12', style: 'curly', shirt: '#ea580c' },
+    style: 'You are Max, a 22-year-old student and barista in Cologne. You speak casually (du-form), energetic and friendly, but still clear and correct.' }
 ];
 const MISSIONS = [
-  { id: 'cafe', ic: '☕', lv: 'A1', de: 'Im Café bestellen', en: 'Order at a café', role: 'a waiter/waitress in a café in Berlin',
+  { id: 'cafe', ic: '☕', lv: 'A1', de: 'Im Café bestellen', en: 'Order at a café', role: 'a waiter/waitress in a café in Berlin', tags: ['alltag', 'reisen'],
     goals: ['Begrüße und bestelle ein Getränk', 'Bestelle etwas zu essen', 'Frag nach dem Preis', 'Bezahle und verabschiede dich'] },
-  { id: 'vorstellen', ic: '👋', lv: 'A1', de: 'Sich vorstellen', en: 'Introduce yourself', role: 'a new neighbour who just met the learner in the stairwell',
+  { id: 'vorstellen', ic: '👋', lv: 'A1', de: 'Sich vorstellen', en: 'Introduce yourself', role: 'a new neighbour who just met the learner in the stairwell', tags: ['alltag', 'pruefung', 'arbeit'],
     goals: ['Sag deinen Namen', 'Sag, woher du kommst', 'Erzähl, was du beruflich machst', 'Frag die andere Person etwas'] },
-  { id: 'supermarkt', ic: '🛒', lv: 'A1', de: 'Im Supermarkt', en: 'At the supermarket', role: 'a supermarket employee',
+  { id: 'supermarkt', ic: '🛒', lv: 'A1', de: 'Im Supermarkt', en: 'At the supermarket', role: 'a supermarket employee', tags: ['alltag'],
     goals: ['Frag, wo es ein Produkt gibt', 'Frag nach einer anderen Größe oder Sorte', 'Bedanke dich'] },
-  { id: 'bahnhof', ic: '🚆', lv: 'A1', de: 'Fahrkarte am Bahnhof', en: 'Train ticket at the station', role: 'a ticket office clerk at Deutsche Bahn',
+  { id: 'bahnhof', ic: '🚆', lv: 'A1', de: 'Fahrkarte am Bahnhof', en: 'Train ticket at the station', role: 'a ticket office clerk at Deutsche Bahn', tags: ['reisen', 'alltag'],
     goals: ['Sag, wohin du fahren willst', 'Frag nach der Abfahrtszeit', 'Frag nach dem Gleis', 'Kauf die Fahrkarte'] },
-  { id: 'arzt', ic: '🩺', lv: 'A2', de: 'Beim Arzt', en: 'At the doctor', role: 'a GP (Hausarzt) in Germany',
+  { id: 'arzt', ic: '🩺', lv: 'A2', de: 'Beim Arzt', en: 'At the doctor', role: 'a GP (Hausarzt) in Germany', tags: ['alltag', 'behoerden'],
     goals: ['Beschreib deine Beschwerden', 'Sag, seit wann du sie hast', 'Frag, was du tun sollst', 'Frag nach einer Krankmeldung'] },
-  { id: 'termin', ic: '📞', lv: 'A2', de: 'Termin am Telefon verschieben', en: 'Reschedule an appointment by phone', role: 'a receptionist at a dental practice, on the phone',
+  { id: 'termin', ic: '📞', lv: 'A2', de: 'Termin am Telefon verschieben', en: 'Reschedule an appointment by phone', role: 'a receptionist at a dental practice, on the phone', tags: ['alltag', 'arbeit'],
     goals: ['Nenne deinen Namen und deinen Termin', 'Sag, dass du nicht kommen kannst, und warum', 'Vereinbare einen neuen Termin'] },
-  { id: 'wohnung', ic: '🏠', lv: 'A2', de: 'Wohnungsbesichtigung', en: 'Flat viewing', role: 'a landlord showing a flat',
+  { id: 'wohnung', ic: '🏠', lv: 'A2', de: 'Wohnungsbesichtigung', en: 'Flat viewing', role: 'a landlord showing a flat', tags: ['alltag', 'behoerden'],
     goals: ['Frag nach der Miete und den Nebenkosten', 'Frag, ab wann die Wohnung frei ist', 'Erzähl etwas über dich', 'Sag, dass du Interesse hast'] },
-  { id: 'apotheke', ic: '💊', lv: 'A2', de: 'In der Apotheke', en: 'At the pharmacy', role: 'a pharmacist',
+  { id: 'apotheke', ic: '💊', lv: 'A2', de: 'In der Apotheke', en: 'At the pharmacy', role: 'a pharmacist', tags: ['alltag'],
     goals: ['Beschreib dein Problem', 'Frag, wie oft du das Medikament nehmen sollst', 'Frag nach dem Preis'] },
-  { id: 'kollegen', ic: '💼', lv: 'A2', de: 'Small Talk mit Kollegen', en: 'Small talk with colleagues', role: 'a colleague in the office kitchen on Monday morning',
+  { id: 'kollegen', ic: '💼', lv: 'A2', de: 'Small Talk mit Kollegen', en: 'Small talk with colleagues', role: 'a colleague in the office kitchen on Monday morning', tags: ['arbeit'],
     goals: ['Erzähl von deinem Wochenende', 'Frag nach dem Wochenende der anderen Person', 'Mach einen Vorschlag für die Mittagspause'] },
-  { id: 'amt', ic: '🏛️', lv: 'B1', de: 'Anmeldung beim Bürgeramt', en: 'Registering at the Bürgeramt', role: 'an official at the Bürgeramt (citizens\' office)',
+  { id: 'amt', ic: '🏛️', lv: 'B1', de: 'Anmeldung beim Bürgeramt', en: 'Registering at the Bürgeramt', role: 'an official at the Bürgeramt (citizens\' office)', tags: ['behoerden'],
     goals: ['Sag, warum du da bist', 'Beantworte Fragen zu deiner Adresse und Familie', 'Frag, welche Unterlagen fehlen', 'Frag nach der Meldebescheinigung'] },
-  { id: 'bank', ic: '🏦', lv: 'B1', de: 'Ein Konto eröffnen', en: 'Open a bank account', role: 'a bank clerk',
+  { id: 'bank', ic: '🏦', lv: 'B1', de: 'Ein Konto eröffnen', en: 'Open a bank account', role: 'a bank clerk', tags: ['behoerden', 'alltag'],
     goals: ['Sag, welches Konto du möchtest', 'Frag nach den Gebühren', 'Frag nach der Bankkarte und Online-Banking'] },
-  { id: 'reklamation', ic: '🧾', lv: 'B1', de: 'Reklamation im Geschäft', en: 'Returning a faulty product', role: 'a shop assistant at an electronics store',
+  { id: 'reklamation', ic: '🧾', lv: 'B1', de: 'Reklamation im Geschäft', en: 'Returning a faulty product', role: 'a shop assistant at an electronics store', tags: ['alltag'],
     goals: ['Erklär das Problem mit dem Gerät', 'Sag, was du möchtest (Umtausch/Geld zurück)', 'Reagiere höflich auf einen Vorschlag'] },
-  { id: 'bewerbung', ic: '🤝', lv: 'B1', de: 'Vorstellungsgespräch', en: 'Job interview', role: 'an HR manager interviewing the learner for a job that fits them',
+  { id: 'bewerbung', ic: '🤝', lv: 'B1', de: 'Vorstellungsgespräch', en: 'Job interview', role: 'an HR manager interviewing the learner for a job that fits them', tags: ['arbeit', 'pruefung'],
     goals: ['Stell dich und deine Erfahrung vor', 'Nenne deine Stärken', 'Erklär, warum du die Stelle willst', 'Stell eine eigene Frage'] },
-  { id: 'meinung', ic: '💬', lv: 'B1', de: 'Diskussion: Deine Meinung', en: 'Discussion: give your opinion', role: 'a discussion partner in a B1 oral exam (topic: Is it better to live in the city or in the countryside?)',
+  { id: 'meinung', ic: '💬', lv: 'B1', de: 'Diskussion: Deine Meinung', en: 'Discussion: give your opinion', role: 'a discussion partner in a B1 oral exam (topic: Is it better to live in the city or in the countryside?)', tags: ['pruefung'],
     goals: ['Sag deine Meinung mit Begründung', 'Nenne ein Beispiel', 'Reagiere auf ein Gegenargument', 'Fass zusammen'] },
-  { id: 'frei', ic: '🌟', lv: 'alle', de: 'Freies Gespräch', en: 'Free conversation', role: 'a friendly conversation partner; let the learner choose the topic',
+  { id: 'frei', ic: '🌟', lv: 'alle', de: 'Freies Gespräch', en: 'Free conversation', role: 'a friendly conversation partner; let the learner choose the topic', tags: ['alltag', 'reisen', 'arbeit', 'pruefung', 'behoerden'],
     goals: ['Wähle ein Thema', 'Sprich mindestens 6 Mal', 'Stell selbst 2 Fragen'] }
 ];
+const GOALS = [['alltag', '🏡 Alltag'], ['arbeit', '💼 Arbeit'], ['pruefung', '🎓 Prüfung (telc/Goethe)'], ['reisen', '✈️ Reisen'], ['behoerden', '🏛️ Ämter & Papiere']];
 const LEVELS = ['A1', 'A2', 'B1', 'B2'];
+const SCRIPTS = window.DC_TUTOR_SCRIPTS || {};
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = {
   get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 };
 const aiOn = () => typeof dcAIConfigured === 'function' && dcAIConfigured();
-let ST = store.get('dc_tutor_v1', { tutor: 'lena', level: 'A2', done: {}, sessions: 0, minutes: 0 });
-let S = null;   // current session
-
-/* ---------------- setup ---------------- */
-function renderSetup() {
-  document.getElementById('noKey').hidden = aiOn();
-  const doneN = Object.values(ST.done).reduce((a, b) => a + b, 0);
-  document.getElementById('statsRow').innerHTML = `<span class="chip">🗣️ ${ST.sessions} Gespräche</span><span class="chip">🏅 ${doneN} Missionen geschafft</span>
-    <span class="chip">⏱️ ${Math.round(ST.minutes)} Min. gesprochen</span><span class="chip">📓 ${store.get('de_coach_vault', []).length} im Fehler-Tagebuch</span>`;
-  document.getElementById('tutorList').innerHTML = TUTORS.map(t => `<button type="button" class="tutor ${ST.tutor === t.id ? 'active' : ''}" data-tutor="${t.id}">
-    <div class="face">${t.face}</div><b>${esc(t.name)} · ${esc(t.de)}</b><small>🇬🇧 ${esc(t.en)}</small></button>`).join('');
-  document.getElementById('levelRow').innerHTML = LEVELS.map(l => `<button type="button" class="chip ${ST.level === l ? 'active' : ''}" data-level="${l}">${l}</button>`).join('');
-  const order = { A1: 0, A2: 1, B1: 2, B2: 3, alle: 4 };
-  document.getElementById('missionList').innerHTML = MISSIONS.slice().sort((a, b) => order[a.lv] - order[b.lv]).map(m => `<button type="button" class="mission" data-mission="${m.id}" ${aiOn() ? '' : 'disabled'}>
-    <span class="lvl">${m.lv}</span><span class="ic">${m.ic}</span><b>${esc(m.de)}</b><small>🇬🇧 ${esc(m.en)} · ${m.goals.length} Ziele</small>
-    ${ST.done[m.id] ? `<span class="done">✓ ${ST.done[m.id]}× geschafft</span>` : ''}</button>`).join('');
-}
+const today = () => new Date().toISOString().slice(0, 10);
+let ST = Object.assign({ tutor: 'lena', level: 'A1', mode: 'guided', done: {}, sessions: 0, minutes: 0, days: {}, profile: null }, store.get('dc_tutor_v1', {}));
+if (ST.tutor && !TUTORS.some(t => t.id === ST.tutor)) ST.tutor = 'lena';
+let S = null;
+const $ = id => document.getElementById(id);
 function saveST() { store.set('dc_tutor_v1', ST); }
+function show(view) { ['onbView', 'homeView', 'callView', 'reportView'].forEach(v => $(v).hidden = v !== view); window.scrollTo({ top: 0 }); }
 
-/* ---------------- AI ---------------- */
+/* ---------------- avatars ---------------- */
+function avatarSVG(t, cls) {
+  const L = t.look, sk = L.skin, hr = L.hair;
+  const hairBack = L.style === 'long' ? `<path d="M52 92 Q48 40 100 36 Q152 40 148 92 L152 160 Q100 150 48 160 Z" fill="${hr}"/>`
+    : L.style === 'bun' ? `<circle cx="100" cy="30" r="18" fill="${hr}"/>` : '';
+  const hairTop = L.style === 'curly' ? `<g fill="${hr}">${[62, 76, 90, 104, 118, 132].map((x, i) => `<circle cx="${x + 4}" cy="${52 - (i % 2) * 6}" r="16"/>`).join('')}</g>`
+    : L.style === 'side' ? `<path d="M58 78 Q60 42 102 42 Q140 42 144 70 Q118 56 84 64 Q70 68 58 84 Z" fill="${hr}"/>`
+    : L.style === 'short' ? `<path d="M58 80 Q58 40 100 40 Q142 40 142 80 Q126 58 100 58 Q74 58 58 80 Z" fill="${hr}"/>`
+    : `<path d="M56 86 Q56 40 100 40 Q144 40 144 86 Q138 60 100 58 Q62 60 56 86 Z" fill="${hr}"/>`;
+  return `<svg viewBox="0 0 200 200" class="av ${cls || ''}" role="img" aria-label="${esc(t.name)}">
+    ${hairBack}
+    <path d="M40 200 Q44 150 100 146 Q156 150 160 200 Z" fill="${L.shirt}"/>
+    ${L.tie ? '<path d="M96 150 L104 150 L108 186 L100 196 L92 186 Z" fill="#b91c1c"/>' : ''}
+    <rect x="88" y="128" width="24" height="24" rx="8" fill="${sk}"/>
+    <g class="head">
+      <ellipse cx="100" cy="92" rx="44" ry="50" fill="${sk}"/>
+      <ellipse cx="56" cy="96" rx="7" ry="11" fill="${sk}"/><ellipse cx="144" cy="96" rx="7" ry="11" fill="${sk}"/>
+      ${hairTop}
+      <ellipse cx="82" cy="92" rx="6" ry="7" fill="#1f2937"/><ellipse cx="118" cy="92" rx="6" ry="7" fill="#1f2937"/>
+      <circle cx="84" cy="90" r="2" fill="#fff"/><circle cx="120" cy="90" r="2" fill="#fff"/>
+      <g class="lids" fill="${sk}"><rect x="74" y="84" width="16" height="16" rx="6"/><rect x="110" y="84" width="16" height="16" rx="6"/></g>
+      <path d="M74 78 Q82 73 90 77" stroke="${hr === '#e5e7eb' ? '#9ca3af' : hr}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M110 77 Q118 73 126 78" stroke="${hr === '#e5e7eb' ? '#9ca3af' : hr}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      ${L.glasses ? '<g fill="none" stroke="#374151" stroke-width="2.5"><circle cx="82" cy="92" r="12"/><circle cx="118" cy="92" r="12"/><path d="M94 92 L106 92"/></g>' : ''}
+      ${L.bindi ? '<circle cx="100" cy="74" r="3" fill="#dc2626"/>' : ''}
+      <path d="M100 98 Q96 110 101 112" stroke="#00000033" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="74" cy="112" r="7" fill="#f87171" opacity=".18"/><circle cx="126" cy="112" r="7" fill="#f87171" opacity=".18"/>
+      ${L.beard ? `<path d="M64 110 Q70 146 100 146 Q130 146 136 110 Q124 132 100 132 Q76 132 64 110 Z" fill="${hr}" opacity=".85"/>` : ''}
+      <ellipse class="mouth" cx="100" cy="124" rx="11" ry="5" fill="#7f1d1d"/>
+      <path d="M89 122 Q100 128 111 122" stroke="#7f1d1d" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+  </svg>`;
+}
+const tutorOf = id => TUTORS.find(t => t.id === id) || TUTORS[0];
+
+/* ---------------- onboarding ---------------- */
+let ONB = { goal: 'alltag', level: 'A1', min: 10 };
+function renderOnb() {
+  $('onbGoal').innerHTML = GOALS.map(([k, l]) => `<button type="button" class="chip ${ONB.goal === k ? 'active' : ''}" data-onbgoal="${k}">${l}</button>`).join('');
+  $('onbLevel').innerHTML = LEVELS.map(l => `<button type="button" class="chip ${ONB.level === l ? 'active' : ''}" data-onblevel="${l}">${l}</button>`).join('');
+  $('onbMin').innerHTML = [5, 10, 15, 20].map(m => `<button type="button" class="chip ${ONB.min === m ? 'active' : ''}" data-onbmin="${m}">${m} Min.</button>`).join('');
+}
+
+/* ---------------- home ---------------- */
+function streak() {
+  let n = 0; const d = new Date();
+  if (!(ST.days[today()] > 0)) d.setDate(d.getDate() - 1);            // today not practised yet: count up to yesterday
+  for (;;) { const k = d.toISOString().slice(0, 10); if (ST.days[k] > 0) { n++; d.setDate(d.getDate() - 1); } else break; }
+  return n;
+}
+function pathMissions() {
+  const lvIdx = LEVELS.indexOf(ST.level), goal = ST.profile ? ST.profile.goal : 'alltag';
+  const lvOf = m => m.lv === 'alle' ? lvIdx : LEVELS.indexOf(m.lv);
+  return MISSIONS.slice().sort((a, b) => (Math.abs(lvOf(a) - lvIdx) - Math.abs(lvOf(b) - lvIdx)) || ((b.tags.includes(goal)) - (a.tags.includes(goal))) || (lvOf(a) - lvOf(b)));
+}
+function recommended() { const p = pathMissions(); return p.find(m => !ST.done[m.id] && (ST.mode !== 'guided' || SCRIPTS[m.id])) || p[0]; }
+function renderHome() {
+  const doneN = Object.values(ST.done).reduce((a, b) => a + b, 0), todayMin = ST.days[today()] || 0, goalMin = ST.profile ? ST.profile.min : 10;
+  $('stats').innerHTML = `<div class="stat"><b>🔥 ${streak()}</b><span>Tage in Folge</span></div>
+    <div class="stat"><b>${Math.round(todayMin)} / ${goalMin}</b><span>Minuten heute</span><div class="dayring"><i style="width:${Math.min(100, 100 * todayMin / goalMin)}%"></i></div></div>
+    <div class="stat"><b>🏅 ${doneN}</b><span>Lektionen geschafft</span></div>
+    <div class="stat"><b>📓 ${store.get('de_coach_vault', []).length}</b><span>im Fehler-Tagebuch</span></div>`;
+  const m = recommended(), t = tutorOf(ST.tutor);
+  $('todayCard').innerHTML = `<div class="face">${avatarSVG(t)}</div><div><small style="margin:0;">Heute für dich · ${esc(t.name)} wartet</small>
+    <b>${m.ic} ${esc(m.de)}</b><small>🇬🇧 ${esc(m.en)} · ${m.lv} · ${m.goals.length} Ziele</small>
+    <div class="row"><button type="button" class="btn" data-start="${m.id}">▶ Anruf starten</button>
+    ${ST.mode === 'guided' && aiOn() ? `<button type="button" class="btn ghost" data-startai="${m.id}">🤖 frei mit KI</button>` : ''}</div></div>`;
+  $('modeRow').innerHTML = `<button type="button" class="${ST.mode === 'guided' ? 'active' : ''}" data-mode="guided"><b>🎓 Geführte Lektion</b><small>Tutor spricht, du antwortest — mit Aufgabe, Hilfe und Aussprache-Punkten. Ohne KI, auch offline.</small></button>
+    <button type="button" class="${ST.mode === 'ai' ? 'active' : ''}" data-mode="ai" ${aiOn() ? '' : 'disabled'}><b>🤖 Freies Gespräch (KI)</b><small>Sag, was du willst — die KI antwortet in ihrer Rolle und korrigiert dich sofort.</small></button>`;
+  $('noKey').hidden = aiOn();
+  $('tutorList').innerHTML = TUTORS.map(x => `<button type="button" class="tutor ${ST.tutor === x.id ? 'active' : ''}" data-tutor="${x.id}">${avatarSVG(x)}<b>${esc(x.name)}</b><small>${esc(x.role)}</small><small>🇬🇧 ${esc(x.en)}</small></button>`).join('');
+  const p = ST.profile || { goal: 'alltag', min: 10 };
+  $('profileNote').textContent = `(${(GOALS.find(g => g[0] === p.goal) || GOALS[0])[1]} · ${ST.level} · ${p.min} Min./Tag)`;
+  const byLv = {}; pathMissions().forEach(mm => { (byLv[mm.lv] = byLv[mm.lv] || []).push(mm); });
+  $('pathList').innerHTML = [...LEVELS, 'alle'].filter(l => byLv[l]).map(l => `<div class="path-level">${l === 'alle' ? '🌟 Für alle Niveaus' : l}${l === ST.level ? ' ← dein Niveau' : ''}</div>
+    <div class="missions">${byLv[l].map(mm => `<button type="button" class="mission" data-start="${mm.id}">${ST.done[mm.id] ? `<span class="done">✓ ${ST.done[mm.id]}×</span>` : ''}
+      <span class="ic">${mm.ic}</span><b>${esc(mm.de)}</b><small>🇬🇧 ${esc(mm.en)}</small>
+      <small>${SCRIPTS[mm.id] ? '🎓 geführt' : ''}${SCRIPTS[mm.id] && aiOn() ? ' · ' : ''}${aiOn() ? '🤖 frei' : ''}</small></button>`).join('')}</div>`).join('');
+}
+
+/* ---------------- call ---------------- */
+let timerId = null;
+function startCall(id, mode) {
+  const mission = MISSIONS.find(m => m.id === id);
+  if (mode === 'guided' && !SCRIPTS[id]) mode = aiOn() ? 'ai' : null;
+  if (mode === 'ai' && !aiOn()) mode = SCRIPTS[id] ? 'guided' : null;
+  if (!mode) { alert('Für diese Lektion gibt es noch keine geführte Version — bitte einen KI-Schlüssel eintragen.'); return; }
+  S = { mode, mission, tutor: ST.tutor, level: ST.level, script: SCRIPTS[id], i: 0, tries: 0, history: [], goals: new Set(), corrections: [],
+    scores: [], helpUsed: 0, turns: 0, start: Date.now(), complete: false, practice: null, lastSugg: [], showTr: false };
+  const t = tutorOf(S.tutor);
+  show('callView');
+  $('bigFace').innerHTML = avatarSVG(t);
+  $('callMode').textContent = mode === 'guided' ? '🎓 Geführte Lektion' : '🤖 Freies Gespräch';
+  $('callTitle').textContent = `${mission.ic} ${mission.de} · ${S.level}`;
+  $('log').innerHTML = ''; $('sugg').hidden = true; $('interim').textContent = ''; $('taskBox').hidden = true; $('subtitle').innerHTML = '';
+  $('howBtn').hidden = mode !== 'ai';
+  renderGoals();
+  clearInterval(timerId);
+  timerId = setInterval(() => { const s = Math.floor((Date.now() - S.start) / 1000); $('callTimer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }, 1000);
+  if (mode === 'guided') guidedTurn(); else aiTurn(null);
+}
+function renderGoals() {
+  $('goalChips').innerHTML = S.mission.goals.map((g, i) => `<span class="${S.goals.has(i) ? 'ok' : ''}">${S.goals.has(i) ? '✓' : '○'} ${esc(g)}</span>`).join('');
+}
+function setState(txt) { $('callState').textContent = txt || ''; }
+function face() { return document.querySelector('#bigFace .av'); }
+function logBubble(html, cls) {
+  const d = document.createElement('div'); d.className = cls; d.innerHTML = html; $('log').appendChild(d);
+  $('log').scrollTop = $('log').scrollHeight; return d;
+}
+function tutorSays(de, en, ta, then) {
+  S.cur = { de, en, ta };
+  renderSubtitle();
+  logBubble(`${esc(de)}<div class="tools"><button type="button" data-say="${esc(de)}">🔊</button><button type="button" data-slow="${esc(de)}">🐢</button></div>`, 'msg ai');
+  speak(de, () => { setState('Du bist dran — 🎙️ drücken'); if (then) then(); });
+}
+function renderSubtitle() {
+  const c = S.cur || {};
+  $('subtitle').innerHTML = `${esc(c.de || '')}${S.showTr && (c.en || c.ta) ? `<div class="tr">🇬🇧 ${esc(c.en || '')}${c.ta && $('optTa').checked ? `<br><span lang="ta">🇮🇳 ${esc(c.ta)}</span>` : ''}</div>` : ''}`;
+}
+function autoMic() { if ($('optHands').checked && !S.complete) setTimeout(startMic, 250); }
+
+/* ---- guided lesson ---- */
+function guidedTurn() {
+  const sc = S.script;
+  if (S.i >= sc.turns.length) {
+    S.complete = true; $('taskBox').hidden = true; $('sugg').hidden = true;
+    tutorSays(sc.end, sc.end_en, sc.end_ta, () => setTimeout(endCall, 900));
+    return;
+  }
+  const t = sc.turns[S.i]; S.tries = 0; S.helped = false;
+  $('sugg').hidden = true;
+  $('taskBox').hidden = false;
+  $('taskBox').innerHTML = `🎯 <b>Deine Aufgabe:</b> ${esc(t.task_en)}${t.task_ta && $('optTa').checked ? `<div class="ta" lang="ta">🇮🇳 ${esc(t.task_ta)}</div>` : ''}`;
+  S.lastSugg = t.options.map(o => o.de);
+  tutorSays(t.tutor, t.tutor_en, t.tutor_ta, autoMic);
+}
+/* sample names in the model answers ("Ich heiße Arun") — the learner says their own name, so they don't count */
+const SAMPLE_NAMES = /\b(arun|priya|karthik|kumar|raman|meena|ravi|lakshmi)\b/gi;
+function guidedAnswer(text) {
+  const t = S.script.turns[S.i];
+  const best = t.options.map(o => ({ o, r: speechScore(o.de.replace(SAMPLE_NAMES, ' '), text) })).sort((a, b) => b.r.score - a.r.score)[0];
+  const words = best.r.words.map((w, k) => `<span class="${best.r.ok[k] ? 'ok-w' : 'no-w'}">${esc(w)}</span>`).join(' ');
+  S.tries++;
+  if (best.r.score >= 60) {
+    S.scores.push(best.r.score); S.turns++;
+    if (t.goal != null && t.goal >= 0) S.goals.add(t.goal);
+    if (S.helped) S.helpUsed++;
+    renderGoals();
+    logBubble(`${best.r.score >= 85 ? '🌟 Super!' : '✅ Gut!'} <b>${best.r.score}%</b> — ${words}${best.r.score < 100 ? `<div>Modell: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button></div>` : ''}
+      ${t.tip ? `<div class="note">💡 ${esc(t.tip)}</div>` : ''}`, 'fbk good');
+    S.i++; setTimeout(guidedTurn, 700);
+  } else if (S.tries < 2) {
+    logBubble(`🤔 Fast — <b>${best.r.score}%</b>. Versuch es noch einmal! Nah dran: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button>`, 'fbk bad');
+    showHelp(true); autoMic();
+  } else {
+    S.scores.push(best.r.score); S.turns++;
+    S.corrections.push({ original: text, corrected: best.o.de, why: t.tip || 'Wiederhole diesen Satz.', why_ta: '' });
+    logBubble(`📌 So sagt man es: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button> — kommt in dein Fehler-Tagebuch.${t.tip ? `<div class="note">💡 ${esc(t.tip)}</div>` : ''}`, 'fbk bad');
+    if (t.goal != null && t.goal >= 0) S.goals.add(t.goal);
+    renderGoals(); S.i++; setTimeout(guidedTurn, 1400);
+  }
+}
+
+/* ---- free AI conversation ---- */
 function systemPrompt() {
-  const t = TUTORS.find(x => x.id === S.tutor), m = S.mission;
+  const t = tutorOf(S.tutor), m = S.mission;
   return `${t.style} You are role-playing as ${m.role} in a German practice conversation with a learner at CEFR level ${S.level}
 whose native languages are English and Tamil. Mission: "${m.de}" (${m.en}). The learner's goals (ids g0..g${m.goals.length - 1}):
 ${m.goals.map((g, i) => `g${i}: ${g}`).join('\n')}
@@ -231,112 +446,101 @@ Rules:
 - "suggestions": 3 short, different, correct German replies the learner could say next (level ${S.level}).
 - When all goals are done, wrap up the scene politely and set "mission_complete": true.
 Answer ONLY with JSON, no other text:
-{"reply":"...","reply_en":"English translation of reply","correction":null or {"wrong":"learner's wrong part","right":"corrected sentence","why":"short English explanation","why_ta":"short Tamil explanation"},"better":null or "...","goals_done":["g0"],"suggestions":["...","...","..."],"mission_complete":false}`;
+{"reply":"...","reply_en":"English translation of reply","reply_ta":"Tamil translation of reply","correction":null or {"wrong":"learner's wrong part","right":"corrected sentence","why":"short English explanation","why_ta":"short Tamil explanation"},"better":null or "...","goals_done":["g0"],"suggestions":["...","...","..."],"mission_complete":false}`;
 }
 function parseAI(txt) {
   try { const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1)); if (j && typeof j.reply === 'string') return j; } catch (e) {}
   return { reply: String(txt || '').trim(), reply_en: '', correction: null, better: null, goals_done: [], suggestions: [], mission_complete: false };
 }
-async function askAI(userText) {
+async function aiTurn(userText) {
   if (userText != null) S.history.push({ role: 'user', content: userText });
   const msgs = [{ role: 'system', content: systemPrompt() }, ...S.history.slice(-16)];
   if (userText == null) msgs.push({ role: 'user', content: '(Start the scene now with a short greeting and your first question.)' });
-  const raw = await dcCallAI(msgs, { temperature: 0.6 });
-  const j = parseAI(raw);
-  S.history.push({ role: 'assistant', content: JSON.stringify({ reply: j.reply }) });
-  return j;
-}
-
-/* ---------------- conversation ---------------- */
-async function startMission(id) {
-  if (!aiOn()) return;
-  S = { tutor: ST.tutor, level: ST.level, mission: MISSIONS.find(m => m.id === id), history: [], goals: new Set(), corrections: [], better: [],
-    turns: 0, start: Date.now(), practice: null, complete: false };
-  const t = TUTORS.find(x => x.id === S.tutor);
-  document.getElementById('setupView').hidden = true; document.getElementById('reportView').hidden = true; document.getElementById('talkView').hidden = false;
-  document.getElementById('avatar').textContent = t.face;
-  document.getElementById('tutorName').textContent = `${t.name} · ${t.de}`;
-  document.getElementById('missionName').textContent = `${S.mission.ic} ${S.mission.de} · ${S.level}`;
-  document.getElementById('chat').innerHTML = '';
-  document.getElementById('sugg').hidden = true; document.getElementById('interim').textContent = ''; document.getElementById('input').value = '';
-  renderGoals(); window.scrollTo({ top: 0 });
-  await aiTurn(null);
-}
-function renderGoals() {
-  document.getElementById('goalList').innerHTML = S.mission.goals.map((g, i) => `<li class="${S.goals.has('g' + i) ? 'ok' : ''}">${S.goals.has('g' + i) ? '✅' : '⬜'} ${esc(g)}</li>`).join('');
-}
-function addBubble(html, cls) {
-  const chat = document.getElementById('chat');
-  const d = document.createElement('div'); d.className = cls; d.innerHTML = html; chat.appendChild(d);
-  d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  return d;
-}
-async function aiTurn(userText) {
-  const typing = addBubble('✍️ …', 'typing');
-  setBusy(true);
+  setBusy(true); setState('✍️ denkt nach …');
   try {
-    const j = await askAI(userText);
-    typing.remove();
-    if (userText != null) showFeedback(j);
-    (j.goals_done || []).forEach(g => { if (/^g\d+$/.test(g) && +g.slice(1) < S.mission.goals.length) S.goals.add(g); });
+    const j = parseAI(await dcCallAI(msgs, { temperature: 0.6 }));
+    S.history.push({ role: 'assistant', content: JSON.stringify({ reply: j.reply }) });
+    if (userText != null) aiFeedback(j);
+    (j.goals_done || []).forEach(g => { const n = +String(g).replace(/\D/g, ''); if (!isNaN(n) && n < S.mission.goals.length) S.goals.add(n); });
     renderGoals();
-    const id = 'r' + Date.now();
-    addBubble(`${esc(j.reply)}<div class="tr" id="${id}" hidden>🇬🇧 ${esc(j.reply_en || '')}</div>
-      <div class="tools"><button type="button" data-say="${esc(j.reply)}">🔊</button><button type="button" data-slow="${esc(j.reply)}">🐢</button>
-      ${j.reply_en ? `<button type="button" data-tr="${id}">🌐 Übersetzung</button>` : ''}</div>`, 'msg ai');
-    S.lastSugg = (j.suggestions || []).filter(Boolean).slice(0, 3);
-    document.getElementById('sugg').hidden = true;
-    if (j.mission_complete || S.goals.size === S.mission.goals.length) { S.complete = true; addBubble('🏅 <b>Mission geschafft!</b> Du kannst weitersprechen oder auf „🏁 Beenden“ drücken.', 'typing'); }
-    speakTutor(j.reply, () => { if (document.getElementById('optHands').checked && !S.complete) startMic(); });
-  } catch (e) {
-    typing.remove(); addBubble('❌ ' + esc(e.message), 'typing');
-  } finally { setBusy(false); }
+    S.lastSugg = (j.suggestions || []).filter(Boolean).slice(0, 3); $('sugg').hidden = true;
+    if (j.mission_complete || S.goals.size === S.mission.goals.length) S.complete = true;
+    setBusy(false);
+    tutorSays(j.reply, j.reply_en, j.reply_ta, () => { if (S.complete) logBubble('🏅 <b>Mission geschafft!</b> Weiterreden oder 📞 Beenden.', 'fbk good'); else autoMic(); });
+  } catch (e) { setBusy(false); setState(''); logBubble('❌ ' + esc(e.message), 'fbk bad'); }
 }
-function showFeedback(j) {
+function aiFeedback(j) {
   const c = j.correction;
   if (c && c.right) {
     S.corrections.push({ original: S.lastUser, corrected: c.right, why: c.why || '', why_ta: c.why_ta || '' });
-    addBubble(`✏️ ${c.wrong ? `<s>${esc(c.wrong)}</s> → ` : ''}<span class="right">${esc(c.right)}</span>
-      ${c.why ? `<div>💡 ${esc(c.why)}</div>` : ''}${c.why_ta && document.getElementById('optTa').checked ? `<div class="ta" lang="ta">🇮🇳 ${esc(c.why_ta)}</div>` : ''}
-      <div class="tools" style="margin-top:4px;"><button type="button" data-say="${esc(c.right)}">🔊 richtig anhören</button><button type="button" data-repeat="${esc(c.right)}">🎙️ nachsprechen</button></div>`, 'corr bad');
-  } else {
-    addBubble('✅ Richtig!' + (j.better ? ` <span class="note">Noch natürlicher: <b>${esc(j.better)}</b> <button type="button" data-say="${esc(j.better)}" style="font-size:11px;">🔊</button></span>` : ''), 'corr good');
-  }
-  if (j.better && c) S.better.push(j.better);
+    logBubble(`✏️ ${c.wrong ? `<s>${esc(c.wrong)}</s> → ` : ''}<span class="right">${esc(c.right)}</span>
+      ${c.why ? `<div>💡 ${esc(c.why)}</div>` : ''}${c.why_ta && $('optTa').checked ? `<div class="ta" lang="ta">🇮🇳 ${esc(c.why_ta)}</div>` : ''}
+      <div class="tools"><button type="button" class="mini" data-say="${esc(c.right)}">🔊</button> <button type="button" class="mini" data-repeat="${esc(c.right)}">🎙️ nachsprechen</button></div>`, 'fbk bad');
+  } else logBubble('✅ Richtig!' + (j.better ? ` <span class="note">Noch natürlicher: <b>${esc(j.better)}</b> <button type="button" class="mini" data-say="${esc(j.better)}">🔊</button></span>` : ''), 'fbk good');
 }
-function sendText(text) {
-  text = String(text || '').trim(); if (!text || S.busy) return;
-  document.getElementById('input').value = '';
+
+/* ---- learner input (both modes) ---- */
+function send(text) {
+  text = String(text || '').trim(); if (!text || !S || S.busy) return;
+  $('input').value = ''; $('interim').textContent = '';
   let extra = '';
-  if (S.practice) {                                   // the learner repeated a suggestion/correction: pronunciation score
+  if (S.practice) {
     const r = speechScore(S.practice, text);
-    extra = `<div class="tr">🎯 Aussprache: <b>${r.score}%</b> — ${r.words.map((w, i) => `<span class="${r.ok[i] ? 'score-ok' : 'score-no'}">${esc(w)}</span>`).join(' ')}</div>`;
+    extra = `<div class="note">🎯 Aussprache: <b>${r.score}%</b> — ${r.words.map((w, k) => `<span class="${r.ok[k] ? 'ok-w' : 'no-w'}">${esc(w)}</span>`).join(' ')}</div>`;
     S.practice = null;
+    logBubble(esc(text) + extra, 'msg me');
+    return;                                          // a repeat drill, not a new turn
   }
-  addBubble(esc(text) + extra, 'msg me');
-  S.lastUser = text; S.turns++;
-  aiTurn(text);
+  logBubble(esc(text), 'msg me');
+  S.lastUser = text;
+  if (S.mode === 'guided') guidedAnswer(text); else { S.turns++; aiTurn(text); }
 }
-function setBusy(b) { S.busy = b; document.getElementById('sendBtn').disabled = b; document.getElementById('micBtn').disabled = b; }
+function setBusy(b) { S.busy = b; $('micBtn').disabled = b; $('sendBtn').disabled = b; }
+function showHelp(force) {
+  const box = $('sugg');
+  if (!force && !box.hidden) { box.hidden = true; return; }
+  S.helped = true;
+  const opts = S.mode === 'guided' && S.script.turns[S.i] ? S.script.turns[S.i].options : (S.lastSugg || []).map(de => ({ de }));
+  box.hidden = false;
+  box.innerHTML = opts.length ? '<div class="note">💡 So kannst du antworten — 🔊 anhören, dann selbst sagen:</div>' + opts.map(o => `<div class="opt"><b data-use="${esc(o.de)}">${esc(o.de)}</b>
+      <button type="button" data-say="${esc(o.de)}">🔊</button><button type="button" data-slow="${esc(o.de)}">🐢</button>
+      ${o.en ? `<span class="note">🇬🇧 ${esc(o.en)}${o.ta && $('optTa').checked ? ` · <span lang="ta">🇮🇳 ${esc(o.ta)}</span>` : ''}</span>` : ''}</div>`).join('')
+    : '<span class="note">Keine Vorschläge — versuch einen einfachen Satz!</span>';
+}
+async function howDoISay() {
+  const en = prompt('Was möchtest du sagen? (Englisch oder Tamil)'); if (!en) return;
+  const b = logBubble('⏳ …', 'fbk good');
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: `Translate the learner's message into simple, natural German at CEFR level ${S.level} that fits this situation: ${S.mission.en} (the learner talks to ${S.mission.role}). Answer ONLY with the German sentence.` },
+      { role: 'user', content: en }], { temperature: 0.2 });
+    const de = txt.trim().replace(/^"|"$/g, '');
+    b.innerHTML = `🇬🇧 ${esc(en)} → 🇩🇪 <b>${esc(de)}</b> <button type="button" class="mini" data-say="${esc(de)}">🔊</button> <button type="button" class="mini" data-repeat="${esc(de)}">🎙️ üben</button>`;
+  } catch (e) { b.textContent = '❌ ' + e.message; }
+}
 
 /* ---------------- speech ---------------- */
 let deVoice = null;
 function pickVoice() { try { const v = speechSynthesis.getVoices(); deVoice = v.find(x => /^de(-|_)DE/i.test(x.lang)) || v.find(x => /^de/i.test(x.lang)) || null; } catch (e) {} }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speakTutor(text, onend, rate) {
-  const av = document.getElementById('avatar');
-  if (!document.getElementById('optVoice').checked || !('speechSynthesis' in window)) { if (onend) onend(); return; }
+function speak(text, onend, rate) {
+  const f = face();
+  const finish = () => { if (f) f.classList.remove('talking'); setState(''); if (onend) onend(); };
+  if (!$('optVoice').checked || !('speechSynthesis' in window)) {
+    if (f) { f.classList.add('talking'); setTimeout(finish, Math.min(2500, 400 + text.length * 35)); } else finish();   // silent: short mouth animation
+    return;
+  }
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; if (deVoice) u.voice = deVoice;
-    u.rate = rate || +document.getElementById('optRate').value;
-    let done = false; const fin = () => { if (done) return; done = true; av.classList.remove('speaking'); if (onend) onend(); };
-    u.onstart = () => av.classList.add('speaking'); u.onend = fin; u.onerror = fin;
-    setTimeout(fin, 3000 + text.length * 120);        // some browsers never fire onend
+    u.rate = rate || +$('optRate').value;
+    let done = false; const fin = () => { if (done) return; done = true; finish(); };
+    u.onstart = () => { if (f) f.classList.add('talking'); setState('🔊 spricht …'); };
+    u.onend = fin; u.onerror = fin;
+    setTimeout(fin, 3000 + text.length * 120);
     speechSynthesis.speak(u);
-  } catch (e) { if (onend) onend(); }
+  } catch (e) { finish(); }
 }
-function speechWords(x) { return String(x || '').toLowerCase().replace(/[.,!?;:„“"()]/g, '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean); }
+function speechWords(x) { return String(x || '').toLowerCase().replace(/[.,!?;:„“"()–-]/g, ' ').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean); }
 function speechScore(target, heard) {
   const a = speechWords(target), b = speechWords(heard);
   const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
@@ -348,55 +552,26 @@ function speechScore(target, heard) {
 let rec = null;
 function startMic() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const interim = document.getElementById('interim');
-  if (!SR) { interim.textContent = 'Spracherkennung gibt es in diesem Browser nicht (Chrome/Edge verwenden) — bitte tippen.'; return; }
+  if (!SR) { $('interim').textContent = '🎙️ Spracherkennung gibt es in diesem Browser nicht (Chrome/Edge) — bitte ⌨️ Tippen.'; $('typebar').classList.add('show'); return; }
   if (rec) { rec.stop(); return; }
   try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
-  rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true; rec.maxAlternatives = 1;
-  const mic = document.getElementById('micBtn'), av = document.getElementById('avatar');
-  mic.classList.add('on'); av.classList.add('listening'); interim.textContent = '🎙️ Ich höre zu …';
+  rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true;
+  const f = face(); $('micBtn').classList.add('on'); if (f) f.classList.add('listening'); setState('👂 hört zu …');
   let finalText = '';
-  rec.onresult = ev => {
-    let t = ''; for (let i = 0; i < ev.results.length; i++) { t += ev.results[i][0].transcript; if (ev.results[i].isFinal) finalText = t; }
-    interim.textContent = '🎙️ ' + t;
-  };
-  rec.onerror = ev => { interim.textContent = ev.error === 'not-allowed' ? '🎙️ Mikrofon nicht erlaubt.' : ev.error === 'no-speech' ? '🎙️ Nichts gehört — nochmal drücken.' : '🎙️ ' + ev.error; };
-  rec.onend = () => {
-    mic.classList.remove('on'); av.classList.remove('listening'); rec = null;
-    if (finalText.trim()) { interim.textContent = ''; sendText(finalText); }
-  };
-  try { rec.start(); } catch (e) { interim.textContent = e.message; }
+  rec.onresult = ev => { let t = ''; for (let i = 0; i < ev.results.length; i++) { t += ev.results[i][0].transcript; if (ev.results[i].isFinal) finalText = t; } $('interim').textContent = '🎙️ ' + t; };
+  rec.onerror = ev => { $('interim').textContent = ev.error === 'not-allowed' ? '🎙️ Mikrofon nicht erlaubt.' : ev.error === 'no-speech' ? '🎙️ Nichts gehört — nochmal drücken.' : '🎙️ ' + ev.error; };
+  rec.onend = () => { $('micBtn').classList.remove('on'); if (f) f.classList.remove('listening'); setState(''); rec = null; if (finalText.trim()) send(finalText); };
+  try { rec.start(); } catch (e) { $('interim').textContent = e.message; }
 }
 
-/* ---------------- help ---------------- */
-function showSuggestions() {
-  const box = document.getElementById('sugg');
-  if (!S.lastSugg || !S.lastSugg.length) { box.hidden = false; box.innerHTML = '<span class="note">Keine Vorschläge — versuch es mit einem einfachen Satz!</span>'; return; }
-  box.hidden = false;
-  box.innerHTML = '<span class="note">Tippen = übernehmen · 🎙️ = nachsprechen (mit Aussprache-Punkten):</span>' + S.lastSugg.map(s =>
-    `<span style="display:inline-flex; gap:4px;"><button type="button" data-use="${esc(s)}">${esc(s)}</button><button type="button" data-say="${esc(s)}" title="anhören">🔊</button><button type="button" data-repeat="${esc(s)}" title="nachsprechen">🎙️</button></span>`).join('');
-}
-async function howDoISay() {
-  const en = prompt('Was möchtest du sagen? (Englisch oder Tamil)');
-  if (!en) return;
-  const b = addBubble('⏳ …', 'typing');
-  try {
-    const txt = await dcCallAI([{ role: 'system', content: `Translate the learner's message into simple, natural German at CEFR level ${S.level} that fits this situation: ${S.mission.en} (the learner talks to ${S.mission.role}). Answer ONLY with the German sentence.` },
-      { role: 'user', content: en }], { temperature: 0.2 });
-    const de = txt.trim().replace(/^"|"$/g, '');
-    b.className = 'corr good';
-    b.innerHTML = `🇬🇧 ${esc(en)} → 🇩🇪 <b>${esc(de)}</b><div class="tools" style="margin-top:4px;"><button type="button" data-say="${esc(de)}">🔊</button><button type="button" data-repeat="${esc(de)}">🎙️ selbst sagen</button><button type="button" data-use="${esc(de)}">✍️ übernehmen</button></div>`;
-  } catch (e) { b.textContent = '❌ ' + e.message; }
-}
-
-/* ---------------- report ---------------- */
-async function endMission() {
-  if (rec) rec.stop(); try { speechSynthesis.cancel(); } catch (e) {}
+/* ---------------- end + report ---------------- */
+async function endCall() {
+  if (!S || S.ended) return; S.ended = true;
+  clearInterval(timerId); if (rec) rec.stop(); try { speechSynthesis.cancel(); } catch (e) {}
   const mins = (Date.now() - S.start) / 60000;
-  ST.sessions++; ST.minutes += mins;
+  ST.sessions++; ST.minutes += mins; ST.days[today()] = (ST.days[today()] || 0) + mins;
   if (S.complete) ST.done[S.mission.id] = (ST.done[S.mission.id] || 0) + 1;
   saveST();
-  // corrections go into the KI-Coach's Fehler-Tagebuch (de_coach_vault) for its drill
   if (S.corrections.length) {
     const vault = store.get('de_coach_vault', []);
     S.corrections.forEach(c => vault.unshift({ id: Date.now() + Math.random(), date: new Date().toLocaleDateString(), original: c.original, corrected: c.corrected,
@@ -404,56 +579,98 @@ async function endMission() {
     store.set('de_coach_vault', vault.slice(0, 500));
   }
   if (typeof addXP === 'function') try { addXP(5 * S.turns + 10 * S.goals.size + (S.complete ? 20 : 0), 'KI-Sprechpartner'); } catch (e) {}
-  document.getElementById('talkView').hidden = true; document.getElementById('reportView').hidden = false;
-  const rep = document.getElementById('report');
-  rep.innerHTML = `<h2 style="margin:0;">${S.complete ? '🏅 Mission geschafft!' : '📋 Lernbericht'}</h2>
-    <div class="note">${S.mission.ic} ${esc(S.mission.de)} · ${S.level} · ${S.turns} Antworten · ${Math.max(1, Math.round(mins))} Min.</div>
-    <h3 class="sec">Ziele</h3><ul class="goals">${S.mission.goals.map((g, i) => `<li class="${S.goals.has('g' + i) ? 'ok' : ''}">${S.goals.has('g' + i) ? '✅' : '⬜'} ${esc(g)}</li>`).join('')}</ul>
-    <h3 class="sec">Deine Korrekturen (${S.corrections.length})</h3>
-    ${S.corrections.length ? `<ul class="report">${S.corrections.map(c => `<li><s>${esc(c.original)}</s><br><b>${esc(c.corrected)}</b> <button type="button" class="chip" data-say="${esc(c.corrected)}">🔊</button><div class="note">💡 ${esc(c.why)}</div></li>`).join('')}</ul>
-      <div class="note">📓 Gespeichert im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a> (dort mit „Fehler üben“ wiederholen).</div>` : '<p>Keine Fehler — super! 🎉</p>'}
-    <h3 class="sec">🤖 Feedback</h3><div id="fbAI" class="note">⏳ KI schreibt dein Feedback …</div>
-    <div class="row" style="margin-top:14px;"><button type="button" class="btn" data-again="1">↺ Nochmal</button><button type="button" class="btn grey" data-home="1">← Andere Mission</button></div>`;
-  if (!S.turns) { document.getElementById('fbAI').textContent = 'Du hast noch nichts gesagt — beim nächsten Mal 🎙️ drücken!'; return; }
+  show('reportView');
+  const avg = S.scores.length ? Math.round(S.scores.reduce((a, b) => a + b, 0) / S.scores.length) : null;
+  const words = (S.script && S.script.words) || [];
+  $('report').innerHTML = `<div class="row" style="gap:14px;"><div style="width:90px;">${avatarSVG(tutorOf(S.tutor))}</div>
+      <div><h2 style="margin:0;">${S.complete ? '🏅 Lektion geschafft!' : '📋 Lernbericht'}</h2>
+      <div class="note">${S.mission.ic} ${esc(S.mission.de)} · ${S.level} · ${S.mode === 'guided' ? 'geführt' : 'frei mit KI'} · ${S.turns} Antworten · ${Math.max(1, Math.round(mins))} Min. · 🔥 ${streak()} Tage</div></div></div>
+    ${avg != null ? `<h3 class="sec">🎯 Aussprache</h3><div style="font-size:22px; font-weight:800;">${avg}%</div><div class="note">${S.helpUsed ? `${S.helpUsed}× mit Hilfe · ` : ''}Durchschnitt deiner Antworten (Wort für Wort mit den Modellsätzen verglichen)</div>` : ''}
+    <h3 class="sec">Ziele</h3><div class="goalchips" style="justify-content:flex-start;">${S.mission.goals.map((g, i) => `<span class="chip ${S.goals.has(i) ? 'active' : ''}">${S.goals.has(i) ? '✓' : '○'} ${esc(g)}</span>`).join('')}</div>
+    <h3 class="sec">Zum Üben (${S.corrections.length})</h3>
+    ${S.corrections.length ? `<ul class="report">${S.corrections.map(c => `<li><s>${esc(c.original)}</s><br><b>${esc(c.corrected)}</b> <button type="button" class="mini" data-say="${esc(c.corrected)}">🔊</button><div class="note">💡 ${esc(c.why)}</div></li>`).join('')}</ul>
+      <div class="note">📓 Gespeichert im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a>.</div>` : '<p>Keine Fehler — super! 🎉</p>'}
+    ${words.length ? `<h3 class="sec">Wörter aus dieser Lektion</h3><div class="row" id="wordRow">${words.map(w => `<span class="chip"><span data-say="${esc(w.de)}" style="cursor:pointer;">🔊 ${esc(w.de)}</span> — ${esc(w.en)}</span>`).join('')}</div>
+      <div style="margin-top:8px;"><button type="button" class="btn grey" id="toCards">➕ In meine Karteikarten</button> <span class="note" id="cardsMsg"></span></div>` : ''}
+    <div id="fbAI" class="note"></div>
+    <div class="row" style="margin-top:16px;"><button type="button" class="btn" data-again="1">↺ Nochmal</button>
+      ${recommended() ? `<button type="button" class="btn grey" data-start="${recommended().id}">▶ Nächste: ${esc(recommended().de)}</button>` : ''}
+      <button type="button" class="btn grey" data-home="1">← Lernpfad</button></div>`;
+  const tc = $('toCards'); if (tc) tc.onclick = () => wordsToCards(words);
+  if (S.mode === 'ai' && S.turns) aiReport();
+}
+async function aiReport() {
+  const box = $('fbAI'); box.innerHTML = '<h3 class="sec">🤖 Feedback</h3>⏳ …';
   try {
     const learner = S.history.filter(h => h.role === 'user').map(h => h.content).join('\n');
-    const txt = await dcCallAI([{ role: 'system', content: 'You are a German teacher. Give short, encouraging feedback for a learner (native English/Tamil). Answer ONLY with JSON: {"score":1-10,"strengths":["..."],"work_on":["..."],"words":[{"de":"useful German word/phrase for this situation","en":"English"}]} (max 3 items each, 5 words).' },
+    const txt = await dcCallAI([{ role: 'system', content: 'You are a German teacher. Give short, encouraging feedback for a learner (native English/Tamil). Answer ONLY with JSON: {"score":1-10,"strengths":["..."],"work_on":["..."],"words":[{"de":"useful German word/phrase for this situation (nouns with article)","en":"English"}]} (max 3 items each, 5 words).' },
       { role: 'user', content: `Level ${S.level}, situation: ${S.mission.en}. The learner said:\n${learner}` }], { temperature: 0.3 });
     const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
-    document.getElementById('fbAI').innerHTML = `<div style="font-size:18px;">⭐ ${esc(j.score)}/10</div>
-      ${(j.strengths || []).length ? `<div>👍 ${j.strengths.map(esc).join(' · ')}</div>` : ''}
-      ${(j.work_on || []).length ? `<div>🎯 ${j.work_on.map(esc).join(' · ')}</div>` : ''}
-      ${(j.words || []).length ? `<div style="margin-top:6px;"><b>Nützliche Wörter:</b> ${j.words.map(w => `<span class="chip" data-say="${esc(w.de)}">🔊 ${esc(w.de)} — ${esc(w.en)}</span>`).join(' ')}</div>` : ''}`;
-  } catch (e) { document.getElementById('fbAI').textContent = '(Feedback nicht verfügbar: ' + e.message + ')'; }
+    box.innerHTML = `<h3 class="sec">🤖 Feedback</h3><div style="font-size:18px;">⭐ ${esc(j.score)}/10</div>
+      ${(j.strengths || []).length ? `<div>👍 ${j.strengths.map(esc).join(' · ')}</div>` : ''}${(j.work_on || []).length ? `<div>🎯 ${j.work_on.map(esc).join(' · ')}</div>` : ''}
+      ${(j.words || []).length ? `<div class="row" style="margin-top:6px;">${j.words.map(w => `<span class="chip" data-say="${esc(w.de)}">🔊 ${esc(w.de)} — ${esc(w.en)}</span>`).join('')}</div>
+      <div style="margin-top:8px;"><button type="button" class="btn grey" id="toCards2">➕ In meine Karteikarten</button> <span class="note" id="cardsMsg2"></span></div>` : ''}`;
+    const b = $('toCards2'); if (b) b.onclick = () => wordsToCards(j.words, 'cardsMsg2');
+  } catch (e) { box.innerHTML = '<h3 class="sec">🤖 Feedback</h3>(nicht verfügbar: ' + esc(e.message) + ')'; }
+}
+/* Lesson words → the home flashcards (same mechanism as the Übersetzer: dc_review_requests, only words the app knows) */
+function loadLexicon() {
+  return new Promise(res => {
+    if (window.DC_LEXICON) return res(window.DC_LEXICON);
+    const s = document.createElement('script'); s.src = 'js/lexicon.js'; s.onload = () => res(window.DC_LEXICON || []); s.onerror = () => res([]);
+    document.head.appendChild(s);
+  });
+}
+async function wordsToCards(words, msgId) {
+  const msg = $(msgId || 'cardsMsg'); msg.textContent = '⏳ …';
+  const lex = await loadLexicon();
+  const idx = new Map(lex.map(e => [String(e.w).toLowerCase(), e]));
+  let list = store.get('dc_review_requests', []), added = 0, unknown = [];
+  words.forEach(w => {
+    const bare = String(w.de || '').replace(/^(der|die|das)\s+/i, '').replace(/[.!?]$/, '').trim();
+    const e = idx.get(bare.toLowerCase());
+    if (!e) { unknown.push(w.de); return; }
+    if (!list.some(x => x.c === e.c && x.w === e.w)) { list.push({ c: e.c, w: e.w, a: e.a || '', t: Date.now() }); added++; }
+  });
+  store.set('dc_review_requests', list);
+  msg.textContent = `✓ ${added} Wörter kommen heute in deine Wiederholungen auf der Startseite.` + (unknown.length ? ` (Nicht in der Wortliste: ${unknown.join(', ')})` : '');
 }
 
 /* ---------------- events ---------------- */
 document.addEventListener('click', ev => {
-  const el = ev.target.closest('[data-tutor],[data-level],[data-mission],[data-say],[data-slow],[data-tr],[data-use],[data-repeat],[data-again],[data-home]');
+  const el = ev.target.closest('[data-onbgoal],[data-onblevel],[data-onbmin],[data-tutor],[data-mode],[data-start],[data-startai],[data-say],[data-slow],[data-use],[data-repeat],[data-again],[data-home]');
   if (!el) return;
   const d = el.dataset;
-  if (d.tutor) { ST.tutor = d.tutor; saveST(); renderSetup(); return; }
-  if (d.level) { ST.level = d.level; saveST(); renderSetup(); return; }
-  if (d.mission) { startMission(d.mission); return; }
-  if (d.say) { speakTutor(d.say); return; }
-  if (d.slow) { speakTutor(d.slow, null, 0.7); return; }
-  if (d.tr) { const t = document.getElementById(d.tr); if (t) t.hidden = !t.hidden; return; }
-  if (d.use) { const i = document.getElementById('input'); i.value = d.use; i.focus(); return; }
-  if (d.repeat) { S.practice = d.repeat; document.getElementById('interim').textContent = `🎯 Sprich nach: „${d.repeat}“`; setTimeout(startMic, 150); return; }
-  if (d.again) { startMission(S.mission.id); return; }
-  if (d.home) { document.getElementById('reportView').hidden = true; document.getElementById('setupView').hidden = false; renderSetup(); return; }
+  if (d.onbgoal) { ONB.goal = d.onbgoal; return renderOnb(); }
+  if (d.onblevel) { ONB.level = d.onblevel; return renderOnb(); }
+  if (d.onbmin) { ONB.min = +d.onbmin; return renderOnb(); }
+  if (d.tutor) { ST.tutor = d.tutor; saveST(); return renderHome(); }
+  if (d.mode) { if (d.mode === 'ai' && !aiOn()) return; ST.mode = d.mode; saveST(); return renderHome(); }
+  if (d.start) return startCall(d.start, ST.mode);
+  if (d.startai) return startCall(d.startai, 'ai');
+  if (d.say) return speak(d.say);
+  if (d.slow) return speak(d.slow, null, 0.7);
+  if (d.use) { $('typebar').classList.add('show'); $('input').value = d.use; $('input').focus(); return; }
+  if (d.repeat) { S.practice = d.repeat; $('interim').textContent = `🎯 Sprich nach: „${d.repeat}“`; setTimeout(startMic, 150); return; }
+  if (d.again) return startCall(S.mission.id, S.mode);
+  if (d.home) { show('homeView'); return renderHome(); }
 });
-document.getElementById('sendBtn').onclick = () => sendText(document.getElementById('input').value);
-document.getElementById('micBtn').onclick = () => startMic();
-document.getElementById('helpBtn').onclick = showSuggestions;
-document.getElementById('hintEnBtn').onclick = howDoISay;
-document.getElementById('endBtn').onclick = endMission;
-document.getElementById('input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(e.target.value); } });
+$('onbDone').onclick = () => { ST.profile = { goal: ONB.goal, min: ONB.min }; ST.level = ONB.level; saveST(); show('homeView'); renderHome(); };
+$('editProfile').onclick = () => { ONB = Object.assign({ goal: 'alltag', min: 10 }, ST.profile || {}, { level: ST.level }); renderOnb(); show('onbView'); };
+$('micBtn').onclick = startMic;
+$('helpBtn').onclick = () => showHelp(false);
+$('trBtn').onclick = () => { S.showTr = !S.showTr; renderSubtitle(); };
+$('typeBtn').onclick = () => { $('typebar').classList.toggle('show'); if ($('typebar').classList.contains('show')) $('input').focus(); };
+$('howBtn').onclick = howDoISay;
+$('sendBtn').onclick = () => send($('input').value);
+$('input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); send(e.target.value); } });
+$('endBtn').onclick = () => { if (!S.turns || confirm('Anruf beenden und Lernbericht ansehen?')) endCall(); };
 ['optHands', 'optTa', 'optVoice'].forEach(id => {
-  const el = document.getElementById(id); const v = store.get('dc_tutor_opt_' + id, null); if (v != null) el.checked = v;
+  const el = $(id); const v = store.get('dc_tutor_opt_' + id, null); if (v != null) el.checked = v;
   el.onchange = () => store.set('dc_tutor_opt_' + id, el.checked);
 });
-renderSetup();
+if (ST.mode === 'ai' && !aiOn()) ST.mode = 'guided';
+if (!ST.profile) { ONB.level = ST.level || 'A1'; renderOnb(); show('onbView'); } else { show('homeView'); renderHome(); }
 </script>
 </body>
 </html>
