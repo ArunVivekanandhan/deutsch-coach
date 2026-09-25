@@ -117,6 +117,9 @@
       <button type="button" id="qReview"><b>🔁 Fehler wiederholen</b><small id="qReviewSub">Sätze, die du falsch hattest</small></button>
       <button type="button" id="qNext"><b>🧭 Nächstes Thema</b><small id="qNextSub">der Lernpfad schlägt vor</small></button>
     </div>
+    <div class="note" id="howto" style="margin:4px 0 8px;">ℹ️ Jedes Thema hat <b>Übungssätze</b> (Zahl auf der Karte). <b>✓ gemeistert</b> = 1× richtig ·
+      <b>🏆 Experte</b> = 3× richtig (in beliebigen Übungsarten). Falsche Sätze kommen in „🔁 Fehler wiederholen“ und zählen erst wieder, wenn du sie dort richtig hast.</div>
+    <div class="sb-row" id="aiHome"></div>
     <div class="sb-row" id="levelChips"></div>
     <div class="sb-tabs">
       <button type="button" id="tabG" class="active">📐 Grammatik</button>
@@ -140,6 +143,7 @@
       <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Tamil</label>
       <span class="progress" id="progress"></span>
     </div>
+    <div class="sb-row" id="aiRow" style="margin-bottom:6px;"></div>
     <div class="sb-box" id="card"></div>
   </div>
 
@@ -178,6 +182,46 @@ function orderText(chunks, end) { return chunks.map((c, i) => i === 0 ? cap(c[0]
 function sKey(topicId, s) { return (topicId || 'top') + '::' + sentenceText(s).trim().toLowerCase(); }
 function sentenceLevel(t, s) { return s.lv || t.level; }
 
+/* ---------- word-order check for sentences made at runtime (same rules as scripts/check_satzbau.py) ---------- */
+const V1_TOPICS = new Set(['janein', 'imperativ']), EMBED_TOPICS = new Set(['relativsatz']), ERSATZ_TOPICS = new Set(['ersatzinfinitiv']);
+const ZU_INTRO = new Set(['um', 'ohne', 'statt', 'anstatt']);
+function sentenceProblems(tid, s) {
+  const t = s && s.t;
+  if (!Array.isArray(t) || t.length < 2 || t.length > 10 || !t.every(c => Array.isArray(c) && c.length === 2 && typeof c[0] === 'string' && c[0].trim() && ROLE[c[1]])) return ['format'];
+  const errs = []; let prevSub = false;
+  clauses(t).forEach((cl, ci, cls) => {
+    const roles = cl.map(c => c[1]), words = cl.map(c => c[0]);
+    if (roles[0] === 'N') {
+      const last = roles[roles.length - 1];
+      if (ZU_INTRO.has(words[0].toLowerCase().replace(/,$/, ''))) { if (last !== 'e') errs.push('zu-Infinitiv nicht am Ende'); }
+      else if (!ERSATZ_TOPICS.has(tid)) {
+        if (last !== 'v') errs.push('Verb nicht am Ende des Nebensatzes');
+        if (roles.includes('v') && roles.lastIndexOf('e') > roles.indexOf('v')) errs.push('Infinitiv nach dem Verb');
+      }
+      prevSub = true; return;
+    }
+    const body = roles[0] === 'K' ? roles.slice(1) : roles;
+    if (!body.includes('V')) {
+      if (EMBED_TOPICS.has(tid) || (ci + 1 < cls.length && cls[ci + 1][0][1] === 'N')) { prevSub = false; return; }
+      errs.push('Hauptsatz ohne Verb'); return;
+    }
+    const vi = body.indexOf('V');
+    if (!(vi === 1 || (vi === 0 && (prevSub || V1_TOPICS.has(tid) || EMBED_TOPICS.has(tid))))) errs.push('Verb nicht auf Position 2');
+    prevSub = false;
+  });
+  return errs;
+}
+/* AI-made sentences are kept in this browser (sb_ai_v1: {topicId: [sentence]}) and shown with 🤖 */
+let AI_STORE = store.get('sb_ai_v1', {});
+function saveAIStore() { store.set('sb_ai_v1', AI_STORE); }
+function aiCount() { return Object.values(AI_STORE).reduce((n, a) => n + a.length, 0); }
+ALL_TOPICS.forEach(t => {
+  const have = new Set(t.sentences.map(x => sentenceText(x).toLowerCase()));
+  (AI_STORE[t.id] || []).forEach(x => {
+    if (!sentenceProblems(t.id, x).length && !have.has(sentenceText(x).toLowerCase())) { x.ai = 1; t.sentences.push(x); have.add(sentenceText(x).toLowerCase()); }
+  });
+});
+
 /* ---------- progress ---------- */
 let PROG = store.get('sb_progress_v1', {});
 let REVIEW = store.get('sb_review_v1', []);          // [{id, k}] missed sentences: topic id + sentence key
@@ -198,7 +242,10 @@ function recordResult(topic, s, ok) {
   }
   store.set('sb_review_v1', REVIEW);
 }
-function masteredIn(t) { return t.sentences.filter(s => PROG[sKey(t.id, s)]).length; }
+const EXPERT_AT = 3;
+function inReview(k) { return REVIEW.some(r => r.k === k); }
+function masteredIn(t) { return t.sentences.filter(s => { const k = sKey(t.id, s); return PROG[k] && !inReview(k); }).length; }
+function expertIn(t) { return t.sentences.filter(s => { const k = sKey(t.id, s); return PROG[k] >= EXPERT_AT && !inReview(k); }).length; }
 
 /* ---------- home ---------- */
 let curLevel = store.get('sb_level_v1', 'alle');
@@ -223,11 +270,18 @@ function renderHome() {
   const list = ALL_TOPICS.filter(t => t.kind === curTab && (curLevel === 'alle' || t.level === curLevel ||
     (curTab === 'thematic' && t.sentences.some(s => sentenceLevel(t, s) === curLevel))));
   document.getElementById('topicGrid').innerHTML = list.map(t => {
-    const m = masteredIn(t), n = t.sentences.length, pct = n ? Math.round(100 * m / n) : 0;
-    return `<button type="button" class="topic" data-topic="${esc(t.id)}"><div class="sb-row" style="justify-content:space-between;"><span class="lvl">${esc(levelSpan(t))}</span>${pct >= 100 ? '⭐' : ''}</div>
+    const m = masteredIn(t), x = expertIn(t), n = t.sentences.length, pct = n ? Math.round(100 * m / n) : 0;
+    const nAI = t.sentences.filter(s => s.ai).length;
+    return `<button type="button" class="topic" data-topic="${esc(t.id)}"><div class="sb-row" style="justify-content:space-between;"><span class="lvl">${esc(levelSpan(t))}</span>${x >= n ? '🏆' : pct >= 100 ? '⭐' : ''}</div>
       <div class="t1">${esc(t.title)}</div><div class="t2">🇬🇧 ${esc(t.title_en)}</div>
-      <div class="bar"><i style="width:${pct}%"></i></div><div class="cnt">${m} / ${n} gemeistert</div></button>`;
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="cnt">📝 ${n - nAI} Sätze${nAI ? ` + ${nAI} 🤖` : ''} · ✓ ${m} gemeistert · 🏆 ${x} Experte</div></button>`;
   }).join('') || '<p class="note">Keine Themen für dieses Level in diesem Bereich.</p>';
+  const nAI = aiCount();
+  document.getElementById('aiHome').innerHTML = (typeof dcAIConfigured === 'function' && dcAIConfigured()
+    ? `<span class="note">🤖 KI aktiv: im Thema „🤖 +5 neue Sätze“, nach einem Fehler „🤖 Erklären & üben“.</span>`
+    : `<span class="note">🤖 Mit KI-Schlüssel (<a href="Einstellungen_Setup.html">AI Config & Settings</a>) bekommst du unbegrenzt neue Sätze und persönliche Fehler-Erklärungen.</span>`)
+    + (nAI ? ` <span class="note">· ${nAI} KI-Sätze gespeichert</span> <button type="button" class="btn grey" style="padding:3px 8px;" data-act="exportAI">⬇️ Exportieren</button>` : '');
   document.getElementById('legend').innerHTML = Object.entries(ROLE).map(([r, [de, en]]) =>
     `<span style="${roleStyle(r)}"><b>${r}</b> ${esc(de)} · ${esc(en)}</span>`).join('');
 }
@@ -401,7 +455,8 @@ function renderItem() {
   if (S.i >= S.items.length) return renderSummary();
   const { topic, s } = curItem();
   W = { mode: MODE, tries: 0 };
-  document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}${S.topic ? '' : ' · ' + topic.title}`;
+  document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}${S.topic ? '' : ' · ' + topic.title}${s.ai ? ' · 🤖 KI-Satz' : ''}${curItem().again ? ' · ↻ Wiederholung' : ''}${curItem().extra ? ' · 🏋️ Extra-Übung' : ''}`;
+  renderAIRow();
   const card = document.getElementById('card');
   const color = document.getElementById('optColor').checked;
   const want = curItem().mode || MODE;                  // the mixed round brings its own mode per sentence
@@ -475,9 +530,16 @@ function drawVerb(color) {
 }
 
 /* ---------- checking ---------- */
-function finish(ok, extra, userOrder) {
-  const { topic, s } = curItem();
-  if (!W.done) { recordResult(topic, s, ok); S.results.push({ topic, s, ok }); W.done = true; }
+function finish(ok, extra) {
+  const item = curItem(), { topic, s } = item;
+  if (!W.done) {
+    recordResult(topic, s, ok); S.results.push({ topic, s, ok }); W.done = true;
+    if (ok === false && !item.again) {          // hands-on: the same sentence comes back a few sentences later
+      S.items.splice(Math.min(S.i + 4, S.items.length), 0, { topic, s, mode: item.mode, again: true });
+      W.requeued = true;
+    }
+  }
+  const aiOn = typeof dcAIConfigured === 'function' && dcAIConfigured();
   const target = W.mode === 'transform' ? W.target : s.t;
   const correct = orderText(target, s.end || '.');
   const fb = document.getElementById('fb');
@@ -486,9 +548,13 @@ function finish(ok, extra, userOrder) {
       <div class="sent">${esc(correct)} <button type="button" class="btn grey" data-act="sayCorrect" style="padding:4px 8px;">🔊</button></div>
       ${W.mode !== 'transform' ? planHTML(s) : ''}
       ${!S.topic ? `<div class="note">Regel (${esc(topic.title)}): ${esc(topic.rule)}</div>` : ''}
+      ${W.requeued ? `<div class="note">↻ Dieser Satz kommt in ein paar Sätzen noch einmal — dann sitzt er.</div>` : ''}
+      ${s.ai ? `<div class="note">🤖 KI-Satz (automatisch auf Wortstellung geprüft, kann trotzdem Fehler enthalten). <button type="button" class="btn grey" style="padding:2px 8px;" data-act="delAI">🗑️ Satz löschen</button></div>` : ''}
       <div class="sb-row" style="margin-top:10px;">
         ${ok ? '' : `<button type="button" class="btn grey" data-act="retry">↺ Nochmal diesen Satz</button>`}
-        ${typeof dcAIConfigured === 'function' && dcAIConfigured() ? `<button type="button" class="btn grey" data-act="ai">🤖 Warum diese Reihenfolge?</button>` : ''}
+        ${ok === false ? `<button type="button" class="btn ghost" data-act="similar">🏋️ 3 ähnliche Sätze üben</button>` : ''}
+        ${ok === false && aiOn ? `<button type="button" class="btn ghost" data-act="aiCoach">🤖 Erklären &amp; üben</button>` : ''}
+        ${aiOn && ok !== false ? `<button type="button" class="btn grey" data-act="ai">🤖 Warum diese Reihenfolge?</button>` : ''}
         <button type="button" class="btn" data-act="next">Weiter →</button>
       </div><div id="aiOut" class="note"></div></div>`;
   if (ok || ok === null) say(correct);
@@ -498,6 +564,7 @@ function checkBuild() {
   const { s } = curItem();
   if (W.placed.length < W.target.length) { document.getElementById('fb').innerHTML = `<div class="fb no">Noch ${W.target.length - W.placed.length} Baustein(e) übrig.</div>`; return; }
   const user = W.placed.map(x => x.c);
+  W.user = orderText(user, s.end || '.');
   if (sameOrder(user, W.target)) return finish(true);
   const inv = W.mode !== 'transform' && inversion(s.t);
   if (inv && sameOrder(user, inv.t)) return finish(true, 'Auch richtig — du hast ein anderes Satzglied betont (Vorfeld). Verb bleibt auf Position 2 ✔');
@@ -524,6 +591,7 @@ function normalize(x) { return String(x || '').toLowerCase().replace(/[.,!?;:„
 function checkTyped() {
   const { s } = curItem();
   const v = document.getElementById('typed').value;
+  W.user = v;
   const inv = inversion(s.t);
   const ok = normalize(v) === normalize(sentenceText(s)) || (inv && normalize(v) === normalize(orderText(inv.t, '')));
   document.getElementById('typed').disabled = true;
@@ -558,6 +626,7 @@ function listenMic() {
     const alts = Array.from(ev.results[0]).map(a => a.transcript);
     const best = alts.map(h => ({ h, r: speechScore(sentenceText(s), h) })).sort((x, y) => y.r.score - x.r.score)[0];
     const words = best.r.words.map((w, i) => `<span class="${best.r.ok[i] ? 'say-ok' : 'say-no'}">${esc(w)}</span>`).join(' ');
+    W.user = best.h;
     finish(best.r.score >= 80, `<div>${words}</div><div><b>${best.r.score}%</b> — gehört: „${esc(best.h)}“</div>`);
   };
   rec.onerror = ev => { fb.innerHTML = `<div class="fb no">🎙️ ${ev.error === 'not-allowed' ? 'Mikrofon nicht erlaubt.' : ev.error === 'no-speech' ? 'Nichts gehört — nochmal versuchen.' : esc(ev.error)}</div>`; };
@@ -574,6 +643,129 @@ async function aiWhy() {
       { role: 'user', content: `Topic: ${topic.title_en}. Sentence: "${sentenceText(s)}" (${s.en}). Explain why each part is where it is.` }]);
     out.innerHTML = `🤖 ${esc(txt).replace(/\n/g, '<br>')}`;
   } catch (e) { out.textContent = '❌ ' + e.message; }
+}
+
+/* ---------- more practice ---------- */
+function editDist(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+const roleSig = s => s.t.map(c => c[1]).join('');
+/* sentences of the same topic with the most similar structure (role pattern), inserted right after the current one */
+function practiceSimilar(n) {
+  const item = curItem(), { topic, s } = item;
+  const soon = new Set(S.items.slice(S.i + 1, S.i + 4).map(x => x.s));           // already coming right up
+  const pick = topic.sentences.filter(x => x !== s && !soon.has(x))
+    .map(x => ({ x, d: editDist(roleSig(s), roleSig(x)) + Math.random() * 0.8 })).sort((a, b) => a.d - b.d).slice(0, n).map(o => o.x);
+  // a sentence queued later in this round is moved forward instead of being asked twice
+  S.items = S.items.filter((x, i) => i <= S.i || !pick.includes(x.s) || x.again);
+  S.items.splice(S.i + 1, 0, ...pick.map(x => ({ topic, s: x, mode: W.mode, extra: true })));
+  return pick.length;
+}
+function cleanAISentence(x, topic) {
+  if (!x || !Array.isArray(x.t)) return null;
+  const t = x.t.filter(c => Array.isArray(c) && c.length >= 2).map(c => [String(c[0]).trim(), String(c[1]).trim()]);
+  if (!t.length) return null;
+  let end = String(x.end || '').trim();
+  const m = t[t.length - 1][0].match(/[.?!]+$/);
+  if (m) { t[t.length - 1][0] = t[t.length - 1][0].slice(0, -m[0].length).trim(); end = end || m[0][0]; }
+  if (!/^[.?!]$/.test(end)) end = '.';
+  const out = { t, end, en: String(x.en || '').trim(), ta: String(x.ta || '').trim(), ai: 1 };
+  if (topic.kind === 'thematic') out.lv = curLevel !== 'alle' ? curLevel : 'A2';
+  return out.en && !sentenceProblems(topic.id, out).length ? out : null;
+}
+/* asks the AI for n new sentences of this topic (optionally with the same structure as `like`), keeps only those
+   that pass the word-order check, stores them (sb_ai_v1) and adds them to the topic */
+async function aiGenerate(topic, n, like) {
+  const lvl = topic.kind === 'thematic' && curLevel !== 'alle' ? curLevel : topic.level;
+  const examples = shuffle(topic.sentences.filter(x => !x.ai)).slice(0, 4).map(x => JSON.stringify({ t: x.t, end: x.end, en: x.en, ta: x.ta }));
+  const sys = 'You write German word-order exercises for learners who speak English and Tamil. Output ONLY a JSON array, no other text. ' +
+    'Each item: {"t":[[chunk,role],...],"end":".","en":"English translation","ta":"Tamil translation in Tamil script"}. ' +
+    'Chunks are the Satzglieder in correct German order: a whole noun phrase or prepositional phrase is ONE chunk, every verb form is its own chunk, 3-8 chunks. ' +
+    'Write chunks as they appear in the middle of a sentence (function words lower-case, nouns and names capitalised). A comma belongs to the end of the chunk before it. Final punctuation only in "end". ' +
+    'Roles: S subject; V finite verb of a main clause (always position 2); E verb part at the end of a main clause (participle, infinitive, separable prefix); Q W-question word; ' +
+    'K und/aber/oder/denn/sondern (position 0); A deshalb/trotzdem/dann/außerdem (position 1, verb follows); N word opening a subordinate clause (weil, dass, wenn, ob, obwohl, als, relative pronoun, um/ohne/statt); ' +
+    'v finite verb of a subordinate clause (always last in it); e infinitive/participle before v in a subordinate clause, or the "zu ..." infinitive ending an um/ohne/statt clause; ' +
+    'T time; C reason; M manner; L place; O accusative object; D dative object; P prepositional object; R reflexive pronoun; X nicht/nie; W other complement. ' +
+    'Every German sentence must be 100% correct, natural, everyday German (life in Germany; Tamil/Indian context welcome).';
+  const user = `Topic: ${topic.title} (${topic.title_en}). Rule: ${topic.rule_en}\nLevel: ${lvl}\nExamples:\n${examples.join('\n')}\n` +
+    (like ? `Use the SAME sentence structure as ${JSON.stringify({ t: like.t, end: like.end })}, but with different words and situations.\n` : '') +
+    `Write ${n + 2} NEW sentences (not the examples). JSON array only.`;
+  const txt = await dcCallAI([{ role: 'system', content: sys }, { role: 'user', content: user }], { temperature: 0.7 });
+  let arr = [];
+  try { arr = JSON.parse(txt.slice(txt.indexOf('['), txt.lastIndexOf(']') + 1)); } catch (e) { throw new Error('Die KI-Antwort war kein gültiges JSON — bitte nochmal versuchen.'); }
+  const have = new Set(topic.sentences.map(x => sentenceText(x).toLowerCase()));
+  const added = [];
+  (Array.isArray(arr) ? arr : []).forEach(x => {
+    const c = cleanAISentence(x, topic);
+    if (!c || added.length >= n || have.has(sentenceText(c).toLowerCase())) return;
+    have.add(sentenceText(c).toLowerCase()); added.push(c);
+  });
+  if (added.length) {
+    AI_STORE[topic.id] = (AI_STORE[topic.id] || []).concat(added.map(c => Object.assign({ d: today() }, c))).slice(-300);
+    saveAIStore();
+    added.forEach(c => topic.sentences.push(c));
+  }
+  return { added, offered: Array.isArray(arr) ? arr.length : 0 };
+}
+async function aiCoach() {
+  const item = curItem(), { topic, s } = item;
+  const out = document.getElementById('aiOut');
+  out.innerHTML = '⏳ 🤖 KI schaut sich deinen Fehler an …';
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: 'You are a patient German teacher for a learner who speaks English and Tamil. Be concrete and short.' },
+      { role: 'user', content: `Topic: ${topic.title_en}. Rule: ${topic.rule_en}\nCorrect sentence: "${sentenceText(s)}" (${s.en})\nLearner's answer: "${W.user || '?'}"\n` +
+        '1) Say exactly what is wrong in the learner\'s answer and why (max 4 short lines, simple English). 2) Give the rule as a one-line pattern with the positions. 3) One memory trick. 4) One short Tamil sentence comparing with Tamil word order. No new exercises.' }]);
+    out.innerHTML = `<div class="tipline">🤖 ${esc(txt).replace(/\n/g, '<br>')}</div><div class="note" id="aiMore">⏳ KI schreibt 3 neue Übungssätze mit demselben Muster …</div>`;
+    let r = { added: [] };
+    try { r = await aiGenerate(topic, 3, s); } catch (e) { r = { added: [], err: e.message }; }
+    const more = document.getElementById('aiMore');
+    if (r.added.length) {
+      S.items.splice(S.i + 1, 0, ...r.added.map(x => ({ topic, s: x, mode: W.mode, extra: true })));
+      if (more) more.innerHTML = `🏋️ <b>${r.added.length} neue KI-Sätze</b> mit demselben Muster kommen jetzt als Nächstes (für später gespeichert).`;
+    } else {
+      const k = practiceSimilar(3);
+      if (more) more.innerHTML = `${r.err ? esc(r.err) + ' — ' : 'Die KI-Sätze haben die Wortstellungs-Prüfung nicht bestanden — '}stattdessen kommen ${k} ähnliche Sätze aus dem Thema.`;
+    }
+    document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}`;
+  } catch (e) { out.textContent = '❌ ' + e.message; }
+}
+async function aiMore() {
+  const topic = S && S.topic; if (!topic) return;
+  const box = document.getElementById('aiMsg');
+  box.textContent = '⏳ KI schreibt 5 neue Sätze …';
+  try {
+    const r = await aiGenerate(topic, 5, null);
+    if (r.added.length) {
+      S.items.splice(S.i + 1, 0, ...r.added.map(x => ({ topic, s: x })));
+      box.textContent = `✓ ${r.added.length} neue KI-Sätze (von ${r.offered} vorgeschlagen, Rest fiel durch die Wortstellungs-Prüfung) — kommen als Nächstes und sind gespeichert.`;
+      document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}`;
+    } else box.textContent = 'Keine neuen Sätze: die Vorschläge waren schon vorhanden oder hatten eine falsche Wortstellung — bitte nochmal versuchen.';
+  } catch (e) { box.textContent = '❌ ' + e.message; }
+}
+function renderAIRow() {
+  const row = document.getElementById('aiRow'); if (!row) return;
+  if (!S || !S.topic) { row.innerHTML = ''; return; }
+  const aiOn = typeof dcAIConfigured === 'function' && dcAIConfigured();
+  row.innerHTML = aiOn ? `<button type="button" class="btn ghost" data-act="aiMore">🤖 +5 neue Sätze</button><span class="note" id="aiMsg">unbegrenzt üben — neue Sätze werden geprüft und gespeichert</span>`
+    : `<span class="note">🤖 Mehr Sätze & persönliche Fehler-Hilfe: KI-Schlüssel in <a href="Einstellungen_Setup.html">AI Config & Settings</a> eintragen.</span>`;
+}
+function deleteAISentence() {
+  const { topic, s } = curItem();
+  if (!s.ai || !confirm('Diesen KI-Satz löschen?')) return;
+  const key = sentenceText(s).toLowerCase();
+  AI_STORE[topic.id] = (AI_STORE[topic.id] || []).filter(x => sentenceText(x).toLowerCase() !== key); saveAIStore();
+  topic.sentences = topic.sentences.filter(x => x !== s);
+  S.items = S.items.filter((x, i) => i <= S.i || x.s !== s);
+  REVIEW = REVIEW.filter(r => r.k !== sKey(topic.id, s)); store.set('sb_review_v1', REVIEW);
+  S.i++; renderItem();
+}
+function exportAI() {
+  const blob = new Blob([JSON.stringify(AI_STORE, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'satzbau-ki-saetze.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
 /* ---------- summary ---------- */
@@ -603,11 +795,12 @@ document.addEventListener('click', ev => {
   if (d.un != null && !W.done) { W.bank.push(W.placed.splice(+d.un, 1)[0]); drawBuild(color); return; }
   if (d.opt != null && !W.done) {
     const o = W.opts[+d.opt];
+    W.user = orderText(o.t, curItem().s.end || '.');
     document.querySelectorAll('[data-opt]').forEach(b => { const x = W.opts[+b.dataset.opt]; b.classList.add(x.ok ? 'ok' : (b === el ? 'bad' : 'used')); b.disabled = true; });
     finish(o.ok, o.ok ? '' : `<div class="note">💡 ${esc(o.why)}</div>`); return;
   }
   if (d.err != null && !W.done) {
-    const c = W.wrong.t[+d.err];
+    W.user = `(Fehlersuche) im Satz „${orderText(W.wrong.t, curItem().s.end || '.')}“ habe ich „${W.wrong.t[+d.err][0]}“ angetippt`;
     const ok = +d.err === W.wrong.pos;
     el.classList.add(ok ? 'ok' : 'bad');
     if (!ok && W.tries++ < 1) { document.getElementById('fb').innerHTML = `<div class="fb no">Nicht dieser — schau aufs Verb! (noch 1 Versuch)</div>`; return; }
@@ -623,6 +816,7 @@ document.addEventListener('click', ev => {
       else drawVerb(color);
     } else {
       W.errors++; el.classList.add('bad');
+      W.user = (W.user ? W.user + '; ' : '(Verb-Detektiv) ') + `„${v.c[0]}“ an Lücke ${+d.slot + 1} statt ${want + 1} gesetzt`;
       const r = v.c[1];
       document.getElementById('fb').innerHTML = `<div class="fb no">${r === 'V' ? 'Hauptsatz: das konjugierte Verb steht auf <b>Position 2</b>.' : r === 'E' ? 'Satzklammer: dieser Verbteil steht <b>am Ende</b> des Hauptsatzes.' : r === 'v' ? (curItem().topic.id === 'ersatzinfinitiv' ? 'Ersatzinfinitiv: „hat/haben“ steht im Nebensatz <b>vor</b> den zwei Infinitiven.' : 'Nebensatz: das konjugierte Verb steht <b>ganz am Ende</b>.') : 'Nebensatz: Infinitiv/Partizip steht <b>vor</b> dem konjugierten Verb am Ende.'}</div>`;
     }
@@ -642,6 +836,11 @@ document.addEventListener('click', ev => {
     case 'listenMic': return listenMic();
     case 'skipSpeak': W.done = true; return finish(null, '<span class="note">(Lösung angezeigt — zählt nicht als Fehler. Sprich den Satz jetzt laut nach!)</span>');
     case 'ai': return aiWhy();
+    case 'aiCoach': el.disabled = true; return aiCoach();
+    case 'aiMore': el.disabled = true; return aiMore().finally(() => { el.disabled = false; });
+    case 'similar': { const k = practiceSimilar(3); el.disabled = true; el.textContent = `🏋️ ${k} ähnliche Sätze kommen als Nächstes`; document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}`; return; }
+    case 'delAI': return deleteAISentence();
+    case 'exportAI': return exportAI();
     case 'again': return openTopic(S.topic);
     case 'reviewNow': return reviewRound();
     case 'home': return goHome();

@@ -340,12 +340,12 @@ AI can reproduce with `grep -n "^function "` on each file.)
 - **Status:** Complete, German UI.
 - **Implementation location:** `Satzbau_Trainer.html`.
 - **Related files:** none.
-- **Important logic (Task 43 rewrite):** 546 role-tagged sentences in 41 topics (27 grammar A1–B2 + 14 everyday
+- **Important logic (Task 43 rewrite):** 928 role-tagged sentences in 41 topics (27 grammar A1–B2 × 24 + 14 everyday × 20
   themes with per-sentence levels), only whole pre-validated sentences are used. 8 exercise modes driven by the
   roles (build, choice, type, Verb-Detektiv, Fehler finden, Hören & Bauen, Sprechen, Umbau); wrong options are
   generated only by moving verbs (a moved verb is always wrong) — see Task 43 in Section 28.
 - **Dependencies:** `js/satzbau-data.js`, app-shell (dcCallAI for the optional AI explanation), tts-engine.
-- **Progress:** `sb_progress_v1` (mastered sentences), `sb_review_v1` (missed sentences = review queue),
+- **Progress:** `sb_progress_v1` (correct count per sentence: ≥1 gemeistert, ≥3 Experte), `sb_review_v1` (missed sentences = review queue), `sb_ai_v1` (AI-made sentences, Task 44),
   `sb_day_v1`, `sb_level_v1`, `sb_mode_v1`, `sb_color_v1`, `sb_ta_v1`. No SRS intervals.
 
 ### Feature: Audio listen-and-repeat player
@@ -757,6 +757,42 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 44) — Satzbau: more sentences, AI sentences kept, hands-on help after mistakes, Experte level
+
+#### Task
+User: "Each 0/14 gemeistert. Is it questions for checking? Need more and also ai generated also keep for future. If AI enable,
+and if did incorrect need to give hands-on more and help to expert on it".
+
+#### What changed
+- **Counter explained + clearer:** a topic card now reads "📝 N Sätze (+ n 🤖) · ✓ x gemeistert · 🏆 y Experte"; a line on
+  the home screen explains it (gemeistert = 1× right, Experte = 3× right in any mode; a missed sentence stops counting
+  until it is right again in the review).
+- **More built-in sentences:** grammar topics 14 → 24, everyday themes 12 → 20 (4 more agents, same spec + validator,
+  duplicates against the existing data rejected) → **928 sentences** (was 546).
+- **Hands-on after a mistake (works without AI):** the missed sentence is automatically asked again ~3 sentences later
+  (↻ Wiederholung); "🏋️ 3 ähnliche Sätze üben" pulls the 3 sentences of the topic with the most similar structure
+  (edit distance of the role pattern) to the front, in the mode that was failed.
+- **With an AI key:**
+  - "🤖 Erklären & üben" after a mistake: the AI gets the correct sentence *and the learner's answer* (build order, chosen
+    option, typed text, tapped chunk, misplaced verb gaps, heard speech) and explains exactly what went wrong + pattern +
+    trick + Tamil comparison; then it writes 3 new sentences with the SAME structure, which come next (🏋️ Extra-Übung).
+  - "🤖 +5 neue Sätze" in every topic: unlimited new sentences.
+  - AI sentences pass the same word-order check in the browser (`sentenceProblems()`, a port of
+    scripts/check_satzbau.py); failing or duplicate ones are dropped. Kept ones are saved in `sb_ai_v1`
+    ({topicId: [sentence]}), added to their topic on every visit (counted on the card as "+ n 🤖"), labelled
+    "🤖 KI-Satz" with a 🗑️ delete button, and can be exported as JSON (⬇️ Exportieren on the home screen).
+  - Without a key the page shows where to set one up (AI Config & Settings).
+- `masteredIn()` ignores sentences waiting in the review queue; `expertIn()` = correct ≥ 3×; ⭐ all mastered,
+  🏆 all expert.
+
+#### Verified
+Headless Chromium with a stubbed AI: wrong answer → requeue + 3 similar sentences moved forward; AI coach got the
+learner's answer, 3 AI sentences accepted (one with wrong word order rejected, "." in a chunk moved to end), saved,
+still there after reload, card "14 Sätze + 3 🤖", delete works; +5 with only duplicates → clear message. All
+sentences solved in 7 modes → all right, no JS errors; 390 px no sideways scroll; build.py + smoke_pages.
+
+---
 
 ### 2026-09-25 (Task 43) — Satzbau-Trainer rebuilt: 546 role-tagged sentences, 8 learning modes, Satzbauplan
 
