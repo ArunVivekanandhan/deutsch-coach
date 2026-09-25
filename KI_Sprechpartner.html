@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>KI-Sprechpartner — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="./assets/js/gamification.js"></script>
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<style>
+  .kp { max-width: 880px; margin: 0 auto; padding: 4px 0 40px; color: var(--color-ink); }
+  .kp h1 { font-size: 26px; margin: 0; }
+  .kp .sub { color: var(--color-ink-soft); font-size: 14px; margin: 4px 0 12px; line-height: 1.5; }
+  .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-sm); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .note { font-size: 12.5px; color: var(--color-ink-soft); }
+  .chip { font: inherit; font-size: 12.5px; padding: 5px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border);
+    background: var(--color-surface); color: var(--color-ink); }
+  .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .btn { font: inherit; font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-primary);
+    background: var(--color-primary); color: #fff; }
+  .btn.grey { background: var(--color-surface); color: var(--color-ink); border-color: var(--color-border); }
+  .btn.ghost { background: transparent; color: var(--color-primary); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  h3.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-ink-soft); margin: 16px 0 8px; }
+  .tutors { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .tutor, .mission { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
+    border: 1.5px solid var(--color-border); border-radius: 12px; padding: 12px; }
+  .tutor.active, .mission:hover, .tutor:hover { border-color: var(--color-primary); }
+  .tutor .face { font-size: 34px; line-height: 1; }
+  .tutor b, .mission b { display: block; font-size: 15px; margin-top: 4px; }
+  .tutor small, .mission small { color: var(--color-ink-soft); font-size: 12px; line-height: 1.4; display: block; }
+  .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .mission .ic { font-size: 22px; } .mission .lvl { float: right; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-ink-soft); }
+  .mission .done { font-size: 11px; color: #16a34a; font-weight: 700; }
+  /* conversation */
+  .stage { display: grid; grid-template-columns: 200px 1fr; gap: 12px; align-items: start; }
+  @media (max-width: 720px) { .stage { grid-template-columns: 1fr; } }
+  .avatar-card { text-align: center; position: sticky; top: calc(var(--dc-app-header-h, 64px) + 8px); }
+  .avatar { width: 120px; height: 120px; margin: 4px auto 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 64px; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); border: 3px solid var(--color-border); transition: box-shadow .2s; }
+  .avatar.speaking { animation: talk .5s infinite alternate; border-color: var(--color-primary); }
+  .avatar.listening { box-shadow: 0 0 0 6px color-mix(in srgb, #16a34a 35%, transparent); border-color: #16a34a; }
+  @keyframes talk { from { transform: scale(1); } to { transform: scale(1.05); } }
+  @media (max-width: 720px) { .avatar-card { position: static; display: flex; gap: 12px; align-items: center; text-align: left; }
+    .avatar { width: 64px; height: 64px; font-size: 34px; margin: 0; } }
+  .goals { list-style: none; padding: 0; margin: 8px 0 0; text-align: left; font-size: 13px; }
+  .goals li { padding: 4px 0; border-bottom: 1px dashed var(--color-border); }
+  .goals li.ok { color: #16a34a; font-weight: 700; }
+  .chat { display: flex; flex-direction: column; gap: 10px; min-height: 240px; }
+  .msg { max-width: 88%; padding: 10px 12px; border-radius: 14px; line-height: 1.5; font-size: 15px; }
+  .msg.ai { align-self: flex-start; background: var(--color-surface); border: 1px solid var(--color-border); border-top-left-radius: 4px; }
+  .msg.me { align-self: flex-end; background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface)); border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); border-top-right-radius: 4px; }
+  .msg .tools { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .msg .tools button { font: inherit; font-size: 12px; padding: 2px 8px; border-radius: 8px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .tr { font-size: 13px; color: var(--color-ink-soft); margin-top: 4px; }
+  .corr { align-self: flex-end; max-width: 88%; font-size: 13px; border-radius: 10px; padding: 8px 10px; border: 1px solid; }
+  .corr.bad { border-color: #f59e0b; background: color-mix(in srgb, #f59e0b 12%, var(--color-surface)); }
+  .corr.good { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, var(--color-surface)); }
+  .corr s { color: #dc2626; } .corr .right { color: #15803d; font-weight: 700; }
+  [data-theme="dark"] .corr s { color: #f87171; } [data-theme="dark"] .corr .right { color: #4ade80; }
+  .composer { position: sticky; bottom: 0; background: var(--color-bg, var(--color-surface)); padding: 10px 0 4px; margin-top: 10px; }
+  .composer textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 10px; border-radius: 10px; border: 1px solid var(--color-border);
+    background: var(--color-surface); color: var(--color-ink); resize: none; min-height: 44px; }
+  .mic { width: 58px; height: 58px; border-radius: 50%; font-size: 26px; cursor: pointer; border: 2px solid var(--color-primary); background: var(--color-primary); color: #fff; }
+  .mic.on { background: #dc2626; border-color: #dc2626; animation: talk .6s infinite alternate; }
+  .sugg { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sugg button { font: inherit; font-size: 13.5px; padding: 6px 10px; border-radius: 10px; cursor: pointer; border: 1.5px dashed var(--color-primary); background: var(--color-surface); color: var(--color-ink); }
+  .interim { font-style: italic; color: var(--color-ink-soft); font-size: 14px; min-height: 18px; }
+  .typing { align-self: flex-start; font-size: 13px; color: var(--color-ink-soft); }
+  .score-ok { color: #16a34a; font-weight: 700; } .score-no { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
+  .report li { margin: 6px 0; }
+  .ta { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="kp">
+  <h1>🎭 KI-Sprechpartner</h1>
+  <p class="sub">Sprich mit einem KI-Tutor in echten Alltagssituationen — per Stimme oder Tastatur. Er antwortet auf deinem Niveau,
+    korrigiert dich sofort (mit Erklärung auf Englisch und Tamil), hilft, wenn dir die Worte fehlen, und gibt dir am Ende einen Lernbericht.</p>
+
+  <!-- ============ SETUP ============ -->
+  <div id="setupView">
+    <div class="box" id="noKey" hidden>🔑 Der KI-Sprechpartner braucht einen KI-Schlüssel (z. B. DeepSeek, Groq, Gemini, OpenAI).
+      Trag ihn unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> ein — danach kannst du sofort loslegen.</div>
+    <div class="row" id="statsRow" style="margin:8px 0;"></div>
+    <h3 class="sec">1 · Dein Tutor</h3>
+    <div class="tutors" id="tutorList"></div>
+    <h3 class="sec">2 · Dein Niveau</h3>
+    <div class="row" id="levelRow"></div>
+    <h3 class="sec">3 · Deine Mission</h3>
+    <div class="missions" id="missionList"></div>
+    <h3 class="sec">Optionen</h3>
+    <div class="row">
+      <label class="chip"><input type="checkbox" id="optHands"> 🎧 Freihändig (Mikro startet automatisch)</label>
+      <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Erklärungen auch auf Tamil</label>
+      <label class="chip"><input type="checkbox" id="optVoice" checked> 🔊 Tutor spricht</label>
+      <label class="chip">Tempo <select id="optRate"><option value="0.8">langsam</option><option value="0.95" selected>normal</option><option value="1.05">schnell</option></select></label>
+    </div>
+  </div>
+
+  <!-- ============ CONVERSATION ============ -->
+  <div id="talkView" hidden>
+    <div class="stage">
+      <div class="box avatar-card">
+        <div class="avatar" id="avatar">🙂</div>
+        <div>
+          <b id="tutorName"></b><div class="note" id="missionName"></div>
+          <ul class="goals" id="goalList"></ul>
+          <div class="row" style="margin-top:10px; justify-content:center;">
+            <button type="button" class="btn grey" id="endBtn">🏁 Beenden</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="box">
+          <div class="chat" id="chat"></div>
+        </div>
+        <div class="composer">
+          <div class="interim" id="interim"></div>
+          <div class="sugg" id="sugg" hidden></div>
+          <div class="row" style="flex-wrap:nowrap;">
+            <button type="button" class="mic" id="micBtn" title="Sprechen (Leertaste)">🎙️</button>
+            <textarea id="input" rows="1" placeholder="Antworte auf Deutsch … (oder 🎙️ drücken)"></textarea>
+            <button type="button" class="btn" id="sendBtn">➤</button>
+          </div>
+          <div class="row" style="margin-top:6px;">
+            <button type="button" class="btn ghost" id="helpBtn">💡 Hilfe — was kann ich sagen?</button>
+            <button type="button" class="btn ghost" id="hintEnBtn" title="Schreib auf Englisch, was du sagen willst — die KI zeigt dir den deutschen Satz">🇬🇧→🇩🇪 Wie sage ich …?</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ REPORT ============ -->
+  <div id="reportView" hidden>
+    <div class="box" id="report"></div>
+  </div>
+
+  <p class="note" style="text-align:center; margin-top:18px;">🤖 Alle Antworten, Korrekturen und Übersetzungen kommen von der KI deiner Wahl und können Fehler enthalten.
+    Deine Korrekturen landen im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a>.</p>
+</div>
+
+<script>
+/* KI-Sprechpartner (Task 46): voice-first role-play tutor in the style of Praktika — tutor persona, missions with goals,
+   instant corrections (EN + Tamil), help with suggested replies, pronunciation score when repeating a suggestion,
+   hands-free mode and a lesson report. AI calls go through dcCallAI (js/app-shell.js, key from AI Config & Settings). */
+const TUTORS = [
+  { id: 'lena', face: '👩‍🏫', name: 'Lena', de: 'geduldige Lehrerin', en: 'patient teacher — speaks slowly, praises a lot',
+    style: 'You are Lena, a warm, patient German teacher from Munich. You speak slowly and clearly, praise effort, and keep things simple.' },
+  { id: 'jonas', face: '🧑‍💻', name: 'Jonas', de: 'lockerer Kollege', en: 'casual colleague — everyday spoken German, humour',
+    style: 'You are Jonas, a friendly, relaxed colleague from Berlin in his late twenties. You use natural everyday spoken German (but correct), a bit of humour.' },
+  { id: 'weber', face: '👨‍💼', name: 'Herr Weber', de: 'formeller Beamter', en: 'formal official — Sie-form, exam style (telc/Goethe)',
+    style: 'You are Herr Weber, a polite but formal German official. You always use the Sie-form and speak like an examiner in a telc/Goethe oral exam.' }
+];
+const MISSIONS = [
+  { id: 'cafe', ic: '☕', lv: 'A1', de: 'Im Café bestellen', en: 'Order at a café', role: 'a waiter/waitress in a café in Berlin',
+    goals: ['Begrüße und bestelle ein Getränk', 'Bestelle etwas zu essen', 'Frag nach dem Preis', 'Bezahle und verabschiede dich'] },
+  { id: 'vorstellen', ic: '👋', lv: 'A1', de: 'Sich vorstellen', en: 'Introduce yourself', role: 'a new neighbour who just met the learner in the stairwell',
+    goals: ['Sag deinen Namen', 'Sag, woher du kommst', 'Erzähl, was du beruflich machst', 'Frag die andere Person etwas'] },
+  { id: 'supermarkt', ic: '🛒', lv: 'A1', de: 'Im Supermarkt', en: 'At the supermarket', role: 'a supermarket employee',
+    goals: ['Frag, wo es ein Produkt gibt', 'Frag nach einer anderen Größe oder Sorte', 'Bedanke dich'] },
+  { id: 'bahnhof', ic: '🚆', lv: 'A1', de: 'Fahrkarte am Bahnhof', en: 'Train ticket at the station', role: 'a ticket office clerk at Deutsche Bahn',
+    goals: ['Sag, wohin du fahren willst', 'Frag nach der Abfahrtszeit', 'Frag nach dem Gleis', 'Kauf die Fahrkarte'] },
+  { id: 'arzt', ic: '🩺', lv: 'A2', de: 'Beim Arzt', en: 'At the doctor', role: 'a GP (Hausarzt) in Germany',
+    goals: ['Beschreib deine Beschwerden', 'Sag, seit wann du sie hast', 'Frag, was du tun sollst', 'Frag nach einer Krankmeldung'] },
+  { id: 'termin', ic: '📞', lv: 'A2', de: 'Termin am Telefon verschieben', en: 'Reschedule an appointment by phone', role: 'a receptionist at a dental practice, on the phone',
+    goals: ['Nenne deinen Namen und deinen Termin', 'Sag, dass du nicht kommen kannst, und warum', 'Vereinbare einen neuen Termin'] },
+  { id: 'wohnung', ic: '🏠', lv: 'A2', de: 'Wohnungsbesichtigung', en: 'Flat viewing', role: 'a landlord showing a flat',
+    goals: ['Frag nach der Miete und den Nebenkosten', 'Frag, ab wann die Wohnung frei ist', 'Erzähl etwas über dich', 'Sag, dass du Interesse hast'] },
+  { id: 'apotheke', ic: '💊', lv: 'A2', de: 'In der Apotheke', en: 'At the pharmacy', role: 'a pharmacist',
+    goals: ['Beschreib dein Problem', 'Frag, wie oft du das Medikament nehmen sollst', 'Frag nach dem Preis'] },
+  { id: 'kollegen', ic: '💼', lv: 'A2', de: 'Small Talk mit Kollegen', en: 'Small talk with colleagues', role: 'a colleague in the office kitchen on Monday morning',
+    goals: ['Erzähl von deinem Wochenende', 'Frag nach dem Wochenende der anderen Person', 'Mach einen Vorschlag für die Mittagspause'] },
+  { id: 'amt', ic: '🏛️', lv: 'B1', de: 'Anmeldung beim Bürgeramt', en: 'Registering at the Bürgeramt', role: 'an official at the Bürgeramt (citizens\' office)',
+    goals: ['Sag, warum du da bist', 'Beantworte Fragen zu deiner Adresse und Familie', 'Frag, welche Unterlagen fehlen', 'Frag nach der Meldebescheinigung'] },
+  { id: 'bank', ic: '🏦', lv: 'B1', de: 'Ein Konto eröffnen', en: 'Open a bank account', role: 'a bank clerk',
+    goals: ['Sag, welches Konto du möchtest', 'Frag nach den Gebühren', 'Frag nach der Bankkarte und Online-Banking'] },
+  { id: 'reklamation', ic: '🧾', lv: 'B1', de: 'Reklamation im Geschäft', en: 'Returning a faulty product', role: 'a shop assistant at an electronics store',
+    goals: ['Erklär das Problem mit dem Gerät', 'Sag, was du möchtest (Umtausch/Geld zurück)', 'Reagiere höflich auf einen Vorschlag'] },
+  { id: 'bewerbung', ic: '🤝', lv: 'B1', de: 'Vorstellungsgespräch', en: 'Job interview', role: 'an HR manager interviewing the learner for a job that fits them',
+    goals: ['Stell dich und deine Erfahrung vor', 'Nenne deine Stärken', 'Erklär, warum du die Stelle willst', 'Stell eine eigene Frage'] },
+  { id: 'meinung', ic: '💬', lv: 'B1', de: 'Diskussion: Deine Meinung', en: 'Discussion: give your opinion', role: 'a discussion partner in a B1 oral exam (topic: Is it better to live in the city or in the countryside?)',
+    goals: ['Sag deine Meinung mit Begründung', 'Nenne ein Beispiel', 'Reagiere auf ein Gegenargument', 'Fass zusammen'] },
+  { id: 'frei', ic: '🌟', lv: 'alle', de: 'Freies Gespräch', en: 'Free conversation', role: 'a friendly conversation partner; let the learner choose the topic',
+    goals: ['Wähle ein Thema', 'Sprich mindestens 6 Mal', 'Stell selbst 2 Fragen'] }
+];
+const LEVELS = ['A1', 'A2', 'B1', 'B2'];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const store = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const aiOn = () => typeof dcAIConfigured === 'function' && dcAIConfigured();
+let ST = store.get('dc_tutor_v1', { tutor: 'lena', level: 'A2', done: {}, sessions: 0, minutes: 0 });
+let S = null;   // current session
+
+/* ---------------- setup ---------------- */
+function renderSetup() {
+  document.getElementById('noKey').hidden = aiOn();
+  const doneN = Object.values(ST.done).reduce((a, b) => a + b, 0);
+  document.getElementById('statsRow').innerHTML = `<span class="chip">🗣️ ${ST.sessions} Gespräche</span><span class="chip">🏅 ${doneN} Missionen geschafft</span>
+    <span class="chip">⏱️ ${Math.round(ST.minutes)} Min. gesprochen</span><span class="chip">📓 ${store.get('de_coach_vault', []).length} im Fehler-Tagebuch</span>`;
+  document.getElementById('tutorList').innerHTML = TUTORS.map(t => `<button type="button" class="tutor ${ST.tutor === t.id ? 'active' : ''}" data-tutor="${t.id}">
+    <div class="face">${t.face}</div><b>${esc(t.name)} · ${esc(t.de)}</b><small>🇬🇧 ${esc(t.en)}</small></button>`).join('');
+  document.getElementById('levelRow').innerHTML = LEVELS.map(l => `<button type="button" class="chip ${ST.level === l ? 'active' : ''}" data-level="${l}">${l}</button>`).join('');
+  const order = { A1: 0, A2: 1, B1: 2, B2: 3, alle: 4 };
+  document.getElementById('missionList').innerHTML = MISSIONS.slice().sort((a, b) => order[a.lv] - order[b.lv]).map(m => `<button type="button" class="mission" data-mission="${m.id}" ${aiOn() ? '' : 'disabled'}>
+    <span class="lvl">${m.lv}</span><span class="ic">${m.ic}</span><b>${esc(m.de)}</b><small>🇬🇧 ${esc(m.en)} · ${m.goals.length} Ziele</small>
+    ${ST.done[m.id] ? `<span class="done">✓ ${ST.done[m.id]}× geschafft</span>` : ''}</button>`).join('');
+}
+function saveST() { store.set('dc_tutor_v1', ST); }
+
+/* ---------------- AI ---------------- */
+function systemPrompt() {
+  const t = TUTORS.find(x => x.id === S.tutor), m = S.mission;
+  return `${t.style} You are role-playing as ${m.role} in a German practice conversation with a learner at CEFR level ${S.level}
+whose native languages are English and Tamil. Mission: "${m.de}" (${m.en}). The learner's goals (ids g0..g${m.goals.length - 1}):
+${m.goals.map((g, i) => `g${i}: ${g}`).join('\n')}
+Rules:
+- Stay in your role. Speak ONLY German in "reply", at level ${S.level} (short sentences, common words${S.level === 'A1' ? ', max 12 words per sentence' : ''}). Max 2-3 sentences, usually end with a question that helps the learner reach the next goal.
+- Check the learner's LAST message for grammar/word errors (gender, case, verb position, conjugation, word choice). If there is an error, fill "correction"; small spelling/capitalisation issues from speech recognition are NOT errors. If the message is correct, correction = null.
+- "better": a more natural way a native speaker would say the learner's message (only if clearly better, else null).
+- "goals_done": ids of goals the learner has achieved so far in the whole conversation.
+- "suggestions": 3 short, different, correct German replies the learner could say next (level ${S.level}).
+- When all goals are done, wrap up the scene politely and set "mission_complete": true.
+Answer ONLY with JSON, no other text:
+{"reply":"...","reply_en":"English translation of reply","correction":null or {"wrong":"learner's wrong part","right":"corrected sentence","why":"short English explanation","why_ta":"short Tamil explanation"},"better":null or "...","goals_done":["g0"],"suggestions":["...","...","..."],"mission_complete":false}`;
+}
+function parseAI(txt) {
+  try { const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1)); if (j && typeof j.reply === 'string') return j; } catch (e) {}
+  return { reply: String(txt || '').trim(), reply_en: '', correction: null, better: null, goals_done: [], suggestions: [], mission_complete: false };
+}
+async function askAI(userText) {
+  if (userText != null) S.history.push({ role: 'user', content: userText });
+  const msgs = [{ role: 'system', content: systemPrompt() }, ...S.history.slice(-16)];
+  if (userText == null) msgs.push({ role: 'user', content: '(Start the scene now with a short greeting and your first question.)' });
+  const raw = await dcCallAI(msgs, { temperature: 0.6 });
+  const j = parseAI(raw);
+  S.history.push({ role: 'assistant', content: JSON.stringify({ reply: j.reply }) });
+  return j;
+}
+
+/* ---------------- conversation ---------------- */
+async function startMission(id) {
+  if (!aiOn()) return;
+  S = { tutor: ST.tutor, level: ST.level, mission: MISSIONS.find(m => m.id === id), history: [], goals: new Set(), corrections: [], better: [],
+    turns: 0, start: Date.now(), practice: null, complete: false };
+  const t = TUTORS.find(x => x.id === S.tutor);
+  document.getElementById('setupView').hidden = true; document.getElementById('reportView').hidden = true; document.getElementById('talkView').hidden = false;
+  document.getElementById('avatar').textContent = t.face;
+  document.getElementById('tutorName').textContent = `${t.name} · ${t.de}`;
+  document.getElementById('missionName').textContent = `${S.mission.ic} ${S.mission.de} · ${S.level}`;
+  document.getElementById('chat').innerHTML = '';
+  document.getElementById('sugg').hidden = true; document.getElementById('interim').textContent = ''; document.getElementById('input').value = '';
+  renderGoals(); window.scrollTo({ top: 0 });
+  await aiTurn(null);
+}
+function renderGoals() {
+  document.getElementById('goalList').innerHTML = S.mission.goals.map((g, i) => `<li class="${S.goals.has('g' + i) ? 'ok' : ''}">${S.goals.has('g' + i) ? '✅' : '⬜'} ${esc(g)}</li>`).join('');
+}
+function addBubble(html, cls) {
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div'); d.className = cls; d.innerHTML = html; chat.appendChild(d);
+  d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  return d;
+}
+async function aiTurn(userText) {
+  const typing = addBubble('✍️ …', 'typing');
+  setBusy(true);
+  try {
+    const j = await askAI(userText);
+    typing.remove();
+    if (userText != null) showFeedback(j);
+    (j.goals_done || []).forEach(g => { if (/^g\d+$/.test(g) && +g.slice(1) < S.mission.goals.length) S.goals.add(g); });
+    renderGoals();
+    const id = 'r' + Date.now();
+    addBubble(`${esc(j.reply)}<div class="tr" id="${id}" hidden>🇬🇧 ${esc(j.reply_en || '')}</div>
+      <div class="tools"><button type="button" data-say="${esc(j.reply)}">🔊</button><button type="button" data-slow="${esc(j.reply)}">🐢</button>
+      ${j.reply_en ? `<button type="button" data-tr="${id}">🌐 Übersetzung</button>` : ''}</div>`, 'msg ai');
+    S.lastSugg = (j.suggestions || []).filter(Boolean).slice(0, 3);
+    document.getElementById('sugg').hidden = true;
+    if (j.mission_complete || S.goals.size === S.mission.goals.length) { S.complete = true; addBubble('🏅 <b>Mission geschafft!</b> Du kannst weitersprechen oder auf „🏁 Beenden“ drücken.', 'typing'); }
+    speakTutor(j.reply, () => { if (document.getElementById('optHands').checked && !S.complete) startMic(); });
+  } catch (e) {
+    typing.remove(); addBubble('❌ ' + esc(e.message), 'typing');
+  } finally { setBusy(false); }
+}
+function showFeedback(j) {
+  const c = j.correction;
+  if (c && c.right) {
+    S.corrections.push({ original: S.lastUser, corrected: c.right, why: c.why || '', why_ta: c.why_ta || '' });
+    addBubble(`✏️ ${c.wrong ? `<s>${esc(c.wrong)}</s> → ` : ''}<span class="right">${esc(c.right)}</span>
+      ${c.why ? `<div>💡 ${esc(c.why)}</div>` : ''}${c.why_ta && document.getElementById('optTa').checked ? `<div class="ta" lang="ta">🇮🇳 ${esc(c.why_ta)}</div>` : ''}
+      <div class="tools" style="margin-top:4px;"><button type="button" data-say="${esc(c.right)}">🔊 richtig anhören</button><button type="button" data-repeat="${esc(c.right)}">🎙️ nachsprechen</button></div>`, 'corr bad');
+  } else {
+    addBubble('✅ Richtig!' + (j.better ? ` <span class="note">Noch natürlicher: <b>${esc(j.better)}</b> <button type="button" data-say="${esc(j.better)}" style="font-size:11px;">🔊</button></span>` : ''), 'corr good');
+  }
+  if (j.better && c) S.better.push(j.better);
+}
+function sendText(text) {
+  text = String(text || '').trim(); if (!text || S.busy) return;
+  document.getElementById('input').value = '';
+  let extra = '';
+  if (S.practice) {                                   // the learner repeated a suggestion/correction: pronunciation score
+    const r = speechScore(S.practice, text);
+    extra = `<div class="tr">🎯 Aussprache: <b>${r.score}%</b> — ${r.words.map((w, i) => `<span class="${r.ok[i] ? 'score-ok' : 'score-no'}">${esc(w)}</span>`).join(' ')}</div>`;
+    S.practice = null;
+  }
+  addBubble(esc(text) + extra, 'msg me');
+  S.lastUser = text; S.turns++;
+  aiTurn(text);
+}
+function setBusy(b) { S.busy = b; document.getElementById('sendBtn').disabled = b; document.getElementById('micBtn').disabled = b; }
+
+/* ---------------- speech ---------------- */
+let deVoice = null;
+function pickVoice() { try { const v = speechSynthesis.getVoices(); deVoice = v.find(x => /^de(-|_)DE/i.test(x.lang)) || v.find(x => /^de/i.test(x.lang)) || null; } catch (e) {} }
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speakTutor(text, onend, rate) {
+  const av = document.getElementById('avatar');
+  if (!document.getElementById('optVoice').checked || !('speechSynthesis' in window)) { if (onend) onend(); return; }
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; if (deVoice) u.voice = deVoice;
+    u.rate = rate || +document.getElementById('optRate').value;
+    let done = false; const fin = () => { if (done) return; done = true; av.classList.remove('speaking'); if (onend) onend(); };
+    u.onstart = () => av.classList.add('speaking'); u.onend = fin; u.onerror = fin;
+    setTimeout(fin, 3000 + text.length * 120);        // some browsers never fire onend
+    speechSynthesis.speak(u);
+  } catch (e) { if (onend) onend(); }
+}
+function speechWords(x) { return String(x || '').toLowerCase().replace(/[.,!?;:„“"()]/g, '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean); }
+function speechScore(target, heard) {
+  const a = speechWords(target), b = speechWords(heard);
+  const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const ok = new Array(a.length).fill(false);
+  for (let i = 0, j = 0; i < a.length && j < b.length;) { if (a[i] === b[j]) { ok[i] = true; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
+  return { words: a, ok, score: a.length ? Math.round(100 * ok.filter(Boolean).length / a.length) : 0 };
+}
+let rec = null;
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const interim = document.getElementById('interim');
+  if (!SR) { interim.textContent = 'Spracherkennung gibt es in diesem Browser nicht (Chrome/Edge verwenden) — bitte tippen.'; return; }
+  if (rec) { rec.stop(); return; }
+  try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+  rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true; rec.maxAlternatives = 1;
+  const mic = document.getElementById('micBtn'), av = document.getElementById('avatar');
+  mic.classList.add('on'); av.classList.add('listening'); interim.textContent = '🎙️ Ich höre zu …';
+  let finalText = '';
+  rec.onresult = ev => {
+    let t = ''; for (let i = 0; i < ev.results.length; i++) { t += ev.results[i][0].transcript; if (ev.results[i].isFinal) finalText = t; }
+    interim.textContent = '🎙️ ' + t;
+  };
+  rec.onerror = ev => { interim.textContent = ev.error === 'not-allowed' ? '🎙️ Mikrofon nicht erlaubt.' : ev.error === 'no-speech' ? '🎙️ Nichts gehört — nochmal drücken.' : '🎙️ ' + ev.error; };
+  rec.onend = () => {
+    mic.classList.remove('on'); av.classList.remove('listening'); rec = null;
+    if (finalText.trim()) { interim.textContent = ''; sendText(finalText); }
+  };
+  try { rec.start(); } catch (e) { interim.textContent = e.message; }
+}
+
+/* ---------------- help ---------------- */
+function showSuggestions() {
+  const box = document.getElementById('sugg');
+  if (!S.lastSugg || !S.lastSugg.length) { box.hidden = false; box.innerHTML = '<span class="note">Keine Vorschläge — versuch es mit einem einfachen Satz!</span>'; return; }
+  box.hidden = false;
+  box.innerHTML = '<span class="note">Tippen = übernehmen · 🎙️ = nachsprechen (mit Aussprache-Punkten):</span>' + S.lastSugg.map(s =>
+    `<span style="display:inline-flex; gap:4px;"><button type="button" data-use="${esc(s)}">${esc(s)}</button><button type="button" data-say="${esc(s)}" title="anhören">🔊</button><button type="button" data-repeat="${esc(s)}" title="nachsprechen">🎙️</button></span>`).join('');
+}
+async function howDoISay() {
+  const en = prompt('Was möchtest du sagen? (Englisch oder Tamil)');
+  if (!en) return;
+  const b = addBubble('⏳ …', 'typing');
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: `Translate the learner's message into simple, natural German at CEFR level ${S.level} that fits this situation: ${S.mission.en} (the learner talks to ${S.mission.role}). Answer ONLY with the German sentence.` },
+      { role: 'user', content: en }], { temperature: 0.2 });
+    const de = txt.trim().replace(/^"|"$/g, '');
+    b.className = 'corr good';
+    b.innerHTML = `🇬🇧 ${esc(en)} → 🇩🇪 <b>${esc(de)}</b><div class="tools" style="margin-top:4px;"><button type="button" data-say="${esc(de)}">🔊</button><button type="button" data-repeat="${esc(de)}">🎙️ selbst sagen</button><button type="button" data-use="${esc(de)}">✍️ übernehmen</button></div>`;
+  } catch (e) { b.textContent = '❌ ' + e.message; }
+}
+
+/* ---------------- report ---------------- */
+async function endMission() {
+  if (rec) rec.stop(); try { speechSynthesis.cancel(); } catch (e) {}
+  const mins = (Date.now() - S.start) / 60000;
+  ST.sessions++; ST.minutes += mins;
+  if (S.complete) ST.done[S.mission.id] = (ST.done[S.mission.id] || 0) + 1;
+  saveST();
+  // corrections go into the KI-Coach's Fehler-Tagebuch (de_coach_vault) for its drill
+  if (S.corrections.length) {
+    const vault = store.get('de_coach_vault', []);
+    S.corrections.forEach(c => vault.unshift({ id: Date.now() + Math.random(), date: new Date().toLocaleDateString(), original: c.original, corrected: c.corrected,
+      explanations: [c.why, c.why_ta].filter(Boolean), better: '', src: 'KI-Sprechpartner: ' + S.mission.de }));
+    store.set('de_coach_vault', vault.slice(0, 500));
+  }
+  if (typeof addXP === 'function') try { addXP(5 * S.turns + 10 * S.goals.size + (S.complete ? 20 : 0), 'KI-Sprechpartner'); } catch (e) {}
+  document.getElementById('talkView').hidden = true; document.getElementById('reportView').hidden = false;
+  const rep = document.getElementById('report');
+  rep.innerHTML = `<h2 style="margin:0;">${S.complete ? '🏅 Mission geschafft!' : '📋 Lernbericht'}</h2>
+    <div class="note">${S.mission.ic} ${esc(S.mission.de)} · ${S.level} · ${S.turns} Antworten · ${Math.max(1, Math.round(mins))} Min.</div>
+    <h3 class="sec">Ziele</h3><ul class="goals">${S.mission.goals.map((g, i) => `<li class="${S.goals.has('g' + i) ? 'ok' : ''}">${S.goals.has('g' + i) ? '✅' : '⬜'} ${esc(g)}</li>`).join('')}</ul>
+    <h3 class="sec">Deine Korrekturen (${S.corrections.length})</h3>
+    ${S.corrections.length ? `<ul class="report">${S.corrections.map(c => `<li><s>${esc(c.original)}</s><br><b>${esc(c.corrected)}</b> <button type="button" class="chip" data-say="${esc(c.corrected)}">🔊</button><div class="note">💡 ${esc(c.why)}</div></li>`).join('')}</ul>
+      <div class="note">📓 Gespeichert im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a> (dort mit „Fehler üben“ wiederholen).</div>` : '<p>Keine Fehler — super! 🎉</p>'}
+    <h3 class="sec">🤖 Feedback</h3><div id="fbAI" class="note">⏳ KI schreibt dein Feedback …</div>
+    <div class="row" style="margin-top:14px;"><button type="button" class="btn" data-again="1">↺ Nochmal</button><button type="button" class="btn grey" data-home="1">← Andere Mission</button></div>`;
+  if (!S.turns) { document.getElementById('fbAI').textContent = 'Du hast noch nichts gesagt — beim nächsten Mal 🎙️ drücken!'; return; }
+  try {
+    const learner = S.history.filter(h => h.role === 'user').map(h => h.content).join('\n');
+    const txt = await dcCallAI([{ role: 'system', content: 'You are a German teacher. Give short, encouraging feedback for a learner (native English/Tamil). Answer ONLY with JSON: {"score":1-10,"strengths":["..."],"work_on":["..."],"words":[{"de":"useful German word/phrase for this situation","en":"English"}]} (max 3 items each, 5 words).' },
+      { role: 'user', content: `Level ${S.level}, situation: ${S.mission.en}. The learner said:\n${learner}` }], { temperature: 0.3 });
+    const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+    document.getElementById('fbAI').innerHTML = `<div style="font-size:18px;">⭐ ${esc(j.score)}/10</div>
+      ${(j.strengths || []).length ? `<div>👍 ${j.strengths.map(esc).join(' · ')}</div>` : ''}
+      ${(j.work_on || []).length ? `<div>🎯 ${j.work_on.map(esc).join(' · ')}</div>` : ''}
+      ${(j.words || []).length ? `<div style="margin-top:6px;"><b>Nützliche Wörter:</b> ${j.words.map(w => `<span class="chip" data-say="${esc(w.de)}">🔊 ${esc(w.de)} — ${esc(w.en)}</span>`).join(' ')}</div>` : ''}`;
+  } catch (e) { document.getElementById('fbAI').textContent = '(Feedback nicht verfügbar: ' + e.message + ')'; }
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-tutor],[data-level],[data-mission],[data-say],[data-slow],[data-tr],[data-use],[data-repeat],[data-again],[data-home]');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.tutor) { ST.tutor = d.tutor; saveST(); renderSetup(); return; }
+  if (d.level) { ST.level = d.level; saveST(); renderSetup(); return; }
+  if (d.mission) { startMission(d.mission); return; }
+  if (d.say) { speakTutor(d.say); return; }
+  if (d.slow) { speakTutor(d.slow, null, 0.7); return; }
+  if (d.tr) { const t = document.getElementById(d.tr); if (t) t.hidden = !t.hidden; return; }
+  if (d.use) { const i = document.getElementById('input'); i.value = d.use; i.focus(); return; }
+  if (d.repeat) { S.practice = d.repeat; document.getElementById('interim').textContent = `🎯 Sprich nach: „${d.repeat}“`; setTimeout(startMic, 150); return; }
+  if (d.again) { startMission(S.mission.id); return; }
+  if (d.home) { document.getElementById('reportView').hidden = true; document.getElementById('setupView').hidden = false; renderSetup(); return; }
+});
+document.getElementById('sendBtn').onclick = () => sendText(document.getElementById('input').value);
+document.getElementById('micBtn').onclick = () => startMic();
+document.getElementById('helpBtn').onclick = showSuggestions;
+document.getElementById('hintEnBtn').onclick = howDoISay;
+document.getElementById('endBtn').onclick = endMission;
+document.getElementById('input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(e.target.value); } });
+['optHands', 'optTa', 'optVoice'].forEach(id => {
+  const el = document.getElementById(id); const v = store.get('dc_tutor_opt_' + id, null); if (v != null) el.checked = v;
+  el.onchange = () => store.set('dc_tutor_opt_' + id, el.checked);
+});
+renderSetup();
+</script>
+</body>
+</html>

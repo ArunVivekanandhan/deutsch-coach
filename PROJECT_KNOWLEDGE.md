@@ -113,6 +113,7 @@ Deutsch_Coach_Project/
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
+├── KI_Sprechpartner.html                   # Voice role-play AI tutor (missions, corrections, help, report) — Task 46
 ├── Continuous_Verb_Speaker.html            # Standalone audio loop verb speaker with Suite Hub
 ├── Verben_Hoeren_EN_DE.html                # Standalone audio listen-and-repeat player with Suite Hub
 ├── konnektoren_referenz.html               # Static connector-grammar reference page with Suite Hub
@@ -757,6 +758,38 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 46) — KI-Sprechpartner: Praktika-style voice role-play tutor
+
+#### Task
+User: "And is possible to implement Praktika ai similar in existing on our page".
+
+#### What was built (`KI_Sprechpartner.html`, new; linked from index.html "Coach" and the home suite links)
+- **3 tutor personas:** Lena (patient teacher), Jonas (casual colleague, spoken German), Herr Weber (formal official,
+  Sie-form, telc/Goethe exam style). Level A1–B2. Avatar animates while speaking / glows while listening.
+- **15 missions** (A1 café, introducing yourself, supermarket, train ticket · A2 doctor, rescheduling by phone, flat
+  viewing, pharmacy, small talk · B1 Bürgeramt, bank account, returning a product, job interview, opinion
+  discussion · free conversation), each with 3–4 goals shown as a live checklist (the AI reports goals_done).
+- **Voice first:** 🎙️ speech recognition (de-DE, interim text) → AI → tutor speaks (German voice, speed setting);
+  🎧 hands-free mode starts the mic again after the tutor has spoken; typing always works.
+- **Every learner turn gets feedback:** ✏️ correction (wrong → right, why in English + Tamil, 🔊 listen, 🎙️ repeat)
+  or ✅ "Richtig!" with an optional more natural phrasing.
+- **Help when stuck:** 💡 3 suggested replies (take over / listen / repeat); "🇬🇧→🇩🇪 Wie sage ich …?" translates
+  what the learner wants to say into German for this situation. Repeating a suggestion/correction is scored word by
+  word (🎯 Aussprache %).
+- AI bubbles: 🔊 replay, 🐢 slow, 🌐 English translation on tap.
+- **Report:** goals reached, all corrections (saved to the KI-Coach's Fehler-Tagebuch `de_coach_vault`, so its
+  drill repeats them), AI feedback (score, strengths, what to work on, useful words), XP via addXP.
+  Stats in `dc_tutor_v1` (tutor, level, missions done, sessions, minutes); options in `dc_tutor_opt_*`.
+- One JSON-mode prompt per turn through `dcCallAI` (any provider set in AI Config & Settings); a non-JSON answer
+  falls back to plain text. Without a key the page explains where to set one and the missions are disabled.
+
+#### Verified
+Headless Chromium with a stubbed AI: whole café mission (start, suggestions, correction with Tamil, goal checklist,
+repeat score 100 %, mission complete, report with AI feedback, vault entry, stats), 390 px phone + dark mode, no JS
+errors. Real-provider test still open (api.deepseek.com is blocked in this cloud environment).
+
+---
 
 ### 2026-09-25 (Task 45) — Open points fixed: examples for every word, Studios on shared data, conjugation engine, fast Excel, offline fonts
 
