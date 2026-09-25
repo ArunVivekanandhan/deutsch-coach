@@ -607,6 +607,7 @@
   <script src="js/tamil-dict.js"></script>
   <script src="js/tts-engine.js"></script>
   <script src="js/german-conjugation.js"></script>
+  <script src="js/memory-tips.js"></script>
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
@@ -1284,8 +1285,21 @@ if (document.readyState === 'loading') {
   }
 
   // --- SPREADSHEET ROW BUILDER ---
+  // Merkhilfe: the curated trick when there is one, plus up to two checked tips from js/memory-tips.js
+  // (vowel melody + same-pattern verbs, separable/inseparable, gender ending with its hit rate,
+  // compound "last word is the boss", plural pattern, Steigerung pattern …).
+  function memoryTipText(cat, entry, curated) {
+    const tips = (typeof MemoryTips !== 'undefined') ? MemoryTips.forWord(cat, entry, { noFallback: !!curated }) : [];
+    return [curated, ...tips.slice(0, curated ? 1 : 2).map(t => `${t.title}: ${t.text}`)].filter(Boolean).join(' · ');
+  }
+
   function buildSpreadsheetData() {
     ALL_ROWS = [];
+    if (typeof MemoryTips !== 'undefined') MemoryTips.init({
+      verbs: (VERBS || []).map(v => ({ w: v.inf, pr: v.praeteritum, pp: v.perfekt, en: v.en, rank: v.freq || 1e8 })),
+      nouns: (NOUNS || []).map(n => ({ w: n.sg, a: n.a, p: n.pl, en: n.en, rank: n.freq || 1e8 })),
+      adjs: (ADJS || []).map(a => ({ w: a.w, comp: a.comp || a.komp, sup: a.sup, en: a.en, rank: a.freq || 1e8 }))
+    });
 
     // 1. Verbs
     (VERBS || []).forEach((v, idx) => {
@@ -1326,7 +1340,7 @@ if (document.readyState === 'loading') {
         ta: v.ta || '',
         ta_translit: v.ta_translit || '',
         topic: NO_VALUE,
-        mnemonic: direct ? direct.image : `Stem "${stem}..." → ${v.en}`,
+        mnemonic: memoryTipText('v', { w: inf, pr: v.praeteritum, pp: v.perfekt, en: v.en }, direct && direct.image),
         read: [
           { text: inf, col: 'word' },
           { text: v.praeteritum, col: 'praet' },
@@ -1340,7 +1354,6 @@ if (document.readyState === 'loading') {
       const fullNoun = `${n.a} ${n.sg}`.trim();  // number words have no article
       const direct = NOUN_MNEMONIC_DB[n.sg.toLowerCase()];
       const hasPlural = n.pl && n.pl !== '—' && n.pl !== '-';
-      const PLURAL_TYPE = { e:'-e', en:'-(e)n', er:'-er', s:'-s', umlaut:'Umlaut + Endung', umlaut_only:'nur Umlaut', unchanged:'unverändert' };
 
       ALL_ROWS.push({
         id: 'row_' + (ALL_ROWS.length + 1),
@@ -1362,7 +1375,7 @@ if (document.readyState === 'loading') {
         ta: n.ta || '',
         ta_translit: n.ta_translit || '',
         topic: TOPIC_LABELS[n.topic] || n.topic || NO_VALUE,
-        mnemonic: direct ? direct.trick : (PLURAL_TYPE[n.typ] ? `Plural: ${PLURAL_TYPE[n.typ]}` : ''),
+        mnemonic: memoryTipText('n', { w: n.sg, a: n.a, p: n.pl, en: n.en }, direct && direct.trick),
         read: [
           { text: fullNoun.trim(), col: 'word' },
           { text: hasPlural ? `die ${n.pl}` : '', col: 'noun' }
@@ -1395,7 +1408,7 @@ if (document.readyState === 'loading') {
         ta: a.ta || '',
         ta_translit: a.ta_translit || '',
         topic: NO_VALUE,
-        mnemonic: `Steigerung: ${a.w} → ${comp} → ${sup}`,
+        mnemonic: memoryTipText('adj', { w: a.w, comp: a.comp || a.komp, sup: a.sup, en: a.en }, ''),
         read: [
           { text: a.w, col: 'word' },
           { text: a.comp || a.komp, col: 'adj' },

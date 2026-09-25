@@ -342,6 +342,23 @@
   .levelrow .llabel{width:52px; font-weight:700; flex-shrink:0;}
   .barouter{flex:1; height:14px; background:var(--paper-dark); border-radius:7px; overflow:hidden;}
   .barinner{height:100%; background:linear-gradient(90deg,var(--gold),var(--stamp-red)); border-radius:7px;}
+  /* ---- Lernpfad (learning path in packs) ---- */
+  .pathhint{font-size:12.5px; color:var(--ink-soft); margin:-4px 0 10px; line-height:1.45;}
+  .packgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px; margin-bottom:22px; width:100%; max-width:700px;}
+  .packtile{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 8px 8px; cursor:pointer; text-align:left;
+    font:inherit; color:var(--ink); display:flex; flex-direction:column; gap:4px; box-shadow:var(--shadow-sm);}
+  .packtile:hover{border-color:var(--blue);}
+  .packtile b{font-size:13px;}
+  .packtile small{font-size:11px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .packtile .barouter{flex:none; height:6px;}
+  .packtile.done{border-color:var(--green);}
+  .packtile.done b::after{content:' ✓'; color:var(--green);}
+  .packtile.current{border:2px solid var(--stamp-red);}
+  .levelpath{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--card);
+    margin-bottom:8px; cursor:pointer; max-width:700px;}
+  .levelpath:hover{border-color:var(--blue);}
+  .levelpath .lv{font-weight:700; min-width:44px;}
+  .levelpath .meta2{font-size:12px; color:var(--ink-soft); min-width:150px;}
   .levelrow .lpct{width:38px; text-align:right; flex-shrink:0; color:var(--ink-soft);}
 
   .topicrow{
@@ -947,6 +964,8 @@
   <script src="js/tts-engine.js"></script>
     <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/german-conjugation.js"></script>
+  <script src="js/memory-tips.js"></script>
 </head>
 <body>
   <!-- Suite Navigation Hub -->
@@ -1005,7 +1024,7 @@
       <div class="navbar" id="navBar"></div>
 
       <div class="stage" id="stage"></div>
-      <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Wortschatz stammt aus echten telc-Quellen: B1.1/B1.2 aus „Auf jeden Fall!" B1.1/B1.2, A2 (Thema Arbeit) aus dem „Auf jeden Fall! A2.1"-Probekapitel (Lektion 5, Lernwortschatz). A1 hat bisher nur ein Beispielwort; weitere Niveaus/Themen lassen sich jederzeit ergänzen, es wird nichts erfunden. Wort-Icons sind selbst gezeichnete, einfache Symbole (keine Fotos) — copyright-frei und offline nutzbar. Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
+      <footer>Fortschritt wird lokal in diesem Browser gespeichert (localStorage) — bleibt nur auf diesem Gerät, kein Login nötig. Wortschatz stammt aus echten telc-Quellen: B1.1/B1.2 aus „Auf jeden Fall!" B1.1/B1.2, A2 (Thema Arbeit) aus dem „Auf jeden Fall! A2.1"-Probekapitel (Lektion 5, Lernwortschatz). A1 bis C1 enthalten außerdem alle Wörter der Master-Wortlisten (Verben, Nomen, Adjektive); deren Niveau ist, wo kein Lehrbuch es vorgibt, aus der Worthäufigkeit geschätzt (≈). Merkhilfen werden aus den echten Formen jedes Wortes abgeleitet — es wird nichts erfunden. Wort-Icons sind selbst gezeichnete, einfache Symbole (keine Fotos) — copyright-frei und offline nutzbar. Sprechen nutzt, falls verfügbar, die Web-Speech-API deines Browsers (z. B. Chrome) — dabei kann Audio an den Browser-Anbieter gesendet werden, wie bei jeder Browser-Diktierfunktion. Schreiben zeigt nur einen Beispieltext zum Vergleich, keine automatische KI-Korrektur. „B1-Bereitschaft" ist ein interner Lernindikator, kein offizielles telc-Ergebnis.</footer>
     </div>
   </div>
 
@@ -1164,7 +1183,7 @@ const LEGACY_DATA = [
 {lesson:1, title:"Ankommen", sections:[
   {name:"Je häufiger ich umziehe, desto …", items:[
     {a:"der",w:"(Telefon-/Strom-)Anbieter",p:"",en:"provider",ex:"",cat:"n",mn:"<b>an|bieten</b> = to offer. The Anbieter is the company that 'offers' you a service."},
-    {a:"",w:"angenehm",p:"",en:"pleasant",ex:"",cat:"adj",mn:"Sounds like 'on a name' — a pleasant host who kindly greets you by name."},
+    {a:"",w:"angenehm",p:"",en:"pleasant",ex:"",cat:"adj",mn:"Sounds like 'on a name' — a pleasant host who kindly greets you by name.",comp:"angenehmer",sup:"am angenehmsten"},
     {a:"die",w:"Anmeldung",p:"Anmeldungen",en:"registration",ex:"",cat:"n",mn:"<b>an + melden</b> (to report) → the paperwork where you 'announce yourself' to the city."},
     {a:"der",w:"(Auslands-)Aufenthalt",p:"Aufenthalte",en:"stay (abroad)",ex:"",cat:"n",mn:"auf + <b>halten</b> (hold) — the time you're 'held' somewhere abroad."},
     {a:"der",w:"Behördengang",p:"Behördengänge",en:"visit to the authorities",ex:"",cat:"n",mn:"Behörde (authority) + Gang (a walk) → literally a walk/errand to the authorities."},
@@ -1172,9 +1191,9 @@ const LEGACY_DATA = [
     {a:"die",w:"Deutsche",p:"Deutschen",en:"German",ex:"",cat:"n",mn:"Feminine form of der Deutsche."},
     {a:"der",w:"Durchschnitt",p:"",en:"average",ex:"",cat:"n",mn:"durch (through) + Schnitt (a cut) → cutting straight through all the values."},
     {a:"das",w:"Ehrenamt",p:"Ehrenämter",en:"voluntary work",ex:"",cat:"n",mn:"Ehre (honour) + Amt (office/post) → an honorary, unpaid post."},
-    {a:"",w:"ehrenamtlich",p:"",en:"voluntary",ex:"",cat:"adj",mn:"Adjective of Ehrenamt: done 'in honour', unpaid."},
+    {a:"",w:"ehrenamtlich",p:"",en:"voluntary",ex:"",cat:"adj",mn:"Adjective of Ehrenamt: done 'in honour', unpaid.",comp:"ehrenamtlicher",sup:"am ehrenamtlichsten"},
     {a:"",w:"sich einleben",p:"",en:"to settle in",ex:"",cat:"v",mn:"ein (into) + leben (live) → to 'live yourself into' a new place.",pr:"lebte sich ein",pp:"hat sich eingelebt"},
-    {a:"",w:"einsam",p:"",en:"lonely",ex:"",cat:"adj",mn:"ein (one) + -sam (like '-some') → being 'one-some', all alone."},
+    {a:"",w:"einsam",p:"",en:"lonely",ex:"",cat:"adj",mn:"ein (one) + -sam (like '-some') → being 'one-some', all alone.",comp:"einsamer",sup:"am einsamsten"},
     {a:"das",w:"Einwohnermeldeamt",p:"Einwohnermeldeämter",en:"Registration Office",ex:"",cat:"n",mn:"Einwohner (resident) + melden (report) + Amt (office) → office where residents report themselves."},
     {a:"das",w:"Elternhaus",p:"Elternhäuser",en:"parents' house",ex:"",cat:"n",mn:"Eltern (parents) + Haus (house) → simply 'parents' house'."},
     {a:"",w:"erleben",p:"",en:"to experience",ex:"",cat:"v",mn:"er- + leben (live) → to live through something.",pr:"erlebte",pp:"hat erlebt"},
@@ -1190,9 +1209,9 @@ const LEGACY_DATA = [
     {a:"die",w:"Mannschaft",p:"Mannschaften",en:"team",ex:"",cat:"n",mn:"Mann (person) + -schaft (-ship, group suffix) → a group of people."},
     {a:"die",w:"Million",p:"Millionen",en:"million",ex:"",cat:"n",mn:"Identical to English 'million'."},
     {a:"",w:"pendeln",p:"",en:"to commute",ex:"Er pendelt zwischen der Arbeit und Zuhause.",cat:"v",mn:"Sounds like 'pendulum' — swinging back and forth between home and work.",pr:"pendelte",pp:"ist gependelt"},
-    {a:"",w:"schwer",p:"",en:"difficult",ex:"",cat:"adj",mn:"Sounds like 'chore' — a heavy chore feels schwer."},
+    {a:"",w:"schwer",p:"",en:"difficult",ex:"",cat:"adj",mn:"Sounds like 'chore' — a heavy chore feels schwer.",comp:"schwerer",sup:"am schwersten"},
     {a:"die",w:"Schwierigkeit",p:"Schwierigkeiten",en:"difficulty",ex:"",cat:"n",mn:"schwer (difficult) + -igkeit (-ness) → 'difficult-ness'."},
-    {a:"",w:"sportlich",p:"",en:"athletic",ex:"",cat:"adj",mn:"Sport + -lich (-y) → sporty."},
+    {a:"",w:"sportlich",p:"",en:"athletic",ex:"",cat:"adj",mn:"Sport + -lich (-y) → sporty.",comp:"sportlicher",sup:"am sportlichsten"},
     {a:"der",w:"Tanz",p:"Tänze",en:"dance",ex:"",cat:"n",mn:"Sounds just like English 'dance'."},
     {a:"",w:"sich ummelden",p:"",en:"to re-register",ex:"",cat:"v",mn:"um (change) + melden (report) → re-report yourself when you move.",pr:"meldete sich um",pp:"hat sich umgemeldet"},
     {a:"",w:"unterstützen",p:"",en:"to support",ex:"",cat:"v",mn:"unter (under) + stützen (prop up) → to prop someone up from below.",pr:"unterstützte",pp:"hat unterstützt"},
@@ -1214,12 +1233,12 @@ const LEGACY_DATA = [
     {a:"",w:"begegnen",p:"",en:"to meet",ex:"",cat:"v",mn:"You unexpectedly 'run into' someone — think 'be-gone-in' a crowd, then suddenly face to face.",pr:"begegnete",pp:"ist begegnet"},
     {a:"die",w:"Disko = der Club",p:"Diskos = Clubs",en:"disco (club)",ex:"",cat:"n",mn:"Same as English disco/club."},
     {a:"die",w:"Gesellschaft",p:"Gesellschaften",en:"society",ex:"",cat:"n",mn:"Geselle (companion) + -schaft → companionship at large scale."},
-    {a:"",w:"leicht",p:"",en:"easy",ex:"",cat:"adj",mn:"Sounds like 'light' (not heavy) → leicht = easy/light."},
+    {a:"",w:"leicht",p:"",en:"easy",ex:"",cat:"adj",mn:"Sounds like 'light' (not heavy) → leicht = easy/light.",comp:"leichter",sup:"am leichtesten"},
     {a:"die",w:"Stimmung",p:"Stimmungen",en:"mood",ex:"",cat:"n",mn:"Stimme (voice) + -ung → the 'voice' of the room."},
     {a:"",w:"teilen",p:"",en:"to share",ex:"",cat:"v",mn:"Sounds like 'tile' — splitting tiles evenly between friends.",pr:"teilte",pp:"hat geteilt"},
-    {a:"die",w:"Unterstützung (meistens Sg.)",p:"",en:"support (mostly singular)",ex:"",cat:"n",mn:"Noun of unterstützen (to support)."},
+    {a:"die",w:"Unterstützung (meistens Sg.)",p:"Unterstützungen",en:"support (mostly singular)",ex:"",cat:"n",mn:"Noun of unterstützen (to support)."},
     {a:"das",w:"Vergnügen",p:"",en:"enjoyment",ex:"",cat:"n",mn:"ver + gnügen (enough) → having 'enough' fun and more."},
-    {a:"",w:"zufällig",p:"",en:"random",ex:"",cat:"adj",mn:"Zufall (chance, lit. 'falling to you') + -ig."},
+    {a:"",w:"zufällig",p:"",en:"random",ex:"",cat:"adj",mn:"Zufall (chance, lit. 'falling to you') + -ig.",comp:"zufälliger",sup:"am zufälligsten"},
     {a:"",w:"befreundet sein (mit)",p:"",en:"to be friends (with)",ex:"",cat:"p",mn:"Freund (friend) + be- → 'be-friended' with someone."},
     {a:"",w:"Ich leihe mir ein Fahrrad aus.",p:"",en:"I'm borrowing a bicycle.",ex:"",cat:"p",mn:"Literal use of ausleihen: I lend myself a bike."}
   ]},
@@ -1250,19 +1269,19 @@ const LEGACY_DATA = [
     {a:"die",w:"IT (= Informationstechnik)",p:"",en:"IT (information technology)",ex:"",cat:"n",mn:"Same abbreviation as English IT."},
     {a:"die",w:"Kenntnis",p:"Kenntnisse",en:"knowledge",ex:"",cat:"n",mn:"kennen (to know) + -nis → what you know."},
     {a:"",w:"leisten",p:"",en:"to achieve",ex:"",cat:"v",mn:"Sounds like 'least' — even the least effort still achieves something.",pr:"leistete",pp:"hat geleistet"},
-    {a:"",w:"letzter/letzte/letztes",p:"",en:"last",ex:"",cat:"adj",mn:"Sounds like 'last, ter!' → letzt- = last."},
+    {a:"",w:"letzter/letzte/letztes",p:"",en:"last",ex:"",cat:"adj",mn:"Sounds like 'last, ter!' → letzt- = last.",comp:"letzterer",sup:"am letztersten"},
     {a:"",w:"nämlich",p:"",en:"namely",ex:"",cat:"p",mn:"You name the precise reason: nämlich = namely."},
     {a:"die",w:"Schichtarbeit",p:"Schichtarbeiten",en:"shift work",ex:"",cat:"n",mn:"Schicht (shift/layer) + Arbeit (work)."},
     {a:"das",w:"Stellenangebot = die Stellenanzeige",p:"",en:"job advertisement",ex:"",cat:"n",mn:"Stelle (position) + an|bieten (offer) → an offered position."},
     {a:"der",w:"Tarif",p:"Tarife",en:"rate",ex:"",cat:"n",mn:"Sounds like English 'tariff' → a fixed rate."},
     {a:"die",w:"Tätigkeit",p:"Tätigkeiten",en:"activity",ex:"",cat:"n",mn:"tätig (active) + -keit → being active at something."},
     {a:"",w:"tun",p:"",en:"to do",ex:"",cat:"v",mn:"Sounds like 'toon' — 'what did you DO in that cartoon?'",pr:"tat",pp:"hat getan"},
-    {a:"",w:"unbefristet",p:"",en:"permanent",ex:"Er hat eine unbefristete Aufenthaltserlaubnis.",cat:"adj",mn:"un + befristet (from Frist=deadline) → without a deadline."},
-    {a:"",w:"befristet",p:"",en:"limited",ex:"Die Festeinstellung ist auf ein Jahr befristet.",cat:"adj",mn:"Frist (deadline) + be- → given a deadline."},
+    {a:"",w:"unbefristet",p:"",en:"permanent",ex:"Er hat eine unbefristete Aufenthaltserlaubnis.",cat:"adj",mn:"un + befristet (from Frist=deadline) → without a deadline.",comp:"unbefristeter",sup:"am unbefristetesten"},
+    {a:"",w:"befristet",p:"",en:"limited",ex:"Die Festeinstellung ist auf ein Jahr befristet.",cat:"adj",mn:"Frist (deadline) + be- → given a deadline.",comp:"befristeter",sup:"am befristetesten"},
     {a:"",w:"einstellen",p:"",en:"to hire",ex:"Warum wollen Unternehmen keine Menschen mit Behinderung einstellen?",cat:"v",mn:"ein (in) + stellen (place) → to place someone 'in' a job.",pr:"stellte ein",pp:"hat eingestellt"},
     {a:"",w:"entlassen",p:"",en:"to dismiss",ex:"Sie wurde schon mehrmals entlassen.",cat:"v",mn:"ent (away) + lassen (let) → to 'let someone go away'.",pr:"entließ",pp:"hat entlassen"},
-    {a:"",w:"sicher",p:"",en:"secure",ex:"Ein sicheres Einkommen ist wichtig.",cat:"adj",mn:"Feeling like a 'seeker' who's finally found safety."},
-    {a:"",w:"unsicher",p:"",en:"insecure",ex:"Er ist unsicher, was das korrekte Verhalten ist.",cat:"adj",mn:"un + sicher → not safe."},
+    {a:"",w:"sicher",p:"",en:"secure",ex:"Ein sicheres Einkommen ist wichtig.",cat:"adj",mn:"Feeling like a 'seeker' who's finally found safety.",comp:"sicherer",sup:"am sichersten"},
+    {a:"",w:"unsicher",p:"",en:"insecure",ex:"Er ist unsicher, was das korrekte Verhalten ist.",cat:"adj",mn:"un + sicher → not safe.",comp:"unsicherer",sup:"am unsichersten"},
     {a:"",w:"einen Beitrag leisten zu",p:"",en:"to make a contribution to",ex:"",cat:"p",mn:"Beitrag (contribution) + leisten (achieve).",pr:"leistete einen Beitrag",pp:"hat einen Beitrag geleistet"},
     {a:"",w:"Es fällt mir leicht/schwer, zu …",p:"",en:"I find it easy/difficult to …",ex:"",cat:"p",mn:"fallen (fall) → something 'falls easy/heavy' on me."}
   ]},
@@ -1277,7 +1296,7 @@ const LEGACY_DATA = [
     {a:"der",w:"Erzieher",p:"Erzieher",en:"educator",ex:"",cat:"n",mn:"erziehen (raise/educate) + -er → one who educates."},
     {a:"die",w:"Erzieherin",p:"Erzieherinnen",en:"educator",ex:"",cat:"n",mn:"Feminine form of Erzieher."},
     {a:"",w:"führen zu",p:"",en:"to lead to",ex:"",cat:"v",mn:"führen (lead) + zu (to) → to lead to something.",pr:"führte zu",pp:"hat geführt zu"},
-    {a:"",w:"gleichberechtigt",p:"",en:"equal",ex:"",cat:"adj",mn:"gleich (equal) + Recht (right) + -igt → given equal rights."},
+    {a:"",w:"gleichberechtigt",p:"",en:"equal",ex:"",cat:"adj",mn:"gleich (equal) + Recht (right) + -igt → given equal rights.",comp:"gleichberechtigter",sup:"am gleichberechtigtesten"},
     {a:"die",w:"Gleichberechtigung",p:"Gleichberechtigungen",en:"equality",ex:"",cat:"n",mn:"Noun of gleichberechtigt."},
     {a:"die",w:"Inklusion",p:"",en:"inclusion",ex:"",cat:"n",mn:"Identical to English 'inclusion'."},
     {a:"",w:"irgendwann",p:"",en:"at some point",ex:"",cat:"p",mn:"irgend (some) + wann (when) → 'somewhen'."},
@@ -1286,10 +1305,10 @@ const LEGACY_DATA = [
     {a:"die",w:"Ungleichheit",p:"Ungleichheiten",en:"inequality",ex:"",cat:"n",mn:"un + gleich (equal) + -heit → not-equal-ness."},
     {a:"die",w:"Verantwortung",p:"Verantwortungen",en:"responsibility",ex:"",cat:"n",mn:"ver + Antwort (answer) → being 'answerable' for something."},
     {a:"",w:"zustimmen",p:"",en:"to agree",ex:"",cat:"v",mn:"zu (to) + Stimme (voice) → to add your voice to a decision.",pr:"stimmte zu",pp:"hat zugestimmt"},
-    {a:"",w:"fair",p:"",en:"fair",ex:"",cat:"adj",mn:"Identical to English 'fair'."},
-    {a:"",w:"unfair",p:"",en:"unfair",ex:"",cat:"adj",mn:"Identical to English 'unfair'."},
-    {a:"",w:"gleich",p:"",en:"equal",ex:"Männer und Frauen werden nicht gleich behandelt.",cat:"adj",mn:"Sounds like 'g-like' — things a-glike are gleich."},
-    {a:"",w:"ungleich",p:"",en:"unequal",ex:"Männer und Frauen werden ungleich behandelt.",cat:"adj",mn:"un + gleich → not equal."}
+    {a:"",w:"fair",p:"",en:"fair",ex:"",cat:"adj",mn:"Identical to English 'fair'.",comp:"fairer",sup:"am fairsten"},
+    {a:"",w:"unfair",p:"",en:"unfair",ex:"",cat:"adj",mn:"Identical to English 'unfair'.",comp:"unfairer",sup:"am unfairsten"},
+    {a:"",w:"gleich",p:"",en:"equal",ex:"Männer und Frauen werden nicht gleich behandelt.",cat:"adj",mn:"Sounds like 'g-like' — things a-glike are gleich.",comp:"gleicher",sup:"am gleichsten"},
+    {a:"",w:"ungleich",p:"",en:"unequal",ex:"Männer und Frauen werden ungleich behandelt.",cat:"adj",mn:"un + gleich → not equal.",comp:"ungleicher",sup:"am ungleichsten"}
   ]},
   {name:"Wir streiken!", items:[
     {a:"",w:"allerdings",p:"",en:"however",ex:"",cat:"p",mn:"aller (of all) + dings (things) → adds a 'however' twist."},
@@ -1298,10 +1317,10 @@ const LEGACY_DATA = [
     {a:"die",w:"(Arbeits-)Bedingung",p:"(Arbeits-)Bedingungen",en:"(working) condition",ex:"",cat:"n",mn:"bedingen (to condition) → the conditions of work."},
     {a:"der",w:"Beschäftigte",p:"Beschäftigten",en:"employee",ex:"",cat:"n",mn:"beschäftigen (employ) → one who is employed."},
     {a:"die",w:"Beschäftigte",p:"Beschäftigten",en:"employee",ex:"",cat:"n",mn:"Feminine/generic form of der Beschäftigte."},
-    {a:"",w:"belastend",p:"",en:"onerous",ex:"",cat:"adj",mn:"Last (load) + be- → putting a load on you."},
+    {a:"",w:"belastend",p:"",en:"onerous",ex:"",cat:"adj",mn:"Last (load) + be- → putting a load on you.",comp:"belastender",sup:"am belastendesten"},
     {a:"",w:"betreffen",p:"",en:"to concern",ex:"",cat:"v",mn:"be + treffen (hit/meet) → something that 'hits' or touches you.",pr:"betraf",pp:"hat betroffen"},
-    {a:"das",w:"Einkommen",p:"",en:"income",ex:"",cat:"n",mn:"ein (in) + kommen (come) → what 'comes in'."},
-    {a:"",w:"finanziell",p:"",en:"financial",ex:"",cat:"adj",mn:"Identical root to English 'financial'."},
+    {a:"das",w:"Einkommen",p:"Einkommen",en:"income",ex:"",cat:"n",mn:"ein (in) + kommen (come) → what 'comes in'."},
+    {a:"",w:"finanziell",p:"",en:"financial",ex:"",cat:"adj",mn:"Identical root to English 'financial'.",comp:"finanzieller",sup:"am finanziellsten"},
     {a:"die",w:"Gewerkschaft",p:"Gewerkschaften",en:"union",ex:"",cat:"n",mn:"Gewerk (trade/craft) + -schaft → a fellowship of tradespeople."},
     {a:"",w:"insgesamt",p:"",en:"total",ex:"",cat:"p",mn:"in + gesamt (whole) → 'in whole'."},
     {a:"der",w:"Lohn",p:"Löhne",en:"wage",ex:"",cat:"n",mn:"Sounds like 'loan' — but it's what you earn, not borrow."},
@@ -1313,7 +1332,7 @@ const LEGACY_DATA = [
     {a:"",w:"(sich) verbessern",p:"",en:"to improve (oneself)",ex:"",cat:"v",mn:"ver + besser (better) → to make better.",pr:"verbesserte (sich)",pp:"hat (sich) verbessert"},
     {a:"",w:"verhandeln",p:"",en:"to negotiate",ex:"",cat:"v",mn:"ver + handeln (act/trade) → to trade positions back and forth.",pr:"verhandelte",pp:"hat verhandelt"},
     {a:"das",w:"Verständnis",p:"Verständnisse",en:"understanding",ex:"",cat:"n",mn:"verstehen (understand) + -nis."},
-    {a:"",w:"wertvoll",p:"",en:"valuable",ex:"",cat:"adj",mn:"Wert (value) + voll (full) → full of value."},
+    {a:"",w:"wertvoll",p:"",en:"valuable",ex:"",cat:"adj",mn:"Wert (value) + voll (full) → full of value.",comp:"wertvoller",sup:"am wertvollsten"},
     {a:"",w:"steigen",p:"",en:"to increase",ex:"Die Zahlen steigen nur langsam.",cat:"v",mn:"Sounds like 'stair' — climbing stairs upward.",pr:"stieg",pp:"ist gestiegen"},
     {a:"",w:"sinken",p:"",en:"to decrease",ex:"",cat:"v",mn:"Sounds identical to English 'sink'.",pr:"sank",pp:"ist gesunken"},
     {a:"",w:"für höhere Löhne und bessere Arbeitsbedingungen kämpfen",p:"",en:"to fight for higher wages and better working conditions",ex:"",cat:"p",mn:"kämpfen sounds like 'campaign' — to campaign/fight for a cause.",pr:"kämpfte",pp:"hat gekämpft"},
@@ -1330,26 +1349,26 @@ const LEGACY_DATA = [
     {a:"",w:"beeinflussen",p:"",en:"to influence",ex:"",cat:"v",mn:"be + Einfluss (influence) → to exert influence.",pr:"beeinflusste",pp:"hat beeinflusst"},
     {a:"der",w:"Blick",p:"Blicke",en:"view",ex:"",cat:"n",mn:"Sounds like 'blink' — a quick glance."},
     {a:"die",w:"Couch = Sofa",p:"Couchs = Sofas",en:"couch/sofa",ex:"",cat:"n",mn:"Identical to English 'couch/sofa'."},
-    {a:"",w:"farbig",p:"",en:"colourful",ex:"",cat:"adj",mn:"Farbe (colour) + -ig → colour-y."},
+    {a:"",w:"farbig",p:"",en:"colourful",ex:"",cat:"adj",mn:"Farbe (colour) + -ig → colour-y.",comp:"farbiger",sup:"am farbigsten"},
     {a:"der",w:"Fußboden",p:"Fußböden",en:"floor",ex:"",cat:"n",mn:"Fuß (foot) + Boden (ground) → where your foot meets the ground."},
-    {a:"",w:"gebraucht",p:"",en:"used",ex:"",cat:"adj",mn:"gebrauchen (to use) → already used, second-hand."},
+    {a:"",w:"gebraucht",p:"",en:"used",ex:"",cat:"adj",mn:"gebrauchen (to use) → already used, second-hand.",comp:"gebrauchter",sup:"am gebrauchtesten"},
     {a:"der",w:"Himmel",p:"",en:"sky",ex:"",cat:"n",mn:"Picture a heavenly choir singing up in der Himmel."},
     {a:"der",w:"Hof",p:"Höfe",en:"courtyard",ex:"",cat:"n",mn:"Sounds like 'hoof' — farm animals clicking hooves in der Hof."},
-    {a:"",w:"individuell",p:"",en:"individual",ex:"",cat:"adj",mn:"Identical root to English 'individual'."},
+    {a:"",w:"individuell",p:"",en:"individual",ex:"",cat:"adj",mn:"Identical root to English 'individual'.",comp:"individueller",sup:"am individuellsten"},
     {a:"die",w:"Innenstadt",p:"Innenstädte",en:"inner city",ex:"",cat:"n",mn:"innen (inside) + Stadt (city)."},
     {a:"das",w:"Kissen",p:"Kissen",en:"cushion",ex:"",cat:"n",mn:"Sounds like 'kiss on' the cushion — a soft place to rest your head."},
     {a:"die",w:"Lage",p:"Lagen",en:"location",ex:"",cat:"n",mn:"Sounds like 'lay' — where something is laid."},
     {a:"das",w:"Licht",p:"",en:"light",ex:"",cat:"n",mn:"Sounds like 'light' → das Licht."},
     {a:"",w:"mitten in, auf, …",p:"",en:"in the middle of",ex:"",cat:"p",mn:"Mitte (middle) → right in the middle of."},
     {a:"die",w:"Position",p:"Positionen",en:"position",ex:"",cat:"n",mn:"Identical to English 'position'."},
-    {a:"",w:"schick",p:"",en:"chic",ex:"",cat:"adj",mn:"Looks/sounds like English 'chic'."},
+    {a:"",w:"schick",p:"",en:"chic",ex:"",cat:"adj",mn:"Looks/sounds like English 'chic'.",comp:"schicker",sup:"am schicksten"},
     {a:"der",w:"Spiegel",p:"",en:"mirror",ex:"",cat:"n",mn:"Sounds like 'spy-gull' — a bird spying on its reflection."},
     {a:"die",w:"Toilette = Klo = WC",p:"Toiletten = Klos = WCs",en:"toilet/loo/WC",ex:"",cat:"n",mn:"Same as English toilet/loo/WC."},
     {a:"der",w:"Vogel",p:"Vögel",en:"bird",ex:"",cat:"n",mn:"Think of a bird (Vogel) singing through the fog — sounds foghorn-ish with a V."},
     {a:"die",w:"Wohnungseinrichtung",p:"Wohnungseinrichtungen",en:"furnishing",ex:"",cat:"n",mn:"Wohnung (flat) + Einrichtung (fitting) → how a flat is set up."},
     {a:"das",w:"Zuhause",p:"",en:"home",ex:"",cat:"n",mn:"zu (to) + Hause (house) → 'to-house' = home."},
-    {a:"",w:"weich",p:"",en:"soft",ex:"Weiche Textilien laden zum Entspannen ein.",cat:"adj",mn:"Sounds like 'wich' — 'which pillow is softer?'"},
-    {a:"",w:"hart",p:"",en:"hard",ex:"Der harte Fußboden ist sehr praktisch.",cat:"adj",mn:"Identical to English 'hard'."},
+    {a:"",w:"weich",p:"",en:"soft",ex:"Weiche Textilien laden zum Entspannen ein.",cat:"adj",mn:"Sounds like 'wich' — 'which pillow is softer?'",comp:"weicher",sup:"am weichsten"},
+    {a:"",w:"hart",p:"",en:"hard",ex:"Der harte Fußboden ist sehr praktisch.",cat:"adj",mn:"Identical to English 'hard'.",comp:"härter",sup:"am härtesten"},
     {a:"die",w:"Ordnung",p:"",en:"order",ex:"",cat:"n",mn:"ordnen (arrange) → arrangement."},
     {a:"die",w:"Unordnung",p:"",en:"disorder",ex:"",cat:"n",mn:"un + Ordnung → the opposite of order."}
   ]},
@@ -1364,7 +1383,7 @@ const LEGACY_DATA = [
     {a:"der",w:"Lieblingsort",p:"Lieblingsorte",en:"favourite place",ex:"",cat:"n",mn:"Liebling (darling/favourite) + Ort (place)."},
     {a:"der",w:"Schreibtisch",p:"Schreibtische",en:"desk",ex:"",cat:"n",mn:"schreiben (write) + Tisch (table) → writing table."},
     {a:"das",w:"Spielzeug",p:"Spielzeuge",en:"toy",ex:"",cat:"n",mn:"spielen (play) + Zeug (stuff) → play-stuff."},
-    {a:"",w:"ständig",p:"",en:"constant",ex:"",cat:"adj",mn:"Stand (state) + -ig → always in the same state."},
+    {a:"",w:"ständig",p:"",en:"constant",ex:"",cat:"adj",mn:"Stand (state) + -ig → always in the same state.",comp:"ständiger",sup:"am ständigsten"},
     {a:"das",w:"Zeug",p:"",en:"thing",ex:"",cat:"n",mn:"Random 'stuff' lying around."}
   ]},
   {name:"Mein Gemüse wächst in der Stadt.", items:[
@@ -1379,10 +1398,10 @@ const LEGACY_DATA = [
     {a:"die",w:"Fläche",p:"Flächen",en:"area",ex:"",cat:"n",mn:"Sounds like 'flat-che' — a flat stretch of land."},
     {a:"",w:"gärtnern",p:"",en:"to garden",ex:"",cat:"v",mn:"Garten (garden) → to do garden-work.",pr:"gärtnerte",pp:"hat gegärtnert"},
     {a:"die",w:"Kirche",p:"Kirchen",en:"church",ex:"",cat:"n",mn:"Sounds like English 'church'."},
-    {a:"",w:"lebenswert",p:"",en:"liveable",ex:"",cat:"adj",mn:"leben (live) + wert (worth) → worth living in."},
+    {a:"",w:"lebenswert",p:"",en:"liveable",ex:"",cat:"adj",mn:"leben (live) + wert (worth) → worth living in.",comp:"lebenswerter",sup:"am lebenswertesten"},
     {a:"",w:"mitmachen",p:"",en:"to participate",ex:"",cat:"v",mn:"mit (with) + machen (do) → to do along with others.",pr:"machte mit",pp:"hat mitgemacht"},
     {a:"der",w:"Schatten",p:"",en:"shadow",ex:"",cat:"n",mn:"Sounds like 'shadow' with a 'sch'."},
-    {a:"",w:"städtisch",p:"",en:"urban",ex:"",cat:"adj",mn:"Stadt (city) + -isch → city-like."},
+    {a:"",w:"städtisch",p:"",en:"urban",ex:"",cat:"adj",mn:"Stadt (city) + -isch → city-like.",comp:"städtischer",sup:"am städtischesten"},
     {a:"der",w:"Standort",p:"Standorte",en:"location",ex:"",cat:"n",mn:"Stand (position) + Ort (place) → where something stands."},
     {a:"",w:"wachsen",p:"",en:"to grow",ex:"Die Pflanzen wachsen schnell.",cat:"v",mn:"Sounds like 'wax' dripping and growing on a candle.",pr:"wuchs",pp:"ist gewachsen"},
     {a:"",w:"die Möglichkeit bieten",p:"",en:"to offer the opportunity",ex:"",cat:"p",mn:"möglich (possible) + bieten (offer)."},
@@ -1391,11 +1410,11 @@ const LEGACY_DATA = [
 ]},
 {lesson:4, title:"Migration", sections:[
   {name:"Deutschland ist ein Einwanderungsland.", items:[
-    {a:"",w:"aktuell",p:"",en:"current",ex:"",cat:"adj",mn:"Close to English 'actual' — but means 'current' in German."},
+    {a:"",w:"aktuell",p:"",en:"current",ex:"",cat:"adj",mn:"Close to English 'actual' — but means 'current' in German.",comp:"aktueller",sup:"am aktuellsten"},
     {a:"die",w:"Arbeitskraft",p:"Arbeitskräfte",en:"worker",ex:"",cat:"n",mn:"Arbeit (work) + Kraft (power) → the power/person behind the work."},
     {a:"der",w:"Ausländer",p:"Ausländer",en:"foreigner",ex:"",cat:"n",mn:"aus (out of) + Land (country) → someone from outside the country."},
     {a:"die",w:"Ausländerin",p:"Ausländerinnen",en:"foreigner",ex:"",cat:"n",mn:"Feminine form of Ausländer."},
-    {a:"",w:"ausländisch",p:"",en:"foreign",ex:"",cat:"adj",mn:"Adjective of Ausland (foreign country)."},
+    {a:"",w:"ausländisch",p:"",en:"foreign",ex:"",cat:"adj",mn:"Adjective of Ausland (foreign country).",comp:"ausländischer",sup:"am ausländischesten"},
     {a:"die",w:"Bevölkerung",p:"Bevölkerungen",en:"population",ex:"",cat:"n",mn:"Volk (folk/people) + be- → the 'folked' mass."},
     {a:"der",w:"Bundeskanzler",p:"Bundeskanzler",en:"Federal Chancellor",ex:"",cat:"n",mn:"Bund (federation) + Kanzler (chancellor)."},
     {a:"die",w:"Bundeskanzlerin",p:"Bundeskanzlerinnen",en:"Federal Chancellor",ex:"",cat:"n",mn:"Feminine form of Bundeskanzler."},
@@ -1421,7 +1440,7 @@ const LEGACY_DATA = [
     {a:"die",w:"Offenheit",p:"",en:"openness",ex:"",cat:"n",mn:"offen (open) + -heit."},
     {a:"der",w:"Rassismus",p:"",en:"racism",ex:"",cat:"n",mn:"Identical root to English 'racism'."},
     {a:"die",w:"Regierung",p:"Regierungen",en:"government",ex:"",cat:"n",mn:"regieren (govern) + -ung."},
-    {a:"",w:"selbstverständlich",p:"",en:"of course",ex:"",cat:"adj",mn:"selbst (self) + verständlich (understandable) → understandable by itself."},
+    {a:"",w:"selbstverständlich",p:"",en:"of course",ex:"",cat:"adj",mn:"selbst (self) + verständlich (understandable) → understandable by itself.",comp:"selbstverständlicher",sup:"am selbstverständlichsten"},
     {a:"die",w:"Toleranz",p:"",en:"tolerance",ex:"",cat:"n",mn:"Identical to English 'tolerance'."},
     {a:"die",w:"Wirtschaft",p:"",en:"the economy",ex:"",cat:"n",mn:"wirt(schaften) (to manage/host) → managing resources."},
     {a:"der",w:"Frieden",p:"",en:"peace",ex:"",cat:"n",mn:"Sounds like 'freedom' — peace often brings freedom."},
@@ -1431,17 +1450,17 @@ const LEGACY_DATA = [
   ]},
   {name:"Das war mir nicht bewusst.", items:[
     {a:"der",w:"Bleistift",p:"Bleistifte",en:"pencil",ex:"",cat:"n",mn:"Blei (lead) + Stift (stick/pen) → lead-stick."},
-    {a:"",w:"ernsthaft = ernst",p:"",en:"serious",ex:"",cat:"adj",mn:"Sounds like the serious name 'Ernest'."},
+    {a:"",w:"ernsthaft = ernst",p:"",en:"serious",ex:"",cat:"adj",mn:"Sounds like the serious name 'Ernest'.",comp:"ernsthafter",sup:"am ernsthaftesten"},
     {a:"die",w:"Gewohnheit",p:"Gewohnheiten",en:"habit",ex:"",cat:"n",mn:"gewohnt (used to) + -heit → what you're accustomed to."},
     {a:"die",w:"Hälfte",p:"Hälften",en:"half",ex:"",cat:"n",mn:"halb (half) + -te."},
-    {a:"",w:"kulturell",p:"",en:"cultural",ex:"",cat:"adj",mn:"Identical root to English 'cultural'."},
+    {a:"",w:"kulturell",p:"",en:"cultural",ex:"",cat:"adj",mn:"Identical root to English 'cultural'.",comp:"kultureller",sup:"am kulturellsten"},
     {a:"das",w:"Missverständnis",p:"Missverständnisse",en:"misunderstanding",ex:"",cat:"n",mn:"miss (wrongly) + Verständnis (understanding)."},
     {a:"der",w:"Scherz",p:"Scherze",en:"joke",ex:"",cat:"n",mn:"Sounds like 'shirts' — imagine joking about mismatched shirts."},
     {a:"die",w:"Situation",p:"Situationen",en:"situation",ex:"",cat:"n",mn:"Identical to English 'situation'."},
     {a:"",w:"spinnen",p:"",en:"to be crazy",ex:"Der Typ spinnt wohl! -> Der Typ ist verrückt.",cat:"v",mn:"Literally 'to spin thread' — picture thoughts spinning out of control.",pr:"spann",pp:"hat gesponnen"},
     {a:"das",w:"Trinkgeld",p:"Trinkgelder",en:"tip",ex:"",cat:"n",mn:"trinken (drink) + Geld (money) → 'drinking money' left for the waiter."},
-    {a:"",w:"scherzhaft",p:"",en:"joking",ex:"Ich wusste nicht, ob sie ihre Wut scherzhaft übertrieb.",cat:"adj",mn:"Scherz (joke) + -haft (-like)."},
-    {a:"",w:"ernsthaft",p:"",en:"serious",ex:"",cat:"adj",mn:"Ernst (serious) + -haft."},
+    {a:"",w:"scherzhaft",p:"",en:"joking",ex:"Ich wusste nicht, ob sie ihre Wut scherzhaft übertrieb.",cat:"adj",mn:"Scherz (joke) + -haft (-like).",comp:"scherzhafter",sup:"am scherzhaftesten"},
+    {a:"",w:"ernsthaft",p:"",en:"serious",ex:"",cat:"adj",mn:"Ernst (serious) + -haft.",comp:"ernsthafter",sup:"am ernsthaftesten"},
     {a:"",w:"den Eindruck haben",p:"",en:"to have the impression",ex:"",cat:"p",mn:"ein (in) + Druck (pressure/print) → something 'imprinted' on you."},
     {a:"",w:"in Eile sein",p:"",en:"to be in a hurry",ex:"",cat:"p",mn:"Eile sounds like 'ail' — rushed as if you 'ail' from hurry."},
     {a:"",w:"Mir war nicht bewusst, dass …",p:"",en:"I wasn't aware that …",ex:"",cat:"p",mn:"bewusst (aware, from wissen=to know)."}
@@ -1495,8 +1514,8 @@ const LEGACY_DATA = [
     {a:"die",w:"Zitrone",p:"Zitronen",en:"lemon",ex:"",cat:"n",mn:"Sounds like 'citron'."},
     {a:"",w:"abnehmen",p:"",en:"to lose weight",ex:"Ich will kein Gramm abnehmen.",cat:"v",mn:"ab (off) + nehmen (take) → to take weight off.",pr:"nahm ab",pp:"hat abgenommen"},
     {a:"",w:"zunehmen",p:"",en:"to gain weight",ex:"Sie möchte gerne etwas zunehmen.",cat:"v",mn:"zu (on) + nehmen (take) → to take weight on.",pr:"nahm zu",pp:"hat zugenommen"},
-    {a:"",w:"satt",p:"",en:"full",ex:"Gerichte die satt machen, sind gesünder.",cat:"adj",mn:"Sounds like 'sat' back after a big meal, fully satisfied."},
-    {a:"",w:"hungrig",p:"",en:"hungry",ex:"Tipp: Nicht hungrig einkaufen gehen!",cat:"adj",mn:"Hunger + -ig."},
+    {a:"",w:"satt",p:"",en:"full",ex:"Gerichte die satt machen, sind gesünder.",cat:"adj",mn:"Sounds like 'sat' back after a big meal, fully satisfied.",comp:"satter",sup:"am sattesten"},
+    {a:"",w:"hungrig",p:"",en:"hungry",ex:"Tipp: Nicht hungrig einkaufen gehen!",cat:"adj",mn:"Hunger + -ig.",comp:"hungriger",sup:"am hungrigsten"},
     {a:"",w:"tierische Produkte",p:"",en:"animal products",ex:"",cat:"p",mn:"Tier (animal) + -isch."},
     {a:"",w:"(stark) verarbeitete Lebensmittel",p:"",en:"(highly) processed foods",ex:"",cat:"p",mn:"ver|arbeiten (process) + Lebensmittel (food)."},
     {a:"",w:"sich vollwertig/vegetarisch/vegan/… ernähren",p:"",en:"to eat a wholesome/vegetarian/vegan/… diet",ex:"",cat:"p",mn:"ernähren (nourish) → to nourish yourself in a certain way."},
@@ -1551,12 +1570,12 @@ const LEGACY_DATA = [
     {a:"",w:"Formen der Werbung = Arten von Werbung",p:"",en:"forms/types of advertising",ex:"",cat:"p",mn:"Literal: forms/types of advertising."}
   ]},
   {name:"Ich denke darüber nach, was ich kaufe.", items:[
-    {a:"",w:"defekt = kaputt",p:"",en:"defective/broken",ex:"",cat:"adj",mn:"Identical root to English 'defect'."},
+    {a:"",w:"defekt = kaputt",p:"",en:"defective/broken",ex:"",cat:"adj",mn:"Identical root to English 'defect'.",comp:"defekter",sup:"am defektesten"},
     {a:"der",w:"Empfänger",p:"Empfänger",en:"recipient",ex:"",cat:"n",mn:"empfangen (receive) + -er → one who receives."},
     {a:"die",w:"Empfängerin",p:"Empfängerinnen",en:"recipient",ex:"",cat:"n",mn:"Feminine form of Empfänger."},
     {a:"",w:"erkennen (an)",p:"",en:"to recognise",ex:"",cat:"v",mn:"er + kennen (know) → to fully 'know' something.",pr:"erkannte",pp:"hat erkannt"},
     {a:"",w:"fordern",p:"",en:"to demand",ex:"",cat:"v",mn:"Sounds like 'force' a demand.",pr:"forderte",pp:"hat gefordert"},
-    {a:"",w:"hübsch",p:"",en:"pretty",ex:"",cat:"adj",mn:"Quick and neat-sounding, like a tidy little hub of style."},
+    {a:"",w:"hübsch",p:"",en:"pretty",ex:"",cat:"adj",mn:"Quick and neat-sounding, like a tidy little hub of style.",comp:"hübscher",sup:"am hübschesten"},
     {a:"das",w:"Kleid",p:"Kleider",en:"dress",ex:"",cat:"n",mn:"Sounds like English 'clad' (clothed)."},
     {a:"die",w:"Konsumgewohnheiten (Pl.)",p:"",en:"consumption habits",ex:"",cat:"n",mn:"Konsum (consumption) + Gewohnheiten (habits)."},
     {a:"der",w:"Kundenservice",p:"Kundenservices",en:"customer service",ex:"",cat:"n",mn:"Kunde (customer) + Service."},
@@ -1590,29 +1609,29 @@ const LEGACY_DATA = [
     {a:"die",w:"Verbraucherin",p:"Verbraucherinnen",en:"consumer",ex:"",cat:"n",mn:"Feminine form of Verbraucher."},
     {a:"",w:"widerrufen",p:"",en:"to withdraw",ex:"",cat:"v",mn:"wider (against/back) + rufen (call) → to 'call back' a decision.",pr:"widerrief",pp:"hat widerrufen"},
     {a:"das",w:"Widerrufsrecht",p:"Widerrufsrechte",en:"right of withdrawal",ex:"",cat:"n",mn:"widerrufen + Recht (right)."},
-    {a:"",w:"verpackt",p:"",en:"packed",ex:"Unverpackte Lebensmittel sind umweltfreundlich.",cat:"adj",mn:"ver + packen (pack)."},
-    {a:"",w:"unverpackt",p:"",en:"unpacked",ex:"",cat:"adj",mn:"un + verpackt → not packed."},
+    {a:"",w:"verpackt",p:"",en:"packed",ex:"Unverpackte Lebensmittel sind umweltfreundlich.",cat:"adj",mn:"ver + packen (pack).",comp:"verpackter",sup:"am verpacktesten"},
+    {a:"",w:"unverpackt",p:"",en:"unpacked",ex:"",cat:"adj",mn:"un + verpackt → not packed.",comp:"unverpackter",sup:"am unverpacktesten"},
     {a:"",w:"Ich unterstütze regionale Produzenten.",p:"",en:"I support regional producers.",ex:"",cat:"p",mn:"unterstützen (support) + regional + Produzenten (producers)."}
   ]}
 ]},
 {lesson:7, title:"Man lernt nie aus", sections:[
   {name:"Wie lernt der Mensch?", items:[
-    {a:"",w:"abstrakt",p:"",en:"abstract",ex:"",cat:"adj",mn:"Identical to English 'abstract'."},
+    {a:"",w:"abstrakt",p:"",en:"abstract",ex:"",cat:"adj",mn:"Identical to English 'abstract'.",comp:"abstrakter",sup:"am abstraktesten"},
     {a:"",w:"bereits",p:"",en:"already",ex:"",cat:"p",mn:"Sounds like 'bear-eyes' — imagine a bear already opened its eyes before you arrived."},
     {a:"",w:"beschreiben",p:"",en:"to describe",ex:"",cat:"v",mn:"be + schreiben (write) → to write about something.",pr:"beschrieb",pp:"hat beschrieben"},
-    {a:"",w:"effektiv",p:"",en:"effective",ex:"",cat:"adj",mn:"Identical to English 'effective'."},
+    {a:"",w:"effektiv",p:"",en:"effective",ex:"",cat:"adj",mn:"Identical to English 'effective'.",comp:"effektiver",sup:"am effektivsten"},
     {a:"das",w:"Gehirn",p:"Gehirne",en:"brain",ex:"",cat:"n",mn:"Hums like 'brain' with a G in front — das Gehirn."},
-    {a:"",w:"intensiv",p:"",en:"intensive",ex:"",cat:"adj",mn:"Identical to English 'intensive'."},
+    {a:"",w:"intensiv",p:"",en:"intensive",ex:"",cat:"adj",mn:"Identical to English 'intensive'.",comp:"intensiver",sup:"am intensivsten"},
     {a:"die",w:"Kapazität",p:"Kapazitäten",en:"capacity",ex:"",cat:"n",mn:"Identical to English 'capacity'."},
     {a:"die",w:"Kompetenz",p:"Kompetenzen",en:"expertise",ex:"",cat:"n",mn:"Identical root to English 'competence'."},
-    {a:"",w:"komplex",p:"",en:"complex",ex:"",cat:"adj",mn:"Identical to English 'complex'."},
+    {a:"",w:"komplex",p:"",en:"complex",ex:"",cat:"adj",mn:"Identical to English 'complex'.",comp:"komplexer",sup:"am komplexesten"},
     {a:"das",w:"Kurzzeitgedächtnis",p:"",en:"short-term memory",ex:"",cat:"n",mn:"kurz (short) + Zeit (time) + Gedächtnis (memory)."},
     {a:"das",w:"Langzeitgedächtnis",p:"",en:"long-term memory",ex:"",cat:"n",mn:"lang (long) + Zeit (time) + Gedächtnis (memory)."},
     {a:"der",w:"Lernerfolg",p:"Lernerfolge",en:"learning achievement",ex:"",cat:"n",mn:"lernen (learn) + Erfolg (success)."},
     {a:"",w:"lösen",p:"",en:"to solve",ex:"",cat:"v",mn:"Sounds like 'loosen' a knot — to untangle a problem.",pr:"löste",pp:"hat gelöst"},
-    {a:"",w:"motorisch",p:"",en:"motor",ex:"",cat:"adj",mn:"Identical root to English 'motor'."},
+    {a:"",w:"motorisch",p:"",en:"motor",ex:"",cat:"adj",mn:"Identical root to English 'motor'.",comp:"motorischer",sup:"am motorischesten"},
     {a:"der",w:"Podcast",p:"Podcasts",en:"podcast",ex:"",cat:"n",mn:"Identical to English 'podcast'."},
-    {a:"",w:"relevant",p:"",en:"relevant",ex:"",cat:"adj",mn:"Identical to English 'relevant'."},
+    {a:"",w:"relevant",p:"",en:"relevant",ex:"",cat:"adj",mn:"Identical to English 'relevant'.",comp:"relevanter",sup:"am relevantesten"},
     {a:"der",w:"Schlaf",p:"",en:"sleep",ex:"",cat:"n",mn:"Rhymes with 'half' — half your life is der Schlaf."},
     {a:"der",w:"Soft Skill",p:"Soft Skills",en:"soft skill",ex:"",cat:"n",mn:"Identical to English 'soft skill'."},
     {a:"die",w:"Teamfähigkeit",p:"",en:"teamwork",ex:"",cat:"n",mn:"Team + Fähigkeit (ability) → team-ability."},
@@ -1628,12 +1647,12 @@ const LEGACY_DATA = [
     {a:"",w:"analysieren",p:"",en:"to analyse",ex:"",cat:"v",mn:"Identical to English 'analyse'.",pr:"analysierte",pp:"hat analysiert"},
     {a:"die",w:"Eigenschaft",p:"Eigenschaften",en:"feature",ex:"",cat:"n",mn:"eigen (own) + -schaft → what's 'your own' trait."},
     {a:"die",w:"Emotion",p:"Emotionen",en:"emotion",ex:"",cat:"n",mn:"Identical to English 'emotion'."},
-    {a:"",w:"emotional",p:"",en:"emotional",ex:"",cat:"adj",mn:"Identical to English 'emotional'."},
+    {a:"",w:"emotional",p:"",en:"emotional",ex:"",cat:"adj",mn:"Identical to English 'emotional'.",comp:"emotionaler",sup:"am emotionalsten"},
     {a:"das",w:"Ergebnis",p:"Ergebnisse",en:"result",ex:"",cat:"n",mn:"er + geben (give) → what a process 'gives out'."},
     {a:"der",w:"Experte",p:"Experten",en:"expert",ex:"",cat:"n",mn:"Identical root to English 'expert'."},
     {a:"die",w:"Expertin",p:"Expertinnen",en:"expert",ex:"",cat:"n",mn:"Feminine form of Experte."},
     {a:"die",w:"Fähigkeit",p:"Fähigkeiten",en:"ability",ex:"",cat:"n",mn:"fähig (capable) + -keit."},
-    {a:"",w:"hilfreich",p:"",en:"helpful",ex:"",cat:"adj",mn:"Hilfe (help) + reich (rich) → 'rich in help'."},
+    {a:"",w:"hilfreich",p:"",en:"helpful",ex:"",cat:"adj",mn:"Hilfe (help) + reich (rich) → 'rich in help'.",comp:"hilfreicher",sup:"am hilfreichsten"},
     {a:"der",w:"Hörer",p:"Hörer",en:"listener",ex:"",cat:"n",mn:"hören (hear) + -er → one who hears."},
     {a:"die",w:"Hörerin",p:"Hörerinnen",en:"listener",ex:"",cat:"n",mn:"Feminine form of Hörer."},
     {a:"die",w:"Intelligenz",p:"Intelligenzen",en:"intelligence",ex:"",cat:"n",mn:"Identical to English 'intelligence'."},
@@ -1643,20 +1662,20 @@ const LEGACY_DATA = [
     {a:"die",w:"Persönlichkeitsentwicklung",p:"Persönlichkeitsentwicklungen",en:"personal development",ex:"",cat:"n",mn:"Persönlichkeit (personality) + Entwicklung (development)."},
     {a:"die",w:"Sendung",p:"Sendungen",en:"programme",ex:"",cat:"n",mn:"senden (broadcast) + -ung → what's broadcast."},
     {a:"die",w:"Studie",p:"Studien",en:"study",ex:"",cat:"n",mn:"Identical to English 'study'."},
-    {a:"",w:"theoretisch",p:"",en:"theoretical",ex:"",cat:"adj",mn:"Identical to English 'theoretical'."},
+    {a:"",w:"theoretisch",p:"",en:"theoretical",ex:"",cat:"adj",mn:"Identical to English 'theoretical'.",comp:"theoretischer",sup:"am theoretischesten"},
     {a:"",w:"verlernen",p:"",en:"to unlearn",ex:"",cat:"v",mn:"ver + lernen (learn) → to 'un-learn'.",pr:"verlernte",pp:"hat verlernt"},
     {a:"",w:"zeigen",p:"",en:"to show",ex:"",cat:"v",mn:"Pointing something out dramatically = to show.",pr:"zeigte",pp:"hat gezeigt"},
     {a:"",w:"eine Rolle spielen",p:"",en:"to play a role",ex:"",cat:"p",mn:"Rolle (role) + spielen (play)."}
   ]},
   {name:"Mein Opa lernt Englisch.", items:[
     {a:"",w:"damals",p:"",en:"back then",ex:"",cat:"p",mn:"da (then) + mal (time/once) → back then."},
-    {a:"",w:"deutlich",p:"",en:"clear",ex:"",cat:"adj",mn:"deuten (point/indicate) + -lich → clearly pointed-out."},
+    {a:"",w:"deutlich",p:"",en:"clear",ex:"",cat:"adj",mn:"deuten (point/indicate) + -lich → clearly pointed-out.",comp:"deutlicher",sup:"am deutlichsten"},
     {a:"der",w:"Elternteil",p:"Elternteile",en:"parent",ex:"",cat:"n",mn:"Eltern (parents) + Teil (part) → one part of the parent-pair."},
-    {a:"",w:"extrem",p:"",en:"extreme",ex:"",cat:"adj",mn:"Identical to English 'extreme'."},
+    {a:"",w:"extrem",p:"",en:"extreme",ex:"",cat:"adj",mn:"Identical to English 'extreme'.",comp:"extremer",sup:"am extremsten"},
     {a:"der",w:"Faktor",p:"Faktoren",en:"factor",ex:"",cat:"n",mn:"Identical to English 'factor'."},
     {a:"die",w:"Finanzen (Pl.)",p:"",en:"finances",ex:"",cat:"n",mn:"Identical root to English 'finances'."},
     {a:"die",w:"Motivation",p:"Motivationen",en:"motivation",ex:"",cat:"n",mn:"Identical to English 'motivation'."},
-    {a:"",w:"nah",p:"",en:"near",ex:"",cat:"adj",mn:"'Nah, it's not far, it's nah (near)!'"},
+    {a:"",w:"nah",p:"",en:"near",ex:"",cat:"adj",mn:"'Nah, it's not far, it's nah (near)!'",comp:"näher",sup:"am nächsten"},
     {a:"das",w:"Schulfach",p:"Schulfächer",en:"school subject",ex:"",cat:"n",mn:"Schule (school) + Fach (subject/compartment)."},
     {a:"",w:"Herzlich willkommen!",p:"",en:"Welcome!",ex:"",cat:"p",mn:"Herz (heart) + -lich → 'heartily welcome'."}
   ]}
@@ -1672,7 +1691,7 @@ const LEGACY_DATA = [
     {a:"die",w:"Christin",p:"Christinnen",en:"Christian",ex:"",cat:"n",mn:"Feminine form of Christ."},
     {a:"das",w:"Christentum",p:"",en:"Christianity",ex:"",cat:"n",mn:"Christ + -tum (-dom) → Christianity."},
     {a:"",w:"ehren",p:"",en:"to honour",ex:"",cat:"v",mn:"Ehre (honour) → to honour.",pr:"ehrte",pp:"hat geehrt"},
-    {a:"die",w:"Entwicklung",p:"",en:"development",ex:"",cat:"n",mn:"entwickeln (develop) + -ung."},
+    {a:"die",w:"Entwicklung",p:"Entwicklungen",en:"development",ex:"",cat:"n",mn:"entwickeln (develop) + -ung."},
     {a:"",w:"etwa",p:"",en:"approximately",ex:"",cat:"p",mn:"Sounds like 'et-vah' — roughly, approximately."},
     {a:"das",w:"Geschlecht",p:"Geschlechter",en:"gender",ex:"",cat:"n",mn:"Think of a family tree 'lecht'-branching into genders."},
     {a:"der",w:"Glaube",p:"",en:"faith",ex:"",cat:"n",mn:"glauben (to believe) → faith."},
@@ -1680,7 +1699,7 @@ const LEGACY_DATA = [
     {a:"die",w:"Gläubige",p:"Gläubigen",en:"believer",ex:"",cat:"n",mn:"Feminine/generic form of der Gläubige."},
     {a:"der",w:"Gott",p:"Götter",en:"God",ex:"",cat:"n",mn:"Sounds identical to English 'God'."},
     {a:"das",w:"Grundgesetz",p:"",en:"constitution",ex:"",cat:"n",mn:"Grund (basic/ground) + Gesetz (law) → the basic law."},
-    {a:"",w:"heilig",p:"",en:"holy",ex:"",cat:"adj",mn:"Heil (salvation/wholeness) + -ig → holy."},
+    {a:"",w:"heilig",p:"",en:"holy",ex:"",cat:"adj",mn:"Heil (salvation/wholeness) + -ig → holy.",comp:"heiliger",sup:"am heiligsten"},
     {a:"die",w:"Herkunft",p:"Herkünfte",en:"origin",ex:"",cat:"n",mn:"her (from) + Kunft (coming) → where one comes from."},
     {a:"der",w:"Hinduismus",p:"",en:"Hinduism",ex:"",cat:"n",mn:"Identical to English 'Hinduism'."},
     {a:"der",w:"Islam",p:"",en:"Islam",ex:"",cat:"n",mn:"Identical to English 'Islam'."},
@@ -1691,14 +1710,14 @@ const LEGACY_DATA = [
     {a:"der",w:"Muslim",p:"Muslime",en:"Muslim",ex:"",cat:"n",mn:"Identical to English 'Muslim'."},
     {a:"die",w:"Muslimin",p:"Musliminnen",en:"Muslim",ex:"",cat:"n",mn:"Feminine form of Muslim."},
     {a:"",w:"n. Chr. (nach Christus)",p:"",en:"AD (after Christ)",ex:"",cat:"p",mn:"Abbreviation like AD: 'nach Christus' = after Christ."},
-    {a:"",w:"regional",p:"",en:"regional",ex:"",cat:"adj",mn:"Identical to English 'regional'."},
+    {a:"",w:"regional",p:"",en:"regional",ex:"",cat:"adj",mn:"Identical to English 'regional'.",comp:"regionaler",sup:"am regionalsten"},
     {a:"die",w:"Religion",p:"Religionen",en:"religion",ex:"",cat:"n",mn:"Identical to English 'religion'."},
     {a:"der",w:"Teilnehmende",p:"Teilnehmenden",en:"participant",ex:"",cat:"n",mn:"teil|nehmen (take part) → one taking part."},
     {a:"die",w:"Teilnehmende",p:"Teilnehmenden",en:"participant",ex:"",cat:"n",mn:"Feminine/generic form of der Teilnehmende."},
     {a:"",w:"unterscheiden",p:"",en:"to differentiate",ex:"",cat:"v",mn:"unter (among) + scheiden (separate) → to separate among options.",pr:"unterschied",pp:"hat unterschieden"},
-    {a:"",w:"unterschiedlich",p:"",en:"different",ex:"",cat:"adj",mn:"Adjective of unterscheiden: differing."},
+    {a:"",w:"unterschiedlich",p:"",en:"different",ex:"",cat:"adj",mn:"Adjective of unterscheiden: differing.",comp:"unterschiedlicher",sup:"am unterschiedlichsten"},
     {a:"die",w:"Vielfalt",p:"",en:"diversity",ex:"",cat:"n",mn:"viel (many) + Falt(en) (folds) → many folds/forms."},
-    {a:"",w:"weltweit",p:"",en:"worldwide",ex:"",cat:"adj",mn:"Welt (world) + weit (wide)."},
+    {a:"",w:"weltweit",p:"",en:"worldwide",ex:"",cat:"adj",mn:"Welt (world) + weit (wide).",comp:"weltweiter",sup:"am weltweitesten"},
     {a:"die",w:"Zuwanderung",p:"",en:"immigration",ex:"",cat:"n",mn:"zu + wandern (wander) → wandering into a country."},
     {a:"",w:"zwar",p:"",en:"namely",ex:"",cat:"p",mn:"Sounds like 'zvar' — used to concede a point precisely."}
   ]},
@@ -1731,19 +1750,19 @@ const LEGACY_DATA = [
 ]},
 {lesson:9, title:"Für eine nachhaltigere Zukunft", sections:[
   {name:"Ich wohne nachhaltig.", items:[
-    {a:"",w:"absolut",p:"",en:"absolutely",ex:"",cat:"adj",mn:"Identical to English 'absolute(ly)'."},
+    {a:"",w:"absolut",p:"",en:"absolutely",ex:"",cat:"adj",mn:"Identical to English 'absolute(ly)'.",comp:"absoluter",sup:"am absolutesten"},
     {a:"der",w:"Architekt",p:"Architekten",en:"architect",ex:"",cat:"n",mn:"Identical to English 'architect'."},
     {a:"die",w:"Architektin",p:"Architektinnen",en:"architect",ex:"",cat:"n",mn:"Feminine form of Architekt."},
     {a:"der",w:"Aspekt",p:"Aspekte",en:"aspect",ex:"",cat:"n",mn:"Identical to English 'aspect'."},
-    {a:"",w:"autofrei",p:"",en:"car-free",ex:"",cat:"adj",mn:"Auto + frei (free) → car-free."},
-    {a:"",w:"automatisch",p:"",en:"automatic",ex:"",cat:"adj",mn:"Identical to English 'automatic'."},
+    {a:"",w:"autofrei",p:"",en:"car-free",ex:"",cat:"adj",mn:"Auto + frei (free) → car-free.",comp:"autofreier",sup:"am autofreisten"},
+    {a:"",w:"automatisch",p:"",en:"automatic",ex:"",cat:"adj",mn:"Identical to English 'automatic'.",comp:"automatischer",sup:"am automatischesten"},
     {a:"der",w:"Bau",p:"Bauten",en:"construction",ex:"",cat:"n",mn:"bauen (to build) → a construction."},
-    {a:"",w:"billig",p:"",en:"cheap",ex:"",cat:"adj",mn:"Sounds like 'bill-ig' — a cheap bill."},
+    {a:"",w:"billig",p:"",en:"cheap",ex:"",cat:"adj",mn:"Sounds like 'bill-ig' — a cheap bill.",comp:"billiger",sup:"am billigsten"},
     {a:"der",w:"Bürgersteig",p:"Bürgersteige",en:"pavement",ex:"",cat:"n",mn:"Bürger (citizen) + Steig (path) → citizens' path."},
     {a:"",w:"durch",p:"",en:"through",ex:"",cat:"p",mn:"Rhythmically close to English 'through' — durch."},
     {a:"die",w:"Emission",p:"Emissionen",en:"emission",ex:"",cat:"n",mn:"Identical to English 'emission'."},
     {a:"die",w:"Energie",p:"Energien",en:"energy",ex:"",cat:"n",mn:"Identical to English 'energy'."},
-    {a:"",w:"energieeffizient",p:"",en:"energy-efficient",ex:"",cat:"adj",mn:"Energie + effizient (efficient)."},
+    {a:"",w:"energieeffizient",p:"",en:"energy-efficient",ex:"",cat:"adj",mn:"Energie + effizient (efficient).",comp:"energieeffizienter",sup:"am energieeffizientesten"},
     {a:"",w:"erfüllen",p:"",en:"to fulfil",ex:"",cat:"v",mn:"er + füllen (fill) → to fill something up completely.",pr:"erfüllte",pp:"hat erfüllt"},
     {a:"die",w:"Forschung",p:"Forschungen",en:"research",ex:"",cat:"n",mn:"forschen (to research) + -ung."},
     {a:"der",w:"Fußgänger",p:"Fußgänger",en:"pedestrian",ex:"",cat:"n",mn:"Fuß (foot) + Gänger (goer, from gehen) → one who goes on foot."},
@@ -1760,7 +1779,7 @@ const LEGACY_DATA = [
     {a:"die",w:"Politik",p:"",en:"politics",ex:"",cat:"n",mn:"Identical root to English 'politics'."},
     {a:"die",w:"Ressource",p:"Ressourcen",en:"resource",ex:"",cat:"n",mn:"Identical to English 'resource'."},
     {a:"",w:"retten",p:"",en:"to rescue",ex:"",cat:"v",mn:"Picture firefighters in red retten (rescuing) someone.",pr:"rettete",pp:"hat gerettet"},
-    {a:"",w:"schädlich",p:"",en:"harmful",ex:"",cat:"adj",mn:"Schaden (damage) + -lich → damage-causing."},
+    {a:"",w:"schädlich",p:"",en:"harmful",ex:"",cat:"adj",mn:"Schaden (damage) + -lich → damage-causing.",comp:"schädlicher",sup:"am schädlichsten"},
     {a:"die",w:"Solaranlage",p:"Solaranlagen",en:"solar system",ex:"",cat:"n",mn:"Solar + Anlage (installation)."},
     {a:"die",w:"Sonnenenergie",p:"Sonnenenergien",en:"solar energy",ex:"",cat:"n",mn:"Sonne (sun) + Energie."},
     {a:"der",w:"Spezialist",p:"Spezialisten",en:"specialist",ex:"",cat:"n",mn:"Identical to English 'specialist'."},
@@ -1778,7 +1797,7 @@ const LEGACY_DATA = [
   {name:"Fahrradfahren in der Stadt – aber sicher!", items:[
     {a:"der",w:"Bewohner",p:"Bewohner",en:"resident",ex:"",cat:"n",mn:"be + wohnen (live) + -er → one who lives there."},
     {a:"die",w:"Bewohnerin",p:"Bewohnerinnen",en:"resident",ex:"",cat:"n",mn:"Feminine form of Bewohner."},
-    {a:"",w:"bezahlbar",p:"",en:"affordable",ex:"",cat:"adj",mn:"bezahlen (pay) + -bar → payable."},
+    {a:"",w:"bezahlbar",p:"",en:"affordable",ex:"",cat:"adj",mn:"bezahlen (pay) + -bar → payable.",comp:"bezahlbarer",sup:"am bezahlbarsten"},
     {a:"",w:"erhalten",p:"",en:"to receive",ex:"",cat:"v",mn:"er + halten (hold) → to be handed and hold something.",pr:"erhielt",pp:"hat erhalten"},
     {a:"der",w:"Fahrradfahrer",p:"Fahrradfahrer",en:"cyclist",ex:"",cat:"n",mn:"Fahrrad (bicycle) + fahren (ride) + -er."},
     {a:"die",w:"Fahrradfahrerin",p:"Fahrradfahrerinnen",en:"cyclist",ex:"",cat:"n",mn:"Feminine form of Fahrradfahrer."},
@@ -1787,14 +1806,14 @@ const LEGACY_DATA = [
     {a:"der",w:"Parkplatz",p:"Parkplätze",en:"car park",ex:"",cat:"n",mn:"parken (park) + Platz (place) → car park."}
   ]},
   {name:"Da bleibt nichts übrig.", items:[
-    {a:"",w:"essbar",p:"",en:"edible",ex:"",cat:"adj",mn:"essen (eat) + -bar → eatable."},
-    {a:"",w:"genießbar",p:"",en:"enjoyable",ex:"",cat:"adj",mn:"genießen (enjoy) + -bar."},
+    {a:"",w:"essbar",p:"",en:"edible",ex:"",cat:"adj",mn:"essen (eat) + -bar → eatable.",comp:"essbarer",sup:"am essbarsten"},
+    {a:"",w:"genießbar",p:"",en:"enjoyable",ex:"",cat:"adj",mn:"genießen (enjoy) + -bar.",comp:"genießbarer",sup:"am genießbarsten"},
     {a:"der",w:"Gewinn",p:"Gewinne",en:"profit",ex:"",cat:"n",mn:"gewinnen (win) → what you win."},
     {a:"die",w:"Landwirtschaft",p:"Landwirtschaften",en:"agriculture",ex:"",cat:"n",mn:"Land + Wirtschaft (economy/management) → managing the land."},
     {a:"die",w:"Lebensmittelverschwendung",p:"",en:"food waste",ex:"",cat:"n",mn:"Lebensmittel (food) + Verschwendung (waste)."},
     {a:"",w:"liefern",p:"",en:"deliver",ex:"",cat:"v",mn:"Sounds like 'deliver' minus the 'de-'.",pr:"lieferte",pp:"hat geliefert"},
-    {a:"",w:"lokal",p:"",en:"local",ex:"",cat:"adj",mn:"Identical to English 'local'."},
-    {a:"",w:"national",p:"",en:"national",ex:"",cat:"adj",mn:"Identical to English 'national'."},
+    {a:"",w:"lokal",p:"",en:"local",ex:"",cat:"adj",mn:"Identical to English 'local'.",comp:"lokaler",sup:"am lokalsten"},
+    {a:"",w:"national",p:"",en:"national",ex:"",cat:"adj",mn:"Identical to English 'national'.",comp:"nationaler",sup:"am nationalsten"},
     {a:"das",w:"Start-up",p:"Start-ups",en:"start-up",ex:"",cat:"n",mn:"Identical to English 'start-up'."},
     {a:"",w:"stoppen",p:"",en:"to stop",ex:"",cat:"v",mn:"Identical to English 'stop'.",pr:"stoppte",pp:"hat gestoppt"},
     {a:"der",w:"Teil",p:"Teile",en:"part",ex:"",cat:"n",mn:"Sounds like 'tile' — one tile is one part of the floor."},
@@ -1819,12 +1838,12 @@ const LEGACY_DATA = [
     {a:"die",w:"Bundesregierung",p:"Bundesregierungen",en:"Federal Government",ex:"",cat:"n",mn:"Bund + Regierung (government)."},
     {a:"der",w:"Bundestag",p:"",en:"Bundestag",ex:"",cat:"n",mn:"Bund + Tag (historically 'assembly-day') → the federal parliament."},
     {a:"die",w:"Demokratie",p:"Demokratien",en:"democracy",ex:"",cat:"n",mn:"Identical to English 'democracy'."},
-    {a:"",w:"demokratisch",p:"",en:"democratic",ex:"",cat:"adj",mn:"Identical to English 'democratic'."},
+    {a:"",w:"demokratisch",p:"",en:"democratic",ex:"",cat:"adj",mn:"Identical to English 'democratic'.",comp:"demokratischer",sup:"am demokratischesten"},
     {a:"die",w:"Demonstration",p:"Demonstrationen",en:"demonstration",ex:"",cat:"n",mn:"Identical to English 'demonstration'."},
     {a:"die",w:"Diktatur",p:"Diktaturen",en:"dictatorship",ex:"",cat:"n",mn:"Identical root to English 'dictatorship'."},
     {a:"die",w:"Europäische Union (EU)",p:"",en:"European Union (EU)",ex:"",cat:"n",mn:"Literal: European Union."},
     {a:"die",w:"Freiheit",p:"",en:"freedom",ex:"",cat:"n",mn:"frei (free) + -heit."},
-    {a:"",w:"friedlich",p:"",en:"peaceful",ex:"",cat:"adj",mn:"Friede(n) (peace) + -lich."},
+    {a:"",w:"friedlich",p:"",en:"peaceful",ex:"",cat:"adj",mn:"Friede(n) (peace) + -lich.",comp:"friedlicher",sup:"am friedlichsten"},
     {a:"die",w:"Grenze",p:"Grenzen",en:"border",ex:"",cat:"n",mn:"The line that 'grants' where one country ends."},
     {a:"das",w:"Grundrecht",p:"Grundrechte",en:"fundamental right",ex:"",cat:"n",mn:"Grund (basic) + Recht (right)."},
     {a:"die",w:"Gründung",p:"Gründungen",en:"foundation",ex:"",cat:"n",mn:"gründen (to found) + -ung."},
@@ -1846,7 +1865,7 @@ const LEGACY_DATA = [
     {a:"das",w:"System",p:"Systeme",en:"system",ex:"",cat:"n",mn:"Identical to English 'system'."},
     {a:"die",w:"Überzeugung",p:"Überzeugungen",en:"conviction",ex:"",cat:"n",mn:"überzeugen (convince) + -ung."},
     {a:"die",w:"Vergangenheit",p:"",en:"past",ex:"",cat:"n",mn:"vergangen (past, from vergehen=pass by) + -heit."},
-    {a:"",w:"virtuell",p:"",en:"virtual",ex:"",cat:"adj",mn:"Identical to English 'virtual'."},
+    {a:"",w:"virtuell",p:"",en:"virtual",ex:"",cat:"adj",mn:"Identical to English 'virtual'.",comp:"virtueller",sup:"am virtuellsten"},
     {a:"",w:"wiedervereinigen",p:"",en:"reunite",ex:"",cat:"v",mn:"wieder (again) + vereinigen (unite) → to unite again.",pr:"wiedervereinigte",pp:"hat wiedervereinigt"},
     {a:"der",w:"Zeitpunkt",p:"Zeitpunkte",en:"point in time",ex:"",cat:"n",mn:"Zeit (time) + Punkt (point)."},
     {a:"der",w:"Zusammenschluss",p:"Zusammenschlüsse",en:"association",ex:"",cat:"n",mn:"zusammen (together) + Schluss (joining) → joining together."}
@@ -1858,7 +1877,7 @@ const LEGACY_DATA = [
     {a:"der",w:"Bundesstaat",p:"Bundesstaaten",en:"federal state",ex:"",cat:"n",mn:"Bund + Staat."},
     {a:"die",w:"Funktion",p:"Funktionen",en:"function",ex:"",cat:"n",mn:"Identical to English 'function'."},
     {a:"der",w:"Grundwert",p:"Grundwerte",en:"fundamental value",ex:"",cat:"n",mn:"Grund (basic) + Wert (value)."},
-    {a:"",w:"politisch",p:"",en:"political",ex:"",cat:"adj",mn:"Identical to English 'political'."},
+    {a:"",w:"politisch",p:"",en:"political",ex:"",cat:"adj",mn:"Identical to English 'political'.",comp:"politischer",sup:"am politischesten"},
     {a:"",w:"regeln",p:"",en:"to regulate",ex:"",cat:"v",mn:"Regel (rule) → to make rules for.",pr:"regelte",pp:"hat geregelt"},
     {a:"das",w:"Volk",p:"Völker",en:"people",ex:"",cat:"n",mn:"Sounds like 'folk' → das Volk."},
     {a:"die",w:"Wahl",p:"Wahlen",en:"election",ex:"",cat:"n",mn:"wählen (choose/vote) → an election."},
@@ -1871,7 +1890,7 @@ const LEGACY_DATA = [
     {a:"",w:"endlich",p:"",en:"finally",ex:"",cat:"p",mn:"Ende (end) + -lich → 'at the end'."},
     {a:"die",w:"Gemeinde",p:"Gemeinden",en:"municipality",ex:"",cat:"n",mn:"gemein (common/shared) + -de → a shared local body."},
     {a:"die",w:"Gemeinschaft",p:"Gemeinschaften",en:"community",ex:"",cat:"n",mn:"gemein (common) + -schaft."},
-    {a:"",w:"gesamt",p:"",en:"total",ex:"",cat:"adj",mn:"ge + samt (together, like 'sammeln'=collect) → all together."},
+    {a:"",w:"gesamt",p:"",en:"total",ex:"",cat:"adj",mn:"ge + samt (together, like 'sammeln'=collect) → all together.",comp:"gesamter",sup:"am gesamtesten"},
     {a:"der",w:"Kanton",p:"Kantone",en:"canton",ex:"",cat:"n",mn:"Identical to English 'canton' (Swiss)."},
     {a:"die",w:"Volksabstimmung",p:"Volksabstimmungen",en:"referendum",ex:"",cat:"n",mn:"Volk (people) + Abstimmung (vote) → a vote by the people."},
     {a:"die",w:"Währung",p:"Währungen",en:"currency",ex:"",cat:"n",mn:"währen (last/endure) + -ung → something that holds value over time."},
@@ -1880,16 +1899,16 @@ const LEGACY_DATA = [
 ]},
 {lesson:11, title:"Im Namen der Gerechtigkeit", sections:[
   {name:"Wir können alle gewinnen.", items:[
-    {a:"",w:"allgemein",p:"",en:"general",ex:"",cat:"adj",mn:"all (all) + gemein (common) → common to all."},
+    {a:"",w:"allgemein",p:"",en:"general",ex:"",cat:"adj",mn:"all (all) + gemein (common) → common to all.",comp:"allgemeiner",sup:"am allgemeinsten"},
     {a:"die",w:"Aussage",p:"Aussagen",en:"statement",ex:"",cat:"n",mn:"aus + sagen (say) → what is 'said out'."},
-    {a:"",w:"bekannt",p:"",en:"known",ex:"",cat:"adj",mn:"be + kennen (know) → known."},
-    {a:"",w:"egoistisch",p:"",en:"selfish",ex:"",cat:"adj",mn:"Identical root to English 'egoistic'."},
+    {a:"",w:"bekannt",p:"",en:"known",ex:"",cat:"adj",mn:"be + kennen (know) → known.",comp:"bekannter",sup:"am bekanntesten"},
+    {a:"",w:"egoistisch",p:"",en:"selfish",ex:"",cat:"adj",mn:"Identical root to English 'egoistic'.",comp:"egoistischer",sup:"am egoistischesten"},
     {a:"der",w:"Fakt",p:"Fakten",en:"fact",ex:"",cat:"n",mn:"Identical to English 'fact'."},
     {a:"die",w:"Gerechtigkeit",p:"",en:"justice",ex:"",cat:"n",mn:"gerecht (fair/just) + -igkeit."},
     {a:"das",w:"Gewissen",p:"",en:"conscience",ex:"",cat:"n",mn:"ge + wissen (know) → your inner 'knowing'."},
     {a:"",w:"handeln",p:"",en:"to act",ex:"",cat:"v",mn:"Hand (hand) → to put your hand to something.",pr:"handelte",pp:"hat gehandelt"},
     {a:"die",w:"Moral",p:"",en:"morale",ex:"",cat:"n",mn:"Identical to English 'moral(e)'."},
-    {a:"",w:"moralisch",p:"",en:"morally",ex:"",cat:"adj",mn:"Identical to English 'moral(ly)'."},
+    {a:"",w:"moralisch",p:"",en:"morally",ex:"",cat:"adj",mn:"Identical to English 'moral(ly)'.",comp:"moralischer",sup:"am moralischesten"},
     {a:"der",w:"Spielende",p:"Spielenden",en:"player",ex:"",cat:"n",mn:"spielen (play) + -de → one who plays."},
     {a:"die",w:"Spielende",p:"Spielenden",en:"player",ex:"",cat:"n",mn:"Feminine/generic form of der Spielende."},
     {a:"die",w:"Stimme",p:"Stimmen",en:"vote",ex:"",cat:"n",mn:"Your voice, also your 'vote'."},
@@ -1929,8 +1948,8 @@ const LEGACY_DATA = [
     {a:"",w:"auf der Flucht sein vor etw./jdm.",p:"",en:"to be on the run from sth./sb.",ex:"",cat:"p",mn:"Flucht (flight) → to be in flight from someone."},
     {a:"",w:"beteiligt sein an",p:"",en:"to be involved in",ex:"",cat:"p",mn:"Teil (part) → to be 'parted-in' something."},
     {a:"",w:"aussagen gegen",p:"",en:"to testify against",ex:"",cat:"p",mn:"aus + sagen (say out) → to state against someone.",pr:"sagte aus",pp:"hat ausgesagt"},
-    {a:"",w:"gerecht",p:"",en:"fair",ex:"",cat:"adj",mn:"Related to Recht (right/law) → in line with the law."},
-    {a:"",w:"ungerecht",p:"",en:"unfair",ex:"",cat:"adj",mn:"un + gerecht → not fair."},
+    {a:"",w:"gerecht",p:"",en:"fair",ex:"",cat:"adj",mn:"Related to Recht (right/law) → in line with the law.",comp:"gerechter",sup:"am gerechtesten"},
+    {a:"",w:"ungerecht",p:"",en:"unfair",ex:"",cat:"adj",mn:"un + gerecht → not fair.",comp:"ungerechter",sup:"am ungerechtesten"},
     {a:"",w:"jdm. auf die Spur kommen",p:"",en:"to track someone down",ex:"",cat:"p",mn:"Spur (trace/track) → to come upon someone's trace."},
     {a:"",w:"zwingen zu etw.",p:"",en:"to force sb. to do sth.",ex:"",cat:"v",mn:"Sounds like 'twinge' of pain forcing you to act.",pr:"zwang",pp:"hat gezwungen"}
   ]},
@@ -1944,18 +1963,18 @@ const LEGACY_DATA = [
     {a:"die",w:"Lücke",p:"Lücken",en:"gap",ex:"",cat:"n",mn:"Sounds like a 'leak' — a leak/gap in the wall."},
     {a:"die",w:"Pflege",p:"",en:"care",ex:"",cat:"n",mn:"The careful, attentive act of caring for someone."},
     {a:"die",w:"Sorgearbeit",p:"",en:"care work",ex:"",cat:"n",mn:"Sorge (worry/care) + Arbeit (work)."},
-    {a:"",w:"wirtschaftlich",p:"",en:"economically",ex:"",cat:"adj",mn:"Wirtschaft (economy) + -lich."},
+    {a:"",w:"wirtschaftlich",p:"",en:"economically",ex:"",cat:"adj",mn:"Wirtschaft (economy) + -lich.",comp:"wirtschaftlicher",sup:"am wirtschaftlichsten"},
     {a:"",w:"abhängig sein von",p:"",en:"to depend on",ex:"",cat:"p",mn:"ab + hängen (hang) → to 'hang off' something."},
-    {a:"",w:"bezahlt",p:"",en:"paid",ex:"",cat:"adj",mn:"bezahlen (pay) → paid."},
-    {a:"",w:"unbezahlt",p:"",en:"unpaid",ex:"Frauen verbringen viel Zeit mit unbezahlter Sorgearbeit.",cat:"adj",mn:"un + bezahlt → unpaid."}
+    {a:"",w:"bezahlt",p:"",en:"paid",ex:"",cat:"adj",mn:"bezahlen (pay) → paid.",comp:"bezahlter",sup:"am bezahltesten"},
+    {a:"",w:"unbezahlt",p:"",en:"unpaid",ex:"Frauen verbringen viel Zeit mit unbezahlter Sorgearbeit.",cat:"adj",mn:"un + bezahlt → unpaid.",comp:"unbezahlter",sup:"am unbezahltesten"}
   ]}
 ]},
 {lesson:12, title:"Zukunftsvisionen", sections:[
   {name:"Wenn es das alles nicht gegeben hätte …", items:[
     {a:"der",w:"Apparat",p:"Apparate",en:"device",ex:"",cat:"n",mn:"Identical to English 'apparatus'."},
-    {a:"",w:"(voll)autonom",p:"",en:"(fully) autonomous",ex:"",cat:"adj",mn:"voll (fully) + autonom (autonomous)."},
+    {a:"",w:"(voll)autonom",p:"",en:"(fully) autonomous",ex:"",cat:"adj",mn:"voll (fully) + autonom (autonomous).",comp:"autonomer",sup:"am autonomsten"},
     {a:"der",w:"Buchdruck",p:"",en:"letterpress",ex:"",cat:"n",mn:"Buch (book) + Druck (print) → letterpress printing."},
-    {a:"",w:"elektrisch",p:"",en:"electrical",ex:"",cat:"adj",mn:"Identical to English 'electrical'."},
+    {a:"",w:"elektrisch",p:"",en:"electrical",ex:"",cat:"adj",mn:"Identical to English 'electrical'.",comp:"elektrischer",sup:"am elektrischesten"},
     {a:"",w:"erfinden",p:"",en:"to invent",ex:"",cat:"v",mn:"er + finden (find) → to 'find out' something new.",pr:"erfand",pp:"hat erfunden"},
     {a:"die",w:"Erfindung",p:"Erfindungen",en:"invention",ex:"",cat:"n",mn:"Noun of erfinden."},
     {a:"",w:"erwarten",p:"",en:"to expect",ex:"",cat:"v",mn:"er + warten (wait) → to wait expectantly.",pr:"erwartete",pp:"hat erwartet"},
@@ -1981,20 +2000,20 @@ const LEGACY_DATA = [
     {a:"die",w:"Diagnose",p:"Diagnosen",en:"diagnosis",ex:"",cat:"n",mn:"Identical to English 'diagnosis'."},
     {a:"",w:"ersetzen",p:"",en:"to replace",ex:"",cat:"v",mn:"er + setzen (set/place) → to place something in another's spot.",pr:"ersetzte",pp:"hat ersetzt"},
     {a:"die",w:"künstliche Intelligenz (KI)",p:"",en:"artificial intelligence (AI)",ex:"",cat:"n",mn:"künstlich (artificial) + Intelligenz."},
-    {a:"",w:"lebensecht",p:"",en:"lifelike",ex:"",cat:"adj",mn:"Leben (life) + echt (real) → life-real."},
-    {a:"",w:"maschinell",p:"",en:"automatic",ex:"",cat:"adj",mn:"Maschine (machine) + -ell → machine-like."},
-    {a:"",w:"menschlich",p:"",en:"human",ex:"",cat:"adj",mn:"Mensch (human) + -lich."},
+    {a:"",w:"lebensecht",p:"",en:"lifelike",ex:"",cat:"adj",mn:"Leben (life) + echt (real) → life-real.",comp:"lebensechter",sup:"am lebensechtesten"},
+    {a:"",w:"maschinell",p:"",en:"automatic",ex:"",cat:"adj",mn:"Maschine (machine) + -ell → machine-like.",comp:"maschineller",sup:"am maschinellsten"},
+    {a:"",w:"menschlich",p:"",en:"human",ex:"",cat:"adj",mn:"Mensch (human) + -lich.",comp:"menschlicher",sup:"am menschlichsten"},
     {a:"der",w:"Psychologe",p:"Psychologen",en:"psychologist",ex:"",cat:"n",mn:"Identical to English 'psychologist'."},
     {a:"die",w:"Psychologin",p:"Psychologinnen",en:"psychologist",ex:"",cat:"n",mn:"Feminine form of Psychologe."},
     {a:"",w:"scannen",p:"",en:"to scan",ex:"",cat:"v",mn:"Identical to English 'scan'.",pr:"scannte",pp:"hat gescannt"},
     {a:"die",w:"Therapie",p:"Therapien",en:"therapy",ex:"",cat:"n",mn:"Identical to English 'therapy'."},
-    {a:"",w:"überflüssig",p:"",en:"superfluous",ex:"",cat:"adj",mn:"über (over) + fließen/Fluss (flow) → overflowing, more than needed."},
+    {a:"",w:"überflüssig",p:"",en:"superfluous",ex:"",cat:"adj",mn:"über (over) + fließen/Fluss (flow) → overflowing, more than needed.",comp:"überflüssiger",sup:"am überflüssigsten"},
     {a:"der",w:"Übersetzer",p:"Übersetzer",en:"translator",ex:"",cat:"n",mn:"über + setzen (set across) → one who 'sets' meaning across languages."},
     {a:"die",w:"Übersetzerin",p:"Übersetzerinnen",en:"translator",ex:"",cat:"n",mn:"Feminine form of Übersetzer."},
     {a:"die",w:"Übersetzung",p:"Übersetzungen",en:"translation",ex:"",cat:"n",mn:"Noun of übersetzen."},
     {a:"die",w:"Veränderung",p:"Veränderungen",en:"change",ex:"",cat:"n",mn:"Noun of verändern."},
     {a:"",w:"(sich) weiterentwickeln",p:"",en:"to evolve",ex:"",cat:"v",mn:"weiter (further) + entwickeln (develop) → to develop further.",pr:"entwickelte sich weiter",pp:"hat sich weiterentwickelt"},
-    {a:"",w:"zwischenmenschlich",p:"",en:"interpersonal",ex:"",cat:"adj",mn:"zwischen (between) + menschlich (human)."},
+    {a:"",w:"zwischenmenschlich",p:"",en:"interpersonal",ex:"",cat:"adj",mn:"zwischen (between) + menschlich (human).",comp:"zwischenmenschlicher",sup:"am zwischenmenschlichsten"},
     {a:"",w:"sich zugehörig fühlen",p:"",en:"to feel a sense of belonging",ex:"",cat:"p",mn:"zu + gehören (belong) + fühlen (feel)."}
   ]},
   {name:"KI und Kunst – Partner oder Konkurrenz?", items:[
@@ -2009,12 +2028,12 @@ const LEGACY_DATA = [
     {a:"",w:"existieren",p:"",en:"to exist",ex:"",cat:"v",mn:"Identical to English 'exist'.",pr:"existierte",pp:"hat existiert"},
     {a:"die",w:"Gefahr",p:"Gefahren",en:"danger",ex:"",cat:"n",mn:"Sounds like 'geh-far' — don't go too far, there's Gefahr ahead!"},
     {a:"die",w:"Hausarbeit",p:"Hausarbeiten",en:"housework",ex:"",cat:"n",mn:"Haus (house) + Arbeit (work)."},
-    {a:"",w:"KI-generiert",p:"",en:"AI-generated",ex:"",cat:"adj",mn:"KI (AI) + generiert (generated)."},
+    {a:"",w:"KI-generiert",p:"",en:"AI-generated",ex:"",cat:"adj",mn:"KI (AI) + generiert (generated).",comp:"KI-generierter",sup:"am KI-generiertesten"},
     {a:"die",w:"Kunst",p:"",en:"art",ex:"",cat:"n",mn:"die Kunst = art — think of skillful 'construction'."},
     {a:"der",w:"Künstler",p:"Künstler",en:"artist",ex:"",cat:"n",mn:"Kunst (art) + -ler → one who makes art."},
     {a:"die",w:"Künstlerin",p:"Künstlerinnen",en:"artist",ex:"",cat:"n",mn:"Feminine form of Künstler."},
     {a:"der",w:"Poetry-Slam",p:"Poetry-Slams",en:"poetry slam",ex:"",cat:"n",mn:"Identical loanword to English 'poetry slam'."},
-    {a:"",w:"unheimlich",p:"",en:"sinister",ex:"",cat:"adj",mn:"un + heimlich (secretive/homely) → not cosy/familiar."},
+    {a:"",w:"unheimlich",p:"",en:"sinister",ex:"",cat:"adj",mn:"un + heimlich (secretive/homely) → not cosy/familiar.",comp:"unheimlicher",sup:"am unheimlichsten"},
     {a:"das",w:"Werk",p:"Werke",en:"work",ex:"",cat:"n",mn:"Sounds like English 'work' → das Werk = a (creative) work."},
     {a:"",w:"zurzeit",p:"",en:"currently",ex:"",cat:"p",mn:"zur (at the) + Zeit (time) → 'at this time'."}
   ]}
@@ -2168,7 +2187,7 @@ LEGACY_DATA.forEach(lek=>{
         topic: topicKey,
         lesson: lek.lesson, lessonTitle: lek.title, section: sec.name,
         a: it.a||"", w: it.w, p: it.p||"", en: it.en, ex: it.ex||"",
-        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", icon: it.icon||""
+        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", comp: it.comp||"", sup: it.sup||"", icon: it.icon||""
       });
     });
   });
@@ -2182,7 +2201,7 @@ A2_DATA.forEach(lek=>{
         topic: "arbeit",
         lesson: lek.lesson, lessonTitle: lek.title, section: sec.name,
         a: it.a||"", w: it.w, p: it.p||"", en: it.en, ex: it.ex||"",
-        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", icon: it.icon||""
+        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", comp: it.comp||"", sup: it.sup||"", icon: it.icon||""
       });
     });
   });
@@ -2192,208 +2211,208 @@ A2_DATA.forEach(lek=>{
 /* =========================================================
    A1 FOUNDATIONAL VOCABULARY (~110 core words with Tamil)
 ========================================================= */
-const A1_DATA_STARTER = [{"a":"","w":"Hallo","p":"","en":"Hello","cat":"p","topic":"kommunikation","ex":"Hallo! Wie geht es dir?","mn":"வணக்கம் (Vaṇakkam) · Basic universal greeting","icon":"smile"},{"a":"","w":"Guten Morgen","p":"","en":"Good morning","cat":"p","topic":"kommunikation","ex":"Guten Morgen, Herr Müller!","mn":"காலை வணக்கம் (Kālai vaṇakkam) · Used until ~11am","icon":"smile"},{"a":"","w":"Guten Tag","p":"","en":"Good day / Hello","cat":"p","topic":"kommunikation","ex":"Guten Tag! Kann ich Ihnen helfen?","mn":"மதிய வணக்கம் (Matiya vaṇakkam) · Standard daytime greeting","icon":"smile"},{"a":"","w":"Guten Abend","p":"","en":"Good evening","cat":"p","topic":"kommunikation","ex":"Guten Abend allerseits!","mn":"மாலை வணக்கம் (Mālai vaṇakkam)","icon":"smile"},{"a":"","w":"Tschüss","p":"","en":"Bye (informal)","cat":"p","topic":"kommunikation","ex":"Tschüss, bis morgen!","mn":"சென்று வருகிறேன் (Poittu varēn)","icon":"smile"},{"a":"","w":"Auf Wiedersehen","p":"","en":"Goodbye (formal)","cat":"p","topic":"kommunikation","ex":"Auf Wiedersehen und schönen Tag noch!","mn":"மீண்டும் சந்திப்போம் (Mīṇṭum cantippōm)","icon":"smile"},{"a":"","w":"Bitte","p":"","en":"Please / You're welcome","cat":"p","topic":"kommunikation","ex":"Eine Tasse Kaffee, bitte.","mn":"தயவுசெய்து / நல்வரவு (Thayavuseithu)","icon":"smile"},{"a":"","w":"Danke","p":"","en":"Thank you","cat":"p","topic":"kommunikation","ex":"Vielen Dank für Ihre Hilfe!","mn":"நன்றி (Naṉṟi)","icon":"heart"},{"a":"die","w":"Entschuldigung","p":"-en","en":"Excuse me / Sorry","cat":"n","topic":"kommunikation","ex":"Entschuldigung, wo ist der Bahnhof?","mn":"மன்னிக்கவும் (Maṉṉikkavum)","icon":"speak"},{"a":"","w":"Ja","p":"","en":"Yes","cat":"p","topic":"kommunikation","ex":"Ja, das ist richtig.","mn":"ஆம் (Ām)","icon":"check"},{"a":"","w":"Nein","p":"","en":"No","cat":"p","topic":"kommunikation","ex":"Nein, ich habe keine Zeit.","mn":"இல்லை (Illai)","icon":"check"},{"a":"der","w":"Name","p":"-n","en":"Name","cat":"n","topic":"kommunikation","ex":"Mein Name ist Arun.","mn":"பெயர் (Peyar)","icon":"speak"},{"a":"die","w":"Sprache","p":"-n","en":"Language","cat":"n","topic":"schule","ex":"Ich lerne die deutsche Sprache.","mn":"மொழி (Moḻi)","icon":"speak"},{"a":"der","w":"Mann","p":"Männer","en":"Man / Husband","cat":"n","topic":"familie","ex":"Der Mann arbeitet im Garten.","mn":"ஆண் / கணவர் (Āṇ / Kaṇavar)","icon":"team"},{"a":"die","w":"Frau","p":"-en","en":"Woman / Wife","cat":"n","topic":"familie","ex":"Meine Frau kommt aus Indien.","mn":"பெண் / மனைவி (Peṇ / Manaivi)","icon":"team"},{"a":"das","w":"Kind","p":"-er","en":"Child","cat":"n","topic":"familie","ex":"Das Kind spielt mit dem Ball.","mn":"குழந்தை (Kuḻantai)","icon":"team"},{"a":"der","w":"Vater","p":"Väter","en":"Father","cat":"n","topic":"familie","ex":"Mein Vater lebt in Chennai.","mn":"தந்தை / அப்பா (Appā)","icon":"team"},{"a":"die","w":"Mutter","p":"Mütter","en":"Mother","cat":"n","topic":"familie","ex":"Meine Mutter kocht sehr gut.","mn":"தாய் / அம்மா (Ammā)","icon":"team"},{"a":"die","w":"Eltern","p":"(Plural)","en":"Parents","cat":"n","topic":"familie","ex":"Meine Eltern wohnen in Indien.","mn":"பெற்றோர் (Peṟṟōr)","icon":"team"},{"a":"der","w":"Sohn","p":"Söhne","en":"Son","cat":"n","topic":"familie","ex":"Unser Sohn geht in die Schule.","mn":"மகன் (Makaṉ)","icon":"team"},{"a":"die","w":"Tochter","p":"Töchter","en":"Daughter","cat":"n","topic":"familie","ex":"Unsere Tochter ist fünf Jahre alt.","mn":"மகள் (Makaḷ)","icon":"team"},{"a":"der","w":"Bruder","p":"Brüder","en":"Brother","cat":"n","topic":"familie","ex":"Ich habe einen älteren Bruder.","mn":"சகோதரன் / அண்ணன் (Aṇṇaṉ)","icon":"team"},{"a":"die","w":"Schwester","p":"-n","en":"Sister","cat":"n","topic":"familie","ex":"Meine Schwester studiert Medizin.","mn":"சகோதரி / தங்கை (Taṅkai)","icon":"team"},{"a":"der","w":"Freund","p":"-e","en":"Friend (male) / Boyfriend","cat":"n","topic":"familie","ex":"Mein Freund hilft mir beim Umzug.","mn":"நண்பன் (Naṇpaṉ)","icon":"team"},{"a":"die","w":"Freundin","p":"-nen","en":"Friend (female) / Girlfriend","cat":"n","topic":"familie","ex":"Sie ist meine beste Freundin.","mn":"தோழி (Tōḻi)","icon":"team"},{"a":"das","w":"Wasser","p":"-","en":"Water","cat":"n","topic":"essen","ex":"Ich trinke jeden Tag zwei Liter Wasser.","mn":"தண்ணீர் (Taṇṇīr)","icon":"drink"},{"a":"das","w":"Brot","p":"-e","en":"Bread","cat":"n","topic":"essen","ex":"Wir essen frisches deutsches Brot.","mn":"ரொட்டி (Roṭṭi)","icon":"eat"},{"a":"der","w":"Kaffee","p":"-s","en":"Coffee","cat":"n","topic":"essen","ex":"Morgens trinke ich gern Kaffee mit Milch.","mn":"காபி (Kāpi)","icon":"drink"},{"a":"der","w":"Tee","p":"-s","en":"Tea","cat":"n","topic":"essen","ex":"Möchtest du schwarzen oder grünen Tee?","mn":"தேநீர் (Tēnīr)","icon":"drink"},{"a":"die","w":"Milch","p":"-","en":"Milk","cat":"n","topic":"essen","ex":"Die Milch steht im Kühlschrank.","mn":"பால் (Pāl)","icon":"drink"},{"a":"der","w":"Apfel","p":"Äpfel","en":"Apple","cat":"n","topic":"essen","ex":"Ein Apfel am Tag ist gesund.","mn":"ஆப்பிள் (Āppiḷ)","icon":"eat"},{"a":"das","w":"Obst","p":"-","en":"Fruit","cat":"n","topic":"essen","ex":"Frisches Obst schmeckt süß.","mn":"பழங்கள் (Paḻaṅkaḷ)","icon":"eat"},{"a":"das","w":"Gemüse","p":"-","en":"Vegetables","cat":"n","topic":"essen","ex":"Wir kaufen Bio-Gemüse auf dem Markt.","mn":"காய்கறிகள் (Kāykaṟikaḷ)","icon":"eat"},{"a":"der","w":"Reis","p":"-","en":"Rice","cat":"n","topic":"essen","ex":"In Südindien essen wir oft Reis.","mn":"அரிசி / சாதம் (Cātam)","icon":"eat"},{"a":"das","w":"Ei","p":"-er","en":"Egg","cat":"n","topic":"essen","ex":"Zum Frühstück esse ich zwei Eier.","mn":"முட்டை (Muṭṭai)","icon":"eat"},{"a":"der","w":"Zucker","p":"-","en":"Sugar","cat":"n","topic":"essen","ex":"Ich trinke Tee ohne Zucker.","mn":"சர்க்கரை (Carkkarai)","icon":"eat"},{"a":"das","w":"Salz","p":"-e","en":"Salt","cat":"n","topic":"essen","ex":"Das Essen braucht noch etwas Salz.","mn":"உப்பு (Uppu)","icon":"eat"},{"a":"das","w":"Frühstück","p":"-e","en":"Breakfast","cat":"n","topic":"essen","ex":"Was isst du zum Frühstück?","mn":"காலை உணவு (Kālai uṇavu)","icon":"eat"},{"a":"das","w":"Mittagessen","p":"-","en":"Lunch","cat":"n","topic":"essen","ex":"Um 12:30 Uhr machen wir Mittagessen.","mn":"மதிய உணவு (Matiya uṇavu)","icon":"eat"},{"a":"das","w":"Abendessen","p":"-","en":"Dinner","cat":"n","topic":"essen","ex":"Das Abendessen ist um 19 Uhr fertig.","mn":"இரவு உணவு (Iravu uṇavu)","icon":"eat"},{"a":"das","w":"Haus","p":"Häuser","en":"House","cat":"n","topic":"wohnen","ex":"Wir wohnen in einem kleinen Haus.","mn":"வீடு (Vīṭu)","icon":"house"},{"a":"die","w":"Wohnung","p":"-en","en":"Apartment / Flat","cat":"n","topic":"wohnen","ex":"Die Wohnung hat drei Zimmer und einen Balkon.","mn":"குடியிருப்பு (Kuṭiyiruppu)","icon":"house"},{"a":"das","w":"Zimmer","p":"-","en":"Room","cat":"n","topic":"wohnen","ex":"Das Wohnzimmer ist sehr hell.","mn":"அறை (Aṟai)","icon":"house"},{"a":"die","w":"Küche","p":"-n","en":"Kitchen","cat":"n","topic":"wohnen","ex":"Wir kochen zusammen in der Küche.","mn":"சமையலறை (Camaiyalaṟai)","icon":"house"},{"a":"das","w":"Bad","p":"Bäder","en":"Bathroom","cat":"n","topic":"wohnen","ex":"Das Bad hat eine Dusche und eine Badewanne.","mn":"குளியலறை (Kuḷiyalaṟai)","icon":"shower"},{"a":"der","w":"Tisch","p":"-e","en":"Table","cat":"n","topic":"wohnen","ex":"Das Buch liegt auf dem Tisch.","mn":"மேசை (Mēcai)","icon":"house"},{"a":"der","w":"Stuhl","p":"Stühle","en":"Chair","cat":"n","topic":"wohnen","ex":"Bitte nimm Platz auf dem Stuhl.","mn":"நாற்காலி (Nāṟkāli)","icon":"house"},{"a":"das","w":"Bett","p":"-en","en":"Bed","cat":"n","topic":"wohnen","ex":"Das Bett ist sehr bequem.","mn":"படுக்கை (Paṭukkai)","icon":"bed"},{"a":"die","w":"Tür","p":"-en","en":"Door","cat":"n","topic":"wohnen","ex":"Bitte schließe die Tür.","mn":"கதவு (Katavu)","icon":"key"},{"a":"das","w":"Fenster","p":"-","en":"Window","cat":"n","topic":"wohnen","ex":"Mach bitte das Fenster auf.","mn":"ஜன்னல் (Jaṉṉal)","icon":"house"},{"a":"die","w":"Stadt","p":"Städte","en":"City / Town","cat":"n","topic":"reisen","ex":"München ist eine schöne deutsche Stadt.","mn":"நகரம் (Nakaram)","icon":"building"},{"a":"die","w":"Straße","p":"-n","en":"Street / Road","cat":"n","topic":"reisen","ex":"In welcher Straße wohnen Sie?","mn":"தெரு (Teru)","icon":"car"},{"a":"das","w":"Geld","p":"-","en":"Money","cat":"n","topic":"geld","ex":"Ich habe nicht genug Geld dabei.","mn":"பணம் (Paṇam)","icon":"money"},{"a":"der","w":"Euro","p":"-s","en":"Euro","cat":"n","topic":"geld","ex":"Das kostet fünf Euro fünfzig.","mn":"யூரோ நாணயம் (Yūrō)","icon":"money"},{"a":"der","w":"Preis","p":"-e","en":"Price","cat":"n","topic":"einkaufen","ex":"Der Preis ist sehr günstig.","mn":"விலை (Vilai)","icon":"cart"},{"a":"der","w":"Supermarkt","p":"Supermärkte","en":"Supermarket","cat":"n","topic":"einkaufen","ex":"Der Supermarkt öffnet um 8 Uhr.","mn":"பல்பொருள் அங்காடி (Supermarket)","icon":"cart"},{"a":"die","w":"Rechnung","p":"-en","en":"Bill / Invoice","cat":"n","topic":"geld","ex":"Können wir bitte die Rechnung haben?","mn":"பில் / ரசீது (Racītu)","icon":"email"},{"a":"der","w":"Tag","p":"-e","en":"Day","cat":"n","topic":"gesellschaft","ex":"Schönen Tag noch!","mn":"நாள் (Nāḷ)","icon":"calendar"},{"a":"die","w":"Woche","p":"-n","en":"Week","cat":"n","topic":"gesellschaft","ex":"Die Woche hat sieben Tage.","mn":"வாரம் (Vāram)","icon":"calendar"},{"a":"der","w":"Monat","p":"-e","en":"Month","cat":"n","topic":"gesellschaft","ex":"Im nächsten Monat habe ich Urlaub.","mn":"மாதம் (Mātam)","icon":"calendar"},{"a":"das","w":"Jahr","p":"-e","en":"Year","cat":"n","topic":"gesellschaft","ex":"Ein Jahr hat 365 Tage.","mn":"ஆண்டு / வருடம் (Varuṭam)","icon":"calendar"},{"a":"die","w":"Uhr","p":"-en","en":"Clock / o'clock","cat":"n","topic":"gesellschaft","ex":"Es ist genau drei Uhr.","mn":"கடிகாரம் / மணி (Kaṭikāram)","icon":"clock"},{"a":"die","w":"Zeit","p":"-en","en":"Time","cat":"n","topic":"gesellschaft","ex":"Hast du heute etwas Zeit für mich?","mn":"நேரம் (Nēram)","icon":"clock"},{"a":"","w":"heute","p":"","en":"Today","cat":"adj","topic":"gesellschaft","ex":"Heute ist das Wetter sehr schön.","mn":"இன்று (Iṉṟu)","icon":"clock"},{"a":"","w":"morgen","p":"","en":"Tomorrow","cat":"adj","topic":"gesellschaft","ex":"Morgen muss ich früh aufstehen.","mn":"நாளை (Nāḷai)","icon":"clock"},{"a":"","w":"gestern","p":"","en":"Yesterday","cat":"adj","topic":"gesellschaft","ex":"Gestern habe ich viel Deutsch gelernt.","mn":"நேற்று (Nēṟṟu)","icon":"clock"},{"a":"","w":"jetzt","p":"","en":"Now","cat":"adj","topic":"gesellschaft","ex":"Wir müssen jetzt losgehen.","mn":"இப்போது (Ippōtu)","icon":"clock"},{"a":"","w":"immer","p":"","en":"Always","cat":"adj","topic":"gesellschaft","ex":"Er kommt immer pünktlich.","mn":"எப்போதும் (Eppōtum)","icon":"clock"},{"a":"","w":"oft","p":"","en":"Often","cat":"adj","topic":"gesellschaft","ex":"Ich fahre oft mit dem Fahrrad.","mn":"அடிக்கடி (Aṭikkaṭi)","icon":"clock"},{"a":"","w":"sein","p":"","en":"to be","cat":"v","topic":"gesellschaft","ex":"Ich bin Arun. Du bist sehr nett.","pr":"war","pp":"ist gewesen","mn":"இருப்பது (Iruppatu) · ich bin, du bist, er ist, wir sind","icon":"smile"},{"a":"","w":"haben","p":"","en":"to have","cat":"v","topic":"gesellschaft","ex":"Ich habe eine Frage.","pr":"hatte","pp":"hat gehabt","mn":"வைத்திருப்பது (Vaittiruppatu) · ich habe, du hast, er hat","icon":"abstract"},{"a":"","w":"kommen","p":"","en":"to come","cat":"v","topic":"reisen","ex":"Woher kommst du? Ich komme aus Indien.","pr":"kam","pp":"ist gekommen","mn":"வருவது (Varuvatu)","icon":"walk"},{"a":"","w":"gehen","p":"","en":"to go / walk","cat":"v","topic":"reisen","ex":"Ich gehe jetzt nach Hause.","pr":"ging","pp":"ist gegangen","mn":"செல்வது / போவது (Pōvatu)","icon":"walk"},{"a":"","w":"wohnen","p":"","en":"to live / reside","cat":"v","topic":"wohnen","ex":"Wo wohnen Sie? Ich wohne in Deutschland.","pr":"wohnte","pp":"hat gewohnt","mn":"வசிப்பது (Vasippatu)","icon":"house"},{"a":"","w":"heißen","p":"","en":"to be named / called","cat":"v","topic":"kommunikation","ex":"Wie heißen Sie? Ich heiße Arun.","pr":"hieß","pp":"hat geheißen","mn":"பெயர் கொண்டிருப்பது (Peyar)","icon":"speak"},{"a":"","w":"machen","p":"","en":"to do / make","cat":"v","topic":"arbeit","ex":"Was machst du am Wochenende?","pr":"machte","pp":"hat gemacht","mn":"செய்வது (Ceyvatu)","icon":"wrench"},{"a":"","w":"lernen","p":"","en":"to learn / study","cat":"v","topic":"schule","ex":"Wir lernen fleißig Deutsch.","pr":"lernte","pp":"hat gelernt","mn":"கற்பது (Kaṟpatu)","icon":"book"},{"a":"","w":"arbeiten","p":"","en":"to work","cat":"v","topic":"arbeit","ex":"Er arbeitet als Ingenieur.","pr":"arbeitete","pp":"hat gearbeitet","mn":"வேலை செய்வது (Vēlai)","icon":"briefcase"},{"a":"","w":"sprechen","p":"","en":"to speak","cat":"v","topic":"kommunikation","ex":"Sprechen Sie Englisch oder Deutsch?","pr":"sprach","pp":"hat gesprochen","mn":"பேசுவது (Pēsuvatu)","icon":"speak"},{"a":"","w":"verstehen","p":"","en":"to understand","cat":"v","topic":"schule","ex":"Ich verstehe diesen Satz gut.","pr":"verstand","pp":"hat verstanden","mn":"புரிந்து கொள்வது (Purintu koḷvatu)","icon":"think"},{"a":"","w":"schreiben","p":"","en":"to write","cat":"v","topic":"schule","ex":"Ich schreibe eine E-Mail an meinen Chef.","pr":"schrieb","pp":"hat geschrieben","mn":"எழுதுவது (Eḻutuvatu)","icon":"write"},{"a":"","w":"lesen","p":"","en":"to read","cat":"v","topic":"schule","ex":"Sie liest jeden Abend ein Buch.","pr":"las","pp":"hat gelesen","mn":"வாசிப்பது / படிப்பது (Vācippatu)","icon":"book"},{"a":"","w":"essen","p":"","en":"to eat","cat":"v","topic":"essen","ex":"Wir essen gern südindisches Essen.","pr":"aß","pp":"hat gegessen","mn":"உண்பது / சாப்பிடுவது (Cāppiṭuvatu)","icon":"eat"},{"a":"","w":"trinken","p":"","en":"to drink","cat":"v","topic":"essen","ex":"Was möchten Sie trinken?","pr":"trank","pp":"hat getrunken","mn":"குடிப்பது (Kuṭippatu)","icon":"drink"},{"a":"","w":"schlafen","p":"","en":"to sleep","cat":"v","topic":"wohnen","ex":"Ich schlafe meistens acht Stunden.","pr":"schlief","pp":"hat geschlafen","mn":"தூங்குவது (Tūṅkuvatu)","icon":"bed"},{"a":"","w":"hören","p":"","en":"to hear / listen","cat":"v","topic":"kommunikation","ex":"Hörst du gern Musik?","pr":"hörte","pp":"hat gehört","mn":"கேட்பது (Kēṭpatu)","icon":"ear"},{"a":"","w":"sehen","p":"","en":"to see","cat":"v","topic":"kommunikation","ex":"Ich sehe den Bus schon kommen.","pr":"sah","pp":"hat gesehen","mn":"பார்ப்பது (Pārppatu)","icon":"eye"},{"a":"","w":"kaufen","p":"","en":"to buy","cat":"v","topic":"einkaufen","ex":"Ich kaufe Obst im Supermarkt.","pr":"kaufte","pp":"hat gekauft","mn":"வாங்குவது (Vāṅkuvatu)","icon":"cart"},{"a":"","w":"kosten","p":"","en":"to cost","cat":"v","topic":"geld","ex":"Wie viel kostet das?","pr":"kostete","pp":"hat gekostet","mn":"விலையாக இருப்பது (Vilai)","icon":"money"},{"a":"","w":"bezahlen","p":"","en":"to pay","cat":"v","topic":"geld","ex":"Kann ich mit Karte bezahlen?","pr":"bezahlte","pp":"hat bezahlt","mn":"பணம் செலுத்துவது (Paṇam)","icon":"money"},{"a":"","w":"brauchen","p":"","en":"to need","cat":"v","topic":"gesellschaft","ex":"Ich brauche deine Hilfe.","pr":"brauchte","pp":"hat gebraucht","mn":"தேவைப்படுவது (Tēvai)","icon":"abstract"},{"a":"","w":"möchten","p":"","en":"would like to","cat":"v","topic":"kommunikation","ex":"Ich möchte einen Termin vereinbaren.","pr":"wollte","pp":"hat gewollt","mn":"விரும்புவது (Virumpuvatu)","icon":"target"},{"a":"","w":"können","p":"","en":"can / be able to","cat":"v","topic":"gesellschaft","ex":"Kannst du mir bitte helfen?","pr":"konnte","pp":"hat gekonnt","mn":"முடியும் (Muṭiyum) · ich kann, du kannst, er kann","icon":"target"},{"a":"","w":"müssen","p":"","en":"must / have to","cat":"v","topic":"gesellschaft","ex":"Ich muss heute lange arbeiten.","pr":"musste","pp":"hat gemusst","mn":"கட்டாயம் செய்ய வேண்டும் (Kaṭṭāyam)","icon":"target"},{"a":"","w":"gut","p":"","en":"good / well","cat":"adj","topic":"gefuehle","ex":"Mir geht es sehr gut, danke!","mn":"நல்ல (Nalla)","icon":"smile"},{"a":"","w":"schlecht","p":"","en":"bad","cat":"adj","topic":"gefuehle","ex":"Das Wetter ist heute schlecht.","mn":"மோசமான (Mōcamāṉa)","icon":"cry"},{"a":"","w":"schön","p":"","en":"beautiful / nice","cat":"adj","topic":"wohnen","ex":"Das ist ein sehr schönes Zimmer.","mn":"அழகான (Aḻakāṉa)","icon":"smile"},{"a":"","w":"groß","p":"","en":"big / tall","cat":"adj","topic":"wohnen","ex":"Die Wohnung ist ziemlich groß.","mn":"பெரிய (Periya)","icon":"house"},{"a":"","w":"klein","p":"","en":"small / little","cat":"adj","topic":"wohnen","ex":"Das Zimmer ist klein aber gemütlich.","mn":"சிறிய (Ciṟiya)","icon":"house"},{"a":"","w":"neu","p":"","en":"new","cat":"adj","topic":"gesellschaft","ex":"Ich habe ein neues Fahrrad gekauft.","mn":"புதிய (Putiya)","icon":"gift"},{"a":"","w":"alt","p":"","en":"old","cat":"adj","topic":"gesellschaft","ex":"Das Haus ist über hundert Jahre alt.","mn":"பழைய / வயதுடைய (Paḻaiya)","icon":"house"},{"a":"","w":"teuer","p":"","en":"expensive","cat":"adj","topic":"geld","ex":"Das Auto ist mir zu teuer.","mn":"விலையுயர்ந்த (Vilaiyuyarnta)","icon":"money"},{"a":"","w":"billig","p":"","en":"cheap / inexpensive","cat":"adj","topic":"geld","ex":"Auf dem Markt ist das Gemüse billig.","mn":"மலிவான (Malivāṉa)","icon":"money"},{"a":"","w":"schnell","p":"","en":"fast / quick","cat":"adj","topic":"reisen","ex":"Der ICE-Zug fährt sehr schnell.","mn":"வேகமான (Vēkamāṉa)","icon":"car"},{"a":"","w":"langsam","p":"","en":"slow","cat":"adj","topic":"reisen","ex":"Bitte sprechen Sie etwas langsamer.","mn":"மெதுவான (Metuvāṉa)","icon":"walk"},{"a":"","w":"einfach","p":"","en":"easy / simple","cat":"adj","topic":"schule","ex":"Diese Grammatik-Regel ist ganz einfach.","mn":"எளிதான (Eḷitāṉa)","icon":"check"},{"a":"","w":"schwer","p":"","en":"difficult / heavy","cat":"adj","topic":"schule","ex":"Die deutsche Sprache ist nicht so schwer!","mn":"கடினமான (Kaṭiṉamāṉa)","icon":"think"},{"a":"","w":"richtig","p":"","en":"correct / right","cat":"adj","topic":"schule","ex":"Deine Antwort ist absolut richtig!","mn":"சரியான (Cariyāṉa)","icon":"check"},{"a":"","w":"falsch","p":"","en":"wrong / false","cat":"adj","topic":"schule","ex":"Nein, das ist leider falsch.","mn":"தவறான (Tavaṟāṉa)","icon":"check"},{"a":"","w":"Wer","p":"","en":"Who","cat":"p","topic":"kommunikation","ex":"Wer ist das? Das ist mein Kollege.","mn":"யார் (Yār)","icon":"speak"},{"a":"","w":"Was","p":"","en":"What","cat":"p","topic":"kommunikation","ex":"Was machst du beruflich?","mn":"என்ன (Eṉṉa)","icon":"speak"},{"a":"","w":"Wo","p":"","en":"Where (location)","cat":"p","topic":"kommunikation","ex":"Wo wohnst du?","mn":"எங்கே (Eṅkē)","icon":"search"},{"a":"","w":"Wohin","p":"","en":"Where to (direction)","cat":"p","topic":"kommunikation","ex":"Wohin gehst du jetzt?","mn":"எங்கே நோக்கி (Eṅkē pōkiṟāy)","icon":"walk"},{"a":"","w":"Woher","p":"","en":"Where from (origin)","cat":"p","topic":"kommunikation","ex":"Woher kommen Sie? Aus Indien.","mn":"எங்கிருந்து (Eṅkiruntu)","icon":"reisen"},{"a":"","w":"Wie","p":"","en":"How","cat":"p","topic":"kommunikation","ex":"Wie heißt du? Wie geht es Ihnen?","mn":"எப்படி (Eppaṭi)","icon":"speak"},{"a":"","w":"Warum","p":"","en":"Why","cat":"p","topic":"kommunikation","ex":"Warum lernst du Deutsch?","mn":"ஏன் (Ēṉ)","icon":"think"},{"a":"","w":"Wann","p":"","en":"When","cat":"p","topic":"kommunikation","ex":"Wann beginnt der Sprachkurs?","mn":"எப்போது (Eppōtu)","icon":"clock"},{"a":"","w":"eins","p":"","en":"one","cat":"adj","topic":"kommunikation","ex":"Ich habe ein Ticket.","mn":"ஒன்று (Ondru)","icon":"cart"},{"a":"","w":"zwei","p":"","en":"two","cat":"adj","topic":"kommunikation","ex":"Zwei Kaffee, bitte.","mn":"இரண்டு (Irandu)","icon":"cart"},{"a":"","w":"drei","p":"","en":"three","cat":"adj","topic":"kommunikation","ex":"Wir sind drei Personen.","mn":"மூன்று (Moondru)","icon":"cart"},{"a":"","w":"rot","p":"","en":"red","cat":"adj","topic":"einkaufen","ex":"Das Auto ist rot.","mn":"சிவப்பு (Sivappu)","icon":"abstract"},{"a":"","w":"blau","p":"","en":"blue","cat":"adj","topic":"einkaufen","ex":"Der Himmel ist blau.","mn":"நீலம் (Neelam)","icon":"abstract"},{"a":"","w":"grün","p":"","en":"green","cat":"adj","topic":"reisen","ex":"Die Ampel ist grün.","mn":"பச்சை (Pachai)","icon":"abstract"},{"a":"","w":"weiß","p":"","en":"white","cat":"adj","topic":"einkaufen","ex":"Das Hemd ist weiß.","mn":"வெள்ளை (Vellai)","icon":"abstract"},{"a":"","w":"schwarz","p":"","en":"black","cat":"adj","topic":"einkaufen","ex":"Ich trage eine schwarze Hose.","mn":"கருப்பு (Karuppu)","icon":"abstract"},{"a":"die","w":"Hose","p":"-n","en":"trousers / pants","cat":"n","topic":"einkaufen","ex":"Die Hose passt mir gut.","mn":"கால்சட்டை (Kaalsattai)","icon":"briefcase"},{"a":"die","w":"Jacke","p":"-n","en":"jacket","cat":"n","topic":"einkaufen","ex":"Zieh deine Jacke an.","mn":"மேலாடை (Mēlādai)","icon":"briefcase"},{"a":"der","w":"Schuh","p":"-e","en":"shoe","cat":"n","topic":"einkaufen","ex":"Meine Schuhe sind neu.","mn":"காலணி (Kālani)","icon":"walk"},{"a":"das","w":"Hemd","p":"-en","en":"shirt","cat":"n","topic":"einkaufen","ex":"Er trägt ein weißes Hemd.","mn":"சட்டை (Sattai)","icon":"briefcase"},{"a":"der","w":"Kopf","p":"Köpfe","en":"head","cat":"n","topic":"gesundheit","ex":"Mein Kopf tut weh.","mn":"தலை (Thalai)","icon":"think"},{"a":"die","w":"Hand","p":"Hände","en":"hand","cat":"n","topic":"gesundheit","ex":"Wasch dir die Hände.","mn":"கை (Kai)","icon":"handshake"},{"a":"das","w":"Auge","p":"-n","en":"eye","cat":"n","topic":"gesundheit","ex":"Sie hat blaue Augen.","mn":"கண் (Kan)","icon":"eye"},{"a":"der","w":"Arzt","p":"Ärzte","en":"doctor","cat":"n","topic":"gesundheit","ex":"Ich muss zum Arzt gehen.","mn":"மருத்துவர் (Maruthuvar)","icon":"building"},{"a":"das","w":"Medikament","p":"-e","en":"medication","cat":"n","topic":"gesundheit","ex":"Nehmen Sie dieses Medikament.","mn":"மருந்து (Marunthu)","icon":"briefcase"},{"a":"der","w":"Zug","p":"Züge","en":"train","cat":"n","topic":"reisen","ex":"Der Zug fährt um 9 Uhr ab.","mn":"ரயில் (Rayil)","icon":"reisen"},{"a":"der","w":"Bus","p":"-se","en":"bus","cat":"n","topic":"reisen","ex":"Ich nehme den Bus zur Arbeit.","mn":"பேருந்து (Pērunthu)","icon":"reisen"},{"a":"der","w":"Bahnhof","p":"Bahnhöfe","en":"train station","cat":"n","topic":"reisen","ex":"Wo ist der Hauptbahnhof?","mn":"ரயில் நிலையம் (Rayil nilaiyam)","icon":"building"},{"a":"die","w":"Fahrkarte","p":"-n","en":"ticket","cat":"n","topic":"reisen","ex":"Eine Fahrkarte nach München, bitte.","mn":"பயணச்சீட்டு (Payanacheettu)","icon":"email"},{"a":"der","w":"Flughafen","p":"Flughäfen","en":"airport","cat":"n","topic":"reisen","ex":"Der Flughafen ist weit weg.","mn":"விமான நிலையம் (Vimāna nilaiyam)","icon":"reisen"},{"a":"die","w":"Sonne","p":"-","en":"sun","cat":"n","topic":"umwelt","ex":"Die Sonne scheint heute.","mn":"சூரியன் (Sooriyan)","icon":"weather"},{"a":"der","w":"Regen","p":"-","en":"rain","cat":"n","topic":"umwelt","ex":"Morgen gibt es Regen.","mn":"மழை (Mazhai)","icon":"weather"},{"a":"","w":"warm","p":"","en":"warm","cat":"adj","topic":"umwelt","ex":"Im Sommer ist es warm.","mn":"சூடான (Soodaana)","icon":"weather"},{"a":"","w":"kalt","p":"","en":"cold","cat":"adj","topic":"umwelt","ex":"Im Winter ist es kalt.","mn":"குளிர்ந்த (Kulirntha)","icon":"weather"},
-  {"w": "entscheiden", "en": "decide", "cat": "v"},
-  {"w": "antworten", "en": "answer / reply", "cat": "v"},
-  {"w": "baden", "en": "bathe", "cat": "v"},
-  {"w": "bedeuten", "en": "mean", "cat": "v"},
-  {"w": "beginnen", "en": "begin", "cat": "v"},
-  {"w": "bekommen", "en": "get", "cat": "v"},
-  {"w": "benutzen", "en": "use", "cat": "v"},
-  {"w": "bestellen", "en": "order", "cat": "v"},
-  {"w": "besuchen", "en": "visit (person)", "cat": "v"},
-  {"w": "besichtigen", "en": "visit (appartment),Inspect", "cat": "v"},
-  {"w": "bitten", "en": "request", "cat": "v"},
-  {"w": "bleiben", "en": "stay / remain", "cat": "v"},
-  {"w": "bringen", "en": "bring", "cat": "v"},
-  {"w": "buchstabieren", "en": "spell", "cat": "v"},
-  {"w": "danken", "en": "thank", "cat": "v"},
-  {"w": "drucken", "en": "print", "cat": "v"},
-  {"w": "drücken", "en": "press", "cat": "v"},
-  {"w": "duschen", "en": "shower", "cat": "v"},
-  {"w": "enden", "en": "end/ end up", "cat": "v"},
-  {"w": "entschuldigen", "en": "excuse/apologize", "cat": "v"},
-  {"w": "erklären", "en": "explain", "cat": "v"},
-  {"w": "erlauben", "en": "allow", "cat": "v"},
-  {"w": "erzählen", "en": "tell in detail", "cat": "v"},
-  {"w": "fehlen", "en": "missing/absence", "cat": "v"},
-  {"w": "finden", "en": "find", "cat": "v"},
-  {"w": "fliegen", "en": "fly", "cat": "v"},
-  {"w": "fragen", "en": "ask", "cat": "v"},
-  {"w": "frühstücken", "en": "breakfasting", "cat": "v"},
-  {"w": "fallen", "en": "fall", "cat": "v"},
-  {"w": "gefallen", "en": "to be liked", "cat": "v"},
-  {"w": "gehören", "en": "belong", "cat": "v"},
-  {"w": "gewinnen", "en": "win", "cat": "v"},
-  {"w": "glauben", "en": "believe", "cat": "v"},
-  {"w": "gratulieren", "en": "congratulate", "cat": "v"},
-  {"w": "grillen", "en": "barbecue", "cat": "v"},
-  {"w": "heiraten", "en": "marry", "cat": "v"},
-  {"w": "holen", "en": "get (collect)", "cat": "v"},
-  {"w": "kennen", "en": "know", "cat": "v"},
-  {"w": "kochen", "en": "cook", "cat": "v"},
-  {"w": "denken", "en": "think", "cat": "v"},
-  {"w": "kriegen", "en": "get", "cat": "v"},
-  {"w": "lachen", "en": "laugh", "cat": "v"},
-  {"w": "leben", "en": "live", "cat": "v"},
-  {"w": "legen", "en": "lay", "cat": "v"},
-  {"w": "lügen", "en": "Telling lie", "cat": "v"},
-  {"w": "lieben", "en": "love", "cat": "v"},
-  {"w": "liegen", "en": "lie", "cat": "v"},
-  {"w": "tun", "en": "do (physical)", "cat": "v"},
-  {"w": "mieten", "en": "rent", "cat": "v"},
-  {"w": "öffnen", "en": "open", "cat": "v"},
-  {"w": "rauchen", "en": "smoke", "cat": "v"},
-  {"w": "regnen", "en": "rain", "cat": "v"},
-  {"w": "reparieren", "en": "repair", "cat": "v"},
-  {"w": "riechen", "en": "smell", "cat": "v"},
-  {"w": "sagen", "en": "say", "cat": "v"},
-  {"w": "scheinen", "en": "seem", "cat": "v"},
-  {"w": "schicken", "en": "send", "cat": "v"},
-  {"w": "schließen", "en": "close", "cat": "v"},
-  {"w": "schmecken", "en": "taste", "cat": "v"},
-  {"w": "schwimmen", "en": "swim", "cat": "v"},
+const A1_DATA_STARTER = [{"a":"","w":"Hallo","p":"","en":"Hello","cat":"p","topic":"kommunikation","ex":"Hallo! Wie geht es dir?","mn":"வணக்கம் (Vaṇakkam) · Basic universal greeting","icon":"smile"},{"a":"","w":"Guten Morgen","p":"","en":"Good morning","cat":"p","topic":"kommunikation","ex":"Guten Morgen, Herr Müller!","mn":"காலை வணக்கம் (Kālai vaṇakkam) · Used until ~11am","icon":"smile"},{"a":"","w":"Guten Tag","p":"","en":"Good day / Hello","cat":"p","topic":"kommunikation","ex":"Guten Tag! Kann ich Ihnen helfen?","mn":"மதிய வணக்கம் (Matiya vaṇakkam) · Standard daytime greeting","icon":"smile"},{"a":"","w":"Guten Abend","p":"","en":"Good evening","cat":"p","topic":"kommunikation","ex":"Guten Abend allerseits!","mn":"மாலை வணக்கம் (Mālai vaṇakkam)","icon":"smile"},{"a":"","w":"Tschüss","p":"","en":"Bye (informal)","cat":"p","topic":"kommunikation","ex":"Tschüss, bis morgen!","mn":"சென்று வருகிறேன் (Poittu varēn)","icon":"smile"},{"a":"","w":"Auf Wiedersehen","p":"","en":"Goodbye (formal)","cat":"p","topic":"kommunikation","ex":"Auf Wiedersehen und schönen Tag noch!","mn":"மீண்டும் சந்திப்போம் (Mīṇṭum cantippōm)","icon":"smile"},{"a":"","w":"Bitte","p":"","en":"Please / You're welcome","cat":"p","topic":"kommunikation","ex":"Eine Tasse Kaffee, bitte.","mn":"தயவுசெய்து / நல்வரவு (Thayavuseithu)","icon":"smile"},{"a":"","w":"Danke","p":"","en":"Thank you","cat":"p","topic":"kommunikation","ex":"Vielen Dank für Ihre Hilfe!","mn":"நன்றி (Naṉṟi)","icon":"heart"},{"a":"die","w":"Entschuldigung","p":"-en","en":"Excuse me / Sorry","cat":"n","topic":"kommunikation","ex":"Entschuldigung, wo ist der Bahnhof?","mn":"மன்னிக்கவும் (Maṉṉikkavum)","icon":"speak"},{"a":"","w":"Ja","p":"","en":"Yes","cat":"p","topic":"kommunikation","ex":"Ja, das ist richtig.","mn":"ஆம் (Ām)","icon":"check"},{"a":"","w":"Nein","p":"","en":"No","cat":"p","topic":"kommunikation","ex":"Nein, ich habe keine Zeit.","mn":"இல்லை (Illai)","icon":"check"},{"a":"der","w":"Name","p":"-n","en":"Name","cat":"n","topic":"kommunikation","ex":"Mein Name ist Arun.","mn":"பெயர் (Peyar)","icon":"speak"},{"a":"die","w":"Sprache","p":"-n","en":"Language","cat":"n","topic":"schule","ex":"Ich lerne die deutsche Sprache.","mn":"மொழி (Moḻi)","icon":"speak"},{"a":"der","w":"Mann","p":"Männer","en":"Man / Husband","cat":"n","topic":"familie","ex":"Der Mann arbeitet im Garten.","mn":"ஆண் / கணவர் (Āṇ / Kaṇavar)","icon":"team"},{"a":"die","w":"Frau","p":"-en","en":"Woman / Wife","cat":"n","topic":"familie","ex":"Meine Frau kommt aus Indien.","mn":"பெண் / மனைவி (Peṇ / Manaivi)","icon":"team"},{"a":"das","w":"Kind","p":"-er","en":"Child","cat":"n","topic":"familie","ex":"Das Kind spielt mit dem Ball.","mn":"குழந்தை (Kuḻantai)","icon":"team"},{"a":"der","w":"Vater","p":"Väter","en":"Father","cat":"n","topic":"familie","ex":"Mein Vater lebt in Chennai.","mn":"தந்தை / அப்பா (Appā)","icon":"team"},{"a":"die","w":"Mutter","p":"Mütter","en":"Mother","cat":"n","topic":"familie","ex":"Meine Mutter kocht sehr gut.","mn":"தாய் / அம்மா (Ammā)","icon":"team"},{"a":"die","w":"Eltern","p":"(Plural)","en":"Parents","cat":"n","topic":"familie","ex":"Meine Eltern wohnen in Indien.","mn":"பெற்றோர் (Peṟṟōr)","icon":"team"},{"a":"der","w":"Sohn","p":"Söhne","en":"Son","cat":"n","topic":"familie","ex":"Unser Sohn geht in die Schule.","mn":"மகன் (Makaṉ)","icon":"team"},{"a":"die","w":"Tochter","p":"Töchter","en":"Daughter","cat":"n","topic":"familie","ex":"Unsere Tochter ist fünf Jahre alt.","mn":"மகள் (Makaḷ)","icon":"team"},{"a":"der","w":"Bruder","p":"Brüder","en":"Brother","cat":"n","topic":"familie","ex":"Ich habe einen älteren Bruder.","mn":"சகோதரன் / அண்ணன் (Aṇṇaṉ)","icon":"team"},{"a":"die","w":"Schwester","p":"-n","en":"Sister","cat":"n","topic":"familie","ex":"Meine Schwester studiert Medizin.","mn":"சகோதரி / தங்கை (Taṅkai)","icon":"team"},{"a":"der","w":"Freund","p":"-e","en":"Friend (male) / Boyfriend","cat":"n","topic":"familie","ex":"Mein Freund hilft mir beim Umzug.","mn":"நண்பன் (Naṇpaṉ)","icon":"team"},{"a":"die","w":"Freundin","p":"-nen","en":"Friend (female) / Girlfriend","cat":"n","topic":"familie","ex":"Sie ist meine beste Freundin.","mn":"தோழி (Tōḻi)","icon":"team"},{"a":"das","w":"Wasser","p":"-","en":"Water","cat":"n","topic":"essen","ex":"Ich trinke jeden Tag zwei Liter Wasser.","mn":"தண்ணீர் (Taṇṇīr)","icon":"drink"},{"a":"das","w":"Brot","p":"-e","en":"Bread","cat":"n","topic":"essen","ex":"Wir essen frisches deutsches Brot.","mn":"ரொட்டி (Roṭṭi)","icon":"eat"},{"a":"der","w":"Kaffee","p":"-s","en":"Coffee","cat":"n","topic":"essen","ex":"Morgens trinke ich gern Kaffee mit Milch.","mn":"காபி (Kāpi)","icon":"drink"},{"a":"der","w":"Tee","p":"-s","en":"Tea","cat":"n","topic":"essen","ex":"Möchtest du schwarzen oder grünen Tee?","mn":"தேநீர் (Tēnīr)","icon":"drink"},{"a":"die","w":"Milch","p":"-","en":"Milk","cat":"n","topic":"essen","ex":"Die Milch steht im Kühlschrank.","mn":"பால் (Pāl)","icon":"drink"},{"a":"der","w":"Apfel","p":"Äpfel","en":"Apple","cat":"n","topic":"essen","ex":"Ein Apfel am Tag ist gesund.","mn":"ஆப்பிள் (Āppiḷ)","icon":"eat"},{"a":"das","w":"Obst","p":"-","en":"Fruit","cat":"n","topic":"essen","ex":"Frisches Obst schmeckt süß.","mn":"பழங்கள் (Paḻaṅkaḷ)","icon":"eat"},{"a":"das","w":"Gemüse","p":"-","en":"Vegetables","cat":"n","topic":"essen","ex":"Wir kaufen Bio-Gemüse auf dem Markt.","mn":"காய்கறிகள் (Kāykaṟikaḷ)","icon":"eat"},{"a":"der","w":"Reis","p":"-","en":"Rice","cat":"n","topic":"essen","ex":"In Südindien essen wir oft Reis.","mn":"அரிசி / சாதம் (Cātam)","icon":"eat"},{"a":"das","w":"Ei","p":"-er","en":"Egg","cat":"n","topic":"essen","ex":"Zum Frühstück esse ich zwei Eier.","mn":"முட்டை (Muṭṭai)","icon":"eat"},{"a":"der","w":"Zucker","p":"-","en":"Sugar","cat":"n","topic":"essen","ex":"Ich trinke Tee ohne Zucker.","mn":"சர்க்கரை (Carkkarai)","icon":"eat"},{"a":"das","w":"Salz","p":"-e","en":"Salt","cat":"n","topic":"essen","ex":"Das Essen braucht noch etwas Salz.","mn":"உப்பு (Uppu)","icon":"eat"},{"a":"das","w":"Frühstück","p":"-e","en":"Breakfast","cat":"n","topic":"essen","ex":"Was isst du zum Frühstück?","mn":"காலை உணவு (Kālai uṇavu)","icon":"eat"},{"a":"das","w":"Mittagessen","p":"-","en":"Lunch","cat":"n","topic":"essen","ex":"Um 12:30 Uhr machen wir Mittagessen.","mn":"மதிய உணவு (Matiya uṇavu)","icon":"eat"},{"a":"das","w":"Abendessen","p":"-","en":"Dinner","cat":"n","topic":"essen","ex":"Das Abendessen ist um 19 Uhr fertig.","mn":"இரவு உணவு (Iravu uṇavu)","icon":"eat"},{"a":"das","w":"Haus","p":"Häuser","en":"House","cat":"n","topic":"wohnen","ex":"Wir wohnen in einem kleinen Haus.","mn":"வீடு (Vīṭu)","icon":"house"},{"a":"die","w":"Wohnung","p":"-en","en":"Apartment / Flat","cat":"n","topic":"wohnen","ex":"Die Wohnung hat drei Zimmer und einen Balkon.","mn":"குடியிருப்பு (Kuṭiyiruppu)","icon":"house"},{"a":"das","w":"Zimmer","p":"-","en":"Room","cat":"n","topic":"wohnen","ex":"Das Wohnzimmer ist sehr hell.","mn":"அறை (Aṟai)","icon":"house"},{"a":"die","w":"Küche","p":"-n","en":"Kitchen","cat":"n","topic":"wohnen","ex":"Wir kochen zusammen in der Küche.","mn":"சமையலறை (Camaiyalaṟai)","icon":"house"},{"a":"das","w":"Bad","p":"Bäder","en":"Bathroom","cat":"n","topic":"wohnen","ex":"Das Bad hat eine Dusche und eine Badewanne.","mn":"குளியலறை (Kuḷiyalaṟai)","icon":"shower"},{"a":"der","w":"Tisch","p":"-e","en":"Table","cat":"n","topic":"wohnen","ex":"Das Buch liegt auf dem Tisch.","mn":"மேசை (Mēcai)","icon":"house"},{"a":"der","w":"Stuhl","p":"Stühle","en":"Chair","cat":"n","topic":"wohnen","ex":"Bitte nimm Platz auf dem Stuhl.","mn":"நாற்காலி (Nāṟkāli)","icon":"house"},{"a":"das","w":"Bett","p":"-en","en":"Bed","cat":"n","topic":"wohnen","ex":"Das Bett ist sehr bequem.","mn":"படுக்கை (Paṭukkai)","icon":"bed"},{"a":"die","w":"Tür","p":"-en","en":"Door","cat":"n","topic":"wohnen","ex":"Bitte schließe die Tür.","mn":"கதவு (Katavu)","icon":"key"},{"a":"das","w":"Fenster","p":"-","en":"Window","cat":"n","topic":"wohnen","ex":"Mach bitte das Fenster auf.","mn":"ஜன்னல் (Jaṉṉal)","icon":"house"},{"a":"die","w":"Stadt","p":"Städte","en":"City / Town","cat":"n","topic":"reisen","ex":"München ist eine schöne deutsche Stadt.","mn":"நகரம் (Nakaram)","icon":"building"},{"a":"die","w":"Straße","p":"-n","en":"Street / Road","cat":"n","topic":"reisen","ex":"In welcher Straße wohnen Sie?","mn":"தெரு (Teru)","icon":"car"},{"a":"das","w":"Geld","p":"-","en":"Money","cat":"n","topic":"geld","ex":"Ich habe nicht genug Geld dabei.","mn":"பணம் (Paṇam)","icon":"money"},{"a":"der","w":"Euro","p":"-s","en":"Euro","cat":"n","topic":"geld","ex":"Das kostet fünf Euro fünfzig.","mn":"யூரோ நாணயம் (Yūrō)","icon":"money"},{"a":"der","w":"Preis","p":"-e","en":"Price","cat":"n","topic":"einkaufen","ex":"Der Preis ist sehr günstig.","mn":"விலை (Vilai)","icon":"cart"},{"a":"der","w":"Supermarkt","p":"Supermärkte","en":"Supermarket","cat":"n","topic":"einkaufen","ex":"Der Supermarkt öffnet um 8 Uhr.","mn":"பல்பொருள் அங்காடி (Supermarket)","icon":"cart"},{"a":"die","w":"Rechnung","p":"-en","en":"Bill / Invoice","cat":"n","topic":"geld","ex":"Können wir bitte die Rechnung haben?","mn":"பில் / ரசீது (Racītu)","icon":"email"},{"a":"der","w":"Tag","p":"-e","en":"Day","cat":"n","topic":"gesellschaft","ex":"Schönen Tag noch!","mn":"நாள் (Nāḷ)","icon":"calendar"},{"a":"die","w":"Woche","p":"-n","en":"Week","cat":"n","topic":"gesellschaft","ex":"Die Woche hat sieben Tage.","mn":"வாரம் (Vāram)","icon":"calendar"},{"a":"der","w":"Monat","p":"-e","en":"Month","cat":"n","topic":"gesellschaft","ex":"Im nächsten Monat habe ich Urlaub.","mn":"மாதம் (Mātam)","icon":"calendar"},{"a":"das","w":"Jahr","p":"-e","en":"Year","cat":"n","topic":"gesellschaft","ex":"Ein Jahr hat 365 Tage.","mn":"ஆண்டு / வருடம் (Varuṭam)","icon":"calendar"},{"a":"die","w":"Uhr","p":"-en","en":"Clock / o'clock","cat":"n","topic":"gesellschaft","ex":"Es ist genau drei Uhr.","mn":"கடிகாரம் / மணி (Kaṭikāram)","icon":"clock"},{"a":"die","w":"Zeit","p":"-en","en":"Time","cat":"n","topic":"gesellschaft","ex":"Hast du heute etwas Zeit für mich?","mn":"நேரம் (Nēram)","icon":"clock"},{"a":"","w":"heute","p":"","en":"Today","cat":"adj","topic":"gesellschaft","ex":"Heute ist das Wetter sehr schön.","mn":"இன்று (Iṉṟu)","icon":"clock"},{"a":"","w":"morgen","p":"","en":"Tomorrow","cat":"adj","topic":"gesellschaft","ex":"Morgen muss ich früh aufstehen.","mn":"நாளை (Nāḷai)","icon":"clock"},{"a":"","w":"gestern","p":"","en":"Yesterday","cat":"adj","topic":"gesellschaft","ex":"Gestern habe ich viel Deutsch gelernt.","mn":"நேற்று (Nēṟṟu)","icon":"clock"},{"a":"","w":"jetzt","p":"","en":"Now","cat":"adj","topic":"gesellschaft","ex":"Wir müssen jetzt losgehen.","mn":"இப்போது (Ippōtu)","icon":"clock"},{"a":"","w":"immer","p":"","en":"Always","cat":"adj","topic":"gesellschaft","ex":"Er kommt immer pünktlich.","mn":"எப்போதும் (Eppōtum)","icon":"clock"},{"a":"","w":"oft","p":"","en":"Often","cat":"adj","topic":"gesellschaft","ex":"Ich fahre oft mit dem Fahrrad.","mn":"அடிக்கடி (Aṭikkaṭi)","icon":"clock"},{"a":"","w":"sein","p":"","en":"to be","cat":"v","topic":"gesellschaft","ex":"Ich bin Arun. Du bist sehr nett.","pr":"war","pp":"ist gewesen","mn":"இருப்பது (Iruppatu) · ich bin, du bist, er ist, wir sind","icon":"smile"},{"a":"","w":"haben","p":"","en":"to have","cat":"v","topic":"gesellschaft","ex":"Ich habe eine Frage.","pr":"hatte","pp":"hat gehabt","mn":"வைத்திருப்பது (Vaittiruppatu) · ich habe, du hast, er hat","icon":"abstract"},{"a":"","w":"kommen","p":"","en":"to come","cat":"v","topic":"reisen","ex":"Woher kommst du? Ich komme aus Indien.","pr":"kam","pp":"ist gekommen","mn":"வருவது (Varuvatu)","icon":"walk"},{"a":"","w":"gehen","p":"","en":"to go / walk","cat":"v","topic":"reisen","ex":"Ich gehe jetzt nach Hause.","pr":"ging","pp":"ist gegangen","mn":"செல்வது / போவது (Pōvatu)","icon":"walk"},{"a":"","w":"wohnen","p":"","en":"to live / reside","cat":"v","topic":"wohnen","ex":"Wo wohnen Sie? Ich wohne in Deutschland.","pr":"wohnte","pp":"hat gewohnt","mn":"வசிப்பது (Vasippatu)","icon":"house"},{"a":"","w":"heißen","p":"","en":"to be named / called","cat":"v","topic":"kommunikation","ex":"Wie heißen Sie? Ich heiße Arun.","pr":"hieß","pp":"hat geheißen","mn":"பெயர் கொண்டிருப்பது (Peyar)","icon":"speak"},{"a":"","w":"machen","p":"","en":"to do / make","cat":"v","topic":"arbeit","ex":"Was machst du am Wochenende?","pr":"machte","pp":"hat gemacht","mn":"செய்வது (Ceyvatu)","icon":"wrench"},{"a":"","w":"lernen","p":"","en":"to learn / study","cat":"v","topic":"schule","ex":"Wir lernen fleißig Deutsch.","pr":"lernte","pp":"hat gelernt","mn":"கற்பது (Kaṟpatu)","icon":"book"},{"a":"","w":"arbeiten","p":"","en":"to work","cat":"v","topic":"arbeit","ex":"Er arbeitet als Ingenieur.","pr":"arbeitete","pp":"hat gearbeitet","mn":"வேலை செய்வது (Vēlai)","icon":"briefcase"},{"a":"","w":"sprechen","p":"","en":"to speak","cat":"v","topic":"kommunikation","ex":"Sprechen Sie Englisch oder Deutsch?","pr":"sprach","pp":"hat gesprochen","mn":"பேசுவது (Pēsuvatu)","icon":"speak"},{"a":"","w":"verstehen","p":"","en":"to understand","cat":"v","topic":"schule","ex":"Ich verstehe diesen Satz gut.","pr":"verstand","pp":"hat verstanden","mn":"புரிந்து கொள்வது (Purintu koḷvatu)","icon":"think"},{"a":"","w":"schreiben","p":"","en":"to write","cat":"v","topic":"schule","ex":"Ich schreibe eine E-Mail an meinen Chef.","pr":"schrieb","pp":"hat geschrieben","mn":"எழுதுவது (Eḻutuvatu)","icon":"write"},{"a":"","w":"lesen","p":"","en":"to read","cat":"v","topic":"schule","ex":"Sie liest jeden Abend ein Buch.","pr":"las","pp":"hat gelesen","mn":"வாசிப்பது / படிப்பது (Vācippatu)","icon":"book"},{"a":"","w":"essen","p":"","en":"to eat","cat":"v","topic":"essen","ex":"Wir essen gern südindisches Essen.","pr":"aß","pp":"hat gegessen","mn":"உண்பது / சாப்பிடுவது (Cāppiṭuvatu)","icon":"eat"},{"a":"","w":"trinken","p":"","en":"to drink","cat":"v","topic":"essen","ex":"Was möchten Sie trinken?","pr":"trank","pp":"hat getrunken","mn":"குடிப்பது (Kuṭippatu)","icon":"drink"},{"a":"","w":"schlafen","p":"","en":"to sleep","cat":"v","topic":"wohnen","ex":"Ich schlafe meistens acht Stunden.","pr":"schlief","pp":"hat geschlafen","mn":"தூங்குவது (Tūṅkuvatu)","icon":"bed"},{"a":"","w":"hören","p":"","en":"to hear / listen","cat":"v","topic":"kommunikation","ex":"Hörst du gern Musik?","pr":"hörte","pp":"hat gehört","mn":"கேட்பது (Kēṭpatu)","icon":"ear"},{"a":"","w":"sehen","p":"","en":"to see","cat":"v","topic":"kommunikation","ex":"Ich sehe den Bus schon kommen.","pr":"sah","pp":"hat gesehen","mn":"பார்ப்பது (Pārppatu)","icon":"eye"},{"a":"","w":"kaufen","p":"","en":"to buy","cat":"v","topic":"einkaufen","ex":"Ich kaufe Obst im Supermarkt.","pr":"kaufte","pp":"hat gekauft","mn":"வாங்குவது (Vāṅkuvatu)","icon":"cart"},{"a":"","w":"kosten","p":"","en":"to cost","cat":"v","topic":"geld","ex":"Wie viel kostet das?","pr":"kostete","pp":"hat gekostet","mn":"விலையாக இருப்பது (Vilai)","icon":"money"},{"a":"","w":"bezahlen","p":"","en":"to pay","cat":"v","topic":"geld","ex":"Kann ich mit Karte bezahlen?","pr":"bezahlte","pp":"hat bezahlt","mn":"பணம் செலுத்துவது (Paṇam)","icon":"money"},{"a":"","w":"brauchen","p":"","en":"to need","cat":"v","topic":"gesellschaft","ex":"Ich brauche deine Hilfe.","pr":"brauchte","pp":"hat gebraucht","mn":"தேவைப்படுவது (Tēvai)","icon":"abstract"},{"a":"","w":"möchten","p":"","en":"would like to","cat":"v","topic":"kommunikation","ex":"Ich möchte einen Termin vereinbaren.","pr":"wollte","pp":"hat gewollt","mn":"விரும்புவது (Virumpuvatu)","icon":"target"},{"a":"","w":"können","p":"","en":"can / be able to","cat":"v","topic":"gesellschaft","ex":"Kannst du mir bitte helfen?","pr":"konnte","pp":"hat gekonnt","mn":"முடியும் (Muṭiyum) · ich kann, du kannst, er kann","icon":"target"},{"a":"","w":"müssen","p":"","en":"must / have to","cat":"v","topic":"gesellschaft","ex":"Ich muss heute lange arbeiten.","pr":"musste","pp":"hat gemusst","mn":"கட்டாயம் செய்ய வேண்டும் (Kaṭṭāyam)","icon":"target"},{"a":"","w":"gut","p":"","en":"good / well","cat":"adj","topic":"gefuehle","ex":"Mir geht es sehr gut, danke!","mn":"நல்ல (Nalla)","icon":"smile", "comp": "besser", "sup": "am besten"},{"a":"","w":"schlecht","p":"","en":"bad","cat":"adj","topic":"gefuehle","ex":"Das Wetter ist heute schlecht.","mn":"மோசமான (Mōcamāṉa)","icon":"cry", "comp": "schlechter", "sup": "am schlechtesten"},{"a":"","w":"schön","p":"","en":"beautiful / nice","cat":"adj","topic":"wohnen","ex":"Das ist ein sehr schönes Zimmer.","mn":"அழகான (Aḻakāṉa)","icon":"smile", "comp": "schöner", "sup": "am schönsten"},{"a":"","w":"groß","p":"","en":"big / tall","cat":"adj","topic":"wohnen","ex":"Die Wohnung ist ziemlich groß.","mn":"பெரிய (Periya)","icon":"house", "comp": "größer", "sup": "am größten"},{"a":"","w":"klein","p":"","en":"small / little","cat":"adj","topic":"wohnen","ex":"Das Zimmer ist klein aber gemütlich.","mn":"சிறிய (Ciṟiya)","icon":"house", "comp": "kleiner", "sup": "am kleinsten"},{"a":"","w":"neu","p":"","en":"new","cat":"adj","topic":"gesellschaft","ex":"Ich habe ein neues Fahrrad gekauft.","mn":"புதிய (Putiya)","icon":"gift", "comp": "neuer", "sup": "am neuesten"},{"a":"","w":"alt","p":"","en":"old","cat":"adj","topic":"gesellschaft","ex":"Das Haus ist über hundert Jahre alt.","mn":"பழைய / வயதுடைய (Paḻaiya)","icon":"house", "comp": "älter", "sup": "am ältesten"},{"a":"","w":"teuer","p":"","en":"expensive","cat":"adj","topic":"geld","ex":"Das Auto ist mir zu teuer.","mn":"விலையுயர்ந்த (Vilaiyuyarnta)","icon":"money", "comp": "teurer", "sup": "am teuersten"},{"a":"","w":"billig","p":"","en":"cheap / inexpensive","cat":"adj","topic":"geld","ex":"Auf dem Markt ist das Gemüse billig.","mn":"மலிவான (Malivāṉa)","icon":"money", "comp": "billiger", "sup": "am billigsten"},{"a":"","w":"schnell","p":"","en":"fast / quick","cat":"adj","topic":"reisen","ex":"Der ICE-Zug fährt sehr schnell.","mn":"வேகமான (Vēkamāṉa)","icon":"car", "comp": "schneller", "sup": "am schnellsten"},{"a":"","w":"langsam","p":"","en":"slow","cat":"adj","topic":"reisen","ex":"Bitte sprechen Sie etwas langsamer.","mn":"மெதுவான (Metuvāṉa)","icon":"walk", "comp": "langsamer", "sup": "am langsamsten"},{"a":"","w":"einfach","p":"","en":"easy / simple","cat":"adj","topic":"schule","ex":"Diese Grammatik-Regel ist ganz einfach.","mn":"எளிதான (Eḷitāṉa)","icon":"check"},{"a":"","w":"schwer","p":"","en":"difficult / heavy","cat":"adj","topic":"schule","ex":"Die deutsche Sprache ist nicht so schwer!","mn":"கடினமான (Kaṭiṉamāṉa)","icon":"think", "comp": "schwerer", "sup": "am schwersten"},{"a":"","w":"richtig","p":"","en":"correct / right","cat":"adj","topic":"schule","ex":"Deine Antwort ist absolut richtig!","mn":"சரியான (Cariyāṉa)","icon":"check", "comp": "richtiger", "sup": "am richtigsten"},{"a":"","w":"falsch","p":"","en":"wrong / false","cat":"adj","topic":"schule","ex":"Nein, das ist leider falsch.","mn":"தவறான (Tavaṟāṉa)","icon":"check", "comp": "falscher", "sup": "am falschesten"},{"a":"","w":"Wer","p":"","en":"Who","cat":"p","topic":"kommunikation","ex":"Wer ist das? Das ist mein Kollege.","mn":"யார் (Yār)","icon":"speak"},{"a":"","w":"Was","p":"","en":"What","cat":"p","topic":"kommunikation","ex":"Was machst du beruflich?","mn":"என்ன (Eṉṉa)","icon":"speak"},{"a":"","w":"Wo","p":"","en":"Where (location)","cat":"p","topic":"kommunikation","ex":"Wo wohnst du?","mn":"எங்கே (Eṅkē)","icon":"search"},{"a":"","w":"Wohin","p":"","en":"Where to (direction)","cat":"p","topic":"kommunikation","ex":"Wohin gehst du jetzt?","mn":"எங்கே நோக்கி (Eṅkē pōkiṟāy)","icon":"walk"},{"a":"","w":"Woher","p":"","en":"Where from (origin)","cat":"p","topic":"kommunikation","ex":"Woher kommen Sie? Aus Indien.","mn":"எங்கிருந்து (Eṅkiruntu)","icon":"reisen"},{"a":"","w":"Wie","p":"","en":"How","cat":"p","topic":"kommunikation","ex":"Wie heißt du? Wie geht es Ihnen?","mn":"எப்படி (Eppaṭi)","icon":"speak"},{"a":"","w":"Warum","p":"","en":"Why","cat":"p","topic":"kommunikation","ex":"Warum lernst du Deutsch?","mn":"ஏன் (Ēṉ)","icon":"think"},{"a":"","w":"Wann","p":"","en":"When","cat":"p","topic":"kommunikation","ex":"Wann beginnt der Sprachkurs?","mn":"எப்போது (Eppōtu)","icon":"clock"},{"a":"","w":"eins","p":"","en":"one","cat":"adj","topic":"kommunikation","ex":"Ich habe ein Ticket.","mn":"ஒன்று (Ondru)","icon":"cart"},{"a":"","w":"zwei","p":"","en":"two","cat":"adj","topic":"kommunikation","ex":"Zwei Kaffee, bitte.","mn":"இரண்டு (Irandu)","icon":"cart"},{"a":"","w":"drei","p":"","en":"three","cat":"adj","topic":"kommunikation","ex":"Wir sind drei Personen.","mn":"மூன்று (Moondru)","icon":"cart"},{"a":"","w":"rot","p":"","en":"red","cat":"adj","topic":"einkaufen","ex":"Das Auto ist rot.","mn":"சிவப்பு (Sivappu)","icon":"abstract"},{"a":"","w":"blau","p":"","en":"blue","cat":"adj","topic":"einkaufen","ex":"Der Himmel ist blau.","mn":"நீலம் (Neelam)","icon":"abstract"},{"a":"","w":"grün","p":"","en":"green","cat":"adj","topic":"reisen","ex":"Die Ampel ist grün.","mn":"பச்சை (Pachai)","icon":"abstract"},{"a":"","w":"weiß","p":"","en":"white","cat":"adj","topic":"einkaufen","ex":"Das Hemd ist weiß.","mn":"வெள்ளை (Vellai)","icon":"abstract"},{"a":"","w":"schwarz","p":"","en":"black","cat":"adj","topic":"einkaufen","ex":"Ich trage eine schwarze Hose.","mn":"கருப்பு (Karuppu)","icon":"abstract"},{"a":"die","w":"Hose","p":"-n","en":"trousers / pants","cat":"n","topic":"einkaufen","ex":"Die Hose passt mir gut.","mn":"கால்சட்டை (Kaalsattai)","icon":"briefcase"},{"a":"die","w":"Jacke","p":"-n","en":"jacket","cat":"n","topic":"einkaufen","ex":"Zieh deine Jacke an.","mn":"மேலாடை (Mēlādai)","icon":"briefcase"},{"a":"der","w":"Schuh","p":"-e","en":"shoe","cat":"n","topic":"einkaufen","ex":"Meine Schuhe sind neu.","mn":"காலணி (Kālani)","icon":"walk"},{"a":"das","w":"Hemd","p":"-en","en":"shirt","cat":"n","topic":"einkaufen","ex":"Er trägt ein weißes Hemd.","mn":"சட்டை (Sattai)","icon":"briefcase"},{"a":"der","w":"Kopf","p":"Köpfe","en":"head","cat":"n","topic":"gesundheit","ex":"Mein Kopf tut weh.","mn":"தலை (Thalai)","icon":"think"},{"a":"die","w":"Hand","p":"Hände","en":"hand","cat":"n","topic":"gesundheit","ex":"Wasch dir die Hände.","mn":"கை (Kai)","icon":"handshake"},{"a":"das","w":"Auge","p":"-n","en":"eye","cat":"n","topic":"gesundheit","ex":"Sie hat blaue Augen.","mn":"கண் (Kan)","icon":"eye"},{"a":"der","w":"Arzt","p":"Ärzte","en":"doctor","cat":"n","topic":"gesundheit","ex":"Ich muss zum Arzt gehen.","mn":"மருத்துவர் (Maruthuvar)","icon":"building"},{"a":"das","w":"Medikament","p":"-e","en":"medication","cat":"n","topic":"gesundheit","ex":"Nehmen Sie dieses Medikament.","mn":"மருந்து (Marunthu)","icon":"briefcase"},{"a":"der","w":"Zug","p":"Züge","en":"train","cat":"n","topic":"reisen","ex":"Der Zug fährt um 9 Uhr ab.","mn":"ரயில் (Rayil)","icon":"reisen"},{"a":"der","w":"Bus","p":"-se","en":"bus","cat":"n","topic":"reisen","ex":"Ich nehme den Bus zur Arbeit.","mn":"பேருந்து (Pērunthu)","icon":"reisen"},{"a":"der","w":"Bahnhof","p":"Bahnhöfe","en":"train station","cat":"n","topic":"reisen","ex":"Wo ist der Hauptbahnhof?","mn":"ரயில் நிலையம் (Rayil nilaiyam)","icon":"building"},{"a":"die","w":"Fahrkarte","p":"-n","en":"ticket","cat":"n","topic":"reisen","ex":"Eine Fahrkarte nach München, bitte.","mn":"பயணச்சீட்டு (Payanacheettu)","icon":"email"},{"a":"der","w":"Flughafen","p":"Flughäfen","en":"airport","cat":"n","topic":"reisen","ex":"Der Flughafen ist weit weg.","mn":"விமான நிலையம் (Vimāna nilaiyam)","icon":"reisen"},{"a":"die","w":"Sonne","p":"-","en":"sun","cat":"n","topic":"umwelt","ex":"Die Sonne scheint heute.","mn":"சூரியன் (Sooriyan)","icon":"weather"},{"a":"der","w":"Regen","p":"-","en":"rain","cat":"n","topic":"umwelt","ex":"Morgen gibt es Regen.","mn":"மழை (Mazhai)","icon":"weather"},{"a":"","w":"warm","p":"","en":"warm","cat":"adj","topic":"umwelt","ex":"Im Sommer ist es warm.","mn":"சூடான (Soodaana)","icon":"weather", "comp": "wärmer", "sup": "am wärmsten"},{"a":"","w":"kalt","p":"","en":"cold","cat":"adj","topic":"umwelt","ex":"Im Winter ist es kalt.","mn":"குளிர்ந்த (Kulirntha)","icon":"weather", "comp": "kälter", "sup": "am kältesten"},
+  {"w": "entscheiden", "en": "decide", "cat": "v", "pr": "entschied (sich)", "pp": "hat (sich) entschieden"},
+  {"w": "antworten", "en": "answer / reply", "cat": "v", "pr": "antwortete", "pp": "hat geantwortet"},
+  {"w": "baden", "en": "bathe", "cat": "v", "pr": "badete", "pp": "hat gebadet"},
+  {"w": "bedeuten", "en": "mean", "cat": "v", "pr": "bedeutete", "pp": "hat bedeutet"},
+  {"w": "beginnen", "en": "begin", "cat": "v", "pr": "begann", "pp": "hat begonnen"},
+  {"w": "bekommen", "en": "get", "cat": "v", "pr": "bekam", "pp": "hat bekommen"},
+  {"w": "benutzen", "en": "use", "cat": "v", "pr": "benutzte", "pp": "hat benutzt"},
+  {"w": "bestellen", "en": "order", "cat": "v", "pr": "bestellte", "pp": "hat bestellt"},
+  {"w": "besuchen", "en": "visit (person)", "cat": "v", "pr": "besuchte", "pp": "hat besucht"},
+  {"w": "besichtigen", "en": "visit (appartment),Inspect", "cat": "v", "pr": "besichtigte", "pp": "hat besichtigt"},
+  {"w": "bitten", "en": "request", "cat": "v", "pr": "bat", "pp": "hat gebeten"},
+  {"w": "bleiben", "en": "stay / remain", "cat": "v", "pr": "blieb", "pp": "ist geblieben"},
+  {"w": "bringen", "en": "bring", "cat": "v", "pr": "brachte", "pp": "hat gebracht"},
+  {"w": "buchstabieren", "en": "spell", "cat": "v", "pr": "buchstabierte", "pp": "hat buchstabiert"},
+  {"w": "danken", "en": "thank", "cat": "v", "pr": "dankte", "pp": "hat gedankt"},
+  {"w": "drucken", "en": "print", "cat": "v", "pr": "druckte", "pp": "hat gedruckt"},
+  {"w": "drücken", "en": "press", "cat": "v", "pr": "drückte", "pp": "hat gedrückt"},
+  {"w": "duschen", "en": "shower", "cat": "v", "pr": "duschte", "pp": "hat geduscht"},
+  {"w": "enden", "en": "end/ end up", "cat": "v", "pr": "endete", "pp": "hat geendet"},
+  {"w": "entschuldigen", "en": "excuse/apologize", "cat": "v", "pr": "entschuldigte", "pp": "hat entschuldigt"},
+  {"w": "erklären", "en": "explain", "cat": "v", "pr": "erklärte", "pp": "hat erklärt"},
+  {"w": "erlauben", "en": "allow", "cat": "v", "pr": "erlaubte", "pp": "hat erlaubt"},
+  {"w": "erzählen", "en": "tell in detail", "cat": "v", "pr": "erzählte", "pp": "hat erzählt"},
+  {"w": "fehlen", "en": "missing/absence", "cat": "v", "pr": "fehlte", "pp": "hat gefehlt"},
+  {"w": "finden", "en": "find", "cat": "v", "pr": "fand", "pp": "hat gefunden"},
+  {"w": "fliegen", "en": "fly", "cat": "v", "pr": "flog", "pp": "ist geflogen"},
+  {"w": "fragen", "en": "ask", "cat": "v", "pr": "fragte", "pp": "hat gefragt"},
+  {"w": "frühstücken", "en": "breakfasting", "cat": "v", "pr": "frühstückte", "pp": "hat gefrühstückt"},
+  {"w": "fallen", "en": "fall", "cat": "v", "pr": "fiel", "pp": "ist gefallen"},
+  {"w": "gefallen", "en": "to be liked", "cat": "v", "pr": "gefiel", "pp": "hat gefallen"},
+  {"w": "gehören", "en": "belong", "cat": "v", "pr": "gehörte", "pp": "hat gehört"},
+  {"w": "gewinnen", "en": "win", "cat": "v", "pr": "gewann", "pp": "hat gewonnen"},
+  {"w": "glauben", "en": "believe", "cat": "v", "pr": "glaubte", "pp": "hat geglaubt"},
+  {"w": "gratulieren", "en": "congratulate", "cat": "v", "pr": "gratulierte", "pp": "hat gratuliert"},
+  {"w": "grillen", "en": "barbecue", "cat": "v", "pr": "grillte", "pp": "hat gegrillt"},
+  {"w": "heiraten", "en": "marry", "cat": "v", "pr": "heiratete", "pp": "hat geheiratet"},
+  {"w": "holen", "en": "get (collect)", "cat": "v", "pr": "holte", "pp": "hat geholt"},
+  {"w": "kennen", "en": "know", "cat": "v", "pr": "kannte", "pp": "hat gekannt"},
+  {"w": "kochen", "en": "cook", "cat": "v", "pr": "kochte", "pp": "hat gekocht"},
+  {"w": "denken", "en": "think", "cat": "v", "pr": "dachte", "pp": "hat gedacht"},
+  {"w": "kriegen", "en": "get", "cat": "v", "pr": "kriegte", "pp": "hat gekriegt"},
+  {"w": "lachen", "en": "laugh", "cat": "v", "pr": "lachte", "pp": "hat gelacht"},
+  {"w": "leben", "en": "live", "cat": "v", "pr": "lebte", "pp": "hat gelebt"},
+  {"w": "legen", "en": "lay", "cat": "v", "pr": "legte", "pp": "hat gelegt"},
+  {"w": "lügen", "en": "Telling lie", "cat": "v", "pr": "log", "pp": "hat gelogen"},
+  {"w": "lieben", "en": "love", "cat": "v", "pr": "liebte", "pp": "hat geliebt"},
+  {"w": "liegen", "en": "lie", "cat": "v", "pr": "lag", "pp": "hat gelegen"},
+  {"w": "tun", "en": "do (physical)", "cat": "v", "pr": "tat", "pp": "hat getan"},
+  {"w": "mieten", "en": "rent", "cat": "v", "pr": "mietete", "pp": "hat gemietet"},
+  {"w": "öffnen", "en": "open", "cat": "v", "pr": "öffnete", "pp": "hat geöffnet"},
+  {"w": "rauchen", "en": "smoke", "cat": "v", "pr": "rauchte", "pp": "hat geraucht"},
+  {"w": "regnen", "en": "rain", "cat": "v", "pr": "regnete", "pp": "hat geregnet"},
+  {"w": "reparieren", "en": "repair", "cat": "v", "pr": "reparierte", "pp": "hat repariert"},
+  {"w": "riechen", "en": "smell", "cat": "v", "pr": "roch", "pp": "hat gerochen"},
+  {"w": "sagen", "en": "say", "cat": "v", "pr": "sagte", "pp": "hat gesagt"},
+  {"w": "scheinen", "en": "seem", "cat": "v", "pr": "schien", "pp": "hat geschienen"},
+  {"w": "schicken", "en": "send", "cat": "v", "pr": "schickte", "pp": "hat geschickt"},
+  {"w": "schließen", "en": "close", "cat": "v", "pr": "schloss", "pp": "hat geschlossen"},
+  {"w": "schmecken", "en": "taste", "cat": "v", "pr": "schmeckte", "pp": "hat geschmeckt"},
+  {"w": "schwimmen", "en": "swim", "cat": "v", "pr": "schwamm", "pp": "ist geschwommen"},
   {"w": "sitzen", "en": "sit", "cat": "v"},
-  {"w": "spielen", "en": "play", "cat": "v"},
-  {"w": "stehen", "en": "stand", "cat": "v"},
-  {"w": "stellen", "en": "place/put", "cat": "v"},
-  {"w": "studieren", "en": "study", "cat": "v"},
-  {"w": "suchen", "en": "search", "cat": "v"},
-  {"w": "tanzen", "en": "dance", "cat": "v"},
-  {"w": "telefonieren", "en": "talking on phone", "cat": "v"},
-  {"w": "übernachten", "en": "stay overnight", "cat": "v"},
-  {"w": "überweisen", "en": "transfer (money)", "cat": "v"},
-  {"w": "umziehen", "en": "move out of appt", "cat": "v"},
-  {"w": "unterschreiben", "en": "sign", "cat": "v"},
-  {"w": "verdienen", "en": "earn", "cat": "v"},
-  {"w": "verkaufen", "en": "sell", "cat": "v"},
-  {"w": "vermieten", "en": "rent out", "cat": "v"},
-  {"w": "warten", "en": "wait", "cat": "v"},
-  {"w": "waschen", "en": "wash", "cat": "v"},
-  {"w": "wiederholen", "en": "repeat", "cat": "v"},
-  {"w": "zahlen", "en": "pay", "cat": "v"},
+  {"w": "spielen", "en": "play", "cat": "v", "pr": "spielte", "pp": "hat gespielt"},
+  {"w": "stehen", "en": "stand", "cat": "v", "pr": "stand", "pp": "hat gestanden"},
+  {"w": "stellen", "en": "place/put", "cat": "v", "pr": "stellte", "pp": "hat gestellt"},
+  {"w": "studieren", "en": "study", "cat": "v", "pr": "studierte", "pp": "hat studiert"},
+  {"w": "suchen", "en": "search", "cat": "v", "pr": "suchte", "pp": "hat gesucht"},
+  {"w": "tanzen", "en": "dance", "cat": "v", "pr": "tanzte", "pp": "hat getanzt"},
+  {"w": "telefonieren", "en": "talking on phone", "cat": "v", "pr": "telefonierte", "pp": "hat telefoniert"},
+  {"w": "übernachten", "en": "stay overnight", "cat": "v", "pr": "übernachtete", "pp": "hat übernachtet"},
+  {"w": "überweisen", "en": "transfer (money)", "cat": "v", "pr": "überwies", "pp": "hat überwiesen"},
+  {"w": "umziehen", "en": "move out of appt", "cat": "v", "pr": "zog um", "pp": "ist umgezogen"},
+  {"w": "unterschreiben", "en": "sign", "cat": "v", "pr": "unterschrieb", "pp": "hat unterschrieben"},
+  {"w": "verdienen", "en": "earn", "cat": "v", "pr": "verdiente", "pp": "hat verdient"},
+  {"w": "verkaufen", "en": "sell", "cat": "v", "pr": "verkaufte", "pp": "hat verkauft"},
+  {"w": "vermieten", "en": "rent out", "cat": "v", "pr": "vermietete", "pp": "hat vermietet"},
+  {"w": "warten", "en": "wait", "cat": "v", "pr": "wartete", "pp": "hat gewartet"},
+  {"w": "waschen", "en": "wash", "cat": "v", "pr": "wusch", "pp": "hat gewaschen"},
+  {"w": "wiederholen", "en": "repeat", "cat": "v", "pr": "wiederholte", "pp": "hat wiederholt"},
+  {"w": "zahlen", "en": "pay", "cat": "v", "pr": "zahlte", "pp": "hat gezahlt"},
   {"w": "es gibt", "en": "There is/ are", "cat": "v"},
   {"w": "weh tun", "en": "hurt", "cat": "v"},
-  {"w": "feiern", "en": "celebrate", "cat": "v"},
-  {"w": "versuchen", "en": "try", "cat": "v"},
-  {"w": "gucken", "en": "look/watch", "cat": "v"},
-  {"w": "geben", "en": "give", "cat": "v"},
-  {"w": "halten", "en": "hold", "cat": "v"},
-  {"w": "helfen", "en": "help", "cat": "v"},
-  {"w": "laufen", "en": "run", "cat": "v"},
-  {"w": "nehmen", "en": "take", "cat": "v"},
-  {"w": "fahren", "en": "drive", "cat": "v"},
-  {"w": "empfehlen", "en": "recommend", "cat": "v"},
-  {"w": "treffen", "en": "meet", "cat": "v"},
-  {"w": "wissen", "en": "know", "cat": "v"},
-  {"w": "werden", "en": "become / will", "cat": "v"},
-  {"w": "Absender", "en": "sender", "cat": "n"},
-  {"w": "Chef", "en": "boss", "cat": "n"},
-  {"w": "Fahrer", "en": "driver", "cat": "n"},
-  {"w": "Gast", "en": "guest", "cat": "n"},
-  {"w": "Großvater", "en": "grandfather", "cat": "n"},
-  {"w": "Hausmann", "en": "househusband", "cat": "n"},
-  {"w": "Kollege", "en": "colleague", "cat": "n"},
-  {"w": "Opa", "en": "grandpa", "cat": "n"},
-  {"w": "Student", "en": "student", "cat": "n"},
+  {"w": "feiern", "en": "celebrate", "cat": "v", "pr": "feierte", "pp": "hat gefeiert"},
+  {"w": "versuchen", "en": "try", "cat": "v", "pr": "versuchte", "pp": "hat versucht"},
+  {"w": "gucken", "en": "look/watch", "cat": "v", "pr": "guckte", "pp": "hat geguckt"},
+  {"w": "geben", "en": "give", "cat": "v", "pr": "gab", "pp": "hat gegeben"},
+  {"w": "halten", "en": "hold", "cat": "v", "pr": "hielt", "pp": "hat gehalten"},
+  {"w": "helfen", "en": "help", "cat": "v", "pr": "half", "pp": "hat geholfen"},
+  {"w": "laufen", "en": "run", "cat": "v", "pr": "lief", "pp": "ist gelaufen"},
+  {"w": "nehmen", "en": "take", "cat": "v", "pr": "nahm", "pp": "hat genommen"},
+  {"w": "fahren", "en": "drive", "cat": "v", "pr": "fuhr", "pp": "ist gefahren"},
+  {"w": "empfehlen", "en": "recommend", "cat": "v", "pr": "empfahl", "pp": "hat empfohlen"},
+  {"w": "treffen", "en": "meet", "cat": "v", "pr": "traf", "pp": "hat getroffen"},
+  {"w": "wissen", "en": "know", "cat": "v", "pr": "wusste", "pp": "hat gewusst"},
+  {"w": "werden", "en": "become / will", "cat": "v", "pr": "wurde", "pp": "ist geworden"},
+  {"w": "Absender", "en": "sender", "cat": "n", "a": "der", "p": "Absender"},
+  {"w": "Chef", "en": "boss", "cat": "n", "a": "der", "p": "Chefs"},
+  {"w": "Fahrer", "en": "driver", "cat": "n", "a": "der", "p": "Fahrer"},
+  {"w": "Gast", "en": "guest", "cat": "n", "a": "der", "p": "Gäste"},
+  {"w": "Großvater", "en": "grandfather", "cat": "n", "a": "der", "p": "Großväter"},
+  {"w": "Hausmann", "en": "househusband", "cat": "n", "a": "der", "p": "Hausmänner"},
+  {"w": "Kollege", "en": "colleague", "cat": "n", "a": "der", "p": "Kollegen"},
+  {"w": "Opa", "en": "grandpa", "cat": "n", "a": "der", "p": "Opas"},
+  {"w": "Student", "en": "student", "cat": "n", "a": "der", "p": "Studenten"},
   {"w": "Beamte", "en": "official", "cat": "n"},
-  {"w": "Beruf", "en": "occupation", "cat": "n"},
-  {"w": "Ehemann", "en": "husband", "cat": "n"},
-  {"w": "Erwachsene", "en": "grownup / adult", "cat": "n"},
-  {"w": "Herr", "en": "master/Mr.", "cat": "n"},
+  {"w": "Beruf", "en": "occupation", "cat": "n", "a": "der", "p": "Berufe"},
+  {"w": "Ehemann", "en": "husband", "cat": "n", "a": "der", "p": "Ehemänner"},
+  {"w": "Erwachsene", "en": "grownup / adult", "cat": "n", "a": "der", "p": "Erwachsenen"},
+  {"w": "Herr", "en": "master/Mr.", "cat": "n", "a": "der", "p": "Herren"},
   {"w": "Jugendliche", "en": "youth", "cat": "n"},
-  {"w": "Junge", "en": "boy", "cat": "n"},
-  {"w": "Kunde", "en": "client/customer", "cat": "n"},
-  {"w": "Lehrer", "en": "teacher", "cat": "n"},
-  {"w": "Mensch", "en": "human", "cat": "n"},
-  {"w": "Schüler", "en": "student", "cat": "n"},
-  {"w": "Verkäufer", "en": "seller/salesman", "cat": "n"},
-  {"w": "Vermieter", "en": "landlord", "cat": "n"},
+  {"w": "Junge", "en": "boy", "cat": "n", "a": "der", "p": "Jungen"},
+  {"w": "Kunde", "en": "client/customer", "cat": "n", "a": "der", "p": "Kunden"},
+  {"w": "Lehrer", "en": "teacher", "cat": "n", "a": "der", "p": "Lehrer"},
+  {"w": "Mensch", "en": "human", "cat": "n", "a": "der", "p": "Menschen"},
+  {"w": "Schüler", "en": "student", "cat": "n", "a": "der", "p": "Schüler"},
+  {"w": "Verkäufer", "en": "seller/salesman", "cat": "n", "a": "der", "p": "Verkäufer"},
+  {"w": "Vermieter", "en": "landlord", "cat": "n", "a": "der", "p": "Vermieter"},
   {"w": "Verwandte", "en": "relative", "cat": "n"},
   {"w": "Automat", "en": "vending machine", "cat": "n"},
-  {"w": "Computer", "en": "computer", "cat": "n"},
-  {"w": "Anrufbeantworter", "en": "answering machine", "cat": "n"},
-  {"w": "Aufzug", "en": "elevator", "cat": "n"},
-  {"w": "Baum", "en": "tree", "cat": "n"},
-  {"w": "Bleistift", "en": "pencil", "cat": "n"},
-  {"w": "Brief", "en": "letter", "cat": "n"},
-  {"w": "Buchstabe", "en": "letter/character like alphabets", "cat": "n"},
-  {"w": "Drucker", "en": "printer", "cat": "n"},
-  {"w": "Esslöffel", "en": "tablespoon", "cat": "n"},
-  {"w": "Fernseher", "en": "TV", "cat": "n"},
-  {"w": "Kugelschreiber", "en": "ballpen", "cat": "n"},
+  {"w": "Computer", "en": "computer", "cat": "n", "a": "der", "p": "Computer"},
+  {"w": "Anrufbeantworter", "en": "answering machine", "cat": "n", "a": "der", "p": "Anrufbeantworter"},
+  {"w": "Aufzug", "en": "elevator", "cat": "n", "a": "der", "p": "Aufzüge"},
+  {"w": "Baum", "en": "tree", "cat": "n", "a": "der", "p": "Bäume"},
+  {"w": "Bleistift", "en": "pencil", "cat": "n", "a": "der", "p": "Bleistifte"},
+  {"w": "Brief", "en": "letter", "cat": "n", "a": "der", "p": "Briefe"},
+  {"w": "Buchstabe", "en": "letter/character like alphabets", "cat": "n", "a": "der", "p": "Buchstaben"},
+  {"w": "Drucker", "en": "printer", "cat": "n", "a": "der", "p": "Drucker"},
+  {"w": "Esslöffel", "en": "tablespoon", "cat": "n", "a": "der", "p": "Esslöffel"},
+  {"w": "Fernseher", "en": "TV", "cat": "n", "a": "der", "p": "Fernseher"},
+  {"w": "Kugelschreiber", "en": "ballpen", "cat": "n", "a": "der", "p": "Kugelschreiber"},
   {"w": "Kühlschrank", "en": "refrigerator", "cat": "n"},
-  {"w": "Schalter", "en": "counter/switch", "cat": "n"},
-  {"w": "Schlüssel", "en": "key", "cat": "n"},
+  {"w": "Schalter", "en": "counter/switch", "cat": "n", "a": "der", "p": "Schalter"},
+  {"w": "Schlüssel", "en": "key", "cat": "n", "a": "der", "p": "Schlüssel"},
   {"w": "Schrank", "en": "cupboard", "cat": "n"},
-  {"w": "Balkon", "en": "balcony", "cat": "n"},
-  {"w": "Garten", "en": "garden", "cat": "n"},
-  {"w": "Kindergarten", "en": "kindergarten", "cat": "n"},
-  {"w": "Park", "en": "park", "cat": "n"},
+  {"w": "Balkon", "en": "balcony", "cat": "n", "a": "der", "p": "Balkone"},
+  {"w": "Garten", "en": "garden", "cat": "n", "a": "der", "p": "Gärten"},
+  {"w": "Kindergarten", "en": "kindergarten", "cat": "n", "a": "der", "p": "Kindergärten"},
+  {"w": "Park", "en": "park", "cat": "n", "a": "der", "p": "Parks"},
   {"w": "Platz", "en": "place", "cat": "n"},
-  {"w": "Raum", "en": "room", "cat": "n"},
-  {"w": "Arbeitsplatz", "en": "workplace", "cat": "n"},
-  {"w": "Bahnsteig", "en": "platform", "cat": "n"},
-  {"w": "Geburtsort", "en": "birthplace", "cat": "n"},
-  {"w": "Laden", "en": "store", "cat": "n"},
-  {"w": "See", "en": "lake", "cat": "n"},
-  {"w": "Stock", "en": "storey/floor", "cat": "n"},
-  {"w": "Verein", "en": "club/union", "cat": "n"},
-  {"w": "Fisch", "en": "fish", "cat": "n"},
-  {"w": "Salat", "en": "salad", "cat": "n"},
-  {"w": "Wein", "en": "wine", "cat": "n"},
-  {"w": "Kuchen", "en": "cake", "cat": "n"},
-  {"w": "Saft", "en": "juice", "cat": "n"},
-  {"w": "Schinken", "en": "ham", "cat": "n"},
-  {"w": "Appetit", "en": "appetite", "cat": "n"},
-  {"w": "Dank", "en": "thanks", "cat": "n"},
-  {"w": "Durst", "en": "thirst", "cat": "n"},
-  {"w": "Film", "en": "film", "cat": "n"},
-  {"w": "Fußball", "en": "soccer/football", "cat": "n"},
-  {"w": "Hunger", "en": "hunger", "cat": "n"},
-  {"w": "Job", "en": "job", "cat": "n"},
-  {"w": "Moment", "en": "moment", "cat": "n"},
-  {"w": "Plan", "en": "plan", "cat": "n"},
-  {"w": "Prospekt", "en": "prospect", "cat": "n"},
-  {"w": "Sport", "en": "sport", "cat": "n"},
-  {"w": "Test", "en": "test", "cat": "n"},
-  {"w": "Text", "en": "text", "cat": "n"},
-  {"w": "Anfang", "en": "start", "cat": "n"},
-  {"w": "Anruf", "en": "call", "cat": "n"},
-  {"w": "Anschluss", "en": "connection", "cat": "n"},
-  {"w": "Ausflug", "en": "excursion", "cat": "n"},
-  {"w": "Ausgang", "en": "exit", "cat": "n"},
-  {"w": "Ausländer", "en": "foreigner", "cat": "n"},
-  {"w": "Ausweis", "en": "ID card", "cat": "n"},
-  {"w": "Eingang", "en": "entrance", "cat": "n"},
-  {"w": "Eintritt", "en": "entry/admission", "cat": "n"},
-  {"w": "Fehler", "en": "mistake", "cat": "n"},
-  {"w": "Schluss", "en": "conclusion/end", "cat": "n"},
-  {"w": "Termin", "en": "appointment", "cat": "n"},
-  {"w": "Urlaub", "en": "vacation/holiday", "cat": "n"},
-  {"w": "Zoll", "en": "duty/customs", "cat": "n"},
-  {"w": "Arm", "en": "arm", "cat": "n"},
-  {"w": "Bauch", "en": "belly", "cat": "n"},
-  {"w": "Fuß", "en": "foot", "cat": "n"},
-  {"w": "Mund", "en": "mouth", "cat": "n"},
-  {"w": "Abflug", "en": "departure/take-off", "cat": "n"},
+  {"w": "Raum", "en": "room", "cat": "n", "a": "der", "p": "Räume"},
+  {"w": "Arbeitsplatz", "en": "workplace", "cat": "n", "a": "der", "p": "Arbeitsplätze"},
+  {"w": "Bahnsteig", "en": "platform", "cat": "n", "a": "der", "p": "Bahnsteige"},
+  {"w": "Geburtsort", "en": "birthplace", "cat": "n", "a": "der", "p": "Geburtsorte"},
+  {"w": "Laden", "en": "store", "cat": "n", "a": "der", "p": "Läden"},
+  {"w": "See", "en": "lake", "cat": "n", "a": "der", "p": "Seen"},
+  {"w": "Stock", "en": "storey/floor", "cat": "n", "a": "der", "p": "Stöcke"},
+  {"w": "Verein", "en": "club/union", "cat": "n", "a": "der", "p": "Vereine"},
+  {"w": "Fisch", "en": "fish", "cat": "n", "a": "der", "p": "Fische"},
+  {"w": "Salat", "en": "salad", "cat": "n", "a": "der", "p": "Salate"},
+  {"w": "Wein", "en": "wine", "cat": "n", "a": "der", "p": "Weine"},
+  {"w": "Kuchen", "en": "cake", "cat": "n", "a": "der", "p": "Kuchen"},
+  {"w": "Saft", "en": "juice", "cat": "n", "a": "der", "p": "Säfte"},
+  {"w": "Schinken", "en": "ham", "cat": "n", "a": "der", "p": "Schinken"},
+  {"w": "Appetit", "en": "appetite", "cat": "n", "a": "der"},
+  {"w": "Dank", "en": "thanks", "cat": "n", "a": "der"},
+  {"w": "Durst", "en": "thirst", "cat": "n", "a": "der"},
+  {"w": "Film", "en": "film", "cat": "n", "a": "der", "p": "Filme"},
+  {"w": "Fußball", "en": "soccer/football", "cat": "n", "a": "der", "p": "Fußbälle"},
+  {"w": "Hunger", "en": "hunger", "cat": "n", "a": "der"},
+  {"w": "Job", "en": "job", "cat": "n", "a": "der", "p": "Jobs"},
+  {"w": "Moment", "en": "moment", "cat": "n", "a": "der", "p": "Momente"},
+  {"w": "Plan", "en": "plan", "cat": "n", "a": "der", "p": "Pläne"},
+  {"w": "Prospekt", "en": "prospect", "cat": "n", "a": "der", "p": "Prospekte"},
+  {"w": "Sport", "en": "sport", "cat": "n", "a": "der"},
+  {"w": "Test", "en": "test", "cat": "n", "a": "der", "p": "Tests"},
+  {"w": "Text", "en": "text", "cat": "n", "a": "der", "p": "Texte"},
+  {"w": "Anfang", "en": "start", "cat": "n", "a": "der", "p": "Anfänge"},
+  {"w": "Anruf", "en": "call", "cat": "n", "a": "der", "p": "Anrufe"},
+  {"w": "Anschluss", "en": "connection", "cat": "n", "a": "der", "p": "Anschlüsse"},
+  {"w": "Ausflug", "en": "excursion", "cat": "n", "a": "der", "p": "Ausflüge"},
+  {"w": "Ausgang", "en": "exit", "cat": "n", "a": "der", "p": "Ausgänge"},
+  {"w": "Ausländer", "en": "foreigner", "cat": "n", "a": "der", "p": "Ausländer"},
+  {"w": "Ausweis", "en": "ID card", "cat": "n", "a": "der", "p": "Ausweise"},
+  {"w": "Eingang", "en": "entrance", "cat": "n", "a": "der", "p": "Eingänge"},
+  {"w": "Eintritt", "en": "entry/admission", "cat": "n", "a": "der", "p": "Eintritte"},
+  {"w": "Fehler", "en": "mistake", "cat": "n", "a": "der", "p": "Fehler"},
+  {"w": "Schluss", "en": "conclusion/end", "cat": "n", "a": "der", "p": "Schlüsse"},
+  {"w": "Termin", "en": "appointment", "cat": "n", "a": "der", "p": "Termine"},
+  {"w": "Urlaub", "en": "vacation/holiday", "cat": "n", "a": "der", "p": "Urlaube"},
+  {"w": "Zoll", "en": "duty/customs", "cat": "n", "a": "der", "p": "Zölle"},
+  {"w": "Arm", "en": "arm", "cat": "n", "a": "der", "p": "Arme"},
+  {"w": "Bauch", "en": "belly", "cat": "n", "a": "der", "p": "Bäuche"},
+  {"w": "Fuß", "en": "foot", "cat": "n", "a": "der", "p": "Füße"},
+  {"w": "Mund", "en": "mouth", "cat": "n", "a": "der", "p": "Münder"},
+  {"w": "Abflug", "en": "departure/take-off", "cat": "n", "a": "der", "p": "Abflüge"},
   {"w": "Geburtstag", "en": "birthday", "cat": "n"},
-  {"w": "Morgen", "en": "morning", "cat": "n"},
-  {"w": "Unterricht", "en": "lesson", "cat": "n"},
-  {"w": "Familienname", "en": "surname", "cat": "n"},
-  {"w": "Familienstand", "en": "marital status", "cat": "n"},
-  {"w": "Garten", "en": "garden", "cat": "n"},
-  {"w": "Grad", "en": "degree", "cat": "n"},
-  {"w": "Gruß", "en": "greeting", "cat": "n"},
-  {"w": "Hund", "en": "dog", "cat": "n"},
+  {"w": "Morgen", "en": "morning", "cat": "n", "a": "der", "p": "Morgen"},
+  {"w": "Unterricht", "en": "lesson", "cat": "n", "a": "der"},
+  {"w": "Familienname", "en": "surname", "cat": "n", "a": "der", "p": "Familiennamen"},
+  {"w": "Familienstand", "en": "marital status", "cat": "n", "a": "der"},
+  {"w": "Garten", "en": "garden", "cat": "n", "a": "der", "p": "Gärten"},
+  {"w": "Grad", "en": "degree", "cat": "n", "a": "der", "p": "Grad"},
+  {"w": "Gruß", "en": "greeting", "cat": "n", "a": "der", "p": "Grüße"},
+  {"w": "Hund", "en": "dog", "cat": "n", "a": "der", "p": "Hunde"},
   {"w": "Kurs", "en": "course", "cat": "n"},
   {"w": "Partner", "en": "partner", "cat": "n"},
   {"w": "Pass", "en": "passport", "cat": "n"},
   {"w": "Vorname", "en": "first name", "cat": "n"},
-  {"w": "Wind", "en": "wind", "cat": "n"},
-  {"w": "Blick", "en": "view", "cat": "n"},
+  {"w": "Wind", "en": "wind", "cat": "n", "a": "der", "p": "Winde"},
+  {"w": "Blick", "en": "view", "cat": "n", "a": "der", "p": "Blicke"},
   {"w": "Bogen", "en": "sheet/arc", "cat": "n"},
-  {"w": "Empfänger", "en": "recipient", "cat": "n"},
+  {"w": "Empfänger", "en": "recipient", "cat": "n", "a": "der", "p": "Empfänger"},
   {"w": "Glückwunsch", "en": "congratulations", "cat": "n"},
   {"w": "Herd", "en": "stove", "cat": "n"},
   {"w": "Koffer", "en": "suitcase", "cat": "n"},
@@ -2401,18 +2420,18 @@ const A1_DATA_STARTER = [{"a":"","w":"Hallo","p":"","en":"Hello","cat":"p","topi
   {"w": "Ort", "en": "place", "cat": "n"},
   {"w": "Reiseführer", "en": "guidebook", "cat": "n"},
   {"w": "Satz", "en": "sentence", "cat": "n"},
-  {"w": "Teil", "en": "part", "cat": "n"},
+  {"w": "Teil", "en": "part", "cat": "n", "a": "der", "p": "Teile"},
   {"w": "Hausaufgabe", "en": "homework", "cat": "n"},
   {"w": "Klasse", "en": "class", "cat": "n"},
   {"w": "Kreditkarte", "en": "credit card", "cat": "n"},
-  {"w": "Nummer", "en": "number", "cat": "n"},
+  {"w": "Nummer", "en": "number", "cat": "n", "a": "die", "p": "Nummern"},
   {"w": "Party", "en": "party", "cat": "n"},
   {"w": "Polizei", "en": "police", "cat": "n"},
   {"w": "Postleitzahl", "en": "postal code", "cat": "n"},
   {"w": "Toilette", "en": "toilet", "cat": "n"},
   {"w": "Bahn", "en": "railroad/train", "cat": "n"},
   {"w": "Miete", "en": "rent", "cat": "n"},
-  {"w": "Vorwahl", "en": "area code", "cat": "n"},
+  {"w": "Vorwahl", "en": "area code", "cat": "n", "a": "die", "p": "Vorwahlen"},
   {"w": "Zeitung", "en": "newspaper", "cat": "n"}];
 
 A1_DATA_STARTER.forEach(it=>{
@@ -2431,6 +2450,8 @@ A1_DATA_STARTER.forEach(it=>{
     mn: it.mn || "",
     pr: it.pr || "",
     pp: it.pp || "",
+    comp: it.comp || "",
+    sup: it.sup || "",
     icon: it.icon || "smile"
   });
 });
@@ -2443,7 +2464,7 @@ VERB_ADD_DATA.forEach(lek=>{
         topic: sec.topic || "gesellschaft",
         lesson: lek.lesson, lessonTitle: lek.title, section: sec.name,
         a: it.a||"", w: it.w, p: it.p||"", en: it.en, ex: it.ex||"",
-        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", icon: it.icon||""
+        cat: it.cat||"n", mn: it.mn||"", pr: it.pr||"", pp: it.pp||"", comp: it.comp||"", sup: it.sup||"", icon: it.icon||""
       });
     });
   });
@@ -2636,7 +2657,7 @@ function buildSmartQueue(pool, limit){
     addFrom(recent);
   }
   if(out.length<limit){
-    const fresh = shuffleArr(pool.filter(c=>isNew(c.uid)));
+    const fresh = learnOrder(pool.filter(c=>isNew(c.uid)));   // textbook order, then most frequent first
     addFrom(fresh, Math.max(4, Math.floor(limit*0.4)));
   }
   if(out.length<limit){
@@ -2701,253 +2722,31 @@ function pickQType(card){
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
-function getCheatCodesForWord(w, cat, opt = {}) {
-  const word = (w || '').trim();
-  const lower = word.toLowerCase();
-  const rawWord = lower.replace(/^sich\s+/, '').replace(/^(der|die|das)\s+/, '');
-  const hints = [];
+/* Memory tips come from js/memory-tips.js: every rule is checked against the card's own forms
+   (Präteritum/Perfekt, article, plural, Steigerung) before it is shown. The lexicon is every card. */
+let _memoryTipsReady = false;
+function ensureMemoryTips(){
+  if (_memoryTipsReady || typeof MemoryTips === 'undefined') return;
+  const rank = c => c.freq || (LEVELS.indexOf(c.level) + 1) * 4000 || 1e8;   // textbook cards have no frequency rank
+  MemoryTips.init({
+    verbs: ALL_CARDS.filter(c => c.cat === 'v').map(c => ({ w: c.w, pr: c.pr, pp: c.pp, en: c.en, rank: rank(c) })),
+    nouns: ALL_CARDS.filter(c => c.cat === 'n').map(c => ({ w: c.w, a: c.a, p: c.p, en: c.en, rank: rank(c) })),
+    adjs: ALL_CARDS.filter(c => c.cat === 'adj').map(c => Object.assign(MemoryTips.entryFrom(c.w, 'adj', c), { rank: rank(c) }))
+  });
+  _memoryTipsReady = true;
+}
 
-  // 1. VERB CHEAT CODES
-  if (cat === 'v' || (!cat && (lower.endsWith('en') || lower.endsWith('rn') || lower.endsWith('ln')))) {
-    const mixedVerbs = ['bringen', 'denken', 'kennen', 'wissen', 'nennen', 'brennen', 'rennen', 'senden', 'wenden'];
-    const matchedMixed = mixedVerbs.find(mv => rawWord.endsWith(mv));
-    if (matchedMixed) {
-      hints.push({
-        num: 'Shortcut 06',
-        title: '🧬 The \'Secret 9\' Mixed Verbs Club (Mischverben)',
-        badge: 'Mixed Verb Hybrid',
-        rule: `<b>${word}</b> is one of only 9 core German Mixed Verbs! Stem vowel shifts like a strong verb (<i>e → a / o</i>), BUT takes regular weak endings (<b>-te</b> in Past, <b>ge-...-t</b> in Perfekt).`,
-        tamil: '💡 <b>Tamil Insight:</b> உயிர் எழுத்து மாறும் + பலவீன வினை விகுதி (-te / -t) இணையும்! இந்த 9 வினைகளில் இதுவும் ஒன்று!'
-      });
-    }
-
-    if (rawWord.endsWith('wissen') || rawWord.endsWith('kennen')) {
-      hints.push({
-        num: 'Shortcut 07',
-        title: '🧙‍♂️ wissen vs. kennen: The Wizard & Ken Doll Hack',
-        badge: 'High-Frequency Trap',
-        rule: `<b>wissen (Wizard 🧙‍♂️):</b> Knows facts, info, numbers, secrets. Followed by <i>wie, wo, was, warum</i> or <i>dass</i>.<br><b>kennen (Ken Doll 👱‍♂️):</b> Knows people or places. Followed by a Person or City (<i>Tom, Berlin</i>).`,
-        tamil: '💡 <b>Tamil Brain Hack:</b> kennen = ஆட்கள்/ஊர்கள்; wissen = உண்மைகள்/தகவல்கள்/விடைகள்.'
-      });
-    }
-
-    if (rawWord.endsWith('ieren')) {
-      hints.push({
-        num: 'Shortcut 04',
-        title: '⚡ The \'-ieren\' Auto-Weak Rule (100% Guaranteed)',
-        badge: '100% Guaranteed',
-        rule: `<b>100% of verbs ending in -ieren are WEAK!</b> Präteritum adds regular <b>-te</b> (<i>${rawWord}te</i>). In Perfekt, it <b>NEVER takes \'ge-\'</b> (<i>hat ${rawWord}t</i>).`,
-        tamil: '💡 <b>Golden Rule:</b> -ieren என முடியும் அனைத்து வினைகளும் 100% Weak! Perfekt-ல் \'ge-\' வராது.'
-      });
-    }
-
-    const seinVerbs = ['gehen', 'fahren', 'fliegen', 'laufen', 'schwimmen', 'kommen', 'reisen', 'wandern', 'springen', 'fallen', 'steigen', 'sterben', 'einschlafen', 'aufwachen', 'wachsen', 'sein', 'bleiben', 'passieren', 'gelingen'];
-    const matchedSein = seinVerbs.some(sv => rawWord.endsWith(sv));
-    if (matchedSein || opt.isAuxSein || (opt.pp && opt.pp.startsWith('ist '))) {
-      hints.push({
-        num: 'Shortcut 08 & 10',
-        title: '🚶→🏃 haben vs. sein: The 2-Question Test',
-        badge: 'Auxiliary SEIN',
-        rule: `Takes <b>ist / sein</b> in Perfekt because it indicates: (1) Movement from Point A to B, (2) State Change (awake→asleep, alive→dead), or is one of the 3 special exceptions (<i>sein, bleiben, passieren</i>).`,
-        tamil: '💡 <b>Tamil Hack:</b> இடம் மாறுதல் (A→B) அல்லது நிலை மாறுதல் இருந்தால் SEIN, மற்றவற்றிற்கு HABEN!'
-      });
-    }
-
-    const insepPrefixes = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
-    const matchedInsep = insepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2);
-    if (matchedInsep) {
-      hints.push({
-        num: 'Shortcut 05',
-        title: '🛡️ Inseparable Prefix Shield (Be-Ge-Er-Ver-Zer-Ent-Emp-Miss)',
-        badge: 'No ge- Prefix',
-        rule: `Starts with inseparable <b>${matchedInsep}-</b>. It NEVER detaches in sentences and <b>NEVER takes \'ge-\' in Perfekt</b> (e.g. <i>hat ${rawWord}t / ${rawWord}en</i>, never <i>hat ge${rawWord}</i>).`,
-        tamil: '💡 <b>Memory:</b> இந்த 8 prefixes ஒருபோதும் பிரியாது, Perfekt-ல் \'ge-\' எடுக்காது!'
-      });
-    }
-
-    const sepPrefixes = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'mit', 'nach', 'vor', 'weg', 'zu', 'zurück'];
-    const matchedSep = sepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2 && !matchedInsep);
-    if (matchedSep) {
-      hints.push({
-        num: 'Shortcut 05B',
-        title: '🚀 Separable Prefix Sandwich Rule',
-        badge: 'Splits in Sentence',
-        rule: `Starts with separable <b>${matchedSep}-</b>. In present tense, prefix flies to sentence end (<i>„Ich ... ${matchedSep}.”</i>). In Perfekt, <b>-ge-</b> is sandwiched in the middle (<i>${matchedSep}-ge-...</i>).`,
-        tamil: '💡 <b>Tamil Rule:</b> வாக்கியத்தின் இறுதியில் Prefix பிரியும்! Perfekt-ல் இடையில் \'-ge-\' இணையும்.'
-      });
-    }
-
-    if (rawWord.includes('ei') && !rawWord.endsWith('ieren')) {
-      hints.push({
-        num: 'Shortcut 02',
-        title: '🔍 The Diphthong Scanner (-ei- → ie / i)',
-        badge: '99% Strong Verb',
-        rule: `Verbs containing <b>-ei-</b> in the stem are 99% STRONG verbs! They shift: <i>-ei- → -ie- / -i-</i> in past tenses (e.g. <i>schreiben → schrieb, bleiben → blieb</i>).`,
-        tamil: '💡 <b>Quick Hack:</b> வினையில் -ei- பார்த்தால், அது 99% Strong Verb (ie/i என மாறும்)!'
-      });
-    } else if (rawWord.includes('ie') && !rawWord.endsWith('ieren')) {
-      hints.push({
-        num: 'Shortcut 02',
-        title: '🔍 The Diphthong Scanner (-ie- → o)',
-        badge: '99% Strong Verb',
-        rule: `Verbs containing <b>-ie-</b> in the stem are 99% STRONG verbs! They shift: <i>-ie- → -o-</i> in past tenses (e.g. <i>fliegen → flog, bieten → bot, ziehen → zog</i>).`,
-        tamil: '💡 <b>Quick Hack:</b> வினையில் -ie- பார்த்தால், அது 99% Strong Verb (o என மாறும்)!'
-      });
-    }
-  }
-
-  // 2. NOUN CHEAT CODES
-  if (cat === 'n' || opt.a || ['der', 'die', 'das'].includes(opt.a)) {
-    const art = opt.a || (word.startsWith('der ') ? 'der' : word.startsWith('die ') ? 'die' : word.startsWith('das ') ? 'das' : '');
-    const femSuffixes = ['ung', 'heit', 'keit', 'schaft', 'tion', 'tät', 'in', 'ik', 'ur', 'ei', 'ade', 'anz', 'enz'];
-    const neutSuffixes = ['chen', 'lein', 'ment', 'um', 'tum', 'ma'];
-    const mascSuffixes = ['ismus', 'ist', 'or', 'ling', 'ant', 'ent', 'eur', 'ich', 'ig'];
-
-    const matchedFem = femSuffixes.find(s => rawWord.endsWith(s));
-    const matchedNeut = neutSuffixes.find(s => rawWord.endsWith(s));
-    const matchedMasc = mascSuffixes.find(s => rawWord.endsWith(s));
-
-    if (matchedFem) {
-      hints.push({
-        num: 'Shortcut 11',
-        title: `🔴 100% Feminine Suffix Lock: -${matchedFem} → DIE`,
-        badge: '100% Accurate DIE',
-        rule: `Nouns ending in <b>-${matchedFem}</b> are <b>100% FEMININE (die)</b>. Plural rule: always adds <b>-${matchedFem === 'in' ? 'nen' : 'en'}</b> (e.g. <i>die ${rawWord} → die ${rawWord}${matchedFem === 'in' ? 'nen' : 'en'}</i>).`,
-        tamil: `💡 <b>Suffix Lock:</b> -${matchedFem} என முடிந்தால் 100% 'die' (பெண்பால்)! பன்மைக்கு -${matchedFem === 'in' ? 'nen' : 'en'} சேர்க்கவும்.`
-      });
-    } else if (matchedNeut) {
-      hints.push({
-        num: 'Shortcut 11',
-        title: `🟢 100% Neuter Suffix Lock: -${matchedNeut} → DAS`,
-        badge: '100% Accurate DAS',
-        rule: `Nouns ending in <b>-${matchedNeut}</b> are <b>100% NEUTER (das)</b>. Diminutives like <i>-chen / -lein</i> have NO plural ending change.`,
-        tamil: `💡 <b>Suffix Lock:</b> -${matchedNeut} என முடிந்தால் 100% 'das' (ஒன்றன்பால்)!`
-      });
-    } else if (matchedMasc) {
-      hints.push({
-        num: 'Shortcut 11',
-        title: `🔵 95% Masculine Suffix Lock: -${matchedMasc} → DER`,
-        badge: '95% Accurate DER',
-        rule: `Nouns ending in <b>-${matchedMasc}</b> are <b>95% MASCULINE (der)</b>.`,
-        tamil: `💡 <b>Suffix Lock:</b> -${matchedMasc} என முடிந்தால் 95% 'der' (ஆண்பால்)!`
-      });
-    }
-
-    if (rawWord.length > 8 && !matchedFem && !matchedNeut && !matchedMasc) {
-      hints.push({
-        num: 'Shortcut 12',
-        title: '🧩 The Last-Word Captain Rule (Compound Nouns)',
-        badge: 'Gender Anchor',
-        rule: `In compound nouns, the <b>very last word component</b> determines the gender and plural with 100% authority!`,
-        tamil: '💡 <b>Compound Hack:</b> கூட்டுப் பெயர்களில் கடைசி சொல்லே Article மற்றும் Plural-ஐ தீர்மானிக்கும்!'
-      });
-    }
-
-    if (art === 'die' && !matchedFem) {
-      hints.push({
-        num: 'Shortcut 13',
-        title: '📦 Feminine Plural Default: -(e)n',
-        badge: '95% Plural Rule',
-        rule: '95% of feminine German nouns take <b>-(e)n</b> in the plural (e.g. <i>die Sprache → die Sprachen, die Frau → die Frauen</i>).',
-        tamil: '💡 <b>Plural Hack:</b> \'die\' பெயர்ச்சொற்கள் 95% பன்மையில் -(e)n பெறும்!'
-      });
-    } else if (art === 'der' && !matchedMasc) {
-      hints.push({
-        num: 'Shortcut 13',
-        title: '📦 Masculine Plural Default: -e + Umlaut',
-        badge: '80% Plural Rule',
-        rule: 'Most masculine nouns form plurals with <b>-e</b>, often adding an Umlaut on a/o/u (e.g. <i>der Stuhl → die Stühle, der Tag → die Tage</i>). Doer nouns in <i>-er</i> keep the same form (<i>der Lehrer → die Lehrer</i>).',
-        tamil: '💡 <b>Plural Hack:</b> \'der\' பெயர்ச்சொற்கள் பெரும்பாலும் -e மற்றும் Umlaut பெறும்!'
-      });
-    } else if (art === 'das' && !matchedNeut) {
-      hints.push({
-        num: 'Shortcut 13',
-        title: '📦 Neuter Plural Default: -er + Umlaut or -e',
-        badge: 'Neuter Plural Rule',
-        rule: 'Monosyllabic neuter nouns typically take <b>-er + Umlaut</b> in plural (e.g. <i>das Haus → die Häuser, das Kind → die Kinder, das Buch → die Bücher</i>).',
-        tamil: '💡 <b>Plural Hack:</b> ஓரசை \'das\' சொற்கள் பன்மையில் -er + Umlaut பெறும்!'
-      });
-    }
-  }
-
-  // 3. ADJECTIVE CHEAT CODES
-  if (cat === 'adj') {
-    const umlautAdjs = ['alt', 'jung', 'groß', 'klein', 'warm', 'kalt', 'stark', 'schwach', 'kurz', 'lang', 'klug', 'dumm', 'nah', 'hoch', 'hart', 'arm', 'scharf'];
-    if (umlautAdjs.includes(rawWord)) {
-      hints.push({
-        num: 'Shortcut 27',
-        title: '⚡ 1-Syllable Comparative Umlaut Rule (a, o, u → ä, ö, ü)',
-        badge: 'Comparative Umlaut',
-        rule: `Short 1-syllable adjectives with <b>a, o, u</b> almost always get an <b>Umlaut</b> in Comparative & Superlative (e.g. <i>${rawWord} → ${rawWord.replace('a','ä').replace('o','ö').replace('u','ü')}er</i>).`,
-        tamil: '💡 <b>Adjective Hack:</b> a, o, u உள்ள ஓரசை உரிச்சொற்கள் Comparative-ல் Umlaut (ä, ö, ü) பெறும்!'
-      });
-    }
-
-    if (rawWord.endsWith('el') || rawWord.endsWith('er')) {
-      hints.push({
-        num: 'Shortcut 28',
-        title: '✂️ The -el / -er Stem Contraction Rule',
-        badge: 'Drop the -e-',
-        rule: `Adjectives ending in <b>-el</b> (e.g. <i>dunkel, edel, flexibel</i>) drop the root <b>-e-</b> before adding comparative or adjective declension endings (<i>dunkel → dunkler / ein dunkles Zimmer</i>).`,
-        tamil: '💡 <b>Contraction Hack:</b> -el முடிவடையும் Adjectives-ல் நடுவில் உள்ள \'e\' மறைந்துவிடும் (dunkel → dunkler)!'
-      });
-    }
-
-    if (rawWord.endsWith('bar')) {
-      hints.push({
-        num: 'Shortcut 29',
-        title: '🧩 Adjective Suffix: -bar = "-able / Feasible"',
-        badge: 'Word Building',
-        rule: `<b>-bar</b> turns verbs into passive abilities (e.g. <i>machbar = doable, bezahlbar = affordable, sichtbar = visible</i>).`,
-        tamil: '💡 <b>Meaning:</b> -bar = செய்யக்கூடிய (English: -able).'
-      });
-    } else if (rawWord.endsWith('los')) {
-      hints.push({
-        num: 'Shortcut 29',
-        title: '🧩 Adjective Suffix: -los = "-less / Without"',
-        badge: 'Word Building',
-        rule: `<b>-los</b> indicates absence of something (e.g. <i>arbeitslos = jobless, kostenlos = free of charge, schlaflos = sleepless</i>).`,
-        tamil: '💡 <b>Meaning:</b> -los = இல்லாத / அற்ற (English: -less).'
-      });
-    } else if (rawWord.endsWith('reich') || rawWord.endsWith('voll')) {
-      hints.push({
-        num: 'Shortcut 29',
-        title: '🧩 Adjective Suffix: -reich / -voll = "Full of / Rich in"',
-        badge: 'Word Building',
-        rule: `<b>-reich / -voll</b> indicates abundance (e.g. <i>erfolgreich = successful, wertvoll = valuable, hilfreich = helpful</i>).`,
-        tamil: '💡 <b>Meaning:</b> -reich / -voll = நிறைந்த / மிகுதியான.'
-      });
-    }
-  }
-
-  // 4. PREPOSITIONS
-  if (cat === 'prep' || ['für', 'ohne', 'gegen', 'durch', 'um', 'aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu'].includes(rawWord)) {
-    const akkuDogfu = ['durch', 'ohne', 'gegen', 'für', 'um'];
-    const dativPreps = ['aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu', 'gegenüber'];
-    if (akkuDogfu.includes(rawWord)) {
-      hints.push({
-        num: 'Shortcut 16',
-        title: '🎯 The DOGFU Akkusativ Shortcut (100% Akkusativ)',
-        badge: 'DOGFU Law',
-        rule: `<b>${word.toUpperCase()}</b> belongs to the famous <b>DOGFU</b> family (<i>Durch, Ohne, Gegen, Für, Um</i>). It ALWAYS triggers the <b>Akkusativ case (den / die / das)</b>!`,
-        tamil: '💡 <b>DOGFU Formula:</b> Durch, Ohne, Gegen, Für, Um எப்போதும் 100% Akkusativ மட்டுமே எடுக்கும்!'
-      });
-    } else if (dativPreps.includes(rawWord)) {
-      hints.push({
-        num: 'Shortcut 17',
-        title: '🎯 The Aus-Bei-Mit-Nach Dativ Anthem (100% Dativ)',
-        badge: 'Dativ Law',
-        rule: `<b>${word.toUpperCase()}</b> belongs to the <b>Aus-Bei-Mit-Nach, Seit-Von-Zu</b> family. It ALWAYS triggers the <b>Dativ case (dem / der / dem / den + n)</b>!`,
-        tamil: '💡 <b>Dativ Anthem:</b> Aus, bei, mit, nach, seit, von, zu வந்தால் எப்போதும் 100% Dativ!'
-      });
-    }
-  }
-
-  return hints;
+function getCheatCodesForWord(w, cat, opt = {}, options) {
+  ensureMemoryTips();
+  if (typeof MemoryTips === 'undefined') return [];
+  return MemoryTips.cheatCodes(w, cat, opt, Object.assign({ noFallback: !!(opt && opt.mn) }, options));
 }
 
 function renderCheatCodesHTML(card) {
-  const codes = getCheatCodesForWord(card.w, card.cat, card);
+  // The prefix / compound table (renderLinguisticsHTML) already covers these, so don't repeat them.
+  const ling = analyzeGermanLinguistics(card.w, card.cat, card);
+  const skip = !ling ? [] : (ling.type === 'compound_noun' ? ['compound'] : ['sep', 'insep']);
+  const codes = getCheatCodesForWord(card.w, card.cat, card, { skip });
   if (!codes || codes.length === 0) return '';
   return codes.map(c => `
     <div class="cheat-box">
@@ -3070,68 +2869,46 @@ function analyzeGermanLinguistics(w, cat, metadata = {}) {
   const en = metadata.en || '';
   const ta = metadata.ta || '';
 
-  // 1. Separable / Inseparable Verbs
-  if (cat === 'v' || (!cat && (lower.endsWith('en') || lower.endsWith('rn') || lower.endsWith('ln')))) {
-    for (const pfx in SEPARABLE_PREFIXES) {
-      if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
-        const root = lower.slice(pfx.length);
-        const pfxInfo = SEPARABLE_PREFIXES[pfx];
-        return {
-          type: 'separable_verb',
-          word: word,
-          prefix: pfx,
-          root: root,
-          pfxInfo: pfxInfo,
-          title: '🚀 3. Separable Verb (Trennbare Verben / வாக்கியத்தில் பிரியும் வினைகள்)',
-          badge: 'Splits in Sentence',
-          literal: `${pfxInfo.en} + ${root}`,
-          actual: `${en || word} ${ta ? `(${ta})` : ''}`,
-          formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🗣️ <b>Sentence (Präsens):</b> <i>„Ich ${root.replace(/en$/,'e').replace(/n$/,'e')} ... <b style="color:var(--stamp-red);">${pfx}</b>.”</i><br>• 📦 <b>Perfekt Sandwich:</b> <i>„${metadata.pp || (metadata.perfekt || `hat/ist ${pfx}ge...`)}”</i> (<b>-ge-</b> is sandwiched in the middle!)`,
-          tamilInsight: `💡 <b>Tamil Word-Splitting Hack:</b> அகராதியில் ஒன்றாக இருக்கும் சொல், வாக்கியத்தில் இரண்டாகப் பிளந்து, அதன் முதல் பாதி (<b>${pfx}</b>) வாக்கியத்தின் இறுதிக்குச் சென்றுவிடும்!`
-        };
-      }
-    }
-
-    for (const pfx in INSEPARABLE_PREFIXES) {
-      if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
-        const root = lower.slice(pfx.length);
-        const pfxInfo = INSEPARABLE_PREFIXES[pfx];
-        return {
-          type: 'inseparable_verb',
-          word: word,
-          prefix: pfx,
-          root: root,
-          pfxInfo: pfxInfo,
-          title: `🛡️ Inseparable Prefix Shield (${pfx.toUpperCase()}- Never Splits)`,
-          badge: 'Inseparable: No ge-',
-          literal: `${pfxInfo.en} + ${root}`,
-          actual: `${en || word} ${ta ? `(${ta})` : ''}`,
-          formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🛡️ <b>Shield Rule:</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> <b>NEVER split</b> in sentences and <b>NEVER take 'ge-' in Perfekt</b> (<i>${metadata.pp || metadata.perfekt || `hat ${lower}t`}</i>).`,
-          tamil: `💡 <b>Memory:</b> இந்த 8 முன்னொட்டுகள் (Prefixes) ஒருபோதும் பிரியாது, Perfekt-ல் 'ge-' எடுக்காது!`
-        };
-      }
-    }
+  // 1. Separable / Inseparable Verbs — only when the Präteritum/Perfekt confirm the prefix
+  //    (a bare "starts with be/ge/an…" check turned gehen into ge + hen and antworten into an + tworten).
+  if (cat === 'v') {
+    ensureMemoryTips();
+    return typeof MemoryTips === 'undefined' ? null : MemoryTips.verbLinguistics(w, metadata);
   }
+  if (cat !== 'n') return null;
 
   // 2. Compound Nouns (Komposita & Fugenlaute / Punarchi)
   const keys = Object.keys(COMPOUND_ROOTS_DB).sort((a,b) => b.length - a.length);
   let matchedParts = [];
 
-  for (let i = 0; i < keys.length; i++) {
+  // Split only where the last part is a real noun with the same article and the first part is a real word.
+  ensureMemoryTips();
+  const split = typeof MemoryTips !== 'undefined' ? MemoryTips.splitCompound(word, metadata.a) : null;
+  if (split) {
+    const dbHead = COMPOUND_ROOTS_DB[split.head.de.toLowerCase()] || {};
+    const dbTail = COMPOUND_ROOTS_DB[split.tail.w.toLowerCase()] || {};
+    matchedParts = [
+      { raw: split.head.de, info: { de: split.head.de, en: split.head.en || dbHead.en || '', ta: dbHead.ta || '' } },
+      { glue: split.glue },
+      { raw: split.tail.w, info: { de: split.tail.w, en: (split.tail.en || '').split(/[\/;,(]/)[0].trim(), ta: dbTail.ta || '' } }
+    ];
+  }
+
+  for (let i = 0; i < keys.length && matchedParts.length === 0; i++) {
     const k = keys[i];
     if (lower.startsWith(k)) {
       const rest = lower.slice(k.length);
+      // The rest must be exactly a known root (optionally after a glue letter) — "starts with" split
+      // unrelated words; no glue is tried first so Haus|schuh isn't read as Haus + s + chuh.
       let glue = '';
       let cleanRest = rest;
-      if (rest.startsWith('s') && rest.length > 2) { glue = 's'; cleanRest = rest.slice(1); }
-      else if (rest.startsWith('en') && rest.length > 3) { glue = 'en'; cleanRest = rest.slice(2); }
-      else if (rest.startsWith('n') && rest.length > 2) { glue = 'n'; cleanRest = rest.slice(1); }
-      else if (rest.startsWith('e') && rest.length > 2) { glue = 'e'; cleanRest = rest.slice(1); }
-      else if (rest.startsWith('er') && rest.length > 3) { glue = 'er'; cleanRest = rest.slice(2); }
+      for (const g of ['', 's', 'es', 'en', 'n', 'er', 'e']) {
+        if (rest.startsWith(g) && COMPOUND_ROOTS_DB[rest.slice(g.length)]) { glue = g; cleanRest = rest.slice(g.length); break; }
+      }
 
       for (let j = 0; j < keys.length; j++) {
         const k2 = keys[j];
-        if (cleanRest === k2 || cleanRest.startsWith(k2)) {
+        if (cleanRest === k2) {
           matchedParts = [
             { raw: k, info: COMPOUND_ROOTS_DB[k] },
             { glue: glue },
@@ -3302,6 +3079,7 @@ function renderInfoPanel(card){
   const collocBlock = colloc ? `<div class="colloc">💬 <b>Kollokationen:</b> ${colloc.join(" · ")}</div>` : "";
   const exBlock = card.ex ? `<div class="example-line">„${card.ex}"</div>` : "";
   const pluralLine = card.p ? `<div class="infoline"><b>Plural:</b> ${card.p}</div>` : "";
+  const compLine = (card.cat==="adj" && card.comp) ? `<div class="infoline"><b>Steigerung:</b> ${card.w} → ${card.comp} → ${card.sup}</div>` : "";
   const cheatBlock = renderCheatCodesHTML(card);
   const lingBlock = renderLinguisticsHTML(card);
   
@@ -3313,6 +3091,7 @@ function renderInfoPanel(card){
       <div class="en-word" style="margin-bottom:12px;">${displayMeaning}</div>
       ${card.a ? `<div class="infoline"><b>Artikel:</b> ${card.a}</div>` : ""}
       ${pluralLine}
+      ${compLine}
       ${verbBlock}
       ${exBlock}
       ${card.mn ? `<div class="mnemonic">💡 ${card.mn}</div>` : ""}
@@ -3933,6 +3712,73 @@ function renderDashboard(){
 <script>
 let practiceTopic = null; // shared with Speaking/Writing views
 
+/* =========================================================
+   LERNPFAD — every level split into packs of 20 words in learning order:
+   textbook words in book order first, then master-list words most frequent first.
+   A word counts as learned once it was answered correctly (box >= 2).
+========================================================= */
+const PACK_SIZE = 20;
+function learnOrder(pool){
+  const key = c => c.freq > 0 ? c.freq : (c.uidBase ? 1e7 : -1);
+  return pool.map((c, i) => ({ c, i })).sort((x, y) => key(x.c) - key(y.c) || x.i - y.i).map(o => o.c);
+}
+function isLearned(c){ const p = PROGRESS[c.uid]; return !!p && p.timesSeen > 0 && p.box >= 2; }
+function packsFor(level){
+  const ordered = learnOrder(poolForLevel(level));
+  const packs = [];
+  for (let i = 0; i < ordered.length; i += PACK_SIZE) packs.push(ordered.slice(i, i + PACK_SIZE));
+  return packs;
+}
+function nextPackIndex(packs){
+  const i = packs.findIndex(pk => pk.some(c => !isLearned(c)));
+  return i === -1 ? packs.length - 1 : i;
+}
+function startPack(level, idx){
+  const pk = packsFor(level)[idx];
+  if (!pk || !pk.length) return;
+  // Words not learned yet (in order) + learned ones that are due; a finished pack is reviewed as a whole.
+  let queue = pk.filter(c => !isLearned(c)).concat(pk.filter(c => isLearned(c) && isDue(c.uid)));
+  if (!queue.length) queue = shuffleArr(pk);
+  startSession(queue, `📦 ${level} · Paket ${idx + 1}`);
+}
+function learningPathHTML(level){
+  if (level === "alle") {
+    const rows = LEVELS.map(lv => {
+      const pool = poolForLevel(lv);
+      if (!pool.length) return '';
+      const learned = pool.filter(isLearned).length, pct = Math.round(learned / pool.length * 100);
+      return `<div class="levelpath" data-lvl="${lv}">
+        <span class="lv">${lv}</span>
+        <span class="meta2">${Math.ceil(pool.length / PACK_SIZE)} Pakete · ${learned}/${pool.length} gelernt</span>
+        <div class="barouter"><div class="barinner" style="width:${pct}%;"></div></div>
+      </div>`;
+    }).join('');
+    return `<div class="sectionlabel">🧭 Lernpfad — wähle dein Niveau</div>
+      <div class="pathhint">Jedes Niveau ist in kleine Pakete à ${PACK_SIZE} Wörter geteilt — Lehrbuchwörter zuerst, dann die häufigsten Wörter.</div>${rows}`;
+  }
+  const packs = packsFor(level);
+  if (!packs.length) return '';
+  const cur = nextPackIndex(packs);
+  const tiles = packs.map((pk, i) => {
+    const learned = pk.filter(isLearned).length, done = learned === pk.length;
+    return `<button class="packtile ${done ? 'done' : ''} ${i === cur && !done ? 'current' : ''}" data-pack="${i}" title="${pk.map(c => c.w).join(', ')}">
+      <b>Paket ${i + 1}</b><small>${pk.slice(0, 3).map(c => c.w).join(', ')}…</small>
+      <div class="barouter"><div class="barinner" style="width:${Math.round(learned / pk.length * 100)}%;"></div></div>
+      <small>${learned}/${pk.length} gelernt</small></button>`;
+  }).join('');
+  const curLearned = packs[cur].filter(isLearned).length;
+  return `<div class="sectionlabel">🧭 Lernpfad ${level} — ${packs.length} Pakete à ${PACK_SIZE} Wörter</div>
+    <div class="pathhint">Lehrbuchwörter zuerst, dann die häufigsten Wörter. Ein Paket dauert ca. 10 Minuten; ein Wort gilt als gelernt, sobald du es einmal richtig wusstest. Die Wiederholung zum richtigen Zeitpunkt übernimmt „Smart Learn".</div>
+    <button class="bigbtn" id="nextPackBtn">▶ Weiter: Paket ${cur + 1} (${curLearned}/${packs[cur].length} gelernt)<span class="subtext">${packs[cur].slice(0, 4).map(c => c.w).join(' · ')} …</span></button>
+    <div class="packgrid">${tiles}</div>`;
+}
+function wireLearningPath(level){
+  document.querySelectorAll('.levelpath[data-lvl]').forEach(el => { el.onclick = () => setLevel(el.dataset.lvl); });
+  const nb = document.getElementById('nextPackBtn');
+  if (nb) nb.onclick = () => startPack(level, nextPackIndex(packsFor(level)));
+  document.querySelectorAll('.packtile[data-pack]').forEach(el => { el.onclick = () => startPack(level, +el.dataset.pack); });
+}
+
 function renderLernen(){
   const stage = document.getElementById("stage");
 
@@ -3952,20 +3798,20 @@ function renderLernen(){
   }
 
   if(!practiceTopic){
-    const tiles = TOPICS.map(t=>{
-      const cnt = topicCardCount(t.key, currentLevel);
-      return `<div class="topictile ${cnt===0?'':''}" data-topic="${t.key}" style="${cnt===0?'opacity:0.4;':''}">
+    // Only topics that have words at this level (the master-list levels B1/B2/C1 are sorted by frequency instead).
+    const withWords = TOPICS.map(t=>({ t, cnt: topicCardCount(t.key, currentLevel) })).filter(x=>x.cnt>0);
+    const tiles = withWords.map(({t, cnt})=>`<div class="topictile" data-topic="${t.key}">
         <span class="icon">${t.icon}</span>
         <span class="label">${t.label}</span>
         <span class="label" style="color:var(--stamp-red);">${cnt} Wörter</span>
-      </div>`;
-    }).join("");
+      </div>`).join("");
 
     stage.innerHTML = `
-      <button class="bigbtn" id="smartLearnBtn2">🧠 What should I study today? (Was soll ich lernen?)<span class="subtext">Smart Learn über alle Themen</span></button>
-      <div class="sectionlabel">…oder wähle ein Thema</div>
-      <div class="topicgrid">${tiles}</div>
+      <button class="bigbtn" id="smartLearnBtn2">🧠 What should I study today? (Was soll ich lernen?)<span class="subtext">Smart Learn: fällige Wiederholungen + neue Wörter (häufigste zuerst)</span></button>
+      ${learningPathHTML(currentLevel)}
+      ${tiles ? `<div class="sectionlabel">…oder wähle ein Thema</div><div class="topicgrid">${tiles}</div>` : ''}
     `;
+    wireLearningPath(currentLevel);
     document.getElementById("smartLearnBtn2").onclick = ()=>{
       const smartPool = poolForLevel(currentLevel);
       if(smartPool.length===0){ alert("Für dieses Niveau gibt es noch keine Vokabeln."); return; }
@@ -4032,7 +3878,9 @@ function getDefaultLevelForTopic(topic){
   return "B1.1";
 }
 function topicsWithContent(level){
-  return TOPICS.filter(t=> poolForLevel(level).some(c=>c.topic===t.key));
+  const own = TOPICS.filter(t=> poolForLevel(level).some(c=>c.topic===t.key));
+  // B1/B2/C1 master-list words have no topics — offer every topic, the word bank then uses the topic's words.
+  return own.length ? own : TOPICS.filter(t=> ALL_CARDS.some(c=>c.topic===t.key));
 }
 function topicPickerHTML(){
   const opts = topicsWithContent(currentLevel);
@@ -4043,15 +3891,20 @@ function topicPickerHTML(){
 function speakingPrompt(level, label){
   if(level==="A1") return `Sag 2–3 einfache Sätze über: <b>${label}</b>.`;
   if(level==="A2") return `Sprich kurz (ca. 20–30 Sekunden) über: <b>${label}</b>.`;
+  if(level==="B2") return `Sprich ca. 1 Minute über: <b>${label}</b>. Meinung, zwei Gründe, ein Beispiel — und nenne ein Gegenargument.`;
+  if(level==="C1") return `Halte einen kurzen Vortrag (1–2 Minuten) über: <b>${label}</b>. Wäge Pro und Contra ab und schließe mit einem Fazit.`;
   return `Sprich 30–60 Sekunden über: <b>${label}</b>. Nutze eine Meinung, einen Grund und ein Beispiel.`;
 }
 function writingPrompt(level, label){
   if(level==="A1") return `Schreibe 3 einfache Sätze über: <b>${label}</b>.`;
   if(level==="A2") return `Beschreibe in 4–6 Sätzen: <b>${label}</b>.`;
+  if(level==="B2") return `Schreibe einen Text (120–150 Wörter) über: <b>${label}</b>. Meinung mit zwei Gründen, ein Gegenargument, Schluss.`;
+  if(level==="C1") return `Schreibe eine Erörterung (150–200 Wörter) über: <b>${label}</b>. Pro und Contra, Beispiele, begründetes Fazit.`;
   return `Schreibe einen kurzen Text (60–100 Wörter) über: <b>${label}</b>. Nenne deine Meinung und einen Grund.`;
 }
 function wordBankFor(topic, level){
-  const pool = poolForLevel(level).filter(c=>c.topic===topic);
+  let pool = poolForLevel(level).filter(c=>c.topic===topic);
+  if(!pool.length) pool = ALL_CARDS.filter(c=>c.topic===topic && (currentCat==="alle" || c.cat===currentCat));
   return shuffleArr(pool).slice(0,10);
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v66';
+const CACHE_NAME = 'deutsch-coach-v67';
 const urlsToCache = [
   './',
   './index.html',
@@ -28,6 +28,8 @@ const urlsToCache = [
   './German_A2_Practice_Studio.html',
   './Wortfamilien_Explorer.html',
   './js/srs-engine.js',
+  './js/german-conjugation.js',
+  './js/memory-tips.js',
   './js/icon-svgs.js',
   './js/tamil-dict.js',
   './js/tts-engine.js',

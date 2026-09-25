@@ -43,7 +43,8 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   (the `SRSEngine.Engine` class — a real, shared spaced-repetition engine), `js/icon-svgs.js`,
   `js/tamil-dict.js`, `js/tts-engine.js` (shared text-to-speech), `js/progress-aggregator.js` (added
   this session — see Section 14), `js/german-conjugation.js` (Präsens engine + person/auxiliary
-  tables, used by Thema_Sprech_Trainer and the Excel sheet — Task 29). This directly supersedes the old "no shared code, everything
+  tables, used by Thema_Sprech_Trainer and the Excel sheet — Task 29), `js/memory-tips.js` (memory tips
+  checked against each word's real forms — home flashcards, Verb/Adjektiv trainers, Excel Merkhilfe — Task 30). This directly supersedes the old "no shared code, everything
   copy-pasted" claim in the original Section 25 below (kept below for historical context but no
   longer accurate as a blanket statement).
 - **The vocabulary/grammar/practice content is still NOT unified.** Content still lives in
@@ -58,8 +59,8 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   VERBS → Excel sheet, Master Grid, Verben Hören, `ALL_VERBS` (Continuous_Verb_Speaker), `VERBS_ALL`
   (Thema_Sprech_Trainer); NOUNS/ADJS → Excel sheet, Master Grid; home flashcards cover every word via
   their lessons + `SYNCED_WORDS`. **After changing words: update the canonical list and every copy, run
-  `python3 scripts/build_freq_ranks.py`, then `python3 scripts/build.py`** — the build runs
-  `scripts/check_vocab_sync.py` and fails on any drift.
+  `python3 scripts/build_freq_ranks.py` and `python3 scripts/fill_home_forms.py`, then `python3 scripts/build.py`**
+  — the build runs `scripts/check_vocab_sync.py` and `fill_home_forms.py --check` and fails on any drift.
   **Levels**: `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` from textbooks, plus frequency estimates for entries with
   no textbook level (`level` A1–C1 with `levelEst: true`; every entry has `freq` = rank in the
   OpenSubtitles-2018 top-50k list, 0 = rarer). Display estimates with "≈"; check a given array's actual
@@ -759,6 +760,53 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 30) — Memory tips checked for every word, and a learning path for every level
+
+#### Task
+User: "1. We have german learning tips for each. Now you can check all are existing and if need add good learning how information for keep it memory. 2. Make it Learning and practice for all level are update easy for learning".
+
+#### Audit: tips were missing for some words and wrong for many
+The "cheat codes" / "linguistics" boxes on the home card back (and copies in `Verb_Transformation_Trainer.html` and `Adjektiv_Adverb_Trainer.html`) guessed from spelling only. Checked against the real forms of the 721 verbs / 1,089 nouns:
+- "Inseparable prefix, never takes ge-" fired on any verb starting with be/ge/er/ver…: 12 of 203 were wrong (*gehen* = ge + hen, *geben*, *gelten*, *beten*, *ernten*, *beugen*; *beilegen*/*beitragen* read as be- instead of separable bei-).
+- "Separable prefix" fired on 165 verbs, 23 wrong (*antworten* = an + tworten, *absolvieren*; *zurückfahren* shown as zu-, *vorbeigehen* as vor-, *auseinandersetzen* as aus-).
+- "Diphthong Scanner — verbs with -ei-/-ie- are 99% STRONG" fired on 162 verbs; **90 of them are regular** (*spielen, lieben, arbeiten, zeigen, reisen, meinen, mieten, heiraten…*).
+- "100% feminine suffix" (-in/-ei/-ur/-ik…) was wrong for 12 nouns (*das Ei, der Termin, der Wein, der Verein, der Tanz, der Streik, der Ursprung*); "100% neuter" (-um/-ma/-ment…) for 10 of 20 (*der Baum, der Raum, die Firma, der Moment, der Kuchen*).
+- Noun plural "defaults" ignored the stored plural (*das Angebot* told "monosyllabic neuter → -er + umlaut", real plural *Angebote*); the sein-auxiliary list matched by word ending (*bekommen* ⊃ kommen); compound splitting accepted any "starts with" match; the -ieren rule called itself "100%" (*verlieren* ends in -ieren).
+- Coverage: 138 home cards had no tip at all (e.g. *Hund*), 577 new nouns had no mnemonic.
+
+#### New: `js/memory-tips.js` — every tip is checked against the word's own data
+- **Verbs**: separable only if the Präteritum shows the particle at the end (*stand auf*, also multi-particle *stellte wieder her*); inseparable only if the participle has no extra ge- (*besucht*; *gehen → gegangen* is excluded); "built on *suchen*" only when the root is a real verb. Vowel melody from Infinitiv/Präteritum/Partizip (*ei → ie → ie*) with the most frequent verbs of the same pattern as anchors (*schreiben – bleiben – steigen*); mixed verbs; regular verbs that *look* strong flagged as a trap (*zeigen – zeigte*); extra -e- (*arbeitete*); -ieren without ge- (only if the participle confirms it); sein/haben from the stored Perfekt; Präsens vowel change / irregular Präsens from the conjugation engine; fixed partner prepositions.
+- **Nouns**: gender-ending rule quoted with its **real hit rate in this list** (*-ung → die: 187 of 190*), only for endings with ≥5 words and ≥75 %; a noun that breaks it gets an **"Ausnahme!"** tip instead (*der Junge, das Auge, der Käse*); nominalised adjectives (*der/die Deutsche, ein Deutscher*); n-Deklination (*den Kollegen*); compound "last word is the boss" only when the last part is a real noun with the same article and the first part a real word (*krank + -en- + Haus*; *Enthaltung* is not Ente + Haltung); plural pattern from the stored plural with same-pattern nouns.
+- **Adjectives**: Steigerung pattern from the stored forms (umlaut / -e- drops / irregular / regular, extra -e- in *am ältesten*) with same-pattern adjectives; un- opposites when the base is a real adjective; word building (*Arbeit + -los*, *essen + -bar*) only with a real base word (a few misleading derivations excluded).
+- Prepositions: Akkusativ (DOGFU), Dativ, and two-way (Wo?/Wohin?) rules. A plain learning-technique tip is the fallback only when a card has neither a curated mnemonic nor a checked tip.
+- Wired in: home card back (`getCheatCodesForWord` / `analyzeGermanLinguistics` now delegate to it; the prefix/compound table no longer repeats in the tip list), Verb trainer, Adjektiv trainer (its "dunkel: regular" rule now says *dunkler*), Excel "Merkhilfe" column (curated trick + up to two tips; the old placeholder "Stem "arbeit..." → to work" / "Plural: -e" is gone).
+
+#### Missing forms filled from the master lists (`scripts/fill_home_forms.py`)
+Textbook/A1 home cards lacked forms the canonical lists have: 182 Präteritum/Perfekt (*entscheiden, bleiben…*), 190 articles/plurals (A1 starter nouns had no article at all: *Junge* → der, *Jungen*), 216 comparison forms (textbook adjectives now show "Steigerung" on the card). Only empty fields, exact word match; idempotent; `--check` runs in `build.py`. These cards now also get verb-tense and plural quizzes. The A1 shorthand plurals ("-n", "-se") are expanded for the tips, and a bare "-" there counts as unknown (it means both "die Zimmer" and "no plural").
+
+#### Engine bug fixed (Präsens)
+`js/german-conjugation.js` matched stem-change verbs by ending: *schalten → er schält*, *ausschalten → hält aus*, *beauftragen → beaufträgt*, *veranlassen → veranlässt*. A weak "-te" Präteritum now disables the stem-change table (Excel sheet and Thema trainer).
+
+#### Part 2 — learning and practice for all levels (home)
+- **Lernpfad**: every level (A1–C1, and per word type) is split into packs of 20 in learning order — textbook words in book order, then master-list words most frequent first. Each pack shows "x/20 gelernt" (learned = answered correctly once); "▶ Weiter: Paket N" continues with the first unfinished pack; "Alle" shows the path per level. B1/B2/C1 (no topics) previously only had Smart Learn.
+- Smart Learn now introduces new words in the same order (most frequent first) instead of randomly.
+- Topic tiles only for topics with words at that level. Sprechen/Schreiben at B1/B2/C1 offered no topics — now every topic, word bank from the topic's words; new B2 (opinion + counter-argument) and C1 (short talk / Erörterung with Pro/Contra) prompts.
+- Outdated footer ("A1 has only one example word") corrected.
+
+#### Testing
+- New suite (38 checks): every one of 2,934 cards has a mnemonic or checked tip; no fake prefix splits (gehen, antworten, beten…); correct sep/insep for aufstehen/besuchen; vowel melody + anchors; no "99%/100%" claims anywhere; Angebot/Junge/Wohnung/Krankenhaus/Enthaltung; filled forms; Lernpfad for all 7 levels, pack sessions, progress counting, frequency order; C1 Sprechen; Verb/Adjektiv trainers; Excel Merkhilfe for all 2,481 rows; Präsens fix in Excel + Thema; zero page errors.
+- Task 29 suite re-run (all uids unchanged), 26-page sweep clean, all inline scripts `node --check`, `build.py` (now also caches `german-conjugation.js` + `memory-tips.js` in `sw.js` — the former was missing, so it failed offline).
+
+#### Files Changed
+- `js/memory-tips.js` (new), `js/german-conjugation.js`, `scripts/fill_home_forms.py` (new), `scripts/build.py`, `sw.js`
+- `deutsch-coach.html`, `Verb_Transformation_Trainer.html`, `Adjektiv_Adverb_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Thema_Sprech_Trainer.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+#### Still open
+30 A1 starter nouns and ~200 textbook nouns are not in the master noun list, so they have no plural data (their tip is the curated mnemonic or the article-chunk technique). C1 words are all rarer than the top-50k frequency list, so within C1 the path is alphabetical.
+
+---
 
 ### 2026-09-24 (Task 29) — Words updated in every page and every form
 

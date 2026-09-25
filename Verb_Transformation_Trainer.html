@@ -471,6 +471,8 @@ html.dark-theme, body.dark {
   <script src="js/tts-engine.js"></script>
     <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/german-conjugation.js"></script>
+  <script src="js/memory-tips.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -883,180 +885,26 @@ const VERB_SENTENCES = {
 
 
 
-function getCheatCodesForWord(w, cat, opt = {}) {
-  const word = (w || '').trim();
-  const lower = word.toLowerCase();
-  const rawWord = lower.replace(/^sich\s+/, '').replace(/^(der|die|das)\s+/, '');
-  const hints = [];
-
-  // VERB CHEAT CODES
-  const mixedVerbs = ['bringen', 'denken', 'kennen', 'wissen', 'nennen', 'brennen', 'rennen', 'senden', 'wenden'];
-  const matchedMixed = mixedVerbs.find(mv => rawWord.endsWith(mv));
-  if (matchedMixed) {
-    hints.push({
-      num: 'Shortcut 06',
-      title: '🧬 The \'Secret 9\' Mixed Verbs Club (Mischverben)',
-      badge: 'Mixed Verb Hybrid',
-      rule: `<b>${word}</b> is one of only 9 core German Mixed Verbs! Stem vowel shifts like a strong verb (<i>e → a / o</i>), BUT takes regular weak endings (<b>-te</b> in Past, <b>ge-...-t</b> in Perfekt).`,
-      tamil: '💡 <b>Tamil Insight:</b> உயிர் எழுத்து மாறும் + பலவீன வினை விகுதி (-te / -t) இணையும்! இந்த 9 வினைகளில் இதுவும் ஒன்று!'
-    });
-  }
-
-  if (rawWord.endsWith('wissen') || rawWord.endsWith('kennen')) {
-    hints.push({
-      num: 'Shortcut 07',
-      title: '🧙‍♂️ wissen vs. kennen: The Wizard & Ken Doll Hack',
-      badge: 'High-Frequency Trap',
-      rule: `<b>wissen (Wizard 🧙‍♂️):</b> Knows facts, info, numbers, secrets. Followed by <i>wie, wo, was, warum</i> or <i>dass</i>.<br><b>kennen (Ken Doll 👱‍♂️):</b> Knows people or places. Followed by a Person or City (<i>Tom, Berlin</i>).`,
-      tamil: '💡 <b>Tamil Brain Hack:</b> kennen = ஆட்கள்/ஊர்கள்; wissen = உண்மைகள்/தகவல்கள்/விடைகள்.'
-    });
-  }
-
-  if (rawWord.endsWith('ieren')) {
-    hints.push({
-      num: 'Shortcut 04',
-      title: '⚡ The \'-ieren\' Auto-Weak Rule (100% Guaranteed)',
-      badge: '100% Guaranteed',
-      rule: `<b>100% of verbs ending in -ieren are WEAK!</b> Präteritum adds regular <b>-te</b> (<i>${rawWord}te</i>). In Perfekt, it <b>NEVER takes \'ge-\'</b> (<i>hat ${rawWord}t</i>).`,
-      tamil: '💡 <b>Golden Rule:</b> -ieren என முடியும் அனைத்து வினைகளும் 100% Weak! Perfekt-ல் \'ge-\' வராது.'
-    });
-  }
-
-  const seinVerbs = ['gehen', 'fahren', 'fliegen', 'laufen', 'schwimmen', 'kommen', 'reisen', 'wandern', 'springen', 'fallen', 'steigen', 'sterben', 'einschlafen', 'aufwachen', 'wachsen', 'sein', 'bleiben', 'passieren', 'gelingen'];
-  const matchedSein = seinVerbs.some(sv => rawWord.endsWith(sv));
-  if (matchedSein || opt.isAuxSein || (opt.perfekt && opt.perfekt.startsWith('ist '))) {
-    hints.push({
-      num: 'Shortcut 08 & 10',
-      title: '🚶→🏃 haben vs. sein: The 2-Question Test',
-      badge: 'Auxiliary SEIN',
-      rule: `Takes <b>ist / sein</b> in Perfekt because it indicates: (1) Movement from Point A to B, (2) State Change (awake→asleep, alive→dead), or is one of the 3 special exceptions (<i>sein, bleiben, passieren</i>).`,
-      tamil: '💡 <b>Tamil Hack:</b> இடம் மாறுதல் (A→B) அல்லது நிலை மாறுதல் இருந்தால் SEIN, மற்றவற்றிற்கு HABEN!'
-    });
-  }
-
-  const insepPrefixes = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
-  const matchedInsep = insepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2);
-  if (matchedInsep) {
-    hints.push({
-      num: 'Shortcut 05',
-      title: '🛡️ Inseparable Prefix Shield (Be-Ge-Er-Ver-Zer-Ent-Emp-Miss)',
-      badge: 'No ge- Prefix',
-      rule: `Starts with inseparable <b>${matchedInsep}-</b>. It NEVER detaches in sentences and <b>NEVER takes \'ge-\' in Perfekt</b> (e.g. <i>hat ${rawWord}t / ${rawWord}en</i>, never <i>hat ge${rawWord}</i>).`,
-      tamil: '💡 <b>Memory:</b> இந்த 8 prefixes ஒருபோதும் பிரியாது, Perfekt-ல் \'ge-\' எடுக்காது!'
-    });
-  }
-
-  const sepPrefixes = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'mit', 'nach', 'vor', 'weg', 'zu', 'zurück'];
-  const matchedSep = sepPrefixes.find(p => rawWord.startsWith(p) && rawWord.length > p.length + 2 && !matchedInsep);
-  if (matchedSep) {
-    hints.push({
-      num: 'Shortcut 05B',
-      title: '🚀 Separable Prefix Sandwich Rule',
-      badge: 'Splits in Sentence',
-      rule: `Starts with separable <b>${matchedSep}-</b>. In present tense, prefix flies to sentence end (<i>„Ich ... ${matchedSep}.”</i>). In Perfekt, <b>-ge-</b> is sandwiched in the middle (<i>${matchedSep}-ge-...</i>).`,
-      tamil: '💡 <b>Tamil Rule:</b> வாக்கியத்தின் இறுதியில் Prefix பிரியும்! Perfekt-ல் இடையில் \'-ge-\' இணையும்.'
-    });
-  }
-
-  if (rawWord.includes('ei') && !rawWord.endsWith('ieren')) {
-    hints.push({
-      num: 'Shortcut 02',
-      title: '🔍 The Diphthong Scanner (-ei- → ie / i)',
-      badge: '99% Strong Verb',
-      rule: `Verbs containing <b>-ei-</b> in the stem are 99% STRONG verbs! They shift: <i>-ei- → -ie- / -i-</i> in past tenses (e.g. <i>schreiben → schrieb, bleiben → blieb</i>).`,
-      tamil: '💡 <b>Quick Hack:</b> வினையில் -ei- பார்த்தால், அது 99% Strong Verb (ie/i என மாறும்)!'
-    });
-  } else if (rawWord.includes('ie') && !rawWord.endsWith('ieren')) {
-    hints.push({
-      num: 'Shortcut 02',
-      title: '🔍 The Diphthong Scanner (-ie- → o)',
-      badge: '99% Strong Verb',
-      rule: `Verbs containing <b>-ie-</b> in the stem are 99% STRONG verbs! They shift: <i>-ie- → -o-</i> in past tenses (e.g. <i>fliegen → flog, bieten → bot, ziehen → zog</i>).`,
-      tamil: '💡 <b>Quick Hack:</b> வினையில் -ie- பார்த்தால், அது 99% Strong Verb (o என மாறும்)!'
-    });
-  }
-
-  return hints;
+/* Tips come from js/memory-tips.js and are checked against each verb's own Präteritum/Perfekt
+   (the old version guessed from spelling: gehen = ge + hen, zeigen = "99% strong", antworten = an + tworten). */
+let _memoryTipsReady = false;
+function ensureMemoryTips(){
+  if (_memoryTipsReady || typeof MemoryTips === 'undefined') return;
+  MemoryTips.init({ verbs: VERBS.map(v => ({ w: v.inf, pr: v.praeteritum, pp: v.perfekt, en: v.en, rank: v.freq || 1e8 })) });
+  _memoryTipsReady = true;
 }
 
+function getCheatCodesForWord(w, cat, opt = {}) {
+  ensureMemoryTips();
+  if (typeof MemoryTips === 'undefined') return [];
+  // The prefix table (renderLinguisticsHTML) already explains separable/inseparable prefixes.
+  return MemoryTips.cheatCodes(w, 'v', opt, { skip: ['sep', 'insep'] });
+}
+
+// Only a prefix that the Präteritum/Perfekt confirm (stand auf / besucht) is shown as a split.
 function analyzeGermanLinguistics(w, cat, metadata = {}) {
-  const word = (w || '').trim();
-  const lower = word.toLowerCase().replace(/^(der|die|das)\s+/, '').replace(/^sich\s+/, '');
-  const en = metadata.en || '';
-  const ta = metadata.ta || '';
-
-  const sepPrefixes = {
-    "ab": { en: "off / away / down", ta: "விலகி / கீழே" },
-    "an": { en: "at / on / start", ta: "மீது / தொடக்கம்" },
-    "auf": { en: "up / open", ta: "மேலே / திறந்து" },
-    "aus": { en: "out / off / exit", ta: "வெளியே / அணைத்து" },
-    "bei": { en: "by / along / assist", ta: "சேர்த்து / கூட" },
-    "ein": { en: "in / into / start", ta: "உள்ளே / தொடக்கம்" },
-    "fern": { en: "far / distant / TV", ta: "தொலைவில்" },
-    "fest": { en: "firm / fixed", ta: "உறுதியாக" },
-    "kennen": { en: "familiar / know", ta: "அறிமுகமான" },
-    "mit": { en: "with / along", ta: "கூட / உடன்" },
-    "nach": { en: "after / re- / copy", ta: "பின்னால் / மீண்டும்" },
-    "vor": { en: "in front / forward", ta: "முன்னால்" },
-    "weg": { en: "away / gone", ta: "விலகி / தொலைந்து" },
-    "weiter": { en: "further / continue", ta: "தொடர்ந்து" },
-    "zu": { en: "to / close / shut", ta: "நோக்கி / மூடி" },
-    "zurück": { en: "back / return", ta: "மீண்டும் / திரும்பி" },
-    "zusammen": { en: "together", ta: "ஒன்றாக" }
-  };
-
-  const insepPrefixes = {
-    "be": { en: "direct object focus", ta: "நேரடி இலக்கு" },
-    "ge": { en: "collective / result", ta: "விளைவு / சேர்ந்த நிலை" },
-    "er": { en: "achievement / deep outcome", ta: "முயற்சியின் வெற்றி" },
-    "ver": { en: "change / away / mistake", ta: "மாற்றம் / தவறு" },
-    "zer": { en: "destruction / pieces", ta: "உடைத்தல் / அழிவு" },
-    "ent": { en: "removal / escape", ta: "நீக்குதல் / தப்பித்தல்" },
-    "emp": { en: "receive / feel", ta: "உணர்தல் / பெறுதல்" },
-    "miss": { en: "mis- / wrong", ta: "தவறான" }
-  };
-
-  for (const pfx in sepPrefixes) {
-    if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
-      const root = lower.slice(pfx.length);
-      const pfxInfo = sepPrefixes[pfx];
-      return {
-        type: 'separable_verb',
-        word: word,
-        prefix: pfx,
-        root: root,
-        pfxInfo: pfxInfo,
-        title: '🚀 3. Separable Verb (Trennbare Verben / வாக்கியத்தில் பிரியும் வினைகள்)',
-        badge: 'Splits in Sentence',
-        literal: `${pfxInfo.en} + ${root}`,
-        actual: `${en || word} ${ta ? `(${ta})` : ''}`,
-        formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🗣️ <b>Sentence (Präsens):</b> <i>„Ich ${root.replace(/en$/,'e').replace(/n$/,'e')} ... <b style="color:var(--red);">${pfx}</b>.”</i><br>• 📦 <b>Perfekt Sandwich:</b> <i>„${metadata.perfekt || metadata.pp || `hat/ist ${pfx}ge...`}”</i> (<b>-ge-</b> is sandwiched in the middle!)`,
-        tamilInsight: `💡 <b>Tamil Word-Splitting Hack:</b> அகராதியில் ஒன்றாக இருக்கும் சொல், வாக்கியத்தில் இரண்டாகப் பிளந்து, அதன் முதல் பாதி (<b>${pfx}</b>) வாக்கியத்தின் இறுதிக்குச் சென்றுவிடும்!`
-      };
-    }
-  }
-
-  for (const pfx in insepPrefixes) {
-    if (lower.startsWith(pfx) && lower.length > pfx.length + 2) {
-      const root = lower.slice(pfx.length);
-      const pfxInfo = insepPrefixes[pfx];
-      return {
-        type: 'inseparable_verb',
-        word: word,
-        prefix: pfx,
-        root: root,
-        pfxInfo: pfxInfo,
-        title: `🛡️ Inseparable Prefix Shield (${pfx.toUpperCase()}- Never Splits)`,
-        badge: 'Inseparable: No ge-',
-        literal: `${pfxInfo.en} + ${root}`,
-        actual: `${en || word} ${ta ? `(${ta})` : ''}`,
-        formula: `<b>Dictionary:</b> <code>${word}</code><br>• 🛡️ <b>Shield Rule:</b> <i>Be-Ge-Er-Ver-Zer-Ent-Emp-Miss</i> <b>NEVER split</b> in sentences and <b>NEVER take 'ge-' in Perfekt</b> (<i>${metadata.perfekt || metadata.pp || `hat ${lower}t`}</i>).`,
-        tamil: `💡 <b>Memory:</b> இந்த 8 முன்னொட்டுகள் (Prefixes) ஒருபோதும் பிரியாது, Perfekt-ல் 'ge-' எடுக்காது!`
-      };
-    }
-  }
-
-  return null;
+  ensureMemoryTips();
+  return typeof MemoryTips === 'undefined' ? null : MemoryTips.verbLinguistics(w, metadata);
 }
 
 function renderLinguisticsHTML(v) {

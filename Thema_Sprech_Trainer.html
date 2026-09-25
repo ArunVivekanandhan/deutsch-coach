@@ -520,7 +520,7 @@ function buildPraesens(inf, praeteritumField, person){
   const words = praeteritumField.split(' ');
   const restRaw = words.slice(1);
   const rest = substituteReflexive(restRaw, person);
-  const form = praesensWordForm(inf, restRaw, person);
+  const form = praesensWordForm(inf, restRaw, person, words[0]);
   const parts = [SUBJ[person], '<b>' + form + '</b>', ...rest];
   return parts.join(' ') + '.';
 }

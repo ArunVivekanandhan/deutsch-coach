@@ -147,7 +147,10 @@ function verbCoreInfinitive(inf){
   while (toks.length > 1 && (GOVERNED_PREPOSITIONS.has(toks[toks.length - 1]) || INFINITIVE_FILLER.has(toks[toks.length - 1]))) toks.pop();
   return toks.join(' ');
 }
-function praesensWordForm(inf, restWords, person){
+// praetMain (optional): first word of the Präteritum. A weak "-te" Präteritum means the verb
+// is weak, so the stem-change table must not fire on a lookalike ending
+// (schalten is not halten, beauftragen is not tragen, veranlassen is not lassen).
+function praesensWordForm(inf, restWords, person, praetMain){
   const lastTok = verbCoreInfinitive(inf).split(' ').pop();
   let workingTok = lastTok;
   let separated = false;
@@ -166,7 +169,8 @@ function praesensWordForm(inf, restWords, person){
     return workingTok.slice(0, workingTok.length - key.length) + form;
   }
 
-  if (person === 'du' || person === 'er/sie/es') {
+  const weakPraet = !!praetMain && /te$/.test(praetMain);
+  if ((person === 'du' || person === 'er/sie/es') && !weakPraet) {
     const scKey = matchTableSuffix(workingTok, STEM_CHANGE_BASES);
     if (scKey) {
       const form = STEM_CHANGE_BASES[scKey][person === 'du' ? 'du' : 'er'];
@@ -186,6 +190,7 @@ function praesensWordForm(inf, restWords, person){
 
 // Plain "fährt ab" / "bemüht sich" Präsens phrase for one person (no subject, no HTML).
 function praesensPhrase(inf, praeteritumField, person){
-  const restRaw = (praeteritumField || '').split(' ').slice(1);
-  return [praesensWordForm(inf, restRaw, person), ...substituteReflexive(restRaw, person)].join(' ');
+  const words = (praeteritumField || '').split(' ');
+  const restRaw = words.slice(1);
+  return [praesensWordForm(inf, restRaw, person, words[0]), ...substituteReflexive(restRaw, person)].join(' ');
 }
