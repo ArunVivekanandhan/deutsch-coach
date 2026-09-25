@@ -112,7 +112,7 @@ Deutsch_Coach_Project/
 ├── Verb_Transformation_Trainer.html        # Standalone verb Präsens→Vergangenheit trainer with Suite Hub
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
-├── Satzbau_Trainer.html                    # Standalone sentence-building trainer with Suite Hub
+├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
 ├── Continuous_Verb_Speaker.html            # Standalone audio loop verb speaker with Suite Hub
 ├── Verben_Hoeren_EN_DE.html                # Standalone audio listen-and-repeat player with Suite Hub
 ├── konnektoren_referenz.html               # Static connector-grammar reference page with Suite Hub
@@ -217,10 +217,11 @@ a tiny irregular-word dict for `nah→näher→am nächsten`), **not sourced fro
 forms as good-faith derivations, not verified textbook data (unlike the noun plurals, which are sourced
 from the original glossary).
 
-**Satzbau_Trainer.html:** `DATA = { grammar: [...], thematic: [...] }`, each entry a topic with
-`templates[]`, each template with `variants[]` (hand-verified full sentences, word-order-scrambled at
-runtime for the build exercise). No per-word `uid`/progress tracking — this app has no spaced repetition
-(see Section 25).
+**Satzbau_Trainer.html** (since Task 43): data in `js/satzbau-data.js` → `window.SATZBAU_DATA = { grammar: [...], thematic: [...] }`.
+A topic = `{id, level, title, title_en, rule, rule_en, rule_ta, formula:[[label, role]], tip, mistake, sentences}`;
+a sentence = `{t: [[chunk, role], ...], end, en, ta, lv?}` — the chunks (Satzglieder) in correct German order, each with
+a role letter (S V E Q K A N v e T C M L O D P R X W, see the file header). `scripts/check_satzbau.py` (run by build.py)
+checks every sentence's word order (V on position 2, v last in a Nebensatz, zu-infinitive last …).
 
 **Verben_Hoeren_EN_DE.html:** `{ w, en, level }` — minimal, audio-playback-only, no progress tracking.
 
@@ -339,14 +340,13 @@ AI can reproduce with `grep -n "^function "` on each file.)
 - **Status:** Complete, German UI.
 - **Implementation location:** `Satzbau_Trainer.html`.
 - **Related files:** none.
-- **Important logic:** word-order scramble-and-rebuild mechanic over **149 hand-verified sentence
-  variants** across 23 topics (8 grammar-focused + 15 thematic); correctness is guaranteed by using only
-  pre-verified full sentences, never generating new combinations at runtime (an earlier
-  independent-slot-rolling bug that could produce ungrammatical sentences was found and fixed prior to
-  shipping — see Section 25).
-- **Dependencies:** none.
-- **Known limitations:** **no spaced-repetition/progress persistence at all** — this app is stateless
-  session-to-session; every visit starts fresh with no due/difficult/mastered tracking.
+- **Important logic (Task 43 rewrite):** 546 role-tagged sentences in 41 topics (27 grammar A1–B2 + 14 everyday
+  themes with per-sentence levels), only whole pre-validated sentences are used. 8 exercise modes driven by the
+  roles (build, choice, type, Verb-Detektiv, Fehler finden, Hören & Bauen, Sprechen, Umbau); wrong options are
+  generated only by moving verbs (a moved verb is always wrong) — see Task 43 in Section 28.
+- **Dependencies:** `js/satzbau-data.js`, app-shell (dcCallAI for the optional AI explanation), tts-engine.
+- **Progress:** `sb_progress_v1` (mastered sentences), `sb_review_v1` (missed sentences = review queue),
+  `sb_day_v1`, `sb_level_v1`, `sb_mode_v1`, `sb_color_v1`, `sb_ta_v1`. No SRS intervals.
 
 ### Feature: Audio listen-and-repeat player
 - **Status:** Complete, covers only the first 50 A2 verbs.
@@ -419,7 +419,7 @@ framework, no state-management library, no event-driven store. Representative st
 | Main app | `ALL_CARDS`, `PROGRESS`, `META`, `currentLevel`, `currentCat`, `currentView`, `currentTopic`, `session`, `sessionIdx`, `sessionStats`, `currentQType`, `revealed`, `practiceTopic`, `recognitionObj`, `recognizing`, `readingIdx` |
 | Verb_Transformation_Trainer | `VERBS`(const), `curLevel`, `curType`, `curDir`, `nounMode`, `meaningLang`, `PROGRESS`, `session`, `sessionIdx` |
 | Nomen_Trainer / Adjektiv_Adverb_Trainer | `curMode` (fixed per page since the Task 22 split), `curFilt1`, `curFilt2`, `curDir`, `meaningLang`, `PROGRESS`, `session`, `sessionIdx` |
-| Satzbau_Trainer | `curCategory`, `curTopic`, `curTemplate`, `curVariant`, `correctOrder`, `buildSlots`, `bankWords`, `seenCount` |
+| Satzbau_Trainer | `DATA`, `ALL_TOPICS`, `PROG`, `REVIEW`, `DAY`, `curLevel`, `curTab`, `MODE`, `S` (session), `W` (current item) |
 | Verben_Hoeren | `VERBS` (data), `deVoices`, `enVoices`, `currentIdx`, `isPlaying`, `isPaused`, `playAllMode`, `voicePollAttempts`, `wakeLock` |
 
 State is mutated directly by event handlers, which then call the relevant `render*()` function(s) to
@@ -757,6 +757,55 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 43) — Satzbau-Trainer rebuilt: 546 role-tagged sentences, 8 learning modes, Satzbauplan
+
+#### Task
+User: "Satzbau-Trainer need to find missing and innovative way to learn and easy for learning and also lot of stuff".
+
+#### What was missing
+Only 52 sentences (9 grammar + 6 theme topics); no W-/Ja-Nein-questions, imperative, negation, TeKaMoLo, Dativ/Akkusativ
+order, reflexive verbs, relative clauses, indirect questions, zu-infinitive, Futur, passive, Konjunktiv II, temporal
+clauses, Ersatzinfinitiv; one exercise type (tap the words) with a rigid right/wrong check; no explanation *why* a word
+stands where it stands; no review of mistakes.
+
+#### Content — `js/satzbau-data.js` (new, 221 KB)
+- 27 grammar topics (A1 7, A2 8, B1 10, B2 2) × 14 sentences + 14 everyday themes (Familie, Wohnen, Arbeit, Einkaufen,
+  Gesundheit, Behörden, Reisen, Freizeit, Essen, Deutschkurs, Termine, Bank/Post/Handy, Wetter, Gefühle & Meinung)
+  × 12 sentences (4 A1 · 5 A2 · 3 B1 each) = **546 sentences** (was 52; the old ones are kept, converted, a few fixed).
+- Each topic: German/English/Tamil rule, a colour formula, a memory trick and the typical English/Tamil-speaker mistake.
+  Tamil notes compare with Tamil word order (verb last = like a German Nebensatz).
+- Each sentence is split into Satzglieder with a role; English + Tamil translation.
+- Sentences, translations and Tamil rules were drafted with AI assistance (4 agents), then machine-checked and
+  read through; the page labels Tamil 🤖 and says so in its footer.
+- **`scripts/check_satzbau.py`** (new, run by build.py → CI): per clause — main clause: V is the 2nd Satzglied
+  (K at position 0 doesn't count, a leading Nebensatz is the 1st); Nebensatz: v last, e before v (Ersatzinfinitiv
+  topic exempt), um/ohne/statt … zu ends with the infinitive; verb-first only in janein/imperativ; required fields,
+  duplicates.
+
+#### Learning methods (`Satzbau_Trainer.html`, rewritten)
+- **Farbhilfe:** every Satzglied coloured by role (Subjekt blue, Verb red, time/place/… own colours; legend on home).
+- **🏗️ Satzbauplan** after each answer: Vorfeld | Verb (Pos. 2) | Mittelfeld | Verbende | Nachfeld, plus the
+  Nebensatz with "verb at the end — like Tamil".
+- 8 modes: 🧩 Bauen (keys 1–9, Enter, Backspace) · 🟢 Auswahl (right order vs. typical mistakes) · ✍️ Schreiben ·
+  🎯 Verb-Detektiv (sentence without its verbs — tap the gap where each verb goes) · 🔍 Fehler finden (one Satzglied
+  misplaced — tap it) · 🎧 Hören & Bauen (audio only, 🐢 slow) · 🎙️ Sprechen (speech recognition, word-by-word score;
+  "Lösung zeigen" doesn't count as a mistake) · 🔄 Umbau (start the sentence with the time/place phrase → inversion).
+- Mistakes are generated only by moving verbs (English "verb 3rd", Tamil "verb last", Satzklammer broken,
+  "weil ich bin", "deshalb ich …", Ersatzinfinitiv "hat" at the end) — a moved verb is always wrong German, so a
+  "wrong" option can never be a correct sentence.
+- Build check accepts the inverted order (Vorfeld variant); a Mittelfeld-only difference gets "Verbstellung richtig!"
+  with the TeKaMoLo/pronoun/nicht rule.
+- Home: stats (mastered / today / to review), 🎲 Gemischte Runde (10 sentences of the chosen level, mode changes per
+  sentence), 🔁 Fehler wiederholen (missed sentences), 🧭 Nächstes Thema (learning path A1→B2), level chips; theme
+  topics opened with a level chosen practise only that level's sentences. 🤖 "Warum diese Reihenfolge?" when an AI key
+  is set. XP + error log hooks as before; `sb_progress_v1` keys unchanged (old progress on kept sentences still counts).
+
+#### Verified
+Headless Chromium: all 546 sentences solved in 7 modes (3,822 items) → all "Richtig", no JS errors; mixed round, review
+queue, speaking skip, dark mode, 390 px phone (no sideways scroll); smoke_pages 27/27; build.py incl. check_satzbau.
+
+---
 
 ### 2026-09-25 (Task 42) — Audit: phone layout on every page, duplicate tools removed
 

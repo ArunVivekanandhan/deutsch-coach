@@ -3,847 +3,669 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Satzbau — Grammatik &amp; Themen-Trainer</title>
+<title>Satzbau-Trainer — Dein Deutsch-Coach</title>
 <link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="./assets/js/gamification.js"></script>
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/satzbau-data.js"></script>
 <style>
-  :root{
-    --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
-    --red:#AE3327; --red-dark:#8A281F; --gold:#B98A2E; --green:#3F6B4A; --blue:#2F5C8A;
-    --purple:#6B4A8A; --line:#cdc7b2; --shadow:rgba(27,42,74,0.18);
+  /* Role colours (Satzglied-Farben): one colour per job in the sentence, readable in light and dark mode */
+  :root {
+    --r-S:#2563eb; --r-V:#dc2626; --r-E:#dc2626; --r-v:#ea580c; --r-e:#ea580c; --r-Q:#9333ea; --r-K:#64748b; --r-A:#0d9488;
+    --r-N:#ea580c; --r-T:#16a34a; --r-C:#a16207; --r-M:#db2777; --r-L:#0891b2; --r-O:#4f46e5; --r-D:#7c3aed; --r-P:#475569;
+    --r-R:#0f766e; --r-X:#111827; --r-W:#b45309;
   }
-  *{box-sizing:border-box;}
-  /* legacy body removed */
-  .wrap{width:100%; max-width:640px;}
-  h1{font-family:'Fjalla One',sans-serif; font-size:22px; border-bottom:3px solid var(--ink); padding-bottom:8px; margin:0 0 4px;}
-  .sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-bottom:14px;}
-
-  .tabrow{display:flex; gap:6px; margin-bottom:12px;}
-  .tabbtn{
-    flex:1; font-family:'Fjalla One',sans-serif; font-size:14px; padding:10px; text-align:center;
-    border:1.5px solid var(--ink); border-radius:6px; background:var(--paper); color:var(--ink); cursor:pointer;
+  [data-theme="dark"] {
+    --r-S:#60a5fa; --r-V:#f87171; --r-E:#f87171; --r-v:#fb923c; --r-e:#fb923c; --r-Q:#c084fc; --r-K:#94a3b8; --r-A:#2dd4bf;
+    --r-N:#fb923c; --r-T:#4ade80; --r-C:#facc15; --r-M:#f472b6; --r-L:#22d3ee; --r-O:#818cf8; --r-D:#a78bfa; --r-P:#cbd5e1;
+    --r-R:#5eead4; --r-X:#f1f5f9; --r-W:#fbbf24;
   }
-  .tabbtn.active{background:var(--ink); color:#fff;}
-
-  .topicgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:16px;}
-  .topiccard{
-    background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 10px;
-    cursor:pointer; box-shadow:0 4px 10px var(--shadow);
-  }
-  .topiccard:active{transform:translateY(1px);}
-  .topiccard .ttitle{font-family:'Fjalla One',sans-serif; font-size:14px; line-height:1.25;}
-  .topiccard .tcount{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); margin-top:4px;}
-
-  .backbtn{
-    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); background:none;
-    border:none; cursor:pointer; padding:0 0 10px; text-align:left;
-  }
-
-  .explainbox{
-    background:var(--card); border-left:4px solid var(--gold); border-radius:0 8px 8px 0;
-    padding:12px 14px; margin-bottom:14px; font-size:13px; line-height:1.6;
-  }
-  .explainbox h2{font-family:'Fjalla One',sans-serif; font-weight:400; font-size:17px; margin:0 0 6px;}
-
-  .exercisecard{
-    background:var(--card); border:1px solid var(--line); border-radius:8px;
-    box-shadow:0 10px 24px var(--shadow); padding:16px; margin-bottom:14px;
-  }
-  .enprompt{font-family:'IBM Plex Sans',sans-serif; font-size:14px; font-style:italic; color:var(--ink-soft);
-    text-align:center; margin-bottom:14px;}
-  .buildarea{
-    min-height:52px; display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; align-content:flex-start;
-    padding:10px; background:var(--paper-dark); border-radius:6px; margin-bottom:12px; border:1.5px dashed var(--line);
-  }
-  .buildarea .placeholder{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); padding:6px;}
-  .wordchip{
-    font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:7px 12px; border-radius:16px;
-    cursor:pointer; user-select:none; border:1.5px solid var(--ink);
-  }
-  .wordchip.inbank{background:#fff;}
-  .wordchip.inbuild{background:var(--ink); color:#fff;}
-  .bankarea{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; min-height:40px;}
-
-  .actionrow{display:flex; gap:8px; margin-bottom:6px;}
-  .actbtn{flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.3px;
-    padding:12px 4px; border-radius:6px; cursor:pointer; border:1.5px solid var(--ink); background:var(--paper);}
-  .actbtn.check{border-color:var(--gold); color:var(--gold-dark,#8a6a1e); font-weight:700;}
-  .actbtn.reset{color:var(--ink-soft);}
-  .actbtn.next{border-color:var(--green); color:var(--green);}
-
-  .feedback{border-radius:0 6px 6px 0; padding:9px 12px; margin-bottom:10px; font-size:13px; line-height:1.5;}
-  .feedback.correct{background:#eaf2ea; border-left:3px solid var(--green);}
-  .feedback.wrong{background:#f6e9e7; border-left:3px solid var(--red);}
-  .feedback .correctsent{font-family:'IBM Plex Sans',sans-serif; font-weight:600; margin-top:4px;}
-
-  .progressline{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:10px;}
-
-  footer{margin-top:20px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); text-align:center; line-height:1.6;}
-
-  html.dark-theme {
-    --paper: #121212; --paper-dark: #1E1E1E; --card: #242424; --ink: #E0E0E0; --ink-soft: #A0A0A0;
-    --line: #444; --shadow: rgba(0,0,0,0.5); --stamp-red: #ff5555; --stamp-red-dark: #cc0000;
-    --gold: #ffcc00; --green: #55cc55; --blue: #5599ff; --purple: #b366ff;
-  }
-
-/* UNIFIED DEUTSCH-COACH SUITE THEME & HUB */
-:root {
-  --suite-bg: #EDEAE1;
-  --suite-card: #F7F5EE;
-  --suite-card-hover: #ffffff;
-  --suite-ink: #1B2A4A;
-  --suite-ink-soft: #4A5878;
-  --suite-line: #cdc7b2;
-  --suite-gold: #B98A2E;
-  --suite-blue: #2F5C8A;
-  --suite-green: #3F6B4A;
-  --suite-red: #AE3327;
-  --suite-shadow: rgba(27, 42, 74, 0.08);
-}
-
-html.dark-theme, body.dark {
-  --suite-bg: #111827;
-  --suite-card: #1f2937;
-  --suite-card-hover: #374151;
-  --suite-ink: #f9fafb;
-  --suite-ink-soft: #9ca3af;
-  --suite-line: #374151;
-  --suite-gold: #fbbf24;
-  --suite-blue: #60a5fa;
-  --suite-green: #34d399;
-  --suite-red: #f87171;
-  --suite-shadow: rgba(0, 0, 0, 0.4);
-}
-
-/* Global Modern UI Additions */
-  body {
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  .stage {
-    background: var(--card);
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-    border: 1px solid var(--line);
-    padding: 24px;
-    margin-top: 10px;
-    transition: box-shadow 0.3s ease;
-  }
-  body.dark .stage {
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4);
-  }
-  button {
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, background-color 0.2s;
-  }
-  button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  }
-  button:active:not(:disabled) {
-    transform: translateY(0);
-  }
-  input[type="text"], input[type="password"], textarea, select {
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    padding: 10px 12px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    background: var(--paper);
-    color: var(--ink);
-  }
-  input[type="text"]:focus, textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  }
-  /* Modern Flashcards */
-  .flashcard {
-      border-radius: 16px;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-      transition: transform 0.4s ease;
-  }
-  .flashcard:hover {
-      transform: translateY(-5px);
-  }
-
+  .sb { max-width: 880px; margin: 0 auto; padding: 4px 0 40px; color: var(--color-ink); }
+  .sb h1 { font-size: 26px; margin: 0; }
+  .sb .sub { color: var(--color-ink-soft); font-size: 14px; margin: 4px 0 12px; line-height: 1.5; }
+  .sb-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-sm); }
+  .sb-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .sb-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0 12px; }
+  .sb-stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px; text-align: center; }
+  .sb-stat b { display: block; font-size: 20px; }
+  .sb-stat span { font-size: 11.5px; color: var(--color-ink-soft); }
+  .sb-quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .sb-quick button { text-align: left; font: inherit; padding: 12px; border-radius: 12px; cursor: pointer; border: 1.5px solid var(--color-border);
+    background: var(--color-surface); color: var(--color-ink); }
+  .sb-quick button:hover { border-color: var(--color-primary); }
+  .sb-quick b { display: block; font-size: 15px; } .sb-quick small { color: var(--color-ink-soft); }
+  .chip { font: inherit; font-size: 12.5px; padding: 5px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border);
+    background: var(--color-surface); color: var(--color-ink); }
+  .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .sb-tabs { display: flex; gap: 6px; margin: 10px 0; }
+  .sb-tabs button { flex: 1; font: inherit; font-weight: 700; padding: 10px; border-radius: 10px; cursor: pointer;
+    border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .sb-tabs button.active { border-color: var(--color-primary); color: var(--color-primary); }
+  .topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .topic { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
+    border: 1px solid var(--color-border); border-radius: 12px; padding: 12px; }
+  .topic:hover { border-color: var(--color-primary); }
+  .topic .t1 { font-weight: 700; font-size: 14.5px; line-height: 1.3; } .topic .t2 { font-size: 12px; color: var(--color-ink-soft); margin-top: 2px; }
+  .lvl { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-ink-soft); }
+  .bar { height: 6px; background: var(--color-border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .bar i { display: block; height: 100%; background: #16a34a; }
+  .topic .cnt { font-size: 11px; color: var(--color-ink-soft); margin-top: 4px; }
+  /* chunks */
+  .ch { display: inline-flex; align-items: center; gap: 4px; font: inherit; font-size: 15px; font-weight: 600; padding: 7px 12px; border-radius: 10px; cursor: pointer;
+    border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); user-select: none; }
+  .ch small { opacity: .5; font-size: 10px; }
+  .ch.role { border-color: var(--rc); background: color-mix(in srgb, var(--rc) 13%, var(--color-surface)); }
+  .ch.role::after { content: attr(data-rl); font-size: 9.5px; font-weight: 700; color: var(--rc); margin-left: 2px; }
+  .ch.used { opacity: .25; pointer-events: none; }
+  .ch.ok { border-color: #16a34a; } .ch.bad { border-color: #dc2626; background: color-mix(in srgb, #dc2626 12%, var(--color-surface)); }
+  .ch.pick { outline: 3px solid var(--color-primary); }
+  .build { min-height: 58px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px; border: 2px dashed var(--color-border); border-radius: 12px; margin: 10px 0; }
+  .build .ph { color: var(--color-ink-soft); font-size: 13px; }
+  .bank { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .slot { display: inline-flex; width: 30px; height: 36px; align-items: center; justify-content: center; border: 2px dashed var(--color-border); border-radius: 8px; cursor: pointer; font-weight: 700; color: var(--color-ink-soft); }
+  .slot:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .slot.bad { border-color: #dc2626; color: #dc2626; }
+  .prompt { font-size: 16px; font-weight: 600; } .prompt .ta { font-size: 14px; color: var(--color-ink-soft); font-weight: 500; margin-top: 3px; }
+  .modes { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .modes button { font: inherit; font-size: 12.5px; padding: 7px 11px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .modes button.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .modes button:disabled { opacity: .45; cursor: not-allowed; }
+  .btn { font: inherit; font-weight: 700; font-size: 13.5px; padding: 10px 14px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-primary);
+    background: var(--color-primary); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--color-primary); }
+  .btn.grey { background: transparent; color: var(--color-ink-soft); border-color: var(--color-border); }
+  .fb { margin-top: 10px; padding: 10px 12px; border-radius: 10px; border-left: 4px solid; font-size: 14px; line-height: 1.55; }
+  .fb.ok { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, var(--color-surface)); }
+  .fb.no { border-color: #dc2626; background: color-mix(in srgb, #dc2626 9%, var(--color-surface)); }
+  .fb .sent { font-size: 16px; font-weight: 700; margin: 4px 0; }
+  .formula { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .formula span { padding: 5px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--rc); background: color-mix(in srgb, var(--rc) 13%, var(--color-surface)); }
+  .rulebox { border-left: 4px solid #f59e0b; }
+  .rulebox .en, .rulebox .ta { font-size: 13.5px; color: var(--color-ink-soft); margin-top: 6px; line-height: 1.5; }
+  .tipline { margin-top: 8px; font-size: 13px; line-height: 1.5; }
+  /* Satzbauplan (field model) */
+  .plan { display: grid; grid-template-columns: repeat(5, minmax(0, auto)); gap: 4px; margin-top: 8px; overflow-x: auto; }
+  .plan .col { border: 1px solid var(--color-border); border-radius: 8px; padding: 5px; min-width: 70px; }
+  .plan .col h6 { margin: 0 0 4px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--color-ink-soft); }
+  .plan .col.verb { border-color: var(--r-V); }
+  .plan .ch { font-size: 12.5px; padding: 3px 7px; cursor: default; margin: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .legend span { font-size: 10.5px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--rc); color: var(--color-ink); background: color-mix(in srgb, var(--rc) 12%, var(--color-surface)); }
+  .note { font-size: 11.5px; color: var(--color-ink-soft); margin-top: 8px; line-height: 1.5; }
+  .progress { font-size: 12.5px; color: var(--color-ink-soft); }
+  .summary li { margin: 4px 0; }
+  .say-ok { color: #16a34a; font-weight: 700; } .say-no { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
+  [data-theme="dark"] .say-ok { color: #4ade80; } [data-theme="dark"] .say-no { color: #f87171; }
+  @media (max-width: 600px) { .ch { font-size: 14px; padding: 6px 9px; } .plan { grid-template-columns: 1fr; } }
 </style>
-  <link rel="stylesheet" href="css/design-system.css">
-  <script src="./assets/js/gamification.js"></script>
-  <script src="js/tts-engine.js"></script>
-    <script src="js/srs-engine.js"></script>
-  <script src="js/progress-aggregator.js"></script>
-  <script src="js/app-shell.js"></script>
 </head>
 <body>
-<div class="wrap">
-  
-  <!-- UNIFIED DEUTSCH-COACH SUITE HUB -->
+<div class="sb">
+  <h1>🧩 Satzbau-Trainer</h1>
+  <p class="sub">Deutsche Wortstellung verstehen und automatisch können — mit Farben für jedes Satzglied, dem <b>Satzbauplan</b>
+    (Vorfeld · Verb · Mittelfeld · Verbende), Verb-Detektiv, Fehlersuche, Hören, Sprechen und Umbau-Übungen.</p>
 
-    
+  <!-- ============ HOME ============ -->
+  <div id="homeView">
+    <div class="sb-stats" id="stats"></div>
+    <div class="sb-quick">
+      <button type="button" id="qMix"><b>🎲 Gemischte Runde</b><small>10 Sätze aus deinem Level, alle Übungsarten</small></button>
+      <button type="button" id="qReview"><b>🔁 Fehler wiederholen</b><small id="qReviewSub">Sätze, die du falsch hattest</small></button>
+      <button type="button" id="qNext"><b>🧭 Nächstes Thema</b><small id="qNextSub">der Lernpfad schlägt vor</small></button>
+    </div>
+    <div class="sb-row" id="levelChips"></div>
+    <div class="sb-tabs">
+      <button type="button" id="tabG" class="active">📐 Grammatik</button>
+      <button type="button" id="tabT">🗂️ Alltag &amp; Themen</button>
+    </div>
+    <div class="topics" id="topicGrid"></div>
+    <details class="sb-box" style="margin-top:12px;"><summary style="cursor:pointer; font-weight:700;">🎨 Farben der Satzglieder</summary>
+      <div class="legend" id="legend"></div>
+      <div class="note">Das Verb (rot) ist der Chef des deutschen Satzes: im Hauptsatz auf <b>Position 2</b>, im Nebensatz <b>ganz am Ende</b>.
+        🇮🇳 Tamil stellt das Verb immer ans Ende — genau wie der deutsche Nebensatz. Im Hauptsatz musst du umdenken!</div>
+    </details>
   </div>
 
-
-  <h1>Satzbau-Trainer</h1>
-  <div class="sub">Grammatik &amp; Themen üben — Wörter in die richtige Reihenfolge bringen</div>
-
-  <div id="topicListView">
-    <div class="tabrow">
-      <div class="tabbtn active" id="tabGrammar">📐 Grammatik <span style="font-size:11px; opacity:0.8;">(Grammar Rules)</span></div>
-      <div class="tabbtn" id="tabThema">🗂️ Themen <span style="font-size:11px; opacity:0.8;">(Daily Topics)</span></div>
+  <!-- ============ EXERCISE ============ -->
+  <div id="exView" hidden>
+    <button type="button" class="btn grey" id="backBtn" style="margin-bottom:8px;">← Themen</button>
+    <div class="sb-box rulebox" id="ruleBox"></div>
+    <div class="modes" id="modes"></div>
+    <div class="sb-row" style="margin-bottom:6px;">
+      <label class="chip"><input type="checkbox" id="optColor"> 🎨 Farbhilfe</label>
+      <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Tamil</label>
+      <span class="progress" id="progress"></span>
     </div>
-    <div class="topicgrid" id="topicGrid"></div>
+    <div class="sb-box" id="card"></div>
   </div>
 
-  <div id="exerciseView" style="display:none;">
-    <button class="backbtn" id="backBtn">← Zurück zu den Themen / Back to Topics</button>
-    <div class="explainbox">
-      <h2 id="topicTitle"></h2>
-      <div id="topicExplain"></div>
-    </div>
-    <div id="modeSelectorArea"></div>
-    <div class="progressline" id="progressLine"></div>
-    <div class="exercisecard">
-      <div class="enprompt" id="enPrompt"></div>
-      <div class="buildarea" id="buildArea"></div>
-      <div class="bankarea" id="bankArea"></div>
-      <div class="actionrow" id="actionRow">
-        <button class="actbtn reset" id="resetBtn">↺ Reset (Zurücksetzen)</button>
-        <button class="actbtn check" id="checkBtn">✓ Check (Prüfen)</button>
-      </div>
-      <div id="feedbackArea"></div>
-      <button class="actbtn next" id="nextBtn" style="width:100%; display:none;">Next Sentence (Nächster Satz) →</button>
-    </div>
-  </div>
-
-  <footer>Jeder Satz stammt aus handgeprüften Vorlagen (kein freier Zufalls-Wortsalat) — „Nächster Satz" wählt eine neue, ebenfalls geprüfte Kombination, damit Subjekt und Verb immer zusammenpassen.</footer>
+  <p class="note" style="text-align:center; margin-top:18px;">Sätze und Rollen sind geprüft (jede Wortstellung wird automatisch gegen die Regeln getestet: Verb auf Position 2, Verb am Ende im Nebensatz).
+    Englisch/Tamil-Übersetzungen und die tamilischen Regel-Erklärungen sind KI-unterstützt 🤖.</p>
 </div>
 
 <script>
-const DATA = {"grammar": [{"id": "v2", "title": "Wortstellung: Hauptsatz (Verb Position 2)", "explanation": "Im deutschen Hauptsatz steht das konjugierte Verb IMMER an Position 2 — egal, was auf Position 1 steht (Subjekt, Zeitangabe, Ort...). Steht die Zeitangabe zuerst, rutscht das Subjekt auf Position 3 hinter das Verb.", "sentences": [{"tokens": ["Ich", "kaufe", "heute", "ein Brot."], "en": "I am buying bread today.", "ta": "நான் இன்று ரொட்டி வாங்குகிறேன்."}, {"tokens": ["Heute", "kaufen", "wir", "Gemüse."], "en": "Today we are buying vegetables.", "ta": "இன்று நாங்கள் காய்கறிகள் வாங்குகிறோம்."}, {"tokens": ["Er", "arbeitet", "morgen", "im Büro."], "en": "He works in the office tomorrow.", "ta": "அவர் நாளை அலுவலகத்தில் வேலை செய்கிறார்."}, {"tokens": ["Morgen", "arbeite", "ich", "zu Hause."], "en": "Tomorrow I will work from home.", "ta": "நாளை நான் வீட்டிலிருந்து வேலை செய்வேன்."}, {"tokens": ["Wir", "lernen", "jeden Tag", "Deutsch."], "en": "We study German every day.", "ta": "நாங்கள் தினமும் ஜெர்மன் கற்கிறோம்."}, {"tokens": ["Am Montag", "fährt", "sie", "nach Berlin."], "en": "On Monday she is traveling to Berlin.", "ta": "திங்கட்கிழமை அவள் பெர்லினுக்கு செல்கிறாள்."}], "title_en": "Main Clause Word Order (Verb Position 2)", "explain_en": "In German main clauses, the conjugated verb is ALWAYS at Position 2 — no matter what starts the sentence (subject, time, location). If time or location comes first at Position 1, the subject moves to Position 3 behind the verb."}, {"id": "nebensatz", "title": "Wortstellung: Nebensatz (weil / dass / wenn / ob)", "explanation": "Nach subordinierenden Konnektoren (weil, dass, wenn, ob, obwohl) wandert das konjugierte Verb an das allerletzte Ende des Nebensatzes!", "sentences": [{"tokens": ["Ich", "bleibe", "zu Hause,", "weil", "ich", "krank", "bin."], "en": "I am staying at home because I am sick.", "ta": "எனக்கு உடல்நிலை சரியில்லாததால் நான் வீட்டில் இருக்கிறேன்."}, {"tokens": ["Er", "bleibt", "zu Hause,", "weil", "er", "müde", "ist."], "en": "He stays at home because he is tired.", "ta": "அவர் சோர்வாக இருப்பதால் வீட்டில் இருக்கிறார்."}, {"tokens": ["Ich", "denke,", "dass", "Deutsch", "sehr wichtig", "ist."], "en": "I think that German is very important.", "ta": "ஜெர்மன் மொழி மிகவும் முக்கியமானது என்று நினைக்கிறேன்."}, {"tokens": ["Wenn", "es", "regnet,", "bleibe", "ich", "zu Hause."], "en": "If it rains, I stay at home.", "ta": "மழை பெய்தால் நான் வீட்டில் இருப்பேன்."}, {"tokens": ["Ich", "weiß", "nicht,", "ob", "der Zug", "pünktlich", "kommt."], "en": "I do not know whether the train arrives on time.", "ta": "ரயில் சரியான நேரத்தில் வருமா என்று எனக்குத் தெரியவில்லை."}, {"tokens": ["Obwohl", "er", "müde", "ist,", "lernt", "er", "weiter."], "en": "Although he is tired, he continues learning.", "ta": "அவன் சோர்வாக இருந்தாலும் தொடர்ந்து படிக்கிறான்."}], "title_en": "Subordinate Clause (weil / dass / wenn / ob)", "explain_en": "After subordinating conjunctions (because, that, if/when, whether, although), the conjugated verb is ALWAYS kicked to the very end of the clause."}, {"id": "konnektoren", "title": "Konnektoren: Position 0 vs. Position 1 vs. Nebensatz", "explanation": "ADUSO (aber, denn, und, sondern, oder) = Position 0 (normale Wortstellung). deshalb/trotzdem = Position 1 (Inversion: Verb auf Pos 2, Subjekt auf Pos 3). weil/obwohl = Verb ans Ende.", "sentences": [{"tokens": ["Er", "war", "müde,", "aber", "er", "arbeitete", "trotzdem."], "en": "He was tired, but he worked anyway.", "ta": "அவர் சோர்வாக இருந்தார், ஆனால் தொடர்ந்து வேலை செய்தார்."}, {"tokens": ["Das Wetter", "war", "schlecht,", "deshalb", "blieb", "ich", "zu Hause."], "en": "The weather was bad, therefore I stayed home.", "ta": "வானிலை மோசமாக இருந்தது, அதனால் நான் வீட்டில் தங்கிவிட்டேன்."}, {"tokens": ["Er", "ist", "nicht", "arbeitslos,", "sondern", "hat", "einen neuen Job."], "en": "He is not unemployed, but rather has a new job.", "ta": "அவர் வேலையில்லாமல் இல்லை, மாறாக ஒரு புதிய வேலை கிடைத்துள்ளது."}, {"tokens": ["Ich", "lerne", "fleißig,", "denn", "ich", "möchte", "die B1-Prüfung", "bestehen."], "en": "I study diligently, for I want to pass B1.", "ta": "நான் ஆர்வத்துடன் படிக்கிறேன், ஏனெனில் B1 தேர்வில் தேர்ச்சி பெற விரும்புகிறேன்."}, {"tokens": ["Andi", "war", "nervös,", "trotzdem", "hatte", "er", "ein gutes Gespräch."], "en": "Andi was nervous, nevertheless he had a good interview.", "ta": "ஆண்டி பதற்றமாக இருந்தார், இருப்பினும் நல்ல நேர்காணல் அமைந்தது."}], "title_en": "Connectors: Position 0 vs. Position 1 vs. End", "explain_en": "ADUSO (aber, denn, und, sondern, oder) take Position 0 (normal word order follows). deshalb/trotzdem take Position 1 (inversion: verb at Pos 2, subject at Pos 3). weil/obwohl send verb to end."}, {"id": "perfekt", "title": "Perfekt-Bildung (haben / sein + Partizip II)", "explanation": "Das Hilfsverb (haben/sein) steht konjugiert auf Position 2. Das Partizip II steht ganz am Satzende (Satzklammer).", "sentences": [{"tokens": ["Ich", "habe", "gestern", "ein interessantes Buch", "gelesen."], "en": "Yesterday I read an interesting book.", "ta": "நேற்று நான் ஒரு சுவாரஸ்யமான புத்தகத்தைப் படித்தேன்."}, {"tokens": ["Wir", "haben", "heute Morgen", "viel Deutsch", "gelernt."], "en": "We learned a lot of German this morning.", "ta": "இன்று காலை நாங்கள் நிறைய ஜெர்மன் படித்தோம்."}, {"tokens": ["Er", "ist", "letzte Woche", "nach München", "gefahren."], "en": "He traveled to Munich last week.", "ta": "அவர் கடந்த வாரம் முனிச்சிற்கு சென்றார்."}, {"tokens": ["Sie", "ist", "gestern Abend", "spät nach Hause", "gekommen."], "en": "She came home late yesterday evening.", "ta": "அவள் நேற்று இரவு தாமதமாக வீட்டிற்கு வந்தாள்."}], "title_en": "Past Perfect Tense (haben / sein + Partizip II)", "explain_en": "The helping verb (haben/sein) sits at Position 2. The main verb's Partizip II (ge- form) sits at the very end of the sentence."}, {"id": "modalverben", "title": "Modalverben (können, müssen, wollen, dürfen...)", "explanation": "Das Modalverb steht konjugiert auf Position 2. Der Infinitiv des Hauptverbs steht unverändert ganz am Satzende.", "sentences": [{"tokens": ["Ich", "kann", "heute", "leider nicht", "zum Kurs", "kommen."], "en": "Unfortunately I cannot come to the course today.", "ta": "துரதிர்ஷ்டவசமாக இன்று என்னால் வகுப்பிற்கு வர முடியாது."}, {"tokens": ["Wir", "müssen", "das Formular", "bis Freitag", "beim Amt", "einreichen."], "en": "We must submit the form to the office by Friday.", "ta": "வெள்ளிக்கிழமைக்குள் அலுவலகத்தில் படிவத்தை சமர்ப்பிக்க வேண்டும்."}, {"tokens": ["Er", "möchte", "nächstes Jahr", "eine Ausbildung", "beginnen."], "en": "He would like to start an apprenticeship next year.", "ta": "அவர் அடுத்த ஆண்டு தொழிற்பயிற்சியைத் தொடங்க விரும்புகிறார்."}], "title_en": "Modal Verbs (can, must, want to, may...)", "explain_en": "The conjugated modal verb sits at Position 2. The infinitive of the main action verb sits unchanged at the very end of the sentence."}, {"id": "trennbar", "title": "Trennbare Verben (Vorsilbe ans Satzende)", "explanation": "Der Verbstamm steht konjugiert auf Position 2. Die trennbare Vorsilbe (auf-, an-, ein-, aus-, mit-...) wandert ganz ans Ende des Satzes!", "sentences": [{"tokens": ["Ich", "stehe", "jeden Morgen", "um sechs Uhr", "auf."], "en": "I get up at six o'clock every morning.", "ta": "நான் தினமும் காலை ஆறு மணிக்கு எழுகிறேன்."}, {"tokens": ["Der Zug", "kommt", "in zehn Minuten", "am Bahnhof", "an."], "en": "The train arrives at the station in ten minutes.", "ta": "ரயில் பத்து நிமிடங்களில் ரயில் நிலையத்திற்கு வந்து சேரும்."}, {"tokens": ["Wir", "räumen", "heute", "die ganze Küche", "auf."], "en": "We are cleaning up the entire kitchen today.", "ta": "நாங்கள் இன்று முழு சமையலறையையும் சுத்தம் செய்கிறோம்."}], "title_en": "Separable Verbs (Prefix moves to end)", "explain_en": "The verb stem is conjugated at Position 2. The separable prefix (auf-, an-, ein-, aus-, mit-...) detaches and flies to the very end of the sentence."}, {"id": "adjektiv", "title": "Adjektivendungen (Nominativ & Akkusativ)", "explanation": "Nach bestimmtem Artikel (der/die/das) im Nominativ: -e. Nach unbestimmtem Artikel (ein/eine): maskulin -er, feminin -e, neutral -es. Im Akkusativ Maskulin: immer -en!", "sentences": [{"tokens": ["Der neue Kollege", "ist", "sehr hilfsbereit", "und nett."], "en": "The new colleague is very helpful and nice.", "ta": "புதிய சக ஊழியர் மிகவும் உதவிகரமானவர் மற்றும் நல்லவர்."}, {"tokens": ["Ich", "habe", "eine schöne Wohnung", "im Zentrum", "gefunden."], "en": "I found a beautiful apartment in the city center.", "ta": "நகர மையத்தில் ஒரு அழகான வீட்டை நான் கண்டறிந்தேன்."}, {"tokens": ["Wir", "haben", "einen neuen Tisch", "für die Küche", "gekauft."], "en": "We bought a new table for the kitchen.", "ta": "சமையலறைக்கு ஒரு புதிய மேசையை வாங்கினோம்."}], "title_en": "Adjective Endings (Nominative & Accusative)", "explain_en": "Adjectives change endings based on gender and case (-e, -en, -er, -es). In masculine accusative, the ending is always -en."}, {"id": "praeposition", "title": "Präpositionen mit Dativ & Akkusativ", "explanation": "DOGFU (durch, ohne, gegen, für, um) = immer Akkusativ. ABMNSVZ (aus, bei, mit, nach, seit, von, zu) = immer Dativ. Wechselpräpositionen: wohin? = Akkusativ, wo? = Dativ.", "sentences": [{"tokens": ["Ich", "gehe", "heute", "ohne meinen Bruder", "ins Kino."], "en": "I am going to the cinema today without my brother.", "ta": "இன்று என் சகோதரன் இல்லாமல் திரைப்படத்திற்கு செல்கிறேன்."}, {"tokens": ["Wir", "fahren", "morgen", "mit dem schnellen Zug", "nach Berlin."], "en": "Tomorrow we travel to Berlin by fast train.", "ta": "நாளை அதிவேக ரயிலில் பெர்லினுக்கு செல்கிறோம்."}, {"tokens": ["Ich", "lege", "das Buch", "auf den Tisch."], "en": "I place the book on the table (action/movement).", "ta": "நான் புத்தகத்தை மேசை மீது வைக்கிறேன்."}, {"tokens": ["Das Buch", "liegt", "schon", "auf dem Tisch."], "en": "The book is already lying on the table (position/location).", "ta": "புத்தகம் ஏற்கனவே மேசை மீது உள்ளது."}], "title_en": "Prepositions with Dative & Accusative Cases", "explain_en": "DOGFU prepositions always take Accusative. ABMNSVZ prepositions always take Dative. Dual prepositions take Accusative for movement/direction, and Dative for stationary location."}], "thematic": [{"id": "familie", "title": "Familie & Alltag", "explanation": "Wortschatz und Sätze rund um Familienmitglieder, Beziehungen und alltägliche Aktivitäten.", "sentences": [{"tokens": ["Meine Eltern", "wohnen", "seit vielen Jahren", "in Indien."], "en": "My parents have lived in India for many years.", "ta": "என் பெற்றோர் பல ஆண்டுகளாக இந்தியாவில் வசிக்கின்றனர்."}, {"tokens": ["Ich", "besuche", "meine Familie", "jeden Sommer", "in Chennai."], "en": "I visit my family in Chennai every summer.", "ta": "ஒவ்வொரு கோடையிலும் நான் சென்னையில் உள்ள என் குடும்பத்தினரை சந்திக்கிறேன்."}, {"tokens": ["Unsere Tochter", "geht", "jeden Morgen", "in die Grundschule."], "en": "Our daughter goes to primary school every morning.", "ta": "எங்கள் மகள் தினமும் காலை தொடக்கப் பள்ளிக்குச் செல்கிறாள்."}], "title_en": "Family & Daily Life", "explain_en": "Vocabulary and real-world sentence building about family members, relationships, and everyday activities."}, {"id": "wohnen", "title": "Wohnen & Miete", "explanation": "Sätze für Wohnungssuche, Mietverträge, Umzug und Nachbarschaft.", "sentences": [{"tokens": ["Die Miete", "für diese Wohnung", "ist", "sehr günstig."], "en": "The rent for this apartment is very affordable.", "ta": "இந்த குடியிருப்பின் வாடகை மிகவும் மலிவானது."}, {"tokens": ["Ich", "habe", "den neuen Mietvertrag", "gestern", "unterschrieben."], "en": "I signed the new tenancy agreement yesterday.", "ta": "நேற்று நான் புதிய வாடகை ஒப்பந்தத்தில் கையெழுத்திட்டேன்."}, {"tokens": ["Wir", "sind", "letzten Monat", "in eine größere Wohnung", "umgezogen."], "en": "Last month we moved into a larger apartment.", "ta": "கடந்த மாதம் நாங்கள் ஒரு பெரிய வீட்டிற்கு குடிபெயர்ந்தோம்."}], "title_en": "Housing, Rent & Moving", "explain_en": "Sentence patterns for apartment search, tenancy agreements, rooms, and neighborhood."}, {"id": "arbeit", "title": "Arbeit & Beruf", "explanation": "Sätze für Bewerbung, Arbeitsplatz, Vorstellungsgespräch und Kollegen.", "sentences": [{"tokens": ["Ich", "habe", "mich", "auf die Stelle als Ingenieur", "beworben."], "en": "I applied for the position as an engineer.", "ta": "பொறியாளர் பணிக்கு நான் விண்ணப்பித்துள்ளேன்."}, {"tokens": ["Mein Kollege", "hat", "das wichtige Meeting", "sehr gut", "organisiert."], "en": "My colleague organized the important meeting very well.", "ta": "என் சக ஊழியர் முக்கியமான கூட்டத்தை சிறப்பாக ஏற்பாடு செய்தார்."}, {"tokens": ["Ich", "arbeite", "seit drei Jahren", "in dieser deutschen Firma."], "en": "I have been working at this German company for three years.", "ta": "நான் இந்த ஜெர்மன் நிறுவனத்தில் மூன்று ஆண்டுகளாக வேலை செய்கிறேன்."}], "title_en": "Work, Job & Career", "explain_en": "Sentence patterns for job applications, office meetings, colleagues, and employment contracts."}, {"id": "einkaufen", "title": "Einkaufen & Online-Shopping", "explanation": "Sätze für Supermarkt, Reklamation, Pakete und Rücksendungen.", "sentences": [{"tokens": ["Ich", "habe", "das falsche Paket", "gestern", "zurückgeschickt."], "en": "I returned the wrong package yesterday.", "ta": "நேற்று தவறான பார்சலை திருப்பி அனுப்பினேன்."}, {"tokens": ["Dieser Rabatt-Gutschein", "gilt", "nur noch", "bis Freitag."], "en": "This discount voucher is only valid until Friday.", "ta": "இந்த தள்ளுபடி கூப்பன் வெள்ளிக்கிழமை வரை மட்டுமே செல்லும்."}, {"tokens": ["Ich", "möchte", "diese Jacke", "bitte", "umtauschen."], "en": "I would like to exchange this jacket, please.", "ta": "தயவுசெய்து இந்த ஜாக்கெட்டை மாற்றிக்கொள்ள விரும்புகிறேன்."}], "title_en": "Shopping & Online Orders", "explain_en": "Sentences for supermarket, sales, returning packages, and customer service."}, {"id": "gesundheit", "title": "Gesundheit & Arztbesuch", "explanation": "Sätze für Arzttermin, Symptome, Apotheke und Medikamente.", "sentences": [{"tokens": ["Ich", "habe", "einen dringenden Termin", "beim Arzt", "vereinbart."], "en": "I scheduled an urgent appointment with the doctor.", "ta": "மருத்துவரிடம் அவசர சந்திப்பை பதிவு செய்துள்ளேன்."}, {"tokens": ["Die Ärztin", "hat", "mir", "ein gutes Medikament", "verschrieben."], "en": "The doctor prescribed a good medicine for me.", "ta": "மருத்துவர் எனக்கு நல்ல மருந்தை பரிந்துரைத்தார்."}, {"tokens": ["Er", "ist", "seit drei Tagen", "schwer erkältet."], "en": "He has had a heavy cold for three days.", "ta": "அவருக்கு மூன்று நாட்களாக கடுமையான சளி பிடித்துள்ளது."}], "title_en": "Health & Doctor Appointments", "explain_en": "Sentences for medical visits, symptoms, pharmacy, and medication."}, {"id": "behoerden", "title": "Behörden & Formulare", "explanation": "Sätze für Einwohnermeldeamt, Ausländerbehörde und Anträge.", "sentences": [{"tokens": ["Ich", "muss", "meinen neuen Wohnsitz", "beim Bürgeramt", "anmelden."], "en": "I must register my new address at the registration office.", "ta": "எனது புதிய குடியிருப்பு முகவரியை பதிவு அலுவலகத்தில் பதிவு செய்ய வேண்டும்."}, {"tokens": ["Das Amt", "hat", "meinen Antrag", "letzte Woche", "genehmigt."], "en": "The office approved my application last week.", "ta": "அலுவலகம் கடந்த வாரம் எனது விண்ணப்பத்தை அங்கீகரித்தது."}, {"tokens": ["Ich", "brauche", "eine beglaubigte Kopie", "von meinem Zeugnis."], "en": "I need a certified copy of my certificate.", "ta": "எனது சான்றிதழின் சான்றளிக்கப்பட்ட நகல் எனக்குத் தேவை."}], "title_en": "Authorities, Bureaucracy & Official Forms", "explain_en": "Sentences for registration office, applications, official certificates, and residence."}]};
+/* Satzbau-Trainer (Task 43). Data: js/satzbau-data.js (window.SATZBAU_DATA), validated by scripts/check_satzbau.py.
+   A sentence is a list of chunks [text, role]; the role drives the colours, the Satzbauplan, the verb detective,
+   the mistake generator and the transformation drill. Progress keys stay compatible with the old page (sb_progress_v1). */
+const DATA = window.SATZBAU_DATA || { grammar: [], thematic: [] };
+const ROLE = {
+  S: ['Subjekt', 'Subject'], V: ['Verb (Pos. 2)', 'finite verb'], E: ['Verbende', 'verb at the end'], v: ['Verb im Nebensatz', 'verb (sub-clause)'],
+  e: ['Verbteil im Nebensatz', 'verb part (sub-clause)'], Q: ['Fragewort', 'question word'], K: ['und/aber (Pos. 0)', 'and/but'],
+  A: ['deshalb/trotzdem', 'therefore/still'], N: ['Nebensatz-Start', 'weil/dass/wenn…'], T: ['Zeit', 'time'], C: ['Grund', 'reason'],
+  M: ['Art & Weise', 'manner'], L: ['Ort', 'place'], O: ['Akkusativ', 'accusative obj.'], D: ['Dativ', 'dative obj.'],
+  P: ['Präp.-Objekt', 'prep. object'], R: ['sich', 'reflexive'], X: ['nicht', 'negation'], W: ['Ergänzung', 'complement'] };
+const VERB_ROLES = new Set(['V', 'E', 'v', 'e']);
+const LEVELS = ['A1', 'A2', 'B1', 'B2'];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const store = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
 
-let curCategory = 'grammar';
-let curTopic = null;
-let curVariant = null;
-let correctOrder = [];
-let buildSlots = [];   // words currently placed in build area, in order
-let bankWords = [];    // remaining shuffled words available to pick
-let seenCount = 0;
-let originalPunctuation = "";
-let practiceMode = 'medium'; // 'easy' (multiple choice), 'medium' (tap-token builder), 'hard' (typed)
-
-function setPracticeMode(m){
-  practiceMode = m;
-  renderModeSelector();
-  renderModeBody();
+/* ---------- data helpers ---------- */
+const ALL_TOPICS = [...DATA.grammar.map(t => Object.assign(t, { kind: 'grammar' })), ...DATA.thematic.map(t => Object.assign(t, { kind: 'thematic' }))];
+const TOPIC_BY_ID = Object.fromEntries(ALL_TOPICS.map(t => [t.id, t]));
+function sentenceText(s) {
+  return s.t.map((c, i) => i === 0 ? cap(c[0]) : c[0]).join(' ') + (s.end || '.');
 }
+function orderText(chunks, end) { return chunks.map((c, i) => i === 0 ? cap(c[0]) : c[0]).join(' ') + (end || ''); }
+function sKey(topicId, s) { return (topicId || 'top') + '::' + sentenceText(s).trim().toLowerCase(); }
+function sentenceLevel(t, s) { return s.lv || t.level; }
 
-function renderModeSelector(){
-  const el = document.getElementById('modeSelectorArea');
-  if(!el) return;
-  const modes = [{k:'easy',l:'🟢 Easy (Multiple Choice)'},{k:'medium',l:'🟡 Medium (Build It)'},{k:'hard',l:'🔴 Hard (Type It)'}];
-  el.innerHTML = `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-    ${modes.map(m=>`<button class="actbtn" style="padding:6px 12px; font-size:11.5px; ${practiceMode===m.k?'background:var(--ink); color:#fff;':'background:#fff;'}" onclick="setPracticeMode('${m.k}')">${m.l}</button>`).join('')}
-  </div>`;
-}
-
-// Dispatches the exercise body to whichever mode is active. Medium reuses the
-// pre-existing tap-token builder UI unchanged (bankArea/actionRow visible);
-// Easy/Hard replace buildArea's contents and hide bankArea/the Reset+Check
-// buttons in favor of their own self-contained UI + action buttons.
-function renderModeBody(){
-  document.getElementById('feedbackArea').innerHTML = '';
-  document.getElementById('nextBtn').style.display = 'none';
-  if(practiceMode === 'easy'){ renderEasyChoice(); return; }
-  if(practiceMode === 'hard'){ renderHardTyped(); return; }
-  document.getElementById('bankArea').style.display = '';
-  document.getElementById('actionRow').style.display = '';
-  document.getElementById('checkBtn').style.display = '';
-  document.getElementById('resetBtn').style.display = '';
-  renderBuild();
-}
-
-// Persistence
-let sb_progress_v1 = JSON.parse(localStorage.getItem('sb_progress_v1') || '{}');
-function saveSbProgress() {
-  try { localStorage.setItem('sb_progress_v1', JSON.stringify(sb_progress_v1)); } catch(e){}
-  updateProgressUI();
-}
-
-function getSentenceKey(topicId, variantText) {
-  return (topicId || 'top') + '::' + (variantText || '').trim().toLowerCase();
-}
-
-function markSentenceDone(topicId, variantText) {
-  const key = getSentenceKey(topicId, variantText);
-  sb_progress_v1[key] = (sb_progress_v1[key] || 0) + 1;
-  saveSbProgress();
-}
-
-function countTotalSentences() {
-  let all = [...DATA.grammar, ...DATA.thematic];
-  return all.reduce((sum, t) => sum + (t.sentences ? t.sentences.length : 0), 0);
-}
-
-function countMasteredInTopic(topic) {
-  let count = 0;
-  if (topic && topic.sentences) {
-    topic.sentences.forEach(s => {
-      let sent = s.tokens.join(' ');
-      if (sb_progress_v1[getSentenceKey(topic.id, sent)]) count++;
-    });
+/* ---------- progress ---------- */
+let PROG = store.get('sb_progress_v1', {});
+let REVIEW = store.get('sb_review_v1', []);          // [{id, k}] missed sentences: topic id + sentence key
+let DAY = store.get('sb_day_v1', { d: '', n: 0, ok: 0 });
+const today = () => new Date().toISOString().slice(0, 10);
+function recordResult(topic, s, ok) {
+  const k = sKey(topic.id, s);
+  if (DAY.d !== today()) DAY = { d: today(), n: 0, ok: 0 };
+  DAY.n++; if (ok) DAY.ok++;
+  store.set('sb_day_v1', DAY);
+  if (ok) {
+    PROG[k] = (PROG[k] || 0) + 1; store.set('sb_progress_v1', PROG);
+    REVIEW = REVIEW.filter(r => r.k !== k);
+    if (typeof addXP === 'function') try { addXP(5, 'Satzbau'); } catch (e) {}
+  } else {
+    if (!REVIEW.some(r => r.k === k)) REVIEW.push({ id: topic.id, k });
+    if (typeof logError === 'function') try { logError('satzbau', { topic: topic.id, sentence: sentenceText(s) }); } catch (e) {}
   }
-  return count;
+  store.set('sb_review_v1', REVIEW);
+}
+function masteredIn(t) { return t.sentences.filter(s => PROG[sKey(t.id, s)]).length; }
+
+/* ---------- home ---------- */
+let curLevel = store.get('sb_level_v1', 'alle');
+let curTab = 'grammar';
+function roleStyle(r) { return `--rc: var(--r-${r});`; }
+function renderHome() {
+  const total = ALL_TOPICS.reduce((n, t) => n + t.sentences.length, 0);
+  const mastered = ALL_TOPICS.reduce((n, t) => n + masteredIn(t), 0);
+  const d = DAY.d === today() ? DAY : { n: 0, ok: 0 };
+  document.getElementById('stats').innerHTML = `
+    <div class="sb-stat"><b>${mastered} / ${total}</b><span>Sätze gemeistert</span></div>
+    <div class="sb-stat"><b>${d.n}</b><span>heute geübt (${d.n ? Math.round(100 * d.ok / d.n) : 0}% richtig)</span></div>
+    <div class="sb-stat"><b>${REVIEW.length}</b><span>zum Wiederholen</span></div>
+    <div class="sb-stat"><b>${ALL_TOPICS.filter(t => t.kind === 'grammar').length} + ${ALL_TOPICS.filter(t => t.kind === 'thematic').length}</b><span>Grammatik- + Alltagsthemen</span></div>`;
+  document.getElementById('qReviewSub').textContent = REVIEW.length ? `${REVIEW.length} Sätze warten` : 'noch keine Fehler — super!';
+  const nxt = nextTopic();
+  document.getElementById('qNextSub').textContent = nxt ? `${nxt.level} · ${nxt.title}` : 'alles gemeistert 🎉';
+  document.getElementById('levelChips').innerHTML = '<span class="progress">Level:</span>' + ['alle', ...LEVELS].map(l =>
+    `<button type="button" class="chip ${curLevel === l ? 'active' : ''}" data-lvl="${l}">${l === 'alle' ? 'Alle' : l}</button>`).join('');
+  document.getElementById('tabG').classList.toggle('active', curTab === 'grammar');
+  document.getElementById('tabT').classList.toggle('active', curTab === 'thematic');
+  const list = ALL_TOPICS.filter(t => t.kind === curTab && (curLevel === 'alle' || t.level === curLevel ||
+    (curTab === 'thematic' && t.sentences.some(s => sentenceLevel(t, s) === curLevel))));
+  document.getElementById('topicGrid').innerHTML = list.map(t => {
+    const m = masteredIn(t), n = t.sentences.length, pct = n ? Math.round(100 * m / n) : 0;
+    return `<button type="button" class="topic" data-topic="${esc(t.id)}"><div class="sb-row" style="justify-content:space-between;"><span class="lvl">${esc(levelSpan(t))}</span>${pct >= 100 ? '⭐' : ''}</div>
+      <div class="t1">${esc(t.title)}</div><div class="t2">🇬🇧 ${esc(t.title_en)}</div>
+      <div class="bar"><i style="width:${pct}%"></i></div><div class="cnt">${m} / ${n} gemeistert</div></button>`;
+  }).join('') || '<p class="note">Keine Themen für dieses Level in diesem Bereich.</p>';
+  document.getElementById('legend').innerHTML = Object.entries(ROLE).map(([r, [de, en]]) =>
+    `<span style="${roleStyle(r)}"><b>${r}</b> ${esc(de)} · ${esc(en)}</span>`).join('');
+}
+function levelSpan(t) {
+  const ls = LEVELS.filter(l => t.sentences.some(s => sentenceLevel(t, s) === l));
+  return ls.length > 1 ? ls[0] + '–' + ls[ls.length - 1] : t.level;
+}
+function nextTopic() {
+  for (const l of LEVELS) for (const t of DATA.grammar) if (t.level === l && masteredIn(t) < t.sentences.length) return t;
+  return null;
 }
 
-function updateProgressUI() {
-  const total = countTotalSentences();
-  const mastered = Object.keys(sb_progress_v1).length;
-  const ind = document.getElementById('sbProgressIndicator');
-  if (ind) ind.textContent = `${mastered} / ${total} gemeistert ⭐`;
+/* ---------- session ---------- */
+let S = null;   // { title, items:[{topic, s}], i, results:[], mode }
+let MODE = store.get('sb_mode_v1', 'build');
+const MODES = [
+  ['build', '🧩 Bauen'], ['choice', '🟢 Auswahl'], ['type', '✍️ Schreiben'], ['verb', '🎯 Verb-Detektiv'],
+  ['error', '🔍 Fehler finden'], ['listen', '🎧 Hören & Bauen'], ['speak', '🎙️ Sprechen'], ['transform', '🔄 Umbau']
+];
+function startSession(title, items, topic) {
+  S = { title, items, i: 0, results: [], topic };
+  document.getElementById('homeView').hidden = true;
+  document.getElementById('exView').hidden = false;
+  window.scrollTo({ top: 0 });
+  renderRule(topic);
+  renderModes();
+  renderItem();
+}
+function openTopic(t) {
+  // everyday topics mix levels (A1–B1): with a level chosen, practise only that level's sentences
+  const own = t.kind === 'thematic' && curLevel !== 'alle' ? t.sentences.filter(s => sentenceLevel(t, s) === curLevel) : [];
+  startSession(t.title, shuffle(own.length ? own : t.sentences).map(s => ({ topic: t, s })), t);
+}
+function mixedRound() {
+  const pool = [];
+  ALL_TOPICS.forEach(t => t.sentences.forEach(s => { if (curLevel === 'alle' || sentenceLevel(t, s) === curLevel) pool.push({ topic: t, s }); }));
+  const mix = ['build', 'choice', 'verb', 'error', 'build', 'transform', 'type'];   // a bit of everything, building most often
+  startSession('🎲 Gemischte Runde', shuffle(pool).slice(0, 10).map((x, i) => Object.assign(x, { mode: mix[i % mix.length] })), null);
+}
+function reviewRound() {
+  const items = [];
+  REVIEW.forEach(r => { const t = TOPIC_BY_ID[r.id]; const s = t && t.sentences.find(x => sKey(t.id, x) === r.k); if (s) items.push({ topic: t, s }); });
+  if (!items.length) { alert('Keine Fehler zum Wiederholen — gut gemacht! 🎉'); return; }
+  startSession('🔁 Fehler wiederholen', shuffle(items).slice(0, 15), null);
+}
+function renderRule(t) {
+  const box = document.getElementById('ruleBox');
+  if (!t) { box.innerHTML = `<b style="font-size:17px;">${esc(S.title)}</b><div class="note">Sätze aus verschiedenen Themen — die Regel zum jeweiligen Satz steht unter der Aufgabe.</div>`; return; }
+  box.innerHTML = `<div class="sb-row" style="justify-content:space-between;"><b style="font-size:18px;">${esc(t.title)}</b><span class="lvl">${esc(levelSpan(t))}</span></div>
+    <div class="progress">🇬🇧 ${esc(t.title_en)}</div>
+    ${t.formula && t.formula.length ? `<div class="formula">${t.formula.map(([l, r]) => `<span style="${roleStyle(r)}">${esc(l)}</span>`).join('<span style="border:none;background:none;padding:5px 0;">→</span>')}</div>` : ''}
+    <div>${esc(t.rule)}</div>
+    <div class="en">🇬🇧 ${esc(t.rule_en)}</div>
+    ${t.rule_ta ? `<div class="ta" lang="ta">🇮🇳 ${esc(t.rule_ta)} <span title="KI-unterstützte Übersetzung">🤖</span></div>` : ''}
+    ${t.tip ? `<div class="tipline">💡 <b>Merktrick:</b> ${esc(t.tip)}</div>` : ''}
+    ${t.mistake ? `<div class="tipline">⚠️ <b>Typischer Fehler:</b> ${esc(t.mistake)}</div>` : ''}`;
+}
+function renderModes(active) {
+  active = active || MODE;
+  document.getElementById('modes').innerHTML = MODES.map(([k, l]) => `<button type="button" data-mode="${k}" class="${active === k ? 'active' : ''}">${l}</button>`).join('');
 }
 
-function speakText(txt) {
-  if (!('speechSynthesis' in window) || !txt) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(txt);
-  u.lang = 'de-DE';
-  u.rate = 0.92;
-  window.speechSynthesis.speak(u);
+/* ---------- clause analysis (same rules as scripts/check_satzbau.py) ---------- */
+function clauses(t) {
+  const out = []; let cur = [];
+  t.forEach((c, i) => {
+    if (cur.length && ('NK'.includes(c[1]) || t[i - 1][0].trim().endsWith(','))) { out.push(cur); cur = []; }
+    cur.push(Object.assign([c[0], c[1]], { i }));
+  });
+  if (cur.length) out.push(cur);
+  return out;
 }
-
-function shuffleArr(arr){
-  const a = arr.slice();
-  for(let i=a.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+/* Satzbauplan of the first main clause: Vorfeld | Verb | Mittelfeld | Verbende | Nachfeld */
+function fieldModel(t) {
+  const vi = t.findIndex(c => c[1] === 'V');
+  if (vi < 0) return null;
+  let start = 0;
+  if (t[0][1] === 'K') start = 1;
+  const cls = clauses(t);
+  let end = t.length;                                   // main clause ends where the next clause starts
+  for (const cl of cls) { const first = cl[0].i; if (first > vi && ('NK'.includes(cl[0][1]))) { end = first; break; } }
+  const eIdx = []; for (let i = vi + 1; i < end; i++) if (t[i][1] === 'E') eIdx.push(i);
+  const mEnd = eIdx.length ? eIdx[0] : end;
+  return {
+    vor: t.slice(start, vi), verb: [t[vi]], mittel: t.slice(vi + 1, mEnd),
+    ende: eIdx.map(i => t[i]), nach: t.slice(eIdx.length ? eIdx[eIdx.length - 1] + 1 : end),
+    lead: start ? [t[0]] : []
+  };
 }
-
-function pickRandom(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
+function chunkHTML(c, opts) {
+  opts = opts || {};
+  const colour = opts.color !== false;
+  return `<span class="ch ${colour ? 'role' : ''}" style="${colour ? roleStyle(c[1]) : ''}" data-rl="${c[1]}">${esc(opts.first ? cap(c[0]) : c[0])}</span>`;
 }
-
-function renderTopicGrid(){
-  const list = curCategory === 'grammar' ? DATA.grammar : DATA.thematic;
-  const grid = document.getElementById('topicGrid');
-  grid.innerHTML = list.map((t, i)=>{
-    const totalSentences = t.sentences ? t.sentences.length : 0;
-    const mastered = countMasteredInTopic(t);
-    const pct = totalSentences > 0 ? Math.round((mastered / totalSentences) * 100) : 0;
-    return `<div class="topiccard" data-idx="${i}">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px;">
-        <div>
-          <div class="ttitle">${t.title}</div>
-          ${t.title_en ? `<div style="font-size:11px; color:var(--ink-soft); font-weight:600; margin-top:2px;">🇬🇧 ${t.title_en}</div>` : ''}
-        </div>
-        ${mastered > 0 ? `<span style="background:${pct>=100?'var(--green)':'var(--gold)'}; color:#fff; font-size:10px; font-family:'IBM Plex Mono',monospace; padding:1px 6px; border-radius:10px; font-weight:700; white-space:nowrap;">${pct}%</span>` : ''}
-      </div>
-      <div class="tcount">${mastered} / ${totalSentences} gemeistert</div>
+function planHTML(s) {
+  const f = fieldModel(s.t);
+  if (!f) return '';
+  const col = (title, arr, cls) => `<div class="col ${cls || ''}"><h6>${title}</h6>${arr.length ? arr.map(c => chunkHTML(c, { first: c === s.t[0] })).join('') : '<span class="note">—</span>'}</div>`;
+  const subs = clauses(s.t).filter(cl => cl[0][1] === 'N');
+  return `<div style="margin-top:10px;"><b>🏗️ Satzbauplan</b>
+    ${f.lead.length ? `<div class="note">Position 0 (zählt nicht): ${f.lead.map(c => chunkHTML(c, { first: true })).join('')}</div>` : ''}
+    <div class="plan">${col('Vorfeld (Pos. 1)', f.vor)}${col('Verb (Pos. 2)', f.verb, 'verb')}${col('Mittelfeld', f.mittel)}${col('Verbende', f.ende, 'verb')}${col('Nachfeld', f.nach)}</div>
+    ${subs.length ? `<div class="note">Nebensatz: ${subs.map(cl => cl.map(c => chunkHTML(c)).join('')).join(' · ')} → das Verb steht <b>am Ende</b> (wie im Tamil 🇮🇳).</div>` : ''}
     </div>`;
-  }).join('');
+}
 
-  grid.querySelectorAll('.topiccard').forEach(el=>{
-    el.onclick = ()=> openTopic(list[parseInt(el.dataset.idx)]);
+/* ---------- mistakes the learner typically makes (for "Auswahl" and "Fehler finden") ---------- */
+function wrongVariants(t, topicId) {
+  // Work on chunk indices; commas stay at the clause borders (they belong to the position, not to the chunk).
+  const bare = t.map(c => c[0].replace(/,$/, ''));
+  const commaBefore = new Set(t.map((c, i) => c[0].trim().endsWith(',') ? i + 1 : -1).filter(i => i > 0));
+  const out = [], orig = t.map((_, i) => i).join('|');
+  const add = (order, why, movedIdx) => {
+    const k = order.join('|');
+    if (k === orig || out.some(o => o.k === k)) return;
+    const arr = order.map(i => [bare[i], t[i][1]]);
+    order.forEach((i, j) => { if (commaBefore.has(j + 1)) arr[j][0] += ','; });   // every move stays inside its clause, so the borders keep their slots
+    out.push({ t: arr, why, moved: bare[movedIdx], pos: order.indexOf(movedIdx), k });
+  };
+  const move = (from, to) => { const o = t.map((_, i) => i); o.splice(from, 1); o.splice(to > from ? to - 1 : to, 0, from); return o; };
+  const cls = clauses(t);
+  const clauseOf = i => cls.find(cl => cl.some(c => c.i === i));
+  t.forEach((c, vi) => {
+    if (c[1] !== 'V') return;
+    const cl = clauseOf(vi), last = cl[cl.length - 1].i;
+    // English order: verb on position 3 ("Heute ich kaufe …", "Wenn es regnet, ich bleibe …", "deshalb ich bleibe …")
+    if (vi + 1 <= last && !'NK'.includes(t[vi + 1][1]) && !t[vi][0].trim().endsWith(','))
+      add(move(vi, vi + 2), cl[0][1] === 'A' || (vi > 0 && commaBefore.has(vi))
+        ? 'Nach „deshalb/trotzdem/dann“ oder nach einem Nebensatz kommt sofort das Verb (Position 2) — erst dann das Subjekt.'
+        : 'Im Hauptsatz steht das konjugierte Verb auf Position 2 — nicht auf Position 3.', vi);
+    // Tamil order: verb at the end of the main clause
+    if (last > vi + 1) add(move(vi, last + 1), 'Im Hauptsatz darf das konjugierte Verb nicht ans Ende — es gehört auf Position 2 (anders als im Tamil).', vi);
+    // Satzklammer: participle/infinitive/prefix right after the verb
+    const eI = cl.map(x => x.i).find(i => t[i][1] === 'E' && i > vi + 1);
+    if (eI != null) add(move(eI, vi + 1), 'Satzklammer: Partizip/Infinitiv/Präfix steht ganz am Ende des Hauptsatzes, nicht direkt nach dem Verb.', eI);
   });
-}
-
-function setTab(){
-  document.getElementById('tabGrammar').classList.toggle('active', curCategory==='grammar');
-  document.getElementById('tabThema').classList.toggle('active', curCategory==='thematic');
-  renderTopicGrid();
-}
-
-document.getElementById('tabGrammar').onclick = ()=>{ curCategory='grammar'; setTab(); };
-document.getElementById('tabThema').onclick = ()=>{ curCategory='thematic'; setTab(); };
-
-function openTopic(topic){
-  curTopic = topic;
-  seenCount = 0;
-  document.getElementById('topicListView').style.display = 'none';
-  document.getElementById('exerciseView').style.display = 'block';
-  document.getElementById('topicTitle').innerHTML = `
-    <span>${topic.title}</span>
-    ${topic.title_en ? `<div style="font-size:13px; color:var(--ink-soft); font-family:'IBM Plex Sans',sans-serif; margin-top:3px; font-weight:400;">🇬🇧 ${topic.title_en}</div>` : ''}
-  `;
-  document.getElementById('topicExplain').innerHTML = `
-    <div style="margin-bottom:6px;">${topic.explanation}</div>
-    ${topic.explain_en ? `<div style="font-size:12px; color:var(--ink-soft); background:#fff; padding:8px 10px; border-radius:6px; border:1px solid var(--line); line-height:1.4;">💡 <b>English Rule Guide:</b> ${topic.explain_en}</div>` : ''}
-  `;
-  renderModeSelector();
-  newSentence();
-}
-
-document.getElementById('backBtn').onclick = ()=>{
-  document.getElementById('exerciseView').style.display = 'none';
-  document.getElementById('topicListView').style.display = 'block';
-  renderTopicGrid();
-};
-
-function getFormattedSentence(tokens) {
-  if (!tokens || tokens.length === 0) return "";
-  return tokens.map((w, i) => {
-    let text = w;
-    if (i === 0) text = text.charAt(0).toUpperCase() + text.slice(1);
-    if (i === tokens.length - 1) text += originalPunctuation;
-    return text;
-  }).join(' ');
-}
-
-function newSentence(){
-  if(!curTopic || !curTopic.sentences || curTopic.sentences.length === 0) return;
-  curVariant = pickRandom(curTopic.sentences);
-  
-  originalPunctuation = "";
-  let cleanCorrectOrder = curVariant.tokens.map((w, idx) => {
-    let word = w;
-    if (idx === curVariant.tokens.length - 1) {
-        const match = word.match(/[.,!?]+$/);
-        if (match) {
-            originalPunctuation = match[0];
-            word = word.replace(/[.,!?]+$/, '');
-        }
+  // sub-clause: verb right after the connector + subject (English order: "weil ich bin krank")
+  cls.filter(cl => cl[0][1] === 'N').forEach(cl => {
+    const v = cl.find(c => c[1] === 'v');
+    const e = cl.find(c => c[1] === 'e');
+    if (topicId === 'ersatzinfinitiv' && v && e && e.i > v.i) {    // "dass er hat kommen können": hat before the double infinitive
+      add(move(v.i, e.i + 1), 'Ersatzinfinitiv: Im Nebensatz steht „hat/haben“ ausnahmsweise VOR den zwei Infinitiven (… hat kommen können).', v.i);
+      return;
     }
-    if (idx === 0 && word !== "Andi") {
-        word = word.charAt(0).toLowerCase() + word.slice(1);
+    if (v && v.i > cl[0].i + 2) add(move(v.i, cl[0].i + 2), 'Im Nebensatz (weil, dass, wenn …) steht das konjugierte Verb am Ende.', v.i);
+  });
+  if (!out.length && t.length > 2) add(move(1, 0), 'Die ersten beiden Satzglieder sind vertauscht.', 1);
+  return out;
+}
+/* Alternative correct order: the adverbial of time/place/reason moves to the Vorfeld and the subject goes right after the verb */
+function inversion(t) {
+  if (t.length < 4 || t[0][1] !== 'S' || t[1][1] !== 'V' || t.some(c => 'NKA'.includes(c[1]))) return null;
+  const k = t.findIndex((c, i) => i > 1 && 'TLC'.includes(c[1]));
+  if (k < 0) return null;
+  const rest = t.filter((_, i) => i !== k && i > 1);
+  const subj = t[0][0];
+  return { t: [t[k], t[1], [subj, 'S'], ...rest], first: t[k][0] };
+}
+function sameOrder(a, b) { return a.length === b.length && a.every((c, i) => c[0] === b[i][0]); }
+
+/* ---------- item rendering ---------- */
+let W = {};   // state of the current item
+function curItem() { return S.items[S.i]; }
+function promptHTML(s, hide) {
+  const showTa = document.getElementById('optTa').checked;
+  if (hide) return `<div class="prompt">🎧 Hör gut zu und baue den Satz. <button type="button" class="btn ghost" data-act="say">🔊 Nochmal</button> <button type="button" class="btn grey" data-act="slow">🐢 Langsam</button>
+    <button type="button" class="btn grey" data-act="reveal">Übersetzung zeigen</button><div id="revealTxt"></div></div>`;
+  return `<div class="prompt">🇬🇧 ${esc(s.en)}${showTa && s.ta ? `<div class="ta" lang="ta">🇮🇳 ${esc(s.ta)}</div>` : ''}</div>`;
+}
+function renderItem() {
+  if (S.i >= S.items.length) return renderSummary();
+  const { topic, s } = curItem();
+  W = { mode: MODE, tries: 0 };
+  document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}${S.topic ? '' : ' · ' + topic.title}`;
+  const card = document.getElementById('card');
+  const color = document.getElementById('optColor').checked;
+  const want = curItem().mode || MODE;                  // the mixed round brings its own mode per sentence
+  const mode = want === 'transform' && !inversion(s.t) ? 'build' : want;
+  W.mode = mode;
+  renderModes(want);
+  let h = '';
+  if (MODE === 'transform' && mode !== 'transform' && !curItem().mode) h += `<div class="note">🔄 Für diesen Satz gibt es keinen einfachen Umbau — hier: normal bauen.</div>`;
+  if (mode === 'build' || mode === 'listen' || mode === 'transform') {
+    let target = s.t, head = '';
+    if (mode === 'transform') {
+      const inv = inversion(s.t);
+      target = inv.t;
+      head = `<div class="prompt">🔄 Stell den Satz um und beginne mit <b>„${esc(cap(inv.first))}“</b>:</div><div class="note">Original: ${esc(sentenceText(s))}</div>`;
     }
-    return word;
-  });
-
-  correctOrder = cleanCorrectOrder.slice();
-  bankWords = shuffleArr(correctOrder.map((w,i)=>({word:w, id:i})));
-  buildSlots = [];
-  seenCount++;
-
-  document.getElementById('enPrompt').innerHTML = `
-    <div style="font-size:15px; font-weight:600; color:var(--ink); margin-bottom:4px;">🇬🇧 ${curVariant.en}</div>
-    ${curVariant.ta ? `<div style="font-size:13.5px; color:var(--purple); font-style:italic;">🇮🇳 ${curVariant.ta}</div>` : ''}
-  `;
-  document.getElementById('progressLine').textContent = `Satz ${seenCount} in diesem Thema`;
-  renderModeBody();
-}
-
-function renderBuild(){
-  const build = document.getElementById('buildArea');
-  const bank = document.getElementById('bankArea');
-  build.innerHTML = buildSlots.length
-    ? buildSlots.map((w, i)=>{
-        let text = w.word;
-        if (i === 0) text = text.charAt(0).toUpperCase() + text.slice(1);
-        if (i === correctOrder.length - 1) text += originalPunctuation;
-        return `<span class="wordchip inbuild" data-id="${w.id}">${text}</span>`;
-      }).join('')
-    : `<span class="placeholder">👆 Tap the words below in the correct German order ... (Press 1-9 to select)</span>`;
-    
-  bank.innerHTML = bankWords.map((w, i)=>{
-    return `<span class="wordchip inbank" data-id="${w.id}"><small style="opacity:0.5; font-size:9px; margin-right:3px;">${i+1}</small>${w.word}</span>`;
-  }).join('');
-
-  build.querySelectorAll('.wordchip').forEach(el=>{
-    el.onclick = ()=>{
-      const id = parseInt(el.dataset.id);
-      const idx = buildSlots.findIndex(w=>w.id===id);
-      if(idx>-1){
-        bankWords.push(buildSlots[idx]);
-        buildSlots.splice(idx,1);
-        renderBuild();
-      }
-    };
-  });
-  bank.querySelectorAll('.wordchip').forEach(el=>{
-    el.onclick = ()=>{
-      const id = parseInt(el.dataset.id);
-      const idx = bankWords.findIndex(w=>w.id===id);
-      if(idx>-1){
-        buildSlots.push(bankWords[idx]);
-        bankWords.splice(idx,1);
-        renderBuild();
-      }
-    };
-  });
-}
-
-document.getElementById('resetBtn').onclick = ()=>{
-  bankWords = shuffleArr(buildSlots.concat(bankWords));
-  buildSlots = [];
-  renderBuild();
-};
-
-/* ---- EASY MODE: multiple-choice full-sentence recognition ----
-   Distractors are real-word reorderings of the SAME correct tokens (swap the
-   first two, swap the last two, or reverse everything after position 0) -
-   never random word salad, matching this page's own stated design
-   philosophy (see the footer note). */
-function buildOrderDistractors(order){
-  const variants = [];
-  if(order.length >= 2){
-    const a = order.slice(); [a[0], a[1]] = [a[1], a[0]]; variants.push(a);
+    W.target = target; W.placed = [];
+    W.bank = shuffle(target.map((c, i) => ({ c, i })));
+    h += (head || promptHTML(s, mode === 'listen')) + `<div class="build" id="build"></div><div class="bank" id="bank"></div>
+      <div class="sb-row"><button type="button" class="btn grey" data-act="undo">↶ Zurück</button><button type="button" class="btn grey" data-act="reset">↺ Neu</button><button type="button" class="btn" data-act="check">✓ Prüfen</button></div>`;
+    card.innerHTML = h + '<div id="fb"></div>';
+    drawBuild(color);
+    if (mode === 'listen') say(sentenceText(s));
+  } else if (mode === 'choice') {
+    const wrong = shuffle(wrongVariants(s.t, topic.id)).slice(0, 3);
+    W.opts = shuffle([{ t: s.t, ok: true }, ...wrong.map(w => ({ t: w.t, ok: false, why: w.why }))]);
+    card.innerHTML = promptHTML(s) + `<div style="display:grid; gap:8px; margin-top:10px;">${W.opts.map((o, i) =>
+      `<button type="button" class="ch" style="justify-content:flex-start; text-align:left;" data-opt="${i}">${esc(orderText(o.t, s.end))}</button>`).join('')}</div><div id="fb"></div>`;
+  } else if (mode === 'type') {
+    card.innerHTML = promptHTML(s) + `<div class="note">Bausteine: ${shuffle(s.t).map(c => chunkHTML(c, { color })).join(' ')}</div>
+      <input id="typed" type="text" autocomplete="off" spellcheck="false" placeholder="Schreib den ganzen Satz auf Deutsch …" style="width:100%; margin:10px 0; font-size:16px;">
+      <button type="button" class="btn" data-act="checkType">✓ Prüfen</button><div id="fb"></div>`;
+    setTimeout(() => { const i = document.getElementById('typed'); if (i) i.focus(); }, 50);
+  } else if (mode === 'verb') {
+    W.verbs = s.t.map((c, i) => ({ c, i })).filter(x => VERB_ROLES.has(x.c[1]));
+    W.rest = s.t.filter(c => !VERB_ROLES.has(c[1]));
+    W.placedVerbs = []; W.cur = 0; W.errors = 0;
+    card.innerHTML = promptHTML(s) + `<div class="note">🎯 Wohin gehören die Verben? Tippe auf die richtige Lücke ▢.</div><div id="verbQ" class="prompt" style="margin-top:8px;"></div><div class="build" id="verbLine"></div><div id="fb"></div>`;
+    drawVerb(color);
+  } else if (mode === 'error') {
+    const wrong = wrongVariants(s.t, topic.id);
+    const w = wrong[Math.floor(Math.random() * wrong.length)];
+    W.wrong = w;
+    card.innerHTML = promptHTML(s) + `<div class="note">🔍 In diesem Satz steht <b>ein Satzglied an der falschen Stelle</b>. Tippe darauf!</div>
+      <div class="build">${w.t.map((c, i) => `<button type="button" class="ch ${color ? 'role' : ''}" style="${color ? roleStyle(c[1]) : ''}" data-rl="${c[1]}" data-err="${i}">${esc(i === 0 ? cap(c[0]) : c[0])}</button>`).join('')}<span>${esc(s.end || '.')}</span></div><div id="fb"></div>`;
+  } else if (mode === 'speak') {
+    card.innerHTML = promptHTML(s) + `<div class="note">🎙️ Sag den Satz auf Deutsch — in der richtigen Reihenfolge. Die Bausteine helfen:</div>
+      <div class="bank" style="margin-top:6px;">${shuffle(s.t).map(c => chunkHTML(c, { color })).join('')}</div>
+      <div class="sb-row"><button type="button" class="btn" data-act="listenMic">🎙️ Sprechen</button><button type="button" class="btn grey" data-act="skipSpeak">Lösung zeigen</button></div><div id="fb"></div>`;
   }
-  if(order.length >= 4){
-    const b = order.slice(); [b[order.length-1], b[order.length-2]] = [b[order.length-2], b[order.length-1]]; variants.push(b);
+}
+function drawBuild(color) {
+  const b = document.getElementById('build'), k = document.getElementById('bank');
+  if (!b) return;
+  const end = curItem().s.end || '.';
+  b.innerHTML = W.placed.length ? W.placed.map((x, i) => `<button type="button" class="ch ${color ? 'role' : ''}" style="${color ? roleStyle(x.c[1]) : ''}" data-rl="${x.c[1]}" data-un="${i}">${esc(i === 0 ? cap(x.c[0]) : x.c[0])}</button>`).join('') +
+    (W.placed.length === W.target.length ? `<span>${esc(end)}</span>` : '') : '<span class="ph">👆 Tippe die Bausteine in der richtigen Reihenfolge an (Tasten 1–9).</span>';
+  k.innerHTML = W.bank.map((x, i) => `<button type="button" class="ch ${color ? 'role' : ''}" style="${color ? roleStyle(x.c[1]) : ''}" data-rl="${x.c[1]}" data-pick="${i}"><small>${i + 1}</small>${esc(x.c[0])}</button>`).join('');
+}
+function drawVerb(color) {
+  const line = document.getElementById('verbLine'); if (!line) return;
+  const { s } = curItem();
+  if (W.cur >= W.verbs.length) return;
+  const v = W.verbs[W.cur];
+  document.getElementById('verbQ').innerHTML = `Wohin gehört ${chunkHTML(v.c)}? <span class="note">(${W.cur + 1}/${W.verbs.length})</span>`;
+  // current line = the sentence without the verbs not yet placed
+  const shown = s.t.map((c, i) => ({ c, i })).filter(x => !VERB_ROLES.has(x.c[1]) || W.placedVerbs.includes(x.i));
+  let h = `<span class="slot" data-slot="0">▢</span>`;
+  shown.forEach((x, n) => { h += `${chunkHTML(x.c, { color: color || VERB_ROLES.has(x.c[1]), first: n === 0 && x.i === 0 })}<span class="slot" data-slot="${n + 1}">▢</span>`; });
+  line.innerHTML = h + `<span>${esc(s.end || '.')}</span>`;
+  W.shown = shown;
+}
+
+/* ---------- checking ---------- */
+function finish(ok, extra, userOrder) {
+  const { topic, s } = curItem();
+  if (!W.done) { recordResult(topic, s, ok); S.results.push({ topic, s, ok }); W.done = true; }
+  const target = W.mode === 'transform' ? W.target : s.t;
+  const correct = orderText(target, s.end || '.');
+  const fb = document.getElementById('fb');
+  fb.innerHTML = `<div class="fb ${ok || ok === null ? 'ok' : 'no'}">
+      <b>${ok ? '✓ Richtig!' : ok === null ? '👀 Lösung:' : '✗ Noch nicht ganz.'}</b> ${extra || ''}
+      <div class="sent">${esc(correct)} <button type="button" class="btn grey" data-act="sayCorrect" style="padding:4px 8px;">🔊</button></div>
+      ${W.mode !== 'transform' ? planHTML(s) : ''}
+      ${!S.topic ? `<div class="note">Regel (${esc(topic.title)}): ${esc(topic.rule)}</div>` : ''}
+      <div class="sb-row" style="margin-top:10px;">
+        ${ok ? '' : `<button type="button" class="btn grey" data-act="retry">↺ Nochmal diesen Satz</button>`}
+        ${typeof dcAIConfigured === 'function' && dcAIConfigured() ? `<button type="button" class="btn grey" data-act="ai">🤖 Warum diese Reihenfolge?</button>` : ''}
+        <button type="button" class="btn" data-act="next">Weiter →</button>
+      </div><div id="aiOut" class="note"></div></div>`;
+  if (ok || ok === null) say(correct);
+  const n = fb.querySelector('[data-act="next"]'); if (n) n.focus({ preventScroll: true });
+}
+function checkBuild() {
+  const { s } = curItem();
+  if (W.placed.length < W.target.length) { document.getElementById('fb').innerHTML = `<div class="fb no">Noch ${W.target.length - W.placed.length} Baustein(e) übrig.</div>`; return; }
+  const user = W.placed.map(x => x.c);
+  if (sameOrder(user, W.target)) return finish(true);
+  const inv = W.mode !== 'transform' && inversion(s.t);
+  if (inv && sameOrder(user, inv.t)) return finish(true, 'Auch richtig — du hast ein anderes Satzglied betont (Vorfeld). Verb bleibt auf Position 2 ✔');
+  if (W.mode !== 'transform' && s.t[0][1] === 'T') {                       // reverse inversion: subject first
+    const back = [s.t[2], s.t[1], s.t[0], ...s.t.slice(3)];
+    if (s.t[1][1] === 'V' && s.t[2][1] === 'S' && !s.t.some(c => 'NKA'.includes(c[1])) && sameOrder(user, back)) return finish(true, 'Auch richtig — Subjekt im Vorfeld, Verb auf Position 2 ✔');
   }
-  if(order.length >= 3){
-    const c = [order[0], ...order.slice(1).reverse()]; variants.push(c);
+  const marks = user.map((c, i) => `<span class="ch ${W.target[i] && W.target[i][0] === c[0] ? 'ok' : 'bad'}" style="cursor:default;">${esc(i === 0 ? cap(c[0]) : c[0])}</span>`).join(' ');
+  finish(false, `<div style="margin:6px 0;">Deine Reihenfolge: ${marks}</div>${hintFor(user, W.target)}`);
+}
+function hintFor(user, target) {
+  const frame = c => 'VEveNKAQ'.includes(c[1]);             // the "skeleton": verbs, connectors, question words
+  if (user.every((c, i) => frame(c) === frame(target[i]) && (!frame(c) || c[0] === target[i][0])) && user[0][0] === target[0][0])
+    return `<div class="note">👍 <b>Verbstellung richtig!</b> Nur die Reihenfolge im <b>Mittelfeld</b> ist anders. Standard: Pronomen zuerst, dann Te-Ka-Mo-Lo (Zeit – Grund – Art – Ort), „nicht“ vor dem, was verneint wird.</div>`;
+  const uv = user.findIndex(c => c[1] === 'V'), tv = target.findIndex(c => c[1] === 'V');
+  if (uv !== tv && tv >= 0) return `<div class="note">💡 Achte auf das <b>konjugierte Verb</b> „${esc(target[tv][0])}“: im Hauptsatz auf Position ${tv + 1}.</div>`;
+  const tl = target.findIndex(c => c[1] === 'v');
+  if (tl >= 0 && curItem().topic.id !== 'ersatzinfinitiv' && user.findIndex(c => c[0] === target[tl][0]) !== tl) return `<div class="note">💡 Im <b>Nebensatz</b> steht „${esc(target[tl][0])}“ ganz am Ende.</div>`;
+  const te = target.findIndex(c => c[1] === 'E');
+  if (te >= 0 && user.findIndex(c => c[0] === target[te][0]) !== te) return `<div class="note">💡 <b>Satzklammer:</b> „${esc(target[te][0])}“ gehört ans Ende des Hauptsatzes.</div>`;
+  return `<div class="note">💡 Vergleiche die rot markierten Bausteine mit der Lösung — die Farben im Satzbauplan zeigen die Satzglieder.</div>`;
+}
+function normalize(x) { return String(x || '').toLowerCase().replace(/[.,!?;:„“"]/g, '').replace(/\s+/g, ' ').trim(); }
+function checkTyped() {
+  const { s } = curItem();
+  const v = document.getElementById('typed').value;
+  const inv = inversion(s.t);
+  const ok = normalize(v) === normalize(sentenceText(s)) || (inv && normalize(v) === normalize(orderText(inv.t, '')));
+  document.getElementById('typed').disabled = true;
+  finish(ok, ok ? '' : `<div class="note">Du hast geschrieben: „${esc(v)}“</div>`);
+}
+
+/* ---------- speech ---------- */
+function say(text, rate) {
+  try {
+    if (typeof speak === 'function' && !rate) { speak(text); return; }
+    const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; u.rate = rate || 0.95;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function speechWords(x) { return normalize(x).split(' ').filter(Boolean); }
+function speechScore(target, heard) {
+  const a = speechWords(target), b = speechWords(heard);
+  const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const ok = new Array(a.length).fill(false);
+  for (let i = 0, j = 0; i < a.length && j < b.length;) { if (a[i] === b[j]) { ok[i] = true; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
+  return { words: a, ok, score: a.length ? Math.round(100 * ok.filter(Boolean).length / a.length) : 0 };
+}
+function listenMic() {
+  const { s } = curItem();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const fb = document.getElementById('fb');
+  if (!SR) { fb.innerHTML = `<div class="fb no">Spracherkennung gibt es in diesem Browser nicht (Chrome/Edge verwenden). <button type="button" class="btn grey" data-act="skipSpeak">Lösung zeigen</button></div>`; return; }
+  const rec = new SR(); rec.lang = 'de-DE'; rec.maxAlternatives = 3;
+  fb.innerHTML = `<div class="fb ok">🎙️ Ich höre zu …</div>`;
+  rec.onresult = ev => {
+    const alts = Array.from(ev.results[0]).map(a => a.transcript);
+    const best = alts.map(h => ({ h, r: speechScore(sentenceText(s), h) })).sort((x, y) => y.r.score - x.r.score)[0];
+    const words = best.r.words.map((w, i) => `<span class="${best.r.ok[i] ? 'say-ok' : 'say-no'}">${esc(w)}</span>`).join(' ');
+    finish(best.r.score >= 80, `<div>${words}</div><div><b>${best.r.score}%</b> — gehört: „${esc(best.h)}“</div>`);
+  };
+  rec.onerror = ev => { fb.innerHTML = `<div class="fb no">🎙️ ${ev.error === 'not-allowed' ? 'Mikrofon nicht erlaubt.' : ev.error === 'no-speech' ? 'Nichts gehört — nochmal versuchen.' : esc(ev.error)}</div>`; };
+  try { rec.start(); } catch (e) { fb.innerHTML = `<div class="fb no">${esc(e.message)}</div>`; }
+}
+
+/* ---------- AI explanation ---------- */
+async function aiWhy() {
+  const { topic, s } = curItem();
+  const out = document.getElementById('aiOut');
+  out.textContent = '⏳ KI erklärt …';
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: 'You are a patient German teacher for a learner who speaks English and Tamil. Explain German word order simply, in English, max 5 short lines; mention position 2 / verb at the end / Satzklammer where relevant; add one short Tamil sentence comparing to Tamil word order.' },
+      { role: 'user', content: `Topic: ${topic.title_en}. Sentence: "${sentenceText(s)}" (${s.en}). Explain why each part is where it is.` }]);
+    out.innerHTML = `🤖 ${esc(txt).replace(/\n/g, '<br>')}`;
+  } catch (e) { out.textContent = '❌ ' + e.message; }
+}
+
+/* ---------- summary ---------- */
+function renderSummary() {
+  const ok = S.results.filter(r => r.ok).length, n = S.results.length;
+  const wrong = S.results.filter(r => !r.ok);
+  document.getElementById('progress').textContent = '';
+  document.getElementById('card').innerHTML = `<div style="text-align:center;"><div style="font-size:40px;">${ok === n ? '🏆' : ok >= n * 0.7 ? '🎉' : '💪'}</div>
+    <b style="font-size:20px;">${ok} / ${n} richtig</b></div>
+    ${wrong.length ? `<div style="margin-top:10px;"><b>Diese Sätze kommen in „🔁 Fehler wiederholen“:</b><ul class="summary">${wrong.map(r => `<li>${esc(sentenceText(r.s))} <button type="button" class="btn grey" style="padding:2px 7px;" data-sayt="${esc(sentenceText(r.s))}">🔊</button></li>`).join('')}</ul></div>` : ''}
+    <div class="sb-row" style="justify-content:center; margin-top:12px;">
+      ${S.topic ? `<button type="button" class="btn" data-act="again">↺ Thema nochmal</button>` : ''}
+      ${wrong.length ? `<button type="button" class="btn ghost" data-act="reviewNow">🔁 Fehler jetzt üben</button>` : ''}
+      <button type="button" class="btn grey" data-act="home">← Themen</button></div>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('button, .slot, [data-slot]'); if (!el) return;
+  const d = el.dataset;
+  if (d.lvl) { curLevel = d.lvl; store.set('sb_level_v1', curLevel); renderHome(); return; }
+  if (d.topic) { openTopic(TOPIC_BY_ID[d.topic]); return; }
+  if (d.mode) { MODE = d.mode; store.set('sb_mode_v1', MODE); if (S) S.items.forEach(x => { delete x.mode; }); renderModes(); if (S && S.i < S.items.length) renderItem(); return; }
+  if (d.sayt) { say(d.sayt); return; }
+  const color = document.getElementById('optColor') && document.getElementById('optColor').checked;
+  if (d.pick != null && !W.done) { W.placed.push(W.bank.splice(+d.pick, 1)[0]); drawBuild(color); return; }
+  if (d.un != null && !W.done) { W.bank.push(W.placed.splice(+d.un, 1)[0]); drawBuild(color); return; }
+  if (d.opt != null && !W.done) {
+    const o = W.opts[+d.opt];
+    document.querySelectorAll('[data-opt]').forEach(b => { const x = W.opts[+b.dataset.opt]; b.classList.add(x.ok ? 'ok' : (b === el ? 'bad' : 'used')); b.disabled = true; });
+    finish(o.ok, o.ok ? '' : `<div class="note">💡 ${esc(o.why)}</div>`); return;
   }
-  const seen = new Set([order.join('|')]);
-  const unique = [];
-  for(const v of variants){
-    const key = v.join('|');
-    if(!seen.has(key)){ seen.add(key); unique.push(v); }
+  if (d.err != null && !W.done) {
+    const c = W.wrong.t[+d.err];
+    const ok = +d.err === W.wrong.pos;
+    el.classList.add(ok ? 'ok' : 'bad');
+    if (!ok && W.tries++ < 1) { document.getElementById('fb').innerHTML = `<div class="fb no">Nicht dieser — schau aufs Verb! (noch 1 Versuch)</div>`; return; }
+    finish(ok, `<div class="note">💡 ${esc(W.wrong.why)} Falsch war: „${esc(W.wrong.moved)}“.</div>`); return;
   }
-  return unique;
-}
-
-function renderEasyChoice(){
-  document.getElementById('bankArea').style.display = 'none';
-  document.getElementById('bankArea').innerHTML = '';
-  document.getElementById('actionRow').style.display = 'none';
-
-  const correctText = getFormattedSentence(correctOrder);
-  const distractors = buildOrderDistractors(correctOrder).slice(0, 3).map(d => getFormattedSentence(d));
-  const optionTexts = shuffleArr([correctText, ...distractors]);
-
-  document.getElementById('buildArea').innerHTML = `
-    <div style="display:grid; gap:8px;">
-      ${optionTexts.map((opt,i)=>`
-        <button class="wordchip" id="easyOpt_${i}" style="display:block; width:100%; text-align:left; padding:10px 14px; cursor:pointer;" onclick="checkEasyChoice(${i})">${opt}</button>
-      `).join('')}
-    </div>
-  `;
-  window._sbEasyState = { correctText, optionTexts };
-}
-
-function checkEasyChoice(idx){
-  const { correctText, optionTexts } = window._sbEasyState;
-  const isCorrect = optionTexts[idx] === correctText;
-  document.querySelectorAll('#buildArea .wordchip').forEach((btn,i)=>{
-    btn.onclick = null;
-    btn.style.cursor = 'default';
-    if(optionTexts[i] === correctText) btn.style.cssText += 'background:#E2EED8; border-color:var(--green);';
-    else if(i === idx) btn.style.cssText += 'background:#F8E4E3; border-color:var(--red);';
-  });
-  if(isCorrect) markSentenceDone(curTopic ? curTopic.id : '', correctText);
-  const fb = document.getElementById('feedbackArea');
-  fb.innerHTML = `
-    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
-      <span style="font-weight:700; font-size:14px; color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect ? '✓ Richtig!' : '✗ Not quite — correct order:'}</span>
-      <div class="correctsent" style="font-size:15px; margin-top:4px;">${correctText}</div>
-      ${!isCorrect ? aiSentenceHelpButtonHTML() : ''}
-    </div>
-  `;
-  document.getElementById('nextBtn').style.display = '';
-}
-
-/* ---- HARD MODE: typed free recall ---- */
-function renderHardTyped(){
-  document.getElementById('bankArea').style.display = 'none';
-  document.getElementById('bankArea').innerHTML = '';
-  document.getElementById('actionRow').style.display = 'none';
-
-  document.getElementById('buildArea').innerHTML = `
-    <input type="text" id="hardSbInput" class="challenge-input" placeholder="Schreib den ganzen Satz auf Deutsch..." autofocus style="width:100%; padding:10px; border-radius:6px; border:1.5px solid var(--line); font-size:14px; margin-bottom:8px;">
-    <button class="actbtn check" style="width:100%;" onclick="checkHardTyped()">✓ Check (Prüfen)</button>
-  `;
-  document.getElementById('hardSbInput').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); checkHardTyped(); } });
-}
-
-function normalizeForCompare(s){
-  return (s || '').toLowerCase().replace(/[.,!?]/g,'').replace(/\s+/g,' ').trim();
-}
-
-function checkHardTyped(){
-  const input = document.getElementById('hardSbInput');
-  const correctText = getFormattedSentence(correctOrder);
-  const isCorrect = normalizeForCompare(input.value) === normalizeForCompare(correctText);
-  if(isCorrect) markSentenceDone(curTopic ? curTopic.id : '', correctText);
-  const fb = document.getElementById('feedbackArea');
-  fb.innerHTML = `
-    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
-      <span style="font-weight:700; font-size:14px; color:${isCorrect?'var(--green)':'var(--red)'};">${isCorrect ? '✓ Perfekt!' : '✗ Not quite — correct sentence:'}</span>
-      <div class="correctsent" style="font-size:15px; margin-top:4px;">${correctText}</div>
-      ${!isCorrect ? aiSentenceHelpButtonHTML() : ''}
-    </div>
-  `;
-  input.disabled = true;
-  document.getElementById('nextBtn').style.display = '';
-}
-
-/* ---- AI weak-spot follow-up (real AI when configured, honest fallback
-   otherwise). Reuses js/app-shell.js's shared callAIHelper()/ai-enabled
-   convention - never invents new sentence data, only explains the SAME
-   real, hand-checked sentence the learner just missed. ---- */
-function aiSentenceHelpButtonHTML(){
-  if(!document.body.classList.contains('ai-enabled')) return '';
-  return `<button class="actbtn" style="background:var(--purple); color:#fff; margin-top:8px;" onclick="aiSentenceHelp()">🤖 Why is this the correct order? (AI)</button>`;
-}
-
-function aiSentenceHelp(){
-  if(typeof callAIHelper !== 'function') return;
-  const correctText = getFormattedSentence(correctOrder);
-  const promptTxt = `I am learning German word order. The correct sentence is: "${correctText}" (English: ${curVariant ? curVariant.en : ''}). Briefly explain WHY the words are in this exact order (word-order rule involved), in 2-3 short sentences. Keep it encouraging.`;
-  const btn = event && event.target;
-  if(btn){ btn.disabled = true; btn.innerText = '⏳ ...'; }
-  callAIHelper(promptTxt, (text) => {
-    const fb = document.getElementById('feedbackArea');
-    const ok = text && !text.startsWith('AI Error') && !text.startsWith('Error connecting');
-    const box = document.createElement('div');
-    box.style.cssText = 'margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;';
-    box.innerHTML = ok ? `<strong>🤖</strong> ${text.replace(/\n/g,'<br>')}` : `⚠️ AI isn't available right now (check your AI key in Settings).`;
-    fb.appendChild(box);
-  });
-}
-
-document.addEventListener('keydown', (e) => {
-  if (document.getElementById('exerciseView').style.display === 'none') return;
-  if (e.key >= '1' && e.key <= '9') {
-    const idx = parseInt(e.key) - 1;
-    const bankChips = document.getElementById('bankArea').querySelectorAll('.wordchip');
-    if (idx < bankChips.length) {
-      bankChips[idx].click();
+  if (d.slot != null && !W.done && W.verbs) {
+    const v = W.verbs[W.cur];
+    // correct slot = number of shown chunks that come before the verb in the real sentence
+    const want = W.shown.filter(x => x.i < v.i).length;
+    if (+d.slot === want) {
+      W.placedVerbs.push(v.i); W.cur++;
+      if (W.cur >= W.verbs.length) { drawVerb(color); finish(W.errors === 0, W.errors ? `(${W.errors} Fehlversuch${W.errors > 1 ? 'e' : ''})` : 'Alle Verben richtig platziert!'); document.getElementById('verbQ').innerHTML = ''; }
+      else drawVerb(color);
+    } else {
+      W.errors++; el.classList.add('bad');
+      const r = v.c[1];
+      document.getElementById('fb').innerHTML = `<div class="fb no">${r === 'V' ? 'Hauptsatz: das konjugierte Verb steht auf <b>Position 2</b>.' : r === 'E' ? 'Satzklammer: dieser Verbteil steht <b>am Ende</b> des Hauptsatzes.' : r === 'v' ? (curItem().topic.id === 'ersatzinfinitiv' ? 'Ersatzinfinitiv: „hat/haben“ steht im Nebensatz <b>vor</b> den zwei Infinitiven.' : 'Nebensatz: das konjugierte Verb steht <b>ganz am Ende</b>.') : 'Nebensatz: Infinitiv/Partizip steht <b>vor</b> dem konjugierten Verb am Ende.'}</div>`;
     }
+    return;
+  }
+  switch (d.act) {
+    case 'check': return checkBuild();
+    case 'checkType': return checkTyped();
+    case 'undo': if (W.placed.length && !W.done) { W.bank.push(W.placed.pop()); drawBuild(color); } return;
+    case 'reset': if (!W.done) { W.bank = shuffle(W.target.map((c, i) => ({ c, i }))); W.placed = []; drawBuild(color); } return;
+    case 'next': S.i++; return renderItem();
+    case 'retry': { const done = W.done; renderItem(); W.done = done; return; }
+    case 'say': return say(sentenceText(curItem().s));
+    case 'slow': return say(sentenceText(curItem().s), 0.7);
+    case 'reveal': { const s = curItem().s; document.getElementById('revealTxt').innerHTML = `<div class="prompt" style="margin-top:6px;">🇬🇧 ${esc(s.en)}<div class="ta" lang="ta">🇮🇳 ${esc(s.ta)}</div></div>`; return; }
+    case 'sayCorrect': return say(orderText(W.mode === 'transform' ? W.target : curItem().s.t, curItem().s.end || '.'));
+    case 'listenMic': return listenMic();
+    case 'skipSpeak': W.done = true; return finish(null, '<span class="note">(Lösung angezeigt — zählt nicht als Fehler. Sprich den Satz jetzt laut nach!)</span>');
+    case 'ai': return aiWhy();
+    case 'again': return openTopic(S.topic);
+    case 'reviewNow': return reviewRound();
+    case 'home': return goHome();
   }
 });
-
-function diagnoseMistake(userTokens, correctTokens, topicId) {
-  if (userTokens.length < correctTokens.length) {
-    return `⚠️ <b>Incomplete sentence:</b> You placed ${userTokens.length} of ${correctTokens.length} words. Please click all words into the build box above.`;
-  }
-  if (topicId === 'v2') {
-    return `💡 <b>Verb Position 2 Rule:</b> In a German main clause, the conjugated verb MUST be at Position 2. If a time expression (e.g. 'Heute', 'Morgen') is placed first, the subject must move behind the verb to Position 3.`;
-  } else if (topicId === 'nebensatz') {
-    return `💡 <b>Subordinate Clause Rule:</b> After subordinating connectors (weil, dass, wenn, ob, obwohl), the conjugated verb MUST be placed at the very end of the clause!`;
-  } else if (topicId === 'konnektoren') {
-    return `💡 <b>Connector Rule:</b> Position 0 connectors (aber, denn, und, sondern, oder) maintain normal Subject-Verb order. Position 1 adverbs (deshalb, trotzdem) cause inversion (Verb at Pos 2, Subject at Pos 3).`;
-  } else if (topicId === 'perfekt') {
-    return `💡 <b>Perfekt Sentence Bracket (Satzklammer):</b> The auxiliary verb (haben/sein) stays at Position 2, and the Partizip II (ge- form) MUST go to the very end of the sentence.`;
-  } else if (topicId === 'modalverben') {
-    return `💡 <b>Modal Verb Rule:</b> The conjugated modal verb (kann, muss, will, möchte) stays at Position 2, and the infinitive verb MUST go to the very end.`;
-  } else if (topicId === 'trennbar') {
-    return `💡 <b>Separable Prefix Rule:</b> The main verb stem is conjugated at Position 2, and the separable prefix (auf, an, ein, aus, mit, zu) MUST detach and move to the very end.`;
-  } else {
-    return `💡 <b>Word Order Guide:</b> Compare your word order with the target German sentence below to see which word was placed too early or too late.`;
-  }
-}
-
-function autoFixOrder() {
-  buildSlots = correctOrder.map((w, i) => ({ word: w, id: i }));
-  bankWords = [];
-  renderBuild();
-  const correctSentenceStr = getFormattedSentence(correctOrder);
-  speakText(correctSentenceStr);
-  const fb = document.getElementById('feedbackArea');
-  fb.innerHTML = `
-    <div class="feedback correct" style="border-left-color:var(--blue);">
-      <div style="font-weight:700; color:var(--blue); margin-bottom:4px;">✨ Auto-Corrected to the exact German structure:</div>
-      <div class="correctsent" style="color:var(--ink); font-size:15px;">${correctSentenceStr}</div>
-      <div style="font-size:11.5px; color:var(--ink-soft); margin-top:4px;">Now tap "Try This Sentence Again" to practice building it yourself!</div>
-    </div>
-  `;
-}
-
-function retrySameSentence() {
-  bankWords = shuffleArr(correctOrder.map((w,i)=>({word:w, id:i})));
-  buildSlots = [];
-  document.getElementById('feedbackArea').innerHTML = '';
-  document.getElementById('checkBtn').style.display = '';
-  document.getElementById('nextBtn').style.display = 'none';
-  renderBuild();
-}
-
-// Previously this button was labeled "KI-Satzanalyse" (AI sentence analysis)
-// but analyzeSentenceAIFallback() below was a hardcoded canned response
-// wrapped in a setTimeout - it never called any real AI despite the branding.
-// Now: when AI is actually configured (js/app-shell.js's ai-enabled convention),
-// this calls the real shared callAIHelper(). When it isn't, it shows the same
-// static tip as before but honestly labeled as a tip, not "KI-Analyse".
-window.runKICheck = function() {
-  const btn = document.getElementById('kiCheckBtn');
-  const userSentenceStr = getFormattedSentence(buildSlots.map(w=>w.word));
-  const fb = document.getElementById('feedbackArea');
-
-  if(document.body.classList.contains('ai-enabled') && typeof callAIHelper === 'function'){
-    btn.innerHTML = '🤖 Analysiere...';
-    btn.disabled = true;
-    const correctText = getFormattedSentence(correctOrder);
-    const promptTxt = `I am learning German word order. I tried to build this sentence: "${userSentenceStr}". The correct sentence is: "${correctText}". Briefly explain what's different about my word order and why the correct version follows German word-order rules. Keep it short and encouraging.`;
-    callAIHelper(promptTxt, (text) => {
-      const ok = text && !text.startsWith('AI Error') && !text.startsWith('Error connecting');
-      const kiDiv = document.createElement('div');
-      kiDiv.style.cssText = "background:#f4f0ff; border-left:3px solid var(--purple); padding:10px; margin-top:10px; border-radius:0 6px 6px 0; font-size:13px; color:var(--ink);";
-      kiDiv.innerHTML = ok
-        ? `<b>🤖 KI-Analyse:</b><br/><div style="margin-top:6px; line-height:1.5;">${text.replace(/\n/g,'<br>')}</div>`
-        : `⚠️ AI isn't available right now (check your AI key in Settings).`;
-      fb.appendChild(kiDiv);
-      btn.style.display = 'none';
-    });
-  } else {
-    const tipDiv = document.createElement('div');
-    tipDiv.style.cssText = "background:#f4f0ff; border-left:3px solid var(--purple); padding:10px; margin-top:10px; border-radius:0 6px 6px 0; font-size:13px; color:var(--ink);";
-    tipDiv.innerHTML = `<b>💡 Word Order Tip:</b><br/><div style="margin-top:6px; line-height:1.5;">Im Deutschen kann man Satzglieder oft umstellen (Topikalisierung), um sie zu betonen. Solange das konjugierte Verb an Position 2 bleibt (im Hauptsatz), ist der Satz meistens grammatikalisch korrekt! Vergleiche deinen Satz oben genau mit der korrekten Lösung, um zu sehen, welches Wort zu früh oder zu spät steht.<br><br><i>Enable AI in Settings for a personalized explanation of your exact sentence.</i></div>`;
-    fb.appendChild(tipDiv);
-    btn.style.display = 'none';
-  }
-};
-
-document.getElementById('checkBtn').onclick = ()=>{
-  const userOrderTokens = buildSlots.map(w=>w.word);
-  const correctSentenceStr = getFormattedSentence(correctOrder);
-  const userSentenceStr = getFormattedSentence(userOrderTokens);
-  
-  let isCorrect = false;
-  if (userOrderTokens.length === correctOrder.length) {
-      if (userOrderTokens.every((w,i)=>w===correctOrder[i])) {
-          isCorrect = true;
-      } else {
-          const topicId = curTopic ? curTopic.id : '';
-          const mainClauseTopics = ['v2', 'perfekt', 'modalverben', 'trennbar', 'familie', 'wohnen', 'arbeit', 'einkaufen', 'gesundheit', 'behoerden'];
-          
-          if (mainClauseTopics.includes(topicId)) {
-              let swapped2 = [...correctOrder];
-              [swapped2[0], swapped2[2]] = [swapped2[2], swapped2[0]];
-              
-              let swapped3 = [...correctOrder];
-              if (correctOrder.length >= 4) {
-                  [swapped3[0], swapped3[3]] = [swapped3[3], swapped3[0]];
-              }
-              
-              if (userOrderTokens.join(' ') === swapped2.join(' ') || 
-                  (correctOrder.length >= 4 && userOrderTokens.join(' ') === swapped3.join(' '))) {
-                  isCorrect = true;
-              }
-          }
-      }
-  }
-
-  const fb = document.getElementById('feedbackArea');
-
-  if(isCorrect){
-    markSentenceDone(curTopic ? curTopic.id : '', correctSentenceStr);
-    fb.innerHTML = `
-      <div class="feedback correct">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-weight:700; color:var(--green); font-size:14px;">✓ Perfect! Richtig! Ausgezeichnet!</span>
-          <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${userSentenceStr.replace(/'/g, "\\'")}')">🔊 Listen (Hören)</button>
-        </div>
-        <div class="correctsent" style="color:var(--green); font-size:16px; margin:6px 0;">${userSentenceStr}</div>
-        <div style="font-size:11.5px; color:var(--ink-soft);">Sentence added to your mastered list ⭐</div>
-      </div>
-    `;
-    speakText(userSentenceStr);
-    document.getElementById('checkBtn').style.display = 'none';
-    document.getElementById('nextBtn').style.display = '';
-  } else {
-    const userChipsHtml = buildSlots.map((w, idx)=>{
-      const isWordRight = idx < correctOrder.length && w.word === correctOrder[idx];
-      let text = w.word;
-      if (idx === 0) text = text.charAt(0).toUpperCase() + text.slice(1);
-      if (idx === buildSlots.length - 1 && buildSlots.length === correctOrder.length) text += originalPunctuation;
-      return `<span style="display:inline-block; padding:3px 8px; border-radius:12px; margin:2px; font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600; background:${isWordRight ? '#e2eed8; color:#214427; border:1px solid #3F6B4A;' : '#f8e4e3; color:#8A281F; border:1px solid #AE3327;'}">${text} ${isWordRight ? '✓' : '✗'}</span>`;
-    }).join(' ');
-
-    const explanationText = diagnoseMistake(userOrderTokens, correctOrder, curTopic ? curTopic.id : '');
-
-    fb.innerHTML = `
-      <div class="feedback wrong">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:700; color:var(--red); font-size:14px;">✗ Not quite right / Noch nicht ganz richtig</span>
-          <button class="actbtn" style="padding:4px 10px; font-size:11px;" onclick="speakText('${correctSentenceStr.replace(/'/g, "\\'")}')">🔊 Hear Correct German</button>
-        </div>
-
-        <div style="font-size:12px; margin-bottom:6px;"><b>Your Word Order:</b></div>
-        <div style="margin-bottom:10px;">${userChipsHtml || '<span style="color:var(--red); font-style:italic;">(No words placed)</span>'}</div>
-
-        <div style="background:#fff; border:1px solid var(--line); border-radius:6px; padding:10px; margin-bottom:10px; font-size:12.5px; line-height:1.5;">
-          ${explanationText}
-        </div>
-
-        <div style="font-size:12px; margin-bottom:4px;"><b>Correct German Sentence:</b></div>
-        <div class="correctsent" style="font-size:15px; color:var(--ink); background:#eaf2ea; padding:8px 12px; border-radius:6px; border:1px solid var(--green); margin-bottom:10px;">
-          ${correctSentenceStr}
-        </div>
-
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="actbtn" style="background:var(--blue); color:#fff; border-color:var(--blue); padding:8px 12px; font-size:11.5px;" onclick="autoFixOrder()">✨ Auto-Fix Chips for Me</button>
-          <button class="actbtn" style="background:#fff; color:var(--ink); padding:8px 12px; font-size:11.5px;" onclick="retrySameSentence()">↺ Try This Sentence Again</button>
-          <button class="actbtn" id="kiCheckBtn" style="background:var(--purple); color:#fff; border-color:var(--purple); padding:8px 12px; font-size:11.5px;" onclick="runKICheck()">🤖 KI-Satzanalyse</button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('checkBtn').style.display = 'none';
-    document.getElementById('nextBtn').style.display = '';
-  }
-};
-
-document.getElementById('nextBtn').onclick = newSentence;
-
-// Initial render
-renderTopicGrid();
-updateProgressUI();
-
-// UNIFIED SUITE THEME SYSTEM
-function initSuiteTheme() {
-  const saved = localStorage.getItem('de_theme');
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = saved === 'dark' || (!saved && prefersDark);
-  applyTheme(isDark);
-}
-function applyTheme(isDark) {
-  if (isDark) {
-    document.documentElement.classList.add('dark-theme');
-    document.body.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark-theme');
-    document.body.classList.remove('dark');
-  }
-  const btn = document.getElementById('themeToggleBtn') || document.getElementById('themeToggle');
-  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
-}
-function toggleSuiteTheme() {
-  const isDarkNow = document.documentElement.classList.contains('dark-theme') || document.body.classList.contains('dark');
-  const nextDark = !isDarkNow;
-  localStorage.setItem('de_theme', nextDark ? 'dark' : 'light');
-  applyTheme(nextDark);
-}
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initSuiteTheme);
-} else {
-  initSuiteTheme();
-}
-
-function getGenderClass(article) {
-  if (article === "der") return "gender-der";
-  if (article === "die") return "gender-die";
-  if (article === "das") return "gender-das";
-  return "";
-}
+document.addEventListener('keydown', ev => {
+  if (document.getElementById('exView').hidden || !W) return;
+  if (ev.target && ev.target.id === 'typed') { if (ev.key === 'Enter') { ev.preventDefault(); if (!W.done) checkTyped(); else { S.i++; renderItem(); } } return; }
+  if (/^[1-9]$/.test(ev.key) && W.bank && !W.done) { const b = document.querySelector(`[data-pick="${+ev.key - 1}"]`); if (b) b.click(); }
+  if (ev.key === 'Enter') { ev.preventDefault(); if (W.done) { S.i++; renderItem(); } else if (W.bank) checkBuild(); }
+  if (ev.key === 'Backspace' && W.placed && W.placed.length && !W.done) { ev.preventDefault(); W.bank.push(W.placed.pop()); drawBuild(document.getElementById('optColor').checked); }
+});
+function goHome() { S = null; document.getElementById('exView').hidden = true; document.getElementById('homeView').hidden = false; renderHome(); }
+document.getElementById('backBtn').onclick = goHome;
+document.getElementById('tabG').onclick = () => { curTab = 'grammar'; renderHome(); };
+document.getElementById('tabT').onclick = () => { curTab = 'thematic'; renderHome(); };
+document.getElementById('qMix').onclick = mixedRound;
+document.getElementById('qReview').onclick = reviewRound;
+document.getElementById('qNext').onclick = () => { const t = nextTopic(); if (t) openTopic(t); };
+document.getElementById('optColor').checked = store.get('sb_color_v1', true);
+document.getElementById('optTa').checked = store.get('sb_ta_v1', true);
+document.getElementById('optColor').onchange = e => { store.set('sb_color_v1', e.target.checked); if (S) renderItem(); };
+document.getElementById('optTa').onchange = e => { store.set('sb_ta_v1', e.target.checked); if (S) renderItem(); };
+renderHome();
 </script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Reg Failed', err));
-    });
-  }
-  document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggle');
-    if(themeToggle) {
-      const currentTheme = localStorage.getItem('de_theme') || 'light';
-      if(currentTheme === 'dark') {
-        document.documentElement.classList.add('dark-theme');
-        themeToggle.textContent = '☀️ Light Mode';
-      }
-      themeToggle.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark-theme');
-        if(document.documentElement.classList.contains('dark-theme')){
-          localStorage.setItem('de_theme', 'dark');
-          themeToggle.textContent = '☀️ Light Mode';
-        } else {
-          localStorage.setItem('de_theme', 'light');
-          themeToggle.textContent = '🌙 Dark Mode';
-        }
-      });
-    }
-  });
-</script>
-
-    </body>
+</body>
 </html>
