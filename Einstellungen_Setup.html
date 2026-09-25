@@ -102,9 +102,9 @@
       <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper-dark); padding:16px; border-radius:8px; margin-bottom:12px;">
         <div>
           <div style="font-weight:700;">Hands-Free (Auto-Audio)</div>
-          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Automatically play Text-to-Speech audio when a new card is drawn.</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Automatically play Text-to-Speech audio for each flashcard (on English/Tamil → Deutsch cards after the answer is shown). Also switchable on every flashcard: 🔊 Auto-Audio An/Aus.</div>
         </div>
-        <input type="checkbox" id="autoAudioToggle" style="width:24px; height:24px;" onchange="localStorage.setItem('de_auto_audio', this.checked)">
+        <input type="checkbox" id="autoAudioToggle" style="width:24px; height:24px;" onchange="if (typeof dcSetAutoAudio === 'function') dcSetAutoAudio(this.checked); else localStorage.setItem('de_auto_audio', this.checked)">
       </div>
 
       <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background:var(--paper-dark); padding:16px; border-radius:8px; margin-bottom:12px;">

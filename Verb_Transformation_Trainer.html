@@ -1414,6 +1414,7 @@ function cycleMeaningLang(){
 
 function flipDirection(){
   curDir = (curDir === 'de2en') ? 'en2de' : 'de2en';
+  saveCurDir();
   renderChips();
   if(session && session.length > 0) renderCard();
 }
@@ -1441,7 +1442,9 @@ const TYPES = [{k:'alle',l:'All',dot:null},{k:'weak',l:'Weak',dot:'dot-weak'},{k
 
 let curLevel = 'alle';
 let curType = 'alle';
-let curDir = 'de2en';   // 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
+let curDir = (()=>{ try { return localStorage.getItem('vt_curDir'); } catch(e) { return null; } })() || 'en2de';   // default: English/Tamil -> Deutsch
+function saveCurDir(){ try { localStorage.setItem('vt_curDir', curDir); } catch(e) {} }
+// 'de2en' = see German, produce forms | 'en2de' = see meaning, produce German
 let nounMode = false;
 let auxMode = false;
 let meaningLang = 'en';
@@ -1491,7 +1494,7 @@ function autoReadToggleHTML(){
   if(practiceMode !== 'medium') return '';
   const on = getAutoReadTenses();
   return `<label style="display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; margin-bottom:8px;">
-    <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleAutoReadTenses()" style="cursor:pointer;">
+    <input type="checkbox" data-dc-tense-read ${on ? 'checked' : ''} onchange="toggleAutoReadTenses()" style="cursor:pointer;">
     🔊 Formen automatisch vorlesen (Präsens · Präteritum · Perfekt) · Auto-read after swipe/next
   </label>`;
 }
@@ -1584,7 +1587,7 @@ function renderChips(){
 
   const dc = document.getElementById('dirChips');
   dc.innerHTML = DIRS.map(o=> `<div class="chip ${curDir===o.k?'active':''}" data-dir="${o.k}">${o.l}</div>`).join('');
-  dc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curDir=el.dataset.dir; refreshAll(); });
+  dc.querySelectorAll('.chip').forEach(el=> el.onclick = ()=>{ curDir=el.dataset.dir; saveCurDir(); refreshAll(); });
 }
 
 function renderDash(){
@@ -1759,6 +1762,7 @@ function renderCard(){
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
       <span>Card ${sessionIdx+1} / ${session.length}</span>
       <div class="quick-card-tools">
+        ${typeof dcAudioToggleHTML === 'function' ? dcAudioToggleHTML() : ''}
         <button class="quick-tool-btn" onclick="cycleMeaningLang()" title="Switch Language">🌐 ${langLabel}</button>
         <button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button>
         ${sessionIdx > 0 ? `<button class="quick-tool-btn" onclick="prevCard()">← Prev</button>` : ''}
@@ -1785,15 +1789,19 @@ function renderCard(){
   `;
 
   
-  if (getAutoReadTenses()) {
-      if (typeof scheduleSpeakSequence === 'function') scheduleSpeakSequence([v.inf, v.praeteritum, v.perfekt], 300);
-  } else if (localStorage.getItem('de_auto_audio') === 'true') {
-      if (typeof scheduleSpeak === 'function') scheduleSpeak(v.inf, 300);
-  } else if (typeof cancelPendingSpeech === 'function') {
-      cancelPendingSpeech(); // stop any still-playing/pending speech from a card swiped away from
-  }
+  // Meaning -> Deutsch: the German verb is the answer, so auto-audio reads it on reveal, not before.
+  const autoSpeakVerb = (delay) => {
+    if (getAutoReadTenses()) {
+        if (typeof scheduleSpeakSequence === 'function') scheduleSpeakSequence([v.inf, v.praeteritum, v.perfekt], delay);
+    } else if (localStorage.getItem('de_auto_audio') === 'true') {
+        if (typeof scheduleSpeak === 'function') scheduleSpeak(v.inf, delay);
+    }
+  };
+  if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech(); // stop speech from a card swiped away from
+  if (!reverse) autoSpeakVerb(300);
 
   document.getElementById('revealBtn').onclick = ()=>{
+    if (reverse) autoSpeakVerb(150);
     document.getElementById('revealArea').innerHTML = revealCoreHTML + `
       <div class="answerbtns" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; padding:0 0 14px;">
         <button class="actbtn nochmal" id="btnNochmal" style="flex:1; min-width:90px; padding:13px 4px; font-weight:700; border-width:2px; font-size:13px; border-radius:6px;">↺ Again (1)</button>
@@ -1844,6 +1852,7 @@ function renderEasyMC(v){
     <div class="sessionbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
       <span>Card ${sessionIdx+1} / ${session.length}</span>
       <div class="quick-card-tools">
+        ${typeof dcAudioToggleHTML === 'function' ? dcAudioToggleHTML() : ''}
         <button class="quick-tool-btn" onclick="flipDirection()" title="Flip Direction">⇄ ${reverse?'Meaning → DE':'DE → Meaning'}</button>
       </div>
     </div>

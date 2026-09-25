@@ -534,6 +534,39 @@ document.addEventListener('transitionend', e => {
 }, true);
 
 
+// ---- Auto-audio switch for flashcards (home + Verb/Nomen/Adjektiv trainers). One key, de_auto_audio, is
+// shared with the Einstellungen page; switching it off also stops the tense auto-read and any speech in progress.
+function dcAutoAudioOn() { try { return localStorage.getItem('de_auto_audio') === 'true'; } catch (e) { return false; } }
+function dcSetAutoAudio(on) {
+    try {
+        localStorage.setItem('de_auto_audio', on ? 'true' : 'false');
+        if (!on) localStorage.setItem('de_auto_read_tenses', 'false');
+    } catch (e) { /* storage blocked: the switch only lasts for this page */ }
+    if (!on) {
+        try { if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech(); } catch (e) {}
+        try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+        document.querySelectorAll('input[data-dc-tense-read]').forEach(i => { i.checked = false; });
+    }
+    document.querySelectorAll('.dc-audio-toggle').forEach(dcPaintAudioToggle);
+    document.dispatchEvent(new CustomEvent('dc-audio-change', { detail: { on: !!on } }));
+}
+function dcPaintAudioToggle(btn) {
+    const on = dcAutoAudioOn();
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.textContent = on ? '🔊 Auto-Audio: An' : '🔇 Auto-Audio: Aus';
+    btn.title = on ? 'Karten werden automatisch vorgelesen – klicken zum Ausschalten (Audio off)'
+                   : 'Karten werden nicht vorgelesen – klicken zum Einschalten (Audio on). 🔊 auf der Karte spielt immer.';
+}
+function dcAudioToggleHTML() {
+    const on = dcAutoAudioOn();
+    return `<button type="button" class="dc-audio-toggle${on ? ' on' : ''}" aria-pressed="${on}" onclick="dcSetAutoAudio(!dcAutoAudioOn())"
+        title="${on ? 'Karten werden automatisch vorgelesen – klicken zum Ausschalten (Audio off)' : 'Karten werden nicht vorgelesen – klicken zum Einschalten (Audio on). 🔊 auf der Karte spielt immer.'}">${on ? '🔊 Auto-Audio: An' : '🔇 Auto-Audio: Aus'}</button>`;
+}
+window.dcAutoAudioOn = dcAutoAudioOn;
+window.dcSetAutoAudio = dcSetAutoAudio;
+window.dcAudioToggleHTML = dcAudioToggleHTML;
+
 // Shared string-escaping helper for building onclick="..." attributes safely.
 // Several pages call this but never defined it locally - defining it once
 // here (loaded on nearly every page) instead of re-patching it per page.

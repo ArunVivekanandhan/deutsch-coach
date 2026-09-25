@@ -11,7 +11,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 # 1. Update sw.js automatically
 html_files = glob.glob("*.html")
-assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
+assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/lexicon.js', './js/tamil-meanings.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
 urls_to_cache = ["./", "./index.html"] + [f"./{f}" for f in html_files if f != "index.html"] + assets
 
 with open("sw.js", "r", encoding="utf-8", errors="surrogateescape") as f:
@@ -72,4 +72,9 @@ if tamil.returncode != 0:
 # 7. Levels B1.1 / B1.2 were merged into B1 (Task 34) — they must not come back in a word list.
 b1 = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "merge_b1.py"), "--check"])
 if b1.returncode != 0:
+    sys.exit(1)
+
+# 8. js/lexicon.js + js/tamil-meanings.js (Übersetzer page, Tamil on home cards) must match the word lists.
+lex = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_lexicon.py"), "--check"])
+if lex.returncode != 0:
     sys.exit(1)

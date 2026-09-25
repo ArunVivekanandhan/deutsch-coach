@@ -609,3 +609,13 @@ body.simple-mode .thinkbtn {
   padding: 20px 8px !important;
   font-size: 18px !important;
 }
+
+/* Flashcard auto-audio switch (js/app-shell.js dcAudioToggleHTML) */
+.dc-audio-toggle {
+  font: 600 12px/1.2 inherit; font-family: inherit;
+  padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--color-border, #cbd5e1);
+  background: transparent; color: var(--color-ink-soft, #64748b);
+}
+.dc-audio-toggle.on { border-color: #16a34a; color: #15803d; background: rgba(22, 163, 74, 0.08); }
+[data-theme="dark"] .dc-audio-toggle.on { color: #4ade80; border-color: #4ade80; background: rgba(74, 222, 128, 0.12); }
