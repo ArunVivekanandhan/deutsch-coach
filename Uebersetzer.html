@@ -137,6 +137,8 @@ const CAT_LABEL = { v: 'Verb', n: 'Nomen', adj: 'Adjektiv / Adverb', p: 'Ausdruc
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = s => String(s || '').toLowerCase().replace(/[„“"'»«()\[\]{}.,!?;:…]/g, ' ').replace(/\s+/g, ' ').trim();
 const isTamil = s => /[஀-௿]/.test(s);
+// Tamil drafted by AI carries tai (1, or 2 = uncertain) in js/lexicon.js and is labelled 🤖.
+const taMark = e => (e && e.tai && typeof dcTaMark === 'function') ? dcTaMark({ ta_src: e.tai === 2 ? 'ai?' : 'ai' }) : '';
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 /* ---------- indexes ---------- */
@@ -288,7 +290,7 @@ function wordDetailHTML(e, label) {
       <span class="tx-tag">${esc(CAT_LABEL[e.c] || e.c)}</span>${e.lv ? `<span class="tx-tag">${esc(e.lv)}</span>` : ''}
       ${e.f ? `<span class="tx-tag" title="Rang in einer deutschen Häufigkeitsliste (kleiner = häufiger)">Häufigkeit #${e.f}</span>` : ''}
       ${label && label !== 'Grundform' ? `<span class="tx-muted">gefunden als: ${esc(label)}</span>` : ''}</div>
-    <div class="tx-mean">🇬🇧 ${esc(e.en || '—')}${e.ta ? `<br><span class="ta" lang="ta">🇮🇳 ${esc(e.ta)}</span>` : ''}</div>`;
+    <div class="tx-mean">🇬🇧 ${esc(e.en || '—')}${e.ta ? `<br><span class="ta" lang="ta">🇮🇳 ${esc(e.ta)}</span>${taMark(e)}` : ''}</div>`;
 
   // forms
   let forms = '';
@@ -315,7 +317,7 @@ function wordDetailHTML(e, label) {
   }
   if (e.ex || e.mn) {
     h += `<div class="tx-section"><h3>Beispiel &amp; Notiz</h3>
-      ${e.ex ? `<div class="tx-tip">„${esc(e.ex)}“ ${speakBtnHTML(e.ex)}</div>` : ''}
+      ${e.ex ? `<div class="tx-tip">„${esc(e.ex)}“ ${speakBtnHTML(e.ex)}${e.exen ? `<br><span class="tx-muted">↳ ${esc(e.exen)}</span>` : ''}${e.exta ? `<br><span class="tx-muted" lang="ta">↳ ${esc(e.exta)}</span>` : ''}${e.exai ? `<br><span class="tx-muted" title="AI-drafted example sentence, checked">🤖 KI-Beispiel</span>` : ''}</div>` : ''}
       ${e.mn ? `<div class="tx-tip">${e.mn}</div>` : ''}</div>`;   // mn: app's own note (may contain <b>)
   }
   const fam = familyOf(e);
@@ -329,7 +331,7 @@ function hitListHTML(title, items) {
   return `<div class="tx-section"><h3>${esc(title)}</h3><div class="tx-list">${items.map(({ e, label }) =>
     `<button class="tx-hit" type="button" data-open="${LEX.indexOf(e)}" data-label="${esc(label)}"><b class="${artClass(e.a)}">${esc((e.a ? e.a + ' ' : '') + e.w)}</b>
       <span class="tx-tag">${esc(CAT_LABEL[e.c] || e.c)}</span>${e.lv ? ` <span class="tx-tag">${esc(e.lv)}</span>` : ''}<br>
-      <span class="tx-muted">${esc(e.en || '')}${e.ta ? ' · ' + esc(e.ta) : ''}</span>${label && label !== 'Grundform' ? `<br><span class="tx-muted">→ ${esc(label)}</span>` : ''}</button>`).join('')}</div></div>`;
+      <span class="tx-muted">${esc(e.en || '')}${e.ta ? ' · ' + esc(e.ta) + taMark(e) : ''}</span>${label && label !== 'Grundform' ? `<br><span class="tx-muted">→ ${esc(label)}</span>` : ''}</button>`).join('')}</div></div>`;
 }
 
 /* ---------- rendering: sentence ---------- */
@@ -375,7 +377,7 @@ function sentenceHTML(raw) {
       const { e, label } = x.hits[0];
       return `<div class="tx-tok known" data-open="${LEX.indexOf(e)}" data-label="${esc(label)}" title="Details öffnen"><div class="t">${esc(x.tok)}</div>
         <div class="b">${esc((e.a ? e.a + ' ' : '') + e.w)}${label && label !== 'Grundform' ? ' · ' + esc(label) : ''}</div>
-        <div class="e">${esc((e.en || '').slice(0, 40))}</div>${e.ta ? `<div class="ta" lang="ta">${esc(e.ta)}</div>` : ''}</div>`;
+        <div class="e">${esc((e.en || '').slice(0, 40))}</div>${e.ta ? `<div class="ta" lang="ta">${esc(e.ta)}${taMark(e)}</div>` : ''}</div>`;
     }).join('')}</div><div class="tx-note">Tippe ein blaues Wort an für alle Details.</div></div>`;
   } else {
     const words = toks.filter(t => !EN_STOP.has(norm(t)));

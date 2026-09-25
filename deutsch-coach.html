@@ -2545,8 +2545,12 @@ ALL_CARDS.forEach(c=>{
    for cards that have none of their own, so English/Tamil -> Deutsch cards can show both. */
 if (window.DC_TAMIL) ALL_CARDS.forEach(c=>{
   if (c.ta) return;
-  const ta = DC_TAMIL[c.cat + "|" + String(c.w).replace(/\([^)]*\)/g, "").trim()];
-  if (ta) c.ta = ta;
+  const key = c.cat + "|" + String(c.w).replace(/\([^)]*\)/g, "").trim();
+  const ta = DC_TAMIL[key];
+  if (!ta) return;
+  c.ta = ta;
+  const ai = window.DC_TAMIL_AI && DC_TAMIL_AI[key];
+  if (ai) c.ta_src = ai === 2 ? "ai?" : "ai";      // shown with the 🤖 label (dcTaMark)
 });
 
 /* Stable unique id per card */
@@ -3108,7 +3112,7 @@ function renderInfoPanel(card){
   return `
     <div class="revealbox">
       <div class="de-word ${getGenderClass(card)}" style="font-size:28px; font-weight:bold; margin-bottom:4px;">${card.a ? card.a + ' ' : ''}${card.w} <button onclick="playTTS('${String(card.w).replace(/'/g, "\\'")}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
-      <div class="en-word" style="margin-bottom:12px;">${displayMeaning}</div>
+      <div class="en-word" style="margin-bottom:12px;">${displayMeaning}${displayMeaning === card.ta && card.ta ? (typeof dcTaMark === 'function' ? dcTaMark(card) : '') : ''}</div>
       ${typeof MemoryTips !== 'undefined' ? MemoryTips.partsHTML(card.cat, card.w) : ''}
       ${card.a ? `<div class="infoline"><b>Artikel:</b> ${card.a}</div>` : ""}
       ${pluralLine}
@@ -3168,7 +3172,8 @@ function difficultBanner(card){
 function meaningSecondHTML(card){
   if (!card.ta) return '';
   const second = window.langPref === 'ta' ? card.en : card.ta;
-  return second ? `<div class="meaning-second" style="font-size:15px; color:var(--ink-soft); margin-top:4px;">${second}</div>` : '';
+  const mark = window.langPref === 'ta' ? '' : (typeof dcTaMark === 'function' ? dcTaMark(card) : '');
+  return second ? `<div class="meaning-second" style="font-size:15px; color:var(--ink-soft); margin-top:4px;">${second}${mark}</div>` : '';
 }
 /* Auto-audio: on English/Tamil -> Deutsch cards the German word is the answer, so it is read out on reveal. */
 function autoSpeakGerman(card){
@@ -3188,7 +3193,7 @@ function renderRecallMeaning(card, advanceFn){
       <div class="qlabel">${card.ta ? "Englisch / Tamil" : "Englisch"} → Deutsch &nbsp;·&nbsp; 📦 ${box}</div>
       <div class="prompt">
         ${promptIconHTML(card)}
-        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${displayMeaning}</div>
+        <div class="word" style="cursor:pointer;" onclick="const rb=document.getElementById('revealBtn'); if(rb)rb.click();">${displayMeaning}${displayMeaning === card.ta ? (typeof dcTaMark === 'function' ? dcTaMark(card) : '') : ''}</div>
         ${meaningSecondHTML(card)}
         <div class="subq">Was ist das auf Deutsch? · What is this in German?</div>
       </div>
@@ -3219,7 +3224,7 @@ function renderRecallMeaning(card, advanceFn){
         }
 
         const displayMeaning = (card.en && card.ta) ? 
-          `<b>EN:</b> ${card.en}<br><b style="margin-top:4px;display:inline-block;">TA:</b> ${card.ta}` : 
+          `<b>EN:</b> ${card.en}<br><b style="margin-top:4px;display:inline-block;">TA:</b> ${card.ta}${typeof dcTaMark === 'function' ? dcTaMark(card) : ''}` : 
           (card.en || card.ta);
           
         const meaningHtml = `<div class="revealbox" style="font-size:22px; color:var(--purple);">${displayMeaning}</div>`;

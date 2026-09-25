@@ -1378,6 +1378,7 @@
         primaryWord: v.inf,
         meaningEn: v.en || '',
         meaningTa: v.ta || '',
+        ta_src: v.ta_src || '',
         meaningTaTranslit: v.ta_translit || '',
         verb: v.inf,
         praeteritum: v.praeteritum || '',
@@ -1412,6 +1413,7 @@
         primaryWord: n.sg,
         meaningEn: n.en || '',
         meaningTa: n.ta || '',
+        ta_src: n.ta_src || '',
         meaningTaTranslit: n.ta_translit || '',
         verb: n.related_verb || '',
         praeteritum: '',
@@ -1439,6 +1441,7 @@
         primaryWord: a.w,
         meaningEn: a.en || '',
         meaningTa: a.ta || '',
+        ta_src: a.ta_src || '',
         meaningTaTranslit: a.ta_translit || '',
         verb: '',
         praeteritum: '',
@@ -1599,7 +1602,7 @@
           ${item.meaningEn || '—'}
           <button class="speaker-btn" onclick="playGermanAudio('${item.primaryWord}', event)" title="German Audio">🔊</button>
         </div>
-        <div class="meaning-ta">${item.meaningTa} ${item.meaningTaTranslit ? '(' + item.meaningTaTranslit + ')' : ''}</div>
+        <div class="meaning-ta">${item.meaningTa} ${item.meaningTaTranslit ? '(' + item.meaningTaTranslit + ')' : ''}${typeof dcTaMark === 'function' ? dcTaMark(item) : ''}</div>
       </div>
     `;
 
@@ -1750,7 +1753,7 @@
                 <td>
                   <b>${item.meaningEn}</b>
                   <button class="speaker-btn" onclick="playGermanAudio('${item.primaryWord}', event)">🔊</button>
-                  <div style="font-size:11.5px; color:var(--purple);">${item.meaningTa}</div>
+                  <div style="font-size:11.5px; color:var(--purple);">${item.meaningTa}${typeof dcTaMark === 'function' ? dcTaMark(item) : ''}</div>
                 </td>
                 <td>
                   ${item.verb ? `

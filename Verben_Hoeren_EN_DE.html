@@ -566,7 +566,7 @@ function renderList() {
     li.id = 'verb-' + idx;
 
     const typBadge = v.typ ? `<span class="typ-pill typ-${v.typ}">${v.typ.toUpperCase()}</span>` : '';
-    const tamilTxt = v.ta ? `<div class="ta">${v.ta} ${v.ta_translit ? '(' + v.ta_translit + ')' : ''}</div>` : '';
+    const tamilTxt = v.ta ? `<div class="ta">${v.ta} ${v.ta_translit ? '(' + v.ta_translit + ')' : ''}${typeof dcTaMark === 'function' ? dcTaMark(v) : ''}</div>` : '';
 
     li.innerHTML = `
       <div class="num">${idx + 1}</div>

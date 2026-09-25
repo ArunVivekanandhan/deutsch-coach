@@ -535,6 +535,18 @@ document.addEventListener('transitionend', e => {
 }, true);
 
 
+// ---- Tamil that was drafted by AI (Task 38: ta_src "ai" / "ai?" in js/word-data.js) is labelled 🤖 wherever
+// a page shows it; "ai?" = the translator was unsure. Human-entered Tamil has no ta_src and no label.
+function dcTaIsAI(e) { return !!(e && typeof e.ta_src === 'string' && e.ta_src.indexOf('ai') === 0); }
+function dcTaMark(e) {
+    if (!dcTaIsAI(e)) return '';
+    const unsure = e.ta_src === 'ai?';
+    const title = unsure ? 'Tamil: KI-Übersetzung, unsicher (AI-assisted, uncertain)' : 'Tamil: KI-Übersetzung (AI-assisted translation, spot-checked)';
+    return `<span class="dc-ta-ai" title="${title}" aria-label="${title}" style="font-size:.75em; opacity:.75; margin-left:3px; cursor:help;">🤖${unsure ? '?' : ''}</span>`;
+}
+function dcTaMarkText(e) { return dcTaIsAI(e) ? (e.ta_src === 'ai?' ? ' 🤖?' : ' 🤖') : ''; }
+window.dcTaIsAI = dcTaIsAI; window.dcTaMark = dcTaMark; window.dcTaMarkText = dcTaMarkText;
+
 // ---- Auto-audio switch for flashcards (home + Verb/Nomen/Adjektiv trainers). One key, de_auto_audio, is
 // shared with the Einstellungen page; switching it off also stops the tense auto-read and any speech in progress.
 function dcAutoAudioOn() { try { return localStorage.getItem('de_auto_audio') === 'true'; } catch (e) { return false; } }

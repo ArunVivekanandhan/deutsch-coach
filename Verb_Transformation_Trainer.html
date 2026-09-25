@@ -573,11 +573,11 @@ function typLabel(t){ return t==='weak'?'Weak':t==='strong'?'Strong':'Mixed'; }
 
 function meaningHTML(v){
   if(meaningLang==='ta'){
-    return v.ta ? `<div class="meaningbox"><div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span></div></div>`
+    return v.ta ? `<div class="meaningbox"><div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span>${typeof dcTaMark === 'function' ? dcTaMark(v) : ''}</div></div>`
                 : `<div class="meaningbox"><div class="en">${v.en}</div></div>`;
   }
   if(meaningLang==='both'){
-    return `<div class="meaningbox"><div class="en">${v.en}</div>${v.ta?`<div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span></div>`:''}</div>`;
+    return `<div class="meaningbox"><div class="en">${v.en}</div>${v.ta?`<div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span>${typeof dcTaMark === 'function' ? dcTaMark(v) : ''}</div>`:''}</div>`;
   }
   return `<div class="meaningbox"><div class="en">${v.en}</div></div>`;
 }
@@ -1086,6 +1086,16 @@ function verbFamilyHTML(inf) {
   }).join('');
 }
 /* Prefix line for the answer: which prefix, untrennbar / trennbar, and what that means for Präsens and Perfekt. */
+/* Example sentence for the answer box: the verb in a real sentence (AI-drafted ones are labelled). */
+function verbExampleHTML(v) {
+  if (!v.ex) return '';
+  return `<div class="example-line" style="margin:8px 0 4px; font-size:13.5px; line-height:1.5; text-align:left; padding:8px 10px; border-left:3px solid var(--gold); background:var(--paper); border-radius:0 6px 6px 0;">
+    🗣️ <i>„${v.ex}”</i> ${speakBtn(v.ex, 'Listen to sentence')}
+    ${v.ex_en ? `<div style="font-size:12px; color:var(--ink-soft);">↳ ${v.ex_en}</div>` : ''}
+    ${v.ex_ta ? `<div lang="ta" style="font-size:12px; color:var(--ink-soft);">↳ ${v.ex_ta}</div>` : ''}
+    ${v.ex_src === 'ai' ? `<div style="font-size:10px; opacity:.65;" title="Beispielsatz von KI erstellt (AI-drafted example sentence, checked)">🤖 KI-Beispiel</div>` : ''}
+  </div>`;
+}
 function verbPrefixRowHTML(v) {
   const list = verbPrefixes(v.inf);
   const small = 'display:block; font-family:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-weight:400; font-size:11.5px; line-height:1.45; margin-top:2px;';
@@ -1215,6 +1225,7 @@ function renderUniversal3StepMemoryHack(v){
     sentences = direct.sentences;
   } else {
     sentences = [
+      ...(v.ex ? [{ de: v.ex, en: v.ex_en || '', ta: v.ex_ta || '', ai: v.ex_src === 'ai' }] : []),
       { de: ichModal, en: 'I would like to ' + enBare + ' today. [Modalverb + infinitive at the end]' },
       ichPerfekt ? { de: 'Gestern ' + ichPerfekt.replace(/^Ich (bin|habe)/, (m, a) => a + ' ich').replace(/\.$/, '') + '.', en: 'Yesterday I … (' + enBare + ') [Perfekt: ' + perf + ']' } : null,
       erPraet ? { de: erPraet, en: 'He often … (' + enBare + ') in the past. [Präteritum' + (praetTokens.length > 1 ? ', ' + praetTokens.slice(1).join(' ') + ' at the end' : '') + ']' } : null
@@ -1303,8 +1314,10 @@ function renderUniversal3StepMemoryHack(v){
         <div style="background:#fff; border:1px solid #fae8b4; padding:8px 10px; border-radius:4px;">
           ${sentences.map(sent => `
             <div style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px dashed #fae8b4;">
-              🗣️ <i>„${sent.de}”</i><br>
+              🗣️ <i>„${sent.de}”</i> ${speakBtn(sent.de, 'Listen to sentence')}<br>
               <small style="color:var(--ink-soft); font-size:11px;">↳ ${sent.en}</small>
+              ${sent.ta ? `<br><small lang="ta" style="color:var(--ink-soft); font-size:11px;">↳ ${sent.ta}</small>` : ''}
+              ${sent.ai ? `<small class="dc-ta-ai" title="Beispielsatz von KI erstellt (AI-drafted example, checked)" style="font-size:10px; opacity:.7;"> 🤖 KI-Beispiel</small>` : ''}
             </div>
           `).join('')}
         </div>
@@ -1690,7 +1703,7 @@ function renderCard(){
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German words" style="font-size:24px; font-weight:700;">
-          ${meaningPromptText(v)} <span style="font-size:14px; opacity:0.7;">👁️</span>
+          ${meaningPromptText(v)}${meaningLang !== 'en' && typeof dcTaMark === 'function' ? dcTaMark(v) : ''} <span style="font-size:14px; opacity:0.7;">👁️</span>
         </div>
         <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
           👆 <i>Click meaning (or press T) to peek German verb &amp; noun</i>
@@ -1713,7 +1726,7 @@ function renderCard(){
           👆 <i>Click word (or press T) to peek translation</i>
         </div>
         <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
-          <b>Meaning:</b> ${meaningPromptText(v)}
+          <b>Meaning:</b> ${meaningPromptText(v)}${meaningLang !== 'en' && typeof dcTaMark === 'function' ? dcTaMark(v) : ''}
         </div>
         <div class="subq" style="margin-top:10px;">Which noun belongs to this verb?</div>
       </div>`;
@@ -1725,6 +1738,7 @@ function renderCard(){
         <div class="formrow"><span class="flabel">Simple Past</span><span class="fval">${v.praeteritum}${speakBtn(v.praeteritum,'Listen to simple past')}</span></div>
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${meaningHTML(v)}
+        ${verbExampleHTML(v)}
         ${transformDiagram(v)}
       </div>`;
   } else {
@@ -1733,7 +1747,7 @@ function renderCard(){
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
         <div class="word word-click-reveal" onclick="toggleInlinePeek()" title="Click to peek German verb" style="font-size:24px; font-weight:700;">
-          ${meaningPromptText(v)} <span style="font-size:14px; opacity:0.7;">👁️</span>
+          ${meaningPromptText(v)}${meaningLang !== 'en' && typeof dcTaMark === 'function' ? dcTaMark(v) : ''} <span style="font-size:14px; opacity:0.7;">👁️</span>
         </div>
         <div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px; cursor:pointer;" onclick="toggleInlinePeek()">
           👆 <i>Click meaning (or press T) to peek German verb</i>
@@ -1756,7 +1770,7 @@ function renderCard(){
           👆 <i>Click word (or press T) to peek translation</i>
         </div>
         <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
-          <b>Meaning:</b> ${meaningPromptText(v)}
+          <b>Meaning:</b> ${meaningPromptText(v)}${meaningLang !== 'en' && typeof dcTaMark === 'function' ? dcTaMark(v) : ''}
         </div>
         <div class="subq" style="margin-top:10px;">What are the <b>Simple Past</b> (Präteritum) and <b>Present Perfect</b> (Perfekt) forms?</div>
       </div>`;
@@ -1768,6 +1782,7 @@ function renderCard(){
         <div class="formrow"><span class="flabel">Present Perfect</span><span class="fval">${formatPerfekt(v.perfekt)}${speakBtn(v.perfekt,'Listen to present perfect')}</span></div>
         ${v.noun ? `<div class="nounrow">🌳 ${v.noun} ${speakBtn(v.noun,'Listen to noun')}</div>` : ''}
         ${meaningHTML(v)}
+        ${verbExampleHTML(v)}
         ${transformDiagram(v)}
       </div>`;
   }
@@ -1878,7 +1893,7 @@ function renderEasyMC(v){
       <div class="meta"><span>${v.source}</span><span class="pill level"${v.levelEst ? ' title="Level geschätzt aus Worthäufigkeit"' : ''}>${v.levelEst ? '≈' : ''}${v.level}</span></div>
       <div class="prompt">
         <div class="wordicon">${getIcon(v)}</div>
-        <div class="word" style="font-size:22px; font-weight:700;">${reverse ? meaningPromptText(v) : v.inf}</div>
+        <div class="word" style="font-size:22px; font-weight:700;">${reverse ? meaningPromptText(v) + (meaningLang !== 'en' && typeof dcTaMark === 'function' ? dcTaMark(v) : '') : v.inf}</div>
         <div class="subq" style="margin-top:10px;">${reverse ? 'Pick the correct German verb' : 'Pick the correct meaning'}</div>
       </div>
       <div class="opt-grid" style="display:grid; gap:8px; padding:0 18px 18px;">

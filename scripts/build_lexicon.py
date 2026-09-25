@@ -25,6 +25,12 @@ HOME = os.path.join(ROOT, 'deutsch-coach.html')
 HOME_CATS = {'v', 'n', 'adj', 'p', 'adv', 'x', 'q', 'pron', 'prep', 'konj', 'num'}
 
 
+def ta_ai(e):
+    """1 = Tamil drafted by AI, 2 = drafted by AI and marked uncertain (ta_src "ai?"), None = entered by a person."""
+    src = str(e.get('ta_src', ''))
+    return (2 if src == 'ai?' else 1) if src.startswith('ai') else None
+
+
 def ta_text(e):
     ta = (e.get('ta') or '').strip()
     if not ta:
@@ -47,16 +53,17 @@ def build():
 
     for e in load(*CANON['v'][:2]):
         add({'c': 'v', 'w': e['inf'], 'en': e.get('en'), 'ta': ta_text(e), 'pr': e.get('praeteritum'),
+             'ex': e.get('ex'), 'exen': e.get('ex_en'), 'exta': e.get('ex_ta'), 'exai': 1 if e.get('ex_src') == 'ai' else None,
              'pp': e.get('perfekt'), 'noun': e.get('noun'), 'typ': e.get('typ'), 'lv': e.get('level'),
-             'f': e.get('freq')})
+             'f': e.get('freq'), 'tai': ta_ai(e)})
     for e in load(*CANON['n'][:2]):
         if ('n', e['sg'].lower()) in index:
             continue
         add({'c': 'n', 'w': e['sg'], 'a': e.get('a'), 'pl': e.get('pl'), 'en': e.get('en'), 'ta': ta_text(e),
-             'lv': e.get('level'), 'topic': e.get('topic'), 'f': e.get('freq')})
+             'lv': e.get('level'), 'topic': e.get('topic'), 'f': e.get('freq'), 'tai': ta_ai(e)})
     for e in load(*CANON['a'][:2]):
         add({'c': 'adj', 'w': e['w'], 'komp': e.get('komp') or e.get('comp'), 'sup': e.get('sup'),
-             'en': e.get('en'), 'ta': ta_text(e), 'lv': e.get('level'), 'f': e.get('freq')})
+             'en': e.get('en'), 'ta': ta_text(e), 'lv': e.get('level'), 'f': e.get('freq'), 'tai': ta_ai(e)})
 
     # Home flashcards: example sentence + note for the same word; phrases and other words only the
     # lessons have are added as their own entries.
@@ -72,8 +79,10 @@ def build():
         ex, mn, en = unescape(field(obj, 'ex')).strip(), unescape(field(obj, 'mn')).strip(), unescape(field(obj, 'en')).strip()
         e = index.get((cat_key, sg.lower()))
         if e:
-            if ex and 'ex' not in e:
+            if ex and (not e.get('ex') or e.get('exai')):     # the home card's own example wins over an AI one
                 e['ex'] = ex
+                for k in ('exen', 'exta', 'exai'):
+                    e.pop(k, None)
             if mn and 'mn' not in e and not mn.startswith('<b>Nomen:</b>'):
                 e['mn'] = mn
             continue
@@ -88,7 +97,9 @@ def build():
             ' - do not edit by hand. */\n')
     lex = head + 'window.DC_LEXICON = ' + json.dumps(words, ensure_ascii=False, separators=(',', ':')) + ';\n'
     tamil = {e['c'] + '|' + e['w']: e['ta'] for e in words if e.get('ta')}
-    ta = head + 'window.DC_TAMIL = ' + json.dumps(tamil, ensure_ascii=False, separators=(',', ':')) + ';\n'
+    ai = {e['c'] + '|' + e['w']: e['tai'] for e in words if e.get('ta') and e.get('tai')}
+    ta = (head + 'window.DC_TAMIL = ' + json.dumps(tamil, ensure_ascii=False, separators=(',', ':')) + ';\n'
+          + '/* Tamil drafted by AI, labelled 🤖 in the app (2 = marked uncertain) */\nwindow.DC_TAMIL_AI = ' + json.dumps(ai, ensure_ascii=False, separators=(',', ':'), sort_keys=True) + ';\n')
     return lex, ta, len(words), len(tamil)
 
 

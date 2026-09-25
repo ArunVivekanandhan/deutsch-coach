@@ -1145,7 +1145,7 @@ function renderQueueList() {
     return '<li class="verb-item ' + (isCur ? 'playing' : '') + '" data-idx="' + idx + '" onclick="jumpToVerb(' + idx + ')">' +
       '<span class="v-idx">' + (idx + 1) + '</span>' +
       '<div class="v-body">' +
-        '<div class="v-en">' + v.en + (v.ta ? ' · <span style="color:var(--purple);">' + v.ta + '</span>' : '') + '</div>' +
+        '<div class="v-en">' + v.en + (v.ta ? ' · <span style="color:var(--purple);">' + v.ta + '</span>' + (typeof dcTaMark === 'function' ? dcTaMark(v) : '') : '') + '</div>' +
         '<div class="v-de">' + v.inf + ' <span style="font-size:10px; opacity:0.7;">[' + v.level + ']</span></div>' +
         '<div class="v-tenses">' + (v.praeteritum || '') + ' · ' + (v.perfekt || '') + (v.noun ? ' · 🌳 ' + v.noun : '') + '</div>' +
       '</div>' +
@@ -1160,7 +1160,7 @@ function renderActiveCard(v) {
   document.getElementById('cardTypeBadge').textContent = (v.typ || 'weak').toUpperCase();
   document.getElementById('cardEn').textContent = v.en || '';
   document.getElementById('cardDe').textContent = v.inf || '';
-  document.getElementById('cardTa').textContent = v.ta ? (v.ta + (v.ta_translit ? ' (' + v.ta_translit + ')' : '')) : '';
+  document.getElementById('cardTa').textContent = v.ta ? (v.ta + (v.ta_translit ? ' (' + v.ta_translit + ')' : '') + (typeof dcTaMarkText === 'function' ? dcTaMarkText(v) : '')) : '';
   document.getElementById('cardPraet').textContent = v.praeteritum || '—';
   document.getElementById('cardPerfekt').textContent = v.perfekt || '—';
   document.getElementById('cardNoun').textContent = v.noun || '—';
