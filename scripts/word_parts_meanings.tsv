@@ -1,0 +1,884 @@
+# Reviewed meanings for the root words used in Wortaufbau (js/word-parts.js): word <TAB> English <TAB> Tamil
+# English: the everyday main sense (replaces Ding's automatically chosen gloss, which was sometimes a side sense).
+# Tamil: translated with AI assistance (Claude) and reviewed for this app; shown with a note on every page.
+# Checked by scripts/build_word_parts.py — every root used as a part must have a line here.
+Abend	evening	மாலை
+Abenteuer	adventure	சாகசம்
+achten	to pay attention, to respect	கவனி / மதி
+ahnen	to suspect, to sense	உணர் / ஊகி
+Akt	act	செயல் / நாடக அங்கம்
+Aktie	share (stock)	பங்கு
+aktiv	active	சுறுசுறுப்பான
+albern	silly	முட்டாள்தனமான
+All	all; (outer) space	அனைத்தும்
+allein	alone	தனியாக
+Alter	age	வயது
+Amt	office, authority	அலுவலகம்
+Analyse	analysis	பகுப்பாய்வு
+anstrengen	to make an effort	முயற்சி எடு
+antworten	to answer	பதில் சொல்
+Anzeige	advertisement; report	விளம்பரம் / புகார்
+Arbeit	work	வேலை
+arbeiten	to work	வேலை செய்
+Arbeitnehmer	employee	ஊழியர்
+Architekt	architect	கட்டிடக் கலைஞர்
+arm	poor	ஏழையான
+Armut	poverty	வறுமை
+Art	kind, type; manner	வகை / விதம்
+Arzt	doctor	மருத்துவர்
+atmen	to breathe	சுவாசி
+auf	on, onto (fixed preposition)	மேல் (நிலையான முன்னிடைச்சொல்)
+auferlegt	imposed	விதிக்கப்பட்ட
+aufmuntern	to cheer up	உற்சாகப்படுத்து
+Aufnahme	admission; recording	சேர்க்கை / பதிவு
+Auftrag	order, task	பணி / ஆணை
+Aufwand	effort, expense	முயற்சி / செலவு
+Auge	eye	கண்
+ausbeuten	to exploit	சுரண்டு
+ausloten	to sound out, to explore	ஆராய்
+Auto	car	கார்
+Autor	author	எழுத்தாளர்
+baden	to bathe	குளி
+Bahn	railway; track, path	ரயில் பாதை / வழி
+Ball	ball	பந்து
+Bau	construction, building	கட்டுமானம்
+Bauch	belly	வயிறு
+bauen	to build	கட்டு
+Bedarf	need, demand	தேவை
+bedingt	conditional	நிபந்தனைக்குட்பட்ட
+bedürftig	needy	தேவையுள்ள
+beeinträchtigen	to impair	பாதி
+Befehl	order, command	கட்டளை
+befriedigen	to satisfy	திருப்திப்படுத்து
+befristet	limited in time	கால வரம்புக்குட்பட்ட
+begegnen	to meet (by chance)	எதிர்கொள் / சந்தி
+begrenzt	limited	வரையறுக்கப்பட்ட
+Begriff	term, concept	கருத்து / சொல்
+behaglich	cosy	வசதியான
+beharren	to insist	வலியுறுத்து
+Behörde	authority (office)	அரசு அலுவலகம்
+berechenbar	predictable	கணிக்கக்கூடிய
+berechtigt	entitled, justified	உரிமையுள்ள
+Berechtigung	entitlement, authorisation	உரிமை / அனுமதி
+bereichern	to enrich	வளப்படுத்து
+bereit	ready	தயாரான
+Beruf	profession, job	தொழில்
+Besatzung	crew; occupation (military)	குழு / ஆக்கிரமிப்பு
+bescheiden	modest	அடக்கமான
+beschweren	to complain	புகார் செய்
+beschäftigen	to employ; to keep busy	பணியமர்த்து / ஈடுபடுத்து
+bessern	to improve	மேம்படுத்து
+Bestand	stock, existence	இருப்பு
+bestätigen	to confirm	உறுதிப்படுத்து
+beteiligen	to take part	பங்கேற்
+beteiligt	involved	சம்பந்தப்பட்ட
+betreuen	to look after	கவனித்துக்கொள்
+Bett	bed	படுக்கை
+betten	to embed, to lay down	பதி / படுக்க வை
+beugen	to bend	வளை
+bevormunden	to patronise	அதிகாரம் செலுத்து
+bevorstehen	to be about to happen	நெருங்கி வா
+bewaffnet	armed	ஆயுதம் தாங்கிய
+bewegen	to move	நகர்த்து / அசை
+bezogen	related (to)	தொடர்புடைய
+Bezug	reference, relation	தொடர்பு
+bieten	to offer	வழங்கு
+Bild	picture, image	படம்
+bilden	to form; to educate	உருவாக்கு / கல்வி கொடு
+binden	to tie, to bind	கட்டு
+Blatt	leaf; sheet	இலை / தாள்
+bleiben	to stay	தங்கு / இரு
+Blick	look, view	பார்வை
+Blitz	lightning, flash	மின்னல்
+Blut	blood	இரத்தம்
+Boden	ground, floor	தரை / நிலம்
+Bogen	bow, arc	வில் / வளைவு
+bohren	to drill	துளையிடு
+brauchen	to need	தேவைப்படு
+Braut	bride	மணப்பெண்
+brechen	to break	உடை
+brennen	to burn	எரி
+bringen	to bring	கொண்டுவா
+Brot	bread	ரொட்டி
+Buch	book	புத்தகம்
+buchen	to book	முன்பதிவு செய்
+Buchstabe	letter (of the alphabet)	எழுத்து
+Bund	federation, union	கூட்டமைப்பு
+Burg	castle	கோட்டை
+bügeln	to iron	இஸ்திரி போடு
+Bürger	citizen	குடிமகன்
+Chance	chance	வாய்ப்பு
+Christ	Christian	கிறிஸ்தவர்
+dabei	there, present; with it	உடன் / அங்கே
+Dach	roof	கூரை
+danken	to thank	நன்றி சொல்
+Dauer	duration	கால அளவு
+dauern	to last	நீடி
+Decke	blanket; ceiling	போர்வை / மேற்கூரை
+decken	to cover	மூடு
+demonstrieren	to demonstrate	ஆர்ப்பாட்டம் செய் / காட்டு
+denken	to think	நினை / சிந்தி
+deuten	to interpret, to point	விளக்கு / சுட்டிக்காட்டு
+dicht	dense, tight	அடர்த்தியான
+Dichter	poet	கவிஞர்
+Dieb	thief	திருடன்
+dienen	to serve	சேவை செய்
+Dienst	service, duty	சேவை / பணி
+Distanz	distance	தூரம்
+Donner	thunder	இடி
+Dreck	dirt	அழுக்கு
+drehen	to turn	திருப்பு
+dringen	to penetrate, to press	ஊடுருவு
+drohen	to threaten	அச்சுறுத்து
+Drohne	drone	ட்ரோன்
+Druck	pressure; print	அழுத்தம் / அச்சு
+drucken	to print	அச்சிடு
+drängeln	to push, to jostle	நெருக்கியடி
+drängen	to push, to urge	வற்புறுத்து / தள்ளு
+dunkel	dark	இருண்ட
+echt	real, genuine	உண்மையான
+effizient	efficient	திறமையான
+Ehe	marriage	திருமணம்
+Ehre	honour	மரியாதை / கௌரவம்
+Ehrgeiz	ambition	லட்சியம்
+Eifer	eagerness, zeal	ஆர்வம்
+eigen	own	சொந்த
+Eile	hurry	அவசரம்
+ein	one	ஒன்று
+einen	to unite	ஒன்றிணை
+einigen	to agree	உடன்படு
+einverstanden	agreed	சம்மதமான
+einzig	only, single	ஒரே
+Eis	ice; ice cream	பனிக்கட்டி / ஐஸ்கிரீம்
+Eltern	parents	பெற்றோர்
+Empfang	reception	வரவேற்பு
+enden	to end	முடி
+Energie	energy	ஆற்றல்
+engagieren	to get involved	ஈடுபடு
+Enge	narrowness, tight spot	நெருக்கம்
+entschuldigen	to excuse, to apologise	மன்னிப்பு கேள்
+Erbe	inheritance; heir	மரபுரிமை / வாரிசு
+erben	to inherit	மரபுரிமையாகப் பெறு
+Erde	earth, soil	பூமி / மண்
+Erfolg	success	வெற்றி
+Erkenntnis	insight, finding	அறிவு / கண்டுபிடிப்பு
+erkältet	having a cold	சளி பிடித்த
+erlauben	to allow	அனுமதி
+erlaubt	allowed	அனுமதிக்கப்பட்ட
+ermüden	to tire	சோர்வடை
+erneuern	to renew	புதுப்பி
+Ernst	seriousness	தீவிரம்
+ernten	to harvest	அறுவடை செய்
+erstatten	to refund	திருப்பிக் கொடு
+Ertrag	yield, return	விளைச்சல் / வருவாய்
+es	it	அது
+essen	to eat	சாப்பிடு
+Essen	food, meal	உணவு
+Experte	expert	நிபுணர்
+Export	export	ஏற்றுமதி
+Fach	subject; compartment	பாடம் / அறை
+fahren	to drive, to travel	ஓட்டு / பயணம் செய்
+fair	fair	நியாயமான
+Fall	case; fall	நிகழ்வு / வீழ்ச்சி
+fallen	to fall	விழு
+Familie	family	குடும்பம்
+Fang	catch	பிடிப்பு
+fangen	to catch	பிடி
+Farbe	colour	நிறம்
+Fass	barrel	பீப்பாய்
+fassen	to grasp, to hold	பற்று / பிடி
+fechten	to fence (sword fight)	வாள்சண்டை செய்
+fehlen	to be missing	இல்லாமல் இரு
+Feind	enemy	எதிரி
+Feld	field	வயல் / களம்
+Fels	rock	பாறை
+Fenster	window	ஜன்னல்
+fern	far	தொலைவான
+fertig	finished, ready	முடிந்த / தயாரான
+fest	firm, fixed	உறுதியான
+festigen	to strengthen	உறுதிப்படுத்து
+fett	fat, fatty	கொழுப்பான
+Fett	fat	கொழுப்பு
+finanzieren	to finance	நிதியளி
+finden	to find	கண்டுபிடி
+Firma	company	நிறுவனம்
+fit	fit	உடல்நலமுள்ள
+flechten	to braid, to weave	பின்னு
+Fleisch	meat	இறைச்சி
+fließen	to flow	பாய்
+Flug	flight	விமானப் பயணம்
+Fluss	river; flow	ஆறு / ஓட்டம்
+Fläche	area, surface	பரப்பு
+Folge	consequence; episode	விளைவு / தொடர்
+folgen	to follow	பின்தொடர்
+Follower	follower	பின்தொடர்பவர்
+fordern	to demand	கோரு
+Form	form, shape	வடிவம்
+forschen	to research	ஆராய்ச்சி செய்
+Foto	photo	புகைப்படம்
+Fotograf	photographer	புகைப்படக் கலைஞர்
+fotografieren	to photograph	புகைப்படம் எடு
+fragen	to ask	கேள்
+Frau	woman; wife	பெண் / மனைவி
+frei	free	சுதந்திரமான / இலவச
+fremd	foreign, strange	அந்நிய
+Freund	friend	நண்பன்
+Friede	peace	அமைதி
+Frieden	peace	அமைதி
+Frist	deadline, time limit	காலக்கெடு
+früh	early	சீக்கிரமான / அதிகாலை
+Funk	radio	வானொலி
+Funktion	function	செயல்பாடு
+funktionieren	to work, to function	இயங்கு
+Furcht	fear	அச்சம்
+Fuß	foot	கால் / பாதம்
+Fußgänger	pedestrian	பாதசாரி
+fähig	capable	திறமையுள்ள
+Fälscher	forger	போலி தயாரிப்பவர்
+fördern	to promote, to support	ஊக்குவி / ஆதரி
+fügen	to fit together; to submit	இணை / அடிபணி
+führen	to lead	வழிநடத்து
+füllen	to fill	நிரப்பு
+für	for (fixed preposition)	க்காக (நிலையான முன்னிடைச்சொல்)
+fürchten	to fear	அஞ்சு
+Gabe	gift	பரிசு / கொடை
+Gang	walk; corridor; gear	நடை / தாழ்வாரம்
+Garten	garden	தோட்டம்
+Gast	guest	விருந்தினர்
+geben	to give	கொடு
+Gebot	commandment; bid	கட்டளை / ஏலத்தொகை
+Gebrauch	use	பயன்பாடு
+Geburt	birth	பிறப்பு
+Geduld	patience	பொறுமை
+Gefahr	danger	ஆபத்து
+Gefühl	feeling	உணர்வு
+Gehalt	salary	சம்பளம்
+geheimhalten	to keep secret	ரகசியமாக வை
+gehen	to go, to walk	போ / நட
+Geist	mind, spirit	மனம் / ஆவி
+geistern	to haunt	உலாவு (ஆவி போல)
+Geld	money	பணம்
+gelingen	to succeed	வெற்றிபெறு
+gemein	common; mean	பொதுவான / கெட்ட
+genehmigen	to approve	அனுமதி அளி
+generieren	to generate	உருவாக்கு
+genießen	to enjoy	அனுபவி
+gerecht	fair, just	நியாயமான
+Gericht	court; dish	நீதிமன்றம் / உணவு வகை
+gerichtet	directed	நோக்கிய
+Geräusch	noise, sound	சத்தம்
+geschlagen	beaten	அடிபட்ட / தோற்கடிக்கப்பட்ட
+Geschoss	floor, storey; projectile	மாடி / குண்டு
+Gesellschaft	society; company	சமூகம் / நிறுவனம்
+Gesetz	law	சட்டம்
+gesetzt	set, placed	வைக்கப்பட்ட
+Gesicht	face	முகம்
+Gespräch	conversation	உரையாடல்
+Geständnis	confession	ஒப்புதல் வாக்குமூலம்
+gesund	healthy	ஆரோக்கியமான
+Gewalt	violence; power	வன்முறை / அதிகாரம்
+Gewicht	weight	எடை
+Gewinn	profit; prize	லாபம் / வெற்றிப் பரிசு
+gewinnen	to win	வெல்
+gewöhnen	to get used to	பழகு
+gibt	gives (es gibt = there is)	உண்டு (இருக்கிறது)
+Gier	greed	பேராசை
+Gift	poison	விஷம்
+glauben	to believe	நம்பு
+gleich	equal, same	சமமான / அதே
+gleichen	to resemble	ஒத்திரு
+gleiten	to glide, to slide	சறுக்கு
+gliedern	to structure, to divide	பிரித்து அமை
+Glück	luck, happiness	அதிர்ஷ்டம் / மகிழ்ச்சி
+Gott	God	கடவுள்
+graben	to dig	தோண்டு
+grauen	to dread; to dawn	அஞ்சு / விடி
+greifen	to grab, to reach	பற்று / எட்டிப் பிடி
+Grenze	border, limit	எல்லை
+Griff	grip, handle	பிடி / கைப்பிடி
+groß	big	பெரிய
+Grund	reason; ground	காரணம் / அடிப்படை
+Gruppe	group	குழு
+Grün	green	பச்சை
+gründen	to found	நிறுவு
+grüßen	to greet	வணக்கம் சொல்
+gültig	valid	செல்லுபடியான
+haben	to have	வைத்திரு
+Hafen	harbour, port	துறைமுகம்
+Haft	custody, detention	காவல் / சிறை
+haften	to be liable; to stick	பொறுப்பேற் / ஒட்டு
+Hagel	hail	ஆலங்கட்டி மழை
+Halt	stop; hold, support	நிறுத்தம் / ஆதாரம்
+halten	to hold; to stop	பிடி / நிறுத்து
+Hand	hand	கை
+Handel	trade	வணிகம்
+handeln	to act; to trade	செயல்படு / வணிகம் செய்
+Hang	slope; tendency	சரிவு / நாட்டம்
+Haube	hood, cap	மூடி / தொப்பி
+Haus	house	வீடு
+heben	to lift	தூக்கு
+heften	to staple, to attach	இணை / ஒட்டு
+Heil	salvation, well-being	நலம் / மீட்பு
+Heim	home	இல்லம்
+Heimat	homeland, home	தாய்நாடு / சொந்த ஊர்
+helfen	to help	உதவு
+hemmen	to hinder, to inhibit	தடு
+Herr	gentleman; Mr.; lord	திரு / எஜமானர்
+herrschen	to rule, to prevail	ஆட்சி செய் / நிலவு
+Herz	heart	இதயம்
+Hilfe	help	உதவி
+hindern	to hinder, to prevent	தடு
+hoch	high	உயர்ந்த
+Hof	yard, courtyard; court	முற்றம் / அரசவை
+holen	to fetch	கொண்டுவா / எடுத்து வா
+hungern	to go hungry	பட்டினி கிட
+Husten	cough	இருமல்
+hängen	to hang	தொங்கு
+häufen	to pile up	குவி
+hören	to hear, to listen	கேள்
+Import	import	இறக்குமதி
+Influencer	influencer	சமூக ஊடகச் செல்வாக்காளர்
+Informatiker	computer scientist	கணினி விஞ்ஞானி
+informieren	to inform	தகவல் தெரிவி
+Ingenieur	engineer	பொறியாளர்
+Inhalt	content	உள்ளடக்கம்
+Initiative	initiative	முன்முயற்சி
+integrieren	to integrate	ஒருங்கிணை
+Investition	investment	முதலீடு
+Jahr	year	வருடம்
+Jammer	misery; pity	துயரம்
+Job	job	வேலை
+Journalist	journalist	பத்திரிகையாளர்
+Jude	Jew	யூதர்
+Jugend	youth	இளமை / இளைஞர்கள்
+Kaiser	emperor	பேரரசர்
+Kampf	fight, struggle	போராட்டம்
+Kanzler	chancellor	அதிபர் (சான்சலர்)
+Kar	(old) lament — as in Karfreitag	துக்கம் (பழைய சொல்)
+Karte	card; ticket; map	அட்டை / சீட்டு / வரைபடம்
+Karton	cardboard box	அட்டைப்பெட்டி
+Kasse	till, checkout; health fund	பணப்பெட்டி / காசாளர் இடம்
+Kasten	box	பெட்டி
+Kater	tomcat; hangover	ஆண் பூனை / போதைக்குப் பின் தலைவலி
+Katze	cat	பூனை
+kaufen	to buy	வாங்கு
+kehren	to sweep; to turn	பெருக்கு / திருப்பு
+kennen	to know (be familiar with)	அறி / தெரியும்
+keuchen	to pant	மூச்சிரை
+Kind	child	குழந்தை
+kleben	to stick, to glue	ஒட்டு
+Kleid	dress	உடை
+Klima	climate	காலநிலை
+klingen	to sound	ஒலி / கேட்பதற்கு இரு
+klären	to clarify	தெளிவுபடுத்து
+Knochen	bone	எலும்பு
+Knoten	knot	முடிச்சு
+Kodex	code (of conduct)	நெறிமுறை
+Kohle	coal	நிலக்கரி
+Kollege	colleague	சக ஊழியர்
+kommen	to come	வா
+Konsum	consumption	நுகர்வு
+Konsument	consumer	நுகர்வோர்
+Kontrolle	check, control	சோதனை / கட்டுப்பாடு
+Kopf	head	தலை
+Kost	food, fare	உணவு
+Kraft	strength, power	வலிமை / சக்தி
+krank	ill, sick	நோயுற்ற
+Kranke	sick person	நோயாளி
+Kredit	loan, credit	கடன்
+Kreis	circle; district	வட்டம் / மாவட்டம்
+kreuzen	to cross	கடந்து செல்
+kriegen	to get	பெறு
+kräftigen	to strengthen	வலுப்படுத்து
+Kugel	ball, sphere; bullet	கோளம் / குண்டு
+Kulisse	scenery, backdrop	பின்னணி
+Kultur	culture	பண்பாடு
+Kumpel	buddy, mate	நண்பன்
+Kunde	customer	வாடிக்கையாளர்
+Kunst	art	கலை
+Kurs	course; exchange rate	பாடநெறி / மாற்று விகிதம்
+König	king	அரசன்
+kühl	cool	குளிர்ச்சியான
+kündigen	to cancel, to give notice	ரத்து செய் / வேலையை விடு
+Künstler	artist	கலைஞர்
+kürzen	to shorten, to cut	சுருக்கு / குறை
+Laden	shop	கடை
+laden	to load; to charge	ஏற்று / மின்னேற்று
+Lage	location; situation	இடம் / நிலைமை
+lagern	to store	சேமித்து வை
+Land	country; land	நாடு / நிலம்
+landen	to land	தரையிறங்கு
+lang	long	நீளமான
+langen	to be enough; to reach	போதுமானதாக இரு
+langweilen	to bore	சலிப்படையச் செய்
+lassen	to let, to leave	விடு
+Last	burden, load	சுமை
+lasten	to weigh on	சுமையாக இரு
+Lauf	run, course	ஓட்டம்
+laufen	to run, to walk	ஓடு / நட
+Leben	life	வாழ்க்கை
+leben	to live	வாழ்
+legen	to lay, to put	வை / கிடத்து
+lehren	to teach	கற்பி
+leid	sorry (es tut mir leid)	வருந்தும்
+Leiden	suffering	துன்பம்
+leiden	to suffer	துன்பப்படு
+leihen	to lend, to borrow	கடன் கொடு / கடன் வாங்கு
+leisten	to achieve; to afford	சாதி / செலவு செய்ய முடி
+leiten	to lead, to manage	நடத்து / நிர்வகி
+lenken	to steer	செலுத்து
+lernen	to learn	கற்றுக்கொள்
+leuchten	to shine	ஒளிர்
+lieben	to love	நேசி
+liefern	to deliver	வழங்கு / டெலிவரி செய்
+links	left	இடது
+List	cunning, trick	தந்திரம்
+locken	to lure, to attract	கவர்
+lohnen	to be worth it	பயனுள்ளதாக இரு
+Luft	air	காற்று
+lähmen	to paralyse	முடக்கு
+lösen	to solve; to loosen	தீர் / தளர்த்து
+lüften	to air, to ventilate	காற்றோட்டமாக்கு
+machen	to do, to make	செய்
+Macht	power	அதிகாரம்
+malen	to paint	வர்ணம் தீட்டு
+Manager	manager	மேலாளர்
+Mangel	lack, shortage; defect	பற்றாக்குறை / குறைபாடு
+Mann	man; husband	ஆண் / கணவன்
+Markt	market	சந்தை
+Maschine	machine	இயந்திரம்
+Material	material	பொருள்
+Mauer	wall	சுவர் / மதில்
+Meer	sea	கடல்
+Meister	master	வல்லுநர்
+melden	to report, to register	தெரிவி / பதிவு செய்
+Menge	amount, crowd	அளவு / கூட்டம்
+Mensch	human being	மனிதன்
+merken	to notice; to remember	கவனி / நினைவில் வை
+mieten	to rent	வாடகைக்கு எடு
+Migrant	migrant	புலம்பெயர்ந்தவர்
+Migration	migration	இடம்பெயர்வு
+Militär	military	இராணுவம்
+Minister	minister	அமைச்சர்
+mischen	to mix	கல
+missen	to miss (do without)	இல்லாமல் இரு
+mit	with (fixed preposition)	உடன் (நிலையான முன்னிடைச்சொல்)
+Mittel	means, remedy	வழிமுறை / மருந்து
+mitteln	to average; (in ermitteln/vermitteln)	சராசரி கணக்கிடு
+mobil	mobile	நகரக்கூடிய
+Moral	morals; morale	ஒழுக்கம் / மன உறுதி
+Motiv	motive; motif	நோக்கம் / கருப்பொருள்
+motivieren	to motivate	ஊக்குவி
+Motor	engine, motor	இயந்திரம் / மோட்டார்
+Muslim	Muslim	முஸ்லிம்
+mögen	to like	விரும்பு
+müde	tired	களைப்பான
+mühen	to strive	முயல்
+nah	near	அருகில் உள்ள
+Nahrung	food, nourishment	உணவு
+Name	name	பெயர்
+national	national	தேசிய
+Natur	nature	இயற்கை
+nehmen	to take	எடு
+Neid	envy	பொறாமை
+neigen	to tend, to lean	சாய் / நாட்டம் கொள்
+nennen	to name, to call	பெயரிடு / அழை
+neu	new	புதிய
+nieder	down, low	கீழ்
+Not	need, distress	தேவை / துயரம்
+Note	grade, mark; note	மதிப்பெண் / குறிப்பு
+nutzen	to use	பயன்படுத்து
+nähren	to nourish	ஊட்டமளி
+nötigen	to force, to urge	கட்டாயப்படுத்து
+nützen	to be of use	பயன்படு
+offen	open	திறந்த
+ordnen	to arrange, to sort	ஒழுங்குபடுத்து
+organisieren	to organise	ஏற்பாடு செய்
+Ort	place	இடம்
+packen	to pack; to grab	பொதி கட்டு / பற்று
+Park	park	பூங்கா
+parken	to park	வாகனம் நிறுத்து
+Partei	party (political)	கட்சி
+passen	to fit, to suit	பொருந்து
+Pause	break	இடைவேளை
+Person	person	நபர்
+Pfiff	whistle	விசில்
+Pflege	care	பராமரிப்பு
+Phänomen	phenomenon	நிகழ்வு
+Plan	plan	திட்டம்
+planen	to plan	திட்டமிடு
+Plattform	platform	தளம்
+Platz	place, square; seat	இடம் / சதுக்கம்
+polieren	to polish	மெருகேற்று
+Politiker	politician	அரசியல்வாதி
+Praxis	practice; surgery	நடைமுறை / மருத்துவமனை
+Preis	price; prize	விலை / பரிசு
+pressen	to press	அழுத்து
+Probe	test; rehearsal; sample	சோதனை / ஒத்திகை
+probieren	to try	முயற்சி செய் / சுவைத்துப் பார்
+Problem	problem	பிரச்சனை
+Profil	profile	சுயவிவரம்
+Protest	protest	எதிர்ப்பு
+Prozess	trial; process	வழக்கு / செயல்முறை
+präsent	present	இருக்கும்
+Präsident	president	ஜனாதிபதி
+prüfen	to check, to test	சரிபார் / சோதி
+Psychologe	psychologist	உளவியலாளர்
+Pulver	powder	தூள்
+Punkt	point	புள்ளி
+Putsch	coup	ஆட்சிக்கவிழ்ப்பு
+Rad	wheel; bicycle	சக்கரம் / மிதிவண்டி
+Rand	edge	விளிம்பு
+Rang	rank	தரம் / பதவி
+Rasse	race, breed	இனம்
+Rast	rest, break	ஓய்வு
+Rat	advice; council	ஆலோசனை / சபை
+raten	to advise; to guess	ஆலோசனை கூறு / ஊகி
+rauchen	to smoke	புகைபிடி
+Raum	room; space	அறை / இடம்
+rechnen	to calculate	கணக்கிடு
+Recht	right; law	உரிமை / சட்டம்
+recht	right, correct	சரியான
+rechts	right (side)	வலது
+reden	to talk	பேசு
+regeln	to regulate, to settle	ஒழுங்குபடுத்து
+regen	to stir, to move	அசை
+regieren	to govern	ஆட்சி செய்
+Reich	empire, realm	பேரரசு
+reichen	to reach; to hand; to be enough	எட்டு / கொடு / போதுமானதாக இரு
+Reise	journey, trip	பயணம்
+reisen	to travel	பயணம் செய்
+reiten	to ride (a horse)	குதிரை சவாரி செய்
+Reiz	stimulus; charm	தூண்டல் / கவர்ச்சி
+reißen	to tear	கிழி
+Religion	religion	மதம்
+Reserve	reserve	இருப்பு
+Rest	rest, remainder	மீதி
+richten	to direct; to judge	திருப்பு / தீர்ப்பளி
+Risiko	risk	ஆபத்து / இடர்
+riskant	risky	ஆபத்தான
+Ruder	oar; rudder	துடுப்பு
+rufen	to call	அழை
+Ruhe	rest, quiet	அமைதி / ஓய்வு
+rund	round	வட்டமான
+Runde	round	சுற்று
+räumen	to clear	அகற்று / காலி செய்
+Rücken	back	முதுகு
+rücken	to move, to shift	நகர்த்து
+rüsten	to arm; to prepare	ஆயுதம் தயாரி / தயார் செய்
+Rüsten	arming (arms build-up)	ஆயுதக் குவிப்பு
+Sache	thing, matter	பொருள் / விஷயம்
+sagen	to say	சொல்
+Salon	salon, drawing room	வரவேற்பறை
+Salz	salt	உப்பு
+sammeln	to collect	சேகரி
+Sanitäter	paramedic	முதலுதவியாளர்
+Sattel	saddle	சேணம்
+Satz	sentence; set	வாக்கியம் / தொகுப்பு
+sauer	sour; annoyed	புளிப்பான / கோபமான
+Schach	chess	சதுரங்கம்
+schaden	to damage, to harm	தீங்கு செய்
+schaffen	to create; to manage	உருவாக்கு / சாதி
+schalten	to switch	மாற்று (சுவிட்ச்)
+Schatz	treasure; darling	புதையல் / அன்பே
+Schau	show	காட்சி
+schauen	to look	பார்
+scheiden	to separate, to divorce	பிரி / விவாகரத்து செய்
+Schein	appearance; banknote; certificate	தோற்றம் / நோட்டு / சான்றிதழ்
+scheinen	to shine; to seem	ஒளிர் / தோன்று
+scheren	to shear	கத்தரி
+Scherz	joke	நகைச்சுவை
+Schicht	shift; layer	பணி நேரம் / அடுக்கு
+schicken	to send	அனுப்பு
+schieben	to push	தள்ளு
+schief	crooked, askew	சாய்வான
+Schießen	shooting	சுடுதல்
+schimpfen	to scold, to grumble	திட்டு
+Schlacht	battle	போர்
+schlafen	to sleep	தூங்கு
+Schlag	blow, hit	அடி
+schlagen	to hit, to beat	அடி
+Schlamm	mud	சேறு
+Schleier	veil	முக்காடு
+schleppen	to drag, to tow	இழு
+schließen	to close	மூடு
+Schluss	end, conclusion	முடிவு
+schmeißen	to throw	எறி
+Schmerz	pain	வலி
+schmieren	to smear, to grease	பூசு
+Schmutz	dirt	அழுக்கு
+schneiden	to cut	வெட்டு
+schnell	fast	வேகமான
+Schnitt	cut; average	வெட்டு / சராசரி
+Schock	shock	அதிர்ச்சி
+Schrank	cupboard, wardrobe	அலமாரி
+schreiben	to write	எழுது
+Schreiben	letter, writing	கடிதம் / எழுத்து
+Schrift	writing, script	எழுத்து
+Schritt	step	அடி / படி
+schränken	(in einschränken: to restrict)	கட்டுப்படுத்து
+Schule	school	பள்ளி
+schulen	to train	பயிற்சி அளி
+Schuss	shot	சூடு
+Schutz	protection	பாதுகாப்பு
+schwach	weak	பலவீனமான
+schwer	heavy; difficult	கனமான / கடினமான
+schwierig	difficult	கடினமான
+schwingen	to swing	ஆடு
+schwören	to swear	சத்தியம் செய்
+schädigen	to damage	சேதப்படுத்து
+schätzen	to estimate; to value	மதிப்பிடு / மதி
+See	lake; sea	ஏரி / கடல்
+sehen	to see	பார்
+Sehen	seeing, sight	பார்வை
+sehnen	to long for	ஏங்கு
+sein	to be	இரு
+Selbst	self	சுயம்
+selbständig	independent	சுயமாக
+selig	blissful	பேரின்பமான
+senden	to send; to broadcast	அனுப்பு / ஒளிபரப்பு
+setzen	to put, to set	வை / அமர வை
+sich	oneself (reflexive)	தன்னை
+sicher	safe; sure	பாதுகாப்பான / உறுதியான
+sichern	to secure	பாதுகா
+Sicht	view, visibility	பார்வை
+sichten	to sight; to sift	கண்டறி / பிரித்துப் பார்
+siegen	to win	வெல்
+Sinn	sense, meaning	அர்த்தம் / உணர்வு
+Sitz	seat	இருக்கை
+Slogan	slogan	முழக்கம்
+Sonne	sun	சூரியன்
+Sorge	worry; care	கவலை / அக்கறை
+sorgen	to take care; to worry	கவனித்துக்கொள் / கவலைப்படு
+Sorte	sort, kind	வகை
+sozial	social	சமூக
+spalten	to split	பிள
+spannen	to stretch, to tighten	இழுத்துக் கட்டு
+sparen	to save	சேமி
+sperren	to block, to lock	தடு / பூட்டு
+spezialisieren	to specialise	நிபுணத்துவம் பெறு
+Spezialist	specialist	சிறப்பு நிபுணர்
+Spiel	game, play	விளையாட்டு
+spielen	to play	விளையாடு
+Spitze	top, peak; lead	உச்சி / முன்னணி
+Spitzen	top, leading (Spitze)	முன்னணி
+Sport	sport	விளையாட்டு
+Sportler	athlete	விளையாட்டு வீரர்
+Sprache	language	மொழி
+sprechen	to speak	பேசு
+sprengen	to blow up	வெடிக்கச் செய்
+Spruch	saying	பழமொழி
+Sprung	jump	தாவல்
+Staat	state	அரசு / நாடு
+Stadt	city, town	நகரம்
+Stahl	steel	எஃகு
+stammen	to come from	இருந்து வா / தோன்று
+Stand	stand; state, level	நிலை / கடை
+Stange	pole, bar	கம்பம்
+Stau	traffic jam	போக்குவரத்து நெரிசல்
+staunen	to be amazed	வியப்படை
+stechen	to sting, to stab	கொட்டு / குத்து
+stecken	to put, to stick (in)	செருகு
+stehen	to stand	நில்
+Steig	path, track	பாதை
+steigen	to climb; to rise	ஏறு / உயர்
+Stelle	place; job	இடம் / பணியிடம்
+stellen	to put, to place	வை
+sterben	to die	இற
+still	quiet, still	அமைதியான
+stimmen	to be right; to vote	சரியாக இரு / வாக்களி
+stinken	to stink	நாற்றமடி
+Stoff	material, fabric; substance	துணி / பொருள்
+stornieren	to cancel	ரத்து செய்
+Stoß	push, blow	தள்ளு / அடி
+stoßen	to push, to bump	தள்ளு / மோது
+Strafe	punishment, fine	தண்டனை / அபராதம்
+strafen	to punish	தண்டி
+strahlen	to shine, to beam	ஒளிவீசு
+Straße	street, road	தெரு / சாலை
+streben	to strive	பாடுபடு
+streichen	to paint; to cross out	வர்ணம் பூசு / அடித்துவிடு
+streiken	to strike	வேலைநிறுத்தம் செய்
+Strom	electricity; stream	மின்சாரம் / நீரோட்டம்
+stufen	to grade, to scale	தரம் பிரி
+Stunde	hour; lesson	மணி நேரம் / பாட வேளை
+Sturz	fall	வீழ்ச்சி
+Stätte	place, site	இடம்
+stören	to disturb	தொந்தரவு செய்
+Stück	piece	துண்டு
+stützen	to support	ஆதரி / தாங்கு
+suchen	to look for, to search	தேடு
+Sucht	addiction	போதைப் பழக்கம்
+super	great	அருமையான
+Säule	pillar, column	தூண்
+Tafel	board; bar (of chocolate)	பலகை
+Tag	day	நாள்
+Takt	beat, rhythm; tact	தாளம் / நாசூக்கு
+tanzen	to dance	நடனமாடு
+Tarif	tariff, rate	கட்டண விகிதம்
+Tasche	bag; pocket	பை
+Tat	deed, act	செயல்
+tauchen	to dive	நீரில் மூழ்கு
+taugen	to be good for	பயன்படு
+tauschen	to exchange, to swap	மாற்று / பரிமாறு
+Team	team	அணி
+Teamleiter	team leader	அணித் தலைவர்
+Teil	part	பகுதி
+teilen	to share, to divide	பகிர் / பிரி
+Telefon	telephone	தொலைபேசி
+Theke	counter	கவுண்டர்
+Theorie	theory	கோட்பாடு
+Tier	animal	விலங்கு
+Tisch	table	மேசை
+Ton	sound, tone; clay	ஒலி / களிமண்
+trachten	to strive	முயல்
+Tradition	tradition	பாரம்பரியம்
+tragen	to carry; to wear	சுமந்து செல் / அணி
+trauen	to trust; to marry	நம்பு / திருமணம் செய்துவை
+Traum	dream	கனவு
+treffen	to meet; to hit	சந்தி / தாக்கு
+treiben	to drive, to push; to do (sport)	செலுத்து / தள்ளு / ஈடுபடு
+treten	to step; to kick	அடியெடுத்து வை / உதை
+trinken	to drink	குடி
+Tritt	step; kick	அடி / உதை
+Tuch	cloth	துணி
+tun	to do	செய்
+Täter	offender	குற்றவாளி
+täuschen	to deceive	ஏமாற்று
+tüchtig	capable, hard-working	திறமையான
+Ufer	shore, bank	கரை
+Umzug	move (house); parade	வீடு மாற்றம் / ஊர்வலம்
+Umwelt	environment	சுற்றுச்சூழல்
+Unschuld	innocence	குற்றமின்மை
+Unterschied	difference	வேறுபாடு
+unterwegs	on the way	வழியில்
+Urteil	judgement, verdict	தீர்ப்பு
+urteilen	to judge	தீர்ப்பளி
+Vakuum	vacuum	வெற்றிடம்
+Vater	father	தந்தை
+veranstalten	to organise (an event)	நடத்து / ஏற்பாடு செய்
+verbindung	connection	இணைப்பு
+Verbindung	connection	இணைப்பு
+Verbrauch	consumption	நுகர்வு
+Verdacht	suspicion	சந்தேகம்
+Verein	club, association	சங்கம்
+Verfahren	procedure	நடைமுறை
+vergangen	past	கடந்த
+vergessen	to forget	மறந்துவிடு
+Verhalten	behaviour	நடத்தை
+Verkehr	traffic	போக்குவரத்து
+Verlass	reliance	நம்பகத்தன்மை
+verliebt	in love	காதலில் விழுந்த
+vermehren	to increase, to multiply	பெருக்கு
+Vermögen	wealth, assets	சொத்து
+vernichten	to destroy	அழி
+Vernunft	reason, good sense	அறிவு / பகுத்தறிவு
+verpflichten	to oblige, to commit	கடமைப்படுத்து
+verschlechtern	to make worse	மோசமாக்கு
+verschwenden	to waste	வீணாக்கு
+Verstand	mind, intellect	அறிவு
+Verstoß	violation	மீறல்
+Vertrag	contract	ஒப்பந்தம்
+verunsichern	to unsettle	குழப்பு / நம்பிக்கை இழக்கச் செய்
+verwunden	to wound	காயப்படுத்து
+Video	video	காணொளி
+vielseitig	versatile	பல்திறன் கொண்ட
+Volk	people, nation	மக்கள் / இனம்
+voll	full	நிறைந்த
+vollziehen	to carry out	நிறைவேற்று
+von	from, of (fixed preposition)	இருந்து (நிலையான முன்னிடைச்சொல்)
+Waage	scales	தராசு
+wachen	to be awake, to watch	விழித்திரு / காவல் கா
+wachsen	to grow	வளர்
+Waffe	weapon	ஆயுதம்
+Wahl	election; choice	தேர்தல் / தேர்வு
+wahr	true	உண்மையான
+Wandel	change	மாற்றம்
+wandeln	to change	மாற்று
+wandern	to hike	நடைபயணம் செல்
+Wanne	tub	தொட்டி
+warten	to wait	காத்திரு
+Wasser	water	தண்ணீர்
+wechseln	to change, to exchange	மாற்று
+Weg	way, path	வழி / பாதை
+Weh	pain, ache	வலி
+weh	sore, painful (weh tun = to hurt)	வலிக்கும்
+weichen	to give way; to soften	விலகு
+weigern	to refuse	மறு
+weihen	to consecrate	அர்ப்பணி
+weinen	to cry	அழு
+weise	wise	ஞானமுள்ள
+weisen	to show, to point	காட்டு / சுட்டு
+weit	far; wide	தொலைவான / அகலமான
+weiten	to widen	விரிவாக்கு
+Welle	wave	அலை
+Welt	world	உலகம்
+Wende	turn, turning point	திருப்பம்
+wenden	to turn	திருப்பு
+werben	to advertise; to recruit	விளம்பரம் செய் / சேர்த்துக்கொள்
+werden	to become	ஆகு
+werfen	to throw	எறி
+Werk	work; plant, factory	படைப்பு / தொழிற்சாலை
+wert	worth	மதிப்புள்ள
+Wert	value	மதிப்பு
+werten	to rate, to evaluate	மதிப்பிடு
+Wesen	being; nature, essence	உயிரினம் / இயல்பு
+Wettbewerb	competition	போட்டி
+wetten	to bet	பந்தயம் கட்டு
+Wetter	weather	வானிலை
+wickeln	to wrap, to wind	சுற்று
+Widerspruch	contradiction, objection	முரண்பாடு / ஆட்சேபனை
+wiegen	to weigh	எடை போடு
+Wind	wind	காற்று
+winden	to wind, to twist	சுற்று
+Winkel	angle; corner	கோணம் / மூலை
+wirken	to have an effect; to seem	விளைவை ஏற்படுத்து / தோன்று
+Wirt	host; landlord	உரிமையாளர் / விடுதிக்காரர்
+Wissen	knowledge	அறிவு
+wohl	well	நலமாக
+wohnen	to live, to reside	வசி
+wollen	to want	விரும்பு / வேண்டும்
+wundern	to wonder, to be surprised	ஆச்சரியப்படு
+Wunsch	wish	விருப்பம்
+Wurf	throw	எறிதல்
+währen	to last	நீடி
+wärmen	to warm	சூடாக்கு
+wühlen	to rummage, to dig	கிளறு
+Würde	dignity	கண்ணியம்
+wüten	to rage	சீறு
+Zahl	number	எண்
+zahlen	to pay	பணம் செலுத்து
+Zahn	tooth	பல்
+Zeichen	sign	அடையாளம்
+zeichnen	to draw	வரை
+Zeile	line (of text)	வரி
+Zeit	time	நேரம் / காலம்
+Zentrum	centre	மையம்
+Zeug	stuff, things	பொருட்கள்
+zeugen	to testify; to father	சாட்சி சொல் / பிள்ளை பெறு
+ziehen	to pull; to move	இழு / குடிபெயர்
+Ziel	goal, destination	இலக்கு
+Ziffer	digit	இலக்கம்
+Zimmer	room	அறை
+Zone	zone	மண்டலம்
+zu	to; closed (fixed preposition)	க்கு (நிலையான முன்னிடைச்சொல்)
+zufrieden	satisfied	திருப்தியான
+Zug	train; pull; move	ரயில் / இழுப்பு
+Zukunft	future	எதிர்காலம்
+zumuten	to expect (too much) of	அதிகம் எதிர்பார்
+zusammen	together	ஒன்றாக
+zweifeln	to doubt	சந்தேகப்படு
+zwingen	to force	கட்டாயப்படுத்து
+zählen	to count	எண்ணு
+zähligen	countable (zählig)	எண்ணக்கூடிய
+zünden	to ignite	பற்றவை
+ändern	to change	மாற்று
+Ärger	anger; trouble	கோபம் / தொல்லை
+äußern	to express	வெளிப்படுத்து
+übel	bad; nauseous	மோசமான / குமட்டலான
+über	about, over (fixed preposition)	பற்றி / மேல் (நிலையான முன்னிடைச்சொல்)
+übereinstimmen	to agree, to match	ஒத்துப்போ
+überschwemmen	to flood	வெள்ளத்தில் மூழ்கடி
+Akte	file, record	கோப்பு
+sitzen	to sit	உட்கார்
+Karfreitag	Good Friday	புனித வெள்ளி

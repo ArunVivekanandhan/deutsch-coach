@@ -21,7 +21,7 @@
   const PREPS = new Set(['zu', 'auf', 'von', 'über', 'für', 'mit', 'an', 'in', 'um', 'aus', 'bei', 'nach', 'vor', 'gegen', 'unter', 'durch', 'als']);
   const FILLER = new Set(['etw.', 'etw', 'etwas', 'jmdn.', 'jmdm.', 'jmdn', 'jmdm', 'jemanden', 'jemandem', 'sich']);
   const AUX = new Set(['hat', 'ist', 'hat/ist', 'ist/hat', 'haben', 'sein']);
-  const PARTICLES = new Set(['aus', 'ein', 'an', 'auf', 'ab', 'vor', 'nach', 'mit', 'zu', 'um', 'über', 'unter', 'bei', 'durch', 'gegen', 'hinter', 'neben', 'zwischen', 'rück', 'zurück']);
+  const PARTICLES = new Set(['aus', 'ein', 'an', 'auf', 'ab', 'vor', 'nach', 'mit', 'zu', 'um', 'über', 'unter', 'bei', 'durch', 'gegen', 'hinter', 'neben', 'zwischen', 'rück', 'zurück', 'fort', 'ober', 'innen', 'außen']);
   const IRREG_PRAES = new Set(['sein', 'haben', 'werden', 'wissen', 'tun', 'mögen', 'wollen', 'können', 'müssen', 'dürfen', 'sollen']);
   const GENDER_SUFFIXES = ['schaft', 'ismus', 'heit', 'keit', 'ling', 'chen', 'lein', 'tion', 'sion', 'ment', 'ette', 'ung', 'tät', 'tum', 'nis', 'eur', 'ant', 'ent', 'ist', 'ade', 'age', 'anz', 'enz', 'ik', 'ie', 'ei', 'ur', 'in', 'um', 'ma', 'or', 'ich', 'ig', 'ing', 'el', 'en', 'e', 'o'];   // -er left out: der Lehrer but das Zimmer/Fenster/Wasser
   const ART_COLOR = { der: '#1d4ed8', die: '#b91c1c', das: '#15803d' };
@@ -271,10 +271,16 @@
     if (INSEP.includes(h)) return null;                  // Ent-haltung is ent- + halten, not Ente + Haltung
     const hit = (o, kind, glue) => o ? { de: o.w, en: shortEn(o.en), glue, kind } : null;
     // exact word, then verb stem (Sehn|sucht = sehnen), then a linking letter, then a dropped -e (Schul|e)
-    let r = hit(Nf(h), 'n', '') || hit(Af(h), 'adj', '');
-    if (r) return r;
-    if (h.length >= 4) for (const suf of ['en', 'n']) { r = hit(Vf(h + suf), 'v', ''); if (r) return r; }
-    for (const [k, glue] of [[h.replace(/s$/, ''), 's'], [h.replace(/es$/, ''), 'es'], [h.replace(/en$/, ''), 'en'], [h.replace(/n$/, ''), 'n'], [h.replace(/er$/, ''), 'er'], [h.replace(/e$/, ''), 'e']]) {
+    const cands = [[Nf(h), 'n', h], [Af(h), 'adj', h]];
+    if (h.length >= 4) for (const suf of ['en', 'n']) cands.push([Vf(h + suf), 'v', h + suf]);
+    const found = cands.filter(c => c[0]);
+    if (found.length) {
+      const rk = c => c[0]._root ? ((c[1] === 'n' ? (RN.get(c[2]) || [])[3] : c[1] === 'v' ? (RV.get(c[2]) || [])[1] : (RA.get(c[2]) || [])[1]) || 1e9) : 0;
+      found.sort((a, b) => rk(a) - rk(b));
+      return hit(found[0][0], found[0][1], '');
+    }
+    let r;
+    for (const [k, glue] of [[h.replace(/s$/, ''), 's'], [h.replace(/n$/, ''), 'n'], [h.replace(/en$/, ''), 'en'], [h.replace(/es$/, ''), 'es'], [h.replace(/er$/, ''), 'er'], [h.replace(/e$/, ''), 'e']]) {
       if (k.length < 3 || k === h) continue;
       r = hit(Nf(k), 'n', glue) || hit(Af(k), 'adj', glue);
       if (r) return r;
@@ -615,7 +621,38 @@
     be: 'makes the verb act on something', ent: 'away, removal (un-)', emp: 'receive (= ent- before f)',
     er: 'achieve, reach a result', ge: '(old prefix, meaning faded)', miss: 'wrongly (mis-)',
     ver: 'change; wrongly; away', zer: 'apart, to pieces', un: 'not, the opposite (un-)', ur: 'original, very old',
-    haupt: 'main', neben: 'beside; side-', hinter: 'behind', zwischen: 'between', rück: 'back'
+    haupt: 'main', neben: 'beside; side-', hinter: 'behind', zwischen: 'between', rück: 'back',
+    ober: 'upper, top', innen: 'inside, inner', 'außen': 'outside, outer', aufrecht: 'upright', dazu: 'in addition, to it',
+    weh: 'pain, sore', wider: 'against', voll: 'fully, completely', herbei: 'here, over here', vorher: 'before, in advance',
+    'überein': 'in agreement'
+  };
+  // Tamil for the prefixes / suffixes (AI-assisted translation, reviewed; see scripts/word_parts_meanings.tsv for roots)
+  const PREFIX_TA = {
+    ab: 'விலகி, கீழே', an: 'மீது; தொடக்கம்', auf: 'மேலே, திறந்து', aus: 'வெளியே, அணைத்து', bei: 'அருகில், உடன்',
+    ein: 'உள்ளே', mit: 'உடன், கூட', nach: 'பின்னால்; மீண்டும்', vor: 'முன்னால்', weg: 'விலகி, அப்பால்',
+    zu: 'நோக்கி; மூடி', zurück: 'திரும்பி', zusammen: 'ஒன்றாக', her: 'இங்கே (பேசுபவரை நோக்கி)', hin: 'அங்கே (விலகி)',
+    fort: 'விலகி, தொடர்ந்து', los: 'விடுபட்டு; தொடங்கி', um: 'சுற்றி; மாற்றி', durch: 'ஊடாக', über: 'மேலாக, கடந்து',
+    unter: 'கீழே, இடையே', wieder: 'மீண்டும்', weiter: 'மேலும், தொடர்ந்து', fest: 'உறுதியாக', vorbei: 'கடந்து',
+    heraus: 'வெளியே (இங்கே)', hinaus: 'வெளியே (அங்கே)', herein: 'உள்ளே (இங்கே)', hinein: 'உள்ளே (அங்கே)',
+    herunter: 'கீழே', hinunter: 'கீழே (அங்கே)', herauf: 'மேலே', hinauf: 'மேலே (அங்கே)', hinzu: 'கூடுதலாக',
+    auseinander: 'பிரிந்து', entgegen: 'எதிராக, நோக்கி', gegen: 'எதிராக', 'gegenüber': 'எதிரே', statt: 'இடம் (நடைபெறு)',
+    teil: 'பங்கு', dar: 'அங்கே, முன்வைத்து', empor: 'மேல்நோக்கி', nieder: 'கீழே', voran: 'முன்னோக்கி', voraus: 'முன்கூட்டியே',
+    kennen: 'அறி', frei: 'விடுதலையாக', hoch: 'உயரே', wahr: 'உண்மையாக', bereit: 'தயாராக', fern: 'தொலைவில்',
+    be: 'ஒரு பொருளின் மீது செயல்', ent: 'நீக்கம், விலகல்', emp: 'பெறுதல் (f-க்கு முன் ent-)', er: 'அடைதல், விளைவு',
+    ge: '(பழைய முன்னொட்டு)', miss: 'தவறாக', ver: 'மாற்றம்; தவறு; விலகல்', zer: 'துண்டுகளாக', un: 'இல்லை, எதிர்மறை',
+    ur: 'மூல, மிகப் பழைய', haupt: 'முக்கிய', neben: 'அருகே; துணை', hinter: 'பின்னால்', zwischen: 'இடையில்', 'rück': 'திரும்பி',
+    ober: 'மேல், உயர்', innen: 'உள்', 'außen': 'வெளி', aufrecht: 'நிமிர்ந்து', dazu: 'அதனுடன்', voll: 'முழுமையாக',
+    wider: 'எதிராக', weh: 'வலி', herbei: 'அருகே', vorher: 'முன்பே', 'überein': 'ஒத்து'
+  };
+  const SUFFIX_TA = {
+    ung: 'வினையிலிருந்து பெயர்ச்சொல்: செயல் / விளைவு', heit: 'பெயரடையிலிருந்து பெயர்ச்சொல்: தன்மை',
+    keit: 'பெயரடையிலிருந்து பெயர்ச்சொல்: தன்மை', igkeit: 'பெயரடையிலிருந்து பெயர்ச்சொல்: தன்மை',
+    schaft: 'குழு அல்லது நிலை', nis: 'விளைவு அல்லது நிலை', tum: 'நிலை, மண்டலம்', er: 'செய்பவர் அல்லது கருவி',
+    in: 'பெண்பால் வடிவம்', chen: 'சிறிய (எப்போதும் das)', lein: 'சிறிய (எப்போதும் das)', ling: 'நபர்',
+    ation: 'செயல் (ஆங்கில -ation போல)', 'ität': 'தன்மை (ஆங்கில -ity போல)', ismus: 'கொள்கை (ஆங்கில -ism போல)',
+    ei: 'இடம் அல்லது செயல்', lich: 'பெயரடை ஆக்கும் (-ஆன)', ig: 'பெயரடை ஆக்கும்: …உள்ள', isch: 'பெயரடை ஆக்கும் (-ஆன)',
+    bar: 'செய்யக்கூடிய', los: 'இல்லாத, அற்ற', voll: 'நிறைந்த', sam: 'இயல்புடைய', haft: 'போன்ற', reich: 'நிறைந்த, வளமான',
+    frei: 'இல்லாத (-free)', 'mäßig': 'ஏற்ப, முறைப்படி', end: 'நிகழ்கால வினையெச்சம்: …கின்ற', ieren: 'வினைச்சொல் முடிவு (பெரும்பாலும் அயல்மொழி)'
   };
   const SUFFIX_MEANING = {
     ung: 'turns a verb into a noun: the act or result (like English -ing / -tion)',
@@ -640,7 +677,7 @@
     ['chen', 'n', ['n'], e => e.a === 'das'], ['lein', 'n', ['n'], e => e.a === 'das'],
     ['ling', 'n', ['v', 'adj', 'n'], e => e.a === 'der'], ['ität', 'n', ['adj'], e => e.a === 'die'],
     ['ung', 'n', ['v'], e => e.a === 'die'], ['nis', 'n', ['v', 'adj'], e => e.a === 'die' || e.a === 'das'],
-    ['tum', 'n', ['n', 'adj'], () => true], ['ei', 'n', ['n', 'v'], e => e.a === 'die'],
+    ['tum', 'n', ['adj', 'v', 'n'], () => true], ['ei', 'n', ['n', 'v'], e => e.a === 'die'],
     ['er', 'n', ['v'], e => e.a === 'der'], ['in', 'n', ['n'], e => e.a === 'die' && /innen$/.test(String(e.p || ''))],
     ['mäßig', 'adj', ['n'], () => true], ['lich', 'adj', ['n', 'v', 'adj'], () => true], ['isch', 'adj', ['n'], () => true],
     ['haft', 'adj', ['n', 'adj'], () => true], ['reich', 'adj', ['n'], () => true], ['frei', 'adj', ['n'], () => true],
@@ -660,7 +697,7 @@
   // Words that look derived but aren't (Mädchen is not Made + -chen, Zucker is not zucken + -er).
   const NO_SPLIT = new Set(['mädchen', 'märchen', 'kaninchen', 'veilchen', 'zucker', 'bürger', 'körper', 'sommer', 'wetter', 'messer',
     'mutter', 'vater', 'bruder', 'schwester', 'tochter', 'butter', 'feuer', 'wasser', 'fenster', 'zimmer', 'theater', 'ufer', 'meer',
-    'heimat', 'monat', 'arbeit', 'schlauberger', 'hochzeit', 'mahlzeit', 'ereignis', 'gebäude', 'bedingung', 'verein', 'vergnügen']);
+    'heimat', 'monat', 'arbeit', 'schlauberger', 'wichtig', 'topisch', 'offenbar', 'hochzeit', 'mahlzeit', 'ereignis', 'gebäude', 'bedingung', 'verein', 'vergnügen']);
   // The app's learner meaning first, plus Ding's main sense when it adds something (treiben: "do, chase; to drive").
   const dingGloss = w => { const k = String(w).toLowerCase(); return (RV.get(k) || [])[0] || (RN.get(k) || [])[2] || (RA.get(k) || [])[0] || ''; };
   const normG = g => String(g).toLowerCase().replace(/\bto\s+/g, '').replace(/[^a-zäöüß ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -787,10 +824,19 @@
     return null;
   }
 
+  // Hand-checked splits where the automatic rules pick a wrong root (Aus|sage is aussagen, not Sage 'legend').
+  const PARTS_OVERRIDE = {
+    'n|Aussage': [pre('aus'), root('sagen', 'to say')], 'n|Umzugskarton': [root('Umzug', 'move'), { t: 's', k: 'glue' }, root('Karton', 'cardboard box')],
+    'n|Bohrplattform': [root('bohren', 'to drill'), root('Plattform', 'platform')], 'v|fotografieren': [root('Fotograf', 'photographer'), suf('ieren')],
+    'adj|einsam': [root('ein', 'one'), suf('sam')], 'n|Alleingang': [root('allein', 'alone'), root('Gang', 'walk, course')]
+  };
+
   // -> {parts:[{t,k,m}], simple} for one entry; cat 'v' | 'n' | 'adj' | 'p'
   function wordParts(cat, e) {
     const raw = String(e.w || '').replace(/\([^)]*\)/g, ' ').trim();
     if (!raw || cat === 'p') return null;
+    const ov = PARTS_OVERRIDE[cat + '|' + raw];
+    if (ov) return ov.map(x => Object.assign({}, x));
     let parts = null;
     try {
       if (cat === 'v') {
@@ -803,7 +849,8 @@
           if (lt === tok) parts.push(...vp);
           else if (lt === 'sich') parts.push({ t: 'sich', k: 'word', m: 'oneself (reflexive)' });
           else if (PREPS.has(lt)) parts.push({ t, k: 'word', m: 'fixed preposition' });
-          else { const o = gN(lt) || gA(lt); parts.push({ t, k: 'word', m: o ? gloss(o.en) : '' }); }
+          else if (FILLER.has(lt) || /^(etw|jdn|jdm|jds)\./.test(lt)) continue;   // "etw." is a placeholder, not a part
+          else { const o = N.get(lt) || A.get(lt) || V.get(lt); parts.push({ t, k: 'word', m: o ? gloss(o.en) : '' }); }
         }
         if (parts.length === 1) parts = null;
       } else if (cat === 'n') {
@@ -824,11 +871,12 @@
       : (x.k === 'related' ? '~' : '') + x.t + (x.m ? '=' + x.m : ''));
   }
   function decodePart(s) {
-    if (/^-/.test(s)) { const k = s.slice(1); return { t: s, k: 'suffix', m: SUFFIX_MEANING[k] || '' }; }
-    if (/-$/.test(s)) { const k = s.slice(0, -1); return { t: s, k: 'prefix', m: PREFIX_MEANING[k] || '' }; }
-    if (/^\+/.test(s)) return { t: '-' + s.slice(1) + '-', k: 'glue', m: 'linking letter(s) between the two words' };
+    if (/^-/.test(s)) { const k = s.slice(1); return { t: s, k: 'suffix', m: SUFFIX_MEANING[k] || '', ta: SUFFIX_TA[k] || '' }; }
+    if (/-$/.test(s)) { const k = s.slice(0, -1); return { t: s, k: 'prefix', m: PREFIX_MEANING[k] || '', ta: PREFIX_TA[k] || '' }; }
+    if (/^\+/.test(s)) return { t: '-' + s.slice(1) + '-', k: 'glue', m: 'linking letter(s) between the two words', ta: 'இணைப்பு எழுத்து' };
     const rel = s[0] === '~', body = rel ? s.slice(1) : s, i = body.indexOf('=');
-    return { t: i < 0 ? body : body.slice(0, i), k: rel ? 'related' : 'root', m: i < 0 ? '' : body.slice(i + 1) };
+    const rest = i < 0 ? '' : body.slice(i + 1), j = rest.indexOf('@');
+    return { t: i < 0 ? body : body.slice(0, i), k: rel ? 'related' : 'root', m: j < 0 ? rest : rest.slice(0, j), ta: j < 0 ? '' : rest.slice(j + 1) };
   }
 
   const cleanKey = w => String(w || '').replace(/\([^)]*\)/g, ' ').replace(/^(der|die|das)\s+/i, '').replace(/\s+/g, ' ').trim();
@@ -842,20 +890,21 @@
   function partsText(cat, w) {
     const r = lookupParts(cat, w);
     if (!r) return '';
-    return r.syl + (r.parts ? ' — ' + r.parts.map(p => p.t + (p.m ? ` (${p.m})` : '')).join(' + ') : '');
+    return r.syl + (r.parts ? ' — ' + r.parts.map(p => p.t + (p.m || p.ta ? ` (${[p.m, p.ta].filter(Boolean).join(' / ')})` : '')).join(' + ') : '');
   }
   function partsHTML(cat, w) {
     const r = lookupParts(cat, w);
     if (!r) return '';
-    const items = r.parts ? r.parts.map(p => `<li><b>${esc(p.t)}</b>${p.m ? ` <span style="opacity:.8">(${esc(p.m)})</span>` : ''}${p.k === 'related' ? ' <i style="opacity:.7">— related word</i>' : ''}</li>`).join('') : '';
+    const items = r.parts ? r.parts.map(p => `<li><b>${esc(p.t)}</b>${p.m ? ` <span style="opacity:.8">(${esc(p.m)})</span>` : ''}${p.ta ? ` · <span lang="ta" style="color:var(--gold, #b98a2e);">${esc(p.ta)}</span>` : ''}${p.k === 'related' ? ' <i style="opacity:.7">— related word</i>' : ''}</li>`).join('') : '';
     return `<div class="wordparts" style="margin:8px 0; padding:8px 10px; border:1px solid var(--line, #e2e8f0); border-left:3px solid var(--blue, #2563eb); border-radius:6px; font-size:13px; line-height:1.5; text-align:left;">
       <div><b>🧩 Wortaufbau:</b> <span style="font-size:15px; letter-spacing:.3px;">${esc(r.syl)}</span></div>
-      ${items ? `<div style="margin-top:3px;">Related parts:</div><ul style="margin:2px 0 0 18px; padding:0;">${items}</ul>`
+      ${items ? `<div style="margin-top:3px;">Related parts:</div><ul style="margin:2px 0 0 18px; padding:0;">${items}</ul>
+        <div style="margin-top:3px; font-size:10.5px; opacity:.6;">Tamil for the parts: AI-assisted translation, reviewed.</div>`
         : (cat === 'p' || /\s/.test(r.word) ? '' : `<div style="opacity:.8; margin-top:2px;">Grundwort — a basic word, not built from smaller parts.</div>`)}
     </div>`;
   }
 
-  global.MemoryTips = { wordParts, encodeParts, lookupParts, partsHTML, partsText, cleanKey, PREFIX_MEANING, SUFFIX_MEANING,
+  global.MemoryTips = { PREFIX_TA, SUFFIX_TA, wordParts, encodeParts, lookupParts, partsHTML, partsText, cleanKey, PREFIX_MEANING, SUFFIX_MEANING,
     init, forWord, cheatCodes, verbLinguistics, splitCompound, verbInfo, pluralClass, entryFrom,
     ready: () => VLIST.length + NLIST.length + ALIST.length > 0, suffixStats: () => SUFFIX_STATS, _lex: () => ({ V, N, A }) };
 })(typeof window !== 'undefined' ? window : globalThis);

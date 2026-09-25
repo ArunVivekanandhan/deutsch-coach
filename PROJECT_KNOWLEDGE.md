@@ -62,7 +62,8 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   their lessons + `SYNCED_WORDS`. **After changing words: update the canonical list and every copy, run
   `python3 scripts/build_freq_ranks.py`, `python3 scripts/fill_home_forms.py` and `python3 scripts/build_word_parts.py`
   (needs `pip install pyphen`, node, apt access for the Ding package), then `python3 scripts/build.py`** — the build runs
-  `scripts/check_vocab_sync.py`, `fill_home_forms.py --check` and `build_word_parts.py --check` and fails on any drift.
+  `scripts/check_vocab_sync.py`, `fill_home_forms.py --check`, `build_word_parts.py --check` and `fix_tamil.py --check`
+  and fails on any drift. A new root word used as a word part needs a line (English + Tamil) in `scripts/word_parts_meanings.tsv`.
   **Levels**: `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` from textbooks, plus frequency estimates for entries with
   no textbook level (`level` A1–C1 with `levelEst: true`; every entry has `freq` = rank in the
   OpenSubtitles-2018 top-50k list, 0 = rarer). Display estimates with "≈"; check a given array's actual
@@ -762,6 +763,35 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 32) — Tamil for every word part, reviewed root meanings, and 207 wrong Tamil values fixed
+
+#### Task
+User: "Also show Tamil meaning for each part. And also fix the open issue" (open issue from Task 31: some root meanings were Ding side senses, e.g. *reichen* "to hold out", *werben* "to court").
+
+#### Tamil for each part
+- Every part of every word now shows Tamil next to the English (home card back, Verb / Nomen / Adjektiv trainers, Excel "Wortaufbau" column): *Ab·trei·bung — ab- (away, off, down · விலகி, கீழே) + treiben (to drive, to push · செலுத்து / தள்ளு) + -ung (turns a verb into a noun · வினையிலிருந்து பெயர்ச்சொல்)*.
+- Roots: new **`scripts/word_parts_meanings.tsv`** — a reviewed English meaning + Tamil for all ~880 root words used as parts. Prefixes (≈60), suffixes (≈30) and linking letters: Tamil tables in `js/memory-tips.js` (`PREFIX_TA`, `SUFFIX_TA`). The Tamil is an AI-assisted translation (Claude), reviewed; the page says so under every breakdown ("Tamil for the parts: AI-assisted translation, reviewed.").
+- `build_word_parts.py` fails if a root has no line in the TSV or a prefix/suffix lacks English or Tamil, so coverage stays at 100 %.
+
+#### Open issue fixed: reviewed meanings for every root
+The same TSV replaces the automatically picked Ding glosses for all roots (*reichen* → to reach; to hand; to be enough, *werben* → to advertise; to recruit, *füllen* → to fill, *Weh* → pain, ache — Ding had a vulgar slang sense, *Kohl*, *Ober*, *Wirt* …). Also fixed while reviewing: *wichtig/topisch/offenbar* are no longer split into Wicht/Top/Off; *fort-/ober-/innen-/außen-* are prefixes (Fortschritt, Obergrenze, Innenstadt); linking *-n-* is tried before *-en-* (Kohle|n|stoff, not Kohl 'cabbage'); *-tum* can attach to verbs (Wachs|tum = wachsen); among Ding roots the more frequent word wins (Lade|säule = laden, not Lade 'drawer'); placeholder words (etw.) and Ding meanings are no longer used for words inside verb phrases; six hand-checked splits (Aussage, Umzugskarton, Bohrplattform, fotografieren, einsam, Alleingang). Syllables are now hyphenated per compound segment (Fort·schritt, Fa·mi·li·en·na·me instead of Forts·chritt, Fa·mi·li·enna·me).
+
+#### Wrong Tamil in the word lists (found while doing this)
+The `ta` field of the master lists had been filled by matching English **substrings**: send/extend/referendum/defendant/customer-friendly/dependent → முடி ("end" = finish); change/exchange → தொங்கு ("hang"); parents' house/accused/employee → பயன்படுத்து ("use"); breathable/meat-free/weatherproof → சாப்பிடு ("eat"); planet/power plant → திட்டமிடு ("plan"); verstehen → நில் ("stand"); wiederholen → சாப்பிடு; Diät → இற ("die"); unbezahlt → "paid"; eventuell → "maybe / never". All 1,333 existing Tamil values were reviewed: **207 were wrong** (86 verbs, 77 nouns, 44 adjectives) and are corrected in the canonical lists and every copy (793 edits in 7 pages) by **`scripts/fix_tamil.py`**, which also regenerates `ta_translit` (ISO 15919, the style most entries use). `build.py` runs `fix_tamil.py --check`.
+
+#### Still open
+~1,700 list entries have no Tamil at all (157 verbs, 566 nouns, 425 adjectives — the flashcards show English only for them); Tamil elsewhere (sister verbs, A1 mnemonics, tamil-dict.js) was not part of this review; the list Tamil is not labelled as AI-generated in the UI (its origin predates this session).
+
+#### Testing
+Word-parts suite extended to 27 checks (Tamil on every part of every word, AI note shown, reviewed meanings, corrected list Tamil + regenerated transliteration in the Verb and Nomen trainers, Excel text with Tamil). Task 29/30 suites, 26-page sweep, `node --check`, `build.py` (now 6 checks) all pass.
+
+#### Files Changed
+- `scripts/word_parts_meanings.tsv` (new), `scripts/fix_tamil.py` (new), `scripts/build_word_parts.py`, `scripts/build.py`, `js/memory-tips.js`, `js/word-parts.js` (regenerated), `sw.js`
+- Word lists (Tamil): `Verb_Transformation_Trainer.html`, `Nomen_Trainer.html`, `Adjektiv_Adverb_Trainer.html`, `Continuous_Verb_Speaker.html`, `Verben_Hoeren_EN_DE.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
 
 ### 2026-09-25 (Task 31) — Wortaufbau: syllables + meaningful parts for every word
 

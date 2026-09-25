@@ -63,3 +63,8 @@ if forms.returncode != 0:
 parts = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_word_parts.py"), "--check"])
 if parts.returncode != 0:
     sys.exit(1)
+
+# 6. Tamil values corrected in Task 32 (substring-matching bug) must stay corrected in every copy.
+tamil = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "fix_tamil.py"), "--check"])
+if tamil.returncode != 0:
+    sys.exit(1)
