@@ -283,9 +283,10 @@
       /* The sheet scrolls inside this box (both directions, header row stays on top). Without a height the
          box grew to all 2,479 rows, the page scrolled instead, and the sideways scrollbar sat below the last
          row — so only the first columns (A–F) could be reached. */
-      height: calc(100vh - 72px);
-      height: calc(100dvh - 72px);
-      min-height: 360px;
+      height: calc(100vh - var(--dc-app-header-h, 72px));
+      height: calc(100dvh - var(--dc-app-header-h, 72px));
+      min-height: 300px;
+      scroll-margin-top: var(--dc-app-header-h, 72px);
       overscroll-behavior-x: contain;
     }
     .cols-hidden-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 7px 10px; margin: 0;
@@ -337,6 +338,15 @@
       white-space: nowrap;
       position: relative;
     }
+    /* Column resize handle (right edge of every header label; wider on touch screens) */
+    .excel-table thead tr.hdr-labels th { position: relative; }
+    .col-resizer { position: absolute; top: 0; right: -4px; width: 9px; height: 100%; cursor: col-resize; z-index: 5; touch-action: none; }
+    .col-resizer::after { content: ''; position: absolute; top: 20%; bottom: 20%; left: 3px; width: 3px; border-radius: 2px; background: var(--excel-border); }
+    .col-resizer:hover::after, .col-resizer.active::after { background: var(--excel-green); }
+    @media (pointer: coarse) { .col-resizer { width: 22px; right: -11px; } .col-resizer::after { left: 9px; width: 4px; background: var(--ink-muted); } }
+    body.col-resizing, body.col-resizing * { cursor: col-resize !important; user-select: none !important; }
+    /* "Umbrechen": long cells (Wortaufbau, Merkhilfe …) wrap onto several lines instead of being cut off */
+    .excel-table.wrap-cells td { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; vertical-align: top; }
     .excel-table thead tr.hdr-labels th:hover {
       background: #d4d4d4;
     }
@@ -389,6 +399,7 @@
     .col-mnemonic { width: 220px; }
     .col-parts { width: 240px; }
     .col-prefix { width: 170px; }
+    .col-example { width: 300px; }
 
     /* Cells */
     .excel-table td {
@@ -720,6 +731,8 @@
       <select id="topicSelect" class="filter-select" onchange="setTopicFilter(this.value)" aria-label="Thema filtern"></select>
 
       <button class="filter-chip" id="colFilterToggle" onclick="toggleColumnFilters()" style="margin-left:10px;" title="Show a text filter under every column header">🔽 Spaltenfilter</button>
+      <button class="filter-chip" id="wrapToggle" onclick="toggleWrapCells()" title="Lange Zellen (z. B. Wortaufbau) auf mehrere Zeilen umbrechen statt abschneiden">↵ Text umbrechen</button>
+      <button class="filter-chip" onclick="resetColumnWidths()" title="Alle Spaltenbreiten auf Standard zurücksetzen. Breite ändern: im Spaltenkopf den rechten Rand ziehen (Doppelklick = Standard).">↔ Breiten zurücksetzen</button>
       <button class="filter-chip" onclick="resetAllFilters()" title="Clear every filter and the search">✖ Filter zurücksetzen</button>
     </div>
 
@@ -807,7 +820,7 @@
       <span>🧩 Spalten &amp; Reihenfolge</span>
       <button class="cols-move" onclick="toggleColumnModal()" aria-label="Schließen">✕</button>
     </div>
-    <div class="cols-hint">☑ = anzeigen · ⠿ ziehen (auch mit dem Finger) oder ▲▼ zum Verschieben.<br>Wird in diesem Browser gespeichert und gilt auch für Export/Kopieren und 🎧 Vorlesen (Modus „Wie die Spalten“).</div>
+    <div class="cols-hint">☑ = anzeigen · ⠿ ziehen (auch mit dem Finger) oder ▲▼ zum Verschieben · Breite: im Tabellenkopf den rechten Rand einer Spalte ziehen.<br>Wird in diesem Browser gespeichert und gilt auch für Export/Kopieren und 🎧 Vorlesen (Modus „Wie die Spalten“).</div>
     <div class="cols-presets" id="colsPresets"></div>
     <ul class="cols-list" id="colsList"></ul>
     <div class="cols-actions">
@@ -1661,9 +1674,9 @@ if (document.readyState === 'loading') {
   function renderHeader() {
     const cols = visibleColumns();
     let html = `<tr class="hdr-letters"><th class="col-row-num">#</th>` +
-      cols.map((c, i) => `<th class="col-${c.key}">${columnLetter(i)}</th>`).join('') + `</tr>`;
+      cols.map((c, i) => `<th class="col-${c.key}"${widthStyle(c.key)}>${columnLetter(i)}</th>`).join('') + `</tr>`;
     html += `<tr class="hdr-labels"><th class="col-row-num">#</th>` +
-      cols.map(c => `<th class="col-${c.key}" onclick="sortBy('${c.key}')">${c.label} <span class="sort-indicator" id="sort_${c.key}"></span></th>`).join('') + `</tr>`;
+      cols.map(c => `<th class="col-${c.key}"${widthStyle(c.key)} onclick="sortBy('${c.key}')">${c.label} <span class="sort-indicator" id="sort_${c.key}"></span><span class="col-resizer" data-colkey="${c.key}" title="Breite ändern: ziehen · Doppelklick = Standard" onclick="event.stopPropagation()"></span></th>`).join('') + `</tr>`;
     if (showColFilters) {
       html += `<tr class="hdr-filters"><th class="col-row-num" title="Spaltenfilter">🔽</th>` +
         cols.map(c => {
@@ -1673,6 +1686,72 @@ if (document.readyState === 'loading') {
     }
     document.getElementById('excelThead').innerHTML = html;
     document.getElementById('colFilterToggle').classList.toggle('active', showColFilters);
+    document.querySelectorAll('#excelThead .col-resizer').forEach(wireResizer);
+  }
+
+  // --- COLUMN WIDTHS (drag the right edge of a header; saved in this browser) ---
+  const COL_WIDTH_KEY = 'excel_sheet_colwidths_v1';
+  const WRAP_KEY = 'excel_sheet_wrap_v1';
+  let colWidths = {};
+  try { colWidths = JSON.parse(localStorage.getItem(COL_WIDTH_KEY) || '{}') || {}; } catch (e) { colWidths = {}; }
+  let wrapCells = false;
+  try { wrapCells = localStorage.getItem(WRAP_KEY) === '1'; } catch (e) {}
+  function widthStyle(key) { return colWidths[key] ? ` style="width:${colWidths[key]}px"` : ''; }
+  function saveColumnWidths() { try { localStorage.setItem(COL_WIDTH_KEY, JSON.stringify(colWidths)); } catch (e) {} }
+  function setHeaderWidth(key, w) {
+    document.querySelectorAll(`#excelThead th.col-${key}`).forEach(th => { th.style.width = w ? w + 'px' : ''; });
+  }
+  function wireResizer(handle) {
+    const key = handle.dataset.colkey;
+    handle.addEventListener('dblclick', e => {             // double-click: back to the standard width
+      e.preventDefault(); e.stopPropagation();
+      delete colWidths[key]; saveColumnWidths(); setHeaderWidth(key, 0);
+    });
+    let lastTap = 0;
+    handle.addEventListener('pointerdown', e => {
+      if (e.button > 0) return;
+      e.preventDefault(); e.stopPropagation();
+      if (e.pointerType !== 'mouse') {                    // double-tap on touch screens = standard width
+        const now = Date.now();
+        if (now - lastTap < 350) { delete colWidths[key]; saveColumnWidths(); setHeaderWidth(key, 0); lastTap = 0; return; }
+        lastTap = now;
+      }
+      const th = handle.closest('th');
+      const startX = e.clientX, startW = th.getBoundingClientRect().width;
+      handle.classList.add('active');
+      document.body.classList.add('col-resizing');
+      const move = ev => {
+        const w = Math.max(50, Math.min(900, Math.round(startW + ev.clientX - startX)));
+        colWidths[key] = w; setHeaderWidth(key, w);
+      };
+      const up = () => {
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', up);
+        document.removeEventListener('pointercancel', up);
+        handle.classList.remove('active');
+        document.body.classList.remove('col-resizing');
+        saveColumnWidths();
+      };
+      document.addEventListener('pointermove', move);
+      document.addEventListener('pointerup', up);
+      document.addEventListener('pointercancel', up);
+    });
+  }
+  function resetColumnWidths() {
+    colWidths = {}; saveColumnWidths();
+    document.querySelectorAll('#excelThead th').forEach(th => { th.style.width = ''; });
+    showToast('↔ Spaltenbreiten zurückgesetzt');
+  }
+  function applyWrapCells() {
+    const t = document.getElementById('excelTable');
+    if (t) t.classList.toggle('wrap-cells', wrapCells);
+    const b = document.getElementById('wrapToggle');
+    if (b) b.classList.toggle('active', wrapCells);
+  }
+  function toggleWrapCells() {
+    wrapCells = !wrapCells;
+    try { localStorage.setItem(WRAP_KEY, wrapCells ? '1' : '0'); } catch (e) {}
+    applyWrapCells();
   }
 
   function renderTable() {
@@ -2271,12 +2350,36 @@ if (document.readyState === 'loading') {
     });
   }
 
+  // The app's top bar (js/app-shell.js) is sticky and its height differs a lot: 64 px on a tablet,
+  // ~220 px on a phone (title + stat boxes). The sheet is sized to the space below it, so its header
+  // row with the column names and resize edges is never hidden under the bar.
+  function syncAppHeaderHeight() {
+    const h = document.querySelector('.app-header');
+    const px = h && getComputedStyle(h).position === 'sticky' ? Math.ceil(h.getBoundingClientRect().height) : 0;
+    // Content below the sheet (status bar, padding) also counts: at the bottom of the page the sheet must
+    // still start below the top bar.
+    const vp = document.getElementById('sheetViewport');
+    let below = 0;
+    if (vp) below = Math.max(0, Math.ceil(document.documentElement.scrollHeight - (vp.getBoundingClientRect().bottom + window.scrollY)));
+    document.documentElement.style.setProperty('--dc-app-header-h', (px + below + 4) + 'px');
+  }
+  window.addEventListener('resize', syncAppHeaderHeight);
+  // After js/app-shell.js has built the top bar (its DOMContentLoaded handler runs first); a ResizeObserver
+  // follows later changes (fonts, rotating the phone). Not tied to window "load", which can come late.
+  document.addEventListener('DOMContentLoaded', () => {
+    syncAppHeaderHeight();
+    const h = document.querySelector('.app-header');
+    if (h && window.ResizeObserver) new ResizeObserver(syncAppHeaderHeight).observe(h);
+    setTimeout(syncAppHeaderHeight, 500);
+  });
+
   // Initialization
   window.addEventListener('DOMContentLoaded', () => {
     initTheme();
     loadColumnLayout();
     loadReaderSettings();
     renderHeader();
+    applyWrapCells();
     buildSpreadsheetData();
   });
   </script>

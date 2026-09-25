@@ -758,6 +758,22 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 41) — Excel sheet: resizable columns, text wrap, example column width, sheet below the phone top bar
+
+#### Task
+User: "In excel page Wortaufbau column need option for resize".
+
+#### What changed (`Deutsch_Wortschatz_Excel_Sheet.html`)
+- **Every column can be resized** (not only Wortaufbau): drag the right edge of a column header (mouse or finger — pointer events; the grab area is 22 px wide on touch screens). Width 50–900 px, saved in this browser (`excel_sheet_colwidths_v1`), double-click / double-tap the edge = standard width, **↔ Breiten zurücksetzen** resets all. Resizing does not trigger sorting.
+- **↵ Text umbrechen** (saved, `excel_sheet_wrap_v1`): long cells such as Wortaufbau wrap onto several lines instead of being cut off with "…".
+- Bug from Task 38 fixed: the "🗣️ Beispielsatz" column had no width and collapsed to 0 px (invisible); it is 300 px now.
+- On phones the app's sticky top bar is ~220 px (title + stat boxes), but the sheet assumed 72 px, so the sheet's header row (column names, resize edges) slid under the bar at the bottom of the page. The sheet height now uses the measured bar height plus the status bar below it (`--dc-app-header-h`, `syncAppHeaderHeight()`, updated by a ResizeObserver; not tied to window "load", which may never fire here).
+
+#### Testing
+Mouse drag Wortaufbau 240 → 400 px (header and body cells), survives reload, double-click resets; finger drag 240 → 340 px at 360/412/800 px; sort not triggered; wrap: rows grow (max 176 px in the first 40 rows); sheet starts below the top bar at 360/412/800/1280 px; Excel suites, contrast, build, smoke (27 pages) pass.
+
+---
+
 ### 2026-09-25 (Task 40) — Excel sheet: hidden columns are visible as such; 🔥 button no longer saves its layout
 
 #### Task
