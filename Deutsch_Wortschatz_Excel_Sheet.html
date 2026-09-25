@@ -288,6 +288,12 @@
       min-height: 360px;
       overscroll-behavior-x: contain;
     }
+    .cols-hidden-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 7px 10px; margin: 0;
+      background: #fff7e0; border: 1px solid #f0c75e; border-radius: 6px; font-size: 12.5px; color: #7a5200; }
+    [data-theme="dark"] .cols-hidden-bar { background: #3a2d0a; border-color: #a17a1c; color: #fcd57a; }
+    .cols-hidden-bar[hidden] { display: none; }
+    .cols-hidden-bar button { font: inherit; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer;
+      border: 1px solid currentColor; background: transparent; color: inherit; }
     .sheet-scroll-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-soft); margin-left: 8px; }
 
     /* Excel Table */
@@ -770,6 +776,7 @@
   </section>
 
   <!-- Spreadsheet Viewport Grid -->
+  <div class="cols-hidden-bar" id="colsHiddenBar" hidden></div>
   <main class="sheet-viewport" id="sheetViewport">
     <table class="excel-table" id="excelTable">
       <thead id="excelThead">
@@ -1675,7 +1682,9 @@ if (document.readyState === 'loading') {
 
     const nCols = visibleColumns().length;
     const lastCol = nCols <= 26 ? String.fromCharCode(64 + nCols) : String(nCols);
-    document.getElementById('statsBadge').textContent = `Gefiltert: ${total} von ${ALL_ROWS.length} Zeilen · ${nCols} Spalten (A–${lastCol}) ↔ seitlich wischen`;
+    const allCols = COLUMN_DEFS.length;
+    document.getElementById('statsBadge').textContent = `Gefiltert: ${total} von ${ALL_ROWS.length} Zeilen · ${nCols < allCols ? nCols + ' von ' + allCols : nCols} Spalten (A–${lastCol}) ↔ seitlich wischen`;
+    renderHiddenColumnsBar();
     document.getElementById('statusRowInfo').textContent = `${total} Zeilen angezeigt · ${cols.length} von ${COLUMN_DEFS.length} Spalten`;
 
     document.querySelectorAll('.sort-indicator').forEach(el => el.textContent = '');
@@ -2074,7 +2083,8 @@ if (document.readyState === 'loading') {
     const preset = COLUMN_PRESETS.find(p => p.name === 'Verben hören');
     colOrder = preset.cols.concat(DEFAULT_COL_ORDER.filter(k => !preset.cols.includes(k)));
     colHidden = new Set(DEFAULT_COL_ORDER.filter(k => !preset.cols.includes(k)));
-    saveColumnLayout();
+    // Only for this listening session: not saved, so the next visit shows the user's own columns again.
+    renderHiddenColumnsBar();
     renderHeader();
     applyFiltersAndRender();
     document.getElementById('sheetViewport').scrollTop = 0;
@@ -2094,6 +2104,7 @@ if (document.readyState === 'loading') {
     renderHeader();
     renderTable();
     renderColumnChooser();
+    renderHiddenColumnsBar();
   }
 
   function renderColumnChooser() {
@@ -2137,6 +2148,17 @@ if (document.readyState === 'loading') {
     showToast(`🧩 Ansicht „${p.name}“ übernommen`);
   }
 
+  // Hidden columns are easy to forget (a preset or the 🔥 button hides some): say so above the sheet.
+  function renderHiddenColumnsBar() {
+    const bar = document.getElementById('colsHiddenBar');
+    if (!bar) return;
+    const n = visibleColumns().length, all = COLUMN_DEFS.length;
+    if (n >= all) { bar.hidden = true; bar.innerHTML = ''; return; }
+    bar.hidden = false;
+    bar.innerHTML = `👁 <b>${n} von ${all} Spalten sichtbar</b> — ${all - n} ausgeblendet.
+      <button type="button" onclick="showAllColumns()">Alle ${all} Spalten zeigen</button>
+      <button type="button" onclick="toggleColumnModal()">🧩 Spalten wählen</button>`;
+  }
   function showAllColumns() {
     colHidden = new Set();
     applyColumnLayout();

@@ -758,6 +758,23 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 40) — Excel sheet: hidden columns are visible as such; 🔥 button no longer saves its layout
+
+#### Task
+User (after Task 39): "Still not showing after f column".
+
+#### Real cause
+Not the scrolling: the saved column layout. The **🔥 Häufigste Verben hören** button applied the preset "Verben hören" (English · Wort · Präteritum · Perfekt · Häufigkeit · Level = exactly 6 columns, A–F) **and saved it** (`excel_sheet_columns_v1`), so every later visit showed only A–F; nothing on the page said that 13 columns were hidden. Reproduced: tap the button, reload → A–F.
+
+#### Fix (`Deutsch_Wortschatz_Excel_Sheet.html`)
+- New bar above the sheet whenever columns are hidden: "👁 6 von 19 Spalten sichtbar — 13 ausgeblendet" with **Alle 19 Spalten zeigen** and **🧩 Spalten wählen** (`renderHiddenColumnsBar()`); the status line says "6 von 19 Spalten (A–F)".
+- The 🔥 button's 6-column view is only for that listening session (not saved) — the next visit shows the user's own layout again. Users who already have the 6-column layout saved see the bar and get all columns back with one tap.
+
+#### Testing
+Saved 6-column layout → bar + one tap → A–S, survives reload; 🔥 button → A–F with the bar, reload → own layout (A–S); smoke test 27 pages; build checks.
+
+---
+
 ### 2026-09-25 (Task 39) — Excel sheet: all columns reachable again
 
 #### Task
