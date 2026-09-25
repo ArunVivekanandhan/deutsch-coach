@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v93';
+const CACHE_NAME = 'deutsch-coach-v97';
 const urlsToCache = [
   './',
   './index.html',
@@ -45,7 +45,26 @@ const urlsToCache = [
   './js/lucide.min.js',
   './icon-192.png',
   './icon-512.png',
-  './manifest.json'
+  './manifest.json',
+  './css/fonts.css',
+  './fonts/fjalla-one-400-latin-ext.woff2',
+  './fonts/fjalla-one-400-latin.woff2',
+  './fonts/ibm-plex-mono-400-italic-latin-ext.woff2',
+  './fonts/ibm-plex-mono-400-italic-latin.woff2',
+  './fonts/ibm-plex-mono-400-latin-ext.woff2',
+  './fonts/ibm-plex-mono-400-latin.woff2',
+  './fonts/ibm-plex-mono-500-latin-ext.woff2',
+  './fonts/ibm-plex-mono-500-latin.woff2',
+  './fonts/ibm-plex-mono-600-latin-ext.woff2',
+  './fonts/ibm-plex-mono-600-latin.woff2',
+  './fonts/ibm-plex-mono-700-latin-ext.woff2',
+  './fonts/ibm-plex-mono-700-latin.woff2',
+  './fonts/ibm-plex-sans-400-italic-latin-ext.woff2',
+  './fonts/ibm-plex-sans-400-italic-latin.woff2',
+  './fonts/ibm-plex-sans-var-latin-ext.woff2',
+  './fonts/ibm-plex-sans-var-latin.woff2',
+  './fonts/inter-var-latin-ext.woff2',
+  './fonts/inter-var-latin.woff2'
 ];
 
 self.addEventListener('install', event => {

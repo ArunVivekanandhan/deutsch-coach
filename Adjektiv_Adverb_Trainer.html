@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Adjektive &amp; Adverbien — Form Trainer</title>
 <link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fonts.css">
 <style>
   :root{
     --paper:#EDEAE1; --paper-dark:#E1DDCF; --card:#F7F5EE; --ink:#1B2A4A; --ink-soft:#4A5878;
@@ -335,6 +335,16 @@ const ADJ_CATEGORIES = [{k:'alle',l:'Alle'},{k:'groesse_menge',l:'Größe & Meng
 const ADJ_TYPES = [{k:'alle',l:'Alle',dot:null},{k:'regular',l:'Regelmäßig',dot:'dot-regular'},
   {k:'umlaut',l:'Umlaut',dot:'dot-umlaut'},{k:'irregular',l:'Unregelmäßig',dot:'dot-irregular'}];
 
+/* Example sentence for the answer box (Task 45; AI-drafted ones are labelled 🤖). */
+function wordExampleHTML(v) {
+  if (!v.ex) return '';
+  return `<div class="example-line" style="margin:8px 0 4px; font-size:13.5px; line-height:1.5; text-align:left; padding:8px 10px; border-left:3px solid var(--gold); background:var(--paper); border-radius:0 6px 6px 0;">
+    🗣️ <i>„${v.ex}”</i> ${speakBtn(v.ex, 'Listen to sentence')}
+    ${v.ex_en ? `<div style="font-size:12px; color:var(--ink-soft);">↳ ${v.ex_en}</div>` : ''}
+    ${v.ex_ta ? `<div lang="ta" style="font-size:12px; color:var(--ink-soft);">↳ ${v.ex_ta}</div>` : ''}
+    ${v.ex_src === 'ai' ? `<div style="font-size:10px; opacity:.65;" title="Beispielsatz von KI erstellt (AI-drafted example sentence, checked)">🤖 KI-Beispiel</div>` : ''}
+  </div>`;
+}
 function meaningHTML(v){
   if(meaningLang==='ta'){
     return v.ta ? `<div class="meaningbox"><div class="ta">${v.ta}<span class="translit">${v.ta_translit}</span>${typeof dcTaMark === 'function' ? dcTaMark(v) : ''}</div></div>`
@@ -1362,7 +1372,7 @@ add(diff); }
       <div class="revealbox">
         <div class="formrow"><span class="flabel">Artikel + Singular</span><span class="fval">${v.a} ${v.sg}${speakBtn(v.a+' '+v.sg,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
-        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
+        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}${wordExampleHTML(v)}
       </div>`;
     } else {
       promptHTML = reverse ? `
@@ -1402,7 +1412,7 @@ add(diff); }
         <div class="revealbox">
           <div class="formrow"><span class="flabel">Singular</span><span class="fval">${wordDisp}${speakBtn(wordDisp,'Listen to word')}</span></div>
           <div class="formrow"><span class="flabel">Plural</span><span class="fval">die ${v.pl}${speakBtn('die '+v.pl,'Listen to plural')}</span></div>
-          ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
+          ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}${wordExampleHTML(v)}
           <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
         </div>`;
     }
@@ -1445,7 +1455,7 @@ add(diff); }
         <div class="formrow"><span class="flabel">Positiv</span><span class="fval">${v.w}${speakBtn(v.w,'Listen to word')}</span></div>
         <div class="formrow"><span class="flabel">Komparativ</span><span class="fval">${v.komp}${speakBtn(v.komp,'Comparative listen')}</span></div>
         <div class="formrow"><span class="flabel">Superlativ</span><span class="fval">${v.sup}${speakBtn(v.sup,'Superlative listen')}</span></div>
-        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}
+        ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}${wordExampleHTML(v)}
         <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
       </div>`;
   }

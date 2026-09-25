@@ -79,9 +79,10 @@ const STEM_CHANGE_BASES = {
 };
 
 // Applies the standard regular person-endings to a bare verb stem, with
-// d/t-epenthesis, s/ß/z/x/tz-ending contraction, and -eln e-drop for ich.
+// e-epenthesis after d/t and after m/n that follow another consonant (öffnest, regnet, atmest, rechnest,
+// but lernst, filmst, wohnst), s/ß/z/x/tz-ending contraction, and -eln e-drop for ich.
 function regularEndingForm(stem, person){
-  const epenthetic = /[dt]$/.test(stem);
+  const epenthetic = /[dt]$/.test(stem) || /(?:[bcdfgkpqstvwxzß]|[^aeiouäöü]h)[mn]$/.test(stem);
   const sibilant = /[sßzx]$/.test(stem) || stem.endsWith('tz');
   switch(person){
     case 'ich':
@@ -113,10 +114,10 @@ function praeteritumWordForm(ichForm, person){
 }
 
 function substituteReflexive(words, person){
-  const idx = words.indexOf('sich');
+  const idx = words.findIndex(w => w === 'sich' || w === '(sich)');   // "(sich)" = optionally reflexive
   if (idx === -1) return words;
   const copy = words.slice();
-  copy[idx] = REFLEXIVE_PRONOUN[person];
+  copy[idx] = words[idx] === 'sich' ? REFLEXIVE_PRONOUN[person] : '(' + REFLEXIVE_PRONOUN[person] + ')';
   return copy;
 }
 
@@ -183,6 +184,8 @@ function praesensWordForm(inf, restWords, person, praetMain){
   // (denken, bringen, kennen, nennen, senden: irregular Praeteritum stem
   // but fully regular Praesens), and non-stem-changing strong verbs alike,
   // since it always works from the infinitive.
+  // wir / sie (Pl.) = the infinitive itself (wir feiern, wir wandern — not "feieren")
+  if (person === 'wir' || person === 'sie (Pl.)') return workingTok;
   const stem = workingTok.endsWith('en') ? workingTok.slice(0, -2) : workingTok.slice(0, -1);
   return regularEndingForm(stem, person);
 }

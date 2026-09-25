@@ -6,9 +6,7 @@
   <title>Deutsch Wortschatz Excel Sheet — Master Vokabel & Grammatik Tabelle</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#107c41">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/fonts.css">
   <style>
     :root {
       --excel-green: #107c41;
@@ -1339,6 +1337,12 @@ if (document.readyState === 'loading') {
     return [curated, ...tips.slice(0, curated ? 1 : 2).map(t => `${t.title}: ${t.text}`)].filter(Boolean).join(' · ');
   }
 
+  // replaces a getter by its value on first use (the memory tips of 2,479 rows are only built when shown or searched)
+  function lazyValue(obj, key, value) {
+    Object.defineProperty(obj, key, { value, writable: true, enumerable: true, configurable: true });
+    return value;
+  }
+
   function buildSpreadsheetData() {
     ALL_ROWS = [];
     if (typeof MemoryTips !== 'undefined') MemoryTips.init({
@@ -1395,7 +1399,7 @@ if (document.readyState === 'loading') {
         exampleEn: v.ex_en || '',
         exampleAI: v.ex_src === 'ai',
         topic: NO_VALUE,
-        mnemonic: memoryTipText('v', { w: inf, pr: v.praeteritum, pp: v.perfekt, en: v.en }, direct && direct.image),
+        get mnemonic() { return lazyValue(this, 'mnemonic', memoryTipText('v', { w: inf, pr: v.praeteritum, pp: v.perfekt, en: v.en }, direct && direct.image)); },  // computed when first shown/searched (speed)
         read: [
           { text: inf, col: 'word' },
           { text: v.praeteritum, col: 'praet' },
@@ -1435,11 +1439,11 @@ if (document.readyState === 'loading') {
         ta: n.ta || '',
         ta_translit: n.ta_translit || '',
         ta_src: n.ta_src || '',
-        example: '',
-        exampleEn: '',
-        exampleAI: false,
+        example: n.ex || '',
+        exampleEn: n.ex_en || '',
+        exampleAI: n.ex_src === 'ai',
         topic: TOPIC_LABELS[n.topic] || n.topic || NO_VALUE,
-        mnemonic: memoryTipText('n', { w: n.sg, a: n.a, p: n.pl, en: n.en }, direct && direct.trick),
+        get mnemonic() { return lazyValue(this, 'mnemonic', memoryTipText('n', { w: n.sg, a: n.a, p: n.pl, en: n.en }, direct && direct.trick)); },  // computed when first shown/searched (speed)
         read: [
           { text: fullNoun.trim(), col: 'word' },
           { text: hasPlural ? `die ${n.pl}` : '', col: 'noun' }
@@ -1477,11 +1481,11 @@ if (document.readyState === 'loading') {
         ta: a.ta || '',
         ta_translit: a.ta_translit || '',
         ta_src: a.ta_src || '',
-        example: '',
-        exampleEn: '',
-        exampleAI: false,
+        example: a.ex || '',
+        exampleEn: a.ex_en || '',
+        exampleAI: a.ex_src === 'ai',
         topic: NO_VALUE,
-        mnemonic: memoryTipText('adj', { w: a.w, comp: a.comp || a.komp, sup: a.sup, en: a.en }, ''),
+        get mnemonic() { return lazyValue(this, 'mnemonic', memoryTipText('adj', { w: a.w, comp: a.comp || a.komp, sup: a.sup, en: a.en }, '')); },  // computed when first shown/searched (speed)
         read: [
           { text: a.w, col: 'word' },
           { text: a.comp || a.komp, col: 'adj' },
@@ -1758,14 +1762,40 @@ if (document.readyState === 'loading') {
       return;
     }
 
-    let html = '';
-    FILTERED_ROWS.forEach((r, idx) => {
-      html += `<tr data-idx="${idx}" onclick="selectRow(this)"><td class="row-hdr-cell col-row-num">` +
-        `<button class="row-play" onclick="event.stopPropagation(); readSingleRow(${idx})" title="Diese Zeile vorlesen" aria-label="Zeile ${idx + 1} vorlesen">▶</button>${idx + 1}</td>` +
-        cols.map(c => c.cell(r, idx)).join('') + `</tr>`;
-    });
-    tbody.innerHTML = html;
+    // Only the first rows are built at once; more follow when the user scrolls near the end (or when the
+    // reader/selection needs a row). Appending all 2,479 rows made the browser re-layout the whole table
+    // again and again (~15 s on a phone).
+    renderCols = cols;
+    renderedUpTo = 0;
+    tbody.innerHTML = '';
+    ensureRendered(Math.min(total, 150));
     if (reader.active) highlightReading(false);
+  }
+  let renderCols = [], renderedUpTo = 0, moreObserver = null;
+  function rowHTML(r, idx) {
+    return `<tr data-idx="${idx}" onclick="selectRow(this)"><td class="row-hdr-cell col-row-num">` +
+      `<button class="row-play" onclick="event.stopPropagation(); readSingleRow(${idx})" title="Diese Zeile vorlesen" aria-label="Zeile ${idx + 1} vorlesen">▶</button>${idx + 1}</td>` +
+      renderCols.map(c => c.cell(r, idx)).join('') + `</tr>`;
+  }
+  function ensureRendered(n) {
+    const tbody = document.getElementById('excelTableBody');
+    n = Math.min(n, FILTERED_ROWS.length);
+    if (n <= renderedUpTo) return;
+    const old = document.getElementById('moreRowsSentinel'); if (old) old.remove();
+    let html = '';
+    for (let i = renderedUpTo; i < n; i++) html += rowHTML(FILTERED_ROWS[i], i);
+    tbody.insertAdjacentHTML('beforeend', html);
+    renderedUpTo = n;
+    if (n < FILTERED_ROWS.length) {
+      tbody.insertAdjacentHTML('beforeend', `<tr id="moreRowsSentinel"><td colspan="${renderCols.length + 1}" style="text-align:center; padding:14px; color:var(--ink-muted); font-size:12px;">⏬ ${FILTERED_ROWS.length - n} weitere Zeilen werden beim Scrollen geladen … <button class="filter-chip" onclick="ensureRendered(FILTERED_ROWS.length)">Alle jetzt laden</button></td></tr>`);
+      if (window.IntersectionObserver) {
+        if (!moreObserver) moreObserver = new IntersectionObserver(es => {
+          if (es.some(e => e.isIntersecting)) ensureRendered(renderedUpTo + 400);
+        }, { root: document.getElementById('sheetViewport'), rootMargin: '600px' });
+        moreObserver.disconnect();
+        moreObserver.observe(document.getElementById('moreRowsSentinel'));
+      }
+    }
   }
 
   // --- ACTIONS & EXPORTS ---
@@ -2013,6 +2043,7 @@ if (document.readyState === 'loading') {
   }
 
   function rowEl(idx) {
+    ensureRendered(idx + 1);
     return document.querySelector(`#excelTableBody tr[data-idx="${idx}"]`);
   }
 

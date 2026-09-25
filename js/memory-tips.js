@@ -712,10 +712,13 @@
 
   function findVerb(stem, maxRank) {
     if (stem.length < 2) return null;
+    // exact spelling first (zähl|bar -> zählen, not zahlen), the umlaut-less stem only as a fallback (Gebäck -> backen)
     const c = [stem + 'en', stem + 'n', stem.replace(/([^aeiouäöü])([lr])$/, '$1e$2') + 'n'];
-    const du = deUmlaut(stem); if (du !== stem) c.push(du + 'en', du + 'n');
-    for (const k of c) { const v = V.get(k); if (v && k.length >= 4) return { key: k, v }; }
-    for (const k of c) { const v = gV(k, maxRank); if (v && k.length >= 4) return { key: k, v }; }
+    const du = deUmlaut(stem), cu = du !== stem ? [du + 'en', du + 'n'] : [];
+    for (const list of [c, cu]) {
+      for (const k of list) { const v = V.get(k); if (v && k.length >= 4) return { key: k, v }; }
+      for (const k of list) { const v = gV(k, maxRank); if (v && k.length >= 4) return { key: k, v }; }
+    }
     return null;
   }
   function findNoun(stem) {

@@ -758,6 +758,52 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 45) — Open points fixed: examples for every word, Studios on shared data, conjugation engine, fast Excel, offline fonts
+
+#### Task
+User: "Now you fix the open points with test key" (a DeepSeek test key). The key was NOT used and is not stored in the
+repo: api.deepseek.com is blocked by this cloud environment's network policy (proxy 403). The user can allow the domain
+in the environment's network settings; then the real-key test of the AI features (point 9) can be done.
+
+#### What changed
+- **Point 1 — Audio Coach retired:** `Verben_Hoeren_EN_DE.html` is a redirect to the Auto-Play Speaker (which has the
+  same verbs, EN/TA → DE, Tamil, filters, drill sequences); the old page is in `archive/`. Links in index.html /
+  deutsch-coach.html point to the Speaker; smoke_pages no longer expects its word list.
+- **Point 2 — A2/B1 Studios use the shared data:** each Studio keeps its verb *selection* (`A2_VERBS_LIST`,
+  `B1_VERBS_LIST`), all fields come from `js/word-data.js` and the Präsens forms from `js/german-conjugation.js`
+  (`dcStudioVerbs()`). The old embedded copies had outdated Tamil (achten = "pay money") and wrong forms
+  ("ich tworte an", "du planest", "du sterbst", "kennenlerne").
+- **Conjugation engine fixes (affect Excel, Verb trainer, Übersetzer, home, Thema):** wir/sie = infinitive
+  ("wir feiern", not "feieren"); e-insertion after consonant + m/n ("du öffnest, es regnet, du rechnest", but "lernst,
+  wohnst"); "(sich)" follows the person ("ich entscheide (mich)").
+- **Points 3/4/5/7 — word data (AI-drafted by agents, labelled):** example sentence + English + Tamil for all 1,089
+  nouns and 671 adjectives (`ex`, `ex_en`, `ex_ta`, `ex_src: "ai"`), shown with 🤖 in the Nomen/Adjektiv trainers
+  (answer box), Excel "Beispielsatz" column (2,467 of 2,479 rows) and the Übersetzer (lexicon `ex/exen/exta/exai`);
+  topics for the 566 nouns without one (`topic_src: "ai"`); a noun for the 169 verbs without one (`noun_src: "ai"`);
+  second opinion on the 68 uncertain Tamil meanings: 53 confirmed (🤖? → 🤖), 13 corrected, 2 stay uncertain.
+  Data fixes: zähligen → zählbar, unzähligen → unzählig (countless), stolz → stolzer/am stolzesten, English of
+  unvergesslich, genießbar, unversiegbar, unsachlich, vermehrbar. Word parts: exact spelling before the umlaut-less
+  stem (zählbar = zählen + -bar, not zahlen).
+- **Point 6 — Excel sheet:** memory tips are computed per row on first use (lazy getter); only the first 150 rows are
+  built, more load when scrolling near the end ("Alle jetzt laden" button; the reader loads a row it needs). Phone-speed
+  test (4× CPU throttling): rows visible after 3.8 s (was 15 s; ~0.5 s unthrottled).
+- **Point 13 — fonts self-hosted:** `css/fonts.css` + `fonts/*.woff2` (Fjalla One, IBM Plex Sans/Mono, Inter;
+  latin + latin-ext; SIL OFL, `fonts/OFL.txt`; 500 KB, in the service-worker cache). All 23 pages use it — a slow or
+  blocked fonts.googleapis.com no longer delays or blanks the pages (it did: 41 s here).
+- **Point 10 — Satzbau second proofread (agents):** 928 sentences checked again; 5 fixed (a logic slip
+  "morgen/heute", two "trotzdem" role tags in the Mittelfeld, two English translations); themes had none.
+- **Points 11/12 — Satzbau:** "⬆️ Importieren" loads an exported AI-sentence file (each sentence re-checked);
+  after a wrong build/typed/listen answer "🤖 Ist meine Version auch richtig?" lets the AI judge the learner's order —
+  if correct it is counted as right (labelled as the AI's verdict).
+- Point 8 (≈ estimated levels) stays: no official list to take levels from.
+
+#### Verified
+Studios load 219/284 shared verbs with correct forms, no JS errors; engine diff reviewed for all 503 Studio verbs;
+Excel scroll-loading/reader row access; trainers show examples; Satzbau import + alternative check with a stubbed AI;
+build.py (all checks) + smoke_pages 27/27.
+
+---
+
 ### 2026-09-25 (Task 44) — Satzbau: more sentences, AI sentences kept, hands-on help after mistakes, Experte level
 
 #### Task

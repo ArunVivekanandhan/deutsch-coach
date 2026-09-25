@@ -281,7 +281,8 @@ function renderHome() {
   document.getElementById('aiHome').innerHTML = (typeof dcAIConfigured === 'function' && dcAIConfigured()
     ? `<span class="note">🤖 KI aktiv: im Thema „🤖 +5 neue Sätze“, nach einem Fehler „🤖 Erklären & üben“.</span>`
     : `<span class="note">🤖 Mit KI-Schlüssel (<a href="Einstellungen_Setup.html">AI Config & Settings</a>) bekommst du unbegrenzt neue Sätze und persönliche Fehler-Erklärungen.</span>`)
-    + (nAI ? ` <span class="note">· ${nAI} KI-Sätze gespeichert</span> <button type="button" class="btn grey" style="padding:3px 8px;" data-act="exportAI">⬇️ Exportieren</button>` : '');
+    + (nAI ? ` <span class="note">· ${nAI} KI-Sätze gespeichert</span> <button type="button" class="btn grey" style="padding:3px 8px;" data-act="exportAI">⬇️ Exportieren</button>` : '')
+    + ` <button type="button" class="btn grey" style="padding:3px 8px;" data-act="importAI" title="KI-Sätze aus einer exportierten Datei laden (z. B. von einem anderen Gerät)">⬆️ Importieren</button>`;
   document.getElementById('legend').innerHTML = Object.entries(ROLE).map(([r, [de, en]]) =>
     `<span style="${roleStyle(r)}"><b>${r}</b> ${esc(de)} · ${esc(en)}</span>`).join('');
 }
@@ -554,6 +555,7 @@ function finish(ok, extra) {
         ${ok ? '' : `<button type="button" class="btn grey" data-act="retry">↺ Nochmal diesen Satz</button>`}
         ${ok === false ? `<button type="button" class="btn ghost" data-act="similar">🏋️ 3 ähnliche Sätze üben</button>` : ''}
         ${ok === false && aiOn ? `<button type="button" class="btn ghost" data-act="aiCoach">🤖 Erklären &amp; üben</button>` : ''}
+        ${ok === false && aiOn && W.user && ['build', 'listen', 'type'].includes(W.mode) ? `<button type="button" class="btn grey" data-act="aiAlt" title="Manchmal sind mehrere Reihenfolgen richtig — die KI prüft deine">🤖 Ist meine Version auch richtig?</button>` : ''}
         ${aiOn && ok !== false ? `<button type="button" class="btn grey" data-act="ai">🤖 Warum diese Reihenfolge?</button>` : ''}
         <button type="button" class="btn" data-act="next">Weiter →</button>
       </div><div id="aiOut" class="note"></div></div>`;
@@ -767,6 +769,55 @@ function exportAI() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'satzbau-ki-saetze.json'; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
+/* Loads an exported file (e.g. from another device): every sentence passes the same word-order check again. */
+function importAI() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    let data; try { data = JSON.parse(await f.text()); } catch (e) { alert('Die Datei ist kein gültiges JSON.'); return; }
+    let added = 0, skipped = 0;
+    Object.entries(data || {}).forEach(([tid, list]) => {
+      const topic = TOPIC_BY_ID[tid];
+      if (!topic || !Array.isArray(list)) { skipped += Array.isArray(list) ? list.length : 0; return; }
+      const have = new Set(topic.sentences.map(x => sentenceText(x).toLowerCase()));
+      list.forEach(x => {
+        const c = cleanAISentence(x, topic);
+        if (c && x && x.lv) c.lv = x.lv;
+        if (!c || have.has(sentenceText(c).toLowerCase())) { skipped++; return; }
+        have.add(sentenceText(c).toLowerCase());
+        topic.sentences.push(c);
+        (AI_STORE[tid] = AI_STORE[tid] || []).push(Object.assign({ d: x.d || today() }, c));
+        added++;
+      });
+    });
+    saveAIStore(); renderHome();
+    alert(`✓ ${added} KI-Sätze importiert` + (skipped ? ` · ${skipped} übersprungen (schon vorhanden oder Wortstellung falsch)` : ''));
+  };
+  inp.click();
+}
+/* The learner's order differs from ours: the AI judges whether it is also correct German with the same meaning. */
+async function aiAltCheck() {
+  const { s } = curItem();
+  const out = document.getElementById('aiOut');
+  out.textContent = '⏳ 🤖 KI prüft deine Version …';
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: 'You are a strict German grammar checker. Answer ONLY with JSON {"correct": true|false, "why": "one short English sentence"}. correct = true only if the learner sentence is fully grammatical, natural German AND means the same as the reference sentence.' },
+      { role: 'user', content: `Reference: "${sentenceText(s)}" (${s.en})\nLearner: "${W.user}"` }], { temperature: 0 });
+    const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+    if (j.correct === true) {
+      acceptAlternative();
+      out.innerHTML = `<div class="fb ok">🤖 ✓ <b>Auch richtig!</b> ${esc(j.why || '')} <span class="note">(Urteil der KI — als richtig gezählt)</span></div>`;
+    } else out.innerHTML = `<div class="tipline">🤖 ✗ ${esc(j.why || 'Deine Version ist so nicht ganz richtig.')}</div>`;
+  } catch (e) { out.textContent = '❌ ' + e.message; }
+}
+function acceptAlternative() {
+  const { topic, s } = curItem(), k = sKey(topic.id, s);
+  PROG[k] = (PROG[k] || 0) + 1; store.set('sb_progress_v1', PROG);
+  REVIEW = REVIEW.filter(r => r.k !== k); store.set('sb_review_v1', REVIEW);
+  if (DAY.d === today()) { DAY.ok++; store.set('sb_day_v1', DAY); }
+  const last = S.results[S.results.length - 1]; if (last && last.s === s) last.ok = true;
+  if (W.requeued) { const j = S.items.findIndex((x, i) => i > S.i && x.s === s && x.again); if (j > 0) S.items.splice(j, 1); W.requeued = false; }
+}
 
 /* ---------- summary ---------- */
 function renderSummary() {
@@ -841,6 +892,8 @@ document.addEventListener('click', ev => {
     case 'similar': { const k = practiceSimilar(3); el.disabled = true; el.textContent = `🏋️ ${k} ähnliche Sätze kommen als Nächstes`; document.getElementById('progress').textContent = `Satz ${S.i + 1} / ${S.items.length}`; return; }
     case 'delAI': return deleteAISentence();
     case 'exportAI': return exportAI();
+    case 'importAI': return importAI();
+    case 'aiAlt': el.disabled = true; return aiAltCheck();
     case 'again': return openTopic(S.topic);
     case 'reviewNow': return reviewRound();
     case 'home': return goHome();

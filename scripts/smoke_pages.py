@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 WORD_PAGES = {'Verb_Transformation_Trainer.html': 'VERBS', 'Nomen_Trainer.html': 'NOUNS',
               'Adjektiv_Adverb_Trainer.html': 'ADJS', 'Deutsch_Wortschatz_Excel_Sheet.html': 'VERBS',
               'Wortschatz_Master_Grid.html': 'NOUNS', 'Continuous_Verb_Speaker.html': 'ALL_VERBS',
-              'Verben_Hoeren_EN_DE.html': 'VERBS', 'Thema_Sprech_Trainer.html': 'VERBS_ALL'}
+              'Thema_Sprech_Trainer.html': 'VERBS_ALL'}
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):

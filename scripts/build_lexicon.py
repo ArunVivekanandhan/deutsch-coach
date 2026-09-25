@@ -60,9 +60,11 @@ def build():
         if ('n', e['sg'].lower()) in index:
             continue
         add({'c': 'n', 'w': e['sg'], 'a': e.get('a'), 'pl': e.get('pl'), 'en': e.get('en'), 'ta': ta_text(e),
+             'ex': e.get('ex'), 'exen': e.get('ex_en'), 'exta': e.get('ex_ta'), 'exai': 1 if e.get('ex_src') == 'ai' else None,
              'lv': e.get('level'), 'topic': e.get('topic'), 'f': e.get('freq'), 'tai': ta_ai(e)})
     for e in load(*CANON['a'][:2]):
         add({'c': 'adj', 'w': e['w'], 'komp': e.get('komp') or e.get('comp'), 'sup': e.get('sup'),
+             'ex': e.get('ex'), 'exen': e.get('ex_en'), 'exta': e.get('ex_ta'), 'exai': 1 if e.get('ex_src') == 'ai' else None,
              'en': e.get('en'), 'ta': ta_text(e), 'lv': e.get('level'), 'f': e.get('freq'), 'tai': ta_ai(e)})
 
     # Home flashcards: example sentence + note for the same word; phrases and other words only the
