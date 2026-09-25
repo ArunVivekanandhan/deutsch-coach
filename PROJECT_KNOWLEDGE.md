@@ -61,9 +61,9 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   (Thema_Sprech_Trainer); NOUNS/ADJS → Excel sheet, Master Grid; home flashcards cover every word via
   their lessons + `SYNCED_WORDS`. **After changing words: update the canonical list and every copy, run
   `python3 scripts/build_freq_ranks.py`, `python3 scripts/fill_home_forms.py` and `python3 scripts/build_word_parts.py`
-  (needs `pip install pyphen`, node, apt access for the Ding package), then `python3 scripts/build.py`** — the build runs
-  `scripts/check_vocab_sync.py`, `fill_home_forms.py --check`, `build_word_parts.py --check` and `fix_tamil.py --check`
-  and fails on any drift. A new root word used as a word part needs a line (English + Tamil) in `scripts/word_parts_meanings.tsv`.
+  (needs `pip install pyphen`, node, apt access for the Ding package) and `python3 scripts/build_lexicon.py`, then `python3 scripts/build.py`** — the build runs
+  `scripts/check_vocab_sync.py`, `fill_home_forms.py --check`, `build_word_parts.py --check`, `fix_tamil.py --check`,
+  `merge_b1.py --check` and `build_lexicon.py --check` and fails on any drift. A new root word used as a word part needs a line (English + Tamil) in `scripts/word_parts_meanings.tsv`.
   **Levels**: `A1`/`A2`/`B1`/`B2`/`C1` (B1.1/B1.2 were merged into B1 in Task 34; the textbook part is kept as `srcLevel`) from textbooks, plus frequency estimates for entries with
   no textbook level (`level` A1–C1 with `levelEst: true`; every entry has `freq` = rank in the
   OpenSubtitles-2018 top-50k list, 0 = rarer). Display estimates with "≈"; check a given array's actual
@@ -763,6 +763,45 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 35) — Auto-Audio switch, English/Tamil → Deutsch default, dark mode fix, Übersetzer page
+
+#### Task
+User: "1. In flash card always audio enabled. We need option to disable it. And also by default english/tamil to german. 2. Sometime dark mode not applying correctly 3. We need global translation page for word or sentence. If word need the details about the word which used in answer for existing and sentence to translate. And also implement the AI for ask related to word/sentence or give questions for practice".
+
+#### What changed
+**1. Flashcard audio + direction**
+- **🔊 Auto-Audio An / 🔇 Aus** button in the session bar of the home flashcards and the Verb, Nomen and Adjektiv trainers (`dcAudioToggleHTML` / `dcSetAutoAudio` in `js/app-shell.js`, key `de_auto_audio`, shared with the Einstellungen checkbox). Switching off also turns off the tense auto-read and stops speech in progress. The 🔊 buttons on the card still play on demand.
+- Default direction is **English/Tamil → Deutsch**: home `dc_cardDir` defaults to `en2de` (button "EN·TA→DE"); trainers default to `en2de` and now remember the choice (`vt_curDir`, `na_curDir`, `adj_curDir`).
+- On meaning → Deutsch cards (and fill-the-gap) the German word is the answer, so auto-audio now reads it **after reveal**, not when the card appears (before, audio gave the answer away).
+- Home cards show Tamil next to English (primary language from the EN/TA toggle): `js/tamil-meanings.js` (1,333 meanings from the master lists) fills `ta` at load — 1,465 of 2,934 cards now have Tamil.
+- Bugs fixed on the way: the German word was missing from the home answer box since an older commit (`f9f17d6`) — restored with its article; progressive hints on EN→DE cards hinted the English word instead of the German one; EN→DE recall cards were recorded as `recall_de2en`.
+
+**2. Dark mode**
+- `js/app-shell.js` is the single source of truth: `dcSetTheme` sets every marker the pages use (`data-theme`, `.dark`, `.dark-theme` on `<html>` and `<body>`, `color-scheme`), switches the pages' `prefers-color-scheme` CSS rules to follow the app choice (not the OS), and follows pages' own toggles.
+- **Contrast guard**: text that ends up the same colour as its background is given a readable colour (re-judged after colour transitions and theme changes; never starves on busy pages).
+- **Surface guard** (dark mode only): hard-coded white/pastel cards (A1/B1 exam simulator phrase cards, A2/B1 Studio tense rows, Continuous Verb Speaker player, KI Coach bubbles, inputs …) get a dark surface of the same tint; saturated badges/buttons and "active" chips are left alone; everything is restored on switching to light.
+- `css/design-system.css`: brighter der/die/das colours in dark mode.
+- Audit: 0 unreadable elements on all pages in 4 scenarios (OS light/dark × app light/dark), 0 after live toggling.
+
+**3. Übersetzer & Wort-Explorer (`Uebersetzer.html`)** — sidebar link "Übersetzer" on every page, card on the start page, "🌐 Alle Details" link in every home answer box, deep link `Uebersetzer.html?q=…`.
+- **Word** (German, English or Tamil, also any form: *ging*, *Häuser*, *besser*, *schönen*, *stehe*): everything the app knows — article/plural, Präteritum/Perfekt/Nomen/Typ, full Präsens table (`js/german-conjugation.js`), Steigerung, Wortaufbau with Tamil + prefix type (`MemoryTips.partsHTML`), Merkhilfen (`MemoryTips.cheatCodes`), example + note from the home card, level, frequency rank, word family; 🔊 for every form. Unknown words get "Meintest du …?" suggestions.
+- **Sentence**: word-for-word help from the app data (separable verbs recognised: *Ich stehe um 7 Uhr auf* → aufstehen, "auf" = Verbzusatz), and with AI a full translation (German / English / Tamil + grammar notes, labelled as AI).
+- **KI fragen**: chat about the word/sentence (quick questions: meaning & use, grammar, similar words, mnemonic / explain sentence, is it correct, other ways to say it, pronunciation); the app's data for the word is given to the AI as facts.
+- **Üben**: practice questions from the app data (always available: meaning, EN→DE, article, plural, Präteritum, hat/ist, Partizip, Präsens, Komparativ, gap-fill) or created by the AI (JSON quiz, validated, labelled as AI); multiple choice + typed answers with checking.
+- `dcCallAI(messages)` / `dcAIConfigured()` in `js/app-shell.js`: chat call for every provider of the settings page (deepseek, openai, groq, gemini, openrouter, ollama).
+- Data: `scripts/build_lexicon.py` generates `js/lexicon.js` (2,797 entries: master lists + home-card examples/notes/phrases) and `js/tamil-meanings.js`; nothing is invented. `build.py` runs `build_lexicon.py --check`; both files are in the offline cache.
+
+#### Testing
+Contrast audit (all pages × 4 theme scenarios) + live-toggle test (8 pages) + surface restore; audio suite (speech spy: nothing spoken before reveal on EN→DE, German word after reveal, off = silent incl. tense read, setting survives reload, trainers default en2de with the switch); translator suite (13 queries: base forms, verb/noun/adjective forms, declined adjective, English, Tamil, phrase, German and English sentences, typo, unknown) + mocked-AI suite (chat with context, JSON quiz incl. dropping an invalid question, answer checking, sentence translation); mobile width without horizontal scroll; earlier suites (tips, parts, prefix, B1), 27-page sweep without errors, `build.py` (8 checks) pass.
+
+#### Files Changed
+- `Uebersetzer.html` (new), `scripts/build_lexicon.py` (new), `js/lexicon.js` + `js/tamil-meanings.js` (generated)
+- `js/app-shell.js`, `css/design-system.css`, `scripts/build.py`, `sw.js`
+- `deutsch-coach.html`, `Verb_Transformation_Trainer.html`, `Nomen_Trainer.html`, `Adjektiv_Adverb_Trainer.html`, `Einstellungen_Setup.html`, `index.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
 
 ### 2026-09-25 (Task 34) — B1.1 and B1.2 merged into B1
 

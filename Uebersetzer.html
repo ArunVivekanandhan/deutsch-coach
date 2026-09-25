@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Übersetzer &amp; Wort-Explorer — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/german-conjugation.js"></script>
+<script src="js/memory-tips.js"></script>
+<script src="js/word-parts.js"></script>
+<script src="js/lexicon.js"></script>
+<style>
+  .tx-wrap { max-width: 900px; margin: 0 auto; padding: 8px 0 40px; display: flex; flex-direction: column; gap: 14px; }
+  .tx-title { font-size: 26px; font-weight: 800; margin: 0; color: var(--color-ink); }
+  .tx-sub { margin: 2px 0 0; color: var(--color-ink-soft); font-size: 14px; line-height: 1.5; }
+  .tx-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); }
+  .tx-form { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
+  .tx-form textarea { flex: 1 1 320px; min-height: 52px; resize: vertical; font: inherit; font-size: 17px; padding: 12px 14px;
+    border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); }
+  .tx-form textarea:focus { outline: 2px solid var(--color-primary); border-color: var(--color-primary); }
+  .tx-btn { font: inherit; font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 10px; cursor: pointer;
+    border: 1.5px solid var(--color-primary); background: var(--color-primary); color: #fff; }
+  .tx-btn.ghost { background: transparent; color: var(--color-primary); }
+  .tx-btn.small { font-size: 12.5px; padding: 6px 11px; border-radius: 999px; }
+  .tx-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .tx-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+  .tx-chip { font: inherit; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); }
+  .tx-chip:hover { border-color: var(--color-primary); }
+  .tx-muted { color: var(--color-ink-soft); font-size: 12.5px; }
+  .tx-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .tx-word { font-size: 30px; font-weight: 800; color: var(--color-ink); }
+  .tx-art { font-size: 20px; font-weight: 700; }
+  .g-der { color: var(--color-der); } .g-die { color: var(--color-die); } .g-das { color: var(--color-das); }
+  .tx-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-ink-soft); }
+  .tx-mean { margin-top: 8px; font-size: 17px; line-height: 1.5; }
+  .tx-mean .ta { color: #b45309; }
+  [data-theme="dark"] .tx-mean .ta { color: #fbbf24; }
+  .tx-section { margin-top: 14px; }
+  .tx-section h3 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-ink-soft); margin: 0 0 6px; }
+  .tx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+  .tx-cell { border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 10px; background: var(--color-bg); }
+  .tx-cell .k { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--color-ink-soft); }
+  .tx-cell .v { font-weight: 700; margin-top: 2px; color: var(--color-ink); }
+  .tx-conj { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tx-conj td { padding: 5px 8px; border-bottom: 1px dashed var(--color-border); }
+  .tx-conj td:first-child { color: var(--color-ink-soft); width: 110px; }
+  .tx-conj td:last-child { font-weight: 700; }
+  .tx-tip { border-left: 3px solid var(--color-primary); padding: 6px 10px; margin: 6px 0; background: var(--color-bg); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.5; }
+  .tx-speak { background: none; border: 1px solid var(--color-border); border-radius: 999px; cursor: pointer; font-size: 15px; padding: 2px 8px; color: var(--color-ink); }
+  .tx-gloss { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tx-tok { border: 1px solid var(--color-border); border-radius: 10px; padding: 6px 9px; background: var(--color-bg); min-width: 70px; cursor: default; }
+  .tx-tok.known { cursor: pointer; border-color: var(--color-primary); }
+  .tx-tok .t { font-weight: 800; color: var(--color-ink); }
+  .tx-tok .b { font-size: 11.5px; color: var(--color-ink-soft); }
+  .tx-tok .e { font-size: 12.5px; color: var(--color-ink); }
+  .tx-tok .ta { font-size: 12px; color: #b45309; }
+  [data-theme="dark"] .tx-tok .ta { color: #fbbf24; }
+  .tx-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .tx-hit { text-align: left; font: inherit; border: 1px solid var(--color-border); border-radius: 10px; padding: 8px 10px; background: var(--color-bg); color: var(--color-ink); cursor: pointer; }
+  .tx-hit:hover { border-color: var(--color-primary); }
+  .tx-hit b { font-size: 15px; }
+  .tx-ai-out { white-space: pre-wrap; line-height: 1.55; font-size: 14.5px; }
+  .tx-msg { padding: 8px 12px; border-radius: 10px; margin: 6px 0; max-width: 92%; }
+  .tx-msg.user { background: rgba(37, 99, 235, 0.10); margin-left: auto; }
+  .tx-msg.ai { background: var(--color-bg); border: 1px solid var(--color-border); }
+  .tx-ask { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .tx-ask input { flex: 1 1 240px; font: inherit; padding: 9px 12px; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); }
+  .tx-q { border: 1px solid var(--color-border); border-radius: 10px; padding: 10px 12px; margin: 8px 0; background: var(--color-bg); }
+  .tx-q .qt { font-weight: 700; margin-bottom: 6px; }
+  .tx-opt { display: block; width: 100%; text-align: left; font: inherit; margin: 4px 0; padding: 7px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .tx-opt.right { border-color: #16a34a; background: rgba(22, 163, 74, 0.14); }
+  .tx-opt.wrong { border-color: #dc2626; background: rgba(220, 38, 38, 0.12); }
+  .tx-q input { font: inherit; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .tx-fb { margin-top: 6px; font-size: 13.5px; }
+  .tx-fb.ok { color: #15803d; } .tx-fb.no { color: #b91c1c; }
+  [data-theme="dark"] .tx-fb.ok { color: #4ade80; } [data-theme="dark"] .tx-fb.no { color: #f87171; }
+  .tx-note { font-size: 11.5px; color: var(--color-ink-soft); margin-top: 6px; }
+  @media (max-width: 600px) { .tx-word { font-size: 24px; } .tx-box { padding: 12px; } }
+</style>
+</head>
+<body>
+<div class="tx-wrap">
+  <div>
+    <h1 class="tx-title">🌐 Übersetzer &amp; Wort-Explorer</h1>
+    <p class="tx-sub">Ein <b>Wort</b> eingeben (Deutsch, Englisch oder Tamil, auch eine Form wie <i>ging</i>, <i>Häuser</i>, <i>besser</i>) → alle Details
+      aus der App: Formen, Präsens, Wortaufbau mit Tamil, Präfix-Typ, Merkhilfen, Beispiel.
+      Einen <b>Satz</b> eingeben → Wort-für-Wort-Hilfe und (mit KI) die ganze Übersetzung. Danach: KI fragen oder üben.</p>
+  </div>
+
+  <div class="tx-box">
+    <form class="tx-form" id="txForm" autocomplete="off">
+      <textarea id="txInput" rows="2" aria-label="Wort oder Satz" placeholder="z. B.  Abtreibung · aufstehen · ging · house · வீடு · Ich stehe um 7 Uhr auf."></textarea>
+      <button class="tx-btn" type="submit">🔎 Suchen / Übersetzen</button>
+    </form>
+    <div class="tx-chips" id="txHistory"></div>
+  </div>
+
+  <div id="txResult"></div>
+
+  <div class="tx-box" id="aiBox" hidden>
+    <div class="tx-head"><b style="font-size:17px;">🤖 KI fragen</b><span class="tx-muted" id="aiContextLabel"></span></div>
+    <div id="aiSetup" class="tx-muted" hidden>KI ist noch nicht eingerichtet — Anbieter und Schlüssel unter
+      <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> eintragen. Die Wort-Details und die Offline-Übungen funktionieren auch ohne KI.</div>
+    <div class="tx-chips" id="aiQuick"></div>
+    <div id="aiChat"></div>
+    <form class="tx-ask" id="aiAskForm" autocomplete="off">
+      <input id="aiAskInput" placeholder="Eigene Frage zu diesem Wort / Satz … (Deutsch, English, தமிழ்)">
+      <button class="tx-btn" type="submit" id="aiAskBtn">Fragen</button>
+    </form>
+  </div>
+
+  <div class="tx-box" id="quizBox" hidden>
+    <div class="tx-head"><b style="font-size:17px;">🎯 Üben</b><span class="tx-muted" id="quizLabel"></span></div>
+    <div class="tx-chips">
+      <button class="tx-btn small" id="quizOffline" type="button">📚 Übungsfragen (aus der App)</button>
+      <button class="tx-btn small ghost" id="quizAI" type="button">🤖 Übungsfragen mit KI</button>
+    </div>
+    <div id="quizArea"></div>
+  </div>
+</div>
+
+<script>
+/* Übersetzer & Wort-Explorer
+   Word data: js/lexicon.js (generated from the canonical word lists + home flashcards by
+   scripts/build_lexicon.py), Wortaufbau/prefixes/tips: js/memory-tips.js + js/word-parts.js,
+   Präsens: js/german-conjugation.js. Full-sentence translation, questions and AI practice use the
+   AI provider configured on Einstellungen_Setup.html (dcCallAI in js/app-shell.js). */
+const LEX = window.DC_LEXICON || [];
+const CAT_LABEL = { v: 'Verb', n: 'Nomen', adj: 'Adjektiv / Adverb', p: 'Ausdruck' };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').toLowerCase().replace(/[„“"'»«()\[\]{}.,!?;:…]/g, ' ').replace(/\s+/g, ' ').trim();
+const isTamil = s => /[஀-௿]/.test(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ---------- indexes ---------- */
+const byWord = new Map();      // normalised base form -> [entry]
+const byForm = new Map();      // normalised form (ging, Häuser, besser, stehe auf …) -> [{e, label}]
+function pushMap(m, k, v) { if (!k) return; let a = m.get(k); if (!a) m.set(k, a = []); if (!a.includes(v)) a.push(v); }
+function addForm(f, e, label) {
+  const k = norm(f); if (!k) return;
+  let a = byForm.get(k); if (!a) byForm.set(k, a = []);
+  if (!a.some(x => x.e === e)) a.push({ e, label });
+}
+const PERS = (typeof PERSONS !== 'undefined') ? PERSONS : ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie (Pl.)'];
+function praesensTable(e) {
+  if (e.c !== 'v' || typeof praesensPhrase !== 'function') return null;
+  try { return PERS.map(p => [p, praesensPhrase(e.w, e.pr || '', p)]); } catch (err) { return null; }
+}
+LEX.forEach(e => {
+  pushMap(byWord, norm(e.w), e);
+  addForm(e.w, e, 'Grundform');
+  if (e.c === 'v') {
+    const bare = e.w.replace(/^sich\s+/, '');
+    if (bare !== e.w) { pushMap(byWord, norm(bare), e); addForm(bare, e, 'Infinitiv'); }
+    if (e.pr) { addForm(e.pr, e, 'Präteritum'); addForm(e.pr.split(' ')[0], e, 'Präteritum'); }
+    if (e.pp) { const t = e.pp.split(' '); addForm(e.pp, e, 'Perfekt'); addForm(t[t.length - 1], e, 'Partizip II'); }
+    (praesensTable(e) || []).forEach(([p, ph]) => { addForm(ph, e, 'Präsens (' + p + ')'); addForm(ph.split(' ')[0], e, 'Präsens (' + p + ')'); });
+  } else if (e.c === 'n') {
+    if (e.pl && !/^[—-]$/.test(e.pl)) addForm(e.pl, e, 'Plural');
+    if (e.a) addForm(e.a + ' ' + e.w, e, 'mit Artikel');
+  } else if (e.c === 'adj') {
+    if (e.komp) addForm(e.komp, e, 'Komparativ');
+    if (e.sup) { addForm(e.sup, e, 'Superlativ'); addForm(e.sup.replace(/^am\s+/, ''), e, 'Superlativ'); }
+  }
+});
+
+/* Function words the lists don't contain (for the sentence gloss). English only. */
+const FUNC = {
+  ich: 'I', du: 'you', er: 'he', sie: 'she / they / you (formal: Sie)', es: 'it', wir: 'we', ihr: 'you (pl.) / her', mich: 'me', dich: 'you (acc.)',
+  mir: 'me (dat.)', dir: 'you (dat.)', ihn: 'him', ihm: 'him (dat.)', uns: 'us', euch: 'you (pl., acc./dat.)', ihnen: 'them (dat.)', sich: 'oneself (reflexive)',
+  mein: 'my', meine: 'my', meinen: 'my', meinem: 'my', meiner: 'my', dein: 'your', deine: 'your', sein: 'his / to be', seine: 'his', unser: 'our', unsere: 'our',
+  der: 'the (m.)', die: 'the (f. / pl.)', das: 'the (n.) / that', den: 'the (acc. m. / dat. pl.)', dem: 'the (dat.)', des: 'of the',
+  ein: 'a / an', eine: 'a / an', einen: 'a / an (acc.)', einem: 'a / an (dat.)', einer: 'a / an (dat. f.)', kein: 'no / not a', keine: 'no / not any', keinen: 'no (acc.)',
+  und: 'and', oder: 'or', aber: 'but', denn: 'because (main clause)', weil: 'because (verb at the end)', dass: 'that (verb at the end)', wenn: 'if / when',
+  als: 'when (past) / than / as', ob: 'whether', damit: 'so that', obwohl: 'although', sondern: 'but rather', auch: 'also', nicht: 'not', nur: 'only', noch: 'still / yet',
+  schon: 'already', sehr: 'very', gern: 'gladly (like doing)', gerne: 'gladly (like doing)', ja: 'yes', nein: 'no', hier: 'here', dort: 'there', da: 'there / since', heute: 'today',
+  morgen: 'tomorrow / morning', gestern: 'yesterday', jetzt: 'now', immer: 'always', oft: 'often', dann: 'then', so: 'so / like this', wie: 'how / like', was: 'what',
+  wer: 'who', wo: 'where', wohin: 'where to', woher: 'where from', wann: 'when', warum: 'why', welche: 'which', viel: 'much', viele: 'many',
+  in: 'in / into', im: 'in the', an: 'at / on', am: 'at the / on the', auf: 'on / onto', aus: 'out of / from', bei: 'at / near / with', mit: 'with', nach: 'to / after',
+  von: 'from / of', vom: 'from the', zu: 'to', zum: 'to the', zur: 'to the (f.)', für: 'for', um: 'at (time) / around', über: 'over / about', unter: 'under / among',
+  vor: 'before / in front of', hinter: 'behind', neben: 'next to', zwischen: 'between', ohne: 'without', gegen: 'against', durch: 'through', seit: 'since / for',
+  bis: 'until', ins: 'into the', beim: 'at the', uhr: "o'clock", man: 'one / you (general)', ist: 'is (sein)', bin: 'am (sein)', sind: 'are (sein)', bist: 'are (sein)', war: 'was (sein)',
+  hat: 'has (haben)', habe: 'have (haben)', hast: 'have (haben)', haben: 'have', wird: 'becomes / will (werden)', werde: 'will (werden)', kann: 'can (können)', muss: 'must (müssen)', will: 'wants (wollen)'
+};
+const EN_STOP = new Set('the a an is are am was were be been i you he she it we they my your his her our their this that these those of to in on at for with from and or but not do does did have has had will would can could should what where when why how who which there here very'.split(' '));
+const PARTICLES = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'fest', 'fort', 'her', 'hin', 'los', 'mit', 'nach', 'vor', 'weg', 'weiter', 'zu', 'zurück', 'zusammen', 'um', 'durch', 'über', 'wieder', 'hoch', 'fern', 'statt', 'teil', 'kennen'];
+
+/* ---------- memory tips need the whole word list ---------- */
+let tipsReady = false;
+function ensureTips() {
+  if (tipsReady || typeof MemoryTips === 'undefined') return;
+  const rank = e => e.f || 1e8;
+  MemoryTips.init({
+    verbs: LEX.filter(e => e.c === 'v').map(e => ({ w: e.w, pr: e.pr, pp: e.pp, en: e.en, rank: rank(e) })),
+    nouns: LEX.filter(e => e.c === 'n').map(e => ({ w: e.w, a: e.a, p: e.pl, en: e.en, rank: rank(e) })),
+    adjs: LEX.filter(e => e.c === 'adj').map(e => Object.assign(MemoryTips.entryFrom(e.w, 'adj', { komp: e.komp, sup: e.sup, en: e.en }), { rank: rank(e) }))
+  });
+  tipsReady = true;
+}
+
+/* ---------- lookup ---------- */
+function stripLead(q) { return q.replace(/^(der|die|das|ein|eine|einen)\s+/, '').replace(/^to\s+/, ''); }
+function lookupWord(raw) {
+  const q = norm(raw);
+  if (!q) return { exact: [], forms: [], meaning: [], fuzzy: [] };
+  const out = { exact: [], forms: [], meaning: [], fuzzy: [] };
+  const seen = new Set();
+  const add = (list, e, label) => { if (seen.has(e)) return; seen.add(e); list.push({ e, label }); };
+  [q, stripLead(q), q.replace(/^sich\s+/, '')].forEach(k => (byWord.get(k) || []).forEach(e => add(out.exact, e, 'Grundform')));
+  [q, stripLead(q)].forEach(k => (byForm.get(k) || []).forEach(x => add(out.forms, x.e, x.label)));
+  if (!out.exact.length && !out.forms.length && !/\s/.test(q)) {       // declined adjectives / nouns: schöne, schönen, Kindern
+    for (const end of ['en', 'em', 'er', 'es', 'e', 'n', 's']) {
+      if (q.length - end.length < 3 || !q.endsWith(end)) continue;
+      const base = q.slice(0, -end.length);
+      (byWord.get(base) || []).forEach(e => { if (e.c === 'adj' || e.c === 'n') add(out.forms, e, 'gebeugte Form (−' + end + ')'); });
+      (byForm.get(base) || []).forEach(x => { if (x.e.c === 'adj') add(out.forms, x.e, x.label + ' + Endung −' + end); });
+    }
+  }
+  // meaning search: English (whole words) or Tamil
+  const en = stripLead(q);
+  const re = new RegExp('(^|[^a-z])(to\\s+)?' + en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z])', 'i');
+  const tamil = isTamil(raw);
+  const scored = [];
+  LEX.forEach(e => {
+    if (seen.has(e)) return;
+    if (tamil) { if (e.ta && e.ta.includes(raw.trim())) scored.push([e.ta.startsWith(raw.trim()) ? 0 : 1, e]); return; }
+    if (!e.en || en.length < 2) return;
+    const m = e.en.toLowerCase();
+    const parts = m.split(/\s*[\/,;]\s*/).map(x => x.replace(/^to\s+/, '').replace(/\s*\(.*?\)\s*/g, '').trim());
+    if (parts.includes(en)) scored.push([0, e]);
+    else if (re.test(m)) scored.push([1, e]);
+  });
+  scored.sort((a, b) => a[0] - b[0] || (a[1].f || 1e8) - (b[1].f || 1e8));
+  scored.slice(0, 24).forEach(([, e]) => add(out.meaning, e, tamil ? 'Tamil' : 'English'));
+  if (!out.exact.length && !out.forms.length && !out.meaning.length && q.length >= 3) {
+    const cands = [];
+    for (const k of byWord.keys()) { if (Math.abs(k.length - q.length) > 2) continue; const d = lev(k, q, 2); if (d <= 2) cands.push([d, k]); }
+    cands.sort((a, b) => a[0] - b[0]).slice(0, 8).forEach(([, k]) => byWord.get(k).forEach(e => add(out.fuzzy, e, 'ähnlich')));
+  }
+  return out;
+}
+function lev(a, b, max) {
+  const m = a.length, n = b.length; let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i]; let best = i;
+    for (let j = 1; j <= n; j++) { cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); best = Math.min(best, cur[j]); }
+    if (best > max) return max + 1; prev = cur;
+  }
+  return prev[n];
+}
+
+/* ---------- rendering: word ---------- */
+function speakBtnHTML(text) { return `<button class="tx-speak" type="button" data-say="${esc(text)}" title="Anhören">🔊</button>`; }
+function artClass(a) { return a === 'der' ? 'g-der' : a === 'die' ? 'g-die' : a === 'das' ? 'g-das' : ''; }
+function cell(k, v, say) { return v ? `<div class="tx-cell"><div class="k">${esc(k)}</div><div class="v">${esc(v)} ${say ? speakBtnHTML(say) : ''}</div></div>` : ''; }
+
+function familyOf(e) {
+  const w = e.w.replace(/^sich\s+/, '').toLowerCase();
+  if (w.length < 4 || e.c === 'p') return [];
+  const out = [];
+  for (const x of LEX) {
+    if (x === e || x.c === 'p') continue;
+    const xw = x.w.replace(/^sich\s+/, '').toLowerCase();
+    if (xw === w) continue;
+    if (e.c === 'v' ? (x.c === 'v' && xw.endsWith(w) && xw.length - w.length <= 8) : (xw.includes(w) && (x.c === 'n' || x.c === 'adj'))) out.push(x);
+    if (out.length >= 14) break;
+  }
+  if (e.c === 'v' && e.noun) {
+    const nw = e.noun.replace(/^(der|die|das)\s+/, '');
+    (byWord.get(norm(nw)) || []).forEach(x => { if (!out.includes(x)) out.unshift(x); });
+  }
+  return out;
+}
+
+function wordDetailHTML(e, label) {
+  ensureTips();
+  const art = e.c === 'n' && e.a ? `<span class="tx-art ${artClass(e.a)}">${esc(e.a)}</span>` : '';
+  const say = (e.a ? e.a + ' ' : '') + e.w;
+  let h = `<div class="tx-box" id="wordBox">
+    <div class="tx-head">${art}<span class="tx-word ${artClass(e.a)}">${esc(e.w)}</span> ${speakBtnHTML(say)}
+      <span class="tx-tag">${esc(CAT_LABEL[e.c] || e.c)}</span>${e.lv ? `<span class="tx-tag">${esc(e.lv)}</span>` : ''}
+      ${e.f ? `<span class="tx-tag" title="Rang in einer deutschen Häufigkeitsliste (kleiner = häufiger)">Häufigkeit #${e.f}</span>` : ''}
+      ${label && label !== 'Grundform' ? `<span class="tx-muted">gefunden als: ${esc(label)}</span>` : ''}</div>
+    <div class="tx-mean">🇬🇧 ${esc(e.en || '—')}${e.ta ? `<br><span class="ta" lang="ta">🇮🇳 ${esc(e.ta)}</span>` : ''}</div>`;
+
+  // forms
+  let forms = '';
+  if (e.c === 'v') {
+    forms = `<div class="tx-grid">${cell('Infinitiv', e.w, e.w)}${cell('Präteritum', e.pr, e.pr)}${cell('Perfekt', e.pp, e.pp)}${cell('Nomen', e.noun, e.noun)}${cell('Typ', e.typ === 'strong' ? 'stark (unregelmäßig)' : e.typ === 'weak' ? 'schwach (regelmäßig)' : e.typ === 'mixed' ? 'gemischt' : e.typ)}</div>`;
+    const t = praesensTable(e);
+    if (t) forms += `<div class="tx-section"><h3>Präsens</h3><table class="tx-conj">${t.map(([p, f]) => `<tr><td>${esc(p)}</td><td>${esc(f)} ${speakBtnHTML(p.replace(/ \(Pl\.\)/, '') .replace('er/sie/es', 'er') + ' ' + f)}</td></tr>`).join('')}</table></div>`;
+  } else if (e.c === 'n') {
+    const pl = e.pl && !/^[—-]$/.test(e.pl) ? 'die ' + e.pl : (e.pl ? 'kein Plural' : '');
+    forms = `<div class="tx-grid">${cell('Singular', (e.a ? e.a + ' ' : '') + e.w, say)}${cell('Plural', pl, pl && pl !== 'kein Plural' ? pl : '')}${e.topic ? cell('Thema', e.topic) : ''}</div>`;
+  } else if (e.c === 'adj') {
+    forms = `<div class="tx-grid">${cell('Positiv', e.w, e.w)}${cell('Komparativ', e.komp, e.komp)}${cell('Superlativ', e.sup, e.sup)}</div>`;
+  }
+  if (forms) h += `<div class="tx-section"><h3>Formen</h3>${forms}</div>`;
+
+  // Wortaufbau + prefix type
+  if (typeof MemoryTips !== 'undefined') {
+    const parts = MemoryTips.partsHTML(e.c === 'p' ? 'p' : e.c, e.w);
+    if (parts) h += `<div class="tx-section"><h3>Wortaufbau</h3>${parts}</div>`;
+    const tips = (e.c === 'v' || e.c === 'n' || e.c === 'adj')
+      ? MemoryTips.cheatCodes(e.w, e.c, { pr: e.pr, pp: e.pp, a: e.a, p: e.pl, komp: e.komp, sup: e.sup, en: e.en, freq: e.f }, { skip: ['sep', 'insep', 'compound'] })
+      : [];
+    if (tips.length) h += `<div class="tx-section"><h3>Merkhilfen</h3>${tips.map(t => `<div class="tx-tip"><b>${t.title}</b><br>${t.rule}${t.tamil ? `<br>${t.tamil}` : ''}</div>`).join('')}</div>`;
+  }
+  if (e.ex || e.mn) {
+    h += `<div class="tx-section"><h3>Beispiel &amp; Notiz</h3>
+      ${e.ex ? `<div class="tx-tip">„${esc(e.ex)}“ ${speakBtnHTML(e.ex)}</div>` : ''}
+      ${e.mn ? `<div class="tx-tip">${e.mn}</div>` : ''}</div>`;   // mn: app's own note (may contain <b>)
+  }
+  const fam = familyOf(e);
+  if (fam.length) h += `<div class="tx-section"><h3>Wortfamilie &amp; verwandte Wörter</h3><div class="tx-chips" style="margin-top:0;">${fam.map(x => `<button class="tx-chip" type="button" data-open="${LEX.indexOf(x)}">${esc((x.a ? x.a + ' ' : '') + x.w)} <span class="tx-muted">· ${esc((x.en || '').slice(0, 28))}</span></button>`).join('')}</div></div>`;
+  h += `<div class="tx-note">Alle Angaben stammen aus den Wortlisten der App (Verb-, Nomen-, Adjektiv-Trainer und Lernkarten).</div></div>`;
+  return h;
+}
+
+function hitListHTML(title, items) {
+  if (!items.length) return '';
+  return `<div class="tx-section"><h3>${esc(title)}</h3><div class="tx-list">${items.map(({ e, label }) =>
+    `<button class="tx-hit" type="button" data-open="${LEX.indexOf(e)}" data-label="${esc(label)}"><b class="${artClass(e.a)}">${esc((e.a ? e.a + ' ' : '') + e.w)}</b>
+      <span class="tx-tag">${esc(CAT_LABEL[e.c] || e.c)}</span>${e.lv ? ` <span class="tx-tag">${esc(e.lv)}</span>` : ''}<br>
+      <span class="tx-muted">${esc(e.en || '')}${e.ta ? ' · ' + esc(e.ta) : ''}</span>${label && label !== 'Grundform' ? `<br><span class="tx-muted">→ ${esc(label)}</span>` : ''}</button>`).join('')}</div></div>`;
+}
+
+/* ---------- rendering: sentence ---------- */
+function tokenize(s) { return (s.match(/[A-Za-zÄÖÜäöüß஀-௿'-]+|\d+/g) || []); }
+function glossToken(tok, sentenceToks) {
+  const k = norm(tok);
+  const found = lookupWord(tok);
+  let hits = found.exact.concat(found.forms);
+  if (!hits.length && FUNC[k]) return { tok, func: FUNC[k] };
+  // separable verbs: "stehe" is also the first word of "stehe auf" (aufstehen). The separable verb wins
+  // only when its particle closes the sentence ("Ich stehe um 7 Uhr auf."), otherwise the simple verb does.
+  const last = norm(sentenceToks[sentenceToks.length - 1] || '');
+  const sepParticle = e => {
+    if (e.c !== 'v') return '';
+    const bare = e.w.replace(/^sich\s+/, '').toLowerCase();
+    return PARTICLES.find(p => bare.startsWith(p) && bare.length > p.length + 2 && byWord.has(bare.slice(p.length))) || '';
+  };
+  if (norm(tok) !== last) {
+    hits = hits.slice().sort((a, b) => {
+      const pa = sepParticle(a.e), pb = sepParticle(b.e);
+      const sa = pa ? (pa === last ? -1 : 1) : 0, sb = pb ? (pb === last ? -1 : 1) : 0;
+      return sa - sb;
+    }).map(h => { const p = sepParticle(h.e); return p && p === last ? { e: h.e, label: 'trennbar: ' + p + '…' } : h; });
+  }
+  if (!hits.length && FUNC[k]) return { tok, func: FUNC[k] };
+  return { tok, hits };
+}
+function sentenceHTML(raw) {
+  const toks = tokenize(raw);
+  const german = toks.some(t => /[äöüß]/i.test(t)) || toks.filter(t => byForm.has(norm(t)) || FUNC[norm(t)]).length >= toks.filter(t => EN_STOP.has(norm(t))).length;
+  const tamil = isTamil(raw);
+  let h = `<div class="tx-box" id="sentBox"><div class="tx-head"><b style="font-size:17px;">📝 Satz</b>
+    <span class="tx-tag">${tamil ? 'Tamil → Deutsch' : german ? 'Deutsch → English / தமிழ்' : 'English → Deutsch'}</span></div>
+    <div class="tx-mean" style="font-size:18px;">„${esc(raw.trim())}“ ${german ? speakBtnHTML(raw.trim()) : ''}</div>
+    <div class="tx-section"><h3>Übersetzung</h3><div id="sentAI" class="tx-ai-out tx-muted">${dcAIConfigured() ? '⏳ KI übersetzt …' : 'Für eine ganze Übersetzung KI unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> einrichten. Unten: Wort-für-Wort-Hilfe aus der App (keine vollständige Übersetzung).'}</div></div>`;
+  if (german && !tamil) {
+    const g = toks.map(t => glossToken(t, toks));
+    const sep = g.find(x => x.hits && x.hits[0] && /^trennbar/.test(x.hits[0].label));
+    if (sep && g.length) g[g.length - 1] = { tok: g[g.length - 1].tok, func: 'Verbzusatz → gehört zu „' + sep.hits[0].e.w + '“' };
+    h += `<div class="tx-section"><h3>Wort für Wort (aus der App)</h3><div class="tx-gloss">${g.map(x => {
+      if (x.func) return `<div class="tx-tok"><div class="t">${esc(x.tok)}</div><div class="e">${esc(x.func)}</div></div>`;
+      if (!x.hits || !x.hits.length) return `<div class="tx-tok"><div class="t">${esc(x.tok)}</div><div class="b">—</div></div>`;
+      const { e, label } = x.hits[0];
+      return `<div class="tx-tok known" data-open="${LEX.indexOf(e)}" data-label="${esc(label)}" title="Details öffnen"><div class="t">${esc(x.tok)}</div>
+        <div class="b">${esc((e.a ? e.a + ' ' : '') + e.w)}${label && label !== 'Grundform' ? ' · ' + esc(label) : ''}</div>
+        <div class="e">${esc((e.en || '').slice(0, 40))}</div>${e.ta ? `<div class="ta" lang="ta">${esc(e.ta)}</div>` : ''}</div>`;
+    }).join('')}</div><div class="tx-note">Tippe ein blaues Wort an für alle Details.</div></div>`;
+  } else {
+    const words = toks.filter(t => !EN_STOP.has(norm(t)));
+    const g = words.map(t => ({ t, hits: lookupWord(t).meaning.slice(0, 3) }));
+    h += `<div class="tx-section"><h3>Deutsche Wörter dazu (aus der App)</h3><div class="tx-gloss">${g.map(x =>
+      `<div class="tx-tok"><div class="t">${esc(x.t)}</div>${x.hits.length ? x.hits.map(({ e }) => `<div class="e" style="cursor:pointer;color:var(--color-primary);" data-open="${LEX.indexOf(e)}">${esc((e.a ? e.a + ' ' : '') + e.w)}</div>`).join('') : '<div class="b">—</div>'}</div>`).join('')}</div></div>`;
+  }
+  return h + '</div>';
+}
+
+/* ---------- AI ---------- */
+let aiContext = null;        // {kind:'word'|'sentence', text, entry}
+let aiMessages = [];
+function aiSystem() {
+  const base = 'You are a friendly, precise German teacher for a learner whose languages are English and Tamil (level A1–B2). ' +
+    'Answer in simple English, give German examples, and add a short Tamil explanation (Tamil script with transliteration) where it helps. ' +
+    'Be accurate about German grammar (articles, plural, cases, verb forms, separable/inseparable prefixes). Keep answers short and structured. Use plain text, no markdown tables.';
+  if (!aiContext) return base;
+  if (aiContext.kind === 'word') {
+    const e = aiContext.entry;
+    const facts = { word: e.w, category: CAT_LABEL[e.c], article: e.a, plural: e.pl, praeteritum: e.pr, perfekt: e.pp, komparativ: e.komp, superlativ: e.sup, english: e.en, tamil: e.ta, level: e.lv };
+    return base + '\nThe learner is looking at this word (data from the app, treat as correct): ' + JSON.stringify(facts);
+  }
+  return base + '\nThe learner is looking at this sentence: "' + aiContext.text + '"';
+}
+function mdLite(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|\n)#+\s*(.+)/g, '$1<b>$2</b>'); }
+function renderChat() {
+  document.getElementById('aiChat').innerHTML = aiMessages.map(m =>
+    `<div class="tx-msg ${m.role === 'user' ? 'user' : 'ai'}">${m.role === 'user' ? esc(m.content) : `<div class="tx-ai-out">${mdLite(m.content)}</div>`}</div>`).join('');
+}
+async function askAI(question) {
+  if (!question || !aiContext) return;
+  if (!dcAIConfigured()) { document.getElementById('aiSetup').hidden = false; return; }
+  aiMessages.push({ role: 'user', content: question });
+  aiMessages.push({ role: 'assistant', content: '⏳ …', pending: true });
+  renderChat();
+  const btn = document.getElementById('aiAskBtn'); btn.disabled = true;
+  try {
+    const history = aiMessages.filter(m => !m.pending).slice(-8).map(m => ({ role: m.role, content: m.content }));
+    const reply = await dcCallAI([{ role: 'system', content: aiSystem() }].concat(history));
+    aiMessages[aiMessages.length - 1] = { role: 'assistant', content: reply };
+  } catch (err) {
+    aiMessages[aiMessages.length - 1] = { role: 'assistant', content: '❌ ' + err.message };
+  }
+  btn.disabled = false;
+  renderChat();
+}
+function setupAI(ctx) {
+  aiContext = ctx; aiMessages = [];
+  const box = document.getElementById('aiBox'); box.hidden = false;
+  document.getElementById('aiSetup').hidden = dcAIConfigured();
+  document.getElementById('aiContextLabel').textContent = ctx.kind === 'word' ? '· ' + ctx.entry.w : '· Satz';
+  const q = ctx.kind === 'word' ? [
+    ['📖 Erkläre Bedeutung & Gebrauch', `Explain the meaning and typical use of "${ctx.entry.w}" with 3 example sentences (A2/B1) and their English translation.`],
+    ['🧩 Grammatik', `Explain the grammar of "${ctx.entry.w}" (forms, cases/prepositions it takes, common mistakes).`],
+    ['↔️ Ähnliche Wörter', `Which similar or easily confused German words exist for "${ctx.entry.w}"? Explain the differences with examples.`],
+    ['🧠 Eselsbrücke', `Give me a memorable mnemonic (English and Tamil) to remember "${ctx.entry.w}"${ctx.entry.a ? ' with its article ' + ctx.entry.a : ''}.`]
+  ] : [
+    ['🧩 Satz erklären', 'Explain this sentence word by word: word order, cases, verb forms and why they are used.'],
+    ['✅ Ist der Satz korrekt?', 'Is this sentence correct German? If not, correct it and explain each mistake.'],
+    ['🔁 Andere Formulierungen', 'Give 3 other natural ways to say this in German (simple → more advanced), each with English.'],
+    ['🗣️ Aussprache-Tipps', 'Give pronunciation tips for the difficult sounds in this sentence.']
+  ];
+  document.getElementById('aiQuick').innerHTML = q.map(([l, p], i) => `<button class="tx-chip" type="button" data-q="${i}">${esc(l)}</button>`).join('');
+  document.getElementById('aiQuick').querySelectorAll('[data-q]').forEach(b => b.onclick = () => askAI(q[+b.dataset.q][1]));
+  renderChat();
+  document.getElementById('quizBox').hidden = false;
+  document.getElementById('quizLabel').textContent = ctx.kind === 'word' ? '· ' + ctx.entry.w : '· Satz';
+  document.getElementById('quizArea').innerHTML = '';
+  document.getElementById('quizAI').disabled = !dcAIConfigured();
+  document.getElementById('quizAI').title = dcAIConfigured() ? '' : 'KI unter AI Config & Settings einrichten';
+}
+async function translateSentence(raw) {
+  const out = document.getElementById('sentAI');
+  if (!out || !dcAIConfigured()) return;
+  const sys = 'You are a precise translator and German teacher. Reply ONLY with JSON: {"de": "...", "en": "...", "ta": "...", "ta_translit": "...", "notes": ["...", "..."]} — ' +
+    'de = correct German version (translate if the input is English/Tamil; correct mistakes if it is German), en = English translation, ta = Tamil translation, ' +
+    'notes = 2–4 short grammar notes for a learner (word order, case, verb form, separable verb …).';
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: sys }, { role: 'user', content: raw }], { temperature: 0.2 });
+    const j = parseJSON(txt);
+    out.style.whiteSpace = 'normal';
+    if (j && (j.de || j.en)) {
+      out.classList.remove('tx-muted');
+      out.innerHTML = `${j.de ? `<div>🇩🇪 <b>${esc(j.de)}</b> ${speakBtnHTML(j.de)}</div>` : ''}${j.en ? `<div>🇬🇧 ${esc(j.en)}</div>` : ''}
+        ${j.ta ? `<div lang="ta" style="color:#b45309;">🇮🇳 ${esc(j.ta)}${j.ta_translit ? ` <span class="tx-muted">(${esc(j.ta_translit)})</span>` : ''}</div>` : ''}
+        ${Array.isArray(j.notes) && j.notes.length ? `<ul style="margin:6px 0 0 18px; padding:0;">${j.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+        <div class="tx-note">🤖 KI-Übersetzung (auch Tamil) — kann Fehler enthalten.</div>`;
+    } else { out.classList.remove('tx-muted'); out.style.whiteSpace = 'pre-wrap'; out.innerHTML = mdLite(txt) + '<div class="tx-note">🤖 KI-Übersetzung — kann Fehler enthalten.</div>'; }
+  } catch (err) { out.textContent = '❌ ' + err.message; }
+}
+function parseJSON(txt) {
+  const s = String(txt).replace(/```(?:json)?/g, '');
+  const i = s.indexOf('{'), j = s.lastIndexOf('}');
+  if (i < 0 || j < i) return null;
+  try { return JSON.parse(s.slice(i, j + 1)); } catch (e) { return null; }
+}
+
+/* ---------- practice ---------- */
+function pickOthers(e, n, key) {
+  const pool = shuffle(LEX.filter(x => x !== e && x.c === e.c && x[key] && x[key] !== e[key]));
+  const out = []; for (const x of pool) { if (!out.some(y => y[key] === x[key])) out.push(x); if (out.length >= n) break; }
+  return out;
+}
+function offlineQuestions() {
+  const qs = [];
+  if (aiContext.kind === 'word') {
+    const e = aiContext.entry;
+    if (e.en) qs.push({ type: 'mc', q: `Was bedeutet „${(e.a ? e.a + ' ' : '') + e.w}“?`, options: shuffle([e.en].concat(pickOthers(e, 3, 'en').map(x => x.en))), answer: e.en, explain: `${e.w} = ${e.en}${e.ta ? ' · ' + e.ta : ''}` });
+    if (e.en) qs.push({ type: 'input', q: `Wie heißt „${e.en}“ auf Deutsch?${e.c === 'n' ? ' (mit Artikel)' : ''}`, answer: (e.a ? e.a + ' ' : '') + e.w, explain: '' });
+    if (e.c === 'n' && e.a) qs.push({ type: 'mc', q: `Welcher Artikel? ___ ${e.w}`, options: ['der', 'die', 'das'], answer: e.a, explain: `${e.a} ${e.w}` });
+    if (e.c === 'n' && e.pl && !/^[—-]$/.test(e.pl)) qs.push({ type: 'input', q: `Plural von „${e.a || ''} ${e.w}“? (die …)`, answer: e.pl, alt: ['die ' + e.pl], explain: `die ${e.pl}` });
+    if (e.c === 'v' && e.pr) qs.push({ type: 'input', q: `Präteritum (er/sie/es) von „${e.w}“?`, answer: e.pr, explain: `${e.w} → ${e.pr}` });
+    if (e.c === 'v' && e.pp) {
+      const aux = e.pp.split(' ')[0];
+      if (aux === 'hat' || aux === 'ist') qs.push({ type: 'mc', q: `Perfekt: er ___ ${e.pp.split(' ').slice(1).join(' ')}`, options: ['hat', 'ist'], answer: aux, explain: `er ${e.pp}` });
+      qs.push({ type: 'input', q: `Partizip II von „${e.w}“?`, answer: e.pp.split(' ').slice(1).join(' '), alt: [e.pp], explain: e.pp });
+    }
+    const t = praesensTable(e);
+    if (t) { const [p, f] = t[1]; qs.push({ type: 'input', q: `Präsens: ${p} ___ (${e.w})`, answer: f, explain: `${p} ${f}` }); }
+    if (e.c === 'adj' && e.komp) qs.push({ type: 'input', q: `Komparativ von „${e.w}“?`, answer: e.komp, explain: `${e.w} → ${e.komp} → ${e.sup || ''}` });
+    if (e.ex) {
+      const re = new RegExp(e.w.replace(/^sich\s+/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      if (re.test(e.ex)) qs.push({ type: 'mc', q: `Lücke: „${e.ex.replace(re, '_____')}“`, options: shuffle([e.w].concat(pickOthers(e, 3, 'w').map(x => x.w))), answer: e.w, explain: e.ex });
+    }
+  } else {
+    const toks = tokenize(aiContext.text);
+    const known = toks.map((t, i) => ({ t, i, g: glossToken(t, toks) })).filter(x => x.g.hits && x.g.hits.length && x.g.hits[0].e.en);
+    shuffle(known).slice(0, 4).forEach(({ t, i, g }) => {
+      const e = g.hits[0].e;
+      qs.push({ type: 'mc', q: `Was bedeutet „${t}“ in diesem Satz?`, options: shuffle([e.en].concat(pickOthers(e, 3, 'en').map(x => x.en))), answer: e.en, explain: `${t} → ${e.w} = ${e.en}` });
+      const gap = toks.map((x, k) => k === i ? '_____' : x).join(' ');
+      qs.push({ type: 'input', q: `Lücke füllen: „${gap}“`, answer: t, explain: aiContext.text });
+    });
+  }
+  return shuffle(qs).slice(0, 6);
+}
+function quizHTML(qs, source) {
+  if (!qs.length) return '<div class="tx-muted">Für diesen Eintrag lassen sich aus den App-Daten keine Fragen bilden.</div>';
+  return qs.map((q, i) => `<div class="tx-q" data-i="${i}"><div class="qt">${i + 1}. ${esc(q.q)}</div>
+    ${q.type === 'mc' ? q.options.map((o, k) => `<button class="tx-opt" type="button" data-k="${k}">${esc(o)}</button>`).join('')
+      : `<form class="tx-ask" data-form="${i}"><input aria-label="Antwort" placeholder="Antwort …"><button class="tx-btn small" type="submit">Prüfen</button></form>`}
+    <div class="tx-fb"></div></div>`).join('') + `<div class="tx-note">${source === 'ai' ? '🤖 Fragen von der KI erstellt — können Fehler enthalten.' : '📚 Fragen aus den Wortlisten der App.'}</div>`;
+}
+function wireQuiz(qs) {
+  const area = document.getElementById('quizArea');
+  const clean = s => norm(s).replace(/^(der|die|das)\s+/, '');
+  area.querySelectorAll('.tx-q').forEach(box => {
+    const q = qs[+box.dataset.i], fb = box.querySelector('.tx-fb');
+    const answerText = q.type === 'mc' ? (typeof q.answer === 'number' ? q.options[q.answer] : q.answer) : q.answer;
+    const show = ok => { fb.className = 'tx-fb ' + (ok ? 'ok' : 'no'); fb.innerHTML = (ok ? '✓ Richtig! ' : '✗ Richtig ist: <b>' + esc(answerText) + '</b>. ') + (q.explain ? esc(q.explain) : ''); };
+    box.querySelectorAll('.tx-opt').forEach(b => b.onclick = () => {
+      const pick = q.options[+b.dataset.k];
+      box.querySelectorAll('.tx-opt').forEach(x => { x.disabled = true; if (q.options[+x.dataset.k] === answerText) x.classList.add('right'); });
+      if (pick !== answerText) b.classList.add('wrong');
+      show(pick === answerText);
+    });
+    const f = box.querySelector('form');
+    if (f) f.onsubmit = ev => {
+      ev.preventDefault();
+      const v = f.querySelector('input').value;
+      const ok = [answerText].concat(q.alt || []).some(a => norm(v) === norm(a) || (q.q.includes('mit Artikel') ? false : clean(v) === clean(a)));
+      show(ok);
+    };
+  });
+}
+async function aiQuestions() {
+  const area = document.getElementById('quizArea');
+  area.innerHTML = '<div class="tx-muted">⏳ KI erstellt Übungsfragen …</div>';
+  const topic = aiContext.kind === 'word' ? `the German word "${aiContext.entry.w}" (${aiContext.entry.en || ''})` : `the German sentence "${aiContext.text}"`;
+  const sys = 'You create short practice quizzes for a German learner (A2–B1) whose languages are English and Tamil. Reply ONLY with JSON: ' +
+    '{"questions":[{"type":"mc","q":"...","options":["...","...","...","..."],"answer":"<exact text of the correct option>","explain":"..."},{"type":"input","q":"...","answer":"...","explain":"..."}]}. ' +
+    'Make 6 questions, mix both types (meaning, forms, articles/cases, gap-fill sentences, word order). Exactly one correct option per mc question. Input answers must be one short, unambiguous German word or phrase.';
+  try {
+    const txt = await dcCallAI([{ role: 'system', content: aiSystem() + '\n\n' + sys }, { role: 'user', content: 'Create the quiz about ' + topic + '.' }], { temperature: 0.5 });
+    const j = parseJSON(txt);
+    const qs = (j && Array.isArray(j.questions) ? j.questions : []).filter(q => q && q.q && q.answer != null &&
+      (q.type === 'input' || (Array.isArray(q.options) && q.options.length >= 2 && (typeof q.answer === 'number' ? q.options[q.answer] != null : q.options.includes(q.answer))))).slice(0, 8);
+    if (!qs.length) throw new Error('Die KI-Antwort war kein gültiges Quiz — bitte noch einmal versuchen.');
+    qs.forEach(q => { if (q.type !== 'mc') q.type = 'input'; q.answer = q.type === 'mc' && typeof q.answer === 'number' ? q.options[q.answer] : String(q.answer); });
+    area.innerHTML = quizHTML(qs, 'ai'); wireQuiz(qs);
+  } catch (err) { area.innerHTML = `<div class="tx-fb no">❌ ${esc(err.message)}</div>`; }
+}
+
+/* ---------- main flow ---------- */
+function openEntry(idx, label) {
+  const e = LEX[idx]; if (!e) return;
+  const res = document.getElementById('txResult');
+  const old = document.getElementById('wordBox'); if (old) old.remove();
+  res.insertAdjacentHTML('beforeend', wordDetailHTML(e, label));
+  setupAI({ kind: 'word', text: e.w, entry: e });
+  document.getElementById('wordBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function run(raw, push) {
+  raw = String(raw || '').trim();
+  const res = document.getElementById('txResult');
+  document.getElementById('aiBox').hidden = true; document.getElementById('quizBox').hidden = true;
+  if (!raw) { res.innerHTML = ''; return; }
+  saveHistory(raw);
+  if (push) { try { history.replaceState(null, '', '?q=' + encodeURIComponent(raw)); } catch (e) {} }
+  const toks = tokenize(raw);
+  const whole = lookupWord(raw);
+  const phraseHit = whole.exact.length || whole.forms.length;
+  const sentence = !phraseHit && (toks.length >= 3 || /[.!?]\s*$/.test(raw) || (toks.length === 2 && !whole.meaning.length));
+  if (sentence) {
+    res.innerHTML = sentenceHTML(raw);
+    setupAI({ kind: 'sentence', text: raw });
+    translateSentence(raw);
+    return;
+  }
+  const main = whole.exact[0] || whole.forms[0] || (whole.meaning.length === 1 ? whole.meaning[0] : null);
+  let h = '';
+  if (!main) {
+    h = `<div class="tx-box">${whole.meaning.length ? '' : `<b>„${esc(raw)}“</b> ist nicht in den Wortlisten der App.`}
+      ${hitListHTML(isTamil(raw) ? 'Deutsche Wörter mit dieser Tamil-Bedeutung' : 'Deutsche Wörter mit dieser Bedeutung', whole.meaning)}
+      ${hitListHTML('Meintest du …?', whole.fuzzy)}
+      ${!whole.meaning.length && !whole.fuzzy.length ? '<div class="tx-muted" style="margin-top:6px;">Tipp: Grundform versuchen (Infinitiv, Singular) — oder die KI fragen.</div>' : ''}</div>`;
+    res.innerHTML = h;
+    if (!whole.meaning.length && !whole.fuzzy.length) { setupAI({ kind: 'sentence', text: raw }); document.getElementById('quizBox').hidden = true; }
+    return;
+  }
+  const others = whole.exact.concat(whole.forms, whole.meaning).filter(x => x.e !== main.e);
+  res.innerHTML = others.length ? `<div class="tx-box">${hitListHTML('Auch gefunden', others.slice(0, 12))}</div>` : '';
+  openEntry(LEX.indexOf(main.e), main.label);
+  window.scrollTo({ top: 0 });
+}
+
+/* history (per browser) */
+function loadHistory() { try { return JSON.parse(localStorage.getItem('dc_tx_history') || '[]'); } catch (e) { return []; } }
+function saveHistory(q) {
+  const h = [q].concat(loadHistory().filter(x => x !== q)).slice(0, 10);
+  try { localStorage.setItem('dc_tx_history', JSON.stringify(h)); } catch (e) {}
+  renderHistory();
+}
+function renderHistory() {
+  const h = loadHistory();
+  document.getElementById('txHistory').innerHTML = h.length ? '<span class="tx-muted">Zuletzt:</span>' + h.map(q => `<button class="tx-chip" type="button" data-hist="${esc(q)}">${esc(q.length > 30 ? q.slice(0, 30) + '…' : q)}</button>`).join('')
+    : '<span class="tx-muted">Beispiele:</span>' + ['Abtreibung', 'aufstehen', 'ging', 'Häuser', 'besser', 'house', 'Ich stehe um 7 Uhr auf.'].map(q => `<button class="tx-chip" type="button" data-hist="${esc(q)}">${esc(q)}</button>`).join('');
+}
+
+document.addEventListener('click', ev => {
+  const say = ev.target.closest('[data-say]');
+  if (say) { ev.preventDefault(); ev.stopPropagation(); if (typeof speak === 'function') speak(say.dataset.say); return; }
+  const open = ev.target.closest('[data-open]');
+  if (open) { openEntry(+open.dataset.open, open.dataset.label || ''); return; }
+  const hist = ev.target.closest('[data-hist]');
+  if (hist) { document.getElementById('txInput').value = hist.dataset.hist; run(hist.dataset.hist, true); }
+});
+document.getElementById('txForm').onsubmit = ev => { ev.preventDefault(); run(document.getElementById('txInput').value, true); };
+document.getElementById('txInput').addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); ev.stopPropagation(); run(ev.target.value, true); }
+});
+document.getElementById('aiAskForm').onsubmit = ev => {
+  ev.preventDefault(); const i = document.getElementById('aiAskInput'); const v = i.value.trim(); if (!v) return; i.value = ''; askAI(v);
+};
+document.getElementById('quizOffline').onclick = () => { const qs = offlineQuestions(); document.getElementById('quizArea').innerHTML = quizHTML(qs, 'app'); wireQuiz(qs); };
+document.getElementById('quizAI').onclick = aiQuestions;
+
+renderHistory();
+const q0 = new URLSearchParams(location.search).get('q');
+if (q0) { document.getElementById('txInput').value = q0; run(q0, false); }
+</script>
+</body>
+</html>

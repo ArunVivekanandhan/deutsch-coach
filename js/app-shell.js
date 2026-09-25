@@ -127,6 +127,7 @@ function renderAppShell() {
                     <a href="index.html#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon" aria-hidden="true"></i> Prüfung</a>
                     <a href="index.html#coach" class="nav-link"><i data-lucide="bot" class="nav-icon" aria-hidden="true"></i> AI Coach</a>
                     <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i> Tools</a>
+                    <a href="Uebersetzer.html" class="nav-link"><i data-lucide="languages" class="nav-icon" aria-hidden="true"></i> Übersetzer</a>
                     <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon" aria-hidden="true"></i> AI Config & Settings</a>
                 </div>
                 <div class="nav-group" aria-labelledby="level-nav-title">
@@ -590,6 +591,46 @@ function checkAIStatus() {
     }
 }
 document.addEventListener('DOMContentLoaded', checkAIStatus);
+
+// Chat-style AI call for every provider the Einstellungen page offers (deepseek, openai, groq, gemini,
+// openrouter, ollama). messages = [{role:'system'|'user'|'assistant', content}]. Resolves with the reply
+// text; rejects with an Error (no key, HTTP error, network) so callers can show it.
+function dcAIConfigured() {
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
+    return provider === 'ollama' || !!localStorage.getItem('de_ai_key_' + provider);
+}
+async function dcCallAI(messages, opts) {
+    opts = opts || {};
+    const provider = localStorage.getItem('de_ai_provider') || 'groq';
+    const key = localStorage.getItem('de_ai_key_' + provider) || '';
+    if (provider !== 'ollama' && !key) throw new Error('Kein KI-Schlüssel eingerichtet (AI Config & Settings).');
+    const ENDPOINTS = {
+        deepseek: 'https://api.deepseek.com/chat/completions',
+        openai: 'https://api.openai.com/v1/chat/completions',
+        groq: 'https://api.groq.com/openai/v1/chat/completions',
+        gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+        openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+        ollama: localStorage.getItem('de_ai_endpoint_ollama') || 'http://localhost:11434/v1/chat/completions'
+    };
+    const MODELS = { deepseek: 'deepseek-chat', openai: 'gpt-4o-mini', groq: 'llama-3.1-8b-instant',
+        gemini: 'gemini-2.0-flash', openrouter: 'openrouter/auto', ollama: 'llama3' };
+    const endpoint = ENDPOINTS[provider] || ENDPOINTS.groq;
+    const model = localStorage.getItem('de_ai_model_' + provider) || MODELS[provider] || MODELS.groq;
+    const headers = { 'Content-Type': 'application/json' };
+    if (provider !== 'ollama' && key) headers['Authorization'] = 'Bearer ' + key;
+    const res = await fetch(endpoint, { method: 'POST', headers,
+        body: JSON.stringify({ model, messages, temperature: opts.temperature != null ? opts.temperature : 0.4 }) });
+    if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw new Error('KI-Fehler (' + res.status + '): ' + txt.substring(0, 160));
+    }
+    const data = await res.json();
+    const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (!text) throw new Error('Leere KI-Antwort.');
+    return text;
+}
+window.dcAIConfigured = dcAIConfigured;
+window.dcCallAI = dcCallAI;
 
 // Shared AI call helper (same provider/key convention as checkAIStatus above -
 // de_ai_provider + de_ai_key_<provider>, configured on Einstellungen_Setup.html).
