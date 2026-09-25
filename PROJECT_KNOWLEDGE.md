@@ -764,6 +764,21 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 37) — Excel read-aloud follows the column order
+
+#### Task
+User: "If enable audio for verb or noun, need to be based on the order audio speak. Example Verb → order is english, verb and past tense then audio also en, verb and past tense".
+
+#### What changed (`Deutsch_Wortschatz_Excel_Sheet.html`)
+- New read-aloud mode **📑 Wie die Spalten (Reihenfolge & Auswahl)**, now the default (saved settings with the old default "Infinitiv · Präteritum · Perfekt" switch to it once; the other modes still exist). Each row is read **left to right in the visible column order** chosen in 🧩 Spalten & Reihenfolge — English with an English voice, German with the chosen German voice, hidden columns are not read. Example: English · Deutsches Wort · Präteritum → "to go" · "gehen" · "ging".
+- Spoken columns: English, Deutsches Wort, Nomen (nouns: the plural, the singular is the word; verbs: the related noun), Präteritum, Perfekt, Präsens ("er geht"), Adjektiv forms (comparative, superlative), Verb (for nouns; skipped on verb rows where it repeats the word), Tamil only if the device has a Tamil voice. Tags, tips, level, frequency etc. are skipped. Text in brackets is not read.
+- "+ Englisch" is greyed out in this mode (English is read where its column stands). If no readable column is visible, a message says so instead of silently stepping through the rows. The 🔥 Häufigste Verben hören button uses the preset English · Wort · Präteritum · Perfekt, so it is read in that order.
+
+#### Testing
+Speech spy: 6 column orders (verb, separable verb, noun, adjective, no readable column) read in exactly the column order with the right languages; reorder with ▲ taps at phone width → table and audio follow, and persist after reload; "read all" continues row after row; `build.py` passes.
+
+---
+
 ### 2026-09-25 (Task 36) — Verb flashcards: prefix row, real verb family, correct generated sentences
 
 #### Task
