@@ -48,18 +48,12 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   Wortaufbau renderer), `js/word-parts.js` (GENERATED syllables + word parts for every word — Task 31). This directly supersedes the old "no shared code, everything
   copy-pasted" claim in the original Section 25 below (kept below for historical context but no
   longer accurate as a blanket statement).
-- **The vocabulary/grammar/practice content is still NOT unified.** Content still lives in
-  page-specific inline JSON arrays (`VERBS`, `NOUNS`, `ADJS`, `LEGACY_DATA` — see Section 7), each
-  page's own copy, not one canonical source. A `data/*.json` + `scripts/sync_data.py` consolidation
-  was started (by another session) but nothing reads from `data/*.json` yet — it's a stale, disconnected
-  snapshot (503/378/337 words vs. `VERBS`/`NOUNS` now at 581/522 live entries after B2 additions — see
-  Section 28). Do not treat `data/*.json` as authoritative; treat the individual HTML pages' inline
-  arrays as the actual live data until that consolidation is finished and verified.
-  **Current state (Task 29):** canonical lists are `VERBS` in `Verb_Transformation_Trainer.html` (721),
-  `NOUNS` in `Nomen_Trainer.html` (1,089), `ADJS` in `Adjektiv_Adverb_Trainer.html` (671). Copies:
-  VERBS → Excel sheet, Master Grid, Verben Hören, `ALL_VERBS` (Continuous_Verb_Speaker), `VERBS_ALL`
-  (Thema_Sprech_Trainer); NOUNS/ADJS → Excel sheet, Master Grid; home flashcards cover every word via
-  their lessons + `SYNCED_WORDS`. **After changing words: update the canonical list and every copy, run
+- **Word lists are unified (Task 38); grammar/practice content is not.**
+  **Since Task 38 the word lists have ONE source: `js/word-data.js`** (`DC_WORDS.VERBS` 719, `DC_WORDS.NOUNS`
+  1,089, `DC_WORDS.ADJS` 671). The pages that used to carry copies (Verb/Nomen/Adjektiv trainers, Excel sheet,
+  Master Grid, Verben Hören, Continuous Speaker, Thema-Sprech-Trainer) load it and alias it
+  (`const VERBS = DC_WORDS.VERBS;`). The old `data/*.json` snapshot and `sync_data.py` were moved to `archive/`.
+  Home flashcards cover every word via their lessons + `SYNCED_WORDS`. **After changing words: edit `js/word-data.js`, run
   `python3 scripts/build_freq_ranks.py`, `python3 scripts/fill_home_forms.py` and `python3 scripts/build_word_parts.py`
   (needs `pip install pyphen`, node, apt access for the Ding package) and `python3 scripts/build_lexicon.py`, then `python3 scripts/build.py`** — the build runs
   `scripts/check_vocab_sync.py`, `fill_home_forms.py --check`, `build_word_parts.py --check`, `fix_tamil.py --check`,
@@ -74,7 +68,7 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
 - **Repository hygiene**: `/archive` holds ~70 one-off scripts and dead file duplicates moved out of
   the production surface this session (see `archive/README.md` for what and why — none were deleted).
   `/scripts` holds the two still-useful maintenance tools (`build.py` regenerates `sw.js`'s cache list
-  and runs a basic smoke test; `sync_data.py` is the unfinished data-consolidation tool).
+  and runs a basic smoke test; the old `sync_data.py` is archived — `js/word-data.js` is the single word source).
 - **A real, if partial, UX/IA transformation is in progress** (this session, per an explicit product
   brief) — see the changelog entry in Section 28 for exactly what was and wasn't completed. The
   honest summary: bug fixes, progress unification, and an accessibility/mobile pass are done and
@@ -501,7 +495,7 @@ script) anywhere in the repository.
 ## 18. Known Bugs (rewritten — the "none open" claim was false; real bugs found by actually testing)
 
 **Open, discovered this session, not yet fixed:**
-- **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
+- **RESOLVED (Task 35):** `js/app-shell.js` now sets every theme marker (`.dark`, `.dark-theme`, `data-theme`) and follows page toggles. (Original report:) **Page-local dark-theme class never set by the real toggle.** `A1_Sprech_Pruefungs_Simulator.html`
   has its own `applyTheme()` that sets `document.body.classList.add('dark')`, and (not independently
   re-verified, but built from the same template) `Sprech_Pruefungs_Simulator.html` likely has the same
   pattern. `css/design-system.css` never reads a `.dark` class — the real, shared theme button
@@ -513,7 +507,7 @@ script) anywhere in the repository.
   page-local theme-init code — the same fix (add `body[data-theme="dark"]` to whatever selector gates
   each page's dark CSS variables, then delete the dead local toggle/init functions) would apply to
   these two files but was not done, since they weren't otherwise touched this session.
-- `js/app-shell.js` orphaned CSS: ~13 pages still carry unused `.suite-hub`/`.hub-links`/`.hub-banner`
+- **RESOLVED (Task 38):** 186 unused old-menu rules (`hub-*` / `suite-*`) removed from 16 pages, verified by before/after screenshots. (Original report:) `js/app-shell.js` orphaned CSS: ~13 pages still carry unused `.suite-hub`/`.hub-links`/`.hub-banner`
   CSS rules in their `<style>` blocks even though the actual HTML elements were already removed by an
   earlier pass. Cosmetic dead weight, not a functional bug — deliberately left alone this session to
   avoid the regression risk of touching 13 files' CSS without visually verifying each one.
@@ -711,7 +705,7 @@ the larger IA/content-unification work. In priority order for whoever picks this
   `Brief_Schreiben_Trainer.html`, `Dialog_Schatten_Trainer.html`, the audio players, and the AI coach
   pages into one Practice section (speaking/listening/writing/dialogues/exam-prep/AI-assisted), with
   AI positioned as part of practice rather than a standalone "AI Coach" nav item.
-- Finish (or abandon and remove) the `data/*.json` + `scripts/sync_data.py` consolidation — it's
+- DONE (Task 38): word lists consolidated into `js/word-data.js`; `data/*.json` + `sync_data.py` archived. (Old note:) Finish (or abandon and remove) the `data/*.json` + `scripts/sync_data.py` consolidation — it's
   currently a stale, disconnected snapshot (see Section 2) that risks misleading whoever finds it next
   if left as-is.
 - Build a B2 practice/exam-prep studio on top of the B2 vocabulary + grammar added in Section 28's
@@ -763,6 +757,41 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 38) — Everything from the open list: shared word data, Tamil for every word, example sentences, speaking practice, CI
+
+#### Task
+User: "What is pending and what is need to enhance" → "Implement everything if need create agent". Data drafting (Tamil, example sentences) was done by 6 parallel agents (3 hit a usage limit and were re-run), merged and checked here; all code changes were made here.
+
+#### What changed
+**Data**
+- **One source for the word lists: `js/word-data.js`** (`DC_WORDS.VERBS` 719 / `NOUNS` 1,089 / `ADJS` 671). The 8 pages that carried copies load it (`const VERBS = DC_WORDS.VERBS;`; Excel/Master Grid add `comp` from `komp`). Scripts read/write it (`load()`/`array_spans()` also match `DC_WORDS.NAME = [`, `data_files()`, `dump_entries()` keeps one entry per line). `check_vocab_sync.py` now fails if a page defines its own non-empty VERBS/NOUNS/ADJS again or reads DC_WORDS without loading the file. Stale `data/*.json` + `sync_data.py` (503-verb snapshot that would overwrite newer data) → `archive/`.
+- Removed the non-words *befotografieren* / *verfotografieren* (list, home cards, curated sister lists); *backen* Präteritum **backte**; *joggen* **ist gejoggt**, "to jog".
+- **Tamil for every word**: the 1,148 missing meanings (157 verbs, 566 nouns, 425 adjectives) were drafted by AI agents with rules and style examples from the existing data, checked for completeness/alignment/no Latin script, and spot-checked (45 random entries, all correct). Stored with `ta_src: "ai"` (`"ai?"` = the translator marked it uncertain, 68 entries) + generated `ta_translit`. **Labelled 🤖** (`dcTaMark()` in `js/app-shell.js`, tooltip "KI-Übersetzung") on the trainers, Verben hören, Continuous Speaker, Excel, Master Grid, home flashcards (`DC_TAMIL_AI` in `js/tamil-meanings.js`) and the Übersetzer (`tai` in `js/lexicon.js`). Home cards with Tamil: 1,465 → 2,614.
+- **Example sentence for every verb** (707 without a curated one): German + English + Tamil, drafted by agents, checked by script that the verb (any form, separable split, reflexive) is in the sentence, and spot-checked (30 random, all grammatical). Fields `ex`, `ex_en`, `ex_ta`, `ex_src: "ai"`, labelled "🤖 KI-Beispiel". Shown in the Verb flashcard answer + memory system (with 🔊), the new Excel column "🗣️ Beispielsatz" (read aloud in column mode) and the Übersetzer.
+
+**Verb flashcards**
+- Memory system explains every verb built from parts via js/word-parts.js ("ver- (change; wrongly; away) + stehen (to stand) → verstehen") instead of vague prefix metaphors; simple verbs show their syllables instead of "stre… → German Action Sound"; situations use real sentences.
+- Stem diagram keeps separable prefixes (greyed): anerkenn(en) → erkannte … an (was "erkenn → erkannte").
+
+**New features**
+- Übersetzer: **🎙️ Nachsprechen** (speech recognition de-DE; every word marked right/wrong, score %, numbers compared as words) for the word, its example and sentences; **⭐ Satz speichern** → "Meine Sätze" list (with AI translation if available, 🔊/🎙️/🗑); **➕ In meine Wiederholungen** → `dc_review_requests`, which the home page turns into "due today" cards on its next load (and says so in the coach line).
+- 🌐 link to the Übersetzer from the Verb/Nomen/Adjektiv answer boxes, every Excel word and every Master Grid card (`dcTranslatorLink()`).
+- Excel column chooser: drag the ⠿ handle with a finger (pointer events; HTML5 drag doesn't work on touch).
+
+**Housekeeping**
+- 186 unused old-menu CSS rules (`hub-*`/`suite-*` never used outside `<style>`) removed from 16 pages; 48 before/after screenshots (desktop light/dark, phone) — 42 pixel-identical, 6 differ only by the animated avatar's eyes / sub-pixel text rendering.
+- Section 18 / 26 / overview notes updated (resolved items marked, word-data workflow).
+- **CI**: `.github/workflows/checks.yml` (ubuntu-24.04) runs `scripts/build.py` (all data checks) and the new `scripts/smoke_pages.py` (every page over http in headless Chromium, fails on any JavaScript error or if a word page gets an empty list).
+
+#### Not done / limits
+- The Übersetzer's AI features still need one test with a real AI key (only a simulated provider was available here).
+- Levels marked "≈" remain frequency estimates — there is no official list in the repo to replace them with.
+
+#### Testing
+`build.py` (8 checks) + `smoke_pages.py` (27 pages, 0 errors); contrast audit (all pages × 4 theme scenarios) clean; suites: prefix, parts, tips, B1, audio, Excel column reading, Übersetzer (13 queries), new Tamil-label/example suite, new speaking/saved/review/link suite (fake speech recognition), touch drag via real touch events.
+
+---
 
 ### 2026-09-25 (Task 37) — Excel read-aloud follows the column order
 
@@ -1077,7 +1106,7 @@ User: "We have excel. Need option for which are field to me display and where ar
 #### Correction to my own earlier work (Task 24 Phase 4 / Task 26)
 Phase 4 gave all 496 new nouns `topic: "gesellschaft"` and Task 26 gave the 70 rescued nouns `topic: "alltag"`, justified as "topic is unused". That was true for `Nomen_Trainer.html`, but **this Excel page displays `topic` as "Thema"** — so a duck (`Ente`) and a cup (`Tasse`) were labelled "Gesellschaft", and a Thema filter would have made that worse. Checked which pages read the nouns' `topic` (only this one), then cleared those 566 placeholder values to `""` in all three `NOUNS` copies (`Nomen_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`). They now show "—" / "Ohne Thema" instead of a wrong category. Real categorisation of those 566 nouns is still open.
 
-#### Known issue, flagged not fixed
+#### Known issue, flagged not fixed (RESOLVED in a later task: nouns/adjectives now show "—" for verb-only fields)
 For nouns and adjectives the row builder **generates verb-style fields from the word stem** — e.g. Präteritum "achtte"/Perfekt "hat geacht" for the number *acht*, "achthaft, achtlos, achtreich" as its adjective forms, and similar fake Präsens/Verb/Sister-Verb values. These are not real German. Pre-existing and out of scope for this task, but now that users choose which fields to see it matters more; the "Nomen lernen"/"Adjektive" presets avoid those columns.
 
 #### Testing
@@ -2179,7 +2208,7 @@ Modeled all 7 sheets from `German_A2_Practice_Template.xlsx` directly into modul
 - Verified Web Speech API integration for speech output.
 
 #### Remaining Issues
-- Standalone trainers (including the new A2 Practice Studio) are not yet in `sw.js`'s `APP_SHELL` cache list.
+- RESOLVED later: `scripts/build.py` puts every HTML page and shared asset into `sw.js`. (Original:) Standalone trainers (including the new A2 Practice Studio) are not yet in `sw.js`'s `APP_SHELL` cache list.
 
 ---
 

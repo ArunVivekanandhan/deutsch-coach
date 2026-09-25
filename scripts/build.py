@@ -48,7 +48,7 @@ if errors == 0:
 else:
     sys.exit(1)
 
-# 3. Word lists are copied into several pages -- make sure no copy has drifted.
+# 3. Word lists live only in js/word-data.js -- check them and that no page carries its own copy again.
 import subprocess
 sync = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_vocab_sync.py")])
 if sync.returncode != 0:
