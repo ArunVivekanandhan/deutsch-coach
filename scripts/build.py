@@ -11,7 +11,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 # 1. Update sw.js automatically
 html_files = glob.glob("*.html")
-assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
+assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
 urls_to_cache = ["./", "./index.html"] + [f"./{f}" for f in html_files if f != "index.html"] + assets
 
 with open("sw.js", "r", encoding="utf-8", errors="surrogateescape") as f:
@@ -57,4 +57,9 @@ if sync.returncode != 0:
 # 4. Home flashcards must not miss a form (Präteritum/Perfekt, plural, Steigerung) the master lists have.
 forms = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "fill_home_forms.py"), "--check"])
 if forms.returncode != 0:
+    sys.exit(1)
+
+# 5. js/word-parts.js (syllables + word parts for every word) must match the current word lists.
+parts = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_word_parts.py"), "--check"])
+if parts.returncode != 0:
     sys.exit(1)

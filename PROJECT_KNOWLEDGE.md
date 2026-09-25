@@ -44,7 +44,8 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   `js/tamil-dict.js`, `js/tts-engine.js` (shared text-to-speech), `js/progress-aggregator.js` (added
   this session — see Section 14), `js/german-conjugation.js` (Präsens engine + person/auxiliary
   tables, used by Thema_Sprech_Trainer and the Excel sheet — Task 29), `js/memory-tips.js` (memory tips
-  checked against each word's real forms — home flashcards, Verb/Adjektiv trainers, Excel Merkhilfe — Task 30). This directly supersedes the old "no shared code, everything
+  checked against each word's real forms — home flashcards, Verb/Adjektiv trainers, Excel Merkhilfe — Task 30; plus the
+  Wortaufbau renderer), `js/word-parts.js` (GENERATED syllables + word parts for every word — Task 31). This directly supersedes the old "no shared code, everything
   copy-pasted" claim in the original Section 25 below (kept below for historical context but no
   longer accurate as a blanket statement).
 - **The vocabulary/grammar/practice content is still NOT unified.** Content still lives in
@@ -59,8 +60,9 @@ As of this rewrite (branch `feature/production-learning-platform`, off `main`), 
   VERBS → Excel sheet, Master Grid, Verben Hören, `ALL_VERBS` (Continuous_Verb_Speaker), `VERBS_ALL`
   (Thema_Sprech_Trainer); NOUNS/ADJS → Excel sheet, Master Grid; home flashcards cover every word via
   their lessons + `SYNCED_WORDS`. **After changing words: update the canonical list and every copy, run
-  `python3 scripts/build_freq_ranks.py` and `python3 scripts/fill_home_forms.py`, then `python3 scripts/build.py`**
-  — the build runs `scripts/check_vocab_sync.py` and `fill_home_forms.py --check` and fails on any drift.
+  `python3 scripts/build_freq_ranks.py`, `python3 scripts/fill_home_forms.py` and `python3 scripts/build_word_parts.py`
+  (needs `pip install pyphen`, node, apt access for the Ding package), then `python3 scripts/build.py`** — the build runs
+  `scripts/check_vocab_sync.py`, `fill_home_forms.py --check` and `build_word_parts.py --check` and fails on any drift.
   **Levels**: `A1`/`A2`/`B1`/`B1.1`/`B1.2`/`B2` from textbooks, plus frequency estimates for entries with
   no textbook level (`level` A1–C1 with `levelEst: true`; every entry has `freq` = rank in the
   OpenSubtitles-2018 top-50k list, 0 = rarer). Display estimates with "≈"; check a given array's actual
@@ -760,6 +762,35 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-25 (Task 31) — Wortaufbau: syllables + meaningful parts for every word
+
+#### Task
+User: "I need this for all words. Eg: Abtreibung … Ab·trei·bung · Related parts: ab- (away, off), treiben (to drive, to push, to drift), -ung (noun-forming suffix …)".
+
+#### What every word now shows
+A "🧩 Wortaufbau" block: the syllables (*Ab·trei·bung*) and, where the word is built from smaller words, each part with its meaning — prefix (*ab-* away, off, down), root word (*treiben* do, chase; to drive), suffix (*-ung* turns a verb into a noun), linking letters (*Wettbewerb + -s- + fähig + -keit*), related word (*Kauf* ← *kaufen*, *gebraucht* ← *brauchen*). Words that aren't built from parts say "Grundwort" (*Hund*); phrases get syllables only.
+Shown on: home card back (all 2,934 cards), Verb trainer, Nomen trainer, Adjektiv trainer, Excel sheet (new column "🧩 Wortaufbau (Silben + Teile)", searchable, exported, in the Verben/Nomen presets). 2,786 distinct words; 1,380 split into parts.
+
+#### How it's built (no guessing)
+- **Syllables**: `pyphen` with the LibreOffice de_DE hyphenation patterns (standard settings; a consonant left alone by the patterns is merged back, "Ge·brauchs·taug·lich·keit").
+- **Parts**: `MemoryTips.wordParts()` (js/memory-tips.js). A split is made only when the root is a real word: first the app's own ~3,000 words (their learner meaning is used), then a root dictionary from **Ding** (TU Chemnitz, GPL-2+, Debian/Ubuntu package `trans-de-en` 1.9-7) limited to the 50k most frequent German words (`scripts/ding_roots.py`). The suffix must fit the word: *-ung* → a die-noun from a verb, *-er* → a der-noun from a verb (common verbs only), *-heit/-keit* → from an adjective, *-chen* → das, *-in* → plural *-innen*, *-lich/-ig/-bar/-los…* → adjectives. Prefixes on verbs are confirmed by the Präteritum/Partizip where the app has them. Compounds need the last part to have the same article.
+- **Meanings of roots**: the app meaning, plus Ding's main sense when it adds something. Ding senses are chosen by how often a meaning recurs across the word's entries (main senses repeat; "hindern → to embarrass" appears once), rare English words and names last.
+- Guards found by reviewing random samples: closest spelling first (*nötig* = Not + -ig, not Note), exact word/verb stem before "+e" variants (*Sehnsucht* = sehnen + Sucht, not Sehne), verb-stem heads ≥ 4 letters (*Gebrauch* ≠ geb(en) + Rauch), inside compounds a noun stays a noun (*Stadtteil* = Stadt + Teil), an adjective's last part can't be a suffix (*furchtbar* ≠ Furcht + bar 'cash'), and a short list of false etymologies (*Mädchen, Zucker, Bürger, Messer…*).
+- Precomputed by **`scripts/build_word_parts.py`** into **`js/word-parts.js`** (154 KB, generated — do not edit; cached offline via sw.js); `build.py` runs `--check` and fails if the word lists changed without regenerating.
+
+#### Known limits
+Some Ding glosses are still a secondary sense (e.g. *reichen* "to hold out", *werben* "to court"); a split shows the parts' literal meanings, which can differ from the whole word's meaning. Words whose root is neither in the app nor among common Ding words stay "Grundwort".
+
+#### Testing
+New suite (19 checks): every home card / Verb / Nomen / Adjektiv trainer word has Wortaufbau data; exact expected splits for Abtreibung, Krankenhaus, Wettbewerbsfähigkeit, Lehrer, Umweltschutz, nötig, Sehnsucht, aufstehen; Hund/Zucker stay whole; card back shows meanings; phrases without "Grundwort"; Excel column filled for all rows; no page errors. Task 29/30 suites, 26-page sweep, `node --check`, `build.py` all pass.
+
+#### Files Changed
+- `js/memory-tips.js` (Wortaufbau engine + renderer), `js/word-parts.js` (new, generated), `scripts/build_word_parts.py` (new), `scripts/ding_roots.py` (new), `scripts/build.py`, `sw.js`
+- `deutsch-coach.html`, `Verb_Transformation_Trainer.html`, `Nomen_Trainer.html`, `Adjektiv_Adverb_Trainer.html`, `Deutsch_Wortschatz_Excel_Sheet.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
 
 ### 2026-09-25 (Task 30) — Memory tips checked for every word, and a learning path for every level
 

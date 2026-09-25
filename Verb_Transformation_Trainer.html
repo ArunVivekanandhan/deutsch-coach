@@ -473,6 +473,7 @@ html.dark-theme, body.dark {
   <script src="js/app-shell.js"></script>
   <script src="js/german-conjugation.js"></script>
   <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -1271,6 +1272,9 @@ function renderUniversal3StepMemoryHack(v){
           ${prep ? `<div style="margin-top:2px; color:var(--purple);">🎯 <b>Preposition / Case:</b> <b>${prep}</b></div>` : ''}
         </div>
       </div>
+
+      <!-- 4A. Wortaufbau: syllables + meaningful parts (js/word-parts.js) -->
+      ${typeof MemoryTips !== 'undefined' ? MemoryTips.partsHTML('v', v.inf) : ''}
 
       <!-- 4B. Word Breakdown & Linguistic Secret -->
       ${renderLinguisticsHTML(v)}

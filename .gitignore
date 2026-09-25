@@ -3,3 +3,4 @@
 temp_*
 scratch/
 .system_generated/
+__pycache__/

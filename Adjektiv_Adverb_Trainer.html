@@ -376,6 +376,7 @@ html.dark-theme, body.dark {
     <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
   <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -1576,6 +1577,7 @@ add(diff); }
         <button class="actbtn next-bold" id="btnNextAfterReveal" style="flex:1.2; min-width:110px; padding:13px 6px; background:var(--ink); color:#fff; font-weight:700; border:2px solid var(--ink); font-size:13px; border-radius:6px; cursor:pointer;" onclick="advance()">→ NEXT (N)</button>
       </div>
       <div style="margin-top:10px;">
+        ${typeof MemoryTips !== 'undefined' ? MemoryTips.partsHTML(curMode === 'nomen' ? 'n' : 'adj', v.sg || v.w) : ''}
         ${curMode === 'nomen' ? renderNounMemoryHack(v) : renderAdjMemoryHack(v)}
         ${curMode === 'nomen' ? ruleExplanationNoun(v) : ruleExplanationAdj(v)}
       </div>

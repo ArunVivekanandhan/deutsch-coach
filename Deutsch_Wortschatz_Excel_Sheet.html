@@ -371,6 +371,7 @@
     .col-ta { width: 170px; }
     .col-topic { width: 100px; }
     .col-mnemonic { width: 220px; }
+    .col-parts { width: 240px; }
 
     /* Cells */
     .excel-table td {
@@ -608,6 +609,7 @@
   <script src="js/tts-engine.js"></script>
   <script src="js/german-conjugation.js"></script>
   <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
@@ -1134,6 +1136,9 @@ if (document.readyState === 'loading') {
     { key:'adj', label:'Adjektiv (-bar / -end)', exportLabels:['Adjektiv Form'],
       cell:(r)=>`<td class="col-adj">${escHTML(r.adj)}</td>`,
       exportValues:(r)=>[r.adj] },
+    { key:'parts', label:'🧩 Wortaufbau (Silben + Teile)', exportLabels:['Wortaufbau'],
+      cell:(r)=>`<td class="col-parts" style="font-size:11px;" title="${escHTML(r.parts)}">${escHTML(r.parts)}</td>`,
+      exportValues:(r)=>[r.parts] },
     { key:'mnemonic', label:'Merkhilfe & Punarchi', exportLabels:['Merkhilfe'],
       cell:(r)=>`<td class="col-mnemonic" style="font-size:11px; color:var(--ink-muted);" title="${escHTML(r.mnemonic)}">${escHTML(r.mnemonic)}</td>`,
       exportValues:(r)=>[r.mnemonic] },
@@ -1183,8 +1188,8 @@ if (document.readyState === 'loading') {
   const DEFAULT_COL_ORDER = COLUMN_DEFS.map(c => c.key);
   const COLUMN_PRESETS = [
     { name:'Standard',      cols: DEFAULT_COL_ORDER },
-    { name:'Verben lernen', cols: ['en','word','praesens','praet','perfekt','level','ta'] },
-    { name:'Nomen lernen',  cols: ['en','gender','word','noun','level','topic','ta'] },
+    { name:'Verben lernen', cols: ['en','word','parts','praesens','praet','perfekt','level','ta'] },
+    { name:'Nomen lernen',  cols: ['en','gender','word','parts','noun','level','topic','ta'] },
     { name:'Adjektive',     cols: ['en','word','adj','level','ta'] },
     { name:'Kompakt',       cols: ['en','word','pos','level'] },
     { name:'Verben hören',  cols: ['en','word','praet','perfekt','freq','level'] },
@@ -1326,6 +1331,7 @@ if (document.readyState === 'loading') {
         id: 'row_' + (ALL_ROWS.length + 1),
         rowNum: ALL_ROWS.length + 1,
         word: inf,
+        parts: typeof MemoryTips !== 'undefined' ? MemoryTips.partsText('v', inf) : '',
         pos: 'Verb',
         ...levelInfo(v),
         gender: NO_VALUE,
@@ -1359,6 +1365,7 @@ if (document.readyState === 'loading') {
         id: 'row_' + (ALL_ROWS.length + 1),
         rowNum: ALL_ROWS.length + 1,
         word: fullNoun,
+        parts: typeof MemoryTips !== 'undefined' ? MemoryTips.partsText('n', n.sg) : '',
         pos: 'Nomen',
         ...levelInfo(n),
         gender: n.a,
@@ -1392,6 +1399,7 @@ if (document.readyState === 'loading') {
         id: 'row_' + (ALL_ROWS.length + 1),
         rowNum: ALL_ROWS.length + 1,
         word: a.w,
+        parts: typeof MemoryTips !== 'undefined' ? MemoryTips.partsText('adj', a.w) : '',
         pos: 'Adjektiv',
         ...levelInfo(a),
         gender: NO_VALUE,
@@ -1494,7 +1502,7 @@ if (document.readyState === 'loading') {
 
       if (globalSearchTerm) {
         const q = globalSearchTerm.toLowerCase();
-        const full = `${r.word} ${r.noun} ${r.verb} ${r.praet} ${r.perfekt} ${r.adj} ${r.sisters} ${r.en} ${r.ta} ${r.ta_translit} ${r.mnemonic}`.toLowerCase();
+        const full = `${r.parts} ${r.word} ${r.noun} ${r.verb} ${r.praet} ${r.perfekt} ${r.adj} ${r.sisters} ${r.en} ${r.ta} ${r.ta_translit} ${r.mnemonic}`.toLowerCase();
         if (!full.includes(q)) return false;
       }
       return true;

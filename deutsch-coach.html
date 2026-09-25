@@ -966,6 +966,7 @@
   <script src="js/app-shell.js"></script>
   <script src="js/german-conjugation.js"></script>
   <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
 </head>
 <body>
   <!-- Suite Navigation Hub -->
@@ -3089,6 +3090,7 @@ function renderInfoPanel(card){
     <div class="revealbox">
       <div class="de-word ${getGenderClass(card)}" style="font-size:28px; font-weight:bold; margin-bottom:4px;"> <button onclick="playTTS('${card.w}', event)" style="background:none;border:none;cursor:pointer;font-size:20px;vertical-align:middle;margin-left:8px;" title="Speak">🔊</button></div>
       <div class="en-word" style="margin-bottom:12px;">${displayMeaning}</div>
+      ${typeof MemoryTips !== 'undefined' ? MemoryTips.partsHTML(card.cat, card.w) : ''}
       ${card.a ? `<div class="infoline"><b>Artikel:</b> ${card.a}</div>` : ""}
       ${pluralLine}
       ${compLine}

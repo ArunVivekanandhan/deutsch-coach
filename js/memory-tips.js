@@ -27,6 +27,7 @@
   const ART_COLOR = { der: '#1d4ed8', die: '#b91c1c', das: '#15803d' };
 
   let V = new Map(), N = new Map(), A = new Map();       // lower-case key -> entry (+ derived info)
+  let RV = new Map(), RN = new Map(), RA = new Map();    // Ding root dictionary (Wortaufbau build only): key -> [gloss, rank] / [Word, art, gloss, rank]
   let VLIST = [], NLIST = [], ALIST = [];
   let SUFFIX_STATS = {}, PLURAL_BY_ART = {};
 
@@ -258,33 +259,39 @@
   const PLURAL_LABEL = { '–': 'no ending', '¨': 'umlaut only', '-e': '-e', '¨e': 'umlaut + -e', '-er': '-er', '¨er': 'umlaut + -er',
     '-n': '-n', '-en': '-en', '-nen': '-nen', '-s': '-s', 'none': 'no plural', 'other': 'special' };
 
-  function recognizeHead(head) {
+  function recognizeHead(head, useRoots) {
     const h = head.toLowerCase();
-    if (PARTICLES.has(h)) return { de: h, en: '' };
+    if (PARTICLES.has(h) || h === 'haupt' || h === 'neben') return { de: h, en: '' };
+    const app = recognizeIn(h, k => N.get(k), k => V.get(k), k => A.get(k));
+    if (app || !useRoots) return app;
+    return recognizeIn(h, k => gN(k, 20000), k => gV(k, 20000), k => gA(k, 20000));
+  }
+  function recognizeIn(h, Nf, Vf, Af) {
     if (h.length < 3) return null;
     if (INSEP.includes(h)) return null;                  // Ent-haltung is ent- + halten, not Ente + Haltung
-    const tries = [[h, ''], [h.replace(/s$/, ''), 's'], [h.replace(/es$/, ''), 'es'], [h.replace(/en$/, ''), 'en'], [h.replace(/n$/, ''), 'n'], [h.replace(/er$/, ''), 'er'], [h.replace(/e$/, ''), 'e'], [h + 'e', '']];
-    for (const [k, glue] of tries) {
-      if (k.length < 3 || (glue && k === h)) continue;
-      const n = N.get(k); if (n) return { de: n.w, en: shortEn(n.en), glue, kind: 'n' };
+    const hit = (o, kind, glue) => o ? { de: o.w, en: shortEn(o.en), glue, kind } : null;
+    // exact word, then verb stem (Sehn|sucht = sehnen), then a linking letter, then a dropped -e (Schul|e)
+    let r = hit(Nf(h), 'n', '') || hit(Af(h), 'adj', '');
+    if (r) return r;
+    if (h.length >= 4) for (const suf of ['en', 'n']) { r = hit(Vf(h + suf), 'v', ''); if (r) return r; }
+    for (const [k, glue] of [[h.replace(/s$/, ''), 's'], [h.replace(/es$/, ''), 'es'], [h.replace(/en$/, ''), 'en'], [h.replace(/n$/, ''), 'n'], [h.replace(/er$/, ''), 'er'], [h.replace(/e$/, ''), 'e']]) {
+      if (k.length < 3 || k === h) continue;
+      r = hit(Nf(k), 'n', glue) || hit(Af(k), 'adj', glue);
+      if (r) return r;
     }
-    for (const suf of ['en', 'n']) { const v = V.get(h + suf); if (v) return { de: v.w, en: shortEn(v.en), glue: '', kind: 'v' }; }
-    for (const [k, glue] of tries) {
-      if (k.length < 3 || (glue && k === h)) continue;
-      const a = A.get(k); if (a) return { de: a.w, en: shortEn(a.en), glue, kind: 'adj' };
-    }
-    return null;
+    const e = Nf(h + 'e');                                  // Schul|e — only app words (Ding: Irr|e 'whacko')
+    return e && !e._root ? hit(e, 'n', '') : null;
   }
 
   // Last-part split, only when the last part is a real noun with the SAME article and the first part is a real word.
-  function splitCompound(w, a) {
+  function splitCompound(w, a, useRoots) {
     const sg = cleanNoun(w), l = sg.toLowerCase();
     if (!/^[a-zäöüß]+$/.test(l) || l.length < 6) return null;
     for (let i = 2; i <= l.length - 3; i++) {
-      const tail = N.get(l.slice(i));
+      const tail = useRoots ? gN(l.slice(i)) : N.get(l.slice(i));
       if (!tail) continue;
       if (a && tail.a !== a) return null;
-      const head = recognizeHead(l.slice(0, i));
+      const head = recognizeHead(l.slice(0, i), useRoots);
       if (!head) continue;
       if (!head.kind && /ung$/.test(l)) continue;         // Ab-stimmung comes from abstimmen, not ab + Stimmung
       let glue = head.glue || '';
@@ -452,6 +459,8 @@
 
   function init(data) {
     V = new Map(); N = new Map(); A = new Map();
+    const R = data.roots || {};
+    RV = new Map(Object.entries(R.v || {})); RN = new Map(Object.entries(R.n || {})); RA = new Map(Object.entries(R.adj || {}));
     VLIST = []; NLIST = []; ALIST = [];
     for (const e of (data.verbs || [])) {
       if (!e || !e.w || !e.pr || !e.pp) continue;
@@ -586,6 +595,267 @@
       tamilInsight: `💡 <b>Memory:</b> இந்த முன்னொட்டு ஒருபோதும் பிரியாது, Perfekt-ல் 'ge-' சேர்க்கப்படாது!` };
   }
 
-  global.MemoryTips = { init, forWord, cheatCodes, verbLinguistics, splitCompound, verbInfo, pluralClass, entryFrom,
+  /* ================= Wortaufbau: syllables + meaningful parts =================
+     A word is split only where every part is real: the root must be a word in the lexicon
+     (its meaning comes from that word's own entry), the suffix must fit the word class/article
+     (-ung → die-noun from a verb, -er → der-noun from a verb, -lich → adjective …). Otherwise the
+     word is shown as a Grundwort. Precomputed for every word by scripts/build_word_parts.py
+     into js/word-parts.js; pages render it with MemoryTips.partsHTML(). */
+  const PREFIX_MEANING = {
+    ab: 'away, off, down', an: 'at, on; start', auf: 'up, open', aus: 'out, off', bei: 'by, with, along',
+    ein: 'in, into', mit: 'with, along', nach: 'after; again', vor: 'before, in front', weg: 'away',
+    zu: 'to, towards; closed', zurück: 'back', zusammen: 'together', her: 'towards here', hin: 'towards there',
+    fort: 'away, onward', los: 'off; start', um: 'around; change', durch: 'through', über: 'over, across',
+    unter: 'under, among', wieder: 'again, back', weiter: 'further, on', fest: 'firm, fixed', vorbei: 'past, by',
+    heraus: 'out (towards here)', hinaus: 'out (away)', herein: 'in (towards here)', hinein: 'in (away)',
+    herunter: 'down', hinunter: 'down (away)', herauf: 'up', hinauf: 'up (away)', hinzu: 'in addition',
+    auseinander: 'apart', entgegen: 'towards, against', gegen: 'against', gegenüber: 'opposite', statt: 'place',
+    teil: 'part', dar: 'there, forth', empor: 'upwards', nieder: 'down', voran: 'ahead', voraus: 'ahead, in advance',
+    kennen: 'know', frei: 'free', hoch: 'high, up', wahr: 'true', bereit: 'ready', fern: 'far',
+    be: 'makes the verb act on something', ent: 'away, removal (un-)', emp: 'receive (= ent- before f)',
+    er: 'achieve, reach a result', ge: '(old prefix, meaning faded)', miss: 'wrongly (mis-)',
+    ver: 'change; wrongly; away', zer: 'apart, to pieces', un: 'not, the opposite (un-)', ur: 'original, very old',
+    haupt: 'main', neben: 'beside; side-', hinter: 'behind', zwischen: 'between', rück: 'back'
+  };
+  const SUFFIX_MEANING = {
+    ung: 'turns a verb into a noun: the act or result (like English -ing / -tion)',
+    heit: 'turns an adjective into a noun: the state of being … (-ness / -hood)',
+    keit: 'turns an adjective into a noun: the quality of being … (-ness / -ity)',
+    igkeit: 'turns an adjective into a noun: the quality of being … (-ness)',
+    schaft: 'a group or a state (-ship / -hood)', nis: 'result or state (-ness / -ment)', tum: 'state, realm (-dom)',
+    er: 'person or tool that does it (like English -er)', in: 'female form of a person',
+    chen: 'small / cute — always das', lein: 'small / cute — always das', ling: 'a person (like -ling)',
+    ation: 'like English -ation', 'ität': 'like English -ity', ismus: 'like English -ism', ei: 'place or activity',
+    lich: 'makes an adjective (like -ly / -like)', ig: 'makes an adjective: having … (like -y)',
+    isch: 'makes an adjective (like -ish / -ic)', bar: 'can be …-ed (like -able)', los: 'without (like -less)',
+    voll: 'full of (like -ful)', sam: 'tending to (like -some)', haft: 'like, having the nature of',
+    reich: 'rich in', frei: 'free of (-free)', 'mäßig': 'according to', end: 'present participle: …-ing',
+    ieren: 'verb ending (mostly foreign roots)'
+  };
+  // suffix, word class of the word, base classes tried in order, extra check
+  const SUFFIX_RULES = [
+    ['igkeit', 'n', ['adj'], e => e.a === 'die'], ['schaft', 'n', ['n', 'adj'], e => e.a === 'die'],
+    ['ismus', 'n', ['n', 'adj'], e => e.a === 'der'], ['ation', 'n', ['v-ieren'], e => e.a === 'die'],
+    ['heit', 'n', ['adj', 'n'], e => e.a === 'die'], ['keit', 'n', ['adj'], e => e.a === 'die'],
+    ['chen', 'n', ['n'], e => e.a === 'das'], ['lein', 'n', ['n'], e => e.a === 'das'],
+    ['ling', 'n', ['v', 'adj', 'n'], e => e.a === 'der'], ['ität', 'n', ['adj'], e => e.a === 'die'],
+    ['ung', 'n', ['v'], e => e.a === 'die'], ['nis', 'n', ['v', 'adj'], e => e.a === 'die' || e.a === 'das'],
+    ['tum', 'n', ['n', 'adj'], () => true], ['ei', 'n', ['n', 'v'], e => e.a === 'die'],
+    ['er', 'n', ['v'], e => e.a === 'der'], ['in', 'n', ['n'], e => e.a === 'die' && /innen$/.test(String(e.p || ''))],
+    ['mäßig', 'adj', ['n'], () => true], ['lich', 'adj', ['n', 'v', 'adj'], () => true], ['isch', 'adj', ['n'], () => true],
+    ['haft', 'adj', ['n', 'adj'], () => true], ['reich', 'adj', ['n'], () => true], ['frei', 'adj', ['n'], () => true],
+    ['voll', 'adj', ['n'], () => true], ['los', 'adj', ['n', 'v'], () => true], ['bar', 'adj', ['v', 'n'], () => true],
+    ['sam', 'adj', ['v', 'n', 'adj'], () => true], ['end', 'adj', ['v'], () => true], ['ig', 'adj', ['n', 'v'], () => true],
+    ['ieren', 'v', ['n', 'adj'], () => true]
+  ];
+  const ALL_PREFIXES = Object.keys(PREFIX_MEANING).filter(p => !['un', 'ur', 'haupt', 'neben', 'hinter', 'zwischen', 'rück'].includes(p))
+    .sort((a, b) => b.length - a.length);
+  const deUmlaut = s => s.replace(/äu/g, 'au').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u');
+  const gloss = en => { const g = String(en || '').replace(/\([^)]*\)/g, '').split(/;/)[0].replace(/\s*\/\s*/g, ', ').trim(); return g.length > 48 ? g.slice(0, 46).replace(/,[^,]*$/, '') : g; };
+
+  // App words first (with their learner meaning), then Ding roots within a frequency limit.
+  const gV = (k, maxRank) => V.get(k) || (RV.has(k) && RV.get(k)[1] <= (maxRank || 1e9) ? { w: k, en: RV.get(k)[0], _root: true } : null);
+  const gN = (k, maxRank) => N.get(k) || (RN.has(k) && RN.get(k)[3] <= (maxRank || 1e9) ? { w: RN.get(k)[0], _sg: RN.get(k)[0], a: RN.get(k)[1], en: RN.get(k)[2], p: '', _root: true } : null);
+  const gA = (k, maxRank) => A.get(k) || (RA.has(k) && RA.get(k)[1] <= (maxRank || 1e9) ? { w: k, en: RA.get(k)[0], _root: true } : null);
+  // Words that look derived but aren't (Mädchen is not Made + -chen, Zucker is not zucken + -er).
+  const NO_SPLIT = new Set(['mädchen', 'märchen', 'kaninchen', 'veilchen', 'zucker', 'bürger', 'körper', 'sommer', 'wetter', 'messer',
+    'mutter', 'vater', 'bruder', 'schwester', 'tochter', 'butter', 'feuer', 'wasser', 'fenster', 'zimmer', 'theater', 'ufer', 'meer',
+    'heimat', 'monat', 'arbeit', 'schlauberger', 'hochzeit', 'mahlzeit', 'ereignis', 'gebäude', 'bedingung', 'verein', 'vergnügen']);
+  // The app's learner meaning first, plus Ding's main sense when it adds something (treiben: "do, chase; to drive").
+  const dingGloss = w => { const k = String(w).toLowerCase(); return (RV.get(k) || [])[0] || (RN.get(k) || [])[2] || (RA.get(k) || [])[0] || ''; };
+  const normG = g => String(g).toLowerCase().replace(/\bto\s+/g, '').replace(/[^a-zäöüß ]/g, ' ').replace(/\s+/g, ' ').trim();
+  function mergeGloss(appEn, ding) {
+    const a = gloss(appEn), first = String(ding || '').split(',')[0].trim();
+    if (!a) return gloss(ding);
+    return first && !normG(a).includes(normG(first)) && !normG(first).includes(normG(a)) ? `${a}; ${first}` : a;
+  }
+  const root = (w, en) => ({ t: w, k: 'root', m: mergeGloss(en, dingGloss(w)) });
+  const pre = p => ({ t: p + '-', k: 'prefix' });
+  const suf = s => ({ t: '-' + s, k: 'suffix' });
+
+  function findVerb(stem, maxRank) {
+    if (stem.length < 2) return null;
+    const c = [stem + 'en', stem + 'n', stem.replace(/([^aeiouäöü])([lr])$/, '$1e$2') + 'n'];
+    const du = deUmlaut(stem); if (du !== stem) c.push(du + 'en', du + 'n');
+    for (const k of c) { const v = V.get(k); if (v && k.length >= 4) return { key: k, v }; }
+    for (const k of c) { const v = gV(k, maxRank); if (v && k.length >= 4) return { key: k, v }; }
+    return null;
+  }
+  function findNoun(stem) {
+    // closest spelling first (nöt|ig -> Not, not Note); per variant an app word beats a Ding root
+    const c = [stem, deUmlaut(stem), stem.replace(/s$/, ''), stem.replace(/es$/, ''), stem.replace(/n$/, ''), stem.replace(/en$/, ''), stem + 'e', deUmlaut(stem) + 'e'];
+    for (const k of c) { if (k.length >= 3 && (N.get(k) || gN(k, 20000))) return N.get(k) || gN(k, 20000); }
+    return null;
+  }
+  function findAdj(stem) {
+    const c = [stem, stem + 'e', stem.replace(/([^aeiouäöü])([lr])$/, '$1e$2')].filter(k => k.length >= 3);
+    for (const k of c) { if (A.get(k)) return A.get(k); }
+    for (const k of c) { if (gA(k)) return gA(k); }
+    return null;
+  }
+
+  // Parts of a verb infinitive token (lower case), e.g. "abtreiben" -> ab- + treiben.
+  function verbTokenParts(tok, depth) {
+    const e = V.get(tok);
+    if (e && e._x && (e._x.sep || e._x.insep)) {
+      const px = e._x.sep || e._x.insep, rootEntry = V.get(e._x.root);
+      if (rootEntry) return prefixParts(px).concat(verbTokenParts(e._x.root, depth + 1));
+    }
+    for (const p of ALL_PREFIXES) {                        // morphological: prefix + a real verb
+      if (!tok.startsWith(p) || tok.length - p.length < 4) continue;
+      const rest = tok.slice(p.length);
+      if (gV(rest)) return prefixParts(p).concat(verbTokenParts(rest, depth + 1));
+    }
+    const ve = e || gV(tok);
+    return [root(tok, ve ? ve.en : '')];
+  }
+  function prefixParts(px) {                               // "wiederher" -> wieder- + her-
+    if (PREFIX_MEANING[px]) return [pre(px)];
+    for (const p of ALL_PREFIXES) if (px.startsWith(p) && PREFIX_MEANING[px.slice(p.length)]) return [pre(p), pre(px.slice(p.length))];
+    return [pre(px)];
+  }
+  function stemVerbParts(stem, depth, maxRank) {           // stem of a derived word -> verb parts
+    const f = findVerb(stem, maxRank);
+    if (f) return verbTokenParts(f.key, depth);
+    for (const p of ALL_PREFIXES) {
+      if (!stem.startsWith(p) || stem.length - p.length < 3) continue;
+      const g = findVerb(stem.slice(p.length), maxRank);
+      if (g) return prefixParts(p).concat(verbTokenParts(g.key, depth + 1));
+    }
+    return null;
+  }
+
+  function derive(l, cat, e, depth) {
+    for (const [sx, wc, bases, ok] of SUFFIX_RULES) {
+      if (wc !== cat || !l.endsWith(sx) || l.length < sx.length + 3 || !ok(e)) continue;
+      const stem = l.slice(0, -sx.length);
+      for (const b of bases) {
+        let parts = null;
+        if (b === 'v') parts = stemVerbParts(stem, depth, sx === 'er' ? 12000 : 0);   // -er: only common verbs
+        else if (b === 'v-ieren') { const v = gV(stem + 'ieren'); if (v) parts = [root(stem + 'ieren', v.en)]; }
+        else if (b === 'n') { const n = findNoun(stem); if (n) parts = nounParts(n, depth + 1); }
+        else if (b === 'adj') {
+          let a = findAdj(stem);
+          if (!a && sx === 'igkeit') a = null;
+          if (a) parts = adjParts(a, depth + 1);
+        }
+        if (parts) return parts.concat(suf(sx));
+      }
+    }
+    return null;
+  }
+  function nounParts(n, depth) { const r = depth <= 3 ? decomposeNoun(n._sg || n.w, n.a, n.p, n.en, depth) : null; return r || [root(n._sg || n.w, n.en)]; }
+  function adjParts(a, depth) { const r = depth <= 3 ? decomposeAdj(String(a.w).toLowerCase(), a.en, depth) : null; return r || [root(String(a.w).toLowerCase(), a.en)]; }
+
+  function headParts(head, depth) {
+    if (!head.kind) return [pre(head.de)];
+    if (head.kind === 'n') { const n = gN(head.de.toLowerCase()); return n ? nounParts(n, depth + 1) : [root(head.de, head.en)]; }
+    if (head.kind === 'v') { const tok = head.de.toLowerCase().replace(/^sich\s+/, ''); return verbTokenParts(verbToken(tok), depth + 1); }
+    const a = gA(head.de.toLowerCase()); return a ? adjParts(a, depth + 1) : [root(head.de, head.en)];
+  }
+
+  function decomposeNoun(sg, a, p, en, depth) {
+    const l = sg.toLowerCase();
+    if (NO_SPLIT.has(l)) return null;
+    const d = derive(l, 'n', { a, p }, depth);
+    if (d) return d;
+    const c = splitCompound(sg, a, true);
+    if (c) {
+      const tail = nounParts(c.tail, depth + 1);
+      return headParts(c.head, depth).concat(c.glue ? [{ t: c.glue, k: 'glue' }] : [], tail);
+    }
+    // noun from a verb without a suffix: der Besuch – besuchen, der Kauf – kaufen
+    const f = depth === 0 ? findVerb(l) : null;          // inside a compound, Teil stays Teil (not ~teilen)
+    if (f && f.key !== l && !f.v._root) return verbTokenParts(f.key, depth).map(x => x.k === 'root' ? Object.assign({}, x, { k: 'related' }) : x);
+    return null;
+  }
+  function decomposeAdj(l, en, depth) {
+    if (NO_SPLIT.has(l)) return null;
+    const d = derive(l, 'adj', {}, depth);
+    if (d) return d;
+    if (/^un/.test(l) && l.length > 5 && gA(l.slice(2))) return [pre('un')].concat(adjParts(gA(l.slice(2)), depth + 1));
+    // participles used as adjectives: gebraucht – brauchen, verheiratet – heiraten
+    const pv = VLIST.find(o => o._x.part === l && !/\s/.test(o.w));
+    if (pv) return verbTokenParts(pv._x.tok, depth).map(x => x.k === 'root' ? Object.assign({}, x, { k: 'related', note: 'Partizip II' }) : x);
+    // adjective compounds: umwelt|freundlich, hilfs|bereit
+    for (let i = 3; i <= l.length - 3; i++) {
+      if (SUFFIX_MEANING[l.slice(i)]) continue;            // furcht|bar is Furcht + -bar, not + bar 'cash'
+      const tailA = gA(l.slice(i)); if (!tailA) continue;
+      const head = recognizeHead(l.slice(0, i), true); if (!head) continue;
+      return headParts(head, depth).concat(head.glue ? [{ t: head.glue, k: 'glue' }] : [], adjParts(tailA, depth + 1));
+    }
+    return null;
+  }
+
+  // -> {parts:[{t,k,m}], simple} for one entry; cat 'v' | 'n' | 'adj' | 'p'
+  function wordParts(cat, e) {
+    const raw = String(e.w || '').replace(/\([^)]*\)/g, ' ').trim();
+    if (!raw || cat === 'p') return null;
+    let parts = null;
+    try {
+      if (cat === 'v') {
+        const toks = raw.split(/\s+/), tok = verbToken(raw);
+        let vp = verbTokenParts(tok, 0);
+        if (/ieren$/.test(tok) && vp.length === 1) vp = derive(tok, 'v', {}, 1) || vp;
+        parts = [];
+        for (const t of toks) {                              // keep the phrase's word order
+          const lt = t.toLowerCase();
+          if (lt === tok) parts.push(...vp);
+          else if (lt === 'sich') parts.push({ t: 'sich', k: 'word', m: 'oneself (reflexive)' });
+          else if (PREPS.has(lt)) parts.push({ t, k: 'word', m: 'fixed preposition' });
+          else { const o = gN(lt) || gA(lt); parts.push({ t, k: 'word', m: o ? gloss(o.en) : '' }); }
+        }
+        if (parts.length === 1) parts = null;
+      } else if (cat === 'n') {
+        const sg = cleanNoun(raw);
+        if (/^[A-Za-zÄÖÜäöüß]+$/.test(sg)) parts = decomposeNoun(sg, (e.a || '').trim(), expandPlural(sg, e.p), e.en, 0);
+      } else if (cat === 'adj') {
+        const l = raw.toLowerCase();
+        if (/^[a-zäöüß]+$/.test(l)) parts = decomposeAdj(l, e.en, 0);
+      }
+    } catch (_) { parts = null; }
+    if (parts && parts.length < 2 && !(parts[0] && parts[0].k === 'related')) parts = null;
+    return parts;
+  }
+
+  // Compact storage used by js/word-parts.js: "ab-", "-ung", "+s", "treiben=to drive", "~kaufen=to buy"
+  function encodeParts(parts) {
+    return parts.map(x => x.k === 'prefix' || x.k === 'suffix' ? x.t : x.k === 'glue' ? '+' + x.t
+      : (x.k === 'related' ? '~' : '') + x.t + (x.m ? '=' + x.m : ''));
+  }
+  function decodePart(s) {
+    if (/^-/.test(s)) { const k = s.slice(1); return { t: s, k: 'suffix', m: SUFFIX_MEANING[k] || '' }; }
+    if (/-$/.test(s)) { const k = s.slice(0, -1); return { t: s, k: 'prefix', m: PREFIX_MEANING[k] || '' }; }
+    if (/^\+/.test(s)) return { t: '-' + s.slice(1) + '-', k: 'glue', m: 'linking letter(s) between the two words' };
+    const rel = s[0] === '~', body = rel ? s.slice(1) : s, i = body.indexOf('=');
+    return { t: i < 0 ? body : body.slice(0, i), k: rel ? 'related' : 'root', m: i < 0 ? '' : body.slice(i + 1) };
+  }
+
+  const cleanKey = w => String(w || '').replace(/\([^)]*\)/g, ' ').replace(/^(der|die|das)\s+/i, '').replace(/\s+/g, ' ').trim();
+  function lookupParts(cat, w) {
+    const data = global.WORD_PARTS || {};
+    const k = cleanKey(w);
+    const hit = data[cat + '|' + k] || data['v|' + k] || data['n|' + k] || data['adj|' + k] || data['p|' + k];
+    if (!hit) return null;
+    return { word: k, syl: hit[0] || k, parts: hit[1] ? hit[1].map(decodePart) : null };
+  }
+  function partsText(cat, w) {
+    const r = lookupParts(cat, w);
+    if (!r) return '';
+    return r.syl + (r.parts ? ' — ' + r.parts.map(p => p.t + (p.m ? ` (${p.m})` : '')).join(' + ') : '');
+  }
+  function partsHTML(cat, w) {
+    const r = lookupParts(cat, w);
+    if (!r) return '';
+    const items = r.parts ? r.parts.map(p => `<li><b>${esc(p.t)}</b>${p.m ? ` <span style="opacity:.8">(${esc(p.m)})</span>` : ''}${p.k === 'related' ? ' <i style="opacity:.7">— related word</i>' : ''}</li>`).join('') : '';
+    return `<div class="wordparts" style="margin:8px 0; padding:8px 10px; border:1px solid var(--line, #e2e8f0); border-left:3px solid var(--blue, #2563eb); border-radius:6px; font-size:13px; line-height:1.5; text-align:left;">
+      <div><b>🧩 Wortaufbau:</b> <span style="font-size:15px; letter-spacing:.3px;">${esc(r.syl)}</span></div>
+      ${items ? `<div style="margin-top:3px;">Related parts:</div><ul style="margin:2px 0 0 18px; padding:0;">${items}</ul>`
+        : (cat === 'p' || /\s/.test(r.word) ? '' : `<div style="opacity:.8; margin-top:2px;">Grundwort — a basic word, not built from smaller parts.</div>`)}
+    </div>`;
+  }
+
+  global.MemoryTips = { wordParts, encodeParts, lookupParts, partsHTML, partsText, cleanKey, PREFIX_MEANING, SUFFIX_MEANING,
+    init, forWord, cheatCodes, verbLinguistics, splitCompound, verbInfo, pluralClass, entryFrom,
     ready: () => VLIST.length + NLIST.length + ALIST.length > 0, suffixStats: () => SUFFIX_STATS, _lex: () => ({ V, N, A }) };
 })(typeof window !== 'undefined' ? window : globalThis);
