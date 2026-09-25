@@ -758,6 +758,25 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 42) — Audit: phone layout on every page, duplicate tools removed
+
+#### Task
+User: "Check any missing or enhancement need?" and "In tool, why need A2 studio? Like that anything unwanted".
+
+#### Fixed
+- **8 pages could be dragged sideways on a phone** (A1/B1 exam simulators, Cheat Codes, KI Coach, Verben hören, Master Grid, Wortfamilien redirect): `.app-main` is a flex item with the default `min-width:auto`, so one wide child stretched the whole page (to 1,200 px on Cheat Codes); the off-screen drawer (`right:-100%`) then followed the widened page. `css/design-system.css`: `.app-main, .app-content { min-width: 0 }`. KI Coach additionally: its 2-column control grid used `1fr 1fr` (long option texts) → `repeat(2, minmax(0,1fr))`; its drawer is hidden with a transform instead of `right:-100%`. Audit at 390 px: all 27 pages fit (was 19).
+- **Tools list duplicates removed** (`index.html`): "A2 Studio" (same page as Prüfung → A2 Prüfung; B1 wasn't listed in Tools either) and "Wortfamilien" (`Wortfamilien_Explorer.html` is only a redirect to the Master Grid = Lernen → Wortschatz; the redirect file stays for old bookmarks).
+- **Old in-page link bars removed** where they repeated the sidebar menu: Continuous Verb Speaker ("DEUTSCH-COACH SUITE", 7 links) and the Excel sheet ("DEUTSCH SUITE" header). The Excel page's code expected that bar's theme button → guarded (the app's top bar has the theme switch).
+
+#### Audit findings, not changed (for a decision)
+- `Verben_Hoeren_EN_DE.html` ("Audio Coach") does a subset of `Continuous_Verb_Speaker.html` ("Auto-Play Speaker"): same 721→719 verbs, EN → DE audio; the Speaker also has type filters (trennbar/untrennbar/reflexiv), 4 drill sequences, think-pauses and repetitions. Candidate to retire (redirect).
+- A2 / B1 Practice Studios carry their own verb lists (`A2_VERBS` …) separate from js/word-data.js.
+- Data gaps: nouns and adjectives have no example sentences (verbs have); 566 nouns have no topic (Thema); 169 verbs have no related noun; 68 AI Tamil meanings are marked uncertain (🤖?); 1,300 levels are frequency estimates (≈).
+- Excel sheet takes ~4.7 s to open on a phone (2,479 rows × 19 columns rendered at once).
+- Fonts load from Google Fonts (no offline copy); the Übersetzer's AI features still need one test with a real key.
+
+---
+
 ### 2026-09-25 (Task 41) — Excel sheet: resizable columns, text wrap, example column width, sheet below the phone top bar
 
 #### Task

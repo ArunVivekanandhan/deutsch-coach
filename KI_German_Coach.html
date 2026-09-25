@@ -625,7 +625,9 @@
   .drawer {
     position: fixed;
     top: 0;
-    right: -100%;
+    right: 0;
+    transform: translateX(100%);   /* off-screen without widening the page on phones (right:-100% did) */
+    visibility: hidden;
     width: 100%;
     max-width: 440px;
     height: 100%;
@@ -633,12 +635,12 @@
     border-left: 2px solid var(--ink);
     box-shadow: -5px 0 20px var(--shadow-lg);
     z-index: 10000;
-    transition: right .3s ease;
+    transition: transform .3s ease, visibility .3s;
     display: flex;
     flex-direction: column;
     padding: 16px;
   }
-  .drawer.open { right: 0; }
+  .drawer.open { transform: none; visibility: visible; }
   .drawer-content {
     flex: 1;
     overflow-y: auto;
@@ -703,7 +705,8 @@
     .coach-info h1 { font-size: 17px; }
     .bubble { font-size: 13.5px; max-width: 92%; }
     .chat-container { min-height: 380px; max-height: 60vh; padding: 10px 8px; }
-    .control-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .control-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }   /* minmax(0,…): long option texts no longer widen the page */
+    .control-group, .control-group select, .control-group input { min-width: 0; max-width: 100%; }
     .btn-circle { width: 40px; height: 40px; font-size: 16px; }
   }
 

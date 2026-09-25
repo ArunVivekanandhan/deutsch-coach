@@ -647,31 +647,7 @@
 
 
   <!-- Suite Hub Navigation Banner -->
-  <header class="suite-hub">
-    <div class="hub-container">
-      <a href="deutsch-coach.html" class="hub-title">
-        <span>🇩🇪</span> <b>DEUTSCH SUITE</b>
-      </a>
-      <nav class="hub-links">
-        <a href="deutsch-coach.html" class="hub-link">🏠 Hub & Cards</a>
-        <a href="Verb_Transformation_Trainer.html" class="hub-link">⚡ Verb Trainer</a>
-        <a href="Nomen_Trainer.html" class="hub-link">📦 Nomen</a>
-        <a href="Adjektiv_Adverb_Trainer.html" class="hub-link">📐 Adjektive & Adverbien</a>
-        <a href="Wortfamilien_Explorer.html" class="hub-link">🌲 Wortfamilien</a>
-        <a href="Wortschatz_Master_Grid.html" class="hub-link">📑 Spalten-Wortschatz</a>
-        <a href="Deutsch_Wortschatz_Excel_Sheet.html" class="hub-link active">📊 Excel Sheet</a>
-        <a href="Satzbau_Trainer.html" class="hub-link">🎯 Satzbau</a>
-        <a href="Grammatik_Regel_Trainer.html" class="hub-link">📜 Grammatik</a>
-        <a href="German_Grammar_Cheat_Codes.html" class="hub-link">🧩 Cheat Codes</a>
-        <a href="Sprech_Pruefungs_Simulator.html" class="hub-link">🎙️ Sprechen</a>
-        <a href="German_A2_Practice_Studio.html" class="hub-link">🅰️ A2 Studio</a>
-        <a href="German_B1_Practice_Studio.html" class="hub-link">🅱️ B1 Studio</a>
-        <a href="KI_German_Coach.html" class="hub-link">🤖 KI Coach</a>
-        <a href="KI_Human_Partner.html" class="hub-link">👥 KI Partner</a>
-        <button id="themeToggle" class="hub-link" style="cursor:pointer; border:1px solid var(--line);" title="Theme Switcher">🌙 / ☀️</button>
-      </nav>
-    </div>
-  </header>
+  <!-- (old in-page link bar removed: the app sidebar is the navigation) -->
 
   <!-- Excel Ribbon Toolbar -->
   <section class="excel-ribbon">
@@ -2336,7 +2312,10 @@ if (document.readyState === 'loading') {
     if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.body.classList.add('dark');
     }
-    document.getElementById('themeToggle').addEventListener('click', () => {
+    // The page's own theme button went with the old link bar; the app's top bar has the theme button
+    // (js/app-shell.js keeps .dark in sync). Kept only in case an older copy of the page still has it.
+    const tt = document.getElementById('themeToggle');
+    if (tt) tt.addEventListener('click', () => {
       document.body.classList.toggle('dark');
       const isDark = document.body.classList.contains('dark');
       localStorage.setItem('de_theme', isDark ? 'dark' : 'light');
