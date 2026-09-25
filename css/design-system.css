@@ -70,11 +70,18 @@
   --color-ink-soft: #94a3b8;
   --color-border: #334155;
   --color-primary: #3b82f6;
+  /* Brighter gender colours: the light-mode blue/red/green are unreadable on dark cards and badges */
+  --color-der: #60a5fa;
+  --color-die: #f87171;
+  --color-das: #4ade80;
+  --color-der-bg: rgba(96, 165, 250, 0.16);
+  --color-die-bg: rgba(248, 113, 113, 0.16);
+  --color-das-bg: rgba(74, 222, 128, 0.16);
   --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.5);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
 }
 
-[data-theme="dark"] body {
+body[data-theme="dark"], [data-theme="dark"] body {
   background: var(--color-bg) radial-gradient(circle at top right, #1e293b, #0f172a 70%);
   background-attachment: fixed;
 }

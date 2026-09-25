@@ -290,29 +290,15 @@ function renderAppShell() {
             }
         });
 
-        // Theme Toggle Logic for legacy pages
+        // Theme toggle: one source of truth (dcSetTheme below keeps every page's markers in line)
         const themeBtn = document.getElementById('themeToggleBtn');
         if (themeBtn) {
             themeBtn.addEventListener('click', () => {
-                const isDark = document.body.getAttribute('data-theme') === 'dark';
-                if (isDark) {
-                    document.body.removeAttribute('data-theme');
-                    document.body.classList.remove('dark');
-                    localStorage.setItem('de_theme', 'light');
-                    themeBtn.innerHTML = '<i data-lucide="moon"></i>';
-                } else {
-                    document.body.setAttribute('data-theme', 'dark');
-                    document.body.classList.add('dark');
-                    localStorage.setItem('de_theme', 'dark');
-                    themeBtn.innerHTML = '<i data-lucide="sun"></i>';
-                }
+                dcSetTheme(!dcThemeState.dark, true);
+                themeBtn.innerHTML = dcThemeState.dark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
                 if (window.lucide) window.lucide.createIcons();
             });
-            // Initial setup for theme icon
-            if (localStorage.getItem('de_theme') === 'dark') {
-                themeBtn.innerHTML = '<i data-lucide="sun"></i>';
-                document.body.classList.add('dark');
-            }
+            themeBtn.innerHTML = dcThemeState.dark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
         }
 
         // Initialize icons for the newly injected shell
@@ -327,14 +313,225 @@ if (document.readyState === 'loading') {
     renderAppShell();
 }
 
-// Auto-load theme globally
-document.addEventListener('DOMContentLoaded', () => {
-    const theme = localStorage.getItem('de_theme');
-    if (theme === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
-        document.body.classList.add('dark');
+// =========================================================================
+// THEME — one source of truth for dark mode on every page.
+// Pages used four different markers (body[data-theme], body.dark, html.dark / html.dark-theme) and many also had
+// @media (prefers-color-scheme: dark) blocks that followed the phone/OS setting instead of the app's choice, so a
+// page could end up half dark. Here: the app choice (localStorage de_theme; OS setting only when nothing is saved)
+// is applied to ALL markers on <html> and <body>, and every prefers-color-scheme rule is switched to follow it.
+// Pages keep their own toggle buttons: a MutationObserver notices whichever marker they flip and syncs the rest.
+// =========================================================================
+const dcThemeState = { dark: false, syncing: false, orig: new WeakMap() };
+function dcPreferredDark() {
+    let t = null;
+    try { t = localStorage.getItem('de_theme'); } catch (e) { /* storage blocked */ }
+    if (t === 'dark' || t === 'light') return t === 'dark';
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+function dcSyncSchemeMedia(dark) {
+    const walk = rules => {
+        for (const rule of rules) {
+            if (rule.media && rule.cssRules) {
+                let orig = dcThemeState.orig.get(rule);
+                if (orig === undefined) { orig = rule.media.mediaText; dcThemeState.orig.set(rule, orig); }
+                if (/prefers-color-scheme/.test(orig)) {
+                    const wantsDark = /prefers-color-scheme:\s*dark/.test(orig);
+                    const active = wantsDark === dark;
+                    const rest = orig.replace(/(and\s*)?\(\s*prefers-color-scheme:\s*(dark|light)\s*\)(\s*and)?/g, '').trim();
+                    try { rule.media.mediaText = active ? (rest || 'all') : 'not all'; } catch (e) { /* read-only */ }
+                }
+                walk(rule.cssRules);
+            } else if (rule.cssRules) walk(rule.cssRules);
+        }
+    };
+    for (const sheet of Array.from(document.styleSheets)) {
+        let rules = null;
+        try { rules = sheet.cssRules; } catch (e) { continue; }   // cross-origin sheet (fonts)
+        if (rules) walk(rules);
     }
+}
+function dcSetTheme(dark, persist) {
+    dcThemeState.syncing = true;
+    dcThemeState.dark = !!dark;
+    const els = [document.documentElement, document.body].filter(Boolean);
+    for (const el of els) {
+        el.setAttribute('data-theme', dark ? 'dark' : 'light');
+        el.classList.toggle('dark', !!dark);
+        el.classList.toggle('dark-theme', !!dark);
+    }
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    dcSyncSchemeMedia(!!dark);
+    try { dcRestoreSurfaces(); } catch (e) { /* first call runs before the contrast guard below is set up */ }
+    if (persist) { try { localStorage.setItem('de_theme', dark ? 'dark' : 'light'); } catch (e) { /* ignore */ } }
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.innerHTML = dark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+    // let the observer see our own changes first, then listen again
+    setTimeout(() => { dcThemeState.syncing = false; }, 0);
+    if (typeof dcRecheckAllContrast === 'function' && document.body) { setTimeout(dcRecheckAllContrast, 60); setTimeout(dcRecheckAllContrast, 700); }
+}
+function dcWatchThemeMarkers() {
+    const obs = new MutationObserver(muts => {
+        if (dcThemeState.syncing) return;
+        for (const m of muts) {
+            const el = m.target;
+            const dark = m.attributeName === 'data-theme' ? el.getAttribute('data-theme') === 'dark'
+                : (el.classList.contains('dark') || el.classList.contains('dark-theme'));
+            if (dark !== dcThemeState.dark) { dcSetTheme(dark, true); break; }
+        }
+    });
+    [document.documentElement, document.body].filter(Boolean)
+        .forEach(el => obs.observe(el, { attributes: true, attributeFilter: ['class', 'data-theme'] }));
+}
+dcSetTheme(dcPreferredDark(), false);                   // as early as possible (html element)
+document.addEventListener('DOMContentLoaded', () => {   // body exists + all inline <style> parsed
+    dcSetTheme(dcPreferredDark(), false);
+    dcWatchThemeMarkers();
 });
+window.addEventListener('load', () => dcSyncSchemeMedia(dcThemeState.dark));   // late stylesheets
+window.addEventListener('storage', e => { if (e.key === 'de_theme') dcSetTheme(dcPreferredDark(), false); });
+if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onOs = () => { let t = null; try { t = localStorage.getItem('de_theme'); } catch (e) { /* */ } if (!t) dcSetTheme(mq.matches, false); };
+    if (mq.addEventListener) mq.addEventListener('change', onOs);
+}
+window.dcSetTheme = dcSetTheme;
+
+// ---- Contrast guard: text that ends up (almost) the same colour as the background behind it — e.g. a card
+// with a fixed white background whose text turns white in dark mode — gets a readable colour. Runs in idle
+// batches (big tables stay smooth), again for content rendered later, and after every theme change.
+const dcContrast = { fixed: new Set(), queue: [], scheduled: false, bgCache: new WeakMap() };
+function dcRgb(str) {
+    const m = String(str).match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?/);
+    return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null;
+}
+function dcLum(c) {
+    const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+}
+function dcEffectiveBg(el) {
+    const chain = [];
+    let cur = el, found = null;
+    while (cur && cur.nodeType === 1) {
+        if (dcContrast.bgCache.has(cur)) { found = dcContrast.bgCache.get(cur); break; }
+        chain.push(cur);
+        const cs = getComputedStyle(cur);
+        const c = dcRgb(cs.backgroundColor);
+        if (cs.backgroundImage && cs.backgroundImage !== 'none') { found = 'image'; break; }   // gradient / picture: can't judge
+        if (c && c[3] >= 0.6) { found = c; break; }
+        cur = cur.parentElement;
+    }
+    if (!found) found = dcThemeState.dark ? [15, 23, 42, 1] : [255, 255, 255, 1];
+    chain.forEach(e => dcContrast.bgCache.set(e, found));
+    return found;
+}
+function dcHasOwnText(el) {
+    if (/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(el.tagName)) return true;
+    for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) return true;
+    return false;
+}
+// Dark mode: pages that hard-code white / pastel card backgrounds (background:#fff) keep bright boxes in
+// dark mode. Such surfaces get a dark background of the same tint; saturated colours (badges, buttons,
+// highlights) and "active" chips (deliberately inverted) are left alone.
+dcContrast.surfaces = new Set();
+function dcRestoreSurfaces() {
+    dcContrast.surfaces.forEach(el => { el.style.removeProperty('background-color'); el.removeAttribute('data-dc-surface'); });
+    dcContrast.surfaces.clear();
+    dcContrast.bgCache = new WeakMap();
+}
+function dcCheckSurface(el) {
+    if (!dcThemeState.dark || dcContrast.surfaces.has(el) || el === document.body) return;
+    if (/^(BUTTON|HTML|BODY|IMG|VIDEO|CANVAS|OPTION)$/.test(el.tagName) || el.closest('svg')) return;
+    if (el.classList.contains('active') || el.getAttribute('aria-selected') === 'true' || el.getAttribute('aria-pressed') === 'true') return;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || (cs.backgroundImage && cs.backgroundImage !== 'none')) return;
+    const c = dcRgb(cs.backgroundColor);
+    if (!c || c[3] < 0.6) return;
+    const hi = Math.max(c[0], c[1], c[2]), lo = Math.min(c[0], c[1], c[2]);
+    if (dcLum(c) < 0.7 || hi - lo > 70) return;               // not a white / pastel surface
+    if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) {
+        const r = el.getBoundingClientRect();
+        if (r.width * r.height < 2500) return;                 // small badges keep their pastel colour
+    }
+    const base = [30, 41, 59];                                 // slate-800, the app's dark card colour
+    const out = base.map((b, i) => Math.min(255, Math.round(b + (c[i] - lo) * 2.2)));
+    el.style.setProperty('background-color', `rgb(${out[0]}, ${out[1]}, ${out[2]})`, 'important');
+    el.setAttribute('data-dc-surface', '1');
+    dcContrast.surfaces.add(el);
+}
+function dcCheckContrast(el) {
+    if (!el.isConnected || el.closest('svg')) return;
+    dcCheckSurface(el);
+    if (!dcHasOwnText(el)) return;
+    // An element fixed earlier is re-judged with the page's own colour (transitions paused so the
+    // computed colour is the real target, not an in-between value); the fix is kept or dropped in one go.
+    const hadFix = dcContrast.fixed.has(el);
+    let prevTransition = '';
+    if (hadFix) { prevTransition = el.style.transition; el.style.transition = 'none'; el.style.removeProperty('color'); }
+    let fix = null;
+    const cs = getComputedStyle(el);
+    if (cs.display !== 'none' && cs.visibility !== 'hidden') {
+        const bg = dcEffectiveBg(el), fg = dcRgb(cs.color);
+        if (bg !== 'image' && fg && fg[3] >= 0.3) {
+            const lb = dcLum(bg), lf = dcLum(fg);
+            if ((Math.max(lb, lf) + 0.05) / (Math.min(lb, lf) + 0.05) < 2.2) fix = lb > 0.4 ? '#1f2937' : '#f1f5f9';
+        }
+    }
+    if (fix) {
+        el.style.setProperty('color', fix, 'important');
+        el.setAttribute('data-dc-contrast', '1');
+        dcContrast.fixed.add(el);
+    } else if (hadFix) {
+        el.removeAttribute('data-dc-contrast');
+        dcContrast.fixed.delete(el);
+    }
+    if (hadFix) { void getComputedStyle(el).color; el.style.transition = prevTransition; }
+}
+function dcRunContrastQueue(deadline) {
+    dcContrast.scheduled = false;
+    // Always do a small time slice: when the idle callback fires because of its timeout (busy page),
+    // timeRemaining() is 0 and waiting for a "real" idle period could starve the queue forever.
+    const start = Date.now();
+    const more = () => Date.now() - start < 10 || (deadline && deadline.timeRemaining && deadline.timeRemaining() > 2);
+    while (dcContrast.queue.length && more()) {
+        const el = dcContrast.queue.pop();
+        try { dcCheckContrast(el); } catch (e) { /* element gone */ }
+    }
+    if (dcContrast.queue.length) dcScheduleContrast();
+}
+function dcScheduleContrast() {
+    if (dcContrast.scheduled) return;
+    dcContrast.scheduled = true;
+    (window.requestIdleCallback || (f => setTimeout(f, 30)))(dcRunContrastQueue, { timeout: 500 });
+}
+function dcQueueContrast(root) {
+    if (!root || root.nodeType !== 1) return;
+    // The queue is popped from the end: push in reverse document order so parents are handled first
+    // (a card's background is darkened before the text inside it is judged).
+    const all = root.querySelectorAll('*');
+    for (let i = all.length - 1; i >= 0; i--) dcContrast.queue.push(all[i]);
+    dcContrast.queue.push(root);
+    dcScheduleContrast();
+}
+function dcRecheckAllContrast() {
+    // Fixes are not cleared up front (that would flash unreadable text); every element is re-judged in turn.
+    dcContrast.fixed.forEach(el => { if (!el.isConnected) dcContrast.fixed.delete(el); });
+    dcContrast.bgCache = new WeakMap();
+    dcContrast.queue = [];
+    if (document.body) dcQueueContrast(document.body);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(dcRecheckAllContrast, 150);
+    new MutationObserver(muts => {
+        for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) { dcContrast.bgCache = new WeakMap(); dcQueueContrast(n); }
+    }).observe(document.body, { childList: true, subtree: true });
+});
+window.addEventListener('load', () => { setTimeout(dcRecheckAllContrast, 200); setTimeout(dcRecheckAllContrast, 900); });
+// Pages animate colours (transition: all .15s … .3s): judge again once a colour transition has finished.
+document.addEventListener('transitionend', e => {
+    if (!/color|background|^all$/.test(e.propertyName) || !(e.target instanceof Element)) return;
+    dcContrast.bgCache = new WeakMap();
+    dcQueueContrast(e.target);
+}, true);
 
 
 // Shared string-escaping helper for building onclick="..." attributes safely.
