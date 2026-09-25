@@ -792,6 +792,8 @@
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
 </head>
 <body>
 
@@ -832,6 +834,7 @@
           <button class="pos-btn active" data-pos="all" onclick="setPosFilter('all')">🌟 Alle (2481)</button>
           <button class="pos-btn" data-pos="verb" onclick="setPosFilter('verb')">⚡ Nur Verben (721)</button>
           <button class="pos-btn trennbar-btn" data-pos="trennbar" onclick="setPosFilter('trennbar')">✂️ Trennbare Verben (<span id="countTrennbar">180+</span>)</button>
+          <button class="pos-btn trennbar-btn" data-pos="untrennbar" onclick="setPosFilter('untrennbar')">🔒 Untrennbare Verben (<span id="countUntrennbar">…</span>)</button>
           <button class="pos-btn" data-pos="noun" onclick="setPosFilter('noun')">📦 Nur Nomen (1089)</button>
           <button class="pos-btn" data-pos="adj" onclick="setPosFilter('adj')">🎨 Nur Adjektive (671)</button>
           <button class="pos-btn compound-btn" data-pos="compound" onclick="setPosFilter('compound')">🧩 Komposita (<span id="countCompound">400+</span>)</button>
@@ -1338,17 +1341,13 @@
   const SEPARABLE_PREFIXES = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'fest', 'fort', 'her', 'hin', 'los', 'mit', 'nach', 'vor', 'weg', 'weiter', 'zu', 'zurück', 'zusammen'];
   const INSEPARABLE_PREFIXES = ['be', 'emp', 'ent', 'er', 'ge', 'miss', 'ver', 'zer'];
 
-  function isTrennbar(verbStr) {
-    if (!verbStr) return false;
-    const lower = verbStr.toLowerCase().trim();
-    return SEPARABLE_PREFIXES.some(p => lower.startsWith(p) && lower.length > p.length + 2);
+  // Prefix type from js/word-parts.js, checked against each verb's own forms (stand auf / besucht) —
+  // the old "starts with an/be…" test marked gehen as untrennbar and antworten as trennbar.
+  function prefixTypesOf(verbStr) {
+    return (typeof MemoryTips !== 'undefined' && verbStr) ? MemoryTips.prefixInfo('v', verbStr) : [];
   }
-
-  function isUntrennbar(verbStr) {
-    if (!verbStr) return false;
-    const lower = verbStr.toLowerCase().trim();
-    return INSEPARABLE_PREFIXES.some(p => lower.startsWith(p) && lower.length > p.length + 2);
-  }
+  function isTrennbar(verbStr) { return prefixTypesOf(verbStr).some(x => x.type === 't'); }
+  function isUntrennbar(verbStr) { return prefixTypesOf(verbStr).some(x => x.type === 'u'); }
 
   // Sister Verb Meaning lookup
   function getSisterMeaning(sisterVerb) {
@@ -1467,6 +1466,7 @@
     // Count trennbar
     const countTrennbar = allMasterEntries.filter(e => e.type === 'verb' && e.isTrennbar).length;
     document.getElementById('countTrennbar').textContent = countTrennbar;
+    document.getElementById('countUntrennbar').textContent = allMasterEntries.filter(e => e.type === 'verb' && e.isUntrennbar).length;
 
     const countCompound = allMasterEntries.filter(e => e.compoundBreakdown).length;
     document.getElementById('countCompound').textContent = countCompound > 0 ? countCompound : '400+';
@@ -1524,6 +1524,7 @@
     return allMasterEntries.filter(item => {
       if (currentPos === 'verb' && item.type !== 'verb') return false;
       if (currentPos === 'trennbar' && !(item.type === 'verb' && item.isTrennbar)) return false;
+      if (currentPos === 'untrennbar' && !(item.type === 'verb' && item.isUntrennbar)) return false;
       if (currentPos === 'noun' && item.type !== 'noun') return false;
       if (currentPos === 'adj' && item.type !== 'adj') return false;
       if (currentPos === 'compound' && !item.compoundBreakdown) return false;
@@ -1606,8 +1607,10 @@
     // 2. Verb Column
     let verbTrennbarBadge = '';
     if (item.verb) {
-      if (item.isTrennbar) verbTrennbarBadge = '<span class="trennbar-badge">✂️ TRENNBAR</span>';
-      else if (item.isUntrennbar) verbTrennbarBadge = '<span class="untrennbar-badge">🔒 UNTRENNBAR</span>';
+      const pts = prefixTypesOf(item.verb).filter(x => x.type === 't' || x.type === 'u');
+      if (pts.length) verbTrennbarBadge = pts.map(x => x.type === 't'
+        ? `<span class="trennbar-badge" title="${x.info.rule}">✂️ TRENNBAR ${x.p}-</span>`
+        : `<span class="untrennbar-badge" title="${x.info.rule}">🔒 UNTRENNBAR ${x.p}-</span>`).join(' ');
       else if (item.verb.endsWith('ieren')) verbTrennbarBadge = '<span class="untrennbar-badge">⚡ -IEREN</span>';
     }
 

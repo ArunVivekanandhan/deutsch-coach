@@ -261,7 +261,7 @@
 
   function recognizeHead(head, useRoots) {
     const h = head.toLowerCase();
-    if (PARTICLES.has(h) || h === 'haupt' || h === 'neben') return { de: h, en: '' };
+    if (PARTICLES.has(h) || h === 'haupt' || h === 'neben' || h === 'miss') return { de: h, en: '' };   // Miss|verständnis
     const app = recognizeIn(h, k => N.get(k), k => V.get(k), k => A.get(k));
     if (app || !useRoots) return app;
     return recognizeIn(h, k => gN(k, 20000), k => gV(k, 20000), k => gA(k, 20000));
@@ -865,6 +865,37 @@
     return parts;
   }
 
+  /* ---------- Prefix type: untrennbar (u) / trennbar (t) / doppelt (d, über-/um-/… can go either way) / other (x) ----------
+     Verbs: decided by their own forms (stand auf -> trennbar; besucht, no ge- -> untrennbar).
+     Nouns/adjectives: by the prefix in their Wortaufbau (Besuch -> be- untrennbar, Abfahrt -> ab- trennbar). */
+  const OTHER_PREFIX = new Set(['un', 'ur', 'haupt', 'neben', 'ober', 'innen', 'außen', 'hinter', 'zwischen', 'rück']);
+  const typeBySet = p => INSEP.includes(p) ? 'u' : DUAL.includes(p) ? 'd' : OTHER_PREFIX.has(p) ? 'x' : 't';
+  function splitParticles(px) {                              // "wiederher" -> ["wieder", "her"]
+    if (PREFIX_MEANING[px]) return [px];
+    for (const p of ALL_PREFIXES) if (px.startsWith(p) && PREFIX_MEANING[px.slice(p.length)]) return [p, px.slice(p.length)];
+    return [px];
+  }
+  function prefixTypes(cat, e, parts) {
+    const out = [];
+    if (cat === 'v') {
+      const tok = verbToken(e.w), ve = V.get(tok), x = ve && ve._x;
+      if (x && x.part && (x.sep || x.insep)) {
+        if (x.sep) {
+          splitParticles(x.sep).forEach(p => out.push([p, 't']));
+          // anerkennen: an- splits off, er- stays (anerkannt)
+          const rest = x.part.slice(x.sep.length);
+          for (const p of INSEP) {
+            if (x.root.startsWith(p) && x.root.length >= p.length + 3 && rest.startsWith(p) && (p === 'ge' ? !rest.startsWith('geg') : !rest.startsWith('ge'))) { out.push([p, 'u']); break; }
+          }
+        } else out.push([x.insep, 'u']);
+        return out;
+      }
+      if (x && x.part) return out;                           // forms known, no prefix confirmed (gehen, antworten)
+    }
+    for (const q of parts || []) if (q.k === 'prefix') out.push([q.t.replace(/-$/, ''), typeBySet(q.t.replace(/-$/, ''))]);
+    return out;
+  }
+
   // Compact storage used by js/word-parts.js: "ab-", "-ung", "+s", "treiben=to drive", "~kaufen=to buy"
   function encodeParts(parts) {
     return parts.map(x => x.k === 'prefix' || x.k === 'suffix' ? x.t : x.k === 'glue' ? '+' + x.t
@@ -887,6 +918,38 @@
     if (!hit) return null;
     return { word: k, syl: hit[0] || k, parts: hit[1] ? hit[1].map(decodePart) : null };
   }
+  const PTYPE = {
+    u: { de: 'untrennbar', en: 'inseparable', icon: '🛡️', color: '#b91c1c',
+      rule: 'never splits off, Perfekt without ge- (besuchen → ich besuche, hat besucht)',
+      ta: 'பிரியாத முன்னொட்டு: வாக்கியத்தில் பிரியாது, Perfekt-ல் ge- இல்லை' },
+    t: { de: 'trennbar', en: 'separable', icon: '🚀', color: '#1d4ed8',
+      rule: 'goes to the end of the sentence, ge- in the middle (anrufen → ich rufe … an, angerufen)',
+      ta: 'பிரியும் முன்னொட்டு: வாக்கிய இறுதிக்குச் செல்லும், Perfekt-ல் நடுவில் -ge-' },
+    d: { de: 'doppelt', en: 'separable or inseparable', icon: '🔀', color: '#7c3aed',
+      rule: 'depends on the verb (umziehen → zog um · umarmen → umarmte)',
+      ta: 'வினையைப் பொறுத்து பிரியும் அல்லது பிரியாது' },
+    x: { de: 'Wortbildung', en: 'word-building prefix', icon: '🧩', color: '#475569',
+      rule: 'changes the meaning (un- = not), not a verb prefix', ta: 'பொருளை மாற்றும் முன்னொட்டு' }
+  };
+  function prefixInfo(cat, w) {
+    const data = global.WORD_PARTS || {};
+    const k = cleanKey(w);
+    const hit = data[cat + '|' + k] || data['v|' + k] || data['n|' + k] || data['adj|' + k];
+    return hit && hit[2] ? hit[2].map(s => { const [p, t] = s.split(':'); return { p, type: t, info: PTYPE[t] }; }) : [];
+  }
+  function prefixText(cat, w) {
+    return prefixInfo(cat, w).map(x => `${x.p}- ${x.info.de}`).join(', ');
+  }
+  // Compact badge(s); with {full:true} also the rule (English + Tamil).
+  function prefixBadgeHTML(cat, w, opt) { return prefixBadgesFor(prefixInfo(cat, w), opt); }
+  function prefixBadgesFor(items, opt) {
+    const list = (items || []).filter(x => x.type !== 'x' || (opt && opt.all));
+    if (!list.length) return '';
+    const full = opt && opt.full;
+    return list.map(x => `<span class="prefix-badge prefix-${x.type}" title="${esc(x.info.en + ': ' + x.info.rule)}" style="display:inline-block; margin:2px 4px 2px 0; padding:1px 7px; border-radius:10px; border:1px solid ${x.info.color}; color:${x.info.color}; font-size:11px; font-weight:700; line-height:1.6; white-space:nowrap;">${x.info.icon} ${esc(x.p)}- ${x.info.de}</span>` +
+      (full ? `<span style="font-size:11.5px; opacity:.85;"> ${esc(x.info.rule)} · <span lang="ta">${esc(x.info.ta)}</span></span><br>` : '')).join('');
+  }
+
   function partsText(cat, w) {
     const r = lookupParts(cat, w);
     if (!r) return '';
@@ -898,13 +961,14 @@
     const items = r.parts ? r.parts.map(p => `<li><b>${esc(p.t)}</b>${p.m ? ` <span style="opacity:.8">(${esc(p.m)})</span>` : ''}${p.ta ? ` · <span lang="ta" style="color:var(--gold, #b98a2e);">${esc(p.ta)}</span>` : ''}${p.k === 'related' ? ' <i style="opacity:.7">— related word</i>' : ''}</li>`).join('') : '';
     return `<div class="wordparts" style="margin:8px 0; padding:8px 10px; border:1px solid var(--line, #e2e8f0); border-left:3px solid var(--blue, #2563eb); border-radius:6px; font-size:13px; line-height:1.5; text-align:left;">
       <div><b>🧩 Wortaufbau:</b> <span style="font-size:15px; letter-spacing:.3px;">${esc(r.syl)}</span></div>
+      ${prefixBadgeHTML(cat, w) ? `<div style="margin-top:3px;">${prefixBadgeHTML(cat, w, { full: true })}</div>` : ''}
       ${items ? `<div style="margin-top:3px;">Related parts:</div><ul style="margin:2px 0 0 18px; padding:0;">${items}</ul>
         <div style="margin-top:3px; font-size:10.5px; opacity:.6;">Tamil for the parts: AI-assisted translation, reviewed.</div>`
         : (cat === 'p' || /\s/.test(r.word) ? '' : `<div style="opacity:.8; margin-top:2px;">Grundwort — a basic word, not built from smaller parts.</div>`)}
     </div>`;
   }
 
-  global.MemoryTips = { PREFIX_TA, SUFFIX_TA, wordParts, encodeParts, lookupParts, partsHTML, partsText, cleanKey, PREFIX_MEANING, SUFFIX_MEANING,
+  global.MemoryTips = { PREFIX_TA, SUFFIX_TA, prefixTypes, prefixInfo, prefixText, prefixBadgeHTML, prefixBadgesFor, PTYPE, wordParts, encodeParts, lookupParts, partsHTML, partsText, cleanKey, PREFIX_MEANING, SUFFIX_MEANING,
     init, forWord, cheatCodes, verbLinguistics, splitCompound, verbInfo, pluralClass, entryFrom,
     ready: () => VLIST.length + NLIST.length + ALIST.length > 0, suffixStats: () => SUFFIX_STATS, _lex: () => ({ V, N, A }) };
 })(typeof window !== 'undefined' ? window : globalThis);

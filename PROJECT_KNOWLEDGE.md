@@ -764,6 +764,32 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-25 (Task 33) — Prefix type (untrennbar / trennbar) on every page + Excel prefix filter
+
+#### Task
+User: "Inseparable Prefix add in wherever it's page even excel also. In excel need filter Inseparable Prefix (start, end, contain)." — plus "do the best match for the project and also easy for learning".
+
+#### One checked classification for every word
+`js/word-parts.js` now has a 3rd field per word: its prefixes with type — **u** untrennbar (be-, ge-, er-, ver-, zer-, ent-, emp-, miss-), **t** trennbar (an-, auf-, ab-…), **d** doppelt (über-, unter-, um-, durch-… when not decided by a verb), **x** word-building prefix (un-, ur-, Haupt-…). Verbs are decided by their own forms (`MemoryTips.prefixTypes`): *stand auf* → auf- trennbar, *besucht* (no ge-) → be- untrennbar, *anerkennen* → an- trennbar + er- untrennbar; verbs whose forms show no prefix get none (*gehen, antworten, beten*). Nouns/adjectives take the prefix from their Wortaufbau (*Verkäufer* → ver- untrennbar, *Abtreibung* → ab- trennbar). 231 verbs untrennbar, 208 trennbar; 116 nouns/adjectives with an untrennbar prefix. *miss-* is now recognised in nouns (Missverständnis, Missgeschick).
+
+#### Shown everywhere a word is shown
+Shared renderer `MemoryTips.prefixBadgeHTML` / `prefixBadgesFor` (badge "🛡️ be- untrennbar" / "🚀 an- trennbar" / "🔀 um- doppelt", with the rule in English + Tamil in the Wortaufbau block):
+- Home card back, Verb / Nomen / Adjektiv trainers (inside the Wortaufbau block).
+- **Verben Hören** and **Thema-Sprechtrainer** verb cards (new badge).
+- **Continuous Verb Speaker**: card shows the Wortaufbau + badge instead of its old prefix/root guess (which split *gehen* into ge + hen); new "🛡️ Inseparable (Untrennbar)" chip; the "Trennbar" chip now uses the checked type (it used "Präteritum has a space", which counted *führte zu*).
+- **Master Grid**: `isTrennbar`/`isUntrennbar` used "starts with an/be…" (gehen = untrennbar, antworten = trennbar) — now the checked type; badges name the prefix; new "🔒 Untrennbare Verben (229)" filter.
+- **Excel sheet**: new column "🛡️ Präfix (trennbar / untrennbar)" next to the word (badges; exported as text, e.g. "an- trennbar, er- untrennbar"), new preset "Präfixe lernen", and a new filter row **"🛡️ Präfix / Wortteil"**: *beginnt mit / endet mit / enthält* + text (matched on the bare word, no article / "sich"), a prefix-type dropdown (untrennbar / trennbar / doppelt / Wortbildung / ohne Präfix), and one-click chips for the 8 untrennbar prefixes with counts. With *beginnt mit* + a type, the text must be the classified prefix itself, so "be" + untrennbar finds *besuchen* but not *beten*, "ge" finds *gehören/gefallen* but not *gehen/geben*. "Filter zurücksetzen" clears it.
+
+#### Testing
+New suite (21 checks): chips + counts, ge-/be- chips exclude gehen/beten, start/end/contains, trennbar-only, ohne Präfix, column text for anerkennen, reset; Master Grid classification + filter; Continuous Verb Speaker chips; badges on Verben Hören, Thema, home (verbs and nouns), Nomen data; zero page errors. All earlier suites, 26-page sweep, `node --check`, `build.py` pass.
+
+#### Files Changed
+- `js/memory-tips.js`, `js/word-parts.js` (regenerated), `scripts/build_word_parts.py`, `scripts/word_parts_meanings.tsv`, `sw.js`
+- `Deutsch_Wortschatz_Excel_Sheet.html`, `Wortschatz_Master_Grid.html`, `Continuous_Verb_Speaker.html`, `Verben_Hoeren_EN_DE.html`, `Thema_Sprech_Trainer.html`
+- `PROJECT_KNOWLEDGE.md` (this entry)
+
+---
+
 ### 2026-09-25 (Task 32) — Tamil for every word part, reviewed root meanings, and 207 wrong Tamil values fixed
 
 #### Task

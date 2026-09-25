@@ -372,6 +372,7 @@
     .col-topic { width: 100px; }
     .col-mnemonic { width: 220px; }
     .col-parts { width: 240px; }
+    .col-prefix { width: 170px; }
 
     /* Cells */
     .excel-table td {
@@ -704,6 +705,27 @@
 
       <button class="filter-chip" id="colFilterToggle" onclick="toggleColumnFilters()" style="margin-left:10px;" title="Show a text filter under every column header">🔽 Spaltenfilter</button>
       <button class="filter-chip" onclick="resetAllFilters()" title="Clear every filter and the search">✖ Filter zurücksetzen</button>
+    </div>
+
+    <!-- Präfix / Wortteil filter: spelling (beginnt mit / endet mit / enthält) + checked prefix type -->
+    <div class="quick-chips-row" id="affixRow">
+      <span class="filter-label" style="margin-left:0;">🛡️ Präfix / Wortteil:</span>
+      <select id="affixMode" class="filter-select" onchange="setAffixFilter()" aria-label="Wie vergleichen">
+        <option value="start">beginnt mit</option>
+        <option value="end">endet mit</option>
+        <option value="contains">enthält</option>
+      </select>
+      <input type="text" id="affixText" class="filter-select" style="width:110px;" placeholder="z. B. ver, be, ung" oninput="setAffixFilter()" aria-label="Wortteil">
+      <select id="prefixType" class="filter-select" onchange="setAffixFilter()" aria-label="Präfix-Typ">
+        <option value="all">Alle Präfix-Typen</option>
+        <option value="u">🛡️ untrennbar (inseparable)</option>
+        <option value="t">🚀 trennbar (separable)</option>
+        <option value="d">🔀 doppelt (über-, um-, unter-…)</option>
+        <option value="x">🧩 Wortbildung (un-, ur-…)</option>
+        <option value="none">ohne Präfix</option>
+      </select>
+      <span class="filter-label">Untrennbar:</span>
+      <span id="insepChips" style="display:contents;"></span>
     </div>
 
     <!-- Read-aloud bar: reads the visible (filtered + sorted) rows -->
@@ -1071,6 +1093,9 @@ if (document.readyState === 'loading') {
   let filterLevel = 'all';
   let filterGender = 'all';
   let filterTopic = 'all';
+  // Präfix / Wortteil filter: spelling match on the bare word + checked prefix type (js/word-parts.js)
+  let affixText = '', affixMode = 'start', prefixType = 'all';
+  const INSEP_PREFIXES_LIST = ['be', 'ge', 'er', 'ver', 'zer', 'ent', 'emp', 'miss'];
   let globalSearchTerm = '';
   let colFilters = {};
   let showColFilters = false;
@@ -1124,6 +1149,9 @@ if (document.readyState === 'loading') {
     { key:'word', label:'Deutsches Wort', exportLabels:['Deutsches Wort'],
       cell:(r,i)=>`<td class="col-word" style="font-weight:700;">${escHTML(r.word)}${audioBtn(i,'word')}</td>`,
       exportValues:(r)=>[r.word] },
+    { key:'prefix', label:'🛡️ Präfix (trennbar / untrennbar)', exportLabels:['Präfix'],
+      cell:(r)=>`<td class="col-prefix" title="${escHTML(r.prefix)}">${typeof MemoryTips !== 'undefined' ? MemoryTips.prefixBadgesFor(r.pfx, { all: true }) : escHTML(r.prefix)}</td>`,
+      exportValues:(r)=>[r.prefix], filterText:(r)=>r.prefix },
     { key:'noun', label:'Nomen (Sg. & Pl.)', exportLabels:['Nomen'],
       cell:(r,i)=>`<td class="col-noun">${escHTML(r.noun)}${audioBtn(i,'noun')}</td>`,
       exportValues:(r)=>[r.noun] },
@@ -1188,7 +1216,8 @@ if (document.readyState === 'loading') {
   const DEFAULT_COL_ORDER = COLUMN_DEFS.map(c => c.key);
   const COLUMN_PRESETS = [
     { name:'Standard',      cols: DEFAULT_COL_ORDER },
-    { name:'Verben lernen', cols: ['en','word','parts','praesens','praet','perfekt','level','ta'] },
+    { name:'Verben lernen', cols: ['en','word','prefix','parts','praesens','praet','perfekt','level','ta'] },
+    { name:'Präfixe lernen', cols: ['word','prefix','parts','en','praet','perfekt','ta'] },
     { name:'Nomen lernen',  cols: ['en','gender','word','parts','noun','level','topic','ta'] },
     { name:'Adjektive',     cols: ['en','word','adj','level','ta'] },
     { name:'Kompakt',       cols: ['en','word','pos','level'] },
@@ -1332,6 +1361,10 @@ if (document.readyState === 'loading') {
         rowNum: ALL_ROWS.length + 1,
         word: inf,
         parts: typeof MemoryTips !== 'undefined' ? MemoryTips.partsText('v', inf) : '',
+        prefix: typeof MemoryTips !== 'undefined' ? MemoryTips.prefixText('v', inf) : '',
+        pfx: typeof MemoryTips !== 'undefined' ? MemoryTips.prefixInfo('v', inf) : [],
+        bare: String(inf).replace(/\([^)]*\)/g, ' ').replace(/^sich\s+/, '').trim().toLowerCase(),
+        pcat: 'v',
         pos: 'Verb',
         ...levelInfo(v),
         gender: NO_VALUE,
@@ -1366,6 +1399,10 @@ if (document.readyState === 'loading') {
         rowNum: ALL_ROWS.length + 1,
         word: fullNoun,
         parts: typeof MemoryTips !== 'undefined' ? MemoryTips.partsText('n', n.sg) : '',
+        prefix: typeof MemoryTips !== 'undefined' ? MemoryTips.prefixText('n', n.sg) : '',
+        pfx: typeof MemoryTips !== 'undefined' ? MemoryTips.prefixInfo('n', n.sg) : [],
+        bare: String(n.sg).replace(/\([^)]*\)/g, ' ').replace(/^sich\s+/, '').trim().toLowerCase(),
+        pcat: 'n',
         pos: 'Nomen',
         ...levelInfo(n),
         gender: n.a,
@@ -1400,6 +1437,10 @@ if (document.readyState === 'loading') {
         rowNum: ALL_ROWS.length + 1,
         word: a.w,
         parts: typeof MemoryTips !== 'undefined' ? MemoryTips.partsText('adj', a.w) : '',
+        prefix: typeof MemoryTips !== 'undefined' ? MemoryTips.prefixText('adj', a.w) : '',
+        pfx: typeof MemoryTips !== 'undefined' ? MemoryTips.prefixInfo('adj', a.w) : [],
+        bare: String(a.w).replace(/\([^)]*\)/g, ' ').replace(/^sich\s+/, '').trim().toLowerCase(),
+        pcat: 'adj',
         pos: 'Adjektiv',
         ...levelInfo(a),
         gender: NO_VALUE,
@@ -1427,6 +1468,7 @@ if (document.readyState === 'loading') {
 
     renderLevelChips();
     renderTopicOptions();
+    renderInsepChips();
     applyFiltersAndRender();
   }
 
@@ -1478,6 +1520,53 @@ if (document.readyState === 'loading') {
     sel.classList.toggle('has-value', filterTopic !== 'all');
   }
 
+  // Spelling: the bare word (no article / "sich") begins with / ends with / contains the text.
+  // Type: the word has a prefix of that checked type; with "beginnt mit" + a type, the text must BE that prefix
+  // (so "be" + untrennbar finds besuchen, not beten; "ge" + untrennbar finds gehören, not gehen).
+  function affixMatches(r) {
+    const t = affixText.trim().toLowerCase().replace(/^-|-$/g, '');
+    const pfx = r.pfx || [];
+    if (prefixType === 'none' && pfx.length) return false;
+    if (prefixType !== 'all' && prefixType !== 'none') {
+      const ofType = pfx.filter(x => x.type === prefixType);
+      if (!ofType.length) return false;
+      if (t && affixMode === 'start' && !ofType.some(x => x.p === t)) return false;
+    }
+    if (!t) return true;
+    const w = r.bare || '';
+    if (affixMode === 'start') return w.startsWith(t);
+    if (affixMode === 'end') return w.endsWith(t);
+    return w.includes(t);
+  }
+  function setAffixFilter() {
+    affixMode = document.getElementById('affixMode').value;
+    affixText = document.getElementById('affixText').value;
+    prefixType = document.getElementById('prefixType').value;
+    ['affixMode', 'affixText', 'prefixType'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.toggle('has-value', id === 'affixText' ? !!affixText.trim() : id === 'prefixType' ? prefixType !== 'all' : affixMode !== 'start');
+    });
+    renderInsepChips();
+    applyFiltersAndRender();
+  }
+  // One click: every word with this inseparable prefix (checked), e.g. ver- → verstehen, Verkäufer, verfügbar.
+  function setInsepPrefix(p) {
+    const same = prefixType === 'u' && affixMode === 'start' && affixText === p;
+    document.getElementById('affixMode').value = 'start';
+    document.getElementById('affixText').value = same ? '' : p;
+    document.getElementById('prefixType').value = same ? 'all' : 'u';
+    setAffixFilter();
+  }
+  function renderInsepChips() {
+    const box = document.getElementById('insepChips');
+    if (!box) return;
+    box.innerHTML = INSEP_PREFIXES_LIST.map(p => {
+      const n = ALL_ROWS.filter(r => (r.bare || '').startsWith(p) && (r.pfx || []).some(x => x.p === p && x.type === 'u')).length;
+      const on = prefixType === 'u' && affixMode === 'start' && affixText === p;
+      return `<button class="filter-chip ${on ? 'active' : ''}" onclick="setInsepPrefix('${p}')" title="Alle Wörter mit dem untrennbaren Präfix ${p}-">${p}- (${n})</button>`;
+    }).join('');
+  }
+
   function applyFiltersAndRender() {
     // Row indexes change with filters/sort, so a running read-through can't continue safely.
     if (reader.active) stopReading('Vorlesen gestoppt – Filter/Sortierung geändert');
@@ -1494,6 +1583,7 @@ if (document.readyState === 'loading') {
       if (!levelMatches(effectiveLevel(r), filterLevel)) return false;
       if (filterGender !== 'all' && r.gender !== filterGender) return false;
       if (filterTopic !== 'all' && r.topic !== filterTopic) return false;
+      if (!affixMatches(r)) return false;
 
       for (const [col, q] of activeColFilters) {
         const text = col.filterText ? col.filterText(r) : r[col.key];
@@ -1650,6 +1740,11 @@ if (document.readyState === 'loading') {
 
   function resetAllFilters() {
     filterPos = 'all'; filterLevel = 'all'; filterGender = 'all'; filterTopic = 'all';
+    affixText = ''; affixMode = 'start'; prefixType = 'all';
+    document.getElementById('affixText').value = ''; document.getElementById('affixMode').value = 'start';
+    document.getElementById('prefixType').value = 'all';
+    ['affixMode', 'affixText', 'prefixType'].forEach(id => document.getElementById(id).classList.remove('has-value'));
+    renderInsepChips();
     includeEstimatedLevels = true;
     globalSearchTerm = ''; colFilters = {};
     document.getElementById('globalSearchInput').value = '';

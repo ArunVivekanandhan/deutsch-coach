@@ -28,9 +28,12 @@ const inp = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 require(process.argv[3]);
 MemoryTips.init(inp.lexicon);
 const out = {};
+const pfx = {};
 for (const [cat, w, a, p, en] of inp.queries) {
   const parts = MemoryTips.wordParts(cat, { w, a, p, en });
   out[cat + '|' + w] = parts ? MemoryTips.encodeParts(parts) : 0;
+  const t = cat === 'p' ? [] : MemoryTips.prefixTypes(cat, { w, a, p, en }, parts);
+  if (t.length) pfx[cat + '|' + w] = t.map(([q, ty]) => q + ':' + ty);
 }
 const affixGaps = new Set();
 for (const v of Object.values(out)) for (const x of (v || [])) {
@@ -38,6 +41,7 @@ for (const v of Object.values(out)) for (const x of (v || [])) {
   else if (/^-/.test(x)) { const k = x.slice(1); if (!MemoryTips.SUFFIX_MEANING[k] || !MemoryTips.SUFFIX_TA[k]) affixGaps.add(x); }
 }
 out.__affixGaps = [...affixGaps];
+out.__prefixes = pfx;
 process.stdout.write(JSON.stringify(out));
 """
 
@@ -185,6 +189,7 @@ def generate():
             sys.exit('node failed: ' + res.stderr[:500])
         parts = json.loads(res.stdout)
     gaps = parts.pop('__affixGaps', [])
+    prefixes = parts.pop('__prefixes', {})
     if gaps:
         sys.exit('Prefixes/suffixes without English or Tamil in js/memory-tips.js (PREFIX_/SUFFIX_MEANING, PREFIX_/SUFFIX_TA): ' + ', '.join(gaps))
     meanings, missing = load_meanings(), set()
@@ -196,7 +201,10 @@ def generate():
     data = {}
     for (c, w) in sorted(queries):
         pw = parts.get(c + '|' + w, 0) if c != 'p' else 0
-        data[c + '|' + w] = [syllables(w, dic, [x.split('=')[0] for x in pw] if pw else None), pw]
+        entry = [syllables(w, dic, [x.split('=')[0] for x in pw] if pw else None), pw]
+        if prefixes.get(c + '|' + w):
+            entry.append(prefixes[c + '|' + w])               # ["be:u"] untrennbar / trennbar / doppelt / other
+        data[c + '|' + w] = entry
     split = sum(1 for v in data.values() if v[1])
     body = ',\n'.join(json.dumps(k, ensure_ascii=False) + ':' + json.dumps(v, ensure_ascii=False, separators=(',', ':'))
                       for k, v in data.items())
@@ -204,7 +212,7 @@ def generate():
             '   Wortaufbau for every word: [syllables, parts]. Syllables from the LibreOffice de_DE hyphenation\n'
             '   patterns (pyphen); parts from MemoryTips.wordParts() with all words + Ding roots (TU Chemnitz, GPL-2+) ("ab-" prefix,\n'
             '   "-ung" suffix, "+s" linking letter, "treiben=meaning@Tamil" root, "~kaufen=meaning@Tamil" related word,\n'
-            '   0 = Grundwort). Root meanings + Tamil from scripts/word_parts_meanings.tsv (reviewed; Tamil AI-assisted).\n'
+            '   0 = Grundwort). 3rd field: prefixes with type (u untrennbar, t trennbar, d doppelt, x other). Root meanings + Tamil from scripts/word_parts_meanings.tsv (reviewed; Tamil AI-assisted).\n'
             '   %d words, %d split into parts. */\n'
             'window.WORD_PARTS = {\n%s\n};\n') % (len(data), split, body)
     return text, len(data), split

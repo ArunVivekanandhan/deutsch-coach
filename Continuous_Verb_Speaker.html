@@ -602,6 +602,8 @@ html.dark-theme, body.dark {
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
 </head>
 <body onload="initContinuousApp()">
 
@@ -725,6 +727,7 @@ html.dark-theme, body.dark {
         <div class="chip" data-val="strong" onclick="setTypeFilter('strong')">Strong (Ablaut / Irregular)</div>
         <div class="chip" data-val="mixed" onclick="setTypeFilter('mixed')">Mixed (Gemischt)</div>
         <div class="chip" data-val="trennbar" onclick="setTypeFilter('trennbar')">✂️ Separable (Trennbar)</div>
+        <div class="chip" data-val="untrennbar" onclick="setTypeFilter('untrennbar')">🛡️ Inseparable (Untrennbar)</div>
         <div class="chip" data-val="reflexiv" onclick="setTypeFilter('reflexiv')">🔄 Reflexive (sich...)</div>
       </div>
     </div>
@@ -1039,7 +1042,9 @@ function filterAndRebuildQueue() {
     if (curTypeFilter === 'weak') matchType = (v.typ === 'weak');
     else if (curTypeFilter === 'strong') matchType = (v.typ === 'strong');
     else if (curTypeFilter === 'mixed') matchType = (v.typ === 'mixed');
-    else if (curTypeFilter === 'trennbar') matchType = (v.praeteritum && v.praeteritum.includes(' '));
+    // prefix type checked against the verb's own forms (js/word-parts.js); "führte zu" is not separable
+    else if (curTypeFilter === 'trennbar') matchType = typeof MemoryTips !== 'undefined' && MemoryTips.prefixInfo('v', v.inf).some(x => x.type === 't');
+    else if (curTypeFilter === 'untrennbar') matchType = typeof MemoryTips !== 'undefined' && MemoryTips.prefixInfo('v', v.inf).some(x => x.type === 'u');
     else if (curTypeFilter === 'reflexiv') matchType = (v.inf && v.inf.startsWith('sich '));
 
     let matchSearch = true;
@@ -1159,8 +1164,13 @@ function renderActiveCard(v) {
   document.getElementById('cardPerfekt').textContent = v.perfekt || '—';
   document.getElementById('cardNoun').textContent = v.noun || '—';
 
-  const ana = analyzeVerb(v.inf);
   const morphDiv = document.getElementById('cardMorphology');
+  // Wortaufbau + prefix type from js/word-parts.js (checked); the old prefix/root guess split gehen into ge + hen.
+  if (typeof MemoryTips !== 'undefined' && MemoryTips.lookupParts('v', v.inf)) {
+    morphDiv.innerHTML = MemoryTips.partsHTML('v', v.inf);
+    return;
+  }
+  const ana = analyzeVerb(v.inf);
   if (ana.prefix && ana.root) {
     morphDiv.innerHTML = '<div class="morph-box">' +
       '<div class="morph-formula">' +

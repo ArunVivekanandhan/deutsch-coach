@@ -156,6 +156,8 @@
 </div>
 
 <script src="js/german-conjugation.js"></script>
+<script src="js/memory-tips.js"></script>
+<script src="js/word-parts.js"></script>
 <script>
 /* =========================================================================
    DATA: 7 topics x 5 topic-relevant verbs x 6 persons (ich/du/er/wir/ihr/sie),
@@ -655,6 +657,7 @@ function renderVerbCardHTML(thema, v){
         <div class="verb-icon">${ICON_SVGS[v.icon] || ICON_SVGS['abstract']}</div>
         <div class="verb-titlewrap">
           <div class="verb-inf">${v.inf}</div>
+          ${typeof MemoryTips !== 'undefined' ? `<div>${MemoryTips.prefixBadgeHTML('v', v.inf)}</div>` : ''}
           <div class="verb-en">${v.en}</div>
         </div>
         <span class="verb-badge ${done ? 'done' : ''}">${done ? '✓ Geübt' : '6 Sätze'}</span>

@@ -408,6 +408,8 @@
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/memory-tips.js"></script>
+  <script src="js/word-parts.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -571,6 +573,7 @@ function renderList() {
         <div class="en">${v.en}</div>
         ${tamilTxt}
         <div class="de">${v.inf}</div>
+        ${typeof MemoryTips !== 'undefined' ? `<div>${MemoryTips.prefixBadgeHTML('v', v.inf)}</div>` : ''}
         <div class="tenses">Präteritum: ${v.praeteritum || '—'} · Perfekt: ${v.perfekt || '—'} · Nomen: ${v.noun || '—'}</div>
       </div>
       ${typBadge}
