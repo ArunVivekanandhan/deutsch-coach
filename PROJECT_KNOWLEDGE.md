@@ -765,6 +765,24 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 79) — Konnektoren: why "bin" comes first + ≥ 3 examples PER SENTENCE TYPE
+User: "Top says verb goes to the end, but 'Weil der Bus nicht kam, bin ich zu spät zur Arbeit gekommen' — why does
+bin come first? How can you explain it here?" + "And each type scenario 3 examples minimum."
+- Answer shown on the page: "verb to the end" applies only INSIDE the Nebensatz; a Nebensatz at the start is
+  Position 1 as a whole, so the main-clause verb (bin) takes Position 2 right after the comma; gekommen goes to the
+  end (Satzklammer bin … gekommen). Added as a boxed example under the Gruppe-1 rule (.kx-two).
+- `js/konnektoren-posnote.js` (DCKonnNote): one generated line under every example, e.g. "① „Weil der Bus nicht kam,“
+  = der ganze Nebensatz ist Position 1 … → ② „bin“ … → ③ Subjekt „ich“ · Satzklammer „bin … gekommen“". All 102
+  (then 165) notes were read by hand; fixed: "war … weg" wrongly called separable, imperative "ruf mich an" (example
+  changed to "kannst du mich anrufen"), ü in übernachten, "ihr Antrag" vs "ihr".
+- Sentence types: Nebensatz hinten / vorne (sodass only hinten — it never starts a sentence), Position 1 and ADUSO:
+  einfach / mit Satzklammer; two-part: one type. 81 new sentences → 183 examples, ≥ 3 per type per connector.
+  New markup |x| = second verb part at the clause end (Partizip II / Infinitiv / separable prefix), dotted underline.
+- Checker (build step 19) now enforces ≥ 3 per type, "vorne" → verb right after the comma, |x| last in its clause
+  with a {verb} before it. Mutation-tested (3 planted errors caught).
+- Panels group examples under "↪ Nebensatz hinten" / "↩ Nebensatz vorne" / "① Einfach" / "② Mit Satzklammer".
+- Browser-tested 390/1100 px: 34 panels, 183 examples, no type < 3, no overflow, no JS errors.
+
 ### 2026-09-26 (Task 78) — Konnektoren-Referenz: at least 3 examples for EVERY connector
 User: "konnektoren_referenz → each one needs 3 examples minimum." (Before: 34 connector chips, 12 examples in total.)
 - New `js/konnektoren-examples.js` (DC_KONN_EX): 34 connectors × 3 = 102 examples with English + Tamil (Tamil
