@@ -762,6 +762,16 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 57) — Text-Trainer exam: one box per sentence + "what went wrong" explanations
+Request: "Instead of one box have multiple boxes to type one sentence, then check correct or if not explain what missed."
+- Exam tab has two modes (`dc_tt_exam_mode`): **🧩 one box per sentence** (default) and 📄 one big box (old behaviour).
+  Per-sentence mode: English paragraph on top (current sentence highlighted, click a sentence → jump to its box; turns
+  green/orange after checking), one textarea per sentence, Enter = check. Wrong → diff + explanation + rule (`focus`);
+  perfect → focus moves to the next box. First attempt counts; when all are checked the score goes to `dc_tt_exams`.
+- `explain(r)` (used by every diff on the page): lists words in the wrong place (same word missing + extra), wrong
+  forms/endings (article↔article, pronoun↔pronoun or same 4-letter stem, e.g. „den“ → „dem“, „mich“ → „mir“,
+  „meine“ → „meinen“), missing words, extra words and capitalisation/umlaut notes.
+
 ### 2026-09-26 (Task 56) — Text-Trainer: translate an English paragraph for the test
 Request: "Tomorrow I have a test: translate a text like this into German. How can I practise?" + "I have only one day: connectors,
 A1 sentence concepts, Akk and Dativ".
