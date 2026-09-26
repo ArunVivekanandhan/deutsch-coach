@@ -926,6 +926,7 @@
   <style>.suitelauncher, .hero-banner { display: none !important; }</style>
   <link rel="stylesheet" href="css/design-system.css">
           <script src="./assets/js/gamification.js"></script>
+  <script src="js/word-pictures.js"></script>
   <script src="js/icon-svgs.js"></script>
   <script src="js/srs-engine.js"></script>
   <script src="js/tts-engine.js"></script>
@@ -2138,6 +2139,8 @@ function getGenderBgClass(card) {
   return "";
 }
 function promptIconHTML(card){
+  const pic = wordPicHTML(card.cat === 'adj' ? 'a' : card.cat, card.w);
+  if (pic) return `<div class="wordicon">${pic}</div>`;
   if(!card.icon || !ICON_SVGS[card.icon]) return "";
   return `<div class="wordicon">${ICON_SVGS[card.icon]}</div>`;
 }

@@ -23,8 +23,15 @@ const ICON_SVGS = {
 };
 
 
+/* a real picture of the word (js/word-pictures.js, Task 51) when one exists, else the category line icon */
+function wordPicHTML(cat, word) {
+    const e = typeof dcWordPic === 'function' ? dcWordPic(cat, word) : '';
+    return e ? `<span class="wpic" role="img" aria-label="${word}" style="font-size:2.1em; line-height:1; display:inline-block;">${e}</span>` : '';
+}
 function getIcon(v) {
     if (!v) return ICON_SVGS['abstract'];
+    const pic = v.inf ? wordPicHTML('v', v.inf) : v.sg ? wordPicHTML('n', v.sg) : v.w ? wordPicHTML('a', v.w) : '';
+    if (pic) return pic;
     if (v.inf && v.inf.toLowerCase() === 'betreten') {
       return `
       <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">

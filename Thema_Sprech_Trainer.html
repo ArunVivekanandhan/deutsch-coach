@@ -139,6 +139,7 @@
   .empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13px;}
 </style>
   <link rel="stylesheet" href="css/design-system.css">
+  <script src="js/word-pictures.js"></script>
   <script src="js/icon-svgs.js"></script>
   <script src="js/tts-engine.js"></script>
   <script src="js/srs-engine.js"></script>
@@ -655,7 +656,7 @@ function renderVerbCardHTML(thema, v){
   return `
     <div class="verb-card ${isOpen ? 'open' : ''}" id="verbcard_${cssId(v.inf)}">
       <div class="verb-head" onclick="toggleVerb('${thema.id}','${escapeQ(v.inf)}')">
-        <div class="verb-icon">${ICON_SVGS[v.icon] || ICON_SVGS['abstract']}</div>
+        <div class="verb-icon">${getIcon(v)}</div>
         <div class="verb-titlewrap">
           <div class="verb-inf">${v.inf}</div>
           ${typeof MemoryTips !== 'undefined' ? `<div>${MemoryTips.prefixBadgeHTML('v', v.inf)}</div>` : ''}

@@ -759,6 +759,24 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 51) — Word pictures, Wohin/Wo pictures, preposition contractions
+
+#### Task
+User (class sketch "kitchen – die Küche", arrow into the room): "try to explain most of the word by image like this";
+class note "ich gehe ins Kino (in + das)".
+
+#### Done
+- **`js/word-pictures.js`** (`DC_WORD_PICS`, `dcWordPic(cat, word)`): a picture (emoji — offline, every device) for
+  1,113 words that can be pictured (577 nouns, 324 verbs, 212 adjectives; almost all A1/A2 nouns). Abstract words
+  have no entry on purpose. `getIcon()` in js/icon-svgs.js and `promptIconHTML()` on the home cards show the picture
+  (`wordPicHTML`), else the old category icon. Loaded on the 6 pages that load icon-svgs.js.
+  `scripts/check_word_pictures.py` (build.py) checks every key is a real word.
+- Grammatik-Regel-Trainer rule 3: `wohinWoPictureHTML()` — "Ich gehe in die Küche" (arrow into the room → Akkusativ)
+  vs. "Ich koche in der Küche" (inside → Dativ), Tamil -க்கு / -இல்; `contractionTableHTML()` — ins, im, ans, am, zum,
+  zur, beim, vom with examples, when not to contract, Kino ≠ Theater; 3 new drills (ins Kino, in der Küche, zum Arzt).
+
+---
+
 ### 2026-09-26 (Task 50) — Grammar gap research, Tamil ↔ German bridges, grammar fixes, reflexive verbs, preposition pictures
 
 #### Task

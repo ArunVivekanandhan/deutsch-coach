@@ -11,7 +11,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 # 1. Update sw.js automatically
 html_files = glob.glob("*.html")
-assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/word-data.js', './js/lexicon.js', './js/tamil-meanings.js', './js/satzbau-data.js', './js/tutor-scripts.js', './js/grammar-tamil.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
+assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/word-data.js', './js/lexicon.js', './js/tamil-meanings.js', './js/satzbau-data.js', './js/tutor-scripts.js', './js/grammar-tamil.js', './js/word-pictures.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
 assets += [f"./js/call/{f}" for f in sorted(os.listdir("js/call")) if f.endswith(".js")]  # video-call engine (Simli bundle is loaded on demand only)
 assets += ["./css/fonts.css"] + [f"./fonts/{f}" for f in sorted(os.listdir("fonts")) if f.endswith(".woff2")]  # self-hosted fonts (offline)
 urls_to_cache = ["./", "./index.html"] + [f"./{f}" for f in html_files if f != "index.html"] + assets
@@ -94,4 +94,9 @@ if tut.returncode != 0:
 # 11. Tamil ↔ German grammar bridges (js/grammar-tamil.js) for the Grammatik-Regel-Trainer.
 gta = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_grammar_tamil.py")])
 if gta.returncode != 0:
+    sys.exit(1)
+
+# 12. Word pictures (js/word-pictures.js): every key is a real word.
+wpc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_word_pictures.py")])
+if wpc.returncode != 0:
     sys.exit(1)

@@ -547,6 +547,8 @@ const GRAMMAR_RULES = [
         <tr><td><b>Akkusativ Preps</b></td><td><b>Akkusativ</b></td><td>für, ohne, um, durch, gegen</td><td>Das Geschenk ist <b>für meinen Vater</b>.</td></tr>
       </table>
       ${prepPictureGridHTML()}
+      ${wohinWoPictureHTML()}
+      ${contractionTableHTML()}
     `,
     examples: [
       {de:"Ich fahre jeden Tag mit dem Zug (Dat) zur Arbeit (Dat).", en:"I travel by train to work every day."},
@@ -554,6 +556,27 @@ const GRAMMAR_RULES = [
       {de:"Wir treffen uns vor dem Kino (Dat).", en:"We are meeting in front of the cinema. (Wo? → Dativ)"}
     ],
     drills: [
+      {
+        prompt: "Heute Abend gehen wir ___ Kino. (in + das)",
+        en: "Tonight we are going to the cinema.",
+        options: ["ins", "im", "in", "zum"],
+        correct: 0,
+        explain: "Wohin? → Akkusativ: in + das Kino = ins Kino."
+      },
+      {
+        prompt: "Ich koche gerade ___ Küche.",
+        en: "I am cooking in the kitchen right now.",
+        options: ["in der", "in die", "im", "ins"],
+        correct: 0,
+        explain: "Wo? (already inside, no movement) → Dativ: die Küche → in der Küche. Moving there would be: Ich gehe in die Küche."
+      },
+      {
+        prompt: "Morgen muss ich ___ Arzt gehen.",
+        en: "Tomorrow I have to go to the doctor.",
+        options: ["zum", "zur", "ins", "beim"],
+        correct: 0,
+        explain: "Going to a person → zu + Dativ: zu + dem Arzt = zum Arzt. (beim Arzt = at the doctor's.)"
+      },
       {
         prompt: "Er stellt die Lampe neben ___ Schreibtisch.",
         en: "He puts the lamp next to the desk.",
@@ -2616,6 +2639,33 @@ function prepPictureGridHTML(){
       <div class="prep-ex"><b>Wo?</b> ${p[4]} <button class="speak-btn" style="padding:0 5px;" onclick="speakText('${p[4]}')">🔊</button></div>
       <div class="prep-ex"><b>Wohin?</b> ${p[5]} <button class="speak-btn" style="padding:0 5px;" onclick="speakText('${p[5]}')">🔊</button></div></div>`).join('')}</div>
     <div class="note" style="font-size:11.5px; margin-top:4px;">🇮🇳 Tamil puts these words <i>after</i> the noun (மேஜைக்கு மேல்), German puts them <i>before</i> it (auf dem Tisch) — the meaning is the same. 🤖 Tamil KI-unterstützt.</div>`;
+}
+
+/* Wohin? (arrow into the room → Akkusativ) vs. Wo? (already inside → Dativ) — like the class sketch "in die / in der Küche" */
+function wohinWoPictureHTML(){
+  const room = `<rect x="50" y="10" width="80" height="70" rx="3" fill="none" stroke="currentColor" stroke-width="3" opacity=".7"/><rect x="62" y="74" width="22" height="6" fill="var(--paper, #fff)"/><text x="90" y="30" font-size="11" text-anchor="middle" fill="currentColor" opacity=".8">Küche 🍳</text>`;
+  const inTo = room + `<path d="M20 95 Q 50 90 70 60" fill="none" stroke="#e11d48" stroke-width="3" marker-end="url(#arr)"/><circle cx="20" cy="95" r="6" fill="#e11d48"/>`;
+  const inside = room + `<circle cx="95" cy="55" r="8" fill="#2563eb"/>`;
+  const defs = `<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#e11d48"/></marker></defs>`;
+  const card = (svg, head, de, en, why) => `<div class="prep-tile" style="gap:4px;"><svg viewBox="0 0 150 105" width="170" height="119" role="img" aria-label="${head}">${defs}${svg}</svg>
+    <div class="prep-w" style="font-size:17px;">${head}</div><div style="font-size:14px; text-align:center;"><b>${de}</b> <button class="speak-btn" style="padding:0 5px;" onclick="speakText('${de}')">🔊</button></div>
+    <div class="prep-en">${en}</div><div class="prep-ex">${why}</div></div>`;
+  return `<div style="margin-top:14px; font-weight:700; font-size:13px;">➡️ Wohin? vs. 📍 Wo? — the arrow decides the case</div>
+    <div class="prep-grid" style="grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));">
+      ${card(inTo, '➡️ Wohin? → Akkusativ', 'Ich gehe in die Küche.', 'I am going into the kitchen.', 'Movement <b>into</b> the room (arrow crosses the door) → <b>die</b> Küche (Akk.). Verbs: gehen, legen, stellen, hängen, setzen.')}
+      ${card(inside, '📍 Wo? → Dativ', 'Ich koche in der Küche.', 'I am cooking in the kitchen.', 'Already <b>inside</b>, no crossing → <b>der</b> Küche (Dat.). Verbs: sein, liegen, stehen, hängen, sitzen, kochen, wohnen.')}
+    </div>
+    <div class="note" style="font-size:11.5px; margin-top:4px;">🇮🇳 Tamil does the same with endings: <span lang="ta">சமையலறைக்குப் போகிறேன்</span> (-க்கு, Wohin) · <span lang="ta">சமையலறையில் சமைக்கிறேன்</span> (-இல், Wo).</div>`;
+}
+/* preposition + article = one word (ins Kino, im Kino, zum Arzt …) */
+function contractionTableHTML(){
+  const R = [['in + das', 'ins', 'Ich gehe ins Kino.', 'Akk · Wohin'], ['in + dem', 'im', 'Ich bin im Kino.', 'Dat · Wo'], ['an + das', 'ans', 'Wir fahren ans Meer.', 'Akk · Wohin'],
+    ['an + dem', 'am', 'Wir sind am Meer. · am Montag', 'Dat · Wo / Zeit'], ['zu + dem', 'zum', 'Ich gehe zum Arzt.', 'Dat (zu = immer Dativ)'], ['zu + der', 'zur', 'Sie geht zur Schule.', 'Dat (feminin)'],
+    ['bei + dem', 'beim', 'Ich bin beim Arzt.', 'Dat'], ['von + dem', 'vom', 'Ich komme vom Bahnhof.', 'Dat']];
+  return `<div style="margin-top:14px; font-weight:700; font-size:13px;">🔗 Präposition + Artikel = ein Wort (Kurzform)</div>
+    <table class="de-table" style="margin-top:6px;"><tr><th>Lang</th><th>Kurz</th><th>Beispiel</th><th>Fall</th></tr>
+    ${R.map(r => `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]} <button class="speak-btn" style="padding:0 5px;" onclick="speakText('${r[2].split(' · ')[0]}')">🔊</button></td><td>${r[3]}</td></tr>`).join('')}</table>
+    <div class="note" style="font-size:11.5px; margin-top:4px;">Only with der/das-forms (dem, das) and zur (der). Say the long form when you mean <i>this particular</i> one: „in dem Kino, das neu ist“. Spoken also: aufs, übers, unters, fürs. „das Kino“ = cinema; a stage theatre is „das Theater“.</div>`;
 }
 
 /* ---------------- Tamil ↔ German bridges (js/grammar-tamil.js, Task 50) ---------------- */
