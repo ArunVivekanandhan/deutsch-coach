@@ -762,6 +762,24 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 62) — Adjective data: correct Steigerung, "nicht steigerbar", 123 missing core adjectives
+Request: "yes fix all open" (the Komparativ/Superlativ check from the user's class table).
+- **Forms**: every ADJS entry checked against the German rules (`scripts/check_adjectives.py`, build step 17):
+  65 wrong forms corrected (mostly present participles and unstressed -isch: *am spannendesten → am spannendsten*,
+  *am romantischesten → am romantischsten*); typ labels fixed (lang/kurz irregular → umlaut, stolz umlaut → regular,
+  groß → irregular because of *am größten*).
+- **Not comparable**: 197 adjectives get `typ: "none"` and empty komp/sup (tot, schwanger, verheiratet, kostenlos,
+  täglich-type words, nationalities, colours like rosa/lila, past participles such as *annektiert*, adverbs such as
+  *bedauerlicherweise*) — they had invented forms like *am annulliertesten*. Adjektiv- and Nomen-Trainer: new filter
+  "Nicht steigerbar", rule box, "— nicht steigerbar" in the form rows, quiz accepts the word itself, and the old
+  "(kleiner, am am kleinsten)" double-"am" label is fixed. Übersetzer shows "Steigerung: nicht steigerbar".
+- Cleaned entries: "stinksauer (ugs.)" → stinksauer, "bio (=biologisch)" → bio, "(voll)autonom" → autonom,
+  "defekt = kaputt" → defekt, "letzter/letzte/letztes" → letzte; duplicate "ernsthaft = ernst" removed.
+- **123 missing core adjectives added** (breit, eng, laut, leise, müde, nett, freundlich, einfach, schwierig,
+  interessant, all colours, verheiratet/ledig/geschieden, pünktlich, kaputt, …) with English, Tamil 🤖, example
+  sentences 🤖 and 66 pictures; home deck (SYNCED_WORDS) synced, lexicon / word parts / frequency ranks regenerated
+  (+20 root meanings). `fill_home_forms.py` now also corrects home-card comparison forms to the checked master.
+
 ### 2026-09-26 (Task 61) — Organise the pages: one site map, grouped menu, home = daily plan
 Request: "Lots of pages are scattered — find and organise them, and check what learning/practice enhancements are needed."
 - **`DC_SITEMAP`** (top of `js/app-shell.js`): every page once, in 8 groups by skill — Start · Wörter · Grammatik &

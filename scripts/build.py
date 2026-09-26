@@ -120,3 +120,8 @@ if ttc.returncode != 0:
 smc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_sitemap.py")])
 if smc.returncode != 0:
     sys.exit(1)
+
+# 17. Adjective comparison forms (js/word-data.js ADJS) follow the German rules; non-comparable words have none.
+adc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_adjectives.py")])
+if adc.returncode != 0:
+    sys.exit(1)

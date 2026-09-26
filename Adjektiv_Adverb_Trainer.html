@@ -34,7 +34,7 @@
   .chip .dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
   .dot-e{background:var(--blue);} .dot-er{background:var(--red);} .dot-en{background:var(--gold);}
   .dot-s{background:var(--purple);} .dot-unchanged{background:var(--green);} .dot-umlaut_only{background:#8a6a1e;}
-  .dot-regular{background:var(--blue);} .dot-umlaut{background:var(--red);} .dot-irregular{background:var(--gold);}
+  .dot-regular{background:var(--blue);} .dot-umlaut{background:var(--red);} .dot-irregular{background:var(--gold);} .dot-none{background:#9ca3af;}
 
   .countline{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); text-align:center; margin-bottom:2px;}
   .dashgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:12px 0;} @media (max-width: 480px) { .dashgrid { grid-template-columns:repeat(2,1fr); } }
@@ -61,13 +61,13 @@
     overflow:hidden; margin-bottom:14px;}
   .stripe{height:6px;}
   .stripe.e,.stripe.regular{background:var(--blue);} .stripe.er,.stripe.umlaut{background:var(--red);}
-  .stripe.en,.stripe.irregular{background:var(--gold);} .stripe.s{background:var(--purple);}
+  .stripe.en,.stripe.irregular{background:var(--gold);} .stripe.none{background:#9ca3af;} .stripe.s{background:var(--purple);}
   .stripe.unchanged{background:var(--green);} .stripe.umlaut_only{background:#8a6a1e;}
   .meta{display:flex; justify-content:space-between; align-items:center; padding:10px 16px 0;
     font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft);}
   .pill{font-size:9px; text-transform:uppercase; letter-spacing:0.5px; padding:2px 8px; border-radius:10px; color:#fff;}
   .pill.e,.pill.regular{background:var(--blue);} .pill.er,.pill.umlaut{background:var(--red);}
-  .pill.en,.pill.irregular{background:var(--gold);} .pill.s{background:var(--purple);}
+  .pill.en,.pill.irregular{background:var(--gold);} .pill.none{background:#9ca3af;} .pill.s{background:var(--purple);}
   .pill.unchanged{background:var(--green);} .pill.umlaut_only{background:#8a6a1e;}
   .pill.level{background:var(--purple);}
   .qlabel{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--gold); text-transform:uppercase;
@@ -101,6 +101,7 @@
   .rulebox.e,.rulebox.regular{background:#eaeef6; border-left:3px solid var(--blue);}
   .rulebox.er,.rulebox.umlaut{background:#f6e9e7; border-left:3px solid var(--red);}
   .rulebox.en,.rulebox.irregular{background:#fbf3d8; border-left:3px solid var(--gold);}
+  .rulebox.none{background:#f3f4f6; border-left:3px solid #9ca3af;}
   .rulebox.s{background:#f0eaf5; border-left:3px solid var(--purple);}
   .rulebox.unchanged{background:#eaf2ea; border-left:3px solid var(--green);}
   .rulebox.umlaut_only{background:#f5efe0; border-left:3px solid #8a6a1e;}
@@ -334,7 +335,7 @@ const NOUN_TYPES = [{k:'alle',l:'Alle',dot:null},{k:'en',l:'-en/-n',dot:'dot-en'
   {k:'umlaut_only',l:'nur Umlaut',dot:'dot-umlaut_only'}];
 const ADJ_CATEGORIES = [{k:'alle',l:'Alle'},{k:'groesse_menge',l:'Größe & Menge'},{k:'zeit',l:'Zeit & Dauer'},{k:'charakter',l:'Charakter & Persönlichkeit'},{k:'gefuehle',l:'Gefühle & Emotionen'},{k:'aussehen',l:'Aussehen & Zustand'},{k:'qualitaet',l:'Qualität & Bewertung'},{k:'wetter',l:'Wetter & Temperatur'},{k:'gesundheit',l:'Gesundheit & Sicherheit'},{k:'tempo',l:'Geschwindigkeit'},{k:'technik',l:'Technik & Material'},{k:'wirtschaft',l:'Preis & Wirtschaft'},{k:'gesellschaft',l:'Gesellschaft & Kultur'},{k:'sonstige',l:'Sonstige'}];
 const ADJ_TYPES = [{k:'alle',l:'Alle',dot:null},{k:'regular',l:'Regelmäßig',dot:'dot-regular'},
-  {k:'umlaut',l:'Umlaut',dot:'dot-umlaut'},{k:'irregular',l:'Unregelmäßig',dot:'dot-irregular'}];
+  {k:'umlaut',l:'Umlaut',dot:'dot-umlaut'},{k:'irregular',l:'Unregelmäßig',dot:'dot-irregular'},{k:'none',l:'Nicht steigerbar',dot:'dot-none'}];
 
 /* Example sentence for the answer box (Task 45; AI-drafted ones are labelled 🤖). */
 function wordExampleHTML(v) {
@@ -361,7 +362,7 @@ function typLabelNoun(t){
   return {en:'-en/-n', e:'-e', er:'-er', s:'-s', unchanged:'unverändert', umlaut_only:'nur Umlaut'}[t] || t;
 }
 function typLabelAdj(t){
-  return {regular:'Regelmäßig', umlaut:'Umlaut', irregular:'Unregelmäßig'}[t] || t;
+  return {regular:'Regelmäßig', umlaut:'Umlaut', irregular:'Unregelmäßig', none:'Nicht steigerbar'}[t] || t;
 }
 
 const COMPOUND_ROOTS_DB = {
@@ -1059,7 +1060,7 @@ function renderAdjMemoryHack(v){
   const tipSkip = ['comp'];
   if (suffixRule && getCheatCodesForWord(v.w, 'adj', v).some(c => c.id === 'suffix')) suffixRule = '';
 
-  let baseTip = `💡 <b>Comparison Formula:</b> Positive (<i>${v.w}</i>) → Comparative (+<b>-er</b>: <i>${v.komp}</i>) → Superlative (<b>am ...-(e)sten</b>: <i>${v.sup}</i>). Meaning: <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.`;
+  let baseTip = !v.komp ? `💡 <b>Nicht steigerbar:</b> „${v.w}“ has no comparative or superlative — something is either ${v.w} or not. Meaning: <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.` : `💡 <b>Comparison Formula:</b> Positive (<i>${v.w}</i>) → Comparative (+<b>-er</b>: <i>${v.komp}</i>) → Superlative (<b>am ...-(e)sten</b>: <i>${v.sup}</i>). Meaning: <i>„${v.en}”</i> ${v.ta ? `(${v.ta})` : ''}.`;
 
   return `
     <div class="morph-box">
@@ -1095,6 +1096,7 @@ function ruleExplanationAdj(v){
     regular: `<b>Rule: Regular.</b> Stem + <b>-er</b> (Comparative), <b>am</b> + Stem + <b>-(e)sten</b> (Superlative) — an -e- is inserted for stems ending in d/t/s/ß/z/sch.`,
     umlaut: `<b>Rule: Umlaut.</b> Short, single-syllable adjective with a/o/u — the stem vowel umlauts in both comparison forms (a→ä, o→ö, u→ü).`,
     irregular: `<b>Rule: Irregular.</b> A small closed group with completely unique forms — must be memorized.`,
+    none: `<b>Not comparable (nicht steigerbar).</b> Describes a yes/no property (tot, schwanger, verheiratet, kostenlos, täglich, deutsch …) or is an adverb — there is no comparative or superlative. Say <i>sehr</i> or <i>ganz</i> instead of „mehr …“ only where it makes sense.`,
   };
   // dunkel/teuer/sauer are "regular" but lose the -e- of -el/-er (dunkler, not *dunkeler).
   const k = v.komp || v.comp || '';
@@ -1429,9 +1431,9 @@ add(diff); }
           👆 <i>Click meaning (or press T) to peek German adjective</i>
         </div>
         <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
-          <b>German Adjective:</b> <span style="color:var(--blue); font-weight:700;">${v.w}</span> (${v.komp}, am ${v.sup})
+          <b>German Adjective:</b> <span style="color:var(--blue); font-weight:700;">${v.w}</span> (${v.komp ? v.komp + ', ' + v.sup : 'nicht steigerbar'})
         </div>
-        <div class="subq" style="margin-top:10px;">What is the German adjective — and its <b>Comparative</b> &amp; <b>Superlative</b> forms?</div>
+        <div class="subq" style="margin-top:10px;">${v.komp ? 'What is the German adjective — and its <b>Comparative</b> &amp; <b>Superlative</b> forms?' : 'What is the German adjective? <i>(not comparable)</i>'}</div>
       </div>` : `
       <div class="qlabel">${meaningLang==='ta'?'🇩🇪 Adjective → 🇮🇳 தமிழ்':meaningLang==='both'?'🇩🇪 Adjective → 🌐 EN + தமிழ்':'🇩🇪 Adjective → 🇬🇧 English'} · 📦 ${boxNames[box]}</div>
       <div class="prompt">
@@ -1448,16 +1450,16 @@ add(diff); }
         <div id="inlinePeekBox" class="peek-translation-box" style="display:none; margin:10px auto; max-width:440px; padding:8px 12px; background:#fffdf5; border:1.5px dashed var(--gold); border-radius:6px; font-size:14px; color:var(--ink);">
           <b>Meaning:</b> ${meaningPromptText(v)}${meaningLang !== 'en' && typeof dcTaMark === 'function' ? dcTaMark(v) : ''}
         </div>
-        <div class="subq" style="margin-top:10px;">What are the <b>Comparative</b> and <b>Superlative</b> forms?</div>
+        <div class="subq" style="margin-top:10px;">${v.komp ? 'What are the <b>Comparative</b> and <b>Superlative</b> forms?' : 'What does it mean? <i>(This adjective has <b>no</b> comparative / superlative.)</i>'}</div>
       </div>`;
-    const diag = diffHighlight((v.w||'').replace(/\(.*?\)/g,''), v.komp);
+    const diag = v.komp ? diffHighlight((v.w||'').replace(/\(.*?\)/g,''), v.komp) : { a: '', b: '' };
     revealCoreHTML = `
       <div class="revealbox">
         <div class="formrow"><span class="flabel">Positiv</span><span class="fval">${v.w}${speakBtn(v.w,'Listen to word')}</span></div>
-        <div class="formrow"><span class="flabel">Komparativ</span><span class="fval">${v.komp}${speakBtn(v.komp,'Comparative listen')}</span></div>
-        <div class="formrow"><span class="flabel">Superlativ</span><span class="fval">${v.sup}${speakBtn(v.sup,'Superlative listen')}</span></div>
+        <div class="formrow"><span class="flabel">Komparativ</span><span class="fval">${v.komp ? v.komp + speakBtn(v.komp,'Comparative listen') : '<i>— nicht steigerbar</i>'}</span></div>
+        <div class="formrow"><span class="flabel">Superlativ</span><span class="fval">${v.sup ? v.sup + speakBtn(v.sup,'Superlative listen') : '<i>— nicht steigerbar</i>'}</span></div>
         ${meaningHTML(v)}${typeof dcTranslatorLink === 'function' ? dcTranslatorLink(v.inf || v.sg || v.w) : ''}${wordExampleHTML(v)}
-        <div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>
+        ${v.komp ? `<div class="transdiagram">${diag.a}<span class="arrow">→</span>${diag.b}</div>` : ''}
       </div>`;
   }
 
@@ -1658,8 +1660,9 @@ function checkHardProduction(){
   } else {
     const komp = (v.komp || '').toLowerCase();
     const sup = (v.sup || '').toLowerCase();
-    isCorrect = val.length >= 3 && (!komp || val.includes(komp)) && (!sup || val.includes(sup));
-    expectedLabel = `${v.komp}, am ${v.sup}`;
+    isCorrect = komp ? (val.length >= 3 && val.includes(komp) && (!sup || val.includes(sup)))
+                     : val.includes((v.w || '').toLowerCase());          // not comparable: the word itself is the answer
+    expectedLabel = komp ? `${v.w} → ${v.komp} → ${v.sup}` : `${v.w} (nicht steigerbar)`;
   }
   recordAnswer(v.uid, isCorrect);
   const fb = document.getElementById('hardFeedback');

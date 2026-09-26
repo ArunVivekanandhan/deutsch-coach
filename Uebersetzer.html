@@ -313,7 +313,7 @@ function wordDetailHTML(e, label) {
     const pl = e.pl && !/^[—-]$/.test(e.pl) ? 'die ' + e.pl : (e.pl ? 'kein Plural' : '');
     forms = `<div class="tx-grid">${cell('Singular', (e.a ? e.a + ' ' : '') + e.w, say)}${cell('Plural', pl, pl && pl !== 'kein Plural' ? pl : '')}${e.topic ? cell('Thema', e.topic) : ''}</div>`;
   } else if (e.c === 'adj') {
-    forms = `<div class="tx-grid">${cell('Positiv', e.w, e.w)}${cell('Komparativ', e.komp, e.komp)}${cell('Superlativ', e.sup, e.sup)}</div>`;
+    forms = `<div class="tx-grid">${cell('Positiv', e.w, e.w)}${e.komp ? cell('Komparativ', e.komp, e.komp) + cell('Superlativ', e.sup, e.sup) : cell('Steigerung', 'nicht steigerbar')}</div>`;
   }
   if (forms) h += `<div class="tx-section"><h3>Formen</h3>${forms}</div>`;
 

@@ -8,7 +8,8 @@ plural quizzes skip the card, and the memory tips have nothing to check.
 
 Only EMPTY fields are filled, only on an exact word match (for nouns: a missing article is added, a
 plural only when the article matches);
-a form the card already has is never changed. Nouns whose master plural is "—" (no plural) stay empty. Adjectives get comp/sup (Steigerung).
+a form the card already has is never changed — except adjective comp/sup, which are corrected to the rule-checked master
+(and cleared for adjectives that are not comparable). Nouns whose master plural is "—" (no plural) stay empty.
 Idempotent.   Run: python3 scripts/fill_home_forms.py [--check]
 """
 import os, re, sys
@@ -54,9 +55,14 @@ def main():
         if not w or cat not in ('v', 'n', 'adj'):
             return obj
         if cat == 'adj' and w in adjs:
+            # Adjectives: the master list is rule-checked (Task 62), so a card's comparison forms are CORRECTED to it,
+            # and cleared when the master says the word is not comparable (typ "none").
             a = adjs[w]
-            for key, val in (('comp', a.get('komp') or a.get('comp')), ('sup', a.get('sup'))):
-                if val and val not in ('—', '-') and not (field(obj, key) or '').strip():
+            for key, val in (('comp', a.get('komp') or a.get('comp') or ''), ('sup', a.get('sup') or '')):
+                if val in ('—', '-'):
+                    val = ''
+                have = (field(obj, key) or '').strip()
+                if have != val and (val or a.get('typ') == 'none') and (have or val):
                     obj = set_field(obj, key, val); changes.append((w, key, val))
         if cat == 'v' and w in verbs:
             v = verbs[w]
