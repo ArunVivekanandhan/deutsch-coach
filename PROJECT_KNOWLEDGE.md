@@ -762,6 +762,14 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 60) — Text-Trainer: no automatic speech unless switched on
+Request: "Why does clicking Prüfen speak the sentence, and why do the word tiles speak?"
+- Cause: Satz für Satz, Blitz-Quiz and Sätze verbinden read the model sentence right after checking; on Android the
+  voice starts 1–2 s late, so it sounded while the learner was already tapping word tiles.
+- Fix: auto-read is opt-in (`dc_tt_autosay`, default off; switch "🔇/🔊 Nach „Prüfen“ vorlesen" under the tabs).
+  🔊 buttons still always play. A capture-phase click listener cancels speech still playing when a tile, check, next
+  or quiz option is tapped (runs before the button's own handler, so a new read-out is not cut off).
+
 ### 2026-09-26 (Task 59) — Text-Trainer exam: English text on top, answer boxes numbered only
 Request: "Big sentence is fine, only the answer split into multiple sentences."
 - Per-sentence mode no longer repeats the English sentence above each box: the English paragraph (numbered with `<sup>`)

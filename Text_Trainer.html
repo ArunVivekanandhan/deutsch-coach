@@ -75,6 +75,7 @@
     <button type="button" class="tab" data-tab="exam" aria-selected="false">⏱️ Prüfung simulieren</button>
     <button type="button" class="tab" data-tab="own" aria-selected="false">➕ Eigener Text</button>
   </div>
+  <div class="row"><button type="button" class="chip" id="autoSayBtn" aria-pressed="false"></button><span class="muted">🔊 neben einem Satz spielt immer — auf Wunsch.</span></div>
   <div id="view"></div>
   <p class="muted" style="text-align:center;">Musterübersetzungen und Tamil KI-unterstützt erstellt 🤖 und geprüft · Mehrere richtige Versionen werden akzeptiert · 🔊 Browser-Stimme</p>
 </div>
@@ -83,6 +84,9 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 const say = t => { try { if (typeof speak === 'function') speak(t); else { const u = new SpeechSynthesisUtterance(t); u.lang = 'de-DE'; speechSynthesis.cancel(); speechSynthesis.speak(u); } } catch (e) {} };
+let autoSay = store.get('dc_tt_autosay', false);                  // read the correct sentence after "Prüfen"? off by default
+const sayAuto = t => { if (autoSay) say(t); };
+const hush = () => { try { if (typeof cancelPendingSpeech === 'function') cancelPendingSpeech(); if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {} };
 const sayAll = list => { if (typeof speakSequence === 'function') speakSequence(list, 350); else say(list.join(' ')); };
 let OWN = store.get('dc_tt_own', []);
 const TEXTS = () => [...(window.DC_TEXT_DRILLS || []), ...OWN];
@@ -204,7 +208,7 @@ function drawSent() {
       ${diffHTML(r)}<div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div>
       ${s.focus ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}
       <div class="row"><button type="button" class="btn primary" id="next">Weiter →</button>${r.perfect ? '' : '<button type="button" class="btn" id="retry">Nochmal versuchen</button>'}</div>`;
-    say(r.ref);
+    sayAuto(r.ref);
     $('next').onclick = () => { S.k++; drawSent(); };
     if ($('retry')) $('retry').onclick = () => { $('ans').focus(); };
     $('next').focus();
@@ -362,7 +366,12 @@ function renderOwn() {
       const arr = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1)).filter(x => x && x.en && x.de);
       if (!arr.length) throw new Error('keine Sätze');
       const o = { id: 'own' + Date.now(), title: ($('ownTitle').value.trim() || 'Eigener Text') + ' 🤖', en_title: 'your text', level: '', note: 'AI model translation', sentences: arr.map(x => ({ en: x.en, de: x.de, alts: Array.isArray(x.alts) ? x.alts : [], skel: x.skel || '', focus: x.focus || '' })) };
-      OWN.push(o); store.set('dc_tt_own', OWN); textId = o.id; store.set('dc_tt_text', textId); renderChips(); setTab('read');
+      OWN.push(o); store.set('dc_tt_own', OWN); textId = o.id; store.set('dc_tt_text', textId); /* capture phase: runs BEFORE the button's own handler, so a new "vorlesen" after Prüfen is not cut off */
+document.addEventListener('click', e => { if (e.target.closest('.tile, [data-chk], #check, #jCheck, #next, #jNext, #qNext, .opt')) hush(); }, true);
+const paintAutoSay = () => { const b = $('autoSayBtn'); b.setAttribute('aria-pressed', autoSay); b.textContent = autoSay ? '🔊 Nach „Prüfen“ vorlesen: An' : '🔇 Nach „Prüfen“ vorlesen: Aus'; };
+$('autoSayBtn').onclick = () => { autoSay = !autoSay; store.set('dc_tt_autosay', autoSay); if (!autoSay) hush(); paintAutoSay(); };
+paintAutoSay();
+renderChips(); setTab('read');
     } catch (e) { $('ownMsg').textContent = '⚠️ ' + e.message; $('ownGo').disabled = false; }
   };
 }
@@ -426,7 +435,7 @@ function answerQuiz(btn) {
   document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === q.o[0]) b.classList.add('right'); });
   if (ok) Q.right++; else { btn.classList.add('wrong'); Q.wrong.push(q); }
   $('qRes').innerHTML = `<div style="margin:6px 0;">${ok ? '🌟 <b>Richtig!</b>' : '✏️ <b>Nicht ganz.</b>'} ${esc(q.exp)}</div><button type="button" class="btn primary" id="qNext">Weiter →</button>`;
-  if (q.o[0].includes(' ')) say(q.o[0]);
+  if (q.o[0].includes(' ')) sayAuto(q.o[0]);
   $('qNext').onclick = () => { Q.k++; drawQuiz(); }; $('qNext').focus();
 }
 let J = null;
@@ -452,7 +461,7 @@ function drawJoin() {
     $('jRes').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : `✏️ <b>${r.score} %</b> — rot = fehlt / anders:`}</div>${diffHTML(r)}
       <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div><div class="focus">💡 ${esc(j.why)}</div>
       <div class="row"><button type="button" class="btn primary" id="jNext">Weiter →</button></div>`;
-    say(r.ref); $('jNext').onclick = () => { J.k++; drawJoin(); }; $('jNext').focus();
+    sayAuto(r.ref); $('jNext').onclick = () => { J.k++; drawJoin(); }; $('jNext').focus();
   };
 }
 function setTab(t, onlyWrong) {
@@ -481,6 +490,11 @@ document.addEventListener('click', e => {
   if (b.dataset.gap) { b.classList.add('shown'); return; }
   if (b.dataset.del) { OWN = OWN.filter(o => o.id !== b.dataset.del); store.set('dc_tt_own', OWN); if (textId === b.dataset.del) textId = 'familie'; renderChips(); return renderOwn(); }
 });
+/* capture phase: runs BEFORE the button's own handler, so a new "vorlesen" after Prüfen is not cut off */
+document.addEventListener('click', e => { if (e.target.closest('.tile, [data-chk], #check, #jCheck, #next, #jNext, #qNext, .opt')) hush(); }, true);
+const paintAutoSay = () => { const b = $('autoSayBtn'); b.setAttribute('aria-pressed', autoSay); b.textContent = autoSay ? '🔊 Nach „Prüfen“ vorlesen: An' : '🔇 Nach „Prüfen“ vorlesen: Aus'; };
+$('autoSayBtn').onclick = () => { autoSay = !autoSay; store.set('dc_tt_autosay', autoSay); if (!autoSay) hush(); paintAutoSay(); };
+paintAutoSay();
 renderChips(); setTab('read');
 </script>
 </body>
