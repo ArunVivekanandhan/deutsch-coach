@@ -765,6 +765,18 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 70) — Zeitreise word-order feedback names the mistake + "Warum?" for every grammar rule
+User pasted a wrong build answer for "Heute treffen wir uns im Café." (feedback was only a generic rule) and asked
+"why this grammar rule".
+- Zeitreise build mode: `buildHint()` shows "Du hast: …" with the misplaced words underlined red and names the broken
+  rule: time word first · verb directly after it (position 2, "nicht „wir“") · subject after the verb · reflexive
+  pronoun right after the subject (treffen wir uns) · second verb part at the very end · else "An Stelle n gehört …".
+- js/sentence-explain.js: every detected grammar point now has a short **🤔 Warum?** reason (verb slot 2 and why the
+  subject moves behind it, side clause → verb last like Tamil, verb bracket for Perfekt/Futur/modals/separable verbs,
+  haben vs sein, reflexive pronoun, kein = nicht + ein, fixed verb + preposition as vocabulary, Wo/Wohin cases,
+  preposition cases, zu + infinitive, Präsens without "-ing"). wir/sie verb forms that equal the infinitive
+  (treffen wir) are now recognised as the finite verb.
+
 ### 2026-09-26 (Task 69) — After every mistake: "Jetzt üben?" + the sentence explained (grammar + word by word)
 Requests: "In any page if I make a mistake, immediately a pop-up or mode asking to practise where I made the mistake"
 + "explain the sentence I got wrong — vocabulary breakdown (Gestern habe ich mich sehr gefreut) and which grammar it

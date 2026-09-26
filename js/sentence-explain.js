@@ -48,6 +48,28 @@
   const VP = { sprechen: { über: 'Akk', mit: 'Dat' }, reden: { über: 'Akk', mit: 'Dat' }, erzählen: { von: 'Dat', über: 'Akk' }, denken: { an: 'Akk' }, warten: { auf: 'Akk' },
     freuen: { auf: 'Akk', über: 'Akk' }, interessieren: { für: 'Akk' }, ärgern: { über: 'Akk' }, nachdenken: { über: 'Akk' }, träumen: { von: 'Dat' }, teilnehmen: { an: 'Dat' },
     fragen: { nach: 'Dat' }, suchen: { nach: 'Dat' }, bitten: { um: 'Akk' }, kümmern: { um: 'Akk' }, erinnern: { an: 'Akk' }, gewöhnen: { an: 'Akk' }, antworten: { auf: 'Akk' }, achten: { auf: 'Akk' }, lachen: { über: 'Akk' }, diskutieren: { über: 'Akk' } };
+  /* WHY each rule exists — short, learner-friendly reasons (English; the rule names stay German) */
+  const WHY = [
+    [/Inversion|Verb auf Position 2|Aussagesatz/, 'German main clauses have a fixed slot for the conjugated verb: <b>position 2</b>. Position 1 is free — you put there what you want to stress (time, place, an object) — but the verb never leaves slot 2, so the subject has to move <b>behind</b> it. English says "Today <i>we meet</i>", German says "Heute <i>treffen wir</i>". (Tamil is free here, German is strict.)'],
+    [/Nebensatz mit/, 'weil / dass / ob / wenn start a <b>side clause</b> that cannot stand alone. German marks such a clause by sending its verb to the <b>end</b> — exactly like Tamil, where the verb always comes last (…நான் உடம்பு சரியில்லாமல் <b>இருக்கிறேன்</b>).'],
+    [/Nebensatz zuerst/, 'The whole side clause counts as <b>position 1</b> of the main sentence — so the main verb must come right after the comma (slot 2): "…, <b>bleibe</b> ich".'],
+    [/Ja\/Nein-Frage/, 'Moving the verb to the front is the German <b>question signal</b> (like English "<i>Are</i> you…?", but German does it with every verb).'],
+    [/W-Frage/, 'The question word takes position 1 — and the verb keeps its fixed slot 2.'],
+    [/Perfekt/, 'German builds a <b>verb bracket</b> (Satzklammer): the helper verb (haben / sein) stays in slot 2 and the participle closes the sentence at the end — everything else sits inside. sein is used when you move from A to B or change state (gehen, fahren, einschlafen); all others — including reflexive verbs like sich freuen — use haben.'],
+    [/Futur I/, 'Same bracket as the Perfekt: werden (slot 2) opens it, the infinitive closes it at the end. With a time word (morgen) German often just uses the present tense.'],
+    [/Modalverb/, 'A modal verb (können, müssen, möchten …) takes slot 2 and pushes the main verb as an <b>infinitive to the end</b> — the verb bracket again.'],
+    [/Präteritum von/, 'war / hatte are much shorter than "bin gewesen / habe gehabt", so Germans use them even when speaking.'],
+    [/Präteritum:/, 'The simple past is the <b>written</b> past (books, news). In speaking, Germans mostly use the Perfekt.'],
+    [/Trennbares Verb/, 'The prefix works like the English particle in "get <i>up</i>", "call <i>up</i>": it belongs to the verb, but in German it goes to the <b>end</b> of the bracket while the verb stays in slot 2.'],
+    [/Reflexives Verb/, 'The action goes back to the <b>same person</b> (I make <i>myself</i> happy), so German needs the small word mich / dich / sich / uns / euch — it must match the subject.'],
+    [/kein verneint/, 'kein = "nicht + ein" melted into one word — so you negate a noun with kein, never with "nicht ein".'],
+    [/nicht verneint/, 'nicht negates actions and descriptions (verbs, adjectives, places); nouns with ein / no article use kein.'],
+    [/fester Präposition/, 'This is <b>vocabulary</b>, not logic: the verb chooses its preposition and case. Learn them as a pair: sprechen über + Akk, warten auf + Akk, träumen von + Dat.'],
+    [/Wechselpräposition/, 'These 9 prepositions can take both cases: movement <b>to a goal</b> (Wohin?) → Akkusativ; a <b>place</b> where something is (Wo?) → Dativ. The question Wo or Wohin decides.'],
+    [/\+ (Dativ|Akkusativ)/, 'Each preposition "orders" a case: mit, bei, zu, von, aus, nach, seit → always Dativ; für, ohne, durch, gegen, um → always Akkusativ.'],
+    [/zu \+ Infinitiv/, 'zu marks a "to-verb" (English "to speak"); like every second verb it closes the sentence at the end.'],
+    [/Präsens/, 'Präsens = what happens now or regularly. German has no extra "-ing" form: „wir treffen uns“ = we meet / we are meeting. With a time word (morgen, nächste Woche) it also means the near future.']
+  ];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const low = w => w.toLowerCase();
 
@@ -104,7 +126,8 @@
       if (clauses.length > 1 && SUB.has(low(clauses[0][0]))) finIdx = 0;
       else {
         // position 1 can be several words (am Wochenende, meine Schwester): the finite verb is the first known verb form
-        finIdx = m0.findIndex((w, i) => i > 0 && (HABEN.has(w) || SEIN.has(w) || WERDEN.has(w) || MODAL.test(w) || /^(war|waren|warst|hatte|hatten)$/.test(w) || /Präsens|Präteritum/.test((look(main[i]) || {}).label || '')));
+        finIdx = m0.findIndex((w, i) => i > 0 && (HABEN.has(w) || SEIN.has(w) || WERDEN.has(w) || MODAL.test(w) || /^(war|waren|warst|hatte|hatten)$/.test(w) || /Präsens|Präteritum/.test((look(main[i]) || {}).label || '')
+          || (/Infinitiv/.test((look(main[i]) || {}).label || '') && (/^(wir|sie|Sie)$/.test(main[i + 1] || '') || /^(wir|sie)$/.test(m0[i - 1] || '')))));   // wir/sie-form = infinitive (treffen wir)
         if (finIdx > 0) {
           const first = main.slice(0, finIdx).join(' ');
           if (SUBJ.has(m0[0]) && finIdx === 1) pts.push(`2️⃣ <b>Aussagesatz</b>: Subjekt „${esc(main[0])}“ – Verb „${esc(main[1])}“ auf <b>Position 2</b>.`);
@@ -151,7 +174,8 @@
       else if (WECHSEL.has(w) && /^(den|die|das|dem|der|einen|einem|einer|eine|ein|meinen|meinem|meiner|meine|ins|im)$/.test(nx)) pts.push(`🧭 <b>${esc(toks[i])}</b> = Wechselpräposition: ${/^(dem|einem|meinem)$/.test(nx) || (nx === 'der' && i > 1) ? 'Wo? → <b>Dativ</b>' : /^(den|einen|meinen)$/.test(nx) ? 'Wohin? → <b>Akkusativ</b>' : 'Wo? → Dativ · Wohin? → Akkusativ'} („${esc(snip(i))}“).`);
       else if (w === 'im' || w === 'ins' || w === 'am' || w === 'zum' || w === 'zur' || w === 'beim' || w === 'vom') pts.push(`🔗 <b>${esc(toks[i])}</b> = ${esc(FUNC[w][1])}.`);
     });
-    return { toks, pts: [...new Set(pts)], role, finIdx: finIdx >= 0 ? toks.indexOf(main[finIdx]) : -1, subj };
+    const withWhy = [...new Set(pts)].map(p => { const w = WHY.find(([re]) => re.test(p)); return w ? p + `<div class="dcx-why">🤔 <b>Warum?</b> ${w[1]}</div>` : p; });
+    return { toks, pts: withWhy, role, finIdx: finIdx >= 0 ? toks.indexOf(main[finIdx]) : -1, subj };
   }
 
   function row(w, i, A) {
@@ -169,7 +193,7 @@
     st.textContent = `.dcx{margin-top:8px;border:1px solid var(--color-border,#ddd);border-radius:12px;padding:8px 12px;background:var(--color-bg,#f8fafc);color:var(--color-ink,#111);font-size:14px;line-height:1.5;text-align:left}
 .dcx summary{cursor:pointer;font-weight:700}.dcx .dcx-s{font-size:16px;font-weight:800;margin:6px 0}.dcx ul{margin:4px 0 8px;padding-left:18px}.dcx li{margin:3px 0}
 .dcx table{border-collapse:collapse;width:100%;font-size:13.5px}.dcx td{border-top:1px solid var(--color-border,#ddd);padding:4px 6px;vertical-align:top}.dcx td:first-child{white-space:nowrap}
-.dcx .dcx-q{color:var(--color-ink-soft,#777)}.dcx .dcx-ta{color:var(--color-ink-soft,#666);font-size:12.5px;margin-left:4px}.dcx .dcx-scroll{overflow-x:auto}`;
+.dcx .dcx-why{font-size:12.8px;color:var(--color-ink-soft,#555);margin:2px 0 4px;border-left:3px solid #f59e0b;padding-left:8px}.dcx .dcx-q{color:var(--color-ink-soft,#777)}.dcx .dcx-ta{color:var(--color-ink-soft,#666);font-size:12.5px;margin-left:4px}.dcx .dcx-scroll{overflow-x:auto}`;
     document.head.appendChild(st);
   }
   async function into(el, sentence, opts) {
