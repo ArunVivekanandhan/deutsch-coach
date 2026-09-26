@@ -115,3 +115,8 @@ if zrc.returncode != 0:
 ttc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_text_drills.py")])
 if ttc.returncode != 0:
     sys.exit(1)
+
+# 16. Site map (DC_SITEMAP in js/app-shell.js): every page is in the menu / home page exactly once.
+smc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_sitemap.py")])
+if smc.returncode != 0:
+    sys.exit(1)

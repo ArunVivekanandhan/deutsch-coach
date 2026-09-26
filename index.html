@@ -28,6 +28,24 @@
   .tool-item { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-ink); font-size: 14px; font-weight: 500; transition: background 0.2s; }
   .tool-item:hover { background: var(--color-bg); }
   .tool-icon { width: 20px; height: 20px; opacity: 0.7; }
+  .today-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+  .today-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg); box-shadow: var(--shadow-sm); }
+  .today-card h3 { margin: 0 0 10px; font-size: 16px; } .muted-s { font-weight: 400; font-size: 12.5px; color: var(--color-ink-soft); }
+  .plan { margin: 0; padding-left: 0; list-style: none; counter-reset: p; display: flex; flex-direction: column; gap: 8px; }
+  .plan li { counter-increment: p; display: flex; gap: 10px; align-items: flex-start; }
+  .plan li::before { content: counter(p); flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--color-primary); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .plan a { font-weight: 700; color: var(--color-ink); text-decoration: none; } .plan a:hover { color: var(--color-primary); }
+  .plan .why { display: block; font-size: 12.5px; color: var(--color-ink-soft); }
+  .recent { display: flex; flex-wrap: wrap; gap: 6px; } .recent a, .path a { font-size: 13px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); text-decoration: none; }
+  .recent a:hover, .path a:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .path { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: var(--color-ink-soft); font-size: 12px; }
+  .area-head { display: flex; align-items: center; gap: 8px; } .area-count { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; border: 1px solid var(--color-border); }
+  .module-card { position: relative; } .module-meta { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; font-size: 11.5px; }
+  .module-meta span { padding: 1px 7px; border-radius: 99px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-ink-soft); }
+  .module-meta .need-ai { border-color: #f59e0b; color: #b45309; }
+  .dash-grid.compact { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-md); }
+  .dash-grid.compact .module-card { padding: var(--space-md); } .dash-grid.compact .module-icon { width: 38px; height: 38px; margin-bottom: 8px; }
+  @media (max-width: 800px) { .today-grid { grid-template-columns: 1fr; } }
 </style>
   <script src="js/tts-engine.js"></script>
     <script src="js/srs-engine.js"></script>
@@ -45,14 +63,7 @@
       </div>
       <nav class="app-sidebar-nav">
         
-        <div class="nav-group">
-          <div class="nav-group-title">Navigation</div>
-          <a href="#lernen" class="nav-link active"><i data-lucide="book-open" class="nav-icon"></i> Lernen</a>
-          <a href="#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon"></i> Prüfung</a>
-          <a href="#coach" class="nav-link" id="navCoachLink"><i data-lucide="bot" class="nav-icon"></i> AI Coach</a>
-          <a href="#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon"></i> Tools</a>
-          <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon"></i> AI Config & Settings</a>
-        </div>
+        <div id="dcNavSlot"></div>
 
         <div class="nav-group">
           <div class="nav-group-title">Your Level Progress</div>
@@ -131,126 +142,21 @@
       </header>
       
       <div class="app-content">
-        <!-- LERNEN -->
-        <section id="lernen">
-          <div class="section-title">Lernen (Core Learning)</div>
-          <div class="dash-grid">
-            <a href="Wortschatz_Master_Grid.html" class="module-card module-vocab">
-              <div class="module-icon"><i data-lucide="library"></i></div>
-              <div class="module-title">Wortschatz</div>
-              <div class="module-desc">Lerne neue Wörter und übe mit KI-generierten Geschichten.</div>
-            </a>
-            <a href="Uebersetzer.html" class="module-card module-vocab">
-              <div class="module-icon"><i data-lucide="languages"></i></div>
-              <div class="module-title">Übersetzer &amp; Wort-Explorer</div>
-              <div class="module-desc">Wort oder Satz nachschlagen: alle Formen, Wortaufbau, Tamil — und mit KI fragen oder üben.</div>
-            </a>
-            <a href="Grammatik_Regel_Trainer.html" class="module-card module-grammar">
-              <div class="module-icon"><i data-lucide="puzzle"></i></div>
-              <div class="module-title">Grammatik</div>
-              <div class="module-desc">Trainiere Regeln, Satzbau und analysiere Fehler.</div>
-            </a>
-            <a href="Hoerverstehen_Diktat_Trainer.html" class="module-card module-speak">
-              <div class="module-icon"><i data-lucide="headphones"></i></div>
-              <div class="module-title">Hörverstehen</div>
-              <div class="module-desc">Trainiere dein Gehör mit Diktaten und Endlos-Audio.</div>
-            </a>
-            <a href="Thema_Sprech_Trainer.html" class="module-card module-speak">
-              <div class="module-icon"><i data-lucide="mic"></i></div>
-              <div class="module-title">Themen-Sprechtrainer</div>
-              <div class="module-desc">Wähle ein Thema und übe ich/du/er/wir/ihr/sie im Perfekt — mit Audio, Loop und Nachsprechen.</div>
-            </a>
+        <!-- TODAY: plan + recent (filled from real progress below) -->
+        <section id="heute">
+          <div class="section-title">Heute</div>
+          <div class="today-grid">
+            <div class="today-card"><h3>🧭 Dein Plan für heute <span class="muted-s">(ca. 30 Min.)</span></h3><ol class="plan" id="todayPlan"></ol></div>
+            <div class="today-card"><h3>🕘 Zuletzt geübt</h3><div id="recentList" class="recent"></div>
+              <h3 style="margin-top:14px;">🚀 Neu hier? Der Lernweg</h3>
+              <div class="path"><a href="deutsch-coach.html">1 Wörter</a>→<a href="Grammatik_Regel_Trainer.html">2 Regel</a>→<a href="Satzbau_Trainer.html">3 Sätze bauen</a>→<a href="Hoerverstehen_Diktat_Trainer.html">4 Hören</a>→<a href="Thema_Sprech_Trainer.html">5 Sprechen</a>→<a href="Text_Trainer.html">6 Schreiben</a></div>
+            </div>
           </div>
         </section>
-
-        <!-- PRÜFUNG -->
-        <section id="pruefung">
-          <div class="section-title">Prüfung (Exam Prep)</div>
-          <div class="dash-grid">
-            <a href="A1_Sprech_Pruefungs_Simulator.html" class="module-card module-speak">
-              <div class="module-icon"><i data-lucide="mic"></i></div>
-              <div class="module-title">Sprechen (A1)</div>
-              <div class="module-desc">Simuliere die mündliche Start-Deutsch-1-Prüfung: Vorstellen, Fragen, Bitten.</div>
-            </a>
-            <a href="German_A2_Practice_Studio.html" class="module-card module-exam">
-              <div class="module-icon"><i data-lucide="award"></i></div>
-              <div class="module-title">A2 Prüfung</div>
-              <div class="module-desc">Übe die 7 Module des A2-Praxis-Studios.</div>
-            </a>
-            <a href="German_B1_Practice_Studio.html" class="module-card module-exam">
-              <div class="module-icon"><i data-lucide="graduation-cap"></i></div>
-              <div class="module-title">B1 Prüfung</div>
-              <div class="module-desc">Bereite dich gezielt auf das telc/Goethe Zertifikat vor.</div>
-            </a>
-            <a href="Sprech_Pruefungs_Simulator.html" class="module-card module-speak">
-              <div class="module-icon"><i data-lucide="mic"></i></div>
-              <div class="module-title">Sprechen (B1)</div>
-              <div class="module-desc">Simuliere mündliche B1/DTZ-Prüfungen und Dialoge.</div>
-            </a>
-            <a href="Brief_Schreiben_Trainer.html" class="module-card module-write">
-              <div class="module-icon"><i data-lucide="pen-tool"></i></div>
-              <div class="module-title">Schreiben (B1)</div>
-              <div class="module-desc">Verfasse B1-Briefe und lass sie von der KI korrigieren.</div>
-            </a>
-          </div>
-          <div class="progress-label" style="font-size: 11px; opacity: 0.65; margin-top: 8px;">
-            <span>B2-Wortschatz und -Grammatik sind jetzt verfügbar (siehe Vokabular &amp; Grammatik). Eine eigene B2-Prüfungsvorbereitung gibt es noch nicht.</span>
-          </div>
-        </section>
-
-        <!-- COACH -->
-        <section id="coach">
-          <div class="section-title">Coach (AI Practice)</div>
-          <div class="dash-grid" id="aiCoachGrid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-            <!-- This will be populated/hidden by JS depending on AI setup -->
-            <a href="KI_Sprechpartner.html" class="module-card module-speak">
-              <div class="module-icon"><i data-lucide="drama"></i></div>
-              <div class="module-title">🎭 KI-Sprechpartner</div>
-              <div class="module-desc">Rollenspiele mit Stimme: Café, Arzt, Amt, Bewerbung … mit Sofort-Korrektur, Hilfe und Lernbericht.</div>
-            </a>
-            <a href="KI_German_Coach.html" class="module-card module-vocab">
-              <div class="module-icon"><i data-lucide="message-square"></i></div>
-              <div class="module-title">KI Text Coach</div>
-              <div class="module-desc">Chatte auf Deutsch und erhalte sofortige Korrekturen.</div>
-            </a>
-            <a href="KI_Human_Partner.html" class="module-card module-vocab">
-              <div class="module-icon"><i data-lucide="users"></i></div>
-              <div class="module-title">Live Video Partner</div>
-              <div class="module-desc">Führe echte Gespräche mit einem KI-Avatar.</div>
-            </a>
-            <a href="Dialog_Schatten_Trainer.html" class="module-card module-speak">
-              <div class="module-icon"><i data-lucide="mic-2"></i></div>
-              <div class="module-title">Dialog Schatten</div>
-              <div class="module-desc">Lies Dialoge laut vor und verbessere deine Aussprache.</div>
-            </a>
-          </div>
-          <div id="aiSetupPrompt" style="display: none; padding: var(--space-lg); background: rgba(37, 99, 235, 0.05); border: 1px dashed var(--color-primary); border-radius: var(--radius-lg); text-align: center; margin-bottom: var(--space-2xl);">
-             <i data-lucide="bot" style="width: 48px; height: 48px; color: var(--color-primary); margin-bottom: var(--space-sm);"></i>
-             <h3 style="margin-top: 0;">AI Not Configured</h3>
-             <p style="font-size: 14px;">Unlock the powerful interactive AI coaches by configuring your API key.</p>
-             <button class="ds-btn ds-btn-primary" onclick="window.location.href='Einstellungen_Setup.html'">Configure AI Settings</button>
-          </div>
-        </section>
-
-        <!-- TOOLS -->
-        <section id="tools">
-          <div class="section-title">Tools (Quick Access)</div>
-          <div class="tool-list">
-            <a href="Satzbau_Trainer.html" class="tool-item"><i data-lucide="construction" class="tool-icon"></i> Satzbau Trainer</a>
-            <a href="Zeitreise_Trainer.html" class="tool-item"><i data-lucide="history" class="tool-icon"></i> Zeitreise: gestern · heute · morgen</a>
-            <a href="Text_Trainer.html" class="tool-item"><i data-lucide="file-pen" class="tool-icon"></i> Text-Trainer: Prüfungstext EN → DE + ⚡ Crashkurs</a>
-            <a href="Wort_Zwillinge.html" class="tool-item"><i data-lucide="copy" class="tool-icon"></i> Wort-Zwillinge (Küche / Kuchen)</a>
-            <a href="Verb_Transformation_Trainer.html" class="tool-item"><i data-lucide="zap" class="tool-icon"></i> Verben Flashcards</a>
-            <a href="Nomen_Trainer.html" class="tool-item"><i data-lucide="box" class="tool-icon"></i> Nomen</a>
-            <a href="Adjektiv_Adverb_Trainer.html" class="tool-item"><i data-lucide="shapes" class="tool-icon"></i> Adjektive & Adverbien</a>
-            <a href="Geschichte_Trainer.html" class="tool-item"><i data-lucide="book-open" class="tool-icon"></i> Geschichte: Lena & Jonas</a>
-            <a href="German_Grammar_Cheat_Codes.html" class="tool-item"><i data-lucide="lightbulb" class="tool-icon"></i> Cheat Codes</a>
-            <a href="konnektoren_referenz.html" class="tool-item"><i data-lucide="link" class="tool-icon"></i> Konnektoren</a>
-            <a href="Deutsch_Wortschatz_Excel_Sheet.html" class="tool-item"><i data-lucide="table" class="tool-icon"></i> Excel Sheet</a>
-            <a href="Continuous_Verb_Speaker.html" class="tool-item"><i data-lucide="play-circle" class="tool-icon"></i> Auto-Play Speaker</a>
-          </div>
-        </section>
-
+        <!-- ALL AREAS: one section per group of DC_SITEMAP (js/app-shell.js) -->
+        <div id="areas"></div>
+        <!-- old anchors (#lernen, #coach, #tools) still land on the areas -->
+        <span id="lernen"></span><span id="coach"></span><span id="tools"></span>
       </div>
     </main>
 
@@ -376,6 +282,44 @@
             document.body.setAttribute('data-theme', 'dark');
         }
         
+
+        // ---- Home = site map (Task 61): nav, daily plan, recent pages, one section per area ----
+        const SM = window.DC_SITEMAP || [];
+        const slot = document.getElementById('dcNavSlot');
+        if (slot && window.dcNavHTML) { slot.outerHTML = dcNavHTML(); dcBindNavSearch(); }
+        const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const js = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+        const hasAIKey = (() => { try { const pr = localStorage.getItem('de_ai_provider') || 'groq'; return !!(localStorage.getItem('de_ai_key_' + pr) || (pr === 'ollama' && localStorage.getItem('de_ai_endpoint_ollama'))); } catch (e) { return false; } })();
+        const page = href => { for (const g of SM) for (const p of g.pages) if (p.href === href) return p; return null; };
+        document.getElementById('areas').innerHTML = SM.filter(g => g.id !== 'start').map(g => `<section id="${g.id}">
+            <div class="section-title area-head"><i data-lucide="${g.icon}" style="width:16px;height:16px;"></i> ${esc(g.title)} <span class="area-count">${g.pages.length}</span></div>
+            <div class="dash-grid compact">${g.pages.map(p => `<a href="${p.href}" class="module-card module-${g.mod || 'vocab'}">
+              <div class="module-icon"><i data-lucide="${p.icon}"></i></div><div class="module-title">${esc(p.t)}</div><div class="module-desc">${esc(p.d)}</div>
+              <div class="module-meta">${p.lvl ? `<span>${esc(p.lvl)}</span>` : ''}${p.ai ? `<span class="${hasAIKey ? '' : 'need-ai'}">🤖 KI${hasAIKey ? '' : ' — Schlüssel nötig'}</span>` : ''}</div></a>`).join('')}</div></section>`).join('');
+        // daily plan from real data: due cards, stored mistakes, then one new-skill step and one output step
+        const vs = (typeof ProgressAggregator !== 'undefined') ? ProgressAggregator.getVocabularyStats() : { due: 0, reviewed: 0 };
+        const cnt = o => Array.isArray(o) ? o.length : Object.keys(o || {}).length;
+        const ttWrong = cnt(js('dc_tt_wrong', {})), wzHard = cnt(js('dc_wz_hard', {})), vault = cnt(js('de_grammar_vault', []));
+        const plan = [];
+        plan.push(vs.due > 0 ? ['deutsch-coach.html', `${vs.due} fällige Karten wiederholen`, 'Wiederholen, bevor du vergisst — ca. 10 Min.']
+                             : ['deutsch-coach.html', vs.reviewed ? 'Neue Wörter lernen (10 Karten)' : 'Mit den ersten 10 Wörtern starten', 'Karteikarten mit Bild, Tamil und Audio.']);
+        if (ttWrong) plan.push(['Text_Trainer.html', `${ttWrong} falsche Sätze im Text-Trainer nochmal`, 'Fehler von gestern sind die Punkte von morgen.']);
+        else if (vault) plan.push(['Grammatik_Regel_Trainer.html', `${vault} gespeicherte Grammatik-Fehler üben`, 'Aus deinem Fehler-Tresor.']);
+        else if (wzHard) plan.push(['Wort_Zwillinge.html', `${wzHard} verwechselte Wort-Paare wiederholen`, 'Küche/Kuchen & Co.']);
+        const day = new Date().getDay();
+        const rot = [['Satzbau_Trainer.html', 'Satzbau: 10 Sätze bauen', 'Verb auf Position 2, Nebensätze, Konnektoren.'],
+                     ['Grammatik_Regel_Trainer.html', 'Eine Grammatik-Regel üben', 'Tabelle lesen, dann 10 Aufgaben.'],
+                     ['Zeitreise_Trainer.html', 'Zeitreise: gestern · heute · morgen', 'Vergangenheit, Gegenwart, Zukunft.'],
+                     ['Wort_Zwillinge.html', 'Wort-Zwillinge-Quiz', 'Verwechselbare Wörter sicher trennen.']];
+        const out = [['Thema_Sprech_Trainer.html', 'Laut sprechen: ein Thema', '5 Min. nachsprechen — der Mund muss mitlernen.'],
+                     ['Hoerverstehen_Diktat_Trainer.html', 'Ein Diktat hören und schreiben', 'Hören + Rechtschreibung in einem.'],
+                     ['Text_Trainer.html', 'Einen Text übersetzen (Leicht → Schwer)', 'Wie in der Prüfung, Satz für Satz.']];
+        plan.push(rot[day % rot.length]); plan.push(out[day % out.length]);
+        document.getElementById('todayPlan').innerHTML = plan.slice(0, 4).map(([h, t, w]) => `<li><div><a href="${h}">${esc(t)} →</a><span class="why">${esc(w)}</span></div></li>`).join('');
+        const rec = js('dc_recent', []).map(r => page(r.href)).filter(Boolean).slice(0, 6);
+        document.getElementById('recentList').innerHTML = rec.length ? rec.map(p => `<a href="${p.href}">${esc(p.t)}</a>`).join('') : '<span class="muted-s">Noch nichts — fang mit Schritt 1 im Plan an.</span>';
+        if (window.lucide) lucide.createIcons();
+
         // AI Conditional Logic
         const provider = localStorage.getItem('de_ai_provider') || 'groq';
         const apiKey = localStorage.getItem('de_ai_key_' + provider);

@@ -762,6 +762,21 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 61) — Organise the pages: one site map, grouped menu, home = daily plan
+Request: "Lots of pages are scattered — find and organise them, and check what learning/practice enhancements are needed."
+- **`DC_SITEMAP`** (top of `js/app-shell.js`): every page once, in 8 groups by skill — Start · Wörter · Grammatik &
+  Satzbau · Schreiben & Übersetzen · Hören & Lesen · Sprechen · Prüfung · Einstellungen — with icon, title, one-line
+  description, level and `ai` flag. Redirect stubs (Verben_Hoeren_EN_DE, Wortfamilien_Explorer) are left out.
+  `scripts/check_sitemap.py` (build step 16) fails when a page is missing, listed twice or points to no file.
+- **Sidebar menu** (`dcNavHTML()`, all pages incl. index): search box + collapsible groups; the current page's group is
+  open and the page highlighted. Replaces the flat list of 10 hand-picked links (3 pages were not linked anywhere).
+- **"Mehr in <Bereich>"** footer on every wrapped page: the sibling pages of the same group + link to all areas.
+- **Home** (`index.html`): "Heute" = a daily plan from real data (due cards or first words → stored mistakes from
+  Text-Trainer / grammar vault / Wort-Zwillinge → one rotating grammar step → one speaking/listening/writing step),
+  "Zuletzt geübt" (`dc_recent`, written by app-shell on each page visit), a 6-step beginner path, then one card section
+  per group (level badge, "🤖 KI — Schlüssel nötig" instead of hiding AI pages). Old anchors #lernen/#coach/#tools kept.
+- **Mobile header**: the 4 counters are one compact row (header 221 px → 102 px on a 390 px phone).
+
 ### 2026-09-26 (Task 60) — Text-Trainer: no automatic speech unless switched on
 Request: "Why does clicking Prüfen speak the sentence, and why do the word tiles speak?"
 - Cause: Satz für Satz, Blitz-Quiz and Sätze verbinden read the model sentence right after checking; on Android the

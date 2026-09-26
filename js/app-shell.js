@@ -64,6 +64,83 @@ function injectDependencies() {
     }
 }
 
+// ---- Site map (Task 61): ONE list of every page, grouped by skill. Drives the sidebar menu on every page and the
+// home page sections, so a new page is added here once. lvl = suggested level, ai = needs an AI key.
+window.DC_SITEMAP = [
+  { id: 'start', icon: 'sunrise', title: 'Start', pages: [
+    { href: 'index.html', icon: 'home', t: 'Home · Tagesplan', d: 'Dein Plan für heute, zuletzt geübt, alle Bereiche.' },
+    { href: 'deutsch-coach.html', icon: 'layers', t: 'Karteikarten (tägliche Wiederholung)', d: 'Wörter mit Wiederholungs-System: fällige Karten, Bilder, Tamil, Audio.', lvl: 'A1–B2' } ] },
+  { id: 'woerter', icon: 'library', title: 'Wörter', mod: 'vocab', pages: [
+    { href: 'Verb_Transformation_Trainer.html', icon: 'zap', t: 'Verben', d: 'Alle Zeitformen eines Verbs, Karteikarten, Merkhilfen.', lvl: 'A1–B2' },
+    { href: 'Nomen_Trainer.html', icon: 'box', t: 'Nomen (der/die/das)', d: 'Artikel und Plural sicher lernen.', lvl: 'A1–B2' },
+    { href: 'Adjektiv_Adverb_Trainer.html', icon: 'shapes', t: 'Adjektive & Adverbien', d: 'Gegenteile, Komparativ, Superlativ.', lvl: 'A1–B2' },
+    { href: 'Wort_Zwillinge.html', icon: 'copy', t: 'Wort-Zwillinge', d: 'Verwechselbare Wörter: Küche / Kuchen, obwohl / trotzdem …', lvl: 'A1–B1' },
+    { href: 'Wortschatz_Master_Grid.html', icon: 'grid-3x3', t: 'Wortschatz-Übersicht & Wortfamilien', d: 'Alle Wörter als Raster, nach Familie und Level filtern.', lvl: 'A1–B2' },
+    { href: 'Deutsch_Wortschatz_Excel_Sheet.html', icon: 'table', t: 'Wortschatz-Tabelle (Excel)', d: 'Alle Formen in einer Tabelle, drucken und exportieren.', lvl: 'A1–B2' },
+    { href: 'Uebersetzer.html', icon: 'languages', t: 'Übersetzer & Wort-Explorer', d: 'Wort oder Satz nachschlagen: Formen, Wortaufbau, Tamil.', lvl: 'alle' } ] },
+  { id: 'grammatik', icon: 'puzzle', title: 'Grammatik & Satzbau', mod: 'grammar', pages: [
+    { href: 'Grammatik_Regel_Trainer.html', icon: 'puzzle', t: 'Grammatik-Regeln', d: 'Alle Regeln A1 → B2 mit Tabellen, Bildern, Tamil-Brücken und Übungen.', lvl: 'A1–B2' },
+    { href: 'Satzbau_Trainer.html', icon: 'construction', t: 'Satzbau-Trainer', d: 'Sätze bauen: Verb auf Position 2, Nebensätze, Konnektoren.', lvl: 'A1–B1' },
+    { href: 'Zeitreise_Trainer.html', icon: 'history', t: 'Zeitreise: gestern · heute · morgen', d: 'Vergangenheit, Gegenwart, Zukunft im selben Satz üben.', lvl: 'A1–B1' },
+    { href: 'konnektoren_referenz.html', icon: 'link', t: 'Konnektoren', d: 'weil, deshalb, obwohl, trotzdem … mit Wortstellung.', lvl: 'A2–B1' },
+    { href: 'German_Grammar_Cheat_Codes.html', icon: 'lightbulb', t: 'Grammatik-Spickzettel', d: '30+ Abkürzungen und Eselsbrücken.', lvl: 'A1–B1' } ] },
+  { id: 'schreiben', icon: 'pen-tool', title: 'Schreiben & Übersetzen', mod: 'write', pages: [
+    { href: 'Text_Trainer.html', icon: 'file-pen', t: 'Text-Trainer (EN → DE) + ⚡ Crashkurs', d: 'Prüfungstext Satz für Satz übersetzen: Leicht / Mittel / Schwer.', lvl: 'A1–B1' },
+    { href: 'Brief_Schreiben_Trainer.html', icon: 'mail', t: 'Brief schreiben', d: 'E-Mails und Briefe für die Prüfung, KI-Korrektur.', lvl: 'A2–B1', ai: true },
+    { href: 'KI_German_Coach.html', icon: 'message-square', t: 'KI-Text-Coach', d: 'Auf Deutsch chatten und sofort korrigiert werden.', lvl: 'A1–B2', ai: true } ] },
+  { id: 'hoeren', icon: 'headphones', title: 'Hören & Lesen', mod: 'speak', pages: [
+    { href: 'Hoerverstehen_Diktat_Trainer.html', icon: 'headphones', t: 'Hörverstehen & Diktat', d: 'Hören und aufschreiben, Endlos-Audio.', lvl: 'A1–B1' },
+    { href: 'Continuous_Verb_Speaker.html', icon: 'play-circle', t: 'Auto-Play: Verben hören', d: 'Englisch → Deutsch im Loop — beim Gehen oder Kochen.', lvl: 'A1–B2' },
+    { href: 'Geschichte_Trainer.html', icon: 'book-open', t: 'Geschichte: Lena & Jonas', d: 'Eine Geschichte in Kapiteln lesen und hören.', lvl: 'A1–A2' } ] },
+  { id: 'sprechen', icon: 'mic', title: 'Sprechen', mod: 'speak', pages: [
+    { href: 'Thema_Sprech_Trainer.html', icon: 'mic', t: 'Themen-Sprechtrainer', d: 'ich/du/er … im Perfekt nachsprechen, mit Audio und Loop.', lvl: 'A1–B1' },
+    { href: 'Dialog_Schatten_Trainer.html', icon: 'mic-2', t: 'Dialog-Schatten', d: 'Dialoge laut mitsprechen, Aussprache verbessern.', lvl: 'A1–B1' },
+    { href: 'KI_Sprechpartner.html', icon: 'drama', t: 'KI-Sprechpartner (Anruf)', d: 'Rollenspiele mit Stimme: Café, Arzt, Amt … mit Korrektur.', lvl: 'A1–B2', ai: true },
+    { href: 'KI_Human_Partner.html', icon: 'users', t: 'Live-Video-Partner', d: 'Gespräch mit einem KI-Avatar.', lvl: 'A2–B2', ai: true } ] },
+  { id: 'pruefung', icon: 'award', title: 'Prüfung', mod: 'exam', pages: [
+    { href: 'A1_Sprech_Pruefungs_Simulator.html', icon: 'mic', t: 'A1 Sprechen (Start Deutsch 1)', d: 'Vorstellen, Fragen, Bitten — wie in der Prüfung.', lvl: 'A1' },
+    { href: 'German_A2_Practice_Studio.html', icon: 'award', t: 'A2 Praxis-Studio', d: 'Die 7 Module der A2-Prüfung.', lvl: 'A2' },
+    { href: 'German_B1_Practice_Studio.html', icon: 'graduation-cap', t: 'B1 Praxis-Studio', d: 'telc / Goethe Zertifikat B1 gezielt üben.', lvl: 'B1' },
+    { href: 'Sprech_Pruefungs_Simulator.html', icon: 'mic', t: 'B1 Sprechen / DTZ', d: 'Mündliche B1-Prüfung und Dialoge simulieren.', lvl: 'B1' } ] },
+  { id: 'setup', icon: 'settings', title: 'Einstellungen', pages: [
+    { href: 'Einstellungen_Setup.html', icon: 'settings', t: 'KI-Schlüssel & Einstellungen', d: 'KI-Anbieter, Stimme, Audio, Design.' } ] }
+];
+function dcCurrentPage() { const f = (location.pathname.split('/').pop() || 'index.html'); return f || 'index.html'; }
+// Sidebar menu: a search box + one collapsible group per skill; the group of the current page is open.
+function dcNavHTML() {
+    const cur = dcCurrentPage();
+    const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    return `<div class="nav-group dc-nav">
+        <input type="search" class="dc-nav-search" id="dcNavSearch" placeholder="🔎 Seite suchen … (z. B. Verben, Brief)" aria-label="Seite suchen">
+        ${DC_SITEMAP.map(g => {
+            const open = g.pages.some(p => p.href === cur) || (cur === 'index.html' && g.id === 'start');
+            return `<details class="dc-nav-grp" data-grp="${g.id}" ${open ? 'open' : ''}><summary><i data-lucide="${g.icon}" class="nav-icon" aria-hidden="true"></i> ${esc(g.title)} <span class="dc-nav-n">${g.pages.length}</span></summary>
+                ${g.pages.map(p => `<a href="${p.href}" class="nav-link${p.href === cur ? ' active' : ''}" ${p.href === cur ? 'aria-current="page"' : ''} data-q="${esc((p.t + ' ' + p.d).toLowerCase())}"><i data-lucide="${p.icon}" class="nav-icon" aria-hidden="true"></i> ${esc(p.t)}${p.ai ? ' <span title="braucht KI-Schlüssel">🤖</span>' : ''}</a>`).join('')}
+            </details>`; }).join('')}
+    </div>`;
+}
+function dcBindNavSearch(root) {
+    const inp = (root || document).querySelector('#dcNavSearch'); if (!inp) return;
+    inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase();
+        document.querySelectorAll('.dc-nav-grp').forEach(g => {
+            let any = false;
+            g.querySelectorAll('.nav-link').forEach(a => { const hit = !q || a.dataset.q.includes(q); a.style.display = hit ? '' : 'none'; any = any || hit; });
+            g.style.display = any ? '' : 'none'; if (q && any) g.open = true;
+        });
+    });
+}
+// Remember the last pages practised (for "Zuletzt geübt" on the home page).
+(function dcRememberPage() {
+    try {
+        const cur = dcCurrentPage(); if (cur === 'index.html') return;
+        if (!DC_SITEMAP.some(g => g.pages.some(p => p.href === cur))) return;
+        const r = JSON.parse(localStorage.getItem('dc_recent') || '[]').filter(x => x.href !== cur);
+        r.unshift({ href: cur, at: Date.now() }); localStorage.setItem('dc_recent', JSON.stringify(r.slice(0, 8)));
+    } catch (e) { /* storage blocked */ }
+})();
+window.dcNavHTML = dcNavHTML; window.dcBindNavSearch = dcBindNavSearch;
+
 function renderAppShell() {
 
     // Apply Simple Mode globally
@@ -120,19 +197,7 @@ function renderAppShell() {
                 <i data-lucide="graduation-cap" style="margin-right: 8px; color: var(--color-primary);"></i> Deutsch Coach
             </div>
             <nav class="app-sidebar-nav" aria-label="Primary">
-                <div class="nav-group">
-                    <div class="nav-group-title" id="primary-nav-title">Navigation</div>
-                    <a href="index.html" class="nav-link"><i data-lucide="home" class="nav-icon" aria-hidden="true"></i> Home</a>
-                    <a href="index.html#lernen" class="nav-link"><i data-lucide="book-open" class="nav-icon" aria-hidden="true"></i> Lernen</a>
-                    <a href="index.html#pruefung" class="nav-link"><i data-lucide="award" class="nav-icon" aria-hidden="true"></i> Prüfung</a>
-                    <a href="index.html#coach" class="nav-link"><i data-lucide="bot" class="nav-icon" aria-hidden="true"></i> AI Coach</a>
-                    <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i> Tools</a>
-                    <a href="Uebersetzer.html" class="nav-link"><i data-lucide="languages" class="nav-icon" aria-hidden="true"></i> Übersetzer</a>
-                    <a href="Zeitreise_Trainer.html" class="nav-link"><i data-lucide="history" class="nav-icon" aria-hidden="true"></i> Zeitreise (gestern·heute·morgen)</a>
-                    <a href="Text_Trainer.html" class="nav-link"><i data-lucide="file-pen" class="nav-icon" aria-hidden="true"></i> Text-Trainer (Prüfung EN→DE)</a>
-                    <a href="Wort_Zwillinge.html" class="nav-link"><i data-lucide="copy" class="nav-icon" aria-hidden="true"></i> Wort-Zwillinge</a>
-                    <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon" aria-hidden="true"></i> AI Config & Settings</a>
-                </div>
+                ${dcNavHTML()}
                 <div class="nav-group" aria-labelledby="level-nav-title">
                     <div class="nav-group-title" id="level-nav-title">Your Level Progress</div>
                     ${levelRow('A1', byLevel.A1)}
@@ -208,6 +273,14 @@ function renderAppShell() {
         oldHubs.forEach(h => h.style.display = 'none');
         
         content.appendChild(legacyWrapper);
+        // "Mehr in diesem Bereich": the other pages of the same group, so the next exercise is one tap away
+        const curPage = dcCurrentPage(), grp = DC_SITEMAP.find(g => g.id !== 'setup' && g.pages.some(p => p.href === curPage));
+        if (grp) {
+            const more = document.createElement('nav');
+            more.className = 'dc-more'; more.setAttribute('aria-label', 'Mehr in diesem Bereich');
+            more.innerHTML = `<div class="dc-more-t">Mehr in <b>${grp.title}</b> · <a href="index.html#${grp.id}">alle Bereiche</a></div><div class="dc-more-l">${grp.pages.filter(p => p.href !== curPage).map(p => `<a href="${p.href}"><i data-lucide="${p.icon}" aria-hidden="true"></i> ${p.t}</a>`).join('')}</div>`;
+            content.appendChild(more);
+        }
         main.appendChild(content);
         layout.appendChild(main);
         
@@ -307,6 +380,7 @@ function renderAppShell() {
 
         // Initialize icons for the newly injected shell
         if (window.lucide) window.lucide.createIcons();
+        dcBindNavSearch();
     }
 }
 
