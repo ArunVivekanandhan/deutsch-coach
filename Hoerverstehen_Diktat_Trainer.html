@@ -95,6 +95,7 @@ h1 { font-family: 'Fjalla One', sans-serif; margin: 0 0 8px 0; font-size: 28px; 
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+<script src="js/mistakes.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -366,6 +367,7 @@ h1 { font-family: 'Fjalla One', sans-serif; margin: 0 0 8px 0; font-size: 28px; 
         <div style="font-weight:700; margin-bottom:6px;">📖 Transcript</div>
         <div class="transcript">${currentSentenceObj.de}</div>
         <div class="translation">${currentSentenceObj.en}</div>
+        ${!isCorrect && window.DCExplain ? DCExplain.html(currentSentenceObj.de) : ''}
       </div>
     `;
   }
@@ -385,6 +387,7 @@ h1 { font-family: 'Fjalla One', sans-serif; margin: 0 0 8px 0; font-size: 28px; 
         <div style="font-weight:700; margin-bottom:6px;">${isCorrect ? '🎉 Richtig! (Correct)' : '❌ Not quite — the full sentence:'}</div>
         <div class="transcript">${currentSentenceObj.de}</div>
         <div class="translation">${currentSentenceObj.en}</div>
+        ${!isCorrect && window.DCExplain ? DCExplain.html(currentSentenceObj.de) : ''}
       </div>
     `;
   }
@@ -509,7 +512,13 @@ h1 { font-family: 'Fjalla One', sans-serif; margin: 0 0 8px 0; font-size: 28px; 
     } else {
       fBox.className = 'feedback-box incorrect';
       document.getElementById('feedbackTitle').textContent = '❌ Fast! (Almost!) - Vergleiche deinen Text:';
+      // your sentence with the misplaced words marked + which rule + the sentence explained (Task 71)
+      let ex = document.getElementById('hvExplain');
+      if (!ex) { ex = document.createElement('div'); ex.id = 'hvExplain'; fBox.appendChild(ex); }
+      if (window.DCExplain) DCExplain.feedbackInto(ex, userText, targetText);
+      if (window.DCMistakes && userText.trim()) DCMistakes.add({ src: 'hoeren', href: 'Hoerverstehen_Diktat_Trainer.html', q: currentSentenceObj.en || targetText, hint: 'Diktat: schreib den deutschen Satz.', answer: targetText, given: userText });
     }
+    if (userClean === targetClean) { const ex = document.getElementById('hvExplain'); if (ex) ex.innerHTML = ''; }
   }
 
   function revealTranscript() {

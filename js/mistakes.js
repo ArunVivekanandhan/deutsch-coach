@@ -7,7 +7,7 @@
 (function () {
   const KEY = 'dc_mistakes', MAX = 500, DAYS = [0, 1, 3, 7, 14], DAY = 864e5;
   const SRC = { text: '📝 Text-Trainer', satzbau: '🧱 Satzbau', grammar: '📘 Grammatik', zeitreise: '🕰️ Zeitreise',
-                wz: '👯 Wort-Zwillinge', crash: '⚡ Crashkurs', bild: '🎬 Bild-Quiz', words: '🃏 Wörter' };
+                wz: '👯 Wort-Zwillinge', crash: '⚡ Crashkurs', bild: '🎬 Bild-Quiz', words: '🃏 Wörter', hoeren: '🎧 Diktat' };
   const load = () => { try { const a = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(a) ? a : []; } catch (e) { return []; } };
   const save = a => { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) { /* storage full / blocked */ } };
   const strip = s => String(s == null ? '' : s).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
@@ -131,7 +131,7 @@
     document.querySelectorAll('#dcMfBox .o').forEach(b => { b.disabled = true; if (b.dataset.mfo === it.answer) b.classList.add('ok'); else if (b.dataset.mfo === given) b.classList.add('no'); });
     document.getElementById('dcMfRes').innerHTML = `<div class="res ${r.ok ? 'ok' : 'no'}">${r.ok ? '🌟 <b>Richtig!</b>' : '✏️ <b>So ist es richtig:</b>'} <b>${escH(it.answer)}</b>
       ${r.note ? `<div class="h">✏️ ${escH(r.note)}</div>` : ''}${it.why ? `<div class="why">💡 ${escH(it.why)}</div>` : ''}</div>
-      ${!r.ok && / /.test(it.answer) && window.DCExplain ? DCExplain.html(it.answer) : ''}
+      ${!r.ok && / /.test(it.answer) && window.DCExplain ? DCExplain.feedback(it.kind === 'type' ? given : '', it.answer) : ''}
       <div class="r"><button type="button" class="dcmf-b p" data-mf="next">Weiter →</button></div>`;
     document.querySelector('#dcMfBox [data-mf="next"]').focus();
   }

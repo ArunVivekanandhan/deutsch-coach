@@ -765,6 +765,23 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 71) — The same detailed feedback in EVERY sentence-making exercise
+Request: "Not only in these pages — wherever we have this kind of making [sentences] we need to give details."
+- **`DCExplain.feedback(yourSentence, correctSentence)`** (js/sentence-explain.js, shared): "Du hast: …" with the
+  words that are in the wrong place underlined red, then the rule that was broken (`orderTips`): missing / extra
+  words, wrong form of the same word (den → dem, mich → mir: same stem or same word class), verb not on position 2
+  (and the subject behind it), yes/no question verb first, the whole Nebensatz as position 1 → verb right after the
+  comma, weil/dass/… clause → verb at the end (only at a clause start, so "seit drei Jahren" is a preposition),
+  reflexive pronoun position, participle / infinitive / separable prefix at the very end, else the first wrong
+  position — followed by the "🔎 Satz erklärt" box with the grammar points, 🤔 Warum? and the word-by-word table.
+- Used in: Zeitreise (build, type, choose — replaces the page's own hint), Satzbau (build/type), Grammatik-Regel-
+  Trainer sentence building, Text-Trainer (Satz für Satz, Prüfung, Sätze verbinden — rules only, the diff already
+  shows the words), Hörverstehen dictation (+ the choice/gap exercises show the explained sentence; dictation mistakes
+  now also go to Meine Fehler, source 🎧 Diktat), Meine Fehler and the "Jetzt üben" practice.
+- **Bug fixed** (existing): Grammatik-Regel-Trainer sentence builder referenced an undefined `buildOrder` — every wrong
+  built sentence threw a ReferenceError, so its feedback / AI button never appeared. Now uses the placed words.
+- Word splitting uses Unicode letters (Café kept its é).
+
 ### 2026-09-26 (Task 70) — Zeitreise word-order feedback names the mistake + "Warum?" for every grammar rule
 User pasted a wrong build answer for "Heute treffen wir uns im Café." (feedback was only a generic rule) and asked
 "why this grammar rule".

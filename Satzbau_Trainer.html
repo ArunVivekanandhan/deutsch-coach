@@ -559,7 +559,7 @@ function finish(ok, extra) {
       <b>${ok ? '✓ Richtig!' : ok === null ? '👀 Lösung:' : '✗ Noch nicht ganz.'}</b> ${extra || ''}
       <div class="sent">${esc(correct)} <button type="button" class="btn grey" data-act="sayCorrect" style="padding:4px 8px;">🔊</button></div>
       ${W.mode !== 'transform' ? planHTML(s) : ''}
-      ${ok === false && window.DCExplain ? DCExplain.html(correct) : ''}
+      ${ok === false && window.DCExplain ? DCExplain.feedback(W.user || '', correct) : ''}
       ${!S.topic ? `<div class="note">Regel (${esc(topic.title)}): ${esc(topic.rule)}</div>` : ''}
       ${W.requeued ? `<div class="note">↻ Dieser Satz kommt in ein paar Sätzen noch einmal — dann sitzt er.</div>` : ''}
       ${s.ai ? `<div class="note">🤖 KI-Satz (automatisch auf Wortstellung geprüft, kann trotzdem Fehler enthalten). <button type="button" class="btn grey" style="padding:2px 8px;" data-act="delAI">🗑️ Satz löschen</button></div>` : ''}

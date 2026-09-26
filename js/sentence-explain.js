@@ -104,12 +104,12 @@
 
   /* ---------- grammar points ---------- */
   function analyse(sentence) {
-    const words = (sentence.match(/[A-Za-zÄÖÜäöüß0-9-]+|[,.!?]/g) || []);
-    const toks = words.filter(w => /[\wäöüßÄÖÜ]/.test(w)), L = toks.map(low), pts = [], role = {};
+    const words = (sentence.match(/[\p{L}\p{N}-]+|[,.!?]/gu) || []);
+    const toks = words.filter(w => /[\p{L}\p{N}]/u.test(w)), L = toks.map(low), pts = [], role = {};
     const q = /\?\s*$/.test(sentence);
     // clauses split at commas; a clause starting with weil/dass/… is a subordinate clause
     const clauses = []; let cur = [];
-    words.forEach(w => { if (w === ',') { if (cur.length) clauses.push(cur); cur = []; } else if (/[\wäöüßÄÖÜ]/.test(w)) cur.push(w); });
+    words.forEach(w => { if (w === ',') { if (cur.length) clauses.push(cur); cur = []; } else if (/[\p{L}\p{N}]/u.test(w)) cur.push(w); });
     if (cur.length) clauses.push(cur);
     const main = clauses.find(c => !SUB.has(low(c[0]))) || clauses[0] || [];
     clauses.filter(c => SUB.has(low(c[0]))).forEach(c => {
@@ -193,7 +193,7 @@
     st.textContent = `.dcx{margin-top:8px;border:1px solid var(--color-border,#ddd);border-radius:12px;padding:8px 12px;background:var(--color-bg,#f8fafc);color:var(--color-ink,#111);font-size:14px;line-height:1.5;text-align:left}
 .dcx summary{cursor:pointer;font-weight:700}.dcx .dcx-s{font-size:16px;font-weight:800;margin:6px 0}.dcx ul{margin:4px 0 8px;padding-left:18px}.dcx li{margin:3px 0}
 .dcx table{border-collapse:collapse;width:100%;font-size:13.5px}.dcx td{border-top:1px solid var(--color-border,#ddd);padding:4px 6px;vertical-align:top}.dcx td:first-child{white-space:nowrap}
-.dcx .dcx-why{font-size:12.8px;color:var(--color-ink-soft,#555);margin:2px 0 4px;border-left:3px solid #f59e0b;padding-left:8px}.dcx .dcx-q{color:var(--color-ink-soft,#777)}.dcx .dcx-ta{color:var(--color-ink-soft,#666);font-size:12.5px;margin-left:4px}.dcx .dcx-scroll{overflow-x:auto}`;
+.dcx-fb{border-color:#f59e0b !important}.dcx .dcx-mine{font-size:15px;margin-bottom:4px}.dcx .dcx-why{font-size:12.8px;color:var(--color-ink-soft,#555);margin:2px 0 4px;border-left:3px solid #f59e0b;padding-left:8px}.dcx .dcx-q{color:var(--color-ink-soft,#777)}.dcx .dcx-ta{color:var(--color-ink-soft,#666);font-size:12.5px;margin-left:4px}.dcx .dcx-scroll{overflow-x:auto}`;
     document.head.appendChild(st);
   }
   async function into(el, sentence, opts) {
@@ -206,8 +206,62 @@
     b.innerHTML = `<div class="dcx-s">${esc(sentence)}</div>${A.pts.length ? `<div><b>Grammatik in diesem Satz:</b></div><ul>${A.pts.map(p => `<li>${p}</li>`).join('')}</ul>` : ''}
       <div><b>Wort für Wort:</b></div><div class="dcx-scroll"><table>${A.toks.map((w, i) => row(w, i, A)).join('')}</table></div>`;
   }
+  /* ---------- word-order feedback for ANY sentence-making exercise (Task 71) ----------
+     orderTips(got, target): which rule the learner's sentence breaks — missing / extra words, verb position,
+     subject after the verb, reflexive pronoun, verb at the end of a weil/dass clause, 2nd verb part at the end. */
+  const wordsOf = x => (Array.isArray(x) ? x.join(' ') : String(x || '')).match(/[\p{L}\p{N}-]+/gu) || [];
+  function orderTips(got, target) {
+    const G = wordsOf(got), T = wordsOf(target), g = G.map(low), t = T.map(low), tips = [];
+    if (!G.length) return tips;
+    const bag = a => a.slice().sort().join(' ');
+    const miss = t.filter((w, i) => t.slice(0, i).filter(x => x === w).length >= g.filter(x => x === w).length);
+    const extra = g.filter((w, i) => g.slice(0, i).filter(x => x === w).length >= t.filter(x => x === w).length);
+    // a different word with the same beginning = wrong form (Endung, Artikel, Verbform)
+    const pairs = []; miss.slice().forEach(m => { const cat = w => FUNC[w] && (/Artikel/.test(FUNC[w][1]) ? 'art' : /Possessiv/.test(FUNC[w][1]) ? 'pos' : /Subjekt|Pronomen|Akkusativ|Dativ|Reflexiv/.test(FUNC[w][1]) ? 'pro' : '');
+    const k = miss.length > t.length / 2 ? -1 : extra.findIndex(x => (x.length > 3 && x.slice(0, 4) === m.slice(0, 4)) || (cat(x) && cat(x) === cat(m))); /* same stem or same word class (den/dem, mich/mir) */ if (k >= 0) { pairs.push([extra[k], m]); extra.splice(k, 1); miss.splice(miss.indexOf(m), 1); } });
+    pairs.forEach(([x, m]) => tips.push(`✏️ <b>„${esc(x)}“ → „${esc(m)}“</b>: ${FUNC[m] ? esc(FUNC[m][1]) : 'andere Form (Endung / Verbform / Artikel)'}.`));
+    if (miss.length) tips.push(`➕ Es fehlt: <b>${miss.map(esc).join(', ')}</b>.`);
+    if (extra.length) tips.push(`➖ Nicht im Satz: ${extra.map(esc).join(', ')}.`);
+    if (bag(g) !== bag(t) && (miss.length || extra.length)) return tips;          // wrong words first — order comes after
+    const A = analyse(Array.isArray(target) ? T.join(' ') + '.' : String(target));
+    const fi = A.finIdx, v = fi >= 0 ? t[fi] : '';
+    if (v && g.indexOf(v) !== fi) {
+      if (fi === 0) tips.push(`❓ In dieser Frage steht das Verb <b>„${esc(T[0])}“ ganz vorne</b> (Position 1).`);
+      else if (SUB.has(t[0])) tips.push(`↪️ Der ganze Nebensatz „${esc(T.slice(0, fi).join(' '))}“ ist <b>Position 1</b> → danach kommt <b>sofort das Verb „${esc(T[fi])}“</b>, erst dann „${esc(T[fi + 1] || '')}“.`);
+      else { const first = T.slice(0, fi).join(' '); tips.push(`2️⃣ Das Verb <b>„${esc(T[fi])}“</b> gehört auf <b>Position 2</b> — direkt nach „${esc(first)}“${g[fi] ? `, nicht „${esc(G[fi])}“` : ''}.${SUBJ.has(t[fi + 1]) && !SUBJ.has(t[0]) ? ` Das Subjekt „${esc(T[fi + 1])}“ kommt <b>danach</b>.` : ''}`); }
+    } else if (fi > 0 && SUBJ.has(t[fi + 1]) && g[fi + 1] !== t[fi + 1]) tips.push(`👤 Nach dem Verb kommt das Subjekt: ${esc(T[fi])} <b>${esc(T[fi + 1])}</b> …`);
+    // a weil/dass/seit … word opens a clause only at the start of the sentence or right after a comma (seit drei Jahren = preposition)
+    const starts = new Set([0]); { let k = 0; String(Array.isArray(target) ? target.join(' ') : target).split(',').slice(0, -1).forEach(part => { k += wordsOf(part).length; starts.add(k); }); }
+    const sub = t.findIndex((w, i) => SUB.has(w) && starts.has(i));
+    if (sub >= 0) {
+      let e = t.length - 1; for (let k = sub + 1; k < t.length; k++) { if (String(target).split(/\s+/).map(low)[k] && /,$/.test(String(target).split(/\s+/)[k] || '')) { e = k; break; } }
+      const vEnd = t[e]; const gs = g.indexOf(t[sub]);
+      if (gs >= 0 && g.indexOf(vEnd) !== e) tips.push(`🔗 Nach <b>„${esc(T[sub])}“</b> steht das Verb <b>„${esc(T[e])}“ am Ende</b> dieses Satzteils.`);
+    }
+    const refl = t.find(w => /^(mich|dich|sich|uns|euch)$/.test(w));
+    if (refl && g.indexOf(refl) !== t.indexOf(refl)) tips.push(`🔄 Das Reflexivpronomen <b>„${esc(refl)}“</b> steht direkt nach dem Verb/Subjekt: „${esc(T.slice(Math.max(0, t.indexOf(refl) - 2), t.indexOf(refl) + 1).join(' '))}“.`);
+    const last = t[t.length - 1], role = A.role[last + '|end'];
+    if (role && g[g.length - 1] !== last && !(sub >= 0 && tips.some(x => x.includes('am Ende</b> dieses')))) tips.push(`🔚 <b>„${esc(T[T.length - 1])}“</b> (${esc(role.replace(/\s*\(.*\)/, ''))}) gehört ganz ans <b>Ende</b>.`);
+    if (!tips.length) { const k = g.findIndex((w, i) => w !== t[i]); if (k >= 0) tips.push(`📍 An Stelle ${k + 1} gehört <b>„${esc(T[k])}“</b>, nicht „${esc(G[k])}“.`); }
+    return tips;
+  }
+  function mineHTML(got, target) {
+    const G = wordsOf(got), t = wordsOf(target).map(low);
+    return G.map((w, k) => low(w) === t[k] ? esc(w) : `<b style="color:#dc2626;text-decoration:underline wavy;">${esc(w)}</b>`).join(' ');
+  }
+  /* full feedback: "Du hast …" + the broken rules + the explained correct sentence (grammar, Warum?, word by word) */
+  async function feedbackInto(el, got, target, opts) {
+    if (!el || !target) return;
+    css(); await ready();
+    const tips = wordsOf(got).length ? orderTips(got, target) : [];
+    const head = wordsOf(got).length && !(opts && opts.noMine) ? `<div class="dcx-mine">Du hast: ${mineHTML(got, target)}</div>` : '';
+    el.innerHTML = (head || tips.length ? `<div class="dcx dcx-fb">${head}${tips.length ? `<ul>${tips.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}</div>` : '') + '<div class="dcx-x"></div>';
+    into(el.querySelector('.dcx-x'), String(target).trim(), opts);
+  }
+  function feedback(got, target, opts) { const id = 'dcx' + (++n); setTimeout(() => feedbackInto(document.getElementById(id), got, target, opts), 0); return `<div id="${id}"></div>`; }
+
   // convenience: returns a placeholder and fills it once it is in the page
-  let n = 0;
   function html(sentence, opts) { const id = 'dcx' + (++n); setTimeout(() => into(document.getElementById(id), sentence, opts), 0); return `<div id="${id}"></div>`; }
-  window.DCExplain = { into, html, analyse: s => ready().then(() => analyse(s)), ready };
+  let n = 0;
+  window.DCExplain = { into, html, feedback, feedbackInto, orderTips: (g, t) => ready().then(() => orderTips(g, t)), analyse: s => ready().then(() => analyse(s)), ready };
 })();

@@ -124,21 +124,6 @@ const TENSE = [{ k: 'past', ic: '⬅️', de: 'Vergangenheit', en: 'past' }, { k
 const HELPERS = /^(bin|bist|ist|sind|seid|habe|hast|hat|haben|habt|werde|wirst|wird|werden|werdet|war|warst|waren|wart|hatte|hattest|hatten|hattet)$/i;
 /* the future can also be said with Präsens + a future time word (Morgen fahre ich …) */
 function futAlt(s) { if (!s.same) return null; const pres = s.de[1]; if (!pres.startsWith(s.time[1] + ' ')) return null; return s.time[2] + ' ' + pres.slice(s.time[1].length + 1); }
-/* word-order feedback for the build exercise (Task 70): show the learner's sentence with the misplaced words marked
-   and name the exact rule that was broken (time word first → verb → subject → reflexive pronoun → … → 2nd verb at the end) */
-function buildHint(got, target, time) {
-  const tn = time.split(' ').length, verb = target[tn], subj = target[tn + 1], last = target[target.length - 1];
-  const refl = target.find(w => /^(mich|dich|sich|uns|euch)$/.test(w));
-  const mark = got.map((w, k) => w === target[k] ? esc(w) : `<b style="color:#dc2626; text-decoration:underline wavy;">${esc(w)}</b>`).join(' ');
-  const tips = [];
-  if (got.slice(0, tn).join(' ') !== time) tips.push(`Fang mit dem Zeitwort <b>„${esc(time)}“</b> an (Position 1).`);
-  else if (got[tn] !== verb) tips.push(`Direkt nach „${esc(time)}“ kommt das <b>Verb „${esc(verb)}“</b> (Position 2)${got[tn] ? ` — nicht „${esc(got[tn])}“` : ''}. Das Subjekt steht dann <b>hinter</b> dem Verb.`);
-  else if (got[tn + 1] !== subj) tips.push(`Nach dem Verb kommt das <b>Subjekt „${esc(subj)}“</b>: ${esc(time)} ${esc(verb)} <b>${esc(subj)}</b> …`);
-  if (refl && got.indexOf(refl) !== target.indexOf(refl)) tips.push(`Das Reflexivpronomen <b>„${esc(refl)}“</b> steht direkt nach dem Subjekt: ${esc(verb)} ${esc(subj)} <b>${esc(refl)}</b>.`);
-  if (last !== verb && /^[a-zäöüß]+(en|t)$/.test(last) && got[got.length - 1] !== last && target.length > tn + 2) tips.push(`Der zweite Verbteil <b>„${esc(last)}“</b> gehört ganz ans <b>Ende</b>.`);
-  if (!tips.length) { const k = got.findIndex((w, j) => w !== target[j]); if (k >= 0) tips.push(`An Stelle ${k + 1} gehört <b>„${esc(target[k])}“</b>, nicht „${esc(got[k])}“.`); }
-  return `<div style="margin-top:4px;">Du hast: ${mark}</div><ul style="margin:4px 0 0; padding-left:18px;">${tips.map(t => `<li>${t}</li>`).join('')}</ul>`;
-}
 /* mark the verb parts: 2nd position + last word when it is a participle / infinitive */
 function markVerbs(sentence, s, i) {
   const t = s.time[i], rest = sentence.slice(t.length + 1).replace(/[.!?]$/, ''), end = sentence.match(/[.!?]$/) ? sentence.slice(-1) : '';
@@ -205,7 +190,7 @@ function finish(ok, extra) {
     DCMistakes.add({ src: 'zeitreise', href: 'Zeitreise_Trainer.html', q: s.en[i], hint: 'Übersetze ins Deutsche (' + ['Vergangenheit', 'Gegenwart', 'Zukunft'][i] + ').',
       answer: s.de[i], alts: i === 2 && typeof futAlt === 'function' && futAlt(s) ? [futAlt(s)] : [], why: s.why || '' });
   $('fb').innerHTML = `${ok ? '🌟 Richtig!' : '❌ Nicht ganz.'} ${extra || ''}<div style="margin-top:6px;"><b>${esc(s.de[i])}</b> <button type="button" class="zr-btn" data-say="${esc(s.de[i])}">🔊</button> <span class="tl-en">— ${esc(s.en[i])}</span></div>
-    <div class="tl-en" style="margin-top:4px;">${TENSE.map((t, k) => `${t.ic} ${esc(s.de[k])}`).join(' &nbsp;·&nbsp; ')}</div>${!ok ? (window.DCExplain ? DCExplain.html(s.de[i]) : '') : ''}`;
+    <div class="tl-en" style="margin-top:4px;">${TENSE.map((t, k) => `${t.ic} ${esc(s.de[k])}`).join(' &nbsp;·&nbsp; ')}</div>${!ok ? (window.DCExplain ? DCExplain.feedback(cur.m === 'when' ? '' : (cur.given || ''), s.de[i]) : '') : ''}`;
   $('nextQ').hidden = false; $('nextQ').focus();
   if (ok) say(s.de[i]);
 }
@@ -216,7 +201,7 @@ function answerChoice(k) {
     const ok = k === cur.i; btns[cur.i].classList.add('ok'); if (!ok) btns[k].classList.add('no');
     finish(ok, ok ? '' : `Look at the time word „${esc(cur.s.time[cur.i])}“ and the verb.`);
   } else {
-    const o = cur.opts[k], ok = o.k === cur.i;
+    const o = cur.opts[k], ok = o.k === cur.i; cur.given = o.x;
     btns.forEach((b, j) => { if (cur.opts[j].k === cur.i) b.classList.add('ok'); });
     if (!ok) btns[k].classList.add('no');
     finish(ok, ok ? '' : o.k === 3 ? `That sentence has a typical mistake: ${esc(cur.s.why)}` : `That is the ${TENSE[o.k].de} (${TENSE[o.k].en}) — we need the ${TENSE[cur.i].de}.`);
@@ -224,7 +209,7 @@ function answerChoice(k) {
 }
 function checkType() {
   if (cur.done) return;
-  const v = norm($('typeIn').value), s = cur.s, alt = cur.i === 2 ? futAlt(s) : null;
+  const v = norm($('typeIn').value), s = cur.s, alt = cur.i === 2 ? futAlt(s) : null; cur.given = $('typeIn').value;
   const ok = v === norm(s.de[cur.i]) || (alt && v === norm(alt)) || ((s.alts || [])[cur.i] || []).some(x => v === norm(x));   // other correct sentences (Task 69)
   let hint = '';
   if (!ok) {
@@ -317,7 +302,8 @@ document.addEventListener('click', e => {
   if (b.dataset.tile) { if (cur.done) return; cur.built.push(cur.tiles.find(t => t.k === +b.dataset.tile)); return drawTiles(); }
   if (b.id === 'undo') { if (!cur.done) { cur.built.pop(); drawTiles(); } return; }
   if (b.id === 'checkBuild') { if (cur.done) return; const got = cur.built.map(t => t.w); const ok = got.join(' ') === cur.target.join(' ');
-    return finish(ok, ok ? '' : got.length < cur.target.length ? 'Es fehlen noch Wörter — tippe alle Wörter an.' : buildHint(got, cur.target, cur.s.time[cur.i])); }
+    cur.given = got.join(' ');
+    return finish(ok, ok ? '' : got.length < cur.target.length ? 'Es fehlen noch Wörter — tippe alle Wörter an.' : ''); }
   if (b.id === 'checkType') return checkType();
   if (b.id === 'nextQ') return nextQ();
   if (b.id === 'nextVQ') return nextVQ();

@@ -2999,10 +2999,10 @@ function checkBuildAnswer(){
         🔊 Listen in German
       </button>
       ${!isCorrect ? `<button class="actbtn" style="background:#fff; color:var(--ink); padding:6px 12px; font-size:11px;" onclick="retryCurrentQuestion()">↺ Retry This Question</button>` : ''}
-      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${buildOrder.map(w=>w.text).join(' ')}')">🤖 KI-Erklärung (Why is this wrong?)</button>` : ''}
+      ${!isCorrect ? `<button id="aiExplainBtn" class="actbtn" style="background:var(--ink); color:#fff; padding:6px 12px; font-size:11px;" onclick="explainWrongAnswerAI('${escapeQuotes(userSentence)}')">🤖 KI-Erklärung (Why is this wrong?)</button>` : ''}
     </div>
     <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
-  ${!isCorrect && window.DCExplain ? DCExplain.html(correctSentence) : ''}`;
+  ${!isCorrect && window.DCExplain ? DCExplain.feedback(userSentence, correctSentence) : ''}`;
 
   document.getElementById("nextDrillBtn").style.display = "block";
   document.getElementById("finishDrillBtn").style.display = "block";
@@ -3067,7 +3067,7 @@ function checkAnswer(chosenIdx){
 
 function retryCurrentQuestion(){
   drillAnswered = false;
-  buildOrder = [];
+  buildSlots = [];   // was the undefined "buildOrder" — a wrong built sentence crashed the feedback (fixed Task 71)
   renderContent();
 }
 
