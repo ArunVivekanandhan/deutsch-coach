@@ -765,6 +765,19 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 75) — Satzbau level test: A2 contains A1, B1 contains A2 + A1; connectors in every level
+User: "If we are A2, then it should also contain A1 things also and i hope we have connector also."
+- `levelTest(level)` adds revision sentences from the levels below (`TEST_REVIEW`: A2 ← 8 × A1, B1 ← 6 × A2 + 3 × A1),
+  one per grammar topic; connector topics (`CONN_TOPICS`) always come first. They replace some everyday sentences
+  (A1 30, A2 31, B1 34 sentences). Summary groups per topic + sentence level, marks revision rows with a level badge
+  and shows "↩ Wiederholung (A1): x / y".
+- Konnektoren topic (was B1 only) now has per-sentence levels (`lv`): und/aber/oder/denn/sondern in simple present
+  = A1 (12, incl. 4 new sentences), deshalb/dann/außerdem/weil and past-tense ones = A2 (12), trotzdem/sonst = B1 (4).
+  Level labels are this app's own grading (in line with common A1/A2 word lists), not an official CEFR mapping.
+- Grammar topics with mixed levels are listed under every level they have sentences for and practise only that
+  level's sentences (as the everyday topics already did) — Konnektoren now appears under A1 as "A1–B1".
+- check_satzbau.py OK (954 sentences); browser-tested at 390/1100 px, no JS errors.
+
 ### 2026-09-26 (Task 74) — "⏭ Anderer Satz" in every sentence exercise
 User: "Need option for new sentence."
 - New skip button (not counted as wrong; the skipped item comes back once at the end where the page has a fixed list):

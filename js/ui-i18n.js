@@ -136,6 +136,7 @@
     [/^(\d+) fällige Karten wiederholen →$/, 'Review $1 due cards →'], [/^(\d+) Fehler aus deinem Fehlerheft wiederholen →$/, 'Review $1 mistakes from your notebook →'],
     [/^(\d+) falsche Sätze im Text-Trainer nochmal →$/, 'Redo $1 wrong sentences in the text trainer →'],
     [/^(\d+) Sätze · ✓ (\d+) gemeistert · 🏆 (\d+) Experte$/, '$1 sentences · ✓ $2 mastered · 🏆 $3 expert'],
+    [/^\+ Wiederholung (A1(?: \+ A2)?|A2 \+ A1)$/, '+ revision of $1'],
     [/^Jetzt wiederholen \((\d+)\)$/, 'Review now ($1)'], [/^(\d+) Min\.$/, '$1 min.']
   ];
   // elements whose own labels may be translated; learning content inside them is safe because matches are exact

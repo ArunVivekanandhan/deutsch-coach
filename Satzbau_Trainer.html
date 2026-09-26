@@ -278,7 +278,7 @@ function renderHome() {
   document.getElementById('tabG').classList.toggle('active', curTab === 'grammar');
   document.getElementById('tabT').classList.toggle('active', curTab === 'thematic');
   const list = ALL_TOPICS.filter(t => t.kind === curTab && (curLevel === 'alle' || t.level === curLevel ||
-    (curTab === 'thematic' && t.sentences.some(s => sentenceLevel(t, s) === curLevel))));
+    t.sentences.some(s => sentenceLevel(t, s) === curLevel)));   // mixed-level topics (e.g. Konnektoren A1–B1) show at each level
   document.getElementById('topicGrid').innerHTML = list.map(t => {
     const m = masteredIn(t), x = expertIn(t), n = t.sentences.length, pct = n ? Math.round(100 * m / n) : 0;
     const nAI = t.sentences.filter(s => s.ai).length;
@@ -322,8 +322,8 @@ function startSession(title, items, topic) {
   renderItem();
 }
 function openTopic(t) {
-  // everyday topics mix levels (A1–B1): with a level chosen, practise only that level's sentences
-  const own = t.kind === 'thematic' && curLevel !== 'alle' ? t.sentences.filter(s => sentenceLevel(t, s) === curLevel) : [];
+  // mixed-level topics (everyday topics, Konnektoren): with a level chosen, practise only that level's sentences
+  const own = curLevel !== 'alle' ? t.sentences.filter(s => sentenceLevel(t, s) === curLevel) : [];
   startSession(t.title, shuffle(own.length ? own : t.sentences).map(s => ({ topic: t, s })), t);
 }
 function mixedRound() {
@@ -845,23 +845,39 @@ function renderTestPanel() {
   const H = store.get('sb_tests_v1', []);
   const last = l => { const h = H.filter(x => x.level === l).slice(-1)[0]; return h ? `zuletzt ${h.pct} % (${h.d.slice(5).split('-').reverse().join('.')})` : 'noch nicht gemacht'; };
   document.getElementById('testPanel').innerHTML = `<h3>📝 Level-Test: alle Themen eines Levels zusammen</h3>
-    <small>Sätze aus <b>jedem</b> Grammatik- und Alltagsthema des Levels, gemischt — am Ende siehst du pro Thema, was sitzt und was du noch üben musst.</small>
+    <small>Sätze aus <b>jedem</b> Grammatik- und Alltagsthema des Levels, gemischt. <b>A2 enthält auch A1, B1 auch A2 + A1</b> (Wiederholung, Konnektoren immer dabei) — am Ende siehst du pro Thema, was sitzt und was du noch üben musst.</small>
     <div class="sb-row">${Object.entries(TEST_FMTS).map(([k, l]) => `<button type="button" class="chip ${TEST_FMT === k ? 'active' : ''}" data-tfmt="${k}">${l}</button>`).join('')}</div>
-    <div class="lvbtns">${['A1', 'A2', 'B1'].map(l => { const p = testPool(l); return `<button type="button" data-test="${l}"><b>${l}-Test</b><small>${p.filter(x => x.t.kind === 'grammar').length} Grammatik- + ${p.filter(x => x.t.kind !== 'grammar').length} Alltagsthemen · ${testSize(p)} Sätze<br>${last(l)}</small></button>`; }).join('')}</div>`;
+    <div class="lvbtns">${['A1', 'A2', 'B1'].map(l => { const p = testPool(l); return `<button type="button" data-test="${l}"><b>${l}-Test</b><small>${p.filter(x => x.t.kind === 'grammar').length} Grammatik- + ${p.filter(x => x.t.kind !== 'grammar').length} Alltagsthemen · ${testSize(p, reviewSize(l))} Sätze${reviewPlan(l).length ? '<br>+ Wiederholung ' + reviewPlan(l).map(r => r.l).join(' + ') : ''}<br>${last(l)}</small></button>`; }).join('')}</div>`;
 }
-/* grammar topics are the core of the test (2–3 sentences each), everyday topics add 1 sentence each — about 30 in all */
-function testPlan(pool) {
+/* grammar topics are the core of the test (2–3 sentences each), everyday topics add 1 sentence each — about 30 in all;
+   `rev` = revision sentences from the levels below, which take the place of some everyday sentences */
+function testPlan(pool, rev = 0) {
   const g = pool.filter(x => x.t.kind === 'grammar'), th = pool.filter(x => x.t.kind !== 'grammar');
-  const gPer = Math.max(2, Math.min(3, Math.floor(21 / Math.max(1, g.length))));
+  const gPer = rev ? 2 : Math.max(2, Math.min(3, Math.floor(21 / Math.max(1, g.length))));
   const gN = g.reduce((n, x) => n + Math.min(gPer, x.ss.length), 0);
-  return { g, th, gPer, thN: Math.min(th.length, Math.max(6, 30 - gN)), total: gN + Math.min(th.length, Math.max(6, 30 - gN)) };
+  const thN = Math.min(th.length, Math.max(rev ? 3 : 6, 30 - gN - rev));
+  return { g, th, gPer, thN, total: gN + thN + rev };
 }
-function testSize(pool) { return testPlan(pool).total; }
+function testSize(pool, rev = 0) { return testPlan(pool, rev).total; }
+/* A2 and B1 tests also revise the levels below — A2 contains A1, B1 contains A2 and A1 (Task 75).
+   One sentence per grammar topic; connector topics always come first, so every test has connectors. */
+const TEST_REVIEW = { A1: [], A2: [['A1', 8]], B1: [['A2', 6], ['A1', 3]] };
+const CONN_TOPICS = new Set(['konnektoren', 'nebensatz', 'nebensatzerst', 'trotzdemobwohl', 'temporal', 'doppelkonnektoren']);
+function reviewPlan(level) { return (TEST_REVIEW[level] || []).map(([l, n]) => ({ l, n: Math.min(n, testPool(l).filter(x => x.t.kind === 'grammar').length) })); }
+function reviewSize(level) { return reviewPlan(level).reduce((a, r) => a + r.n, 0); }
+function reviewItems(level) {
+  return reviewPlan(level).flatMap(({ l, n }) => {
+    const g = testPool(l).filter(x => x.t.kind === 'grammar');
+    return [...shuffle(g.filter(x => CONN_TOPICS.has(x.t.id))), ...shuffle(g.filter(x => !CONN_TOPICS.has(x.t.id)))]
+      .slice(0, n).map(({ t, ss }) => ({ topic: t, s: shuffle(ss)[0] }));
+  });
+}
 function levelTest(level) {
-  const P = testPlan(testPool(level));
+  const P = testPlan(testPool(level), reviewSize(level));
   const mix = ['build', 'type', 'choice', 'verb', 'error', 'build', 'transform', 'type'];
   const picked = [...P.g.flatMap(({ t, ss }) => shuffle(ss).slice(0, P.gPer).map(s => ({ topic: t, s }))),
-                  ...shuffle(P.th).slice(0, P.thN).map(({ t, ss }) => ({ topic: t, s: shuffle(ss)[0] }))];
+                  ...shuffle(P.th).slice(0, P.thN).map(({ t, ss }) => ({ topic: t, s: shuffle(ss)[0] })),
+                  ...reviewItems(level)];
   const items = shuffle(picked).map((x, i) => Object.assign(x, { mode: TEST_FMT === 'mix' ? mix[i % mix.length] : TEST_FMT }));
   startSession(`📝 ${level}-Gesamttest · ${TEST_FMTS[TEST_FMT]}`, items, null);
   S.test = { level, fmt: TEST_FMT, start: Date.now() };
@@ -870,7 +886,8 @@ function levelTest(level) {
 function renderTestSummary() {
   const R = S.results, n = R.length, ok = R.filter(r => r.ok).length, pct = n ? Math.round(100 * ok / n) : 0;
   const per = new Map();
-  R.forEach(r => { const k = r.topic.id; const o = per.get(k) || { t: r.topic, ok: 0, n: 0 }; o.n++; if (r.ok) o.ok++; per.set(k, o); });
+  R.forEach(r => { const lv = sentenceLevel(r.topic, r.s), k = r.topic.id + '|' + lv; const o = per.get(k) || { t: r.topic, lv, ok: 0, n: 0 }; o.n++; if (r.ok) o.ok++; per.set(k, o); });
+  const revR = R.filter(r => sentenceLevel(r.topic, r.s) !== S.test.level), revOk = revR.filter(r => r.ok).length;
   const rows = [...per.values()].sort((a, b) => a.ok / a.n - b.ok / b.n);
   const weak = rows.filter(r => r.ok / r.n < 0.67).sort((a, b) => (a.t.kind === 'grammar' ? 0 : 1) - (b.t.kind === 'grammar' ? 0 : 1));   // grammar gaps first
   const H = store.get('sb_tests_v1', []); H.push({ level: S.test.level, fmt: S.test.fmt, pct, ok, n, mins: Math.round((Date.now() - S.test.start) / 60000), d: today() }); store.set('sb_tests_v1', H.slice(-40));
@@ -879,8 +896,9 @@ function renderTestSummary() {
   document.getElementById('progress').textContent = '';
   document.getElementById('card').innerHTML = `<div style="text-align:center;"><div style="font-size:40px;">${pct >= 80 ? '🏆' : pct >= 60 ? '🎉' : '💪'}</div>
       <b style="font-size:22px;">${S.test.level}-Test: ${pct} %</b><div class="note">${ok} von ${n} Sätzen richtig · ${pct >= 60 ? '✅ bestanden (ab 60 %)' : '❌ noch nicht bestanden (ab 60 %)'}${prev ? ' · vorher: ' + prev : ''}</div></div>
+    ${revR.length ? `<div class="note" style="margin-top:6px;">↩ Wiederholung (${[...new Set(revR.map(r => sentenceLevel(r.topic, r.s)))].join(' + ')}): <b>${revOk} / ${revR.length}</b> richtig${revOk < revR.length ? ' — Lücken von früher gehen vor!' : ' ✓'}</div>` : ''}
     <div class="note" style="margin-top:6px;">📘 Grammatikthema · 💬 Alltagsthema</div><table class="tres"><tr><th>Thema</th><th>richtig</th><th></th><th></th></tr>
-      ${rows.map(r => `<tr><td>${r.t.kind === 'grammar' ? '📘' : '💬'} ${esc(r.t.title)}</td><td>${r.ok} / ${r.n}</td><td><div class="b"><i style="width:${100 * r.ok / r.n}%; background:${col(r.ok / r.n)}"></i></div></td>
+      ${rows.map(r => `<tr><td>${r.t.kind === 'grammar' ? '📘' : '💬'} ${esc(r.t.title)}${r.lv !== S.test.level ? ` <span class="lvl">${esc(r.lv)}</span>` : ''}</td><td>${r.ok} / ${r.n}</td><td><div class="b"><i style="width:${100 * r.ok / r.n}%; background:${col(r.ok / r.n)}"></i></div></td>
         <td>${r.ok < r.n ? `<button type="button" class="btn grey" style="padding:3px 8px;" data-topic="${esc(r.t.id)}">Üben</button>` : '✓'}</td></tr>`).join('')}</table>
     ${weak.length ? `<div class="note" style="margin-top:8px;">🎯 <b>Das solltest du als Nächstes üben:</b> ${weak.slice(0, 4).map(r => esc(r.t.title)).join(' · ')}</div>` : '<div class="note" style="margin-top:8px;">🌟 Alle Themen sitzen — mach den Test im Format „✍️ Schreiben“ oder das nächste Level.</div>'}
     <div class="sb-row" style="justify-content:center; margin-top:12px;">
