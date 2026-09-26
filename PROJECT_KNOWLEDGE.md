@@ -765,6 +765,13 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 73) — Satzbau: "Neu" did not give a new sentence
+User: "In Satzbau-Trainer, 🧩 Bauen → I clicked Neu, it does not change to a new sentence."
+- Cause: the build mode's "↺ Neu" only put the blocks back and reshuffled them (and did nothing after checking).
+- Renamed to **↺ Leeren** (with a tooltip). New **⏭ Anderer Satz** button next to the progress line (all exercise
+  types): the current sentence is skipped (not counted as wrong) and comes back once at the end of the session.
+  Hidden after answering (then "Weiter →" leads on) and in the level test (a test cannot be skipped).
+
 ### 2026-09-26 (Task 72) — Quick practice + Meine Fehler: Leicht / Mittel / Schwer word selection, 🤖 more questions
 Requests: (screenshot of the "Jetzt üben" typing question) "need option with word selection based on easy medium hard"
 + "option to AI for more questions also".
