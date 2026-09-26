@@ -762,6 +762,16 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 58) — Text-Trainer exam: Leicht / Mittel / Schwer
+Request: "Option for easy, medium and harder. Easy: word pick and suggestions."
+- Per-sentence exam has 3 levels (`dc_tt_level`, default easy):
+  **🟢 Leicht** = grammar tip shown up front + word tiles (model words + up to 3 trap words from `TRAPS`, e.g. dem↔den,
+  mir↔mich, weil↔denn, ob↔wenn, habe↔bin) tapped into a read-only box, ⌫ last word / 🗑 clear.
+  **🟡 Mittel** = type yourself with a first-letter pattern (`W___ m____ F______ …`, shows word count + length) and a
+  "💡 Regel zeigen" button. **🔴 Schwer** = no help.
+- Score history stores `lvl`; "vorher" compares only runs at the same level; ≥ 90 % offers the next level.
+- Answer boxes auto-grow (`fit()`).
+
 ### 2026-09-26 (Task 57) — Text-Trainer exam: one box per sentence + "what went wrong" explanations
 Request: "Instead of one box have multiple boxes to type one sentence, then check correct or if not explain what missed."
 - Exam tab has two modes (`dc_tt_exam_mode`): **🧩 one box per sentence** (default) and 📄 one big box (old behaviour).

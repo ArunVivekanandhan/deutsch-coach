@@ -226,19 +226,43 @@ function renderVanish() {
 }
 /* exam simulation: whole text, timer, then sentence-by-sentence comparison */
 let E = null;
-let examMode = store.get('dc_tt_exam_mode', 'steps');
+let examMode = store.get('dc_tt_exam_mode', 'steps'), examLvl = store.get('dc_tt_level', 'easy');
+const LVL = { easy: ['🟢 Leicht', 'Wörter antippen + Regel sichtbar'], mid: ['🟡 Mittel', 'selbst tippen + Anfangsbuchstaben'], hard: ['🔴 Schwer', 'ohne Hilfe, wie in der Prüfung'] };
+/* trap words for the easy level: the typical wrong choice next to the right one (case, connector, auxiliary …) */
+const TRAPS = { den: 'dem', dem: 'den', der: 'den', die: 'der', das: 'dem', einen: 'einem', einem: 'einen', eine: 'einer', einer: 'eine', ein: 'einen',
+  meine: 'meinen', meinen: 'meinem', meiner: 'meine', mein: 'meinen', deine: 'deiner', deiner: 'deine', unsere: 'unserer', mir: 'mich', mich: 'mir', dir: 'dich', dich: 'dir',
+  ihnen: 'sie', ihm: 'ihn', ihn: 'ihm', uns: 'unser', weil: 'denn', denn: 'weil', ob: 'wenn', wenn: 'als', als: 'wenn', dass: 'das', deshalb: 'weil', trotzdem: 'obwohl',
+  obwohl: 'trotzdem', habe: 'bin', bin: 'habe', sind: 'haben', haben: 'sind', hatten: 'hatte', war: 'waren', sehr: 'viel', kein: 'nicht', keine: 'nicht', um: 'für', zu: 'zum' };
+function tilesFor(s) {
+  const words = toks(s.de), have = new Set(words.map(fold)), traps = [];
+  words.forEach(w => { const t = TRAPS[w.toLowerCase()]; if (t && !have.has(fold(t)) && traps.length < 3 && !traps.some(x => fold(x) === fold(t))) traps.push(w[0] === w[0].toUpperCase() ? t[0].toUpperCase() + t.slice(1) : t); });
+  return shuffle([...words, ...traps]);
+}
+const firstLetters = de => de.replace(/[A-Za-zÄÖÜäöüß]+/g, w => w[0] + '_'.repeat(w.length - 1));
+function stepHelp(i, s) {
+  const tl = examLvl === 'easy' ? tilesFor(s) : [];
+  if (examLvl === 'easy') return `<div class="focus">💡 Tipp: ${esc(s.focus || '')}</div>
+    <div class="muted">Tippe die Wörter in der richtigen Reihenfolge${tl.length > toks(s.de).length ? ' — ⚠️ Vorsicht, ein paar <b>Fallen-Wörter</b> sind dabei (z. B. dem/den, mir/mich)!' : '.'}</div>
+    <div class="tiles" id="tl${i}">${tl.map((w, k) => `<button type="button" class="tile" data-tile="${i}" data-k="${k}">${esc(w)}</button>`).join('')}</div>
+    <div class="row"><button type="button" class="btn" data-undo="${i}">⌫ letztes Wort</button><button type="button" class="btn" data-clear="${i}">🗑 leeren</button></div>`;
+  if (examLvl === 'mid') return `<div class="skel" style="font-family:ui-monospace,monospace; font-size:14.5px; letter-spacing:.5px; overflow-wrap:anywhere;">🔤 ${esc(firstLetters(s.de))}</div>
+    <div class="row"><button type="button" class="btn" data-rule="${i}">💡 Regel zeigen</button><span id="ru${i}"></span></div>`;
+  return '';
+}
+
 function renderExam() {
   const t = cur(); clearInterval(E && E.timer);
-  E = { t, start: Date.now(), timer: null, res: {} };
+  E = { t, start: Date.now(), timer: null, res: {}, stack: {} };
   const steps = examMode === 'steps';
   $('view').innerHTML = `<div class="box">
     <div class="row" style="justify-content:space-between;"><b>Übersetze den Text ins Deutsche.</b><span>⏱️ <span class="timer" id="clock">00:00</span> <span class="muted">(Ziel: ${Math.max(8, Math.round(t.sentences.length * 1.2))} Min.)</span></span></div>
     <div class="row"><button type="button" class="chip" data-emode="steps" aria-pressed="${steps}">🧩 Ein Feld pro Satz</button><button type="button" class="chip" data-emode="free" aria-pressed="${!steps}">📄 Ein großes Feld (wie auf Papier)</button></div>
     <div class="para" id="enPara">${t.sentences.map((s, i) => `<span class="ens" id="en${i}" ${steps ? `data-jump="${i}"` : ''}>${esc(s.en)}</span>`).join(' ')}</div>
-    ${steps ? `<div class="muted">Schreib jeden Satz in sein Feld → <b>Enter</b> = prüfen. Du siehst sofort, was fehlt — dann geht es zum nächsten Satz.</div>
+    ${steps ? `<div class="row">${Object.entries(LVL).map(([k, [l, d]]) => `<button type="button" class="chip" data-lvl="${k}" aria-pressed="${examLvl === k}" title="${d}">${l}</button>`).join('')}<span class="muted">${LVL[examLvl][1]}</span></div>
+      <div class="muted">${examLvl === 'easy' ? 'Tippe die Wörter an' : 'Schreib jeden Satz in sein Feld'} → <b>Prüfen</b>${examLvl === 'easy' ? '' : ' (oder Enter)'}. Du siehst sofort, was fehlt. Tipp: Leicht → Mittel → Schwer, bis Schwer klappt.</div>
       <div id="steps">${t.sentences.map((s, i) => `<div class="step" id="st${i}"><div class="muted"><b>${i + 1}.</b> ${esc(s.en)}</div>
-        <div class="row" style="flex-wrap:nowrap; align-items:flex-start;"><textarea class="in step-in" id="si${i}" data-i="${i}" rows="2" placeholder="Satz ${i + 1} auf Deutsch …" spellcheck="false" autocapitalize="sentences"></textarea>
-        <button type="button" class="btn primary" data-chk="${i}">Prüfen</button></div><div id="sr${i}"></div></div>`).join('')}</div>
+        <div class="row" style="flex-wrap:nowrap; align-items:flex-start;"><textarea class="in step-in" id="si${i}" data-i="${i}" rows="2" placeholder="${examLvl === 'easy' ? 'Wörter unten antippen …' : `Satz ${i + 1} auf Deutsch …`}" spellcheck="false" autocapitalize="sentences" ${examLvl === 'easy' ? 'readonly inputmode="none"' : ''}></textarea>
+        <button type="button" class="btn primary" data-chk="${i}">Prüfen</button></div>${stepHelp(i, s)}<div id="sr${i}"></div></div>`).join('')}</div>
       <div id="examRes"></div>`
     : `<textarea class="in" id="examIn" style="min-height:260px;" placeholder="Schreib hier deinen deutschen Text … (ohne Hilfe, wie in der Prüfung)" spellcheck="false"></textarea>
     <div class="row"><button type="button" class="btn primary" id="submitExam">✅ Abgeben & vergleichen</button><span class="muted">Tipp: erst jeden Satz planen — Verb auf Position 2, nach weil/dass/ob/obwohl ans Ende.</span></div>
@@ -247,10 +271,12 @@ function renderExam() {
   if (!steps) { $('submitExam').onclick = gradeExam; return; }
   document.querySelectorAll('.step-in').forEach(a => {
     a.addEventListener('focus', () => markCur(+a.dataset.i));
+    a.addEventListener('input', () => fit(a));
     a.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); checkStep(+a.dataset.i); } });
   });
-  $('si0').focus();
+  if (examLvl === 'easy') markCur(0); else $('si0').focus();
 }
+const fit = a => { a.style.height = 'auto'; a.style.height = (a.scrollHeight + 2) + 'px'; };
 function markCur(i) { document.querySelectorAll('.ens').forEach(x => x.classList.toggle('cur', x.id === 'en' + i)); }
 function checkStep(i) {
   const t = E.t, s = t.sentences[i], v = $('si' + i).value.trim(); if (!v) return;
@@ -263,15 +289,16 @@ function checkStep(i) {
        <div class="muted">Korrigiere den Satz oben und drück nochmal Enter (zählt nicht mehr für die Note).</div>`;
   const next = t.sentences.findIndex((_, k) => k > i && !(k in E.res));
   if (Object.keys(E.res).length === t.sentences.length) return finishSteps();
-  if (r.perfect && next >= 0) { $('si' + next).focus(); $('st' + next).scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  if (r.perfect && next >= 0) { if (examLvl === 'easy') markCur(next); else $('si' + next).focus(); $('st' + next).scrollIntoView({ block: 'center', behavior: 'smooth' }); }
 }
 function finishSteps() {
   clearInterval(E.timer);
   const t = E.t, rs = t.sentences.map((_, i) => E.res[i]), perfect = rs.filter(r => r.perfect).length;
   const pct = Math.round(rs.reduce((a, r) => a + r.score, 0) / rs.length), mins = Math.round((Date.now() - E.start) / 60000);
-  const hist = store.get('dc_tt_exams', []); hist.push({ id: t.id, pct, perfect, n: rs.length, mins, d: new Date().toISOString().slice(0, 10) }); store.set('dc_tt_exams', hist.slice(-50));
-  const prev = hist.filter(h => h.id === t.id).slice(-4, -1).map(h => h.pct + ' %').join(' → ');
-  $('examRes').innerHTML = `<div class="box" style="text-align:center;"><div class="score">${pct} %</div><div>${perfect} von ${rs.length} Sätzen beim ersten Versuch perfekt · ${mins} Min.${prev ? ` · vorher: ${prev}` : ''}</div>
+  const hist = store.get('dc_tt_exams', []); hist.push({ id: t.id, pct, perfect, n: rs.length, mins, lvl: examLvl, d: new Date().toISOString().slice(0, 10) }); store.set('dc_tt_exams', hist.slice(-50));
+  const prev = hist.filter(h => h.id === t.id && (h.lvl || 'hard') === examLvl).slice(-4, -1).map(h => h.pct + ' %').join(' → ');
+  const up = pct >= 90 && examLvl !== 'hard' ? (examLvl === 'easy' ? 'mid' : 'hard') : '';
+  $('examRes').innerHTML = `<div class="box" style="text-align:center;"><div class="score">${pct} %</div><div>${LVL[examLvl][0]} · ${perfect} von ${rs.length} Sätzen beim ersten Versuch perfekt · ${mins} Min.${prev ? ` · vorher: ${prev}` : ''}</div>${up ? `<div>🚀 Super! Jetzt die nächste Stufe: <button type="button" class="btn primary" data-lvl="${up}">${LVL[up][0]}</button></div>` : ''}
     <div class="row" style="justify-content:center;">${perfect < rs.length ? '<button type="button" class="btn primary" id="practiceWrong">🧩 Falsche Sätze einzeln üben</button>' : ''}<button type="button" class="btn" id="examAgain">↺ Nochmal von vorn</button></div></div>`;
   if ($('practiceWrong')) $('practiceWrong').onclick = () => setTab('sent', true);
   $('examAgain').onclick = () => { renderExam(); window.scrollTo(0, 0); };
@@ -418,7 +445,12 @@ function setTab(t, onlyWrong) {
   if (t === 'crash') renderCrash(); else if (t === 'read') renderRead(); else if (t === 'sent') startSent(onlyWrong); else if (t === 'vanish') { V.level = 0; renderVanish(); } else if (t === 'exam') renderExam(); else renderOwn();
 }
 document.addEventListener('click', e => {
-  const b = e.target.closest('[data-emode],[data-chk],[data-jump],[data-sub],[data-area],[data-opt],[data-tab],[data-text],[data-say],[data-w],[data-level],[data-gap],[data-del]'); if (!b) return;
+  const b = e.target.closest('[data-lvl],[data-tile],[data-undo],[data-clear],[data-rule],[data-emode],[data-chk],[data-jump],[data-sub],[data-area],[data-opt],[data-tab],[data-text],[data-say],[data-w],[data-level],[data-gap],[data-del]'); if (!b) return;
+  if (b.dataset.lvl) { examLvl = b.dataset.lvl; store.set('dc_tt_level', examLvl); examMode = 'steps'; renderExam(); return window.scrollTo(0, 0); }
+  if (b.dataset.tile) { const i = b.dataset.tile, a = $('si' + i); a.value = (a.value.trim() + ' ' + b.textContent).trim(); b.disabled = true; (E.stack[i] = E.stack[i] || []).push(b); fit(a); markCur(+i); return; }
+  if (b.dataset.undo) { const i = b.dataset.undo, st = E.stack[i] || [], last = st.pop(); if (last) { last.disabled = false; const a = $('si' + i); a.value = a.value.trim().split(' ').slice(0, -1).join(' '); fit(a); } return; }
+  if (b.dataset.clear) { const i = b.dataset.clear; (E.stack[i] || []).forEach(x => { x.disabled = false; }); E.stack[i] = []; $('si' + i).value = ''; fit($('si' + i)); return; }
+  if (b.dataset.rule) { const s = E.t.sentences[+b.dataset.rule]; $('ru' + b.dataset.rule).innerHTML = `<span class="focus">${esc(s.focus || '')}</span>`; return; }
   if (b.dataset.emode) { examMode = b.dataset.emode; store.set('dc_tt_exam_mode', examMode); return renderExam(); }
   if (b.dataset.chk) return checkStep(+b.dataset.chk);
   if (b.dataset.jump) { const a = $('si' + b.dataset.jump); a.focus(); return a.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
