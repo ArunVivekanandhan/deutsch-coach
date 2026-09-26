@@ -765,6 +765,20 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 76) — Konnektoren page: "🧩 Sätze bauen" (sentence creation)
+User: "konnektoren_referenz → sentence creation is missing."
+- New third tab **🧩 Sätze bauen** (logic in `js/konnektoren-build.js`, window.KBuild). Two modes:
+  🇬🇧→🇩🇪 Satz bauen (135 sentences from the checked Satzbau data: Konnektoren, Nebensatz, Nebensatz zuerst,
+  trotzdem/obwohl, temporale Nebensätze, Doppelkonnektoren) and 🔗 Zwei Sätze verbinden (16 Crashkurs join items).
+  No new sentences were written for this tab.
+- Filters: Level (A1–B2, uses the per-sentence `lv` from Task 75) and type (🔴 Nebensatz, 🟡 Position 1, 🟣 ADUSO,
+  🔵 zweiteilig, 🟢 zu + Infinitiv), stored in `kb_prefs_v1`. The connector to use is always shown (English "because"
+  could be weil or denn).
+- Input = shared DCMistakes box (🟢 tiles / 🟡 first letters / 🔴 free), Enter = check, 👁 Lösung, ⏭ Anderer Satz,
+  🔊 only on request. Wrong → rule of the group, DCExplain word-by-word explanation, saved to the notebook
+  (new source `konn: '🔗 Konnektoren'`). Reference search + category chips are hidden on this tab.
+- Browser-tested at 390/1100 px (tiles, wrong answer, skip, join, filters), no overflow, no JS errors; smoke 34 pages.
+
 ### 2026-09-26 (Task 75) — Satzbau level test: A2 contains A1, B1 contains A2 + A1; connectors in every level
 User: "If we are A2, then it should also contain A1 things also and i hope we have connector also."
 - `levelTest(level)` adds revision sentences from the levels below (`TEST_REVIEW`: A2 ← 8 × A1, B1 ← 6 × A2 + 3 × A1),

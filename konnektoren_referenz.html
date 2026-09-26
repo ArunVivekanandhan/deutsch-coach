@@ -381,6 +381,26 @@ h1 {
       transform: translateY(-5px);
   }
 
+
+  /* 🧩 Sätze bauen (Task 76) */
+  .kb-intro{font-size:13px;color:var(--ink-soft,var(--ink));margin:4px 0 10px;}
+  .kb-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0;}
+  .kb-lab{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;opacity:.75;margin-right:2px;}
+  .kb-chip{padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;cursor:pointer;}
+  .kb-chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .kb-badge{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px;}
+  .kb-q{font-size:19px;font-weight:700;line-height:1.35;}
+  .kb-ta{font-size:13px;opacity:.8;margin-top:4px;}
+  .kb-join{font-size:17px;font-weight:700;line-height:1.5;}
+  .kb-en{font-size:13px;opacity:.8;margin-top:4px;}
+  .kb-hint{margin:10px 0;padding:6px 10px;border-left:4px solid;border-radius:4px;background:var(--paper);font-size:14px;}
+  .kb-btn{padding:9px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;cursor:pointer;}
+  .kb-btn.p{background:var(--green);border-color:var(--green);color:#fff;font-weight:700;}
+  .kb-fb{margin-top:10px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--line);font-weight:700;}
+  .kb-fb.ok{border-color:var(--green);} .kb-fb.no{border-color:var(--red);}
+  .kb-sol{font-size:17px;margin-top:6px;} .kb-alt,.kb-why{font-weight:400;font-size:13px;margin-top:6px;}
+  .kb-say{border:none;background:none;cursor:pointer;font-size:16px;}
+  .kb-score{font-size:34px;font-weight:700;} .kb-empty{padding:12px;opacity:.8;}
 </style>
   <link rel="stylesheet" href="css/design-system.css">
   <script src="./assets/js/gamification.js"></script>
@@ -388,6 +408,10 @@ h1 {
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/satzbau-data.js"></script>
+  <script src="js/text-drills.js"></script>
+  <script src="js/mistakes.js"></script>
+  <script src="js/konnektoren-build.js"></script>
 </head>
 <body>
 
@@ -402,6 +426,7 @@ h1 {
   <div class="nav-tabs">
     <div class="nav-tab active" id="tabRef" onclick="setTab('ref')">📖 Referenz &amp; Regeln</div>
     <div class="nav-tab" id="tabDrill" onclick="setTab('drill')">🎯 Schnell-Quiz &amp; Drill</div>
+    <div class="nav-tab" id="tabBuild" onclick="setTab('build')">🧩 Sätze bauen</div>
   </div>
 </div>
 
@@ -633,6 +658,13 @@ h1 {
   </div>
 </div>
 
+<!-- 🧩 Sätze bauen (Task 76) — logic in js/konnektoren-build.js -->
+<div id="viewBuild" style="display:none;">
+  <div class="kb-intro">Bau ganze Sätze mit Konnektoren: 🇬🇧 → 🇩🇪 oder zwei Sätze verbinden. Wähle 🟢 Leicht (Wörter antippen), 🟡 Mittel oder 🔴 Schwer.</div>
+  <div id="kbBar"></div>
+  <div class="quiz-card" id="kbCard"></div>
+</div>
+
 <div id="viewDrill" style="display:none;">
   <div id="quizModeSelector" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;"></div>
   <div class="quiz-card">
@@ -693,7 +725,12 @@ function setTab(t) {
   document.getElementById('tabDrill').classList.toggle('active', t === 'drill');
   document.getElementById('viewRef').style.display = t === 'ref' ? 'block' : 'none';
   document.getElementById('viewDrill').style.display = t === 'drill' ? 'block' : 'none';
+  document.getElementById('tabBuild').classList.toggle('active', t === 'build');
+  document.getElementById('viewBuild').style.display = t === 'build' ? 'block' : 'none';
+  document.getElementById('catChips').style.display = t === 'build' ? 'none' : '';
+  document.getElementById('searchInput').style.display = t === 'build' ? 'none' : '';
   if (t === 'drill') { renderQuizModeSelector(); initQuiz(); }
+  if (t === 'build' && window.KBuild) KBuild.start();
 }
 
 // Filtering
