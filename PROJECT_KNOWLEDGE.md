@@ -105,7 +105,7 @@ Deutsch_Coach_Project/
 ├── manifest.json                           # PWA manifest (name, icons, colors, start_url)
 ├── sw.js                                   # Service worker (v4) — caches all suite apps offline
 ├── icon-192.png, icon-512.png              # PWA icons
-├── Grammatik_Regel_Trainer.html            # 16 Core German Grammar Pillars with rules, audio & infinite practice drills
+├── Grammatik_Regel_Trainer.html            # 21 grammar rules (A2–B2): tables, audio, drills, Tamil bridges (js/grammar-tamil.js)
 ├── Sprech_Pruefungs_Simulator.html         # Oral Exam Simulator (Teil 1-3), Spoken Redemittel Vault & Letter Builder
 ├── German_A2_Practice_Studio.html          # Interactive 7-module A2 learning studio with Suite Hub
 ├── German_B1_Practice_Studio.html          # Interactive 7-module B1 learning studio with Suite Hub
@@ -758,6 +758,48 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 50) — Grammar gap research, Tamil ↔ German bridges, grammar fixes, reflexive verbs, preposition pictures
+
+#### Task
+User: "Deep research on what are missing in grammar and what needs to implement. Some time tamil to German some place
+is easy those place add tamil also" + class material (reflexive pronoun table; sich waschen / freuen / fühlen; picture
+sheet of vor / hinter / auf / unter / an / über …). Report: artifact "German Grammar Gap Map".
+
+#### Research findings (coverage vs. Goethe/telc A1–B1)
+Covered: word order, cases, prepositions, adjective endings, Konj. II (present), passive, relative clauses, infinitive,
+connectors, reflexive, n-declination, participles, Konj. I, nominalisation (Grammatik-Regel-Trainer 21 rules, Satzbau 27
+topics, Cheat Codes, Studios, Konnektoren). **Missing / partial (roadmap, in priority order):** personal pronouns +
+possessive articles; present tense endings / stem change / du–Sie; numbers, dates, time (halb drei); comparison rule +
+adjective data fix; dative verbs, verbs/adjectives with prepositions; negation nicht/kein/doch; Plusquamperfekt,
+Konj. II past, Futur I; man/jemand/niemand, dieser, welcher/was für ein, lassen, modal particles; noun-verb phrases.
+Drill variety: the "infinite" drills repeat 214 unique questions (7–18 per rule).
+Open data issues (not yet fixed, need OK): 88 wrong superlatives after -end/-isch (am spannendesten → am spannendsten),
+~60 non-comparable adjectives with invented forms, stolz/kurz typ labels, 30 common adjectives missing.
+
+#### Done
+- **`js/grammar-tamil.js`** (`DC_GRAMMAR_TAMIL`, 24 items for 19 of 21 rules): ✅ "Leicht durch Tamil" bridges and
+  ⚠️ "Tamil-Falle" traps with German example (🔊), Tamil sentence, word-by-word gloss, English + Tamil explanation;
+  optional table (rule 10: mich/mir = என்னை/எனக்கு …). Rendered in the study view under the rule table
+  (`tamilBridgeHTML`), switchable (`localStorage.dc_grammar_ta`), labelled 🤖. Rules 11 and 13 have none on purpose.
+  `scripts/check_grammar_tamil.py` (run by build.py) validates keys/fields/Tamil script.
+- Grammar fixes: adjective-ending table (zero article Dativ -em/-er, plural -e, Genitiv rows were wrong/missing; now 11
+  rows); explanation "nach + Genitiv" → Dativ; rule-1 generator produced nonsense ("because we can work") with wrong
+  English; "ich hätte gern einen Termin vereinbart" ≠ "would like"; doubled gap text (Mit ein___ + "einem", dem neu___ +
+  "Praktikanten"); "16 rules" labels → 21; reflexive table got English (myself …).
+- Rule 3: picture grid of the 9 two-way prepositions (`prepPictureGridHTML`, inline SVG table + ball, English, Tamil
+  postposition, Wo?/Wohin? example with 🔊).
+- **23 everyday reflexive verbs** were missing from `js/word-data.js` (sich freuen, fühlen, waschen, anziehen,
+  ausziehen, umziehen, setzen, beeilen, interessieren, treffen, ausruhen, vorstellen, unterhalten, ärgern, kämmen,
+  verlieben, bewerben, konzentrieren, langweilen, erkälten, anmelden, verabschieden, gewöhnen) — added with forms, level,
+  Tamil (🤖), examples; home flashcards (SYNCED_WORDS), lexicon, word parts (+ wohl- prefix, 11 root meanings)
+  regenerated; English of treffen / duschen fixed.
+
+#### Verified
+All 21 rules render in desktop + 390 px with no JS errors, toggle works, 15 drills per rule generated without errors;
+build.py (incl. new check) + smoke_pages; call tests unaffected.
+
+---
 
 ### 2026-09-26 (Task 49) — KI-Sprechpartner: microphone fixes + diagnostic call log
 

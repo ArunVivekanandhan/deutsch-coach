@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v102';
+const CACHE_NAME = 'deutsch-coach-v109';
 const urlsToCache = [
   './',
   './index.html',
@@ -38,6 +38,7 @@ const urlsToCache = [
   './js/tamil-meanings.js',
   './js/satzbau-data.js',
   './js/tutor-scripts.js',
+  './js/grammar-tamil.js',
   './js/icon-svgs.js',
   './js/tamil-dict.js',
   './js/tts-engine.js',

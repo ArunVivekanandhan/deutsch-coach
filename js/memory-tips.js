@@ -609,7 +609,7 @@
      into js/word-parts.js; pages render it with MemoryTips.partsHTML(). */
   const PREFIX_MEANING = {
     ab: 'away, off, down', an: 'at, on; start', auf: 'up, open', aus: 'out, off', bei: 'by, with, along',
-    ein: 'in, into', mit: 'with, along', nach: 'after; again', vor: 'before, in front', weg: 'away',
+    ein: 'in, into', mit: 'with, along', nach: 'after; again', vor: 'before, in front', weg: 'away', wohl: 'well, comfortably',
     zu: 'to, towards; closed', zurück: 'back', zusammen: 'together', her: 'towards here', hin: 'towards there',
     fort: 'away, onward', los: 'off; start', um: 'around; change', durch: 'through', über: 'over, across',
     unter: 'under, among', wieder: 'again, back', weiter: 'further, on', fest: 'firm, fixed', vorbei: 'past, by',
@@ -629,7 +629,7 @@
   // Tamil for the prefixes / suffixes (AI-assisted translation, reviewed; see scripts/word_parts_meanings.tsv for roots)
   const PREFIX_TA = {
     ab: 'விலகி, கீழே', an: 'மீது; தொடக்கம்', auf: 'மேலே, திறந்து', aus: 'வெளியே, அணைத்து', bei: 'அருகில், உடன்',
-    ein: 'உள்ளே', mit: 'உடன், கூட', nach: 'பின்னால்; மீண்டும்', vor: 'முன்னால்', weg: 'விலகி, அப்பால்',
+    ein: 'உள்ளே', mit: 'உடன், கூட', nach: 'பின்னால்; மீண்டும்', vor: 'முன்னால்', weg: 'விலகி, அப்பால்', wohl: 'நன்றாக, சுகமாக',
     zu: 'நோக்கி; மூடி', zurück: 'திரும்பி', zusammen: 'ஒன்றாக', her: 'இங்கே (பேசுபவரை நோக்கி)', hin: 'அங்கே (விலகி)',
     fort: 'விலகி, தொடர்ந்து', los: 'விடுபட்டு; தொடங்கி', um: 'சுற்றி; மாற்றி', durch: 'ஊடாக', über: 'மேலாக, கடந்து',
     unter: 'கீழே, இடையே', wieder: 'மீண்டும்', weiter: 'மேலும், தொடர்ந்து', fest: 'உறுதியாக', vorbei: 'கடந்து',

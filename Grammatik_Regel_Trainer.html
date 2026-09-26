@@ -95,6 +95,22 @@
   }
 
   .table-box{overflow-x:auto; margin-bottom:14px;}
+  .prep-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:10px; margin-top:8px;}
+  .prep-tile{border:1px solid var(--line); border-radius:8px; padding:8px 10px; display:grid; gap:2px; align-content:start; color:var(--ink);}
+  .prep-tile svg{justify-self:center; color:#2563eb;}
+  .prep-w{font-family:'Fjalla One',sans-serif; font-size:20px; text-align:center;} .prep-en{text-align:center; font-size:12.5px; color:#64748b;}
+  .prep-ta{text-align:center; font-size:13px;} .prep-ex{font-size:12.5px; line-height:1.45; margin-top:3px;}
+  .ta-bridge{border-radius:8px; padding:10px 12px; margin-bottom:10px; border:1px solid var(--line); border-left:4px solid #16a34a; background:#f0fdf4;}
+  .ta-bridge.trap{border-left-color:#d97706; background:#fffbeb;}
+  .ta-bridge .tb-h{font-weight:700; font-size:13.5px; margin-bottom:6px; color:var(--ink);}
+  .ta-bridge .tb-row{display:grid; grid-template-columns:78px 1fr; gap:4px 10px; font-size:13.5px; line-height:1.5; align-items:baseline;}
+  .ta-bridge .tb-row .lb{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; color:#64748b;}
+  .ta-bridge .tb-ta{font-size:15px;} .ta-bridge .tb-gl{font-style:italic; color:#475569; font-size:12.5px;}
+  .ta-bridge .tb-why{margin-top:6px; font-size:13px; line-height:1.55;} .ta-bridge .tb-whyta{margin-top:4px; font-size:13.5px; line-height:1.6; color:#1e293b;}
+  .ta-bridge table.de-table{margin:4px 0 8px;}
+  .ta-toggle{font-size:12px; font-weight:600; display:inline-flex; gap:6px; align-items:center; cursor:pointer;}
+  .dark .ta-bridge, body[data-theme="dark"] .ta-bridge{background:rgba(22,163,74,.12);} .dark .ta-bridge.trap, body[data-theme="dark"] .ta-bridge.trap{background:rgba(217,119,6,.14);}
+  .dark .ta-bridge .tb-whyta, body[data-theme="dark"] .ta-bridge .tb-whyta{color:inherit;}
   table.de-table{width:100%; border-collapse:collapse; font-size:12.5px; text-align:left;}
   table.de-table th{background:var(--ink); color:#fff; padding:6px 8px; font-family:'IBM Plex Mono',monospace; font-weight:600;}
   table.de-table td{padding:6px 8px; border-bottom:1px solid var(--line); background:#fff;}
@@ -362,12 +378,13 @@ html.dark-theme, body.dark {
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/grammar-tamil.js"></script>
 </head>
 <body>
 <div class="wrap">
 
   <h1>German Grammar &amp; Rules Trainer</h1>
-  <div class="sub">16 Essential Grammar Pillars for Fluent Speaking &amp; B1 Exam Success</div>
+  <div class="sub">21 Essential Grammar Pillars (A2–B2) for Fluent Speaking &amp; Exam Success</div>
 
   <!-- Mode Tabs -->
   <div class="ds-tabs" style="margin-bottom: var(--space-lg); display: flex; gap: 8px; flex-wrap: wrap;">
@@ -401,7 +418,7 @@ html.dark-theme, body.dark {
 
 <script>
 /* =========================================================================
-   16 ESSENTIAL GERMAN GRAMMAR RULES WITH EXPLANATIONS, TABLES & DRILLS
+   21 ESSENTIAL GERMAN GRAMMAR RULES (A2–B2) WITH EXPLANATIONS, TABLES & DRILLS
    ========================================================================= */
 const GRAMMAR_RULES = [
   {
@@ -529,6 +546,7 @@ const GRAMMAR_RULES = [
         <tr><td><b>Dativ Preps</b></td><td><b>Dativ</b></td><td>mit, nach, bei, seit, von, zu</td><td>Ich fahre <b>mit dem Bus</b> zur Arbeit.</td></tr>
         <tr><td><b>Akkusativ Preps</b></td><td><b>Akkusativ</b></td><td>für, ohne, um, durch, gegen</td><td>Das Geschenk ist <b>für meinen Vater</b>.</td></tr>
       </table>
+      ${prepPictureGridHTML()}
     `,
     examples: [
       {de:"Ich fahre jeden Tag mit dem Zug (Dat) zur Arbeit (Dat).", en:"I travel by train to work every day."},
@@ -574,7 +592,7 @@ const GRAMMAR_RULES = [
     category: "Adjectives",
     color: "var(--gold)",
     summary: "Adjective endings change depending on whether there is a definite article (der), an indefinite article (ein), or no article at all.",
-    formula: "• Type 1 (after der/die/das): Weak declension → mostly -e in Singular, -en everywhere else (Plural & all Dativ/Genitiv/Akk-masc)!\n• Type 2 (after ein/eine/kein/mein): Mixed declension → reflects gender endings in Nom (-er, -es, -e), -en everywhere in Dativ/Genitiv/Plural!\n• Type 3 (no article): Strong declension → adjective carries the definite article endings (e.g. kalter Kaffee, frische Milch).",
+    formula: "• Type 1 (after der/die/das): Weak declension → mostly -e in Singular, -en everywhere else (Plural & all Dativ/Genitiv/Akk-masc)!\n• Type 2 (after ein/eine/kein/mein): Mixed declension → reflects gender endings in Nom (-er, -es, -e), -en everywhere in Dativ/Genitiv/Plural!\n• Type 3 (no article): Strong declension → adjective carries the definite article endings (kalter Kaffee, frische Milch, mit kaltem Wasser, neue Häuser) — only Genitiv mask./neutral takes -en (trotz starken Regens).",
     tableHTML: `
       <table class="de-table">
         <tr><th>Case &amp; Gender</th><th>After der/die/das</th><th>After ein/kein/mein</th><th>Zero Article (Without article)</th></tr>
@@ -582,7 +600,13 @@ const GRAMMAR_RULES = [
         <tr><td>Akk. Maskulin</td><td>den neu<b>en</b> Wagen</td><td>einen neu<b>en</b> Wagen</td><td>neu<b>en</b> Wagen</td></tr>
         <tr><td>Nom/Akk Neutral</td><td>das neu<b>e</b> Haus</td><td>ein neu<b>es</b> Haus</td><td>neu<b>es</b> Haus</td></tr>
         <tr><td>Nom/Akk Feminin</td><td>die neu<b>e</b> Stadt</td><td>eine neu<b>e</b> Stadt</td><td>neu<b>e</b> Stadt</td></tr>
-        <tr><td>All Dativ &amp; Plural</td><td>dem/den neu<b>en</b> ...</td><td>einem/meinen neu<b>en</b> ...</td><td>neu<b>en</b> ... (Dat pl: -en)</td></tr>
+        <tr><td>Dativ Mask./Neutral</td><td>dem neu<b>en</b> Wagen</td><td>einem neu<b>en</b> Wagen</td><td>mit kalt<b>em</b> Wasser</td></tr>
+        <tr><td>Dativ Feminin</td><td>der neu<b>en</b> Stadt</td><td>einer neu<b>en</b> Stadt</td><td>mit frisch<b>er</b> Milch</td></tr>
+        <tr><td>Genitiv Mask./Neutral</td><td>des neu<b>en</b> Wagens</td><td>eines neu<b>en</b> Wagens</td><td>trotz stark<b>en</b> Regens</td></tr>
+        <tr><td>Genitiv Feminin</td><td>der neu<b>en</b> Stadt</td><td>einer neu<b>en</b> Stadt</td><td>trotz groß<b>er</b> Hitze</td></tr>
+        <tr><td>Plural Nom./Akk.</td><td>die neu<b>en</b> Häuser</td><td>meine neu<b>en</b> Häuser</td><td>neu<b>e</b> Häuser</td></tr>
+        <tr><td>Plural Dativ</td><td>den neu<b>en</b> Häusern</td><td>meinen neu<b>en</b> Häusern</td><td>mit neu<b>en</b> Häusern</td></tr>
+        <tr><td>Plural Genitiv</td><td>der neu<b>en</b> Häuser</td><td>meiner neu<b>en</b> Häuser</td><td>neu<b>er</b> Häuser</td></tr>
       </table>
     `,
     examples: [
@@ -863,12 +887,12 @@ const GRAMMAR_RULES = [
     tableHTML: `
       <table class="de-table">
         <tr><th>Person</th><th>Akkusativ (mich)</th><th>Dativ (mir)</th><th>Common Example</th></tr>
-        <tr><td>ich</td><td><b>mich</b></td><td><b>mir</b></td><td>Ich freue <b>mich</b>. / Ich putze <b>mir</b> die Zähne.</td></tr>
-        <tr><td>du</td><td><b>dich</b></td><td><b>dir</b></td><td>Du beeilst <b>dich</b>. / Du ziehst <b>dir</b> eine Jacke an.</td></tr>
-        <tr><td>er/sie/es/man</td><td><b>sich</b></td><td><b>sich</b></td><td>Er erinnert <b>sich</b> an den Termin.</td></tr>
-        <tr><td>wir</td><td><b>uns</b></td><td><b>uns</b></td><td>Wir unterhalten <b>uns</b> über Politik.</td></tr>
-        <tr><td>ihr</td><td><b>euch</b></td><td><b>euch</b></td><td>Habt ihr <b>euch</b> gut erholt?</td></tr>
-        <tr><td>sie/Sie</td><td><b>sich</b></td><td><b>sich</b></td><td>Setzen Sie <b>sich</b> bitte!</td></tr>
+        <tr><td>ich <small>(myself)</small></td><td><b>mich</b></td><td><b>mir</b></td><td>Ich freue <b>mich</b>. / Ich putze <b>mir</b> die Zähne.</td></tr>
+        <tr><td>du <small>(yourself)</small></td><td><b>dich</b></td><td><b>dir</b></td><td>Du beeilst <b>dich</b>. / Du ziehst <b>dir</b> eine Jacke an.</td></tr>
+        <tr><td>er/sie/es/man <small>(himself/herself/itself)</small></td><td><b>sich</b></td><td><b>sich</b></td><td>Er erinnert <b>sich</b> an den Termin.</td></tr>
+        <tr><td>wir <small>(ourselves)</small></td><td><b>uns</b></td><td><b>uns</b></td><td>Wir unterhalten <b>uns</b> über Politik.</td></tr>
+        <tr><td>ihr <small>(yourselves)</small></td><td><b>euch</b></td><td><b>euch</b></td><td>Habt ihr <b>euch</b> gut erholt?</td></tr>
+        <tr><td>sie/Sie <small>(themselves / yourself formal)</small></td><td><b>sich</b></td><td><b>sich</b></td><td>Setzen Sie <b>sich</b> bitte!</td></tr>
       </table>
     `,
     examples: [
@@ -1006,14 +1030,14 @@ const GRAMMAR_RULES = [
     ],
     drills: [
       {
-        prompt: "Der Chef möchte heute Nachmittag mit dem neu___ sprechen.",
+        prompt: "Der Chef möchte heute Nachmittag mit dem neuen ___ sprechen.",
         en: "The boss would like to speak with the new intern this afternoon.",
         options: ["Praktikanten", "Praktikant", "Praktikants", "Praktikantenes"],
         correct: 0,
         explain: "'der Praktikant' is an N-Deklination noun! In Dativ ('mit dem'), it adds '-en' → 'dem Praktikanten'."
       },
       {
-        prompt: "Hast du gestern den neu___ im Hausflur gesehen?",
+        prompt: "Hast du gestern den neuen ___ im Hausflur gesehen?",
         en: "Did you see the new neighbor in the hallway yesterday?",
         options: ["Nachbarn", "Nachbar", "Nachbars", "Nachbare"],
         correct: 0,
@@ -1571,16 +1595,16 @@ function saveProgress(){
 }
 
 /* =========================================================================
-   INFINITE DYNAMIC QUESTION GENERATORS FOR ALL 16 GRAMMAR PILLARS
+   INFINITE DYNAMIC QUESTION GENERATORS FOR ALL GRAMMAR PILLARS
    ========================================================================= */
 const DYNAMIC_GENERATORS = {
   r1_wordorder: [
     ()=>{
       const subs = [
         {name:"ich", vEnd:"muss", en:"I have to work longer in the office"},
-        {name:"er", vEnd:"muss", en:"he has to work longer in the office"},
-        {name:"sie", vEnd:"will", en:"she wants to finish the project"},
-        {name:"wir", vEnd:"können", en:"we cannot attend today"}
+        {name:"ich", vEnd:"soll", en:"I am supposed to work longer in the office"},
+        {name:"ich", vEnd:"will", en:"I want to work longer in the office"},
+        {name:"ich", vEnd:"möchte", en:"I would like to work longer in the office"}
       ];
       const s = subs[Math.floor(Math.random()*subs.length)];
       return {
@@ -1761,7 +1785,7 @@ const DYNAMIC_GENERATORS = {
     }
   ,
     ()=>{
-      const bank = [{"diff": "easy", "p": "Der ___ Mann arbeitet hier.", "en": "The nice man works here.", "o": ["nette", "netter", "netten", "nettem"], "c": 0, "exp": "After 'der' (definite article), Nominativ Maskulin adjective ending is always '-e'."}, {"diff": "medium", "p": "Ich trinke gern schwarz___ Kaffee.", "en": "I like to drink black coffee.", "o": ["en", "e", "er", "es"], "c": 0, "exp": "No article (Nullartikel) + Akkusativ Maskulin → strong ending '-en': 'schwarzen Kaffee'."}, {"diff": "hard", "p": "Mit ein___ freundlichen Lächeln begrüßte sie die Gäste.", "en": "With a friendly smile, she greeted the guests.", "o": ["einem", "einen", "einer", "eines"], "c": 0, "exp": "'mit' triggers Dativ; 'Lächeln' is neuter, so the ein-word takes '-em': 'einem freundlichen Lächeln'."}];
+      const bank = [{"diff": "easy", "p": "Der ___ Mann arbeitet hier.", "en": "The nice man works here.", "o": ["nette", "netter", "netten", "nettem"], "c": 0, "exp": "After 'der' (definite article), Nominativ Maskulin adjective ending is always '-e'."}, {"diff": "medium", "p": "Ich trinke gern schwarz___ Kaffee.", "en": "I like to drink black coffee.", "o": ["en", "e", "er", "es"], "c": 0, "exp": "No article (Nullartikel) + Akkusativ Maskulin → strong ending '-en': 'schwarzen Kaffee'."}, {"diff": "hard", "p": "Mit ___ freundlichen Lächeln begrüßte sie die Gäste.", "en": "With a friendly smile, she greeted the guests.", "o": ["einem", "einen", "einer", "eines"], "c": 0, "exp": "'mit' triggers Dativ; 'Lächeln' is neuter, so the ein-word takes '-em': 'einem freundlichen Lächeln'."}];
       const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
         ? bank.filter(v => v.diff === currentDifficulty)
         : bank;
@@ -1774,7 +1798,7 @@ const DYNAMIC_GENERATORS = {
     ()=>{
       const konjs = [
         {p:"Entschuldigung, ___ Sie mir bitte sagen, wie viel Uhr es ist?", en:"Excuse me, could you please tell me what time it is?", o:["könnten","können","würden","hätten"], c:0, exp:"'Könnten Sie...' is the polite spoken request formula in German."},
-        {p:"Guten Tag, ich ___ gern einen Termin für nächste Woche vereinbart.", en:"Hello, I would like to arrange an appointment for next week.", o:["hätte","wäre","würde","könnte"], c:0, exp:"'Ich hätte gern...' expresses polite desire."},
+        {p:"Guten Tag, ich ___ gern einen Termin für nächste Woche.", en:"Hello, I would like an appointment for next week.", o:["hätte","wäre","würde","könnte"], c:0, exp:"'Ich hätte gern...' expresses polite desire."},
         {p:"Wenn ich reich ___, würde ich ein großes Haus am Meer kaufen.", en:"If I were rich, I would buy a large house by the sea.", o:["wäre","hätte","würde","könnte"], c:0, exp:"Unreal condition with 'sein' uses 'wäre'."},
         {p:"An deiner Stelle ___ ich sofort den Kundenservice anrufen.", en:"In your shoes, I would call customer service immediately.", o:["würde","wäre","hätte","könnte"], c:0, exp:"Giving friendly advice with 'An deiner Stelle' requires 'würde + Infinitiv'."}
       ];
@@ -2129,7 +2153,7 @@ const DYNAMIC_GENERATORS = {
     }
   ,
     ()=>{
-      const bank = [{"diff": "easy", "p": "Die ___ der Landschaft hat alle beeindruckt.", "en": "The beauty of the landscape impressed everyone.", "o": ["Schönheit", "Schönung", "Schönheiten", "Schöner"], "c": 0, "exp": "Adjectives like 'schön' often nominalize with '-heit': schön → die Schönheit."}, {"diff": "medium", "p": "Die ___ eines Fernstudiums interessiert viele Berufstätige.", "en": "The possibility of distance learning interests many working people.", "o": ["Möglichkeit", "Möglichung", "Möglichheit", "Möglich"], "c": 0, "exp": "'möglich' nominalizes with '-keit': die Möglichkeit."}, {"diff": "hard", "p": "___ der Verhandlungen einigten sich beide Seiten auf einen Kompromiss.", "en": "After the negotiations, both sides agreed on a compromise.", "o": ["Nach", "Nachdem", "Während", "Wegen"], "c": 0, "exp": "A completed prior action ('nachdem verhandelt wurde') nominalizes as 'nach + Genitiv noun', not 'nachdem' (which only introduces a clause, not a noun phrase)."}];
+      const bank = [{"diff": "easy", "p": "Die ___ der Landschaft hat alle beeindruckt.", "en": "The beauty of the landscape impressed everyone.", "o": ["Schönheit", "Schönung", "Schönheiten", "Schöner"], "c": 0, "exp": "Adjectives like 'schön' often nominalize with '-heit': schön → die Schönheit."}, {"diff": "medium", "p": "Die ___ eines Fernstudiums interessiert viele Berufstätige.", "en": "The possibility of distance learning interests many working people.", "o": ["Möglichkeit", "Möglichung", "Möglichheit", "Möglich"], "c": 0, "exp": "'möglich' nominalizes with '-keit': die Möglichkeit."}, {"diff": "hard", "p": "___ den Verhandlungen einigten sich beide Seiten auf einen Kompromiss.", "en": "After the negotiations, both sides agreed on a compromise.", "o": ["Nach", "Nachdem", "Während", "Wegen"], "c": 0, "exp": "A completed prior action ('nachdem sie verhandelt hatten') nominalizes as 'nach + Dativ' (nach den Verhandlungen). 'nachdem' only introduces a clause, not a noun phrase."}];
       const pool = (typeof currentDifficulty !== 'undefined' && currentDifficulty !== 'mixed')
         ? bank.filter(v => v.diff === currentDifficulty)
         : bank;
@@ -2515,7 +2539,7 @@ function init(){
 function renderRuleChips(){
   const container = document.getElementById("ruleChips");
   const allList = [
-    { id: "alle", num: "🎲", title: "All 16 Rules Mixed (Endless Marathon)", category: "Mixed", color: "var(--purple)" },
+    { id: "alle", num: "🎲", title: "All Rules Mixed (Endless Marathon)", category: "Mixed", color: "var(--purple)" },
     ...GRAMMAR_RULES
   ];
   container.innerHTML = allList.map(r=>{
@@ -2523,7 +2547,7 @@ function renderRuleChips(){
     return `
       <div class="chip ${active}" onclick="selectRule('${r.id}')">
         <span class="dot" style="background:${r.color};"></span>
-        <span>${r.id==='alle' ? '🎲 All 16 Rules Mixed' : `Rule ${r.num}: ${r.title.split('(')[0].trim()}`}</span>
+        <span>${r.id==='alle' ? '🎲 All Rules Mixed' : `Rule ${r.num}: ${r.title.split('(')[0].trim()}`}</span>
       </div>
     `;
   }).join("");
@@ -2569,6 +2593,55 @@ function renderContent(){
   }
 }
 
+/* Picture grid of the 9 two-way prepositions (Task 50, like the class sheet): a table and a ball in each position,
+   English, Tamil postposition, Wo? (Dativ) and Wohin? (Akkusativ) example. */
+function prepPictureGridHTML(){
+  const T = (x, y, w) => `<rect x="${x}" y="${y}" width="${w}" height="6" rx="1.5" fill="currentColor" opacity=".75"/><rect x="${x + 4}" y="${y + 6}" width="4" height="30" fill="currentColor" opacity=".75"/><rect x="${x + w - 8}" y="${y + 6}" width="4" height="30" fill="currentColor" opacity=".75"/>`;
+  const B = (cx, cy, op) => `<circle cx="${cx}" cy="${cy}" r="9" fill="#e11d48" opacity="${op || 1}"/>`;
+  const P = [
+    ['auf', 'on (touching the top)', 'மேல் (மேஜையின் மேல்)', T(20, 40, 60) + B(50, 31), 'Die Katze liegt auf dem Tisch.', 'Die Katze springt auf den Tisch.'],
+    ['über', 'above (not touching)', 'மேலே (தொடாமல்)', T(20, 44, 60) + B(50, 16), 'Die Lampe hängt über dem Tisch.', 'Ich hänge die Lampe über den Tisch.'],
+    ['unter', 'under', 'கீழ் (மேஜைக்குக் கீழ்)', T(20, 34, 60) + B(50, 60), 'Der Ball liegt unter dem Tisch.', 'Der Ball rollt unter den Tisch.'],
+    ['vor', 'in front of (covers the table)', 'முன்னால்', T(34, 36, 60) + `<circle cx="38" cy="56" r="16" fill="#e11d48"/>`, 'Der Hund sitzt vor dem Tisch.', 'Der Hund läuft vor den Tisch.'],
+    ['hinter', 'behind (the table covers it)', 'பின்னால்', `<circle cx="38" cy="56" r="16" fill="#e11d48" opacity=".4"/>` + T(34, 36, 60), 'Die Katze versteckt sich hinter dem Tisch.', 'Die Katze läuft hinter den Tisch.'],
+    ['neben', 'next to', 'பக்கத்தில், அருகில்', T(10, 36, 50) + B(78, 62), 'Der Stuhl steht neben dem Tisch.', 'Ich stelle den Stuhl neben den Tisch.'],
+    ['an', 'at / on (touching the side)', 'ஒட்டி (சுவரில், ஓரத்தில்)', `<rect x="72" y="8" width="6" height="64" fill="currentColor" opacity=".75"/>` + B(62, 36), 'Das Bild hängt an der Wand.', 'Ich hänge das Bild an die Wand.'],
+    ['zwischen', 'between', 'இடையில்', T(4, 36, 34) + T(62, 36, 34) + B(50, 62), 'Die Katze sitzt zwischen den Tischen.', 'Die Katze läuft zwischen die Tische.'],
+    ['in', 'in, inside', 'உள்ளே (பெட்டிக்குள்)', `<rect x="22" y="26" width="56" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="4" opacity=".75"/>` + B(50, 58), 'Die Katze schläft in der Kiste.', 'Die Katze springt in die Kiste.']
+  ];
+  return `<div style="margin-top:12px; font-weight:700; font-size:13px;">🖼️ Die 9 Wechselpräpositionen im Bild — the ball is the thing, the table is the place</div>
+    <div class="prep-grid">${P.map(p => `<div class="prep-tile">
+      <svg viewBox="0 0 100 80" width="100" height="80" role="img" aria-label="${p[0]}: ${p[1]}">${p[3]}</svg>
+      <div class="prep-w">${p[0]}</div><div class="prep-en">${p[1]}</div><div class="prep-ta" lang="ta">🇮🇳 ${p[2]}</div>
+      <div class="prep-ex"><b>Wo?</b> ${p[4]} <button class="speak-btn" style="padding:0 5px;" onclick="speakText('${p[4]}')">🔊</button></div>
+      <div class="prep-ex"><b>Wohin?</b> ${p[5]} <button class="speak-btn" style="padding:0 5px;" onclick="speakText('${p[5]}')">🔊</button></div></div>`).join('')}</div>
+    <div class="note" style="font-size:11.5px; margin-top:4px;">🇮🇳 Tamil puts these words <i>after</i> the noun (மேஜைக்கு மேல்), German puts them <i>before</i> it (auf dem Tisch) — the meaning is the same. 🤖 Tamil KI-unterstützt.</div>`;
+}
+
+/* ---------------- Tamil ↔ German bridges (js/grammar-tamil.js, Task 50) ---------------- */
+function showTamilBridges(){ try { return localStorage.getItem('dc_grammar_ta') !== '0'; } catch(e) { return true; } }
+function toggleTamilBridges(on){ try { localStorage.setItem('dc_grammar_ta', on ? '1' : '0'); } catch(e) {} renderContent(); }
+function tamilBridgeHTML(ruleId){
+  const items = (window.DC_GRAMMAR_TAMIL || {})[ruleId];
+  if (!items || !items.length) return '';
+  const esc = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const on = showTamilBridges();
+  const head = `<div class="filterlabel" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <span>🇮🇳 Tamil ↔ Deutsch: ${items.some(i => i.k === 'bridge') ? 'where Tamil makes it easy' : 'where Tamil habits mislead'}</span>
+      <label class="ta-toggle"><input type="checkbox" ${on ? 'checked' : ''} onchange="toggleTamilBridges(this.checked)"> anzeigen</label></div>`;
+  if (!on) return head;
+  return head + items.map(it => `
+    <div class="ta-bridge ${it.k === 'trap' ? 'trap' : ''}">
+      <div class="tb-h">${it.k === 'trap' ? '⚠️ Tamil-Falle' : '✅ Leicht durch Tamil'} · ${esc(it.t)}</div>
+      ${it.table ? `<table class="de-table"><tr><th>Deutsch</th><th>தமிழ்</th><th>English</th></tr>${it.table.map(r => `<tr><td><b>${esc(r[0])}</b></td><td lang="ta">${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</table>` : ''}
+      <div class="tb-row"><span class="lb">Deutsch</span><span>${esc(it.de)} <button class="speak-btn" style="padding:1px 6px;" onclick="speakText('${escapeQuotes(it.de.split(' · ')[0])}')">🔊</button></span>
+        <span class="lb">தமிழ்</span><span class="tb-ta" lang="ta">${esc(it.ta)}</span>
+        <span class="lb">word by word</span><span class="tb-gl">${esc(it.gloss)}</span></div>
+      <div class="tb-why">${esc(it.why)}</div>
+      <div class="tb-whyta" lang="ta">🇮🇳 ${esc(it.why_ta)}</div>
+    </div>`).join('') + `<div class="note" style="font-size:11px; opacity:.75; margin:-4px 0 12px;">🤖 Tamil-Vergleiche KI-unterstützt erstellt und geprüft — Fehler bitte melden.</div>`;
+}
+
 /* ---------------- 1. STUDY VIEW ---------------- */
 function renderStudyView(container){
   const rule = GRAMMAR_RULES.find(r=>r.id === selectedRuleId) || GRAMMAR_RULES[0];
@@ -2586,6 +2659,7 @@ function renderStudyView(container){
 
       <div class="filterlabel">Systematic Grammar Matrix:</div>
       <div class="table-box">${rule.tableHTML}</div>
+${tamilBridgeHTML(rule.id)}
 
       <div class="filterlabel">Living Examples with Native Audio:</div>
       <div class="example-list">
