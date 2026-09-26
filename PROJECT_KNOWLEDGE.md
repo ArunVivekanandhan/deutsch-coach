@@ -765,6 +765,17 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 68) — Satzbau: complete level test (A1 / A2 / B1, all topics together)
+Request: "complete test of grammar for sentence making … not only one topic, complete A1 together".
+- Satzbau-Trainer home: **📝 Level-Test** panel with A1-, A2-, B1-Test and a format choice (🧩 Bauen · ✍️ Schreiben
+  like the exam · 🎲 Gemischt = all exercise types), stored in `sb_test_fmt`.
+- A test = about 30 sentences of exactly that level from **every** grammar topic of the level (2–3 each: A1 7×3,
+  A2 9×2, B1 11×2) plus 1 sentence from randomly chosen everyday topics, shuffled; no topic name shown during the
+  test and no re-queuing (the first answer counts). Wrong sentences still go to "Fehler wiederholen" and Meine Fehler.
+- Result: % with pass line 60 %, previous results, table per topic (📘 grammar / 💬 everyday, x / n, coloured bar,
+  "Üben" opens the topic), "Das solltest du als Nächstes üben" (grammar gaps first). History `sb_tests_v1`
+  (last result shown on each level button).
+
 ### 2026-09-26 (Task 67) — Animated pictures everywhere + "Grammatik in Bildern" (learn concepts by picture)
 Request: "all the images need to be animated and also implement image to learn concept".
 - **Animation layer** (css/design-system.css `.dc-anim[data-anim=…]` + js/app-shell.js `dcAnimatePics`): every word

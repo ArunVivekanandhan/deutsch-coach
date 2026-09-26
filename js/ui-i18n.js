@@ -61,6 +61,9 @@
     'Konzepte ansehen': 'See the concepts', 'Animation: an': 'Animation: on', 'Animation: aus': 'Animation: off', 'Diese Regel als bewegtes Bild ansehen →': 'See this rule as a moving picture →',
     'Subjekt': 'Subject', 'Verb': 'Verb', 'Objekt': 'Object', 'Ort / Richtung': 'Place / direction', 'Konnektor / Fragewort': 'Connector / question word', 'Rest': 'Other',
     'Wohin? (Akkusativ)': 'Where to? (accusative)', 'Wo? (Dativ)': 'Where? (dative)', 'Bilder animieren': 'Animate pictures',
+    'Level-Test: alle Themen eines Levels zusammen': 'Level test: all topics of a level together', 'Bauen (Wörter ordnen)': 'Build (put words in order)', 'Schreiben (wie in der Prüfung)': 'Write (like in the exam)',
+    'Gemischt (alle Übungsarten)': 'Mixed (all exercise types)', 'noch nicht gemacht': 'not done yet', 'Test nochmal (neue Sätze)': 'Test again (new sentences)', 'Fehler jetzt üben': 'Practise mistakes now', 'Themen': 'Topics',
+    'Grammatikthema': 'grammar topic', 'Alltagsthema': 'everyday topic', 'richtig': 'correct', 'Üben': 'Practise',
     // ---- common buttons & words in labels ----
     'Alle': 'All', 'Alle anzeigen': 'Show all', 'Alle Themen': 'All topics', 'Alle löschen': 'Delete all', 'Alle vorlesen': 'Read all aloud', 'Alle nacheinander anhören': 'Listen to all in a row',
     'Anhören': 'Listen', 'anhören': 'listen', 'Nochmal hören': 'Listen again', 'Beispiel anhören': 'Listen to the example', 'ganzen Text hören': 'listen to the whole text', 'vorlesen': 'read aloud',
