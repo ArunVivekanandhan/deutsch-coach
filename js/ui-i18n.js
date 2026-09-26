@@ -67,7 +67,8 @@
     'Fehler gemerkt': 'Mistake saved', 'Richtig:': 'Correct:', 'Jetzt üben': 'Practise now', 'Später': 'Later', 'Fehlerheft': 'Mistake notebook', 'Nach einem Fehler:': 'After a mistake:',
     'fragen': 'ask', 'sofort üben': 'practise at once', 'nur speichern': 'just save', 'Geübt!': 'Practised!', 'Weiter mit der Übung': 'Back to the exercise', 'Welches Verb? (Infinitiv)': 'Which verb? (infinitive)',
     'Nomen mit Artikel (der / die / das)': 'Noun with article (der / die / das)', 'Welches Adjektiv?': 'Which adjective?', 'So ist es richtig:': "Here's the right answer:",
-    'Warum?': 'Why?', 'Du hast:': 'You wrote:', 'Satz erklärt: Grammatik + Wort für Wort': 'Sentence explained: grammar + word by word', 'Grammatik in diesem Satz:': 'Grammar in this sentence:', 'Wort für Wort:': 'Word by word:',
+    'Warum?': 'Why?', 'Leicht': 'Easy', 'Mittel': 'Medium', 'Schwer': 'Hard', 'Wörter antippen': 'tap the words', 'ohne Hilfe': 'no help', 'letztes Wort': 'last word', 'leeren': 'clear',
+    '3 ähnliche Fragen (KI)': '3 similar questions (AI)', '3 weitere ähnliche Fragen (KI)': '3 more similar questions (AI)', 'Mehr Fragen mit KI (Schlüssel einrichten)': 'More questions with AI (set up a key)', 'Mehr üben': 'More practice', 'Du hast:': 'You wrote:', 'Satz erklärt: Grammatik + Wort für Wort': 'Sentence explained: grammar + word by word', 'Grammatik in diesem Satz:': 'Grammar in this sentence:', 'Wort für Wort:': 'Word by word:',
     // ---- common buttons & words in labels ----
     'Alle': 'All', 'Alle anzeigen': 'Show all', 'Alle Themen': 'All topics', 'Alle löschen': 'Delete all', 'Alle vorlesen': 'Read all aloud', 'Alle nacheinander anhören': 'Listen to all in a row',
     'Anhören': 'Listen', 'anhören': 'listen', 'Nochmal hören': 'Listen again', 'Beispiel anhören': 'Listen to the example', 'ganzen Text hören': 'listen to the whole text', 'vorlesen': 'read aloud',

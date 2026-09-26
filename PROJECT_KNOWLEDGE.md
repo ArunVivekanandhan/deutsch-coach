@@ -765,6 +765,18 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 72) — Quick practice + Meine Fehler: Leicht / Mittel / Schwer word selection, 🤖 more questions
+Requests: (screenshot of the "Jetzt üben" typing question) "need option with word selection based on easy medium hard"
++ "option to AI for more questions also".
+- js/mistakes.js `inputHTML(answer, id)` (shared by the quick practice overlay and Meine_Fehler.html): level chips
+  🟢 Leicht (tap the words; up to 3 trap words from TRAPS: dem/den, mir/mich, weil/denn, bis/seit, ist/hat …; ⌫ last word,
+  🗑 clear; read-only box) · 🟡 Mittel (type; first-letter pattern "D_____ G________ i__ …") · 🔴 Schwer (type, no
+  help). Choice remembered in `dc_mf_level` (default Leicht); switching redraws the same question.
+- **🤖 3 ähnliche Fragen (KI)** after every answer, on the practice end screen and in Meine Fehler: the AI (user's key,
+  dcCallAI) writes 3 new sentences training the SAME grammar point (JSON en/de/why, 2–25 words, validated); they are
+  inserted as the next questions, marked "🤖 KI-Übung"; a wrong one is saved to the notebook (source 🤖 KI-Übung).
+  Without a key the button links to the settings.
+
 ### 2026-09-26 (Task 71) — The same detailed feedback in EVERY sentence-making exercise
 Request: "Not only in these pages — wherever we have this kind of making [sentences] we need to give details."
 - **`DCExplain.feedback(yourSentence, correctSentence)`** (js/sentence-explain.js, shared): "Du hast: …" with the

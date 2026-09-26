@@ -109,11 +109,11 @@ function drawItem() {
     <div class="q">${esc(it.q)}</div>
     ${it.kind === 'choice'
       ? `<div id="opts">${shuffle(it.options.length ? it.options : [it.answer]).map(o => `<button type="button" class="opt" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>`
-      : `<textarea class="in" id="ans" placeholder="Auf Deutsch … (Enter = prüfen)" spellcheck="false" autocapitalize="sentences"></textarea>
+      : `${M.inputHTML(it.answer, 'ans')}
          <div class="row"><button type="button" class="btn primary" id="chk">Prüfen</button><button type="button" class="btn" id="show">👁 Weiß ich nicht</button></div>`}
     <div id="res"></div></div>`;
   if (it.kind !== 'choice') {
-    $('ans').focus();
+    if (!$('ans').readOnly) $('ans').focus();
     $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chk').click(); } });
     $('chk').onclick = () => { const v = $('ans').value.trim(); if (v) result(it, M.check(v, it), v); };
     $('show').onclick = () => result(it, { ok: false, note: '' }, '');
@@ -131,7 +131,8 @@ function result(it, r, given) {
       ${r.note ? `<div class="muted">✏️ ${esc(r.note)}</div>` : ''}
       ${it.why ? `<div class="why">💡 ${esc(it.why)}</div>` : ''}
       ${it.given ? `<div class="muted">Damals hattest du: „${esc(it.given)}“ · ${it.wrong}× falsch</div>` : ''}
-    </div>${!r.ok && / /.test(it.answer) && window.DCExplain ? DCExplain.feedback(it.kind === 'type' ? given : '', it.answer) : ''}<div class="row"><button type="button" class="btn primary" id="nx">Weiter →</button>${it.href ? `<a class="btn" href="${esc(it.href)}">Zur Übung</a>` : ''}</div>`;
+    </div>${!r.ok && / /.test(it.answer) && window.DCExplain ? DCExplain.feedback(it.kind === 'type' ? given : '', it.answer) : ''}<div class="row"><button type="button" class="btn primary" id="nx">Weiter →</button>${M.aiButton()}${it.href ? `<a class="btn" href="${esc(it.href)}">Zur Übung</a>` : ''}</div>`;
+  window.__dcMfLast = it;   // the 🤖 button makes 3 new questions like this one
   $('nx').onclick = () => { R.k++; drawItem(); }; $('nx').focus();
 }
 /* ---------- list ---------- */
@@ -149,6 +150,8 @@ document.addEventListener('click', e => {
   if (b.dataset.say) return say(b.dataset.say);
   if (b.dataset.del) { M.remove(b.dataset.del); paintTop(); return drawList(); }
 });
+// level switched (Leicht / Mittel / Schwer) → show the same question again with the new help (not yet answered)
+document.addEventListener('dcmf-level', () => { if (R && R.list[R.k] && R.answered !== R.k && !document.getElementById('dcMfOv')) drawItem(); });
 $('goReview').onclick = () => startReview(false);
 $('goList').onclick = () => { R = null; drawList(); };
 $('clearLearnt').onclick = () => { M.clearLearnt(); paintTop(); drawList(); };
