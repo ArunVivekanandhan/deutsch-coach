@@ -4,7 +4,7 @@ redirect stub) is listed, so no page is left out of the menu / home page. Run: p
 import json, os, re, subprocess, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'js', 'app-shell.js'), encoding='utf-8').read()
-block = src[src.index('window.DC_SITEMAP = ['):src.index('function dcCurrentPage')]
+block = src[src.index('window.DC_SITEMAP = ['):src.index('// the menu entry a page belongs to')]
 sm = json.loads(subprocess.check_output(['node', '-e', 'const window = {};' + block + 'process.stdout.write(JSON.stringify(window.DC_SITEMAP));'], text=True))
 errs, seen = [], set()
 for g in sm:
@@ -14,6 +14,13 @@ for g in sm:
         seen.add(h)
         if not os.path.exists(os.path.join(ROOT, h)): errs.append(f'{h}: file missing')
         if not p.get('t') or not p.get('d') or not p.get('icon'): errs.append(f'{h}: t/d/icon missing')
+        views = [v[0] for v in p.get('views', [])]
+        if views and h not in views: errs.append(f'{h}: must be the first of its views')
+        for v in views:
+            if v == h: continue
+            if v in seen: errs.append(f'{v}: listed twice')
+            seen.add(v)
+            if not os.path.exists(os.path.join(ROOT, v)): errs.append(f'{v}: file missing')
 for f in sorted(os.listdir(ROOT)):
     if not f.endswith('.html') or f in seen: continue
     html = open(os.path.join(ROOT, f), encoding='utf-8', errors='ignore').read()

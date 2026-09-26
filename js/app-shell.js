@@ -76,8 +76,8 @@ window.DC_SITEMAP = [
     { href: 'Nomen_Trainer.html', icon: 'box', t: 'Nomen (der/die/das)', d: 'Artikel und Plural sicher lernen.', lvl: 'A1–B2' },
     { href: 'Adjektiv_Adverb_Trainer.html', icon: 'shapes', t: 'Adjektive & Adverbien', d: 'Gegenteile, Komparativ, Superlativ.', lvl: 'A1–B2' },
     { href: 'Wort_Zwillinge.html', icon: 'copy', t: 'Wort-Zwillinge', d: 'Verwechselbare Wörter: Küche / Kuchen, obwohl / trotzdem …', lvl: 'A1–B1' },
-    { href: 'Wortschatz_Master_Grid.html', icon: 'grid-3x3', t: 'Wortschatz-Übersicht & Wortfamilien', d: 'Alle Wörter als Raster, nach Familie und Level filtern.', lvl: 'A1–B2' },
-    { href: 'Deutsch_Wortschatz_Excel_Sheet.html', icon: 'table', t: 'Wortschatz-Tabelle (Excel)', d: 'Alle Formen in einer Tabelle, drucken und exportieren.', lvl: 'A1–B2' },
+    { href: 'Wortschatz_Master_Grid.html', icon: 'grid-3x3', t: 'Wortschatz: Raster & Tabelle', d: 'Alle Wörter als Raster mit Wortfamilien — oder als Tabelle mit allen Formen (drucken, exportieren).', lvl: 'A1–B2',
+      views: [['Wortschatz_Master_Grid.html', '🔲 Raster & Wortfamilien'], ['Deutsch_Wortschatz_Excel_Sheet.html', '📊 Tabelle (Excel)']] },
     { href: 'Uebersetzer.html', icon: 'languages', t: 'Übersetzer & Wort-Explorer', d: 'Wort oder Satz nachschlagen: Formen, Wortaufbau, Tamil.', lvl: 'alle' } ] },
   { id: 'grammatik', icon: 'puzzle', title: 'Grammatik & Satzbau', mod: 'grammar', pages: [
     { href: 'Grammatik_Regel_Trainer.html', icon: 'puzzle', t: 'Grammatik-Regeln', d: 'Alle Regeln A1 → B2 mit Tabellen, Bildern, Tamil-Brücken und Übungen.', lvl: 'A1–B2' },
@@ -99,13 +99,17 @@ window.DC_SITEMAP = [
     { href: 'KI_Sprechpartner.html', icon: 'drama', t: 'KI-Sprechpartner (Anruf)', d: 'Rollenspiele mit Stimme: Café, Arzt, Amt … mit Korrektur.', lvl: 'A1–B2', ai: true },
     { href: 'KI_Human_Partner.html', icon: 'users', t: 'Live-Video-Partner', d: 'Gespräch mit einem KI-Avatar.', lvl: 'A2–B2', ai: true } ] },
   { id: 'pruefung', icon: 'award', title: 'Prüfung', mod: 'exam', pages: [
-    { href: 'A1_Sprech_Pruefungs_Simulator.html', icon: 'mic', t: 'A1 Sprechen (Start Deutsch 1)', d: 'Vorstellen, Fragen, Bitten — wie in der Prüfung.', lvl: 'A1' },
+    { href: 'A1_Sprech_Pruefungs_Simulator.html', icon: 'mic', t: 'Sprechprüfung simulieren (A1 · B1)', d: 'A1: vorstellen, fragen, bitten · B1/DTZ: planen, diskutieren, präsentieren — wie in der Prüfung.', lvl: 'A1–B1',
+      views: [['A1_Sprech_Pruefungs_Simulator.html', '🅰️ A1 · Start Deutsch 1'], ['Sprech_Pruefungs_Simulator.html', '🅱️ B1 · DTZ']] },
     { href: 'German_A2_Practice_Studio.html', icon: 'award', t: 'A2 Praxis-Studio', d: 'Die 7 Module der A2-Prüfung.', lvl: 'A2' },
     { href: 'German_B1_Practice_Studio.html', icon: 'graduation-cap', t: 'B1 Praxis-Studio', d: 'telc / Goethe Zertifikat B1 gezielt üben.', lvl: 'B1' },
-    { href: 'Sprech_Pruefungs_Simulator.html', icon: 'mic', t: 'B1 Sprechen / DTZ', d: 'Mündliche B1-Prüfung und Dialoge simulieren.', lvl: 'B1' } ] },
+ ] },
   { id: 'setup', icon: 'settings', title: 'Einstellungen', pages: [
     { href: 'Einstellungen_Setup.html', icon: 'settings', t: 'KI-Schlüssel & Einstellungen', d: 'KI-Anbieter, Stimme, Audio, Design.' } ] }
 ];
+// the menu entry a page belongs to (a page can be one "view" of a merged entry, e.g. Raster | Tabelle)
+function dcPageEntry(href) { for (const g of DC_SITEMAP) for (const p of g.pages) if (p.href === href || (p.views || []).some(v => v[0] === href)) return { g, p }; return null; }
+window.dcPageEntry = dcPageEntry;
 function dcCurrentPage() { const f = (location.pathname.split('/').pop() || 'index.html'); return f || 'index.html'; }
 // Sidebar menu: a search box + one collapsible group per skill; the group of the current page is open.
 function dcNavHTML() {
@@ -114,9 +118,9 @@ function dcNavHTML() {
     return `<div class="nav-group dc-nav">
         <input type="search" class="dc-nav-search" id="dcNavSearch" placeholder="🔎 Seite suchen … (z. B. Verben, Brief)" aria-label="Seite suchen">
         ${DC_SITEMAP.map(g => {
-            const open = g.pages.some(p => p.href === cur) || (cur === 'index.html' && g.id === 'start');
+            const open = g.pages.some(p => p.href === cur || (p.views || []).some(v => v[0] === cur)) || (cur === 'index.html' && g.id === 'start');
             return `<details class="dc-nav-grp" data-grp="${g.id}" ${open ? 'open' : ''}><summary><i data-lucide="${g.icon}" class="nav-icon" aria-hidden="true"></i> ${esc(g.title)} <span class="dc-nav-n">${g.pages.length}</span></summary>
-                ${g.pages.map(p => `<a href="${p.href}" class="nav-link${p.href === cur ? ' active' : ''}" ${p.href === cur ? 'aria-current="page"' : ''} data-q="${esc((p.t + ' ' + p.d).toLowerCase())}"><i data-lucide="${p.icon}" class="nav-icon" aria-hidden="true"></i> ${esc(p.t)}${p.ai ? ' <span title="braucht KI-Schlüssel">🤖</span>' : ''}</a>`).join('')}
+                ${g.pages.map(p => { const on = p.href === cur || (p.views || []).some(v => v[0] === cur); return `<a href="${p.href}" class="nav-link${on ? ' active' : ''}" ${on ? 'aria-current="page"' : ''} data-q="${esc((p.t + ' ' + p.d).toLowerCase())}"><i data-lucide="${p.icon}" class="nav-icon" aria-hidden="true"></i> ${esc(p.t)}${p.ai ? ' <span title="braucht KI-Schlüssel">🤖</span>' : ''}</a>`; }).join('')}
             </details>`; }).join('')}
     </div>`;
 }
@@ -135,7 +139,7 @@ function dcBindNavSearch(root) {
 (function dcRememberPage() {
     try {
         const cur = dcCurrentPage(); if (cur === 'index.html') return;
-        if (!DC_SITEMAP.some(g => g.pages.some(p => p.href === cur))) return;
+        if (!dcPageEntry(cur)) return;
         const r = JSON.parse(localStorage.getItem('dc_recent') || '[]').filter(x => x.href !== cur);
         r.unshift({ href: cur, at: Date.now() }); localStorage.setItem('dc_recent', JSON.stringify(r.slice(0, 8)));
     } catch (e) { /* storage blocked */ }
@@ -275,11 +279,18 @@ function renderAppShell() {
         
         content.appendChild(legacyWrapper);
         // "Mehr in diesem Bereich": the other pages of the same group, so the next exercise is one tap away
-        const curPage = dcCurrentPage(), grp = DC_SITEMAP.find(g => g.id !== 'setup' && g.pages.some(p => p.href === curPage));
+        const curPage = dcCurrentPage(), ent = dcPageEntry(curPage), grp = ent && ent.g.id !== 'setup' ? ent.g : null;
+        // merged pages: a switch between the views at the top (Raster | Tabelle, A1 | B1)
+        if (ent && ent.p.views) {
+            const sw = document.createElement('nav');
+            sw.className = 'dc-views'; sw.setAttribute('aria-label', 'Ansicht wechseln');
+            sw.innerHTML = `<span class="dc-views-t">${ent.p.t}:</span>` + ent.p.views.map(([h, l]) => `<a href="${h}"${h === curPage ? ' aria-current="page" class="on"' : ''}>${l}</a>`).join('');
+            content.insertBefore(sw, legacyWrapper);
+        }
         if (grp) {
             const more = document.createElement('nav');
             more.className = 'dc-more'; more.setAttribute('aria-label', 'Mehr in diesem Bereich');
-            more.innerHTML = `<div class="dc-more-t">Mehr in <b>${grp.title}</b> · <a href="index.html#${grp.id}">alle Bereiche</a></div><div class="dc-more-l">${grp.pages.filter(p => p.href !== curPage).map(p => `<a href="${p.href}"><i data-lucide="${p.icon}" aria-hidden="true"></i> ${p.t}</a>`).join('')}</div>`;
+            more.innerHTML = `<div class="dc-more-t">Mehr in <b>${grp.title}</b> · <a href="index.html#${grp.id}">alle Bereiche</a></div><div class="dc-more-l">${grp.pages.filter(p => p !== ent.p).map(p => `<a href="${p.href}"><i data-lucide="${p.icon}" aria-hidden="true"></i> ${p.t}</a>`).join('')}</div>`;
             content.appendChild(more);
         }
         main.appendChild(content);

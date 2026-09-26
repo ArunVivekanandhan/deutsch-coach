@@ -763,6 +763,13 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 64) — Overlapping pages merged into one entry with a view switch
+- DC_SITEMAP entries can have `views: [[href, label], …]`: **Wortschatz: Raster & Tabelle** (Wortschatz_Master_Grid |
+  Deutsch_Wortschatz_Excel_Sheet) and **Sprechprüfung simulieren (A1 · B1)** (A1_Sprech_Pruefungs_Simulator |
+  Sprech_Pruefungs_Simulator). One menu/home card each; app-shell puts a segmented switch at the top of both pages
+  (`.dc-views`), the menu entry stays highlighted on either view, "Zuletzt geübt" and "Mehr in …" understand views.
+  The pages themselves are unchanged (no code risk, saved progress kept). `check_sitemap.py` validates views.
+
 ### 2026-09-26 (Task 63) — Meine Fehler: one mistake notebook for all practice pages
 - **`js/mistakes.js`** (`window.DCMistakes`): `add()` is called on every wrong answer in Text-Trainer (sentence,
   exam, ⚡ quiz, Sätze verbinden), Satzbau (build/type modes), Grammatik-Regel-Trainer (multiple choice + sentence

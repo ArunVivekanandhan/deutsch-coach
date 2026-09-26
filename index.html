@@ -291,12 +291,12 @@
         const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
         const js = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
         const hasAIKey = (() => { try { const pr = localStorage.getItem('de_ai_provider') || 'groq'; return !!(localStorage.getItem('de_ai_key_' + pr) || (pr === 'ollama' && localStorage.getItem('de_ai_endpoint_ollama'))); } catch (e) { return false; } })();
-        const page = href => { for (const g of SM) for (const p of g.pages) if (p.href === href) return p; return null; };
+        const page = href => { const e = window.dcPageEntry && dcPageEntry(href); return e ? e.p : null; };
         document.getElementById('areas').innerHTML = SM.filter(g => g.id !== 'start').map(g => `<section id="${g.id}">
             <div class="section-title area-head"><i data-lucide="${g.icon}" style="width:16px;height:16px;"></i> ${esc(g.title)} <span class="area-count">${g.pages.length}</span></div>
             <div class="dash-grid compact">${g.pages.map(p => `<a href="${p.href}" class="module-card module-${g.mod || 'vocab'}">
               <div class="module-icon"><i data-lucide="${p.icon}"></i></div><div class="module-title">${esc(p.t)}</div><div class="module-desc">${esc(p.d)}</div>
-              <div class="module-meta">${p.lvl ? `<span>${esc(p.lvl)}</span>` : ''}${p.ai ? `<span class="${hasAIKey ? '' : 'need-ai'}">🤖 KI${hasAIKey ? '' : ' — Schlüssel nötig'}</span>` : ''}</div></a>`).join('')}</div></section>`).join('');
+              <div class="module-meta">${p.lvl ? `<span>${esc(p.lvl)}</span>` : ''}${p.views ? `<span>${p.views.length} Ansichten</span>` : ''}${p.ai ? `<span class="${hasAIKey ? '' : 'need-ai'}">🤖 KI${hasAIKey ? '' : ' — Schlüssel nötig'}</span>` : ''}</div></a>`).join('')}</div></section>`).join('');
         // daily plan from real data: due cards, stored mistakes, then one new-skill step and one output step
         const vs = (typeof ProgressAggregator !== 'undefined') ? ProgressAggregator.getVocabularyStats() : { due: 0, reviewed: 0 };
         const cnt = o => Array.isArray(o) ? o.length : Object.keys(o || {}).length;
