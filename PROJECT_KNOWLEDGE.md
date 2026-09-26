@@ -113,7 +113,7 @@ Deutsch_Coach_Project/
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
-├── KI_Sprechpartner.html                   # Voice role-play AI tutor (missions, corrections, help, report) — Task 46
+├── KI_Sprechpartner.html                   # Real-time AI video-call tutor (Task 48; engine in js/call/*, Simli SDK in js/vendor/)
 ├── Continuous_Verb_Speaker.html            # Standalone audio loop verb speaker with Suite Hub
 ├── Verben_Hoeren_EN_DE.html                # Standalone audio listen-and-repeat player with Suite Hub
 ├── konnektoren_referenz.html               # Static connector-grammar reference page with Suite Hub
@@ -758,6 +758,104 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 48) — KI-Sprechpartner v3: real-time conversational video call (existing page upgraded, not a prototype)
+
+#### Task
+User spec "Upgrade Existing AI Video Call into a Natural, Real-Time AI German Conversation Experience": no Speak/Wait
+buttons, barge-in, hesitation-tolerant turn-taking, explicit call states, avatar with real lip sync, level-adapted
+natural voice, streaming, gentle recasts, pronunciation feedback, graceful failures, mobile — and **do not fake**
+capabilities the technology doesn't provide.
+
+#### Architecture (page = content + learning layer; engine = `js/call/*`, plain scripts on `window.DCCall`)
+```
+mic ─► MicInput (echoCancellation/noiseSuppression/AGC) ─► VAD (adaptive noise floor; stricter "barge-in" mode)
+  └─► STT: BrowserSTT (Web Speech, continuous + interim)  |  OpenAISTT (VAD-cut WAV + 0.4 s pre-roll → gpt-4o-mini-transcribe)
+        └─► ConversationEngine turn-taking (end of turn = silence ≥ level hang; +1.4 s after "äh/und/weil/zum/möchte…")
+              └─► page.onUserTurn → guided script | aiReply (LLM) | pronunciation drill
+                    └─► ENG.respond: dcStreamAI (SSE) → sentence splitter → TTS per sentence (next one prefetched)
+                          └─► Avatar.speakChunk (gapless WebAudio) ─► lip sync ─► back to LISTENING
+```
+- `js/call/call-state.js` — `CallStateMachine` with the 11 states IDLE, CONNECTING, LISTENING, USER_SPEAKING,
+  PROCESSING, AI_SPEAKING, INTERRUPTED, PAUSED, RECONNECTING, ERROR, SESSION_ENDED + a transition table; invalid
+  transitions are rejected and logged in `sm.history` (never an impossible state). UI, avatar and VAD subscribe.
+- `js/call/audio-io.js` — shared AudioContext, MicInput (+ `pcm-capture-worklet.js` for OpenAI STT), VAD,
+  AudioPlayer (gapless queue → analyser → out; `stop(fadeMs)` for barge-in), resample / PCM16 / WAV helpers.
+- `js/call/tts.js` — providers with one interface `stream(text,{signal,level,persona})` → PCM chunks:
+  **OpenAI** `gpt-4o-mini-tts` (pcm 24 kHz, per-tutor voice + `instructions` for persona and level pace),
+  **ElevenLabs** `eleven_flash_v2_5` `/stream/with-timestamps` (pcm 16 kHz + per-character timestamps),
+  **Browser** speechSynthesis (native, prefers neural/natural German voices; safety timeout). `DCCall.pace(level)`:
+  A1 0.86 (slow, clear) · A2 0.94 · B1 1.0 · B2 1.06 (native). Voice "auto" = ElevenLabs > OpenAI > browser.
+- `js/call/avatar.js` — `AvatarProvider` interface: connect · disconnect · speakChunk · finish · stop · interrupt ·
+  setExpression · setState · getStatus (+ capabilities). **IllustratedAvatar** (SVG, default): lip sync from
+  (1) ElevenLabs timestamps → German grapheme→viseme timeline (per sentence; request- or chunk-relative times both
+  handled), else (2) the real TTS audio (RMS → jaw, spectral balance → vowel/sibilant shape), else (3) browser voice:
+  approximated from word-boundary events (labelled "ungefähr"); expressions per state/mood tag, random blinks
+  (incl. doubles), gaze saccades, non-repeating idle head motion, nods while the learner talks.
+  **SimliAvatar** (photoreal, optional): Simli v3 SDK, bundled locally as `js/vendor/simli-client.bundle.js`
+  (esbuild IIFE, MIT/Apache, rebuild steps in `js/vendor/LICENSES.md`), session token + ICE → p2p WebRTC, PCM16 16 kHz
+  audio in → Simli renders lips + plays audio; failure/timeout → illustrated tutor takes over with a notice.
+- `js/call/stt.js` — BrowserSTT (auto-restart with back-off; error codes denied/network/nomic) and OpenAISTT
+  (per-utterance transcription with the lesson vocabulary as prompt; works in Firefox too).
+- `js/call/conversation.js` — `ConversationEngine`: start/end/pause/resume/mute/volume, turn-taking, `say()` for
+  fixed text, `respond()` for streamed LLM replies (leading `[mood]` tag → avatar expression, text after `###META`
+  is not spoken but parsed as JSON), barge-in, retries, metrics (end of turn → first token / first audio).
+- `js/app-shell.js`: `dcAIRequestConfig()` shared by `dcCallAI` (now accepts `opts.signal`) and new **`dcStreamAI`**
+  (OpenAI-compatible SSE; falls back to a JSON answer); errors carry `e.status`. CSP connect-src += ElevenLabs,
+  Simli (https/wss), `*.livekit.cloud`; media-src += `mediastream:`.
+
+#### Real-time behaviour
+- **Streaming:** sentence 1 goes to TTS while the LLM still writes (verified: first TTS request before the last
+  token); TTS chunks are played as they arrive; the next sentence is synthesised during playback. A first clause
+  > 60 chars is cut at a comma. Abbreviations ("z. B.", "Dr.") and ordinals don't end a sentence.
+- **Barge-in:** while AI_SPEAKING the VAD needs a louder (noise+18 dB, ≥ −38 dBFS) and longer (320 ms) signal;
+  with Web Speech the interrupt fires on ≥ 2 recognised words (or 1 word + VAD) that are **not** an echo of the
+  tutor's audible/next sentence. Then: LLM stream aborted, TTS requests cancelled, audio faded out (~50 ms),
+  INTERRUPTED → USER_SPEAKING; the history gets only the sentences the learner actually heard + " …", and the next
+  user message is prefixed "[unterbricht]" so the model reacts to the interruption. Captions/echo guard follow the
+  sentence that is audible now (audio is queued ahead).
+- **Turn-taking:** base hang A1 1150 / A2 1000 / B1 880 / B2 780 ms (+350 ms for one-word turns, +1400 ms after
+  fillers, conjunctions, articles, prepositions, pronouns, "möchte/würde/hätte", "," or "…"). The regex uses an
+  explicit Unicode letter boundary — JS `\b` is ASCII-only and never matched before "äh"/"für" (bug found by Test C).
+- **Failures:** `offline` event → abort + RECONNECTING "📡 Verbindung wird wiederhergestellt …", `online` → retry
+  the pending turn; HTTP 5xx/429/timeouts (20 s to first token, 15 s per TTS sentence) → 2 retries with back-off;
+  401/403 → ERROR with key hint (no loop); TTS failure → browser voice for that sentence + notice; Simli failure →
+  illustrated tutor; mic denied / no mic / no Web Speech → notice, typing (💬) uses the same turn path.
+
+#### Learning layer (page)
+Modes: 🎓 guided (scripts, offline) · 🗣️ free (few corrections, confidence first) · 📘 learning (recasts in speech,
+correction card + toast, max 2 vocab cards per reply, pronunciation drill). The system prompt carries tutor
+personality, role/scene, goals, `LEVEL_RULES`, learner memory (recent words from `dc_review_requests`, last mistakes
+from `de_coach_vault`), "no grammar lecture", "[unterbricht]" handling and the mood-tag + `###META` format.
+Pronunciation: recogniser output vs. lexicon (umlaut-folded near-miss, Levenshtein 1 vs. expected words) → card with
+sound tip (EN + Tamil), syllables, 🐢 slow replay, IPA on demand (🤖); honestly labelled as recogniser-based; in
+learning mode the tutor asks for one repetition. Transcript: side panel (desktop) / bottom sheet (≤ 760 px),
+replay 🔊 / 🐢, translate (META.en or AI), tap any word → lexicon popup + ➕ flashcard, correction/vocab cards.
+Settings sheet (⚙): conversation mode, level, voice, keys (OpenAI, ElevenLabs + voice id, Simli + face id), avatar,
+STT, self-view camera, Tamil, captions, "Verbindungen testen", average latency.
+Storage: `dc_call_settings_v1`, `dc_call_latency`, keys `dc_call_openai_key` (falls back to `de_ai_key_openai`),
+`dc_call_eleven_key`, `dc_call_eleven_voice[_<tutor>]`, `dc_call_simli_key` — only in this browser, sent only to
+the provider itself. `dc_tutor_v1.mode` 'ai' is migrated to 'learning'.
+
+#### Honest limits
+Photoreal video and native lip sync only with a Simli key + face id. Natural voice only with an OpenAI or ElevenLabs
+key (browser voices vary; Edge "Natural" voices are decent). Browser-voice lip sync is approximate. Web Speech (Chrome)
+sends audio to Google and can't separate the tutor's voice perfectly — headphones make barge-in reliable.
+Pronunciation feedback is inferred from what the recogniser understood, not phoneme scoring. No live test against the
+vendor APIs was possible from the sandbox (egress blocked); the request formats follow the vendors' documented APIs.
+
+#### Verified (headless Chromium; fake mic stream, fake SpeechRecognition, mocked SSE LLM / PCM TTS / ElevenLabs
+NDJSON with timestamps / OpenAI transcription / Simli 401) — 60/60 checks, 0 console errors
+A basic conversation (streamed greeting, auto turn end, correction + vocab cards, translate, word popup, save, replay,
+typing, report, vault) · B interruption (echo guard, noise ignored, stop ~50 ms, history = heard part + "[unterbricht]")
+· C hesitation ("Ich möchte äh" + 1.9 s silence → still listening, one merged turn; trailing "weil") · D pronunciation
+(Brotchen → Brötchen card + Tamil tip, drill, praise; guided word score) · E level (prompt rules, TTS pace, A1 waits
+longer) · F network (offline mid-reply → RECONNECTING → auto-retry, 503 retry, TTS fallback, 401, mic denied) ·
+G mobile 390 px (one row of 6 controls ≥ 44 px, bottom sheet, no h-scroll, pause/resume) · H ElevenLabs viseme timing,
+OpenAI STT, Simli fallback. build.py + smoke_pages 28/28.
+Run again with `python3 scripts/test_call.py [A … H]` (mocks in `scripts/test_call_mocks.js`; also a CI step in checks.yml).
+
+---
 
 ### 2026-09-25 (Task 47) — KI-Sprechpartner v2: closer to Praktika (video call, animated tutors, guided lessons without AI, learning path)
 

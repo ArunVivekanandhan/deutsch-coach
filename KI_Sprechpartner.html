@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <title>KI-Sprechpartner — Dein Deutsch-Coach</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/fonts.css">
@@ -13,6 +13,12 @@
 <script src="js/progress-aggregator.js"></script>
 <script src="js/app-shell.js"></script>
 <script src="js/tutor-scripts.js"></script>
+<script src="js/call/call-state.js"></script>
+<script src="js/call/audio-io.js"></script>
+<script src="js/call/tts.js"></script>
+<script src="js/call/stt.js"></script>
+<script src="js/call/avatar.js"></script>
+<script src="js/call/conversation.js"></script>
 <style>
   .kp { max-width: 900px; margin: 0 auto; padding: 4px 0 40px; color: var(--color-ink); }
   .kp h1 { font-size: 26px; margin: 0; }
@@ -20,203 +26,249 @@
   .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm); }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .note { font-size: 12.5px; color: var(--color-ink-soft); }
-  .chip { font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border);
-    background: var(--color-surface); color: var(--color-ink); }
+  .chip { font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
   .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
-  .btn { font: inherit; font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 12px; cursor: pointer; border: 1.5px solid var(--color-primary);
-    background: var(--color-primary); color: #fff; }
+  .btn { font: inherit; font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 12px; cursor: pointer; border: 1.5px solid var(--color-primary); background: var(--color-primary); color: #fff; }
   .btn.grey { background: var(--color-surface); color: var(--color-ink); border-color: var(--color-border); }
   .btn.ghost { background: transparent; color: var(--color-primary); }
   .btn:disabled { opacity: .45; cursor: default; }
+  .mini { font: inherit; font-size: 12px; padding: 3px 9px; border-radius: 8px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
   h3.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-ink-soft); margin: 18px 0 8px; }
-  /* stats + today */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 8px 0 12px; }
   .stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 10px; text-align: center; }
   .stat b { display: block; font-size: 20px; } .stat span { font-size: 11.5px; color: var(--color-ink-soft); }
   .dayring { height: 6px; background: var(--color-border); border-radius: 3px; overflow: hidden; margin-top: 6px; } .dayring i { display: block; height: 100%; background: #16a34a; }
-  .today { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 18px; color: #fff;
-    background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: var(--shadow-md, var(--shadow-sm)); }
+  .today { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 18px; color: #fff; background: linear-gradient(135deg, #2563eb, #7c3aed); box-shadow: var(--shadow-md, var(--shadow-sm)); }
   .today .face svg { width: 92px; height: 92px; }
   .today b { font-size: 19px; display: block; } .today small { opacity: .9; display: block; margin: 2px 0 10px; line-height: 1.4; }
   .today .btn { background: #fff; color: #1e3a8a; border-color: #fff; }
-  .today .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.6); }
-  /* tutors + path */
   .tutors { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-  .tutor { text-align: center; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
-    border: 2px solid var(--color-border); border-radius: 14px; padding: 10px 8px; }
+  .tutor { text-align: center; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink); border: 2px solid var(--color-border); border-radius: 14px; padding: 10px 8px; }
   .tutor.active { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent); }
   .tutor svg { width: 74px; height: 74px; } .tutor b { display: block; font-size: 14px; } .tutor small { font-size: 11.5px; color: var(--color-ink-soft); display: block; line-height: 1.35; }
   .path-level { margin: 14px 0 6px; font-weight: 800; font-size: 14px; }
   .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
-  .mission { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink);
-    border: 1.5px solid var(--color-border); border-radius: 14px; padding: 12px; position: relative; }
+  .mission { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); color: var(--color-ink); border: 1.5px solid var(--color-border); border-radius: 14px; padding: 12px; position: relative; }
   .mission:hover { border-color: var(--color-primary); }
   .mission .ic { font-size: 24px; } .mission b { display: block; font-size: 14.5px; margin-top: 4px; } .mission small { color: var(--color-ink-soft); font-size: 12px; display: block; }
   .mission .done { position: absolute; top: 10px; right: 10px; font-size: 12px; color: #16a34a; font-weight: 800; }
   .modes { display: flex; gap: 8px; flex-wrap: wrap; }
-  .modes button { flex: 1; min-width: 200px; text-align: left; font: inherit; padding: 12px; border-radius: 14px; cursor: pointer; border: 2px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .modes button { flex: 1; min-width: 180px; text-align: left; font: inherit; padding: 12px; border-radius: 14px; cursor: pointer; border: 2px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
   .modes button.active { border-color: var(--color-primary); }
   .modes b { display: block; } .modes small { color: var(--color-ink-soft); font-size: 12px; }
-  /* onboarding */
-  .onb { max-width: 560px; margin: 10px auto; text-align: center; }
-  .onb .row { justify-content: center; }
-  /* call */
-  .call { border-radius: 22px; overflow: hidden; border: 1px solid var(--color-border); background: var(--color-surface); box-shadow: var(--shadow-md, var(--shadow-sm)); }
-  .screen { position: relative; padding: 16px 14px 14px; text-align: center; color: #fff;
-    background: radial-gradient(circle at 50% 30%, #3b82f6 0%, #1e3a8a 55%, #0f172a 100%); }
-  .screen .top { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; opacity: .95; gap: 8px; }
-  .screen .live { background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 999px; }
-  .bigface svg { width: 190px; height: 190px; filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
-  @media (max-width: 600px) { .bigface svg { width: 140px; height: 140px; } }
-  .state { font-size: 12px; opacity: .85; min-height: 16px; }
-  .subtitle { margin: 8px auto 0; max-width: 620px; background: rgba(0,0,0,.35); border-radius: 12px; padding: 10px 12px; font-size: 17px; line-height: 1.45; min-height: 26px; }
-  .subtitle .tr { font-size: 13.5px; opacity: .85; margin-top: 4px; }
-  .goalchips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
-  .goalchips span { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.14); }
-  .goalchips span.ok { background: #16a34a; }
-  .task { margin: 10px 14px 0; padding: 10px 12px; border-radius: 12px; border: 1.5px dashed var(--color-primary); font-size: 14px; }
-  .task .ta { font-size: 12.5px; color: var(--color-ink-soft); }
-  .log { max-height: 280px; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
-  .msg { max-width: 88%; padding: 8px 11px; border-radius: 14px; line-height: 1.45; font-size: 14.5px; }
-  .msg.ai { align-self: flex-start; background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface)); border: 1px solid var(--color-border); border-top-left-radius: 4px; }
-  .msg.me { align-self: flex-end; background: color-mix(in srgb, #16a34a 12%, var(--color-surface)); border: 1px solid color-mix(in srgb, #16a34a 35%, var(--color-border)); border-top-right-radius: 4px; }
-  .msg .tools { margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap; }
-  .msg .tools button, .sugg button, .mini { font: inherit; font-size: 12px; padding: 2px 8px; border-radius: 8px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
-  .fbk { align-self: flex-end; max-width: 88%; font-size: 13px; border-radius: 10px; padding: 7px 10px; border: 1px solid; }
-  .fbk.bad { border-color: #f59e0b; background: color-mix(in srgb, #f59e0b 12%, var(--color-surface)); }
-  .fbk.good { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, var(--color-surface)); }
-  .fbk s { color: #dc2626; } .fbk .right { color: #15803d; font-weight: 700; }
-  [data-theme="dark"] .fbk s { color: #f87171; } [data-theme="dark"] .fbk .right { color: #4ade80; }
-  .ok-w { color: #16a34a; font-weight: 700; } .no-w { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
-  [data-theme="dark"] .ok-w { color: #4ade80; } [data-theme="dark"] .no-w { color: #f87171; }
-  .sugg { display: flex; flex-direction: column; gap: 6px; padding: 0 14px 6px; }
-  .sugg .opt { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 14px; }
-  .sugg .opt b { cursor: pointer; border-bottom: 1.5px dashed var(--color-primary); }
-  .interim { font-style: italic; color: var(--color-ink-soft); font-size: 13.5px; min-height: 18px; padding: 0 14px; }
-  .controls { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px 14px 14px; flex-wrap: wrap; border-top: 1px solid var(--color-border); }
-  .ctl { font: inherit; font-size: 12px; width: 64px; padding: 8px 4px; border-radius: 14px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .ctl span { font-size: 20px; }
-  .ctl[hidden] { display: none; }
-  .ctl.end { border-color: #dc2626; color: #dc2626; }
-  .mic { width: 72px; height: 72px; border-radius: 50%; font-size: 30px; cursor: pointer; border: 3px solid #fff; background: #16a34a; color: #fff; box-shadow: 0 6px 18px rgba(22,163,74,.45); }
-  .mic.on { background: #dc2626; box-shadow: 0 0 0 8px rgba(220,38,38,.25); animation: pulse .8s infinite alternate; }
-  .mic:disabled { opacity: .5; }
-  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.06); } }
-  .typebar { display: none; gap: 8px; padding: 0 14px 12px; }
-  .typebar.show { display: flex; }
-  .typebar input { flex: 1; font: inherit; font-size: 15px; padding: 10px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
-  /* avatar animation */
-  .av .mouth { transform-box: fill-box; transform-origin: center; transition: transform .08s; }
-  .av.talking .mouth { animation: mouth .16s infinite alternate; }
-  @keyframes mouth { from { transform: scaleY(.25); } to { transform: scaleY(1.15); } }
-  .av .lids { transform-box: fill-box; transform-origin: center top; animation: blink 4.2s infinite; transform: scaleY(0); }
-  @keyframes blink { 0%, 94%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
-  .av.listening { filter: drop-shadow(0 0 14px rgba(74,222,128,.9)); }
-  .av .head { transform-box: fill-box; transform-origin: center bottom; }
-  .av.talking .head { animation: nod 1.4s infinite ease-in-out; }
-  @keyframes nod { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(1.5deg); } }
+  .onb { max-width: 560px; margin: 10px auto; text-align: center; } .onb .row { justify-content: center; }
   .report li { margin: 6px 0; }
   .ta { font-size: 13px; }
+
+  /* ================= video call (full screen) ================= */
+  .vc { position: fixed; inset: 0; z-index: 3000; display: flex; background: #0b1020; color: #f8fafc; font-size: 15px; }
+  .vc[hidden] { display: none; }
+  .vc-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .vc-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 35%, #1e3a8a 0%, #111b3d 55%, #070b16 100%); }
+  .vc-avatar { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .av-illu { height: min(74%, 560px); aspect-ratio: 1; filter: drop-shadow(0 18px 40px rgba(0,0,0,.45)); }
+  .av-illu svg { width: 100%; height: 100%; }
+  .av-video, .av-video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .vc-self { position: absolute; right: 14px; top: 58px; width: 118px; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px; border: 2px solid rgba(255,255,255,.35); transform: scaleX(-1); background: #000; z-index: 3; }
+  .vc-top { position: absolute; top: 0; left: 0; right: 0; display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+    background: linear-gradient(#000a, transparent); font-size: 13px; z-index: 2; }
+  .vc-top .ttl { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vc-chip { background: rgba(255,255,255,.14); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+  .vc-status { position: absolute; left: 50%; transform: translateX(-50%); top: 52px; display: flex; gap: 8px; align-items: center; padding: 6px 14px; border-radius: 999px;
+    background: rgba(15,23,42,.72); backdrop-filter: blur(6px); font-size: 13.5px; font-weight: 600; z-index: 2; white-space: nowrap; }
+  .vc-status i { width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; }
+  .vc-status[data-s="LISTENING"] i { background: #22c55e; } .vc-status[data-s="USER_SPEAKING"] i { background: #22c55e; animation: vcpulse .7s infinite alternate; }
+  .vc-status[data-s="PROCESSING"] i { background: #fbbf24; animation: vcpulse .5s infinite alternate; } .vc-status[data-s="AI_SPEAKING"] i { background: #60a5fa; animation: vcpulse .6s infinite alternate; }
+  .vc-status[data-s="INTERRUPTED"] i { background: #f97316; } .vc-status[data-s="RECONNECTING"] i, .vc-status[data-s="ERROR"] i { background: #ef4444; }
+  @keyframes vcpulse { to { transform: scale(1.35); opacity: .7; } }
+  .vc-meter { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; } .vc-meter b { width: 3px; background: #22c55e; border-radius: 2px; height: 3px; transition: height .08s; }
+  .vc-caps { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 16px 14px; background: linear-gradient(transparent, rgba(0,0,0,.72)); text-align: center; z-index: 2; }
+  .cap-ai { font-size: clamp(17px, 2.4vw, 22px); line-height: 1.4; font-weight: 600; max-width: 760px; margin: 0 auto; text-shadow: 0 1px 3px #000; }
+  .cap-ai .tr { display: block; font-size: 14px; font-weight: 400; opacity: .85; margin-top: 3px; }
+  .cap-user { font-size: 15px; opacity: .9; margin-top: 8px; min-height: 20px; color: #bbf7d0; }
+  .vc-toast { position: absolute; left: 50%; transform: translateX(-50%); bottom: 96px; background: rgba(255,255,255,.95); color: #0f172a; border-radius: 12px; padding: 8px 12px; font-size: 14px;
+    max-width: min(92%, 620px); box-shadow: 0 6px 24px rgba(0,0,0,.35); z-index: 4; }
+  .vc-toast[hidden] { display: none; }
+  .vc-notice { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); z-index: 5; max-width: min(92%, 560px); background: #fff; color: #0f172a; border-radius: 12px;
+    padding: 10px 12px; display: flex; gap: 8px; align-items: center; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .vc-notice[hidden] { display: none; }
+  .vc-notice.warn { border-left: 5px solid #f59e0b; } .vc-notice.reconnect, .vc-notice.error { border-left: 5px solid #ef4444; }
+  .vc-notice button { font: inherit; font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; padding: 4px 9px; cursor: pointer; }
+  .vc-task { position: absolute; left: 14px; bottom: 110px; max-width: min(60%, 380px); background: rgba(15,23,42,.8); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 8px 10px;
+    font-size: 13.5px; z-index: 3; }
+  .vc-task[hidden] { display: none; }
+  .vc-task .ta { opacity: .8; font-size: 12.5px; }
+  .vc-task button { font: inherit; font-size: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.35); background: transparent; color: #fff; padding: 2px 8px; cursor: pointer; margin-top: 4px; }
+  .vc-opts { margin-top: 6px; display: grid; gap: 4px; } .vc-opts div { cursor: pointer; } .vc-opts small { opacity: .75; }
+  .vc-controls { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 12px 12px max(12px, env(safe-area-inset-bottom)); background: #0b1020; border-top: 1px solid rgba(255,255,255,.08); flex-wrap: wrap; }
+  .vcb { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; font-size: 22px; background: rgba(255,255,255,.12); color: #fff; display: inline-flex; align-items: center; justify-content: center; position: relative; }
+  .vcb:hover { background: rgba(255,255,255,.2); } .vcb:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+  .vcb[aria-pressed="true"] { background: #fff; color: #0f172a; }
+  .vcb.mic { width: 66px; height: 66px; background: #16a34a; font-size: 26px; } .vcb.mic[aria-pressed="true"] { background: #dc2626; color: #fff; }
+  .vcb.end { background: #dc2626; }
+  .vcb .lbl { position: absolute; top: 100%; margin-top: 3px; font-size: 10.5px; color: #cbd5e1; white-space: nowrap; }
+  @media (max-width: 520px) { .vcb .lbl { display: none; } .vc-controls { gap: 8px; padding-left: 8px; padding-right: 8px; } .vcb { width: 48px; height: 48px; font-size: 20px; } .vcb.mic { width: 58px; height: 58px; } }
+  @media (max-width: 360px) { .vc-controls { gap: 5px; } .vcb { width: 44px; height: 44px; } .vcb.mic { width: 52px; height: 52px; } }
+  /* transcript drawer: side panel on desktop, bottom sheet on phones */
+  .vc-drawer { width: 380px; max-width: 100%; background: #f8fafc; color: #0f172a; display: flex; flex-direction: column; border-left: 1px solid #1e293b; }
+  .vc-drawer[hidden] { display: none; }
+  [data-theme="dark"] .vc-drawer { background: #0f172a; color: #e2e8f0; }
+  .vc-dh { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid #cbd5e144; font-weight: 700; }
+  .vc-log { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .tm { max-width: 92%; padding: 8px 11px; border-radius: 14px; line-height: 1.45; font-size: 14.5px; }
+  .tm.ai { align-self: flex-start; background: #e0e7ff; border-top-left-radius: 4px; } .tm.me { align-self: flex-end; background: #dcfce7; border-top-right-radius: 4px; }
+  [data-theme="dark"] .tm.ai { background: #1e293b; } [data-theme="dark"] .tm.me { background: #14532d; }
+  .tm .who { font-size: 11px; opacity: .65; margin-bottom: 2px; }
+  .tm .w { cursor: pointer; border-bottom: 1px dotted transparent; } .tm .w:hover { border-bottom-color: currentColor; }
+  .tm .tools { margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap; }
+  .tm .tr { font-size: 13px; opacity: .8; margin-top: 4px; }
+  .tm .cut { opacity: .6; font-style: italic; }
+  .card { align-self: flex-end; max-width: 92%; font-size: 13px; border-radius: 10px; padding: 7px 10px; border: 1px solid #f59e0b; background: #fffbeb; color: #0f172a; }
+  .card.pron { border-color: #8b5cf6; background: #f5f3ff; } .card.voc { border-color: #0ea5e9; background: #f0f9ff; align-self: flex-start; }
+  .card s { color: #dc2626; } .card .right { color: #15803d; font-weight: 700; }
+  .vc-help { padding: 8px 14px; border-top: 1px solid #cbd5e144; font-size: 13.5px; } .vc-help[hidden] { display: none; }
+  .vc-help .opt { cursor: pointer; padding: 3px 0; } .vc-help .opt b { border-bottom: 1.5px dashed #2563eb; }
+  .vc-input { display: flex; gap: 6px; padding: 10px 12px max(10px, env(safe-area-inset-bottom)); border-top: 1px solid #cbd5e144; }
+  .vc-input input { flex: 1; font: inherit; font-size: 15px; padding: 9px 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; min-width: 0; }
+  .vc-input button { font: inherit; border-radius: 10px; border: none; background: #2563eb; color: #fff; padding: 0 14px; cursor: pointer; }
+  .pop { position: fixed; z-index: 3100; background: #fff; color: #0f172a; border-radius: 12px; padding: 10px 12px; box-shadow: 0 10px 30px rgba(0,0,0,.3); max-width: 280px; font-size: 14px; }
+  .pop[hidden] { display: none; }
+  @media (max-width: 760px) {
+    .vc-drawer { position: fixed; left: 0; right: 0; bottom: 0; height: 64vh; width: auto; border-radius: 18px 18px 0 0; border-left: none; box-shadow: 0 -10px 40px rgba(0,0,0,.45); z-index: 3050; }
+    .vc-task { bottom: 118px; max-width: calc(100% - 28px); }
+    .vc-self { width: 84px; top: 52px; }
+  }
+  /* settings sheet */
+  .vc-sheet { position: fixed; inset: 0; z-index: 3200; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; justify-content: center; }
+  .vc-sheet[hidden] { display: none; }
+  .vc-sheet > div { background: var(--color-surface); color: var(--color-ink); width: min(620px, 100%); max-height: 88vh; overflow-y: auto; border-radius: 18px 18px 0 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); }
+  @media (min-width: 761px) { .vc-sheet { align-items: center; } .vc-sheet > div { border-radius: 18px; } }
+  .set-row { display: grid; gap: 6px; margin: 10px 0; }
+  .set-row label { font-weight: 700; font-size: 13.5px; }
+  .set-row input[type=text], .set-row input[type=password], .set-row select { font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-bg, var(--color-surface)); color: var(--color-ink); }
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg button { font: inherit; font-size: 13px; padding: 7px 11px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .seg button.active { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); font-weight: 700; }
+  .caps { font-size: 12px; color: var(--color-ink-soft); }
+  .ok-w { color: #16a34a; font-weight: 700; } .no-w { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
 </style>
 </head>
 <body>
 <div class="kp">
   <h1>🎭 KI-Sprechpartner</h1>
-  <p class="sub">Sprich Deutsch wie in einem Videoanruf mit deinem Tutor — in echten Situationen aus dem Alltag in Deutschland.
-    <b>Geführte Lektionen</b> funktionieren sofort (auch offline); mit KI-Schlüssel kannst du zusätzlich <b>frei sprechen</b> und bekommst persönliche Korrekturen.</p>
+  <p class="sub">Ein Videoanruf mit deinem Deutsch-Tutor: einfach losreden — der Tutor hört zu, lässt dich ausreden, du kannst ihn jederzeit unterbrechen.
+    <b>Geführte Lektionen</b> gehen sofort (auch offline). Mit KI-Schlüssel: <b>freies Gespräch</b> oder <b>Lern-Gespräch</b> mit Korrekturen.</p>
 
-  <!-- ============ ONBOARDING ============ -->
   <div id="onbView" hidden>
     <div class="box onb">
       <h2 style="margin-top:0;">👋 Willkommen! Lass uns deinen Lernplan machen.</h2>
-      <h3 class="sec">Wofür lernst du Deutsch?</h3>
-      <div class="row" id="onbGoal"></div>
-      <h3 class="sec">Dein Niveau</h3>
-      <div class="row" id="onbLevel"></div>
-      <h3 class="sec">Wie viele Minuten pro Tag?</h3>
-      <div class="row" id="onbMin"></div>
+      <h3 class="sec">Wofür lernst du Deutsch?</h3><div class="row" id="onbGoal"></div>
+      <h3 class="sec">Dein Niveau</h3><div class="row" id="onbLevel"></div>
+      <h3 class="sec">Wie viele Minuten pro Tag?</h3><div class="row" id="onbMin"></div>
       <div style="margin-top:18px;"><button type="button" class="btn" id="onbDone">Los geht's →</button></div>
     </div>
   </div>
 
-  <!-- ============ HOME / LEARNING PATH ============ -->
   <div id="homeView" hidden>
     <div class="stats" id="stats"></div>
     <div class="today" id="todayCard"></div>
-    <h3 class="sec">Übungsart</h3>
+    <h3 class="sec">Art des Gesprächs</h3>
     <div class="modes" id="modeRow"></div>
-    <div class="note" id="noKey" hidden style="margin-top:6px;">🔑 Für das freie Gespräch einen KI-Schlüssel unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> eintragen. Geführte Lektionen gehen auch ohne.</div>
+    <div class="note" id="noKey" hidden style="margin-top:6px;">🔑 Für freie und Lern-Gespräche einen KI-Schlüssel unter <a href="Einstellungen_Setup.html">AI Config &amp; Settings</a> eintragen. Geführte Lektionen gehen auch ohne.</div>
     <h3 class="sec">Dein Tutor</h3>
     <div class="tutors" id="tutorList"></div>
     <h3 class="sec">Dein Lernpfad <span class="note" id="profileNote"></span> <button type="button" class="mini" id="editProfile">⚙️ ändern</button></h3>
     <div id="pathList"></div>
-    <h3 class="sec">Optionen</h3>
-    <div class="row">
-      <label class="chip"><input type="checkbox" id="optHands"> 🎧 Freihändig (Mikro startet automatisch)</label>
-      <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Tamil-Hilfen</label>
-      <label class="chip"><input type="checkbox" id="optVoice" checked> 🔊 Tutor spricht</label>
-      <label class="chip">Tempo <select id="optRate"><option value="0.8">langsam</option><option value="0.95" selected>normal</option><option value="1.05">schnell</option></select></label>
-    </div>
+    <h3 class="sec">Stimme, Avatar &amp; Spracherkennung</h3>
+    <div class="box"><div id="techSummary" class="note"></div><div style="margin-top:8px;"><button type="button" class="btn grey" data-open-settings="1">⚙ Anruf-Einstellungen</button></div></div>
   </div>
 
-  <!-- ============ CALL ============ -->
-  <div id="callView" hidden>
-    <div class="call">
-      <div class="screen">
-        <div class="top"><span class="live" id="callMode"></span><span id="callTitle"></span><span id="callTimer">00:00</span></div>
-        <div class="bigface" id="bigFace"></div>
-        <div class="state" id="callState"></div>
-        <div class="subtitle" id="subtitle"></div>
-        <div class="goalchips" id="goalChips"></div>
-      </div>
-      <div class="task" id="taskBox" hidden></div>
-      <div class="log" id="log"></div>
-      <div class="sugg" id="sugg" hidden></div>
-      <div class="interim" id="interim"></div>
-      <div class="typebar" id="typebar"><input id="input" placeholder="Auf Deutsch schreiben … (Enter)"><button type="button" class="btn" id="sendBtn">➤</button></div>
-      <div class="controls">
-        <button type="button" class="ctl" id="helpBtn"><span>💡</span>Hilfe</button>
-        <button type="button" class="ctl" id="trBtn"><span>🌐</span>Übersetzen</button>
-        <button type="button" class="mic" id="micBtn" title="Sprechen">🎙️</button>
-        <button type="button" class="ctl" id="typeBtn"><span>⌨️</span>Tippen</button>
-        <button type="button" class="ctl" id="howBtn"><span>🇬🇧</span>Wie sage ich?</button>
-        <button type="button" class="ctl end" id="endBtn"><span>📞</span>Beenden</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ REPORT ============ -->
   <div id="reportView" hidden><div class="box" id="report"></div></div>
 
-  <p class="note" style="text-align:center; margin-top:18px;">Geführte Lektionen: Dialoge KI-unterstützt geschrieben und geprüft 🤖. Freies Gespräch: Antworten, Korrekturen und
-    Übersetzungen kommen live von der KI deiner Wahl und können Fehler enthalten. Korrekturen landen im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a>.</p>
+  <p class="note" style="text-align:center; margin-top:18px;">Geführte Lektionen: Dialoge KI-unterstützt geschrieben und geprüft 🤖. KI-Gespräche: Antworten, Korrekturen und Übersetzungen kommen
+    live von der KI deiner Wahl und können Fehler enthalten. Schlüssel bleiben nur in diesem Browser.</p>
 </div>
 
+<!-- ================= VIDEO CALL ================= -->
+<div class="vc" id="callView" hidden role="dialog" aria-label="Videoanruf mit dem Tutor">
+  <div class="vc-main">
+    <div class="vc-stage">
+      <div class="vc-avatar" id="avatarHost"></div>
+      <video class="vc-self" id="selfView" autoplay muted playsinline hidden></video>
+      <div class="vc-top"><span class="vc-chip" id="modeChip"></span><span class="ttl" id="callTitle"></span><span class="vc-chip" id="callTimer">00:00</span></div>
+      <div class="vc-status" id="statusPill" data-s="CONNECTING" role="status" aria-live="polite"><i></i><span id="statusText">Verbinde …</span><span class="vc-meter" id="meter" hidden><b></b><b></b><b></b><b></b></span></div>
+      <div class="vc-notice" id="notice" hidden role="alert"><span id="noticeText"></span><button type="button" id="noticeRetry" hidden>Erneut versuchen</button><button type="button" id="noticeClose" aria-label="Hinweis schließen">✕</button></div>
+      <div class="vc-task" id="taskBox" hidden></div>
+      <div class="vc-toast" id="toast" hidden></div>
+      <div class="vc-caps"><div class="cap-ai" id="capAI"></div><div class="cap-user" id="capUser"></div></div>
+    </div>
+    <div class="vc-controls" role="toolbar" aria-label="Anruf-Steuerung">
+      <button type="button" class="vcb mic" id="micBtn" aria-pressed="false" aria-label="Mikrofon stummschalten">🎙️<span class="lbl">Mikro</span></button>
+      <button type="button" class="vcb" id="spkBtn" aria-pressed="false" aria-label="Tutor stumm">🔊<span class="lbl">Ton</span></button>
+      <button type="button" class="vcb" id="pauseBtn" aria-pressed="false" aria-label="Pause">⏸<span class="lbl">Pause</span></button>
+      <button type="button" class="vcb" id="logBtn" aria-pressed="false" aria-label="Verlauf und Schreiben">💬<span class="lbl">Verlauf</span></button>
+      <button type="button" class="vcb" id="setBtn" aria-label="Einstellungen">⚙<span class="lbl">Einstellungen</span></button>
+      <button type="button" class="vcb end" id="endBtn" aria-label="Anruf beenden">📞<span class="lbl">Beenden</span></button>
+    </div>
+  </div>
+  <aside class="vc-drawer" id="drawer" hidden aria-label="Gesprächsverlauf">
+    <div class="vc-dh"><span>💬 Verlauf</span><span><button type="button" class="mini" id="helpBtn">💡 Was kann ich sagen?</button> <button type="button" class="mini" id="drawerClose" aria-label="Verlauf schließen">✕</button></span></div>
+    <div class="vc-log" id="log"></div>
+    <div class="vc-help" id="help" hidden></div>
+    <div class="vc-input"><input id="input" placeholder="Auf Deutsch schreiben … (Enter)" aria-label="Nachricht schreiben"><button type="button" id="sendBtn" aria-label="Senden">➤</button></div>
+  </aside>
+</div>
+<div class="pop" id="wordPop" hidden></div>
+
+<!-- ================= SETTINGS ================= -->
+<div class="vc-sheet" id="settingsSheet" hidden role="dialog" aria-label="Anruf-Einstellungen"><div>
+  <div class="row" style="justify-content:space-between;"><h2 style="margin:0; font-size:19px;">⚙ Anruf-Einstellungen</h2><button type="button" class="mini" id="setClose">✕ Schließen</button></div>
+  <div class="set-row"><label>Gesprächsart (KI)</label><div class="seg" id="setConv"></div><div class="caps">Frei: fließendes Gespräch, kaum Korrekturen. Lernen: mehr Hilfe, Korrekturen, Wörter, Aussprache-Übungen.</div></div>
+  <div class="set-row"><label>Niveau</label><div class="seg" id="setLevel"></div></div>
+  <div class="set-row"><label>Stimme des Tutors</label><div class="seg" id="setVoice"></div><div class="caps" id="voiceCaps"></div></div>
+  <div class="set-row" id="rowOpenAI"><label for="keyOpenAI">OpenAI-Schlüssel (Stimme / Spracherkennung)</label><input type="password" id="keyOpenAI" autocomplete="off" placeholder="leer = Schlüssel aus AI Config (OpenAI) verwenden"></div>
+  <div class="set-row" id="rowEleven"><label for="keyEleven">ElevenLabs-Schlüssel</label><input type="password" id="keyEleven" autocomplete="off"><input type="text" id="voiceEleven" placeholder="Stimmen-ID (leer = Standardstimme des Tutors)"></div>
+  <div class="set-row"><label>Avatar</label><div class="seg" id="setAvatar"></div><div class="caps" id="avatarCaps"></div></div>
+  <div class="set-row" id="rowSimli"><label for="keySimli">Simli-Schlüssel &amp; Face-ID</label><input type="password" id="keySimli" autocomplete="off"><input type="text" id="faceSimli" placeholder="Face-ID aus dem Simli-Dashboard"></div>
+  <div class="set-row"><label>Spracherkennung</label><div class="seg" id="setSTT"></div><div class="caps" id="sttCaps"></div></div>
+  <div class="set-row"><label>Weiteres</label><div class="row">
+    <label class="chip"><input type="checkbox" id="optSelf"> 📷 Mich selbst sehen</label>
+    <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Tamil-Hilfen</label>
+    <label class="chip"><input type="checkbox" id="optCaps" checked> 💬 Untertitel</label></div>
+    <div class="caps">🎧 Mit Kopfhörern klappt das Unterbrechen am besten (kein Echo). Schlüssel werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter gesendet.</div></div>
+  <div class="row" style="margin-top:12px;"><button type="button" class="btn" id="setTest">🔍 Verbindungen testen</button><span class="note" id="testOut"></span></div>
+  <div class="note" id="latencyOut" style="margin-top:8px;"></div>
+</div></div>
+
 <script>
-/* KI-Sprechpartner v2 (Tasks 46/47): Praktika-style speaking tutor.
-   - 6 animated tutors (SVG faces that blink and move the mouth while the browser voice speaks)
-   - Guided lessons (js/tutor-scripts.js, no AI needed): tutor line → task → the learner speaks; matched against 3 model
-     answers word by word (pronunciation score); help shows the answers
-   - Free AI conversation (dcCallAI, key from AI Config & Settings): corrections with EN + Tamil, suggestions, goals
-   - Learning path from a short onboarding (goal, level, minutes/day), streak, daily minutes, report, words → flashcards */
+/* KI-Sprechpartner v3 (Task 48): real-time conversational video call.
+   Page = content + learning layer (missions, guided scripts, prompts, corrections, pronunciation, report).
+   Engine = js/call/*: state machine, VAD/STT turn-taking, barge-in, streaming LLM → TTS → avatar (see PROJECT_KNOWLEDGE). */
 const TUTORS = [
-  { id: 'lena', name: 'Lena', role: 'Lehrerin aus München', en: 'patient teacher — slow, clear, lots of praise',
+  { id: 'lena', name: 'Lena', role: 'Lehrerin aus München', en: 'patient teacher — clear, lots of praise', gender: 'f',
     look: { skin: '#f2c9a5', hair: '#8b5a2b', style: 'long', shirt: '#2563eb', glasses: true },
-    style: 'You are Lena, a warm, patient German teacher from Munich. You speak slowly and clearly, praise effort, and keep things simple.' },
-  { id: 'priya', name: 'Priya', role: 'aus Chennai, lebt in Stuttgart', en: 'nurse from Chennai — knows how Tamil speakers think',
+    openaiVoice: 'coral', elevenVoice: 'EXAVITQu4vr4xnSDxMaL', voiceStyle: 'Voice: a warm, patient female German teacher in her thirties from Munich.',
+    style: 'You are Lena, a warm, patient German teacher from Munich. You explain simply, praise effort ("Sehr gut!", "Genau!"), and stay calm when the learner struggles.' },
+  { id: 'priya', name: 'Priya', role: 'aus Chennai, lebt in Stuttgart', en: 'nurse from Chennai — knows how Tamil speakers think', gender: 'f',
     look: { skin: '#b07a52', hair: '#1c1c1c', style: 'bun', shirt: '#db2777', bindi: true },
-    style: 'You are Priya, a friendly nurse from Chennai who has lived in Stuttgart for 8 years and learned German herself. You encourage the learner, and in why_ta you compare with Tamil.' },
-  { id: 'jonas', name: 'Jonas', role: 'Kollege aus Berlin', en: 'casual colleague — natural spoken German, humour',
+    openaiVoice: 'shimmer', elevenVoice: 'XrExE9yKIg1WjnnlVkGX', voiceStyle: 'Voice: a friendly, encouraging woman in her thirties who speaks fluent standard German.',
+    style: 'You are Priya, a friendly nurse from Chennai who has lived in Stuttgart for 8 years and learned German herself. You encourage ("Das kenne ich, das war für mich auch schwer!") and in why_ta you compare with Tamil.' },
+  { id: 'jonas', name: 'Jonas', role: 'Kollege aus Berlin', en: 'casual colleague — natural spoken German, humour', gender: 'm',
     look: { skin: '#f5d0b0', hair: '#d4a017', style: 'short', shirt: '#16a34a', beard: true },
-    style: 'You are Jonas, a friendly, relaxed colleague from Berlin in his late twenties. You use natural everyday spoken German (but correct) and a bit of humour.' },
-  { id: 'weber', name: 'Herr Weber', role: 'Beamter / Prüfer', en: 'formal official — Sie-form, exam style (telc/Goethe)',
+    openaiVoice: 'ash', elevenVoice: 'ErXwobaYiN019PkySvjV', voiceStyle: 'Voice: a relaxed, friendly man in his late twenties from Berlin, casual and upbeat.',
+    style: 'You are Jonas, a friendly, relaxed colleague from Berlin in his late twenties. You use natural spoken German (correct, with "na klar", "echt?", "cool") and a bit of humour.' },
+  { id: 'weber', name: 'Herr Weber', role: 'Beamter / Prüfer', en: 'formal official — Sie-form, exam style (telc/Goethe)', gender: 'm',
     look: { skin: '#eac0a0', hair: '#9ca3af', style: 'side', shirt: '#334155', glasses: true, tie: true },
+    openaiVoice: 'onyx', elevenVoice: 'pNInz6obpgDQGcFmaJgB', voiceStyle: 'Voice: a polite, formal man in his fifties, calm, precise and neutral.',
     style: 'You are Herr Weber, a polite but formal German official. You always use the Sie-form and speak like an examiner in a telc/Goethe oral exam.' },
-  { id: 'hilde', name: 'Oma Hilde', role: 'Rentnerin aus Hamburg', en: 'kind grandma — slow, warm, everyday sayings',
+  { id: 'hilde', name: 'Oma Hilde', role: 'Rentnerin aus Hamburg', en: 'kind grandma — slow, warm, everyday sayings', gender: 'f',
     look: { skin: '#f3d3bd', hair: '#e5e7eb', style: 'curly', shirt: '#7c3aed', glasses: true },
-    style: 'You are Hilde, a kind retired grandmother from Hamburg. You speak slowly and warmly, like to use simple everyday sayings and are very patient.' },
-  { id: 'max', name: 'Max', role: 'Student & Barista', en: 'young student — fast, casual, du-form',
+    openaiVoice: 'sage', elevenVoice: '21m00Tcm4TlvDq8ikWAM', voiceStyle: 'Voice: a kind, warm grandmother in her seventies from Hamburg, gentle and unhurried.',
+    style: 'You are Hilde, a kind retired grandmother from Hamburg. You speak warmly, like simple everyday sayings ("Übung macht den Meister!") and are very patient.' },
+  { id: 'max', name: 'Max', role: 'Student & Barista', en: 'young student — fast, casual, du-form', gender: 'm',
     look: { skin: '#8d5a3c', hair: '#2b1b12', style: 'curly', shirt: '#ea580c' },
+    openaiVoice: 'verse', elevenVoice: 'TxGEqnHWrfWFTfGW9XjX', voiceStyle: 'Voice: an energetic, cheerful 22-year-old student, quick but clear.',
     style: 'You are Max, a 22-year-old student and barista in Cologne. You speak casually (du-form), energetic and friendly, but still clear and correct.' }
 ];
 const MISSIONS = [
@@ -259,62 +311,44 @@ const store = {
   get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 };
+const LSs = (k, v) => { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} };
+const LSg = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
 const aiOn = () => typeof dcAIConfigured === 'function' && dcAIConfigured();
 const today = () => new Date().toISOString().slice(0, 10);
-let ST = Object.assign({ tutor: 'lena', level: 'A1', mode: 'guided', done: {}, sessions: 0, minutes: 0, days: {}, profile: null }, store.get('dc_tutor_v1', {}));
-if (ST.tutor && !TUTORS.some(t => t.id === ST.tutor)) ST.tutor = 'lena';
-let S = null;
 const $ = id => document.getElementById(id);
-function saveST() { store.set('dc_tutor_v1', ST); }
-function show(view) { ['onbView', 'homeView', 'callView', 'reportView'].forEach(v => $(v).hidden = v !== view); window.scrollTo({ top: 0 }); }
-
-/* ---------------- avatars ---------------- */
-function avatarSVG(t, cls) {
-  const L = t.look, sk = L.skin, hr = L.hair;
-  const hairBack = L.style === 'long' ? `<path d="M52 92 Q48 40 100 36 Q152 40 148 92 L152 160 Q100 150 48 160 Z" fill="${hr}"/>`
-    : L.style === 'bun' ? `<circle cx="100" cy="30" r="18" fill="${hr}"/>` : '';
-  const hairTop = L.style === 'curly' ? `<g fill="${hr}">${[62, 76, 90, 104, 118, 132].map((x, i) => `<circle cx="${x + 4}" cy="${52 - (i % 2) * 6}" r="16"/>`).join('')}</g>`
-    : L.style === 'side' ? `<path d="M58 78 Q60 42 102 42 Q140 42 144 70 Q118 56 84 64 Q70 68 58 84 Z" fill="${hr}"/>`
-    : L.style === 'short' ? `<path d="M58 80 Q58 40 100 40 Q142 40 142 80 Q126 58 100 58 Q74 58 58 80 Z" fill="${hr}"/>`
-    : `<path d="M56 86 Q56 40 100 40 Q144 40 144 86 Q138 60 100 58 Q62 60 56 86 Z" fill="${hr}"/>`;
-  return `<svg viewBox="0 0 200 200" class="av ${cls || ''}" role="img" aria-label="${esc(t.name)}">
-    ${hairBack}
-    <path d="M40 200 Q44 150 100 146 Q156 150 160 200 Z" fill="${L.shirt}"/>
-    ${L.tie ? '<path d="M96 150 L104 150 L108 186 L100 196 L92 186 Z" fill="#b91c1c"/>' : ''}
-    <rect x="88" y="128" width="24" height="24" rx="8" fill="${sk}"/>
-    <g class="head">
-      <ellipse cx="100" cy="92" rx="44" ry="50" fill="${sk}"/>
-      <ellipse cx="56" cy="96" rx="7" ry="11" fill="${sk}"/><ellipse cx="144" cy="96" rx="7" ry="11" fill="${sk}"/>
-      ${hairTop}
-      <ellipse cx="82" cy="92" rx="6" ry="7" fill="#1f2937"/><ellipse cx="118" cy="92" rx="6" ry="7" fill="#1f2937"/>
-      <circle cx="84" cy="90" r="2" fill="#fff"/><circle cx="120" cy="90" r="2" fill="#fff"/>
-      <g class="lids" fill="${sk}"><rect x="74" y="84" width="16" height="16" rx="6"/><rect x="110" y="84" width="16" height="16" rx="6"/></g>
-      <path d="M74 78 Q82 73 90 77" stroke="${hr === '#e5e7eb' ? '#9ca3af' : hr}" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <path d="M110 77 Q118 73 126 78" stroke="${hr === '#e5e7eb' ? '#9ca3af' : hr}" stroke-width="3" fill="none" stroke-linecap="round"/>
-      ${L.glasses ? '<g fill="none" stroke="#374151" stroke-width="2.5"><circle cx="82" cy="92" r="12"/><circle cx="118" cy="92" r="12"/><path d="M94 92 L106 92"/></g>' : ''}
-      ${L.bindi ? '<circle cx="100" cy="74" r="3" fill="#dc2626"/>' : ''}
-      <path d="M100 98 Q96 110 101 112" stroke="#00000033" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <circle cx="74" cy="112" r="7" fill="#f87171" opacity=".18"/><circle cx="126" cy="112" r="7" fill="#f87171" opacity=".18"/>
-      ${L.beard ? `<path d="M64 110 Q70 146 100 146 Q130 146 136 110 Q124 132 100 132 Q76 132 64 110 Z" fill="${hr}" opacity=".85"/>` : ''}
-      <ellipse class="mouth" cx="100" cy="124" rx="11" ry="5" fill="#7f1d1d"/>
-      <path d="M89 122 Q100 128 111 122" stroke="#7f1d1d" stroke-width="2" fill="none" stroke-linecap="round"/>
-    </g>
-  </svg>`;
-}
+let ST = Object.assign({ tutor: 'lena', level: 'A1', mode: 'guided', done: {}, sessions: 0, minutes: 0, days: {}, profile: null }, store.get('dc_tutor_v1', {}));
+if (ST.mode === 'ai') ST.mode = 'learning';
+if (!TUTORS.some(t => t.id === ST.tutor)) ST.tutor = 'lena';
+let CS = Object.assign({ conv: 'learning', voice: 'auto', avatar: 'illustrated', stt: 'browser', selfView: false, tamil: true, captions: true, simliFace: '' }, store.get('dc_call_settings_v1', {}));
+const saveST = () => store.set('dc_tutor_v1', ST), saveCS = () => store.set('dc_call_settings_v1', CS);
 const tutorOf = id => TUTORS.find(t => t.id === id) || TUTORS[0];
+const thumb = t => DCCall.avatarThumb(t);
+let S = null, ENG = null;
+function show(view) { ['onbView', 'homeView', 'reportView'].forEach(v => $(v).hidden = v !== view); window.scrollTo({ top: 0 }); }
 
-/* ---------------- onboarding ---------------- */
+/* resolved providers ("auto" = best available with the keys that exist) */
+function voiceChoice() {
+  if (CS.voice === 'auto') return DCCall.keys.elevenlabs() ? 'elevenlabs' : DCCall.keys.openai() ? 'openai' : 'browser';
+  return CS.voice;
+}
+function techSummary() {
+  const v = voiceChoice(), b = new DCCall.TTS.browser();
+  const vt = v === 'elevenlabs' ? 'ElevenLabs (natürlich, mit Lippen-Timing)' : v === 'openai' ? 'OpenAI gpt-4o-mini-tts (natürlich)' : `Browser-Stimme${b.isNatural() ? ' (neuronal)' : ' (Standard — klingt maschinell)'}`;
+  const av = CS.avatar === 'simli' && DCCall.keys.simli() && CS.simliFace ? 'fotorealistisch (Simli, Lippen-Sync vom Anbieter)' : 'illustriert (Lippen folgen dem echten Audiosignal)';
+  const stt = CS.stt === 'openai' && DCCall.keys.openai() ? 'OpenAI Transkription' : DCCall.STT.browser.supported() ? 'Browser (Echtzeit)' : 'keine — bitte Chrome/Edge/Safari oder OpenAI wählen';
+  return `🔊 Stimme: <b>${vt}</b> · 🎭 Avatar: <b>${av}</b> · 🎙️ Spracherkennung: <b>${stt}</b>`;
+}
+
+/* ---------------- onboarding + home (learning path) ---------------- */
 let ONB = { goal: 'alltag', level: 'A1', min: 10 };
 function renderOnb() {
   $('onbGoal').innerHTML = GOALS.map(([k, l]) => `<button type="button" class="chip ${ONB.goal === k ? 'active' : ''}" data-onbgoal="${k}">${l}</button>`).join('');
   $('onbLevel').innerHTML = LEVELS.map(l => `<button type="button" class="chip ${ONB.level === l ? 'active' : ''}" data-onblevel="${l}">${l}</button>`).join('');
   $('onbMin').innerHTML = [5, 10, 15, 20].map(m => `<button type="button" class="chip ${ONB.min === m ? 'active' : ''}" data-onbmin="${m}">${m} Min.</button>`).join('');
 }
-
-/* ---------------- home ---------------- */
 function streak() {
   let n = 0; const d = new Date();
-  if (!(ST.days[today()] > 0)) d.setDate(d.getDate() - 1);            // today not practised yet: count up to yesterday
+  if (!(ST.days[today()] > 0)) d.setDate(d.getDate() - 1);
   for (;;) { const k = d.toISOString().slice(0, 10); if (ST.days[k] > 0) { n++; d.setDate(d.getDate() - 1); } else break; }
   return n;
 }
@@ -325,221 +359,184 @@ function pathMissions() {
 }
 function recommended() { const p = pathMissions(); return p.find(m => !ST.done[m.id] && (ST.mode !== 'guided' || SCRIPTS[m.id])) || p[0]; }
 function renderHome() {
+  if (ST.mode !== 'guided' && !aiOn()) ST.mode = 'guided';
   const doneN = Object.values(ST.done).reduce((a, b) => a + b, 0), todayMin = ST.days[today()] || 0, goalMin = ST.profile ? ST.profile.min : 10;
   $('stats').innerHTML = `<div class="stat"><b>🔥 ${streak()}</b><span>Tage in Folge</span></div>
     <div class="stat"><b>${Math.round(todayMin)} / ${goalMin}</b><span>Minuten heute</span><div class="dayring"><i style="width:${Math.min(100, 100 * todayMin / goalMin)}%"></i></div></div>
-    <div class="stat"><b>🏅 ${doneN}</b><span>Lektionen geschafft</span></div>
+    <div class="stat"><b>🏅 ${doneN}</b><span>Gespräche geschafft</span></div>
     <div class="stat"><b>📓 ${store.get('de_coach_vault', []).length}</b><span>im Fehler-Tagebuch</span></div>`;
   const m = recommended(), t = tutorOf(ST.tutor);
-  $('todayCard').innerHTML = `<div class="face">${avatarSVG(t)}</div><div><small style="margin:0;">Heute für dich · ${esc(t.name)} wartet</small>
+  $('todayCard').innerHTML = `<div class="face">${thumb(t)}</div><div><small style="margin:0;">Heute für dich · ${esc(t.name)} wartet</small>
     <b>${m.ic} ${esc(m.de)}</b><small>🇬🇧 ${esc(m.en)} · ${m.lv} · ${m.goals.length} Ziele</small>
-    <div class="row"><button type="button" class="btn" data-start="${m.id}">▶ Anruf starten</button>
-    ${ST.mode === 'guided' && aiOn() ? `<button type="button" class="btn ghost" data-startai="${m.id}">🤖 frei mit KI</button>` : ''}</div></div>`;
-  $('modeRow').innerHTML = `<button type="button" class="${ST.mode === 'guided' ? 'active' : ''}" data-mode="guided"><b>🎓 Geführte Lektion</b><small>Tutor spricht, du antwortest — mit Aufgabe, Hilfe und Aussprache-Punkten. Ohne KI, auch offline.</small></button>
-    <button type="button" class="${ST.mode === 'ai' ? 'active' : ''}" data-mode="ai" ${aiOn() ? '' : 'disabled'}><b>🤖 Freies Gespräch (KI)</b><small>Sag, was du willst — die KI antwortet in ihrer Rolle und korrigiert dich sofort.</small></button>`;
+    <div class="row"><button type="button" class="btn" data-start="${m.id}">📹 Anruf starten</button></div></div>`;
+  const md = (k, t1, t2, dis) => `<button type="button" class="${ST.mode === k ? 'active' : ''}" data-mode="${k}" ${dis ? 'disabled' : ''}><b>${t1}</b><small>${t2}</small></button>`;
+  $('modeRow').innerHTML = md('guided', '🎓 Geführte Lektion', 'Tutor führt dich mit Aufgaben, Modellsätzen und Aussprache-Punkten. Ohne KI, auch offline.')
+    + md('free', '🗣️ Freies Gespräch (KI)', 'Einfach reden. Wenige Korrekturen — Selbstvertrauen zuerst.', !aiOn())
+    + md('learning', '📘 Lern-Gespräch (KI)', 'Gespräch mit Tutor-Hilfe: sanfte Korrekturen, Wörter, Aussprache.', !aiOn());
   $('noKey').hidden = aiOn();
-  $('tutorList').innerHTML = TUTORS.map(x => `<button type="button" class="tutor ${ST.tutor === x.id ? 'active' : ''}" data-tutor="${x.id}">${avatarSVG(x)}<b>${esc(x.name)}</b><small>${esc(x.role)}</small><small>🇬🇧 ${esc(x.en)}</small></button>`).join('');
+  $('tutorList').innerHTML = TUTORS.map(x => `<button type="button" class="tutor ${ST.tutor === x.id ? 'active' : ''}" data-tutor="${x.id}">${thumb(x)}<b>${esc(x.name)}</b><small>${esc(x.role)}</small><small>🇬🇧 ${esc(x.en)}</small></button>`).join('');
   const p = ST.profile || { goal: 'alltag', min: 10 };
   $('profileNote').textContent = `(${(GOALS.find(g => g[0] === p.goal) || GOALS[0])[1]} · ${ST.level} · ${p.min} Min./Tag)`;
   const byLv = {}; pathMissions().forEach(mm => { (byLv[mm.lv] = byLv[mm.lv] || []).push(mm); });
   $('pathList').innerHTML = [...LEVELS, 'alle'].filter(l => byLv[l]).map(l => `<div class="path-level">${l === 'alle' ? '🌟 Für alle Niveaus' : l}${l === ST.level ? ' ← dein Niveau' : ''}</div>
     <div class="missions">${byLv[l].map(mm => `<button type="button" class="mission" data-start="${mm.id}">${ST.done[mm.id] ? `<span class="done">✓ ${ST.done[mm.id]}×</span>` : ''}
       <span class="ic">${mm.ic}</span><b>${esc(mm.de)}</b><small>🇬🇧 ${esc(mm.en)}</small>
-      <small>${SCRIPTS[mm.id] ? '🎓 geführt' : ''}${SCRIPTS[mm.id] && aiOn() ? ' · ' : ''}${aiOn() ? '🤖 frei' : ''}</small></button>`).join('')}</div>`).join('');
+      <small>${SCRIPTS[mm.id] ? '🎓 geführt' : ''}${SCRIPTS[mm.id] && aiOn() ? ' · ' : ''}${aiOn() ? '🤖 KI' : ''}</small></button>`).join('')}</div>`).join('');
+  $('techSummary').innerHTML = techSummary();
 }
 
-/* ---------------- call ---------------- */
-let timerId = null;
-function startCall(id, mode) {
+/* ---------------- settings sheet ---------------- */
+function seg(id, opts, cur, key) {
+  $(id).innerHTML = opts.map(([k, l, dis]) => `<button type="button" class="${cur === k ? 'active' : ''}" data-set="${key}" data-val="${k}" ${dis ? 'disabled' : ''}>${l}</button>`).join('');
+}
+function renderSettings() {
+  seg('setConv', [['free', '🗣️ Frei'], ['learning', '📘 Lernen']], CS.conv, 'conv');
+  seg('setLevel', LEVELS.map(l => [l, l]), ST.level, 'level');
+  seg('setVoice', [['auto', 'Automatisch'], ['openai', 'OpenAI'], ['elevenlabs', 'ElevenLabs'], ['browser', 'Browser']], CS.voice, 'voice');
+  seg('setAvatar', [['illustrated', 'Illustriert'], ['simli', 'Fotorealistisch (Simli)']], CS.avatar, 'avatar');
+  seg('setSTT', [['browser', 'Browser (Echtzeit)', !DCCall.STT.browser.supported()], ['openai', 'OpenAI']], CS.stt, 'stt');
+  const b = new DCCall.TTS.browser();
+  $('voiceCaps').textContent = `Aktiv: ${({ openai: 'OpenAI', elevenlabs: 'ElevenLabs', browser: 'Browser-Stimme' })[voiceChoice()]}. OpenAI/ElevenLabs = natürliche, gestreamte KI-Stimme; Browser = ${b.voice ? b.voice.name : 'keine deutsche Stimme'}${b.isNatural() ? ' (neuronal)' : ' (klingt maschinell)'}. Tempo passt sich dem Niveau an.`;
+  $('avatarCaps').textContent = CS.avatar === 'simli'
+    ? 'Echtes Gesicht mit Lippen-Synchronisation, gerendert von Simli aus der Stimme (braucht OpenAI- oder ElevenLabs-Stimme). Kosten laut Simli-Tarif.'
+    : 'Gezeichneter Tutor: Mund folgt dem echten Audio (mit ElevenLabs: Buchstaben-genaues Timing), Mimik, Blinzeln, Blickkontakt. Kein Foto-Realismus.';
+  $('sttCaps').textContent = DCCall.STT.browser.supported() ? 'Browser: Echtzeit-Text beim Sprechen (Chrome schickt das Audio an Google). OpenAI: genauer, auch in Firefox, Text kommt nach dem Satz.' : 'Dieser Browser hat keine Echtzeit-Spracherkennung — OpenAI wählen oder schreiben.';
+  $('keyOpenAI').value = LSg('dc_call_openai_key'); $('keyEleven').value = LSg('dc_call_eleven_key'); $('voiceEleven').value = LSg('dc_call_eleven_voice');
+  $('keySimli').value = LSg('dc_call_simli_key'); $('faceSimli').value = CS.simliFace || '';
+  $('rowEleven').hidden = !['elevenlabs', 'auto'].includes(CS.voice); $('rowSimli').hidden = CS.avatar !== 'simli';
+  $('optSelf').checked = CS.selfView; $('optTa').checked = CS.tamil; $('optCaps').checked = CS.captions;
+  const m = ENG ? ENG.metrics : store.get('dc_call_latency', []);
+  const ok = m.filter(x => x.endToFirstAudio != null);
+  $('latencyOut').textContent = ok.length ? `⏱ Antwortzeit (Ende deines Satzes → erster Ton), letzte ${ok.length}: Ø ${Math.round(ok.reduce((a, x) => a + x.endToFirstAudio, 0) / ok.length)} ms` : '';
+}
+function saveKeys() {
+  LSs('dc_call_openai_key', $('keyOpenAI').value.trim()); LSs('dc_call_eleven_key', $('keyEleven').value.trim()); LSs('dc_call_eleven_voice', $('voiceEleven').value.trim());
+  LSs('dc_call_simli_key', $('keySimli').value.trim()); CS.simliFace = $('faceSimli').value.trim(); saveCS();
+}
+function openSettings() { renderSettings(); $('settingsSheet').hidden = false; }
+function closeSettings() { saveKeys(); $('settingsSheet').hidden = true; if (!S) renderHome(); }
+async function testConnections() {
+  saveKeys(); const out = $('testOut'); out.textContent = '⏳ …'; const r = [];
+  const v = voiceChoice();
+  if (v !== 'browser') {
+    try { const t = new DCCall.TTS[v](); let n = 0; for await (const ch of t.stream('Hallo!', { signal: AbortSignal.timeout(12000), level: ST.level, persona: tutorOf(ST.tutor) })) n += ch.samples.length; r.push(n ? `🔊 ${v} ✓` : `🔊 ${v}: kein Audio`); }
+    catch (e) { r.push(`🔊 ${v} ✗ (${e.message})`); }
+  } else r.push('🔊 Browser-Stimme ✓');
+  if (CS.avatar === 'simli') {
+    try { await new Promise((res, rej) => { if (window.SimliSDK) return res(); const s = document.createElement('script'); s.src = 'js/vendor/simli-client.bundle.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+      const tk = await SimliSDK.generateSimliSessionToken({ apiKey: DCCall.keys.simli(), config: { faceId: CS.simliFace, handleSilence: true, maxSessionLength: 60, maxIdleTime: 30, model: 'fasttalk' } });
+      r.push(tk && tk.session_token ? '🎭 Simli ✓' : '🎭 Simli: kein Token'); }
+    catch (e) { r.push('🎭 Simli ✗ (' + String(e && e.message || e).slice(0, 80) + ')'); }
+  }
+  if (aiOn()) { try { await dcCallAI([{ role: 'user', content: 'Antworte nur mit: ok' }], { signal: AbortSignal.timeout(12000) }); r.push('🤖 KI ✓'); } catch (e) { r.push('🤖 KI ✗ (' + e.message.slice(0, 60) + ')'); } }
+  out.textContent = r.join(' · ');
+}
+
+/* ---------------- call UI helpers ---------------- */
+const STATUS = { IDLE: 'Bereit', CONNECTING: 'Verbinde …', LISTENING: 'Hört zu', USER_SPEAKING: 'Du sprichst …', PROCESSING: 'Denkt nach …', AI_SPEAKING: 'Spricht',
+  INTERRUPTED: 'Unterbrochen — hört zu', PAUSED: 'Pausiert', RECONNECTING: 'Verbindung wird wiederhergestellt …', ERROR: 'Problem — siehe Hinweis', SESSION_ENDED: 'Beendet' };
+function uiState(to) {
+  $('statusPill').dataset.s = to;
+  $('statusText').textContent = (to === 'AI_SPEAKING' || to === 'PROCESSING' ? tutorOf(S.tutor).name + ' · ' : '') + STATUS[to];
+  $('meter').hidden = !['LISTENING', 'USER_SPEAKING'].includes(to);
+  $('pauseBtn').setAttribute('aria-pressed', to === 'PAUSED'); $('pauseBtn').firstChild.textContent = to === 'PAUSED' ? '▶' : '⏸';
+  if (to === 'LISTENING') $('capUser').textContent = '';
+}
+function uiLevel(lv) { const bars = $('meter').children; for (let i = 0; i < bars.length; i++) bars[i].style.height = (3 + Math.max(0, lv * 12 - i * 2)) + 'px'; }
+let noticeRetry = null;
+function uiNotice(msg, kind, retry) {
+  if (!msg) { $('notice').hidden = true; return; }
+  $('notice').className = 'vc-notice ' + (kind || 'warn'); $('noticeText').textContent = msg; $('notice').hidden = false;
+  noticeRetry = retry || null; $('noticeRetry').hidden = !retry;
+  if (kind === 'warn') { clearTimeout(uiNotice.t); uiNotice.t = setTimeout(() => { if ($('noticeText').textContent === msg) $('notice').hidden = true; }, 9000); }
+}
+function toast(html, ms) { const t = $('toast'); t.innerHTML = html; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, ms || 6000); }
+function wordsHTML(text) { return esc(text).replace(/([A-Za-zÄÖÜäöüß]{2,})/g, '<span class="w" data-word="$1">$1</span>'); }
+function logEl(html, cls) { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; $('log').appendChild(d); $('log').scrollTop = $('log').scrollHeight; return d; }
+/* current tutor message in the transcript grows sentence by sentence as the tutor speaks */
+function aiCaption(text, opts) {
+  if (CS.captions) $('capAI').innerHTML = esc(text) + (opts && opts.tr && S.showTr ? `<span class="tr">🇬🇧 ${esc(opts.tr)}</span>` : '');
+  if (!S.aiEntry) {
+    S.aiEntry = logEl(`<div class="who">${esc(tutorOf(S.tutor).name)}</div><div class="txt"></div><div class="tools"></div>`, 'tm ai'); S.aiEntry.raw = '';
+  }
+  S.aiEntry.raw = (S.aiEntry.raw ? S.aiEntry.raw + ' ' : '') + text;
+  S.aiEntry.querySelector('.txt').innerHTML = wordsHTML(S.aiEntry.raw);
+}
+function closeAIEntry(tr, interrupted) {
+  const e = S.aiEntry; S.aiEntry = null; if (!e) return;
+  if (interrupted) e.querySelector('.txt').insertAdjacentHTML('beforeend', ' <span class="cut">— (unterbrochen)</span>');
+  e.querySelector('.tools').innerHTML = `<button type="button" class="mini" data-say="${esc(e.raw)}">🔊 nochmal</button><button type="button" class="mini" data-slow="${esc(e.raw)}">🐢</button>
+    <button type="button" class="mini" data-tr="1" ${tr ? `data-trtext="${esc(tr)}"` : ''}>🌐 übersetzen</button>`;
+}
+function userEntry(text) { return logEl(`<div class="who">Du</div>${wordsHTML(text)}`, 'tm me'); }
+
+/* ---------------- the call ---------------- */
+async function startCall(id, mode) {
   const mission = MISSIONS.find(m => m.id === id);
-  if (mode === 'guided' && !SCRIPTS[id]) mode = aiOn() ? 'ai' : null;
-  if (mode === 'ai' && !aiOn()) mode = SCRIPTS[id] ? 'guided' : null;
-  if (!mode) { alert('Für diese Lektion gibt es noch keine geführte Version — bitte einen KI-Schlüssel eintragen.'); return; }
-  S = { mode, mission, tutor: ST.tutor, level: ST.level, script: SCRIPTS[id], i: 0, tries: 0, history: [], goals: new Set(), corrections: [],
-    scores: [], helpUsed: 0, turns: 0, start: Date.now(), complete: false, practice: null, lastSugg: [], showTr: false };
+  mode = mode || ST.mode;
+  if (mode === 'guided' && !SCRIPTS[id]) mode = aiOn() ? 'learning' : null;
+  if (mode !== 'guided' && !aiOn()) mode = SCRIPTS[id] ? 'guided' : null;
+  if (!mode) { alert('Für dieses Gespräch braucht es einen KI-Schlüssel (AI Config & Settings).'); return; }
+  if (mode !== 'guided') CS.conv = mode;
+  S = { mode, mission, tutor: ST.tutor, script: SCRIPTS[id], i: 0, tries: 0, history: [], goals: new Set(), corrections: [], vocab: [],
+    scores: [], helpUsed: 0, turns: 0, start: Date.now(), complete: false, practice: null, lastSugg: [], showTr: false, aiEntry: null, interruptions: 0 };
   const t = tutorOf(S.tutor);
-  show('callView');
-  $('bigFace').innerHTML = avatarSVG(t);
-  $('callMode').textContent = mode === 'guided' ? '🎓 Geführte Lektion' : '🤖 Freies Gespräch';
-  $('callTitle').textContent = `${mission.ic} ${mission.de} · ${S.level}`;
-  $('log').innerHTML = ''; $('sugg').hidden = true; $('interim').textContent = ''; $('taskBox').hidden = true; $('subtitle').innerHTML = '';
-  $('howBtn').hidden = mode !== 'ai';
-  renderGoals();
-  clearInterval(timerId);
-  timerId = setInterval(() => { const s = Math.floor((Date.now() - S.start) / 1000); $('callTimer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }, 1000);
-  if (mode === 'guided') guidedTurn(); else aiTurn(null);
+  $('callView').hidden = false; document.body.style.overflow = 'hidden';
+  $('log').innerHTML = ''; $('capAI').textContent = ''; $('capUser').textContent = ''; $('help').hidden = true; $('taskBox').hidden = true; uiNotice('');
+  $('modeChip').textContent = mode === 'guided' ? '🎓 Geführt' : mode === 'free' ? '🗣️ Frei' : '📘 Lernen';
+  $('callTitle').textContent = `${mission.ic} ${mission.de} · ${ST.level} · ${t.name}`;
+  $('micBtn').setAttribute('aria-pressed', 'false'); $('spkBtn').setAttribute('aria-pressed', 'false');
+  if (window.innerWidth > 760) openDrawer(true);
+  clearInterval(startCall.timer);
+  startCall.timer = setInterval(() => { const s = Math.floor((Date.now() - S.start) / 1000); $('callTimer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }, 1000);
+  if (CS.selfView) startSelfView();
+  loadLexicon();                                           // for word look-ups + pronunciation hints (in the background)
+  ENG = new DCCall.ConversationEngine({
+    tutor: t, host: $('avatarHost'), level: () => ST.level,
+    settings: () => ({ voice: voiceChoice(), avatar: CS.avatar === 'simli' && DCCall.keys.simli() && CS.simliFace ? 'simli' : 'illustrated', stt: CS.stt, simliFace: CS.simliFace }),
+    sttPrompt: () => [mission.de, ...(S.script ? S.script.words.map(w => w.de) : [])].join(', '),
+    ui: { state: uiState, level: uiLevel, notice: uiNotice, captionUser: (t2) => { $('capUser').textContent = t2 ? 'Du: ' + t2 : ''; },
+      captionAI: aiCaption, metrics: (m, all) => store.set('dc_call_latency', all.slice(-20)),
+      interrupted: () => { S.interruptions++; closeAIEntry(null, true); } },
+    onUserTurn: (text, info) => onUserTurn(text, info)
+  });
+  try { await ENG.start(); } catch (e) { uiNotice('⚠️ ' + e.message, 'error'); return; }
+  if (mode === 'guided') ENG.tutorTurn(() => guidedTutorLine()); else ENG.tutorTurn(() => aiReply(null));
 }
-function renderGoals() {
-  $('goalChips').innerHTML = S.mission.goals.map((g, i) => `<span class="${S.goals.has(i) ? 'ok' : ''}">${S.goals.has(i) ? '✓' : '○'} ${esc(g)}</span>`).join('');
+async function startSelfView() {
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320 } });
+    S.selfStream = st; $('selfView').srcObject = st; $('selfView').hidden = false;
+  } catch (e) { uiNotice('📷 Kamera nicht erlaubt — der Anruf läuft ohne Selbstansicht.', 'warn'); }
 }
-function setState(txt) { $('callState').textContent = txt || ''; }
-function face() { return document.querySelector('#bigFace .av'); }
-function logBubble(html, cls) {
-  const d = document.createElement('div'); d.className = cls; d.innerHTML = html; $('log').appendChild(d);
-  $('log').scrollTop = $('log').scrollHeight; return d;
-}
-function tutorSays(de, en, ta, then) {
-  S.cur = { de, en, ta };
-  renderSubtitle();
-  logBubble(`${esc(de)}<div class="tools"><button type="button" data-say="${esc(de)}">🔊</button><button type="button" data-slow="${esc(de)}">🐢</button></div>`, 'msg ai');
-  speak(de, () => { setState('Du bist dran — 🎙️ drücken'); if (then) then(); });
-}
-function renderSubtitle() {
-  const c = S.cur || {};
-  $('subtitle').innerHTML = `${esc(c.de || '')}${S.showTr && (c.en || c.ta) ? `<div class="tr">🇬🇧 ${esc(c.en || '')}${c.ta && $('optTa').checked ? `<br><span lang="ta">🇮🇳 ${esc(c.ta)}</span>` : ''}</div>` : ''}`;
-}
-function autoMic() { if ($('optHands').checked && !S.complete) setTimeout(startMic, 250); }
+function stopSelfView() { if (S && S.selfStream) S.selfStream.getTracks().forEach(tr => tr.stop()); $('selfView').hidden = true; }
+function openDrawer(open) { $('drawer').hidden = !open; $('logBtn').setAttribute('aria-pressed', open); }
 
-/* ---- guided lesson ---- */
-function guidedTurn() {
-  const sc = S.script;
-  if (S.i >= sc.turns.length) {
-    S.complete = true; $('taskBox').hidden = true; $('sugg').hidden = true;
-    tutorSays(sc.end, sc.end_en, sc.end_ta, () => setTimeout(endCall, 900));
-    return;
-  }
-  const t = sc.turns[S.i]; S.tries = 0; S.helped = false;
-  $('sugg').hidden = true;
+async function onUserTurn(text, info) {
+  S.turns++;
+  userEntry(text);
+  $('capUser').textContent = 'Du: ' + text;
+  if (S.practice) return practiceTurn(text);
+  if (S.mode === 'guided') return guidedAnswer(text, info);
+  return aiReply(text, info);
+}
+
+/* ---- guided lesson (scripts, works offline) ---- */
+function renderTask() {
+  const t = S.script.turns[S.i]; if (!t) { $('taskBox').hidden = true; return; }
   $('taskBox').hidden = false;
-  $('taskBox').innerHTML = `🎯 <b>Deine Aufgabe:</b> ${esc(t.task_en)}${t.task_ta && $('optTa').checked ? `<div class="ta" lang="ta">🇮🇳 ${esc(t.task_ta)}</div>` : ''}`;
+  $('taskBox').innerHTML = `🎯 <b>${esc(t.task_en)}</b>${t.task_ta && CS.tamil ? `<div class="ta" lang="ta">${esc(t.task_ta)}</div>` : ''}
+    <div><button type="button" data-hint="1">💡 Vorschläge</button></div><div class="vc-opts" id="taskOpts" hidden></div>`;
+}
+async function guidedTutorLine() {
+  const sc = S.script, t = sc.turns[S.i];
+  if (!t) { S.complete = true; $('taskBox').hidden = true; await ENG.say(sc.end); closeAIEntry(sc.end_en); setTimeout(endCall, 700); return; }
+  S.tries = 0; S.helped = false; renderTask();
   S.lastSugg = t.options.map(o => o.de);
-  tutorSays(t.tutor, t.tutor_en, t.tutor_ta, autoMic);
+  await ENG.say(t.tutor, { tr: t.tutor_en });
+  closeAIEntry(t.tutor_en);
 }
-/* sample names in the model answers ("Ich heiße Arun") — the learner says their own name, so they don't count */
 const SAMPLE_NAMES = /\b(arun|priya|karthik|kumar|raman|meena|ravi|lakshmi)\b/gi;
-function guidedAnswer(text) {
-  const t = S.script.turns[S.i];
-  const best = t.options.map(o => ({ o, r: speechScore(o.de.replace(SAMPLE_NAMES, ' '), text) })).sort((a, b) => b.r.score - a.r.score)[0];
-  const words = best.r.words.map((w, k) => `<span class="${best.r.ok[k] ? 'ok-w' : 'no-w'}">${esc(w)}</span>`).join(' ');
-  S.tries++;
-  if (best.r.score >= 60) {
-    S.scores.push(best.r.score); S.turns++;
-    if (t.goal != null && t.goal >= 0) S.goals.add(t.goal);
-    if (S.helped) S.helpUsed++;
-    renderGoals();
-    logBubble(`${best.r.score >= 85 ? '🌟 Super!' : '✅ Gut!'} <b>${best.r.score}%</b> — ${words}${best.r.score < 100 ? `<div>Modell: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button></div>` : ''}
-      ${t.tip ? `<div class="note">💡 ${esc(t.tip)}</div>` : ''}`, 'fbk good');
-    S.i++; setTimeout(guidedTurn, 700);
-  } else if (S.tries < 2) {
-    logBubble(`🤔 Fast — <b>${best.r.score}%</b>. Versuch es noch einmal! Nah dran: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button>`, 'fbk bad');
-    showHelp(true); autoMic();
-  } else {
-    S.scores.push(best.r.score); S.turns++;
-    S.corrections.push({ original: text, corrected: best.o.de, why: t.tip || 'Wiederhole diesen Satz.', why_ta: '' });
-    logBubble(`📌 So sagt man es: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button> — kommt in dein Fehler-Tagebuch.${t.tip ? `<div class="note">💡 ${esc(t.tip)}</div>` : ''}`, 'fbk bad');
-    if (t.goal != null && t.goal >= 0) S.goals.add(t.goal);
-    renderGoals(); S.i++; setTimeout(guidedTurn, 1400);
-  }
-}
-
-/* ---- free AI conversation ---- */
-function systemPrompt() {
-  const t = tutorOf(S.tutor), m = S.mission;
-  return `${t.style} You are role-playing as ${m.role} in a German practice conversation with a learner at CEFR level ${S.level}
-whose native languages are English and Tamil. Mission: "${m.de}" (${m.en}). The learner's goals (ids g0..g${m.goals.length - 1}):
-${m.goals.map((g, i) => `g${i}: ${g}`).join('\n')}
-Rules:
-- Stay in your role. Speak ONLY German in "reply", at level ${S.level} (short sentences, common words${S.level === 'A1' ? ', max 12 words per sentence' : ''}). Max 2-3 sentences, usually end with a question that helps the learner reach the next goal.
-- Check the learner's LAST message for grammar/word errors (gender, case, verb position, conjugation, word choice). If there is an error, fill "correction"; small spelling/capitalisation issues from speech recognition are NOT errors. If the message is correct, correction = null.
-- "better": a more natural way a native speaker would say the learner's message (only if clearly better, else null).
-- "goals_done": ids of goals the learner has achieved so far in the whole conversation.
-- "suggestions": 3 short, different, correct German replies the learner could say next (level ${S.level}).
-- When all goals are done, wrap up the scene politely and set "mission_complete": true.
-Answer ONLY with JSON, no other text:
-{"reply":"...","reply_en":"English translation of reply","reply_ta":"Tamil translation of reply","correction":null or {"wrong":"learner's wrong part","right":"corrected sentence","why":"short English explanation","why_ta":"short Tamil explanation"},"better":null or "...","goals_done":["g0"],"suggestions":["...","...","..."],"mission_complete":false}`;
-}
-function parseAI(txt) {
-  try { const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1)); if (j && typeof j.reply === 'string') return j; } catch (e) {}
-  return { reply: String(txt || '').trim(), reply_en: '', correction: null, better: null, goals_done: [], suggestions: [], mission_complete: false };
-}
-async function aiTurn(userText) {
-  if (userText != null) S.history.push({ role: 'user', content: userText });
-  const msgs = [{ role: 'system', content: systemPrompt() }, ...S.history.slice(-16)];
-  if (userText == null) msgs.push({ role: 'user', content: '(Start the scene now with a short greeting and your first question.)' });
-  setBusy(true); setState('✍️ denkt nach …');
-  try {
-    const j = parseAI(await dcCallAI(msgs, { temperature: 0.6 }));
-    S.history.push({ role: 'assistant', content: JSON.stringify({ reply: j.reply }) });
-    if (userText != null) aiFeedback(j);
-    (j.goals_done || []).forEach(g => { const n = +String(g).replace(/\D/g, ''); if (!isNaN(n) && n < S.mission.goals.length) S.goals.add(n); });
-    renderGoals();
-    S.lastSugg = (j.suggestions || []).filter(Boolean).slice(0, 3); $('sugg').hidden = true;
-    if (j.mission_complete || S.goals.size === S.mission.goals.length) S.complete = true;
-    setBusy(false);
-    tutorSays(j.reply, j.reply_en, j.reply_ta, () => { if (S.complete) logBubble('🏅 <b>Mission geschafft!</b> Weiterreden oder 📞 Beenden.', 'fbk good'); else autoMic(); });
-  } catch (e) { setBusy(false); setState(''); logBubble('❌ ' + esc(e.message), 'fbk bad'); }
-}
-function aiFeedback(j) {
-  const c = j.correction;
-  if (c && c.right) {
-    S.corrections.push({ original: S.lastUser, corrected: c.right, why: c.why || '', why_ta: c.why_ta || '' });
-    logBubble(`✏️ ${c.wrong ? `<s>${esc(c.wrong)}</s> → ` : ''}<span class="right">${esc(c.right)}</span>
-      ${c.why ? `<div>💡 ${esc(c.why)}</div>` : ''}${c.why_ta && $('optTa').checked ? `<div class="ta" lang="ta">🇮🇳 ${esc(c.why_ta)}</div>` : ''}
-      <div class="tools"><button type="button" class="mini" data-say="${esc(c.right)}">🔊</button> <button type="button" class="mini" data-repeat="${esc(c.right)}">🎙️ nachsprechen</button></div>`, 'fbk bad');
-  } else logBubble('✅ Richtig!' + (j.better ? ` <span class="note">Noch natürlicher: <b>${esc(j.better)}</b> <button type="button" class="mini" data-say="${esc(j.better)}">🔊</button></span>` : ''), 'fbk good');
-}
-
-/* ---- learner input (both modes) ---- */
-function send(text) {
-  text = String(text || '').trim(); if (!text || !S || S.busy) return;
-  $('input').value = ''; $('interim').textContent = '';
-  let extra = '';
-  if (S.practice) {
-    const r = speechScore(S.practice, text);
-    extra = `<div class="note">🎯 Aussprache: <b>${r.score}%</b> — ${r.words.map((w, k) => `<span class="${r.ok[k] ? 'ok-w' : 'no-w'}">${esc(w)}</span>`).join(' ')}</div>`;
-    S.practice = null;
-    logBubble(esc(text) + extra, 'msg me');
-    return;                                          // a repeat drill, not a new turn
-  }
-  logBubble(esc(text), 'msg me');
-  S.lastUser = text;
-  if (S.mode === 'guided') guidedAnswer(text); else { S.turns++; aiTurn(text); }
-}
-function setBusy(b) { S.busy = b; $('micBtn').disabled = b; $('sendBtn').disabled = b; }
-function showHelp(force) {
-  const box = $('sugg');
-  if (!force && !box.hidden) { box.hidden = true; return; }
-  S.helped = true;
-  const opts = S.mode === 'guided' && S.script.turns[S.i] ? S.script.turns[S.i].options : (S.lastSugg || []).map(de => ({ de }));
-  box.hidden = false;
-  box.innerHTML = opts.length ? '<div class="note">💡 So kannst du antworten — 🔊 anhören, dann selbst sagen:</div>' + opts.map(o => `<div class="opt"><b data-use="${esc(o.de)}">${esc(o.de)}</b>
-      <button type="button" data-say="${esc(o.de)}">🔊</button><button type="button" data-slow="${esc(o.de)}">🐢</button>
-      ${o.en ? `<span class="note">🇬🇧 ${esc(o.en)}${o.ta && $('optTa').checked ? ` · <span lang="ta">🇮🇳 ${esc(o.ta)}</span>` : ''}</span>` : ''}</div>`).join('')
-    : '<span class="note">Keine Vorschläge — versuch einen einfachen Satz!</span>';
-}
-async function howDoISay() {
-  const en = prompt('Was möchtest du sagen? (Englisch oder Tamil)'); if (!en) return;
-  const b = logBubble('⏳ …', 'fbk good');
-  try {
-    const txt = await dcCallAI([{ role: 'system', content: `Translate the learner's message into simple, natural German at CEFR level ${S.level} that fits this situation: ${S.mission.en} (the learner talks to ${S.mission.role}). Answer ONLY with the German sentence.` },
-      { role: 'user', content: en }], { temperature: 0.2 });
-    const de = txt.trim().replace(/^"|"$/g, '');
-    b.innerHTML = `🇬🇧 ${esc(en)} → 🇩🇪 <b>${esc(de)}</b> <button type="button" class="mini" data-say="${esc(de)}">🔊</button> <button type="button" class="mini" data-repeat="${esc(de)}">🎙️ üben</button>`;
-  } catch (e) { b.textContent = '❌ ' + e.message; }
-}
-
-/* ---------------- speech ---------------- */
-let deVoice = null;
-function pickVoice() { try { const v = speechSynthesis.getVoices(); deVoice = v.find(x => /^de(-|_)DE/i.test(x.lang)) || v.find(x => /^de/i.test(x.lang)) || null; } catch (e) {} }
-if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, onend, rate) {
-  const f = face();
-  const finish = () => { if (f) f.classList.remove('talking'); setState(''); if (onend) onend(); };
-  if (!$('optVoice').checked || !('speechSynthesis' in window)) {
-    if (f) { f.classList.add('talking'); setTimeout(finish, Math.min(2500, 400 + text.length * 35)); } else finish();   // silent: short mouth animation
-    return;
-  }
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.lang = 'de-DE'; if (deVoice) u.voice = deVoice;
-    u.rate = rate || +$('optRate').value;
-    let done = false; const fin = () => { if (done) return; done = true; finish(); };
-    u.onstart = () => { if (f) f.classList.add('talking'); setState('🔊 spricht …'); };
-    u.onend = fin; u.onerror = fin;
-    setTimeout(fin, 3000 + text.length * 120);
-    speechSynthesis.speak(u);
-  } catch (e) { finish(); }
-}
 function speechWords(x) { return String(x || '').toLowerCase().replace(/[.,!?;:„“"()–-]/g, ' ').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean); }
 function speechScore(target, heard) {
   const a = speechWords(target), b = speechWords(heard);
@@ -549,25 +546,177 @@ function speechScore(target, heard) {
   for (let i = 0, j = 0; i < a.length && j < b.length;) { if (a[i] === b[j]) { ok[i] = true; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
   return { words: a, ok, score: a.length ? Math.round(100 * ok.filter(Boolean).length / a.length) : 0 };
 }
-let rec = null;
-function startMic() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { $('interim').textContent = '🎙️ Spracherkennung gibt es in diesem Browser nicht (Chrome/Edge) — bitte ⌨️ Tippen.'; $('typebar').classList.add('show'); return; }
-  if (rec) { rec.stop(); return; }
-  try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
-  rec = new SR(); rec.lang = 'de-DE'; rec.interimResults = true;
-  const f = face(); $('micBtn').classList.add('on'); if (f) f.classList.add('listening'); setState('👂 hört zu …');
-  let finalText = '';
-  rec.onresult = ev => { let t = ''; for (let i = 0; i < ev.results.length; i++) { t += ev.results[i][0].transcript; if (ev.results[i].isFinal) finalText = t; } $('interim').textContent = '🎙️ ' + t; };
-  rec.onerror = ev => { $('interim').textContent = ev.error === 'not-allowed' ? '🎙️ Mikrofon nicht erlaubt.' : ev.error === 'no-speech' ? '🎙️ Nichts gehört — nochmal drücken.' : '🎙️ ' + ev.error; };
-  rec.onend = () => { $('micBtn').classList.remove('on'); if (f) f.classList.remove('listening'); setState(''); rec = null; if (finalText.trim()) send(finalText); };
-  try { rec.start(); } catch (e) { $('interim').textContent = e.message; }
+async function guidedAnswer(text) {
+  const t = S.script.turns[S.i];
+  const best = t.options.map(o => ({ o, r: speechScore(o.de.replace(SAMPLE_NAMES, ' '), text) })).sort((a, b) => b.r.score - a.r.score)[0];
+  const words = best.r.words.map((w, k) => `<span class="${best.r.ok[k] ? 'ok-w' : 'no-w'}">${esc(w)}</span>`).join(' ');
+  S.tries++;
+  await pronHints(text, S.script.words.map(w => w.de.replace(/^(der|die|das)\s+/i, '')));
+  if (best.r.score >= 60) {
+    S.scores.push(best.r.score);
+    if (t.goal != null && t.goal >= 0) S.goals.add(t.goal);
+    if (S.helped) S.helpUsed++;
+    logEl(`${best.r.score >= 85 ? '🌟 Super!' : '✅ Gut!'} <b>${best.r.score}%</b> — ${words}${best.r.score < 100 ? `<div>Modell: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button></div>` : ''}${t.tip ? `<div class="note">💡 ${esc(t.tip)}</div>` : ''}`, 'card');
+    S.i++; return guidedTutorLine();
+  }
+  if (S.tries < 2) {
+    logEl(`🤔 Fast — <b>${best.r.score}%</b>. Nah dran: <span class="right">${esc(best.o.de)}</span> <button type="button" class="mini" data-say="${esc(best.o.de)}">🔊</button>`, 'card');
+    await ENG.say(best.r.score >= 30 ? 'Fast! Versuch es noch einmal.' : 'Kein Problem. Hör zu: ' + best.o.de);
+    closeAIEntry(null);
+    return;
+  }
+  S.scores.push(best.r.score);
+  S.corrections.push({ original: text, corrected: best.o.de, why: t.tip || 'Wiederhole diesen Satz.', why_ta: '' });
+  logEl(`📌 So sagt man es: <span class="right">${esc(best.o.de)}</span> — kommt in dein Fehler-Tagebuch.${t.tip ? `<div class="note">💡 ${esc(t.tip)}</div>` : ''}`, 'card');
+  if (t.goal != null && t.goal >= 0) S.goals.add(t.goal);
+  S.i++;
+  await ENG.say('So sagt man es: ' + best.o.de);
+  closeAIEntry(null);
+  return guidedTutorLine();
+}
+
+/* ---- AI conversation (free / learning) ---- */
+const LEVEL_RULES = {
+  A1: 'The learner is A1: use only very common words, max 8 words per sentence, 1–2 sentences, present tense (and "möchte"). One simple question at a time. If the learner seems lost, say it again more simply.',
+  A2: 'The learner is A2: simple everyday German, max 12 words per sentence, 1–3 sentences, Perfekt allowed. Simplify occasionally.',
+  B1: 'The learner is B1: natural everyday German, subordinate clauses (weil, dass, wenn) are fine, 2–3 sentences, ask for opinions and reasons.',
+  B2: 'The learner is B2: natural, native-like conversational German with idiomatic expressions, 2–4 sentences, normal complexity.'
+};
+function learnerMemory() {
+  const known = store.get('dc_review_requests', []).slice(-15).map(x => x.w);
+  const lesson = S.script ? S.script.words.map(w => w.de) : [];
+  const mistakes = store.get('de_coach_vault', []).slice(0, 5).map(v => `"${v.original}" → "${v.corrected}"`);
+  return `Known/recent vocabulary (reuse naturally): ${[...lesson, ...known].slice(0, 25).join(', ') || '—'}.
+Recent mistakes of this learner (only address them if they come up again): ${mistakes.join('; ') || '—'}.`;
+}
+function systemPrompt() {
+  const t = tutorOf(S.tutor), m = S.mission, learning = S.mode === 'learning';
+  return `${t.style}
+You are on a VIDEO CALL (spoken conversation) with a German learner whose native languages are English and Tamil. Situation: you play ${m.role}. Scene: "${m.de}" (${m.en}).
+Learner goals in this scene (ids): ${m.goals.map((g, i) => `g${i}: ${g}`).join(' | ')}.
+${LEVEL_RULES[ST.level]}
+${learning
+    ? 'MODE LEARNING CONVERSATION: react to the content first and keep the conversation natural. If the learner made a real mistake, reuse the correct form naturally in your reply (recast, e.g. learner "Gestern ich gehe zum Supermarkt." → you "Ah, du bist gestern zum Supermarkt gegangen? Was hast du dort gekauft?") and put the correction into META. Every 2–3 turns you may explain one useful word in META.vocab. Never give a grammar lecture in the spoken reply.'
+    : 'MODE FREE CONVERSATION: keep the conversation flowing and build confidence. Correct only mistakes that make the meaning unclear or repeat often (at most every third turn), mainly by recasting. META.correction only for such mistakes, otherwise null.'}
+If the learner's message starts with "[unterbricht]" they interrupted you: drop your previous thought, answer the interruption directly and naturally, then continue if useful.
+${learnerMemory()}
+FORMAT — your answer is spoken aloud by a text-to-speech voice:
+1) First a mood tag, one of [neutral] [happy] [surprised] [confused] [thinking].
+2) Then your spoken reply in German only: natural spoken style, contractions where natural, no emojis, no lists, no markdown, no English.
+3) Then a new line "###META" and one line of JSON: {"en":"English translation of your reply","correction":null or {"wrong":"...","right":"full corrected learner sentence","why":"short English explanation","why_ta":"short Tamil explanation"},"vocab":[{"de":"der/die/das Wort","en":"..."}],"goals_done":["g0"],"suggestions":["3 short natural German replies the learner could say next"],"mission_complete":false}`;
+}
+async function aiReply(text, info) {
+  if (text != null) {
+    const msg = (ENG.lastInterruption && ENG.lastInterruption.turn === S.turns - 1 ? '[unterbricht] ' : '') + text;
+    S.history.push({ role: 'user', content: msg });
+  }
+  const msgs = [{ role: 'system', content: systemPrompt() }, ...S.history.slice(-18)];
+  if (text == null) msgs.push({ role: 'user', content: '(Der Anruf beginnt. Begrüße mich kurz in deiner Rolle und stell die erste Frage.)' });
+  const r = await ENG.respond(msgs, { onMood: mood => ENG.avatar && ENG.avatar.setExpression(mood === 'neutral' ? 'speaking' : mood) });
+  if (r.interrupted) {
+    S.history.push({ role: 'assistant', content: (r.spoken || '') + ' …' });
+    if (ENG.lastInterruption) ENG.lastInterruption.turn = S.turns;
+    return;
+  }
+  S.history.push({ role: 'assistant', content: r.text });
+  const meta = r.meta || {};
+  closeAIEntry(meta.en);
+  (meta.goals_done || []).forEach(g => { const n = +String(g).replace(/\D/g, ''); if (!isNaN(n) && n < S.mission.goals.length) S.goals.add(n); });
+  S.lastSugg = (meta.suggestions || []).filter(Boolean).slice(0, 3);
+  if (meta.mission_complete || S.goals.size === S.mission.goals.length) { if (!S.complete) toast('🏅 Ziel erreicht! Du kannst weiterreden oder auflegen.'); S.complete = true; }
+  const c = meta.correction;
+  if (text != null && c && c.right) {
+    S.corrections.push({ original: text, corrected: c.right, why: c.why || '', why_ta: c.why_ta || '' });
+    logEl(`💡 ${c.wrong ? `<s>${esc(c.wrong)}</s> → ` : ''}<span class="right">${esc(c.right)}</span>${c.why ? `<div>${esc(c.why)}</div>` : ''}${c.why_ta && CS.tamil ? `<div class="ta" lang="ta">🇮🇳 ${esc(c.why_ta)}</div>` : ''}
+      <div class="tools"><button type="button" class="mini" data-say="${esc(c.right)}">🔊</button></div>`, 'card');
+    toast(`💡 <b>${esc(c.right)}</b>`);
+  }
+  if (S.mode === 'learning' && Array.isArray(meta.vocab)) meta.vocab.slice(0, 2).forEach(v => {
+    if (!v || !v.de) return; S.vocab.push(v);
+    logEl(`📚 <b>${esc(v.de)}</b> — ${esc(v.en || '')} <button type="button" class="mini" data-say="${esc(v.de)}">🔊</button> <button type="button" class="mini" data-save="${esc(v.de)}">➕</button>`, 'card voc');
+  });
+  if (text != null) {
+    const issue = await pronHints(text, S.lastSugg.join(' ').split(/\s+/));
+    if (issue && S.mode === 'learning' && ENG.state !== 'SESSION_ENDED') {     // short pronunciation practice, tutor-style
+      S.practice = { word: issue.word, tries: 0 };
+      await ENG.say(`Kleiner Tipp zur Aussprache: ${issue.word}. Sag es noch einmal!`);
+      closeAIEntry(null);
+    }
+  }
+}
+
+/* ---- pronunciation: what the recogniser heard vs. the dictionary ---- */
+let LEX = null, LEXP = null;
+function loadLexicon() {
+  if (LEXP) return LEXP;
+  LEXP = new Promise(res => {
+    const done = () => {
+      const exact = new Set(), fold = new Map(), byW = new Map();
+      const f = w => w.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss');
+      (window.DC_LEXICON || []).forEach(e => {
+        const forms = [e.w, e.pl, e.komp, e.pr].filter(Boolean).flatMap(x => String(x).split(/[\s,/]+/));
+        forms.forEach(x => { const lx = x.toLowerCase(); if (lx.length < 3) return; exact.add(lx); if (f(lx) !== lx && !fold.has(f(lx))) fold.set(f(lx), x); });
+        byW.set(String(e.w).toLowerCase(), e);
+      });
+      LEX = { exact, fold, byW, f }; res(LEX);
+    };
+    if (window.DC_LEXICON) return done();
+    const s = document.createElement('script'); s.src = 'js/lexicon.js'; s.onload = done; s.onerror = () => { LEX = { exact: new Set(), fold: new Map(), byW: new Map(), f: x => x }; res(LEX); };
+    document.head.appendChild(s);
+  });
+  return LEXP;
+}
+const SOUND_TIPS = [
+  [/ö/, 'ö: Lippen rund wie bei „o“, Zunge vorne wie bei „e“.', 'தமிழில் இல்லாத ஒலி: "ஏ" சொல்லும்போது உதடுகளை "ஓ" போல் குவியுங்கள்.'],
+  [/ü/, 'ü: Lippen rund wie bei „u“, Zunge wie bei „i“.', 'தமிழில் இல்லாத ஒலி: "ஈ" சொல்லும்போது உதடுகளை "ஊ" போல் குவியுங்கள்.'],
+  [/ä/, 'ä: offenes „e“ wie in „Bett“.', '"எ" போன்ற திறந்த ஒலி.'],
+  [/(?:[iüöäe]|ei|eu|[lnr])ch/, 'ch nach i/e/ü/ö (ich-Laut): leises Zischen, Zunge vorne am Gaumen.', ''],
+  [/(?:[aou]|au)ch/, 'ch nach a/o/u (ach-Laut): hinten im Rachen, wie ein leises Kratzen.', ''],
+  [/ß/, 'ß: scharfes, stimmloses s.', '']
+];
+async function pronHints(text, targets) {
+  const L = await loadLexicon();
+  const toks = String(text).match(/[A-Za-zÄÖÜäöüß]{4,}/g) || [];
+  const tset = (targets || []).map(x => String(x).replace(/[.,!?]/g, '')).filter(x => x.length >= 4);
+  for (const tok of toks) {
+    const lx = tok.toLowerCase();
+    if (L.exact.has(lx)) continue;
+    let word = L.fold.get(L.f(lx));
+    if (!word) word = tset.find(x => x.toLowerCase() !== lx && lev(x.toLowerCase(), lx) === 1 && x.length >= 5);
+    if (!word || word.toLowerCase() === lx) continue;
+    const tips = SOUND_TIPS.filter(([re]) => re.test(word.toLowerCase()) && !re.test(lx));
+    const syl = await syllables(word);
+    logEl(`🗣️ <b>Aussprache:</b> gehört „${esc(tok)}“ — gemeint war wohl <b>${esc(word)}</b>${syl ? ` <span class="note">(${esc(syl)})</span>` : ''}
+      ${tips.map(t => `<div>${esc(t[1])}${t[2] && CS.tamil ? `<div class="ta" lang="ta">🇮🇳 ${esc(t[2])}</div>` : ''}</div>`).join('')}
+      <div class="tools"><button type="button" class="mini" data-slow="${esc(word)}">🐢 anhören</button> <button type="button" class="mini" data-ipa="${esc(word)}" ${aiOn() ? '' : 'hidden'}>IPA 🤖</button></div>
+      <div class="note">Hinweis aus der Spracherkennung — sie erkennt nicht jeden Aussprachefehler.</div>`, 'card pron');
+    return { word, heard: tok };
+  }
+  return null;
+}
+function lev(a, b) { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; }
+let WPP = null;
+function syllables(word) {
+  if (!WPP) WPP = new Promise(res => { if (window.WORD_PARTS) return res(); const s = document.createElement('script'); s.src = 'js/word-parts.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+  return WPP.then(() => { const W = window.WORD_PARTS || {}; const e = W['n|' + word] || W['v|' + word] || W['adj|' + word] || W['n|' + word[0].toUpperCase() + word.slice(1)]; return e ? e[0] : ''; });
+}
+async function practiceTurn(text) {
+  const p = S.practice, ok = speechWords(text).includes(p.word.toLowerCase());
+  if (ok) { S.practice = null; logEl(`🌟 <b>${esc(p.word)}</b> — super!`, 'card'); await ENG.say('Super, genau so!'); closeAIEntry(null); return; }
+  p.tries++;
+  if (p.tries < 2) { await ENG.say(`Fast! Versuch noch einmal: ${p.word}.`); closeAIEntry(null); return; }
+  S.practice = null; S.corrections.push({ original: text, corrected: p.word, why: 'Aussprache üben', why_ta: '' });
+  await ENG.say('Kein Problem, das üben wir später noch. Erzähl weiter!'); closeAIEntry(null);
 }
 
 /* ---------------- end + report ---------------- */
 async function endCall() {
   if (!S || S.ended) return; S.ended = true;
-  clearInterval(timerId); if (rec) rec.stop(); try { speechSynthesis.cancel(); } catch (e) {}
+  clearInterval(startCall.timer);
+  try { await ENG.end(); } catch (e) {}
+  stopSelfView();
+  $('callView').hidden = true; document.body.style.overflow = ''; $('wordPop').hidden = true;
   const mins = (Date.now() - S.start) / 60000;
   ST.sessions++; ST.minutes += mins; ST.days[today()] = (ST.days[today()] || 0) + mins;
   if (S.complete) ST.done[S.mission.id] = (ST.done[S.mission.id] || 0) + 1;
@@ -581,95 +730,110 @@ async function endCall() {
   if (typeof addXP === 'function') try { addXP(5 * S.turns + 10 * S.goals.size + (S.complete ? 20 : 0), 'KI-Sprechpartner'); } catch (e) {}
   show('reportView');
   const avg = S.scores.length ? Math.round(S.scores.reduce((a, b) => a + b, 0) / S.scores.length) : null;
-  const words = (S.script && S.script.words) || [];
-  $('report').innerHTML = `<div class="row" style="gap:14px;"><div style="width:90px;">${avatarSVG(tutorOf(S.tutor))}</div>
-      <div><h2 style="margin:0;">${S.complete ? '🏅 Lektion geschafft!' : '📋 Lernbericht'}</h2>
-      <div class="note">${S.mission.ic} ${esc(S.mission.de)} · ${S.level} · ${S.mode === 'guided' ? 'geführt' : 'frei mit KI'} · ${S.turns} Antworten · ${Math.max(1, Math.round(mins))} Min. · 🔥 ${streak()} Tage</div></div></div>
+  const words = [...((S.script && S.script.words) || []), ...S.vocab];
+  const lat = ENG ? ENG.metrics.filter(m => m.endToFirstAudio != null) : [];
+  const rec = recommended();
+  $('report').innerHTML = `<div class="row" style="gap:14px;"><div style="width:90px;">${thumb(tutorOf(S.tutor))}</div>
+      <div><h2 style="margin:0;">${S.complete ? '🏅 Gespräch geschafft!' : '📋 Lernbericht'}</h2>
+      <div class="note">${S.mission.ic} ${esc(S.mission.de)} · ${ST.level} · ${S.mode === 'guided' ? 'geführt' : S.mode === 'free' ? 'frei' : 'Lern-Gespräch'} · ${S.turns} Antworten · ${Math.max(1, Math.round(mins))} Min. · 🔥 ${streak()} Tage${S.interruptions ? ` · ${S.interruptions}× unterbrochen` : ''}</div></div></div>
     ${avg != null ? `<h3 class="sec">🎯 Aussprache</h3><div style="font-size:22px; font-weight:800;">${avg}%</div><div class="note">${S.helpUsed ? `${S.helpUsed}× mit Hilfe · ` : ''}Durchschnitt deiner Antworten (Wort für Wort mit den Modellsätzen verglichen)</div>` : ''}
-    <h3 class="sec">Ziele</h3><div class="goalchips" style="justify-content:flex-start;">${S.mission.goals.map((g, i) => `<span class="chip ${S.goals.has(i) ? 'active' : ''}">${S.goals.has(i) ? '✓' : '○'} ${esc(g)}</span>`).join('')}</div>
+    <h3 class="sec">Ziele</h3><div class="row">${S.mission.goals.map((g, i) => `<span class="chip ${S.goals.has(i) ? 'active' : ''}">${S.goals.has(i) ? '✓' : '○'} ${esc(g)}</span>`).join('')}</div>
     <h3 class="sec">Zum Üben (${S.corrections.length})</h3>
     ${S.corrections.length ? `<ul class="report">${S.corrections.map(c => `<li><s>${esc(c.original)}</s><br><b>${esc(c.corrected)}</b> <button type="button" class="mini" data-say="${esc(c.corrected)}">🔊</button><div class="note">💡 ${esc(c.why)}</div></li>`).join('')}</ul>
       <div class="note">📓 Gespeichert im Fehler-Tagebuch des <a href="KI_German_Coach.html">KI-Coaches</a>.</div>` : '<p>Keine Fehler — super! 🎉</p>'}
-    ${words.length ? `<h3 class="sec">Wörter aus dieser Lektion</h3><div class="row" id="wordRow">${words.map(w => `<span class="chip"><span data-say="${esc(w.de)}" style="cursor:pointer;">🔊 ${esc(w.de)}</span> — ${esc(w.en)}</span>`).join('')}</div>
+    ${words.length ? `<h3 class="sec">Wörter aus diesem Gespräch</h3><div class="row">${words.map(w => `<span class="chip" data-say="${esc(w.de)}">🔊 ${esc(w.de)} — ${esc(w.en || '')}</span>`).join('')}</div>
       <div style="margin-top:8px;"><button type="button" class="btn grey" id="toCards">➕ In meine Karteikarten</button> <span class="note" id="cardsMsg"></span></div>` : ''}
-    <div id="fbAI" class="note"></div>
+    ${lat.length ? `<div class="note" style="margin-top:10px;">⏱ Antwortzeit (Ende deines Satzes → erster Ton): Ø ${Math.round(lat.reduce((a, x) => a + x.endToFirstAudio, 0) / lat.length)} ms</div>` : ''}
     <div class="row" style="margin-top:16px;"><button type="button" class="btn" data-again="1">↺ Nochmal</button>
-      ${recommended() ? `<button type="button" class="btn grey" data-start="${recommended().id}">▶ Nächste: ${esc(recommended().de)}</button>` : ''}
+      ${rec ? `<button type="button" class="btn grey" data-start="${rec.id}">▶ Nächstes: ${esc(rec.de)}</button>` : ''}
       <button type="button" class="btn grey" data-home="1">← Lernpfad</button></div>`;
   const tc = $('toCards'); if (tc) tc.onclick = () => wordsToCards(words);
-  if (S.mode === 'ai' && S.turns) aiReport();
 }
-async function aiReport() {
-  const box = $('fbAI'); box.innerHTML = '<h3 class="sec">🤖 Feedback</h3>⏳ …';
-  try {
-    const learner = S.history.filter(h => h.role === 'user').map(h => h.content).join('\n');
-    const txt = await dcCallAI([{ role: 'system', content: 'You are a German teacher. Give short, encouraging feedback for a learner (native English/Tamil). Answer ONLY with JSON: {"score":1-10,"strengths":["..."],"work_on":["..."],"words":[{"de":"useful German word/phrase for this situation (nouns with article)","en":"English"}]} (max 3 items each, 5 words).' },
-      { role: 'user', content: `Level ${S.level}, situation: ${S.mission.en}. The learner said:\n${learner}` }], { temperature: 0.3 });
-    const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
-    box.innerHTML = `<h3 class="sec">🤖 Feedback</h3><div style="font-size:18px;">⭐ ${esc(j.score)}/10</div>
-      ${(j.strengths || []).length ? `<div>👍 ${j.strengths.map(esc).join(' · ')}</div>` : ''}${(j.work_on || []).length ? `<div>🎯 ${j.work_on.map(esc).join(' · ')}</div>` : ''}
-      ${(j.words || []).length ? `<div class="row" style="margin-top:6px;">${j.words.map(w => `<span class="chip" data-say="${esc(w.de)}">🔊 ${esc(w.de)} — ${esc(w.en)}</span>`).join('')}</div>
-      <div style="margin-top:8px;"><button type="button" class="btn grey" id="toCards2">➕ In meine Karteikarten</button> <span class="note" id="cardsMsg2"></span></div>` : ''}`;
-    const b = $('toCards2'); if (b) b.onclick = () => wordsToCards(j.words, 'cardsMsg2');
-  } catch (e) { box.innerHTML = '<h3 class="sec">🤖 Feedback</h3>(nicht verfügbar: ' + esc(e.message) + ')'; }
+function sayText(text, slow) {                                      // replay outside the conversation flow
+  if (ENG && !S.ended && ENG.state !== 'SESSION_ENDED') { if (slow) return speakBrowser(text, 0.7); ENG.say(text).then(() => closeAIEntry(null)); return; }
+  speakBrowser(text, slow ? 0.7 : 1);
 }
-/* Lesson words → the home flashcards (same mechanism as the Übersetzer: dc_review_requests, only words the app knows) */
-function loadLexicon() {
-  return new Promise(res => {
-    if (window.DC_LEXICON) return res(window.DC_LEXICON);
-    const s = document.createElement('script'); s.src = 'js/lexicon.js'; s.onload = () => res(window.DC_LEXICON || []); s.onerror = () => res([]);
-    document.head.appendChild(s);
-  });
-}
-async function wordsToCards(words, msgId) {
-  const msg = $(msgId || 'cardsMsg'); msg.textContent = '⏳ …';
-  const lex = await loadLexicon();
-  const idx = new Map(lex.map(e => [String(e.w).toLowerCase(), e]));
-  let list = store.get('dc_review_requests', []), added = 0, unknown = [];
+function speakBrowser(text, f) { new DCCall.TTS.browser().speak(text, { level: ST.level, persona: tutorOf(ST.tutor), rateFactor: f || 1 }); }
+async function wordsToCards(words) {
+  const msg = $('cardsMsg'); msg.textContent = '⏳ …';
+  const L = await loadLexicon(); let list = store.get('dc_review_requests', []), added = 0; const unknown = [];
   words.forEach(w => {
-    const bare = String(w.de || '').replace(/^(der|die|das)\s+/i, '').replace(/[.!?]$/, '').trim();
-    const e = idx.get(bare.toLowerCase());
+    const bare = String(w.de || '').replace(/^(der|die|das)\s+/i, '').replace(/[.!?]$/, '').trim(), e = L.byW.get(bare.toLowerCase());
     if (!e) { unknown.push(w.de); return; }
     if (!list.some(x => x.c === e.c && x.w === e.w)) { list.push({ c: e.c, w: e.w, a: e.a || '', t: Date.now() }); added++; }
   });
   store.set('dc_review_requests', list);
   msg.textContent = `✓ ${added} Wörter kommen heute in deine Wiederholungen auf der Startseite.` + (unknown.length ? ` (Nicht in der Wortliste: ${unknown.join(', ')})` : '');
 }
+/* tap a word in the transcript → meaning, Tamil, listen, save */
+async function wordPopup(el) {
+  const raw = el.dataset.word, pop = $('wordPop'); const r = el.getBoundingClientRect();
+  pop.style.left = Math.min(window.innerWidth - 290, Math.max(8, r.left)) + 'px'; pop.style.top = Math.min(window.innerHeight - 160, r.bottom + 6) + 'px';
+  pop.innerHTML = '⏳'; pop.hidden = false;
+  const L = await loadLexicon(), lw = raw.toLowerCase();
+  const cands = [lw, lw.replace(/(en|e|n|s|er|es|em)$/, ''), lw.replace(/(te|ten|test|tet)$/, 'en')];
+  let e = null; for (const c of cands) { e = L.byW.get(c) || [...L.byW.values()].find(x => String(x.pl || '').toLowerCase() === c); if (e) break; }
+  pop.innerHTML = e ? `<b>${esc((e.a ? e.a + ' ' : '') + e.w)}</b> — ${esc(e.en || '')}${e.ta ? `<div class="ta" lang="ta">🇮🇳 ${esc(e.ta)}</div>` : ''}
+      <div class="row" style="margin-top:6px;"><button type="button" class="mini" data-say="${esc(e.w)}">🔊</button><button type="button" class="mini" data-save="${esc(e.w)}">➕ Karteikarte</button></div>`
+    : `<b>${esc(raw)}</b> <span class="note">nicht in der Wortliste</span>${aiOn() ? ` <button type="button" class="mini" data-explain="${esc(raw)}">🤖 erklären</button>` : ''}`;
+}
 
 /* ---------------- events ---------------- */
-document.addEventListener('click', ev => {
-  const el = ev.target.closest('[data-onbgoal],[data-onblevel],[data-onbmin],[data-tutor],[data-mode],[data-start],[data-startai],[data-say],[data-slow],[data-use],[data-repeat],[data-again],[data-home]');
-  if (!el) return;
+document.addEventListener('click', async ev => {
+  const el = ev.target.closest('[data-onbgoal],[data-onblevel],[data-onbmin],[data-tutor],[data-mode],[data-start],[data-say],[data-slow],[data-again],[data-home],[data-set],[data-open-settings],[data-tr],[data-word],[data-save],[data-hint],[data-use],[data-ipa],[data-explain]');
+  if (!el) { if (!ev.target.closest('#wordPop')) $('wordPop').hidden = true; return; }
   const d = el.dataset;
   if (d.onbgoal) { ONB.goal = d.onbgoal; return renderOnb(); }
   if (d.onblevel) { ONB.level = d.onblevel; return renderOnb(); }
   if (d.onbmin) { ONB.min = +d.onbmin; return renderOnb(); }
   if (d.tutor) { ST.tutor = d.tutor; saveST(); return renderHome(); }
-  if (d.mode) { if (d.mode === 'ai' && !aiOn()) return; ST.mode = d.mode; saveST(); return renderHome(); }
-  if (d.start) return startCall(d.start, ST.mode);
-  if (d.startai) return startCall(d.startai, 'ai');
-  if (d.say) return speak(d.say);
-  if (d.slow) return speak(d.slow, null, 0.7);
-  if (d.use) { $('typebar').classList.add('show'); $('input').value = d.use; $('input').focus(); return; }
-  if (d.repeat) { S.practice = d.repeat; $('interim').textContent = `🎯 Sprich nach: „${d.repeat}“`; setTimeout(startMic, 150); return; }
+  if (d.mode) { ST.mode = d.mode; saveST(); return renderHome(); }
+  if (d.start) return startCall(d.start);
   if (d.again) return startCall(S.mission.id, S.mode);
   if (d.home) { show('homeView'); return renderHome(); }
+  if (d.openSettings) return openSettings();
+  if (d.set) { if (d.set === 'level') ST.level = d.val, saveST(); else CS[d.set] = d.val; saveKeys(); saveCS(); renderSettings(); if (S && d.set === 'conv' && S.mode !== 'guided') S.mode = d.val; return; }
+  if (d.say) return sayText(d.say);
+  if (d.slow) return sayText(d.slow, true);
+  if (d.tr) {
+    const box = el.closest('.tm'); if (!box) return;
+    let tr = d.trtext; if (!tr && aiOn()) { el.textContent = '⏳'; try { tr = await dcCallAI([{ role: 'system', content: 'Translate the German text to English. Answer only with the translation.' }, { role: 'user', content: box.querySelector('.txt').textContent }]); } catch (e) { tr = '(' + e.message + ')'; } }
+    if (!box.querySelector('.tr')) box.insertAdjacentHTML('beforeend', `<div class="tr">🇬🇧 ${esc(tr || '—')}</div>`); el.remove(); return;
+  }
+  if (d.word) return wordPopup(el);
+  if (d.save) { const L = await loadLexicon(), e = L.byW.get(d.save.replace(/^(der|die|das)\s+/i, '').toLowerCase()); if (!e) { el.textContent = 'nicht in der Wortliste'; return; }
+    const list = store.get('dc_review_requests', []); if (!list.some(x => x.c === e.c && x.w === e.w)) list.push({ c: e.c, w: e.w, a: e.a || '', t: Date.now() }); store.set('dc_review_requests', list); el.textContent = '✓ gespeichert'; return; }
+  if (d.hint) { S.helped = true; const t = S.script.turns[S.i], box = $('taskOpts'); if (!t || !box) return; box.hidden = !box.hidden;
+    box.innerHTML = t.options.map(o => `<div data-use="${esc(o.de)}">🗣️ <b>${esc(o.de)}</b> <small>${esc(o.en)}</small></div>`).join(''); return; }
+  if (d.use) { openDrawer(true); $('input').value = d.use; $('input').focus(); sayText(d.use); return; }
+  if (d.ipa) { el.textContent = '⏳'; try { el.textContent = '/' + (await dcCallAI([{ role: 'user', content: `IPA transcription (standard German) of "${d.ipa}". Answer only with the IPA, no slashes.` }])).trim().replace(/^\/|\/$/g, '') + '/ 🤖'; } catch (e) { el.textContent = '—'; } return; }
+  if (d.explain) { el.textContent = '⏳'; try { el.outerHTML = esc(await dcCallAI([{ role: 'user', content: `Explain the German word "${d.explain}" in one short English line (meaning + article if noun).` }])) + ' 🤖'; } catch (e) { el.textContent = '—'; } return; }
 });
 $('onbDone').onclick = () => { ST.profile = { goal: ONB.goal, min: ONB.min }; ST.level = ONB.level; saveST(); show('homeView'); renderHome(); };
 $('editProfile').onclick = () => { ONB = Object.assign({ goal: 'alltag', min: 10 }, ST.profile || {}, { level: ST.level }); renderOnb(); show('onbView'); };
-$('micBtn').onclick = startMic;
-$('helpBtn').onclick = () => showHelp(false);
-$('trBtn').onclick = () => { S.showTr = !S.showTr; renderSubtitle(); };
-$('typeBtn').onclick = () => { $('typebar').classList.toggle('show'); if ($('typebar').classList.contains('show')) $('input').focus(); };
-$('howBtn').onclick = howDoISay;
-$('sendBtn').onclick = () => send($('input').value);
-$('input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); send(e.target.value); } });
-$('endBtn').onclick = () => { if (!S.turns || confirm('Anruf beenden und Lernbericht ansehen?')) endCall(); };
-['optHands', 'optTa', 'optVoice'].forEach(id => {
-  const el = $(id); const v = store.get('dc_tutor_opt_' + id, null); if (v != null) el.checked = v;
-  el.onchange = () => store.set('dc_tutor_opt_' + id, el.checked);
-});
-if (ST.mode === 'ai' && !aiOn()) ST.mode = 'guided';
+$('micBtn').onclick = () => { if (!ENG) return; const m = $('micBtn').getAttribute('aria-pressed') !== 'true'; ENG.setMuted(m); $('micBtn').setAttribute('aria-pressed', m); $('micBtn').setAttribute('aria-label', m ? 'Mikrofon einschalten' : 'Mikrofon stummschalten'); $('micBtn').firstChild.textContent = m ? '🔇' : '🎙️'; };
+$('spkBtn').onclick = () => { if (!ENG) return; const m = $('spkBtn').getAttribute('aria-pressed') !== 'true'; ENG.setVolume(m ? 0 : 1); $('spkBtn').setAttribute('aria-pressed', m); $('spkBtn').firstChild.textContent = m ? '🔈' : '🔊'; };
+$('pauseBtn').onclick = () => { if (!ENG) return; if (ENG.state === 'PAUSED') ENG.resume(); else ENG.pause(); };
+$('logBtn').onclick = () => openDrawer($('drawer').hidden);
+$('drawerClose').onclick = () => openDrawer(false);
+$('setBtn').onclick = openSettings;
+$('setClose').onclick = closeSettings;
+$('settingsSheet').addEventListener('click', e => { if (e.target === $('settingsSheet')) closeSettings(); });
+$('setTest').onclick = testConnections;
+['optSelf', 'optTa', 'optCaps'].forEach(id => $(id).onchange = () => { CS.selfView = $('optSelf').checked; CS.tamil = $('optTa').checked; CS.captions = $('optCaps').checked; saveCS();
+  if (id === 'optSelf' && S && !S.ended) { if (CS.selfView) startSelfView(); else stopSelfView(); } });
+$('helpBtn').onclick = () => {
+  const h = $('help'); h.hidden = !h.hidden; if (h.hidden) return; S.helped = true;
+  const opts = S.mode === 'guided' && S.script.turns[S.i] ? S.script.turns[S.i].options : (S.lastSugg || []).map(de => ({ de }));
+  h.innerHTML = opts.length ? '<div class="note">Tippen = übernehmen, dann laut sagen oder senden:</div>' + opts.map(o => `<div class="opt" data-use="${esc(o.de)}">🗣️ <b>${esc(o.de)}</b> ${o.en ? `<span class="note">${esc(o.en)}</span>` : ''}</div>`).join('') : '<span class="note">Sag einfach einen kurzen Satz — z. B. „Können Sie das wiederholen?“</span>';
+};
+$('sendBtn').onclick = () => { if (ENG) { ENG.sendText($('input').value); $('input').value = ''; } };
+$('input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('sendBtn').click(); } });
+$('endBtn').onclick = () => { if (!S || !S.turns || confirm('Anruf beenden und Lernbericht ansehen?')) endCall(); };
+$('noticeRetry').onclick = () => { if (noticeRetry) noticeRetry(); else if (ENG) ENG.retryTurn(); $('notice').hidden = true; };
+$('noticeClose').onclick = () => { $('notice').hidden = true; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('settingsSheet').hidden) closeSettings(); else if (!$('wordPop').hidden) $('wordPop').hidden = true; else if (!$('drawer').hidden && window.innerWidth <= 760) openDrawer(false); } });
+window.addEventListener('beforeunload', () => { if (S && !S.ended && ENG) { const mins = (Date.now() - S.start) / 60000; ST.days[today()] = (ST.days[today()] || 0) + mins; saveST(); } });
 if (!ST.profile) { ONB.level = ST.level || 'A1'; renderOnb(); show('onbView'); } else { show('homeView'); renderHome(); }
 </script>
 </body>

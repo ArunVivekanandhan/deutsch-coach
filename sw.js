@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v99';
+const CACHE_NAME = 'deutsch-coach-v101';
 const urlsToCache = [
   './',
   './index.html',
@@ -48,6 +48,13 @@ const urlsToCache = [
   './icon-192.png',
   './icon-512.png',
   './manifest.json',
+  './js/call/audio-io.js',
+  './js/call/avatar.js',
+  './js/call/call-state.js',
+  './js/call/conversation.js',
+  './js/call/pcm-capture-worklet.js',
+  './js/call/stt.js',
+  './js/call/tts.js',
   './css/fonts.css',
   './fonts/fjalla-one-400-latin-ext.woff2',
   './fonts/fjalla-one-400-latin.woff2',

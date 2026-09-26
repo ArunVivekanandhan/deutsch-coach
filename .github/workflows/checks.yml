@@ -26,3 +26,5 @@ jobs:
         run: python scripts/build.py
       - name: Every page loads without JavaScript errors
         run: python scripts/smoke_pages.py
+      - name: Video-call end-to-end tests (scripts/test_call.py, mocked providers)
+        run: python scripts/test_call.py

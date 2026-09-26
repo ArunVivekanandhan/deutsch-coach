@@ -18,7 +18,7 @@ function injectDependencies() {
         if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
         const cspMeta = document.createElement('meta');
         cspMeta.httpEquiv = "Content-Security-Policy";
-        cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com https://api.deepseek.com https://api.groq.com https://openrouter.ai http://localhost:11434; img-src 'self' data:; media-src 'self' data: blob:;";
+        cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com https://api.deepseek.com https://api.groq.com https://openrouter.ai http://localhost:11434 https://api.elevenlabs.io https://api.simli.ai wss://api.simli.ai https://*.livekit.cloud wss://*.livekit.cloud; img-src 'self' data:; media-src 'self' data: blob: mediastream:;";
         document.head.appendChild(cspMeta);
     }
 
@@ -622,8 +622,8 @@ function dcAIConfigured() {
     const provider = localStorage.getItem('de_ai_provider') || 'groq';
     return provider === 'ollama' || !!localStorage.getItem('de_ai_key_' + provider);
 }
-async function dcCallAI(messages, opts) {
-    opts = opts || {};
+// Endpoint, model and headers of the provider chosen in AI Config & Settings (shared by dcCallAI and dcStreamAI).
+function dcAIRequestConfig() {
     const provider = localStorage.getItem('de_ai_provider') || 'groq';
     const key = localStorage.getItem('de_ai_key_' + provider) || '';
     if (provider !== 'ollama' && !key) throw new Error('Kein KI-Schlüssel eingerichtet (AI Config & Settings).');
@@ -637,23 +637,70 @@ async function dcCallAI(messages, opts) {
     };
     const MODELS = { deepseek: 'deepseek-chat', openai: 'gpt-4o-mini', groq: 'llama-3.1-8b-instant',
         gemini: 'gemini-2.0-flash', openrouter: 'openrouter/auto', ollama: 'llama3' };
-    const endpoint = ENDPOINTS[provider] || ENDPOINTS.groq;
-    const model = localStorage.getItem('de_ai_model_' + provider) || MODELS[provider] || MODELS.groq;
     const headers = { 'Content-Type': 'application/json' };
     if (provider !== 'ollama' && key) headers['Authorization'] = 'Bearer ' + key;
-    const res = await fetch(endpoint, { method: 'POST', headers,
-        body: JSON.stringify({ model, messages, temperature: opts.temperature != null ? opts.temperature : 0.4 }) });
-    if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        throw new Error('KI-Fehler (' + res.status + '): ' + txt.substring(0, 160));
-    }
+    return { provider, endpoint: ENDPOINTS[provider] || ENDPOINTS.groq,
+        model: localStorage.getItem('de_ai_model_' + provider) || MODELS[provider] || MODELS.groq, headers };
+}
+async function dcAIHttpError(res) {
+    const txt = await res.text().catch(() => '');
+    const e = new Error('KI-Fehler (' + res.status + '): ' + txt.substring(0, 160));
+    e.status = res.status;
+    return e;
+}
+async function dcCallAI(messages, opts) {
+    opts = opts || {};
+    const cfg = dcAIRequestConfig();
+    const res = await fetch(cfg.endpoint, { method: 'POST', headers: cfg.headers, signal: opts.signal,
+        body: JSON.stringify({ model: cfg.model, messages, temperature: opts.temperature != null ? opts.temperature : 0.4 }) });
+    if (!res.ok) throw await dcAIHttpError(res);
     const data = await res.json();
     const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     if (!text) throw new Error('Leere KI-Antwort.');
     return text;
 }
+// Streaming variant (Server-Sent Events, OpenAI-compatible "stream": true — all providers above support it).
+// opts.onDelta(textPiece, fullSoFar) is called as tokens arrive; resolves with the full text. opts.signal aborts.
+// A provider that answers without a stream (plain JSON) still works: the whole text arrives as one delta.
+async function dcStreamAI(messages, opts) {
+    opts = opts || {};
+    const cfg = dcAIRequestConfig();
+    const res = await fetch(cfg.endpoint, { method: 'POST', headers: cfg.headers, signal: opts.signal,
+        body: JSON.stringify({ model: cfg.model, messages, stream: true, temperature: opts.temperature != null ? opts.temperature : 0.5 }) });
+    if (!res.ok) throw await dcAIHttpError(res);
+    let full = '';
+    const ct = res.headers.get('content-type') || '';
+    if (!res.body || !/event-stream|x-ndjson|octet-stream/.test(ct)) {
+        const data = await res.json().catch(() => null);
+        full = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+        if (full && opts.onDelta) opts.onDelta(full, full);
+        if (!full) throw new Error('Leere KI-Antwort.');
+        return full;
+    }
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf('\n')) >= 0) {
+            const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+            if (!line.startsWith('data:')) continue;
+            const payload = line.slice(5).trim();
+            if (payload === '[DONE]') return full;
+            try {
+                const j = JSON.parse(payload);
+                const piece = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
+                if (piece) { full += piece; if (opts.onDelta) opts.onDelta(piece, full); }
+            } catch (e) { /* keep-alive or partial line */ }
+        }
+    }
+    return full;
+}
 window.dcAIConfigured = dcAIConfigured;
 window.dcCallAI = dcCallAI;
+window.dcStreamAI = dcStreamAI;
 
 // Shared AI call helper (same provider/key convention as checkAIStatus above -
 // de_ai_provider + de_ai_key_<provider>, configured on Einstellungen_Setup.html).
