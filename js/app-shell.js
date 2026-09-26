@@ -803,11 +803,18 @@ async function dcAIHttpError(res) {
     e.status = res.status;
     return e;
 }
+// "Failed to fetch" = the browser got no answer at all (offline, ad-blocker, provider refuses browser calls, or an
+// invalid/revoked key whose error reply the browser may hide) — say that in plain words (Task 77)
+function dcAINetError(e, cfg) {
+    if (e && e.name === 'AbortError') return e;
+    const err = new Error('Keine Verbindung zur KI (' + cfg.provider + '). Internet an? Werbeblocker aus? Schlüssel noch gültig? → Einstellungen: Verbindung testen');
+    err.network = true; return err;
+}
 async function dcCallAI(messages, opts) {
     opts = opts || {};
     const cfg = dcAIRequestConfig();
     const res = await fetch(cfg.endpoint, { method: 'POST', headers: cfg.headers, signal: opts.signal,
-        body: JSON.stringify({ model: cfg.model, messages, temperature: opts.temperature != null ? opts.temperature : 0.4 }) });
+        body: JSON.stringify({ model: cfg.model, messages, temperature: opts.temperature != null ? opts.temperature : 0.4 }) }).catch(e => { throw dcAINetError(e, cfg); });
     if (!res.ok) throw await dcAIHttpError(res);
     const data = await res.json();
     const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
@@ -821,7 +828,7 @@ async function dcStreamAI(messages, opts) {
     opts = opts || {};
     const cfg = dcAIRequestConfig();
     const res = await fetch(cfg.endpoint, { method: 'POST', headers: cfg.headers, signal: opts.signal,
-        body: JSON.stringify({ model: cfg.model, messages, stream: true, temperature: opts.temperature != null ? opts.temperature : 0.5 }) });
+        body: JSON.stringify({ model: cfg.model, messages, stream: true, temperature: opts.temperature != null ? opts.temperature : 0.5 }) }).catch(e => { throw dcAINetError(e, cfg); });
     if (!res.ok) throw await dcAIHttpError(res);
     let full = '';
     const ct = res.headers.get('content-type') || '';

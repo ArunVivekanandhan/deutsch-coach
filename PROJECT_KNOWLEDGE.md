@@ -765,6 +765,21 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 77) — Quick practice: "Anderer Satz" always gives a NEW sentence; offline "🧱 3 ähnliche Sätze"; clear AI network error
+User: "Sofort üben · 2 / 2 · Grammatik — I clicked Anderer Satz but it always shows the same 'The father gives the little
+boy a new football'." + "⚠️ Failed to fetch — nochmal?" on the 🤖 button.
+- Cause: the popup only holds this round's mistakes; skipping moved the item to the end → with 1–2 items the same
+  sentence(s) came back (ping-pong).
+- `js/mistakes.js`: `similarLocal(it, n)` loads `js/satzbau-data.js` on demand and picks unused sentences of the SAME
+  grammar point (Satzbau topic title in the hint, else keyword guess `GUESS` on hint/rule/answer; unknown → A1 topics).
+  `skip()`: another waiting (not yet skipped) item if any, else a new local sentence; the skipped mistake still comes
+  back once at the end. New button **🧱 3 ähnliche Sätze** (no AI) next to the 🤖 button. New items are `temp`;
+  a wrong one is saved under `tsrc` ('satzbau'). Meine Fehler: same skip logic, temp items are not graded.
+- `js/app-shell.js`: `dcAINetError` — a fetch that gets no answer at all (offline, ad-blocker, provider refuses
+  browser calls, invalid/revoked key whose error reply is hidden) now says so in plain words and points to
+  Einstellungen → "Verbindung testen". The real cause for the user could not be checked from here.
+- Browser-tested at 390/1100 px (skip ×3 → new Dativ/Akk sentences, local button, Meine Fehler, AI error), no JS errors.
+
 ### 2026-09-26 (Task 76) — Konnektoren page: "🧩 Sätze bauen" (sentence creation)
 User: "konnektoren_referenz → sentence creation is missing."
 - New third tab **🧩 Sätze bauen** (logic in `js/konnektoren-build.js`, window.KBuild). Two modes:

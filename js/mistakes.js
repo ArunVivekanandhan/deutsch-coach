@@ -125,6 +125,50 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
     return aiOn() ? `<button type="button" class="dcmf-b" data-mfai="1">🤖 ${label || '3 ähnliche Fragen (KI)'}</button>`
       : `<a class="dcmf-b" href="Einstellungen_Setup.html" style="text-decoration:none;" title="KI-Schlüssel in den Einstellungen eintragen">🤖 Mehr Fragen mit KI (Schlüssel einrichten)</a>`;
   }
+  /* ---------- 🧱 new sentences WITHOUT AI (Task 77): same grammar point, taken from the checked Satzbau sentences ----------
+     js/satzbau-data.js is loaded on demand. The grammar point is guessed from the item (Satzbau topic title in the hint,
+     else keywords in hint / rule / answer); unknown → A1/A2 main-clause topics. */
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  let sbLoad = null;
+  function loadSatzbau() {
+    if (window.SATZBAU_DATA) return Promise.resolve(window.SATZBAU_DATA);
+    if (!sbLoad) sbLoad = new Promise(res => { const sc = document.createElement('script'); sc.src = 'js/satzbau-data.js'; sc.onload = () => res(window.SATZBAU_DATA || null); sc.onerror = () => { sbLoad = null; res(null); }; document.head.appendChild(sc); });
+    return sbLoad;
+  }
+  const GUESS = [[/Doppelkonnektor|entweder|weder|sowohl/i, 'doppelkonnektoren'], [/Relativ/i, 'relativsatz'], [/Passiv/i, 'passiv'],
+    [/Konjunktiv|\bwürde|\bhätte/i, 'konjunktiv2'], [/Futur/i, 'futur'], [/zu[- ]Infinitiv|\bum\b.+\bzu\b/i, 'zuinfinitiv'], [/indirekte Frage/i, 'indirektefrage'],
+    [/trotzdem|obwohl/i, 'trotzdemobwohl'], [/Konnektor|deshalb|deswegen|\bdenn\b|sondern|außerdem/i, 'konnektoren'],
+    [/Nebensatz|\bweil\b|\bdass\b|\bwenn\b|\bob\b/i, 'nebensatz'], [/Perfekt|Partizip/i, 'perfekt'], [/reflexiv|\bsich\b/i, 'reflexiv'],
+    [/Dativ|Akkusativ|\bdem\b.*\b(einen|den|das|die|ein|eine)\b|\b(gibt|schenkt|zeigt|bringt)\b/i, 'dativakk'], [/Präposition/i, 'praeposition'],
+    [/Adjektiv/i, 'adjektiv'], [/trennbar|separable/i, 'trennbar'], [/Modalverb|\b(kann|muss|will|möchte|darf|soll)\b/i, 'modalverben'],
+    [/Imperativ/i, 'imperativ'], [/Negation|\bkein|\bnicht\b/i, 'negation'], [/W-Frage|^\s*(wer|was|wo|wann|wie|warum|woher|wohin)\b/i, 'wfragen'], [/TeKaMoLo/i, 'tekamolo']];
+  function guessTopic(D, it) {
+    const hint = String(it.hint || ''), byTitle = D.grammar.find(t => hint.includes(t.title));
+    if (byTitle) return byTitle;
+    const txt = [hint, it.why, it.answer].join(' ');
+    for (const [re, id] of GUESS) if (re.test(txt)) { const t = D.grammar.find(x => x.id === id); if (t) return t; }
+    return null;
+  }
+  async function similarLocal(it, n) {
+    const D = await loadSatzbau(); if (!D) throw new Error('Satzbau-Sätze konnten nicht geladen werden.');
+    const t = guessTopic(D, it), topics = t ? [t] : D.grammar.filter(x => x.level === 'A1');
+    const used = new Set((P ? P.q : []).map(x => toks(x.answer).map(fold).join(' ')));
+    const cands = shuffle(topics.flatMap(tp => tp.sentences.filter(s2 => !s2.ai && s2.en).map(s2 => ({ tp, s2 }))))
+      .map(({ tp, s2 }) => ({ tp, s2, de: s2.t.map((c, i) => i === 0 ? c[0].charAt(0).toUpperCase() + c[0].slice(1) : c[0]).join(' ') + (s2.end || '.') }))
+      .filter(x => !used.has(toks(x.de).map(fold).join(' ')));
+    return cands.slice(0, n).map((x, i) => ({ id: 'sb|' + Date.now() + i, src: 'satzbau', tsrc: 'satzbau', kind: 'type', q: strip(x.s2.en),
+      hint: '🧱 Neuer Satz, gleiche Regel · ' + x.tp.title, answer: x.de, alts: [], options: [], why: strip(x.tp.rule_en || x.tp.rule || ''), temp: true }));
+  }
+  function localButton() { return `<button type="button" class="dcmf-b" data-mfloc="1" title="Ohne KI — aus den geprüften Satzbau-Sätzen">🧱 3 ähnliche Sätze</button>`; }
+  async function practiseLocal(it, btn) {
+    if (!it) return;
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ …'; }
+    try {
+      const items = await similarLocal(it, 3); if (!items.length) throw new Error('Keine weiteren Sätze zu dieser Regel.');
+      if (P && document.getElementById('dcMfBox') && P.k < P.q.length) { P.q.splice(P.k + 1, 0, ...items); if (btn) btn.textContent = `✅ ${items.length} neue Sätze kommen als Nächstes`; }
+      else openWith(items);
+    } catch (e) { if (btn) { btn.disabled = false; btn.textContent = '⚠️ ' + (e.message || 'Fehler'); } }
+  }
   async function practiseAI(it, btn) {
     if (!it || !aiOn()) return;
     if (btn) { btn.disabled = true; btn.textContent = '⏳ KI schreibt 3 Fragen …'; }
@@ -169,13 +213,27 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
     if (!ov) { ov = document.createElement('div'); ov.id = 'dcMfOv'; ov.innerHTML = '<div id="dcMfBox" role="dialog" aria-modal="true" aria-label="Fehler üben"></div>'; document.body.appendChild(ov); }
     draw();
   }
+  /* ⏭ Anderer Satz: another waiting item if there is one; otherwise (last item) a NEW sentence on the same rule (Task 77).
+     The skipped mistake itself comes back once at the end — it is still yours to practise. */
+  async function skip(btn) {
+    if (!P || P.shown === P.k) return;
+    const it = P.q[P.k], others = P.q.slice(P.k + 1).some(x => x.id !== it.id && !x.skipped);   // already-skipped ones don't count → no ping-pong
+    if (!others) {
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ …'; }
+      let fresh = [];
+      try { fresh = await similarLocal(it, 1); } catch (e) {}
+      if (!fresh.length) { if (btn) { btn.textContent = 'Kein anderer Satz zu dieser Regel'; } return; }
+      P.q.splice(P.k, 1, fresh[0]); if (!it.skipped) P.q.push(Object.assign({}, it, { skipped: true }));
+    } else { P.q.splice(P.k, 1); if (!it.skipped) P.q.push(Object.assign({}, it, { skipped: true })); }
+    P.shown = -1; draw();
+  }
   function close() { const ov = document.getElementById('dcMfOv'); if (ov) ov.remove(); P = null; }
   function draw() {
     const box = document.getElementById('dcMfBox'); if (!box || !P) return;
     if (P.k >= P.q.length) {
       const n = P.q.length - P.again.size;
       box.innerHTML = `<div class="q">✅ Geübt!</div><div>${P.right} von ${P.q.length} Antworten richtig. Die Fehler bleiben im Fehlerheft und kommen morgen wieder (1 → 3 → 7 → 14 Tage).</div>
-        <div class="r"><button type="button" class="dcmf-b p" data-mf="close">Weiter mit der Übung</button>${aiButton('3 weitere ähnliche Fragen (KI)')}<a class="dcmf-b" href="Meine_Fehler.html" style="text-decoration:none;">📒 Fehlerheft</a></div>`;
+        <div class="r"><button type="button" class="dcmf-b p" data-mf="close">Weiter mit der Übung</button>${localButton()}${aiButton('3 weitere ähnliche Fragen (KI)')}<a class="dcmf-b" href="Meine_Fehler.html" style="text-decoration:none;">📒 Fehlerheft</a></div>`;
       PENDING = []; box.querySelector('[data-mf="close"]').focus(); return;
     }
     const it = P.q[P.k], opts = it.kind === 'choice' && it.options.length > 1 ? it.options.slice().sort(() => Math.random() - .5) : null;
@@ -192,13 +250,13 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
     const it = P.q[P.k]; if (P.shown === P.k) return; P.shown = P.k;
     if (r.ok) P.right++; else if (!P.again.has(it.id)) { P.again.add(it.id); P.q.push(it); }     // wrong → once more at the end
     P.last = it;
-    if (!r.ok && it.temp) add({ src: 'ki', q: it.q, hint: it.hint, answer: it.answer, why: it.why, given, silent: true });   // a wrong AI question goes to the notebook
+    if (!r.ok && it.temp) add({ src: it.tsrc || 'ki', q: it.q, hint: it.hint, answer: it.answer, why: it.why, given, silent: true });   // a wrong AI question goes to the notebook
     const ta = document.getElementById('dcMfIn'); if (ta) ta.disabled = true;
     document.querySelectorAll('#dcMfBox .o').forEach(b => { b.disabled = true; if (b.dataset.mfo === it.answer) b.classList.add('ok'); else if (b.dataset.mfo === given) b.classList.add('no'); });
     document.getElementById('dcMfRes').innerHTML = `<div class="res ${r.ok ? 'ok' : 'no'}">${r.ok ? '🌟 <b>Richtig!</b>' : '✏️ <b>So ist es richtig:</b>'} <b>${escH(it.answer)}</b>
       ${r.note ? `<div class="h">✏️ ${escH(r.note)}</div>` : ''}${it.why ? `<div class="why">💡 ${escH(it.why)}</div>` : ''}</div>
       ${!r.ok && / /.test(it.answer) && window.DCExplain ? DCExplain.feedback(it.kind === 'type' ? given : '', it.answer) : ''}
-      <div class="r"><button type="button" class="dcmf-b p" data-mf="next">Weiter →</button>${aiButton()}</div>`;
+      <div class="r"><button type="button" class="dcmf-b p" data-mf="next">Weiter →</button>${localButton()}${aiButton()}</div>`;
     document.querySelector('#dcMfBox [data-mf="next"]').focus();
   }
   if (typeof document !== 'undefined') {
@@ -213,9 +271,10 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
         else { st.forEach(x => { x.disabled = false; }); st.length = 0; ta.value = ''; }
         return;
       }
-      const b = e.target.closest && e.target.closest('[data-mf],[data-mfo],[data-mfai]'); if (!b) return;
+      const b = e.target.closest && e.target.closest('[data-mf],[data-mfo],[data-mfai],[data-mfloc]'); if (!b) return;
       const a = b.dataset.mf;
       if (b.dataset.mfo != null) return result({ ok: b.dataset.mfo === P.q[P.k].answer, note: '' }, b.dataset.mfo);
+      if (b.dataset.mfloc) return practiseLocal((P && (P.q[P.k] || P.last)) || window.__dcMfLast, b);
       if (b.dataset.mfai) return practiseAI((P && (P.q[P.k] || P.last)) || window.__dcMfLast, b);
       if (a === 'go') return practise();
       if (a === 'later') { hideSheet(); return; }
@@ -224,7 +283,7 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
       if (a === 'chk') { const ta = document.getElementById('dcMfIn'); if (ta && ta.value.trim()) result(check(ta.value, P.q[P.k]), ta.value); return; }
       if (a === 'dunno') return result({ ok: false, note: '' }, '');
       if (a === 'next') { P.k++; P.shown = -1; return draw(); }
-      if (a === 'skip') { if (P.shown === P.k) return; const it = P.q.splice(P.k, 1)[0]; if (!it.skipped) P.q.push(Object.assign({}, it, { skipped: true })); P.shown = -1; return draw(); }
+      if (a === 'skip') return skip(b);
     });
     document.addEventListener('change', e => { if (e.target && e.target.name === 'dcmfmode') { try { localStorage.setItem(MODE_KEY, e.target.value); } catch (x) {} if (e.target.value === 'off') setTimeout(hideSheet, 400); } });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (document.getElementById('dcMfOv')) close(); else hideSheet(); } });
@@ -241,7 +300,7 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
       answer: (art && cat === 'n' ? art + ' ' : '') + word, why: forms ? word + (forms ? ' — ' + forms : '') : '' });
   }
   window.DCMistakes = {
-    SRC, add, addWord, grade, check, all: load, practise, inputHTML, level, practiseAI, aiButton, aiOn, pending: () => PENDING.slice(),
+    SRC, add, addWord, similarLocal, grade, check, all: load, practise, inputHTML, level, practiseAI, aiButton, aiOn, pending: () => PENDING.slice(),
     mode, setMode: v => { try { localStorage.setItem(MODE_KEY, v); } catch (e) {} },
     due: () => load().filter(x => !x.done && x.due <= Date.now()),
     remove: id => save(load().filter(x => x.id !== id)),

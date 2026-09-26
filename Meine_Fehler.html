@@ -117,16 +117,27 @@ function drawItem() {
     $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chk').click(); } });
     $('chk').onclick = () => { const v = $('ans').value.trim(); if (v) result(it, M.check(v, it), v); };
     $('show').onclick = () => result(it, { ok: false, note: '' }, '');
-    $('skipI').onclick = () => { const x = R.list.splice(R.k, 1)[0]; if (!x.skipped) R.list.push(Object.assign({}, x, { skipped: true })); drawItem(); };   // later, not graded
+    $('skipI').onclick = async () => {   // later, not graded; on the last item a NEW sentence on the same rule (Task 77)
+      const x = R.list[R.k], others = R.list.slice(R.k + 1).some(y => y.id !== x.id && !y.skipped);
+      if (!others) {
+        $('skipI').disabled = true; let fresh = [];
+        try { fresh = await M.similarLocal(x, 1); } catch (e) {}
+        if (!fresh.length) { $('skipI').textContent = 'Kein anderer Satz zu dieser Regel'; return; }
+        R.list.splice(R.k, 1, fresh[0]);
+      } else R.list.splice(R.k, 1);
+      if (!x.skipped) R.list.push(Object.assign({}, x, { skipped: true }));
+      drawItem();
+    };
   }
 }
 function result(it, r, given) {
   if (R.answered === R.k) return; R.answered = R.k;
-  const g = M.grade(it.id, r.ok); if (r.ok) R.right++;
+  const g = it.temp ? null : M.grade(it.id, r.ok); if (r.ok) R.right++;
+  if (it.temp && !r.ok) M.add({ src: it.tsrc || 'satzbau', q: it.q, hint: it.hint, answer: it.answer, why: it.why, given, silent: true });   // a wrong new sentence joins the notebook
   if ($('ans')) $('ans').disabled = true;
   document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === it.answer) b.classList.add('right'); else if (b.dataset.opt === given) b.classList.add('wrong'); });
   $('res').innerHTML = `<div class="res ${r.ok ? 'right' : 'wrong'}">
-      <div>${r.ok ? `🌟 <b>Richtig!</b> Nächstes Mal: ${esc(when(g))}` : '✏️ <b>So ist es richtig:</b>'}</div>
+      <div>${r.ok ? `🌟 <b>Richtig!</b>${g ? ` Nächstes Mal: ${esc(when(g))}` : ''}` : '✏️ <b>So ist es richtig:</b>'}</div>
       <div style="font-size:17px; font-weight:700;">${esc(it.answer)} <button type="button" class="btn" data-say="${esc(it.answer)}">🔊</button></div>
       ${it.alts && it.alts.length ? `<div class="muted">auch richtig: ${it.alts.slice(0, 2).map(esc).join(' · ')}</div>` : ''}
       ${r.note ? `<div class="muted">✏️ ${esc(r.note)}</div>` : ''}
