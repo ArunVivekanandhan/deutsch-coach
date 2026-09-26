@@ -69,7 +69,8 @@ function injectDependencies() {
 window.DC_SITEMAP = [
   { id: 'start', icon: 'sunrise', title: 'Start', pages: [
     { href: 'index.html', icon: 'home', t: 'Home · Tagesplan', d: 'Dein Plan für heute, zuletzt geübt, alle Bereiche.' },
-    { href: 'deutsch-coach.html', icon: 'layers', t: 'Karteikarten (tägliche Wiederholung)', d: 'Wörter mit Wiederholungs-System: fällige Karten, Bilder, Tamil, Audio.', lvl: 'A1–B2' } ] },
+    { href: 'deutsch-coach.html', icon: 'layers', t: 'Karteikarten (tägliche Wiederholung)', d: 'Wörter mit Wiederholungs-System: fällige Karten, Bilder, Tamil, Audio.', lvl: 'A1–B2' },
+    { href: 'Meine_Fehler.html', icon: 'notebook-pen', t: 'Meine Fehler (Fehlerheft)', d: 'Alle falschen Antworten aus allen Übungen — wiederholen, bis sie sitzen.', lvl: 'alle' } ] },
   { id: 'woerter', icon: 'library', title: 'Wörter', mod: 'vocab', pages: [
     { href: 'Verb_Transformation_Trainer.html', icon: 'zap', t: 'Verben', d: 'Alle Zeitformen eines Verbs, Karteikarten, Merkhilfen.', lvl: 'A1–B2' },
     { href: 'Nomen_Trainer.html', icon: 'box', t: 'Nomen (der/die/das)', d: 'Artikel und Plural sicher lernen.', lvl: 'A1–B2' },

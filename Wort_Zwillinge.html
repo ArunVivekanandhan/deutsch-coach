@@ -11,6 +11,7 @@
 <script src="js/progress-aggregator.js"></script>
 <script src="js/app-shell.js"></script>
 <script src="js/confusables.js"></script>
+<script src="js/mistakes.js"></script>
 <style>
   .wz { max-width: 980px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 16px; }
   .wz h1 { font-size: 27px; margin: 0; color: var(--color-ink); }
@@ -132,7 +133,11 @@ function answer(i) {
   const c = quiz.cur; if (!c || c.done) return; c.done = true;
   const chosen = c.opts[i], ok = chosen === c.target;
   quiz.total++; if (ok) { quiz.right++; if (HARD[c.g.id]) { HARD[c.g.id]--; if (HARD[c.g.id] <= 0) delete HARD[c.g.id]; } }
-  else HARD[c.g.id] = (HARD[c.g.id] || 0) + 1;
+  else {
+    HARD[c.g.id] = (HARD[c.g.id] || 0) + 1;
+    if (window.DCMistakes) DCMistakes.add({ src: 'wz', href: 'Wort_Zwillinge.html', kind: 'choice', q: 'Welches Wort bedeutet „' + c.target.en + '“?',
+      options: c.opts.map(wordLabel), answer: wordLabel(c.target), given: wordLabel(chosen), why: c.target.ex || '' });
+  }
   store.set('dc_wz_hard', HARD);
   document.querySelectorAll('.wz-opt').forEach((b, k) => { b.disabled = true; if (c.opts[k] === c.target) b.classList.add('ok'); else if (k === i) b.classList.add('no'); });
   const t = c.target;

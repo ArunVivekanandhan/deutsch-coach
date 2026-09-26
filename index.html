@@ -51,6 +51,7 @@
     <script src="js/srs-engine.js"></script>
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+  <script src="js/mistakes.js"></script>
   <script src="js/lucide.min.js"></script>
 </head>
 <body>
@@ -303,7 +304,9 @@
         const plan = [];
         plan.push(vs.due > 0 ? ['deutsch-coach.html', `${vs.due} fällige Karten wiederholen`, 'Wiederholen, bevor du vergisst — ca. 10 Min.']
                              : ['deutsch-coach.html', vs.reviewed ? 'Neue Wörter lernen (10 Karten)' : 'Mit den ersten 10 Wörtern starten', 'Karteikarten mit Bild, Tamil und Audio.']);
-        if (ttWrong) plan.push(['Text_Trainer.html', `${ttWrong} falsche Sätze im Text-Trainer nochmal`, 'Fehler von gestern sind die Punkte von morgen.']);
+        const mf = window.DCMistakes ? DCMistakes.stats() : { due: 0 };
+        if (mf.due) plan.push(['Meine_Fehler.html', `${mf.due} Fehler aus deinem Fehlerheft wiederholen`, 'Fehler von gestern sind die Punkte von morgen.']);
+        else if (ttWrong) plan.push(['Text_Trainer.html', `${ttWrong} falsche Sätze im Text-Trainer nochmal`, 'Fehler von gestern sind die Punkte von morgen.']);
         else if (vault) plan.push(['Grammatik_Regel_Trainer.html', `${vault} gespeicherte Grammatik-Fehler üben`, 'Aus deinem Fehler-Tresor.']);
         else if (wzHard) plan.push(['Wort_Zwillinge.html', `${wzHard} verwechselte Wort-Paare wiederholen`, 'Küche/Kuchen & Co.']);
         const day = new Date().getDay();

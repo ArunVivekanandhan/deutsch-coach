@@ -12,6 +12,7 @@
 <script src="js/progress-aggregator.js"></script>
 <script src="js/app-shell.js"></script>
 <script src="js/satzbau-data.js"></script>
+<script src="js/mistakes.js"></script>
 <style>
   /* Role colours (Satzglied-Farben): one colour per job in the sentence, readable in light and dark mode */
   :root {
@@ -535,6 +536,8 @@ function finish(ok, extra) {
   const item = curItem(), { topic, s } = item;
   if (!W.done) {
     recordResult(topic, s, ok); S.results.push({ topic, s, ok }); W.done = true;
+    if (ok === false && W.mode !== 'transform' && s.en && window.DCMistakes)   // shared mistake notebook (Meine_Fehler.html)
+      DCMistakes.add({ src: 'satzbau', href: 'Satzbau_Trainer.html', q: s.en, hint: 'Bau den Satz auf Deutsch — ' + (topic.title || ''), answer: sentenceText(s), given: W.user || '', why: topic.rule_en || topic.rule || '' });
     if (ok === false && !item.again) {          // hands-on: the same sentence comes back a few sentences later
       S.items.splice(Math.min(S.i + 4, S.items.length), 0, { topic, s, mode: item.mode, again: true });
       W.requeued = true;

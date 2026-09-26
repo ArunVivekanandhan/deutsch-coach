@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Meine Fehler — Fehlerheft — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/mistakes.js"></script>
+<style>
+  .mf { max-width: 900px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 14px; }
+  .mf h1 { font-size: 27px; margin: 0; color: var(--color-ink); }
+  .mf .sub { margin: 2px 0 0; color: var(--color-ink-soft); font-size: 14.5px; line-height: 1.55; max-width: 72ch; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 12px; text-align: center; }
+  .stat b { display: block; font-size: 26px; } .stat span { font-size: 12.5px; color: var(--color-ink-soft); }
+  .stat.due b { color: #dc2626; } .stat.open b { color: #b45309; } .stat.learnt b { color: #15803d; }
+  .chip { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .chip[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; }
+  .btn { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); text-decoration: none; }
+  .btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 10px; }
+  .muted { color: var(--color-ink-soft); font-size: 13px; }
+  .q { font-size: 20px; font-weight: 700; color: var(--color-ink); line-height: 1.45; }
+  .src { font-size: 12px; font-weight: 700; color: var(--color-ink-soft); }
+  textarea.in { font: inherit; font-size: 17px; line-height: 1.5; width: 100%; min-height: 64px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); resize: vertical; box-sizing: border-box; }
+  .opt { display: block; width: 100%; text-align: left; font: inherit; font-size: 16px; padding: 10px 12px; margin: 6px 0; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); cursor: pointer; }
+  .opt.right, .res.right { border-color: #15803d; background: color-mix(in srgb, #15803d 12%, var(--color-bg)); }
+  .opt.wrong, .res.wrong { border-color: #dc2626; background: color-mix(in srgb, #dc2626 10%, var(--color-bg)); }
+  .res { border: 1.5px solid var(--color-border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .why { font-size: 13.5px; color: #b45309; }
+  .dots { letter-spacing: 2px; font-size: 13px; color: var(--color-primary); }
+  .progress { height: 8px; border-radius: 4px; background: var(--color-bg); overflow: hidden; } .progress i { display: block; height: 100%; background: var(--color-primary); }
+  .score { font-size: 28px; font-weight: 800; }
+  .list { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .list th, .list td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+  .list th { font-size: 12px; color: var(--color-ink-soft); text-transform: uppercase; }
+  .scroll { overflow-x: auto; }
+  @media (max-width: 640px) { .mf h1 { font-size: 23px; } .list .hide-s { display: none; } }
+</style>
+</head>
+<body>
+<div class="mf">
+  <div>
+    <h1>📒 Meine Fehler</h1>
+    <p class="sub">Dein Fehlerheft für alle Übungen: jeder falsche Satz aus Text-Trainer, Satzbau, Grammatik, Zeitreise und Wort-Zwillinge landet automatisch hier. Du wiederholst ihn nach <b>1 → 3 → 7 → 14 Tagen</b>, bis er sitzt. Falsch beim Wiederholen = wieder von vorn.</p>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="row" id="srcChips"></div>
+  <div class="row">
+    <button type="button" class="btn primary" id="goReview">▶ Jetzt wiederholen</button>
+    <button type="button" class="btn" id="goList">📋 Alle Fehler ansehen</button>
+    <button type="button" class="btn" id="clearLearnt">🧹 Gelernte entfernen</button>
+  </div>
+  <div id="view"></div>
+  <p class="muted" style="text-align:center;">Gespeichert nur in diesem Browser · ● = wie oft schon richtig wiederholt (5 = gelernt)</p>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const M = window.DCMistakes;
+let src = 'all', R = null;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const dots = b => '●'.repeat(Math.min(b || 0, 5)) + '○'.repeat(Math.max(0, 5 - (b || 0)));
+const when = it => it.done ? '✅ gelernt' : it.due <= Date.now() ? 'jetzt' : new Date(it.due).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+const say = t => { try { if (typeof speak === 'function') speak(t); } catch (e) {} };
+const inSrc = it => src === 'all' || it.src === src;
+
+function paintTop() {
+  const all = M.all(), now = Date.now(), f = all.filter(inSrc);
+  const due = f.filter(x => !x.done && x.due <= now).length;
+  $('stats').innerHTML = `<div class="stat due"><b>${due}</b><span>jetzt fällig</span></div><div class="stat open"><b>${f.filter(x => !x.done).length}</b><span>noch offen</span></div><div class="stat learnt"><b>${f.filter(x => x.done).length}</b><span>gelernt</span></div>`;
+  const cnt = k => all.filter(x => x.src === k && !x.done).length;
+  $('srcChips').innerHTML = [['all', 'Alle', all.filter(x => !x.done).length], ...Object.entries(M.SRC).map(([k, l]) => [k, l, cnt(k)]).filter(x => x[2] || x[0] === src)]
+    .map(([k, l, n]) => `<button type="button" class="chip" data-src="${k}" aria-pressed="${src === k}">${esc(l)} <span class="muted">(${n})</span></button>`).join('');
+  $('goReview').textContent = due ? `▶ Jetzt wiederholen (${due})` : '▶ Wiederholen';
+}
+/* ---------- review session ---------- */
+function startReview(extra) {
+  let list = M.due().filter(inSrc);
+  if (!list.length && extra) list = M.all().filter(x => !x.done && inSrc(x)).sort((a, b) => a.due - b.due).slice(0, 10);   // nothing due: practise the next ones early
+  R = { list: shuffle(list).slice(0, 20), k: 0, right: 0 };
+  drawItem();
+}
+function drawItem() {
+  if (!R.list.length) {
+    const open = M.all().filter(x => !x.done && inSrc(x)).length;
+    $('view').innerHTML = `<div class="box" style="text-align:center;">${open ? `<div>🎉 Heute ist nichts mehr fällig.</div><div class="row" style="justify-content:center;"><button type="button" class="btn primary" id="early">Die nächsten ${Math.min(10, open)} trotzdem üben</button></div>`
+      : `<div>✨ Noch keine Fehler gespeichert${src !== 'all' ? ' in diesem Bereich' : ''}.</div><div class="muted">Übe im <a href="Text_Trainer.html">Text-Trainer</a>, <a href="Satzbau_Trainer.html">Satzbau</a>, <a href="Grammatik_Regel_Trainer.html">Grammatik</a>, <a href="Zeitreise_Trainer.html">Zeitreise</a> oder bei den <a href="Wort_Zwillinge.html">Wort-Zwillingen</a> — jede falsche Antwort kommt automatisch hierher.</div>`}</div>`;
+    if ($('early')) $('early').onclick = () => startReview(true);
+    return;
+  }
+  if (R.k >= R.list.length) {
+    $('view').innerHTML = `<div class="box" style="text-align:center;"><div class="score">${R.right} / ${R.list.length}</div><div>richtig wiederholt</div>
+      <div class="muted">Richtige kommen erst in ein paar Tagen wieder, falsche noch heute.</div>
+      <div class="row" style="justify-content:center;"><button type="button" class="btn primary" id="again">▶ Weiter wiederholen</button><button type="button" class="btn" id="toList">📋 Liste</button></div></div>`;
+    $('again').onclick = () => startReview(false); $('toList').onclick = drawList; paintTop(); return;
+  }
+  const it = R.list[R.k];
+  $('view').innerHTML = `<div class="box">
+    <div class="progress"><i style="width:${100 * R.k / R.list.length}%"></i></div>
+    <div class="row" style="justify-content:space-between;"><span class="src">${esc(M.SRC[it.src] || it.src)} · ${R.k + 1} / ${R.list.length}</span><span class="dots" title="richtig wiederholt">${dots(it.box)}</span></div>
+    ${it.hint ? `<div class="muted">${esc(it.hint)}</div>` : ''}
+    <div class="q">${esc(it.q)}</div>
+    ${it.kind === 'choice'
+      ? `<div id="opts">${shuffle(it.options.length ? it.options : [it.answer]).map(o => `<button type="button" class="opt" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>`
+      : `<textarea class="in" id="ans" placeholder="Auf Deutsch … (Enter = prüfen)" spellcheck="false" autocapitalize="sentences"></textarea>
+         <div class="row"><button type="button" class="btn primary" id="chk">Prüfen</button><button type="button" class="btn" id="show">👁 Weiß ich nicht</button></div>`}
+    <div id="res"></div></div>`;
+  if (it.kind !== 'choice') {
+    $('ans').focus();
+    $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chk').click(); } });
+    $('chk').onclick = () => { const v = $('ans').value.trim(); if (v) result(it, M.check(v, it), v); };
+    $('show').onclick = () => result(it, { ok: false, note: '' }, '');
+  }
+}
+function result(it, r, given) {
+  if (R.answered === R.k) return; R.answered = R.k;
+  const g = M.grade(it.id, r.ok); if (r.ok) R.right++;
+  if ($('ans')) $('ans').disabled = true;
+  document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === it.answer) b.classList.add('right'); else if (b.dataset.opt === given) b.classList.add('wrong'); });
+  $('res').innerHTML = `<div class="res ${r.ok ? 'right' : 'wrong'}">
+      <div>${r.ok ? `🌟 <b>Richtig!</b> Nächstes Mal: ${esc(when(g))}` : '✏️ <b>So ist es richtig:</b>'}</div>
+      <div style="font-size:17px; font-weight:700;">${esc(it.answer)} <button type="button" class="btn" data-say="${esc(it.answer)}">🔊</button></div>
+      ${it.alts && it.alts.length ? `<div class="muted">auch richtig: ${it.alts.slice(0, 2).map(esc).join(' · ')}</div>` : ''}
+      ${r.note ? `<div class="muted">✏️ ${esc(r.note)}</div>` : ''}
+      ${it.why ? `<div class="why">💡 ${esc(it.why)}</div>` : ''}
+      ${it.given ? `<div class="muted">Damals hattest du: „${esc(it.given)}“ · ${it.wrong}× falsch</div>` : ''}
+    </div><div class="row"><button type="button" class="btn primary" id="nx">Weiter →</button>${it.href ? `<a class="btn" href="${esc(it.href)}">Zur Übung</a>` : ''}</div>`;
+  $('nx').onclick = () => { R.k++; drawItem(); }; $('nx').focus();
+}
+/* ---------- list ---------- */
+function drawList() {
+  const list = M.all().filter(inSrc).sort((a, b) => (a.done - b.done) || (a.due - b.due));
+  $('view').innerHTML = list.length ? `<div class="box scroll"><table class="list"><tr><th>Frage</th><th>Richtig</th><th class="hide-s">Bereich</th><th>Stand</th><th></th></tr>
+    ${list.map(it => `<tr><td>${esc(it.q)}${it.given ? `<div class="muted">du: ${esc(it.given)}</div>` : ''}</td><td><b>${esc(it.answer)}</b></td><td class="hide-s">${esc(M.SRC[it.src] || it.src)}</td>
+      <td><span class="dots">${dots(it.box)}</span><div class="muted">${esc(when(it))}</div></td><td><button type="button" class="btn" data-del="${esc(it.id)}" aria-label="löschen">🗑</button></td></tr>`).join('')}</table></div>`
+    : `<div class="box muted" style="text-align:center;">Keine Fehler in dieser Auswahl.</div>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-src],[data-opt],[data-say],[data-del]'); if (!b) return;
+  if (b.dataset.src) { src = b.dataset.src; paintTop(); return R ? startReview(false) : drawList(); }
+  if (b.dataset.opt != null) { const it = R.list[R.k]; return result(it, { ok: b.dataset.opt === it.answer, note: '' }, b.dataset.opt); }
+  if (b.dataset.say) return say(b.dataset.say);
+  if (b.dataset.del) { M.remove(b.dataset.del); paintTop(); return drawList(); }
+});
+$('goReview').onclick = () => startReview(false);
+$('goList').onclick = () => { R = null; drawList(); };
+$('clearLearnt').onclick = () => { M.clearLearnt(); paintTop(); drawList(); };
+paintTop(); M.due().filter(inSrc).length ? startReview(false) : drawList();
+</script>
+</body>
+</html>

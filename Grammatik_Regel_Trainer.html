@@ -380,6 +380,7 @@ html.dark-theme, body.dark {
   <script src="js/app-shell.js"></script>
   <script src="js/grammar-tamil.js"></script>
   <script src="js/grammar-rules-extra.js"></script>
+  <script src="js/mistakes.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -2968,6 +2969,8 @@ function checkBuildAnswer(){
     fb.className = "feedback-box wrong";
     fbTitle.textContent = "❌ Noch nicht ganz!";
     recordRuleResult(cur.ruleId || selectedRuleId, false);
+    if (window.DCMistakes) DCMistakes.add({ src: 'grammar', href: 'Grammatik_Regel_Trainer.html', q: cur.en || cur.prompt, hint: 'Bau den Satz auf Deutsch.',
+      answer: correctSentence, alts: cur.alternates || [], given: userSentence, why: cur.explain || '' });   // Meine_Fehler.html
   }
 
   fbText.innerHTML = `
@@ -3028,6 +3031,8 @@ function checkAnswer(chosenIdx){
     fb.className = "feedback-box wrong";
     fbTitle.textContent = "❌ Nicht ganz!";
     recordRuleResult(cur.ruleId || selectedRuleId, false);
+    if (window.DCMistakes) DCMistakes.add({ src: 'grammar', href: 'Grammatik_Regel_Trainer.html', kind: 'choice', q: cur.prompt, hint: cur.en || '',
+      options: cur.options, answer: cur.options[cur.correct], given: cur.options[chosenIdx], why: cur.explain || '' });   // Meine_Fehler.html
   }
   fbText.innerHTML = `
     <div style="background:#fff; padding:8px 10px; border-radius:6px; border:1px solid var(--line); margin-bottom:8px;">

@@ -11,6 +11,7 @@
 <script src="js/progress-aggregator.js"></script>
 <script src="js/app-shell.js"></script>
 <script src="js/text-drills.js"></script>
+<script src="js/mistakes.js"></script>
 <style>
   .tt { max-width: 980px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 14px; }
   .tt h1 { font-size: 27px; margin: 0; color: var(--color-ink); }
@@ -92,7 +93,9 @@ let OWN = store.get('dc_tt_own', []);
 const TEXTS = () => [...(window.DC_TEXT_DRILLS || []), ...OWN];
 let textId = store.get('dc_tt_text', 'familie'), tab = 'read';
 const cur = () => TEXTS().find(t => t.id === textId) || TEXTS()[0];
-let WRONG = store.get('dc_tt_wrong', {});                         // "textId|index" → times wrong
+let WRONG = store.get('dc_tt_wrong', {});
+/* every wrong sentence also goes to the shared mistake notebook (js/mistakes.js → Meine_Fehler.html) */
+const note = (s, given) => { if (window.DCMistakes) DCMistakes.add({ src: 'text', href: 'Text_Trainer.html', q: s.en, hint: 'Übersetze ins Deutsche.', answer: s.de, alts: s.alts, given, why: s.focus }); };                         // "textId|index" → times wrong
 
 /* ---------- compare the learner's German with the model answers ---------- */
 const fold = w => w.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
@@ -201,7 +204,7 @@ function drawSent() {
     if (!S.done) {
       S.done = true;
       if (r.perfect && S.hint < 3) { S.right++; if (WRONG[key]) { WRONG[key]--; if (WRONG[key] <= 0) delete WRONG[key]; } }
-      else { WRONG[key] = (WRONG[key] || 0) + 1; S.wrongNow.push(i); }
+      else { WRONG[key] = (WRONG[key] || 0) + 1; S.wrongNow.push(i); note(s, v); }
       store.set('dc_tt_wrong', WRONG);
     }
     $('res').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : r.score >= 80 ? `🙂 <b>Fast (${r.score} %)</b> — rot = fehlt / anders:` : `✏️ <b>${r.score} %</b> — so heißt es richtig (rot = fehlt bei dir):`}</div>
@@ -301,7 +304,7 @@ const stickTop = () => { const h = document.querySelector('.app-header'); return
 function checkStep(i) {
   const t = E.t, s = t.sentences[i], v = $('si' + i).value.trim(); if (!v) return;
   const r = compare(v, s), key = t.id + '|' + i, first = !(i in E.res);
-  if (first) { E.res[i] = r; if (!r.perfect) { WRONG[key] = (WRONG[key] || 0) + 1; store.set('dc_tt_wrong', WRONG); } }
+  if (first) { E.res[i] = r; if (!r.perfect) { WRONG[key] = (WRONG[key] || 0) + 1; store.set('dc_tt_wrong', WRONG); note(s, v); } }
   $('en' + i).classList.add(r.perfect ? 'done' : 'bad'); if (r.perfect) $('en' + i).classList.remove('bad');
   $('sr' + i).innerHTML = r.perfect ? `<div class="ok-line">🌟 <b>Perfekt!</b> ${esc(r.ref)}</div>`
     : `<div style="margin-top:4px;">✏️ <b>${r.score} %</b> — so heißt es richtig (rot = fehlt bei dir):</div>${diffHTML(r)}
@@ -336,7 +339,7 @@ function gradeExam() {
     if (best && best.r.score >= 25) { from = best.j + 1; total += best.r.score; if (best.r.perfect) perfect++; }
     else best = null;
     const key = t.id + '|' + i;
-    if (!best || !best.r.perfect) { WRONG[key] = (WRONG[key] || 0) + 1; }
+    if (!best || !best.r.perfect) { WRONG[key] = (WRONG[key] || 0) + 1; note(s, best ? parts[best.j] : ''); }
     rows.push(`<div class="sent-res"><div class="muted">${i + 1}. ${esc(s.en)}</div>${best ? `<div>Du: ${esc(parts[best.j])}</div>${diffHTML(best.r)}` : '<div class="diff"><span class="miss">— fehlt —</span></div>'}
       <div class="muted">Muster: ${esc(s.de)} <button type="button" class="btn" data-say="${esc(s.de)}">🔊</button></div>${s.focus && (!best || !best.r.perfect) ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}</div>`);
   });
@@ -433,7 +436,7 @@ function answerQuiz(btn) {
   const q = Q.list[Q.k]; if (Q.answered === Q.k) return; Q.answered = Q.k;
   const ok = btn.dataset.opt === q.o[0];
   document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === q.o[0]) b.classList.add('right'); });
-  if (ok) Q.right++; else { btn.classList.add('wrong'); Q.wrong.push(q); }
+  if (ok) Q.right++; else { btn.classList.add('wrong'); Q.wrong.push(q); if (window.DCMistakes) DCMistakes.add({ src: 'crash', href: 'Text_Trainer.html', kind: 'choice', q: q.p, options: q.o, answer: q.o[0], given: btn.dataset.opt, why: q.exp }); }
   $('qRes').innerHTML = `<div style="margin:6px 0;">${ok ? '🌟 <b>Richtig!</b>' : '✏️ <b>Nicht ganz.</b>'} ${esc(q.exp)}</div><button type="button" class="btn primary" id="qNext">Weiter →</button>`;
   if (q.o[0].includes(' ')) sayAuto(q.o[0]);
   $('qNext').onclick = () => { Q.k++; drawQuiz(); }; $('qNext').focus();
@@ -457,7 +460,7 @@ function drawJoin() {
   $('jCheck').onclick = () => {
     const v = $('jIn').value.trim(); if (!v) return;
     const r = compare(v, j);
-    if (!J.done) { J.done = true; if (r.perfect) J.right++; }
+    if (!J.done) { J.done = true; if (r.perfect) J.right++; else if (window.DCMistakes) DCMistakes.add({ src: 'crash', href: 'Text_Trainer.html', q: `${j.a} ${j.b} (${j.c})`, hint: 'Verbinde die zwei Sätze zu einem Satz.', answer: j.de, alts: j.alts, given: v, why: j.why }); }
     $('jRes').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : `✏️ <b>${r.score} %</b> — rot = fehlt / anders:`}</div>${diffHTML(r)}
       <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div><div class="focus">💡 ${esc(j.why)}</div>
       <div class="row"><button type="button" class="btn primary" id="jNext">Weiter →</button></div>`;

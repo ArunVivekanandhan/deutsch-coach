@@ -113,6 +113,7 @@ Deutsch_Coach_Project/
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Zeitreise_Trainer.html                  # Past / present / future practice + verb time machine (data: js/tense-scenarios.js)
+├── Meine_Fehler.html                      # Shared mistake notebook with spaced review (js/mistakes.js)
 ├── Text_Trainer.html                       # Exam-style EN→DE paragraph translation + ⚡ Crashkurs (data: js/text-drills.js)
 ├── Wort_Zwillinge.html                     # Look-alike / sound-alike words (Küche/Kuchen): learn cards + quiz (data: js/confusables.js)
 ├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
@@ -761,6 +762,17 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 63) — Meine Fehler: one mistake notebook for all practice pages
+- **`js/mistakes.js`** (`window.DCMistakes`): `add()` is called on every wrong answer in Text-Trainer (sentence,
+  exam, ⚡ quiz, Sätze verbinden), Satzbau (build/type modes), Grammatik-Regel-Trainer (multiple choice + sentence
+  building), Zeitreise and Wort-Zwillinge. Item = question (English sentence / gap sentence), answer + alternatives,
+  options for multiple choice, the learner's wrong answer, the rule/explanation, source page. Same question again →
+  back to box 0. Spaced review: box 0 → 1 → 2 → 3 → 4 → learnt after 0 / 1 / 3 / 7 / 14 days; wrong in review →
+  box 0. `localStorage dc_mistakes` (max 500, learnt ones dropped first).
+- **`Meine_Fehler.html`** (menu: Start → Meine Fehler): due / open / learnt counters, filter by source, review session
+  (type the German sentence — umlaut/case-tolerant check with a note — or pick the option), shows rule + "damals
+  hattest du …", list view with delete and "Gelernte entfernen". Home daily plan step 2 = due notebook items.
 
 ### 2026-09-26 (Task 62) — Adjective data: correct Steigerung, "nicht steigerbar", 123 missing core adjectives
 Request: "yes fix all open" (the Komparativ/Superlativ check from the user's class table).

@@ -13,6 +13,7 @@
 <script src="js/word-data.js"></script>
 <script src="js/german-conjugation.js"></script>
 <script src="js/tense-scenarios.js"></script>
+<script src="js/mistakes.js"></script>
 <style>
   .zr { max-width: 1000px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 16px; }
   .zr h1 { font-size: 27px; margin: 0; color: var(--color-ink); }
@@ -185,6 +186,9 @@ function drawTiles() {
 function finish(ok, extra) {
   cur.done = true; stat.total++; if (ok) stat.right++; store.set('dc_zr_stat', stat);
   const s = cur.s, i = cur.i;
+  if (!ok && window.DCMistakes)                                     // shared mistake notebook (Meine_Fehler.html)
+    DCMistakes.add({ src: 'zeitreise', href: 'Zeitreise_Trainer.html', q: s.en[i], hint: 'Übersetze ins Deutsche (' + ['Vergangenheit', 'Gegenwart', 'Zukunft'][i] + ').',
+      answer: s.de[i], alts: i === 2 && typeof futAlt === 'function' && futAlt(s) ? [futAlt(s)] : [], why: s.why || '' });
   $('fb').innerHTML = `${ok ? '🌟 Richtig!' : '❌ Nicht ganz.'} ${extra || ''}<div style="margin-top:6px;"><b>${esc(s.de[i])}</b> <button type="button" class="zr-btn" data-say="${esc(s.de[i])}">🔊</button> <span class="tl-en">— ${esc(s.en[i])}</span></div>
     <div class="tl-en" style="margin-top:4px;">${TENSE.map((t, k) => `${t.ic} ${esc(s.de[k])}`).join(' &nbsp;·&nbsp; ')}</div>`;
   $('nextQ').hidden = false; $('nextQ').focus();
