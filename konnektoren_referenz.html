@@ -401,6 +401,18 @@ h1 {
   .kb-sol{font-size:17px;margin-top:6px;} .kb-alt,.kb-why{font-weight:400;font-size:13px;margin-top:6px;}
   .kb-say{border:none;background:none;cursor:pointer;font-size:16px;}
   .kb-score{font-size:34px;font-weight:700;} .kb-empty{padding:12px;opacity:.8;}
+
+  /* every connector: tap → 3 examples (Task 78, data in js/konnektoren-examples.js) */
+  button.conn-chip { cursor: pointer; }
+  button.conn-chip .kx-n { opacity: .6; font-weight: 400; margin-left: 3px; }
+  button.conn-chip.on { background: var(--card); border-color: currentColor; box-shadow: 0 0 0 1.5px currentColor inset; }
+  .kx-hint { font-size: 12.5px; color: var(--ink-soft); margin: -6px 0 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .kx-all { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 3px 10px; font-size: 12px; cursor: pointer; color: var(--ink); }
+  .kx-panel { border: 1.5px solid var(--line); border-left-width: 5px; border-radius: 8px; padding: 10px 12px; margin: 0 0 14px; background: var(--card); }
+  .kx-panel h3 { margin: 0 0 4px; font-size: 16px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+  .kx-lv { font-family: 'IBM Plex Mono', monospace; font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+  .kx-note { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+  .kx-ai { font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
 </style>
   <link rel="stylesheet" href="css/design-system.css">
   <script src="./assets/js/gamification.js"></script>
@@ -412,6 +424,7 @@ h1 {
   <script src="js/text-drills.js"></script>
   <script src="js/mistakes.js"></script>
   <script src="js/konnektoren-build.js"></script>
+  <script src="js/konnektoren-examples.js"></script>
 </head>
 <body>
 
@@ -753,13 +766,14 @@ function filterContent() {
   const groups = document.querySelectorAll('.grp');
 
   groups.forEach(g => {
-    const text = g.textContent.toLowerCase();
+    const text = g.textContent.toLowerCase() + ' ' + [...g.querySelectorAll('button.conn-chip')].map(b => { const e = (window.DC_KONN_EX || {})[b.dataset.key]; return e ? e.ex.map(x => x.de + ' ' + x.en).join(' ') : ''; }).join(' ').toLowerCase();
     if (!q || text.includes(q)) {
       g.style.display = 'block';
     } else {
       g.style.display = 'none';
     }
   });
+  if (window.KX) KX.search(q);
 }
 
 // Drill Quiz
@@ -914,6 +928,55 @@ function aiConnectorHelp(idx){
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration:', err));
 }
+</script>
+<script>
+/* Task 78: each connector chip opens 3 examples (js/konnektoren-examples.js); "📚 Alle Beispiele" opens the whole group */
+(function () {
+  const EX = window.DC_KONN_EX || {};
+  const CLS = { grp1: 'conn', grp2: 'conn-adv', grp3: 'conn-coord', grp4: 'conn' };
+  const COL = { grp1: 'var(--red)', grp2: 'var(--gold)', grp3: 'var(--purple)', grp4: 'var(--blue)' };
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const plain = t => t.replace(/[\[\]{}]/g, '');
+  const mark = (t, g) => esc(t).replace(/\[([^\]]+)\]/g, `<span class="${CLS[g]}">$1</span>`).replace(/\{([^}]+)\}/g, '<span class="verb">$1</span>');
+  function panelHTML(key, label, g) {
+    const e = EX[key]; if (!e) return '';
+    return `<div class="kx-panel" data-kx="${esc(key)}" style="border-left-color:${COL[g]}">
+      <h3><span style="color:${COL[g]}">${esc(label)}</span><span class="kx-lv">${esc(e.lv)}</span></h3>
+      <div class="kx-note">💡 ${esc(e.note)}</div>
+      ${e.ex.map(x => `<div class="ex"><div class="ex-top"><div><div class="en">${esc(x.en)}</div>${x.ta ? `<div class="ta" lang="ta">${esc(x.ta)}</div>` : ''}
+        <div class="de">${mark(x.de, g)}</div></div><button type="button" class="audio-btn" data-kxsay="${esc(plain(x.de))}" aria-label="vorlesen">🔊</button></div></div>`).join('')}
+      <div class="kx-ai">Tamil KI-unterstützt 🤖 · Wortstellung automatisch geprüft</div></div>`;
+  }
+  document.querySelectorAll('.grp').forEach(grp => {
+    const g = grp.dataset.cat, row = grp.querySelector('.conn-chips'); if (!row) return;
+    row.querySelectorAll('span.conn-chip').forEach(sp => {
+      const label = sp.textContent.trim(), key = label.split(/\s+/)[0].toLowerCase(), e = EX[key];
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'conn-chip'; b.style.cssText = sp.style.cssText;
+      b.dataset.key = key; b.dataset.label = label; b.setAttribute('aria-expanded', 'false');
+      b.innerHTML = esc(label) + (e ? `<span class="kx-n">· ${e.ex.length}</span>` : '');
+      sp.replaceWith(b);
+    });
+    const hint = document.createElement('div'); hint.className = 'kx-hint';
+    hint.innerHTML = '👆 Tippe auf einen Konnektor → 3 Beispiele <button type="button" class="kx-all">📚 Alle Beispiele</button>';
+    row.after(hint);
+    const box = document.createElement('div'); box.className = 'kx-box'; hint.after(box);
+  });
+  function toggle(b, force) {
+    const grp = b.closest('.grp'), box = grp.querySelector('.kx-box'), key = b.dataset.key;
+    const open = box.querySelector(`[data-kx="${CSS.escape(key)}"]`), want = force != null ? force : !open;
+    if (open && !want) { open.remove(); b.classList.remove('on'); b.setAttribute('aria-expanded', 'false'); return; }
+    if (!open && want) { box.insertAdjacentHTML('beforeend', panelHTML(key, b.dataset.label, grp.dataset.cat)); b.classList.add('on'); b.setAttribute('aria-expanded', 'true'); }
+  }
+  document.addEventListener('click', e => {
+    const say = e.target.closest('[data-kxsay]'); if (say) { speak(say.dataset.kxsay); return; }
+    const all = e.target.closest('.kx-all');
+    if (all) { const bs = [...all.closest('.grp').querySelectorAll('button.conn-chip')], on = bs.every(b => b.classList.contains('on'));
+      bs.forEach(b => toggle(b, !on)); all.textContent = on ? '📚 Alle Beispiele' : '✖ Beispiele schließen'; return; }
+    const b = e.target.closest('button.conn-chip'); if (b) { toggle(b); const p = b.closest('.grp').querySelector(`[data-kx="${CSS.escape(b.dataset.key)}"]`); if (p) p.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  });
+  /* search: a query that matches a connector opens its examples */
+  window.KX = { search(q) { if (!q || q.length < 2) return; document.querySelectorAll('button.conn-chip').forEach(b => { if (b.dataset.key.startsWith(q) || b.dataset.label.toLowerCase().includes(q)) toggle(b, true); }); } };
+})();
 </script>
     </body>
 </html>

@@ -765,6 +765,20 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 78) — Konnektoren-Referenz: at least 3 examples for EVERY connector
+User: "konnektoren_referenz → each one needs 3 examples minimum." (Before: 34 connector chips, 12 examples in total.)
+- New `js/konnektoren-examples.js` (DC_KONN_EX): 34 connectors × 3 = 102 examples with English + Tamil (Tamil
+  AI-assisted, labelled 🤖), level and a one-line usage note. Markup: [connector] and {verb whose position matters}.
+  German/English written for this task (a few reuse Satzbau sentences).
+- Page: the chips became buttons ("weil (because) · 3"); tapping opens a panel with the 3 examples (colour-coded like
+  the existing ones, 🔊 on request); "📚 Alle Beispiele" per group opens/closes all; search also matches example text
+  and opens the matching connector.
+- `scripts/check_konnektoren_examples.py` (build step 19): every chip on the page has ≥ 3 examples; Tamil script;
+  markers balanced; word order per group (Nebensatz verb last in its clause; Position 1 verb right after; ADUSO subject
+  first except questions; two-part both marked). Mutation-tested (3 planted errors caught).
+- build.py asset list: added js/konnektoren-build.js (missing since Task 76 → was not cached offline) and the new file.
+- Browser-tested 390/1100 px: 34 chip buttons, panels, group toggle, search, no overflow, no JS errors.
+
 ### 2026-09-26 (Task 77) — Quick practice: "Anderer Satz" always gives a NEW sentence; offline "🧱 3 ähnliche Sätze"; clear AI network error
 User: "Sofort üben · 2 / 2 · Grammatik — I clicked Anderer Satz but it always shows the same 'The father gives the little
 boy a new football'." + "⚠️ Failed to fetch — nochmal?" on the 🤖 button.
