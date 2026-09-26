@@ -113,6 +113,7 @@ Deutsch_Coach_Project/
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Zeitreise_Trainer.html                  # Past / present / future practice + verb time machine (data: js/tense-scenarios.js)
+├── Text_Trainer.html                       # Exam-style EN→DE paragraph translation + ⚡ Crashkurs (data: js/text-drills.js)
 ├── Wort_Zwillinge.html                     # Look-alike / sound-alike words (Küche/Kuchen): learn cards + quiz (data: js/confusables.js)
 ├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
 ├── KI_Sprechpartner.html                   # Real-time AI video-call tutor (Task 48; engine in js/call/*, Simli SDK in js/vendor/)
@@ -760,6 +761,23 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 56) — Text-Trainer: translate an English paragraph for the test
+Request: "Tomorrow I have a test: translate a text like this into German. How can I practise?" + "I have only one day: connectors,
+A1 sentence concepts, Akk and Dativ".
+- **`Text_Trainer.html`** (sidebar + home Tools) + **`js/text-drills.js`**: `DC_TEXT_DRILLS` = 4 texts / 48 sentences
+  (the learner's family test text + Freunde, Wohnung, Alltag), each sentence `{en, de, alts, skel, focus, ta}`.
+  Tabs: ⚡ Crashkurs · 📖 read & listen (EN/DE/TA side by side) · 🧩 sentence by sentence (hints: skeleton → word tiles →
+  solution; wrong ones stored in `dc_tt_wrong`, "only the wrong ones again") · 🫥 vanishing text (0/25/50/75/100 % of words
+  hidden, tap to peek) · ⏱️ exam simulation (timer, whole text, sentences aligned greedily and diffed; history `dc_tt_exams`)
+  · ➕ own text (teacher's English text → AI model translation 🤖, stored in `dc_tt_own`, needs an AI key).
+- Answer check `compare()`: LCS over umlaut-folded tokens against the model and every alt; best = highest score, then fewest
+  capitalisation/umlaut notes (so "… Deshalb …" after a full stop matches the alt, not the "…, deshalb" model).
+- **⚡ Crashkurs** (`DC_CRASH`): cheat sheet (connectors by verb position 0 / 1 / end, V2, Satzklammer, questions, kein/nicht,
+  TeKaMoLo, Akk/Dat article + pronoun tables, prepositions, Dativ verbs, Wechselpräpositionen), Blitz-Quiz (55 items in
+  kon/satz/kasus, 15 per round, area filter, retry wrong) and "Sätze verbinden" (16 join-two-sentences items, typed, diffed).
+- `scripts/check_text_drills.py` (build step 15). Browser-tested at 1100/390 px: every model + alt scores perfect, exam with the
+  model text = 100 %, no horizontal scroll, no JS errors.
 
 ### 2026-09-26 (Task 55) — trotzdem vs. obwohl (nevertheless)
 

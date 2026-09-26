@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Text-Trainer — Englisch → Deutsch wie in der Prüfung — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/text-drills.js"></script>
+<style>
+  .tt { max-width: 980px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 14px; }
+  .tt h1 { font-size: 27px; margin: 0; color: var(--color-ink); }
+  .tt .sub { margin: 2px 0 0; color: var(--color-ink-soft); font-size: 14.5px; line-height: 1.55; max-width: 72ch; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip, .tab { font: inherit; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .chip { font-size: 13px; padding: 6px 12px; border-radius: 999px; } .chip[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .tab { font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 10px; } .tab[aria-selected="true"] { border-color: var(--color-primary); color: var(--color-primary); box-shadow: inset 0 -3px 0 var(--color-primary); }
+  .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; }
+  .btn { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 10px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .muted { color: var(--color-ink-soft); font-size: 13px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+  .pair:last-child { border-bottom: 0; }
+  .pair .en { color: var(--color-ink-soft); font-size: 14.5px; } .pair .de { font-weight: 700; font-size: 15.5px; color: var(--color-ink); }
+  .focus { font-size: 12.5px; color: #b45309; grid-column: 1 / -1; } .ta { font-size: 14px; }
+  .en-big { font-size: 19px; font-weight: 700; color: var(--color-ink); line-height: 1.45; }
+  textarea.in { font: inherit; font-size: 17px; line-height: 1.5; width: 100%; min-height: 70px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); resize: vertical; box-sizing: border-box; }
+  .skel { font-size: 15.5px; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg)); }
+  .tiles { display: flex; flex-wrap: wrap; gap: 6px; } .tile { font: inherit; font-size: 15px; padding: 6px 10px; border-radius: 8px; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); }
+  .diff { font-size: 16px; line-height: 2; } .diff .ok { color: #15803d; font-weight: 700; } .diff .miss { color: #dc2626; font-weight: 700; text-decoration: underline wavy; } .diff .extra { color: #9ca3af; text-decoration: line-through; } .diff .case { color: #b45309; font-weight: 700; }
+  .progress { height: 8px; border-radius: 4px; background: var(--color-bg); overflow: hidden; } .progress i { display: block; height: 100%; background: var(--color-primary); }
+  .vanish { font-size: 18px; line-height: 2.1; } .vanish .gap { display: inline-block; min-width: 2.2em; border-bottom: 2px solid var(--color-primary); color: transparent; cursor: pointer; margin: 0 1px; }
+  .vanish .gap.shown { color: #b45309; border-color: transparent; }
+  .score { font-size: 28px; font-weight: 800; }
+  .sent-res { padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+  .timer { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 18px; }
+  .cheat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .cheat > div { border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 12px; background: var(--color-bg); font-size: 14px; line-height: 1.5; }
+  .cheat h4 { margin: 0 0 4px; font-size: 14.5px; } .cheat .ex { font-weight: 700; } .cheat .v { color: #dc2626; font-weight: 800; }
+  .ktab { border-collapse: collapse; font-size: 14px; width: 100%; } .ktab th, .ktab td { border: 1px solid var(--color-border); padding: 4px 6px; text-align: left; }
+  .ktab th { background: var(--color-bg); } .ktab .a { color: #1d4ed8; font-weight: 700; } .ktab .d { color: #b45309; font-weight: 700; }
+  .scroll { overflow-x: auto; }
+  .opt { display: block; width: 100%; text-align: left; font: inherit; font-size: 16px; padding: 10px 12px; margin: 6px 0; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); cursor: pointer; }
+  .opt.right { border-color: #15803d; background: color-mix(in srgb, #15803d 12%, var(--color-bg)); } .opt.wrong { border-color: #dc2626; background: color-mix(in srgb, #dc2626 12%, var(--color-bg)); }
+  @media (max-width: 800px) { .cheat { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } .tt h1 { font-size: 23px; } }
+</style>
+</head>
+<body>
+<div class="tt">
+  <div>
+    <h1>📝 Text-Trainer: Englisch → Deutsch</h1>
+    <p class="sub">Für Prüfungen wie „Übersetze diesen Text über deine Familie“. <b>⚡ Crashkurs</b> = Konnektoren, Satzbau A1, Akkusativ/Dativ auf einer Seite plus Blitz-Quiz. Dann lesen und hören, Satz für Satz übersetzen (mit Skelett-Hilfe), mit dem <b>Verschwinde-Text</b> auswendig lernen und zum Schluss die <b>Prüfung simulieren</b> — mit Zeit und Wort-für-Wort-Vergleich.</p>
+  </div>
+  <div class="row" id="textChips"></div>
+  <div class="row" role="tablist">
+    <button type="button" class="tab" data-tab="crash" aria-selected="false">⚡ Crashkurs</button>
+    <button type="button" class="tab" data-tab="read" aria-selected="true">📖 Lesen & Hören</button>
+    <button type="button" class="tab" data-tab="sent" aria-selected="false">🧩 Satz für Satz</button>
+    <button type="button" class="tab" data-tab="vanish" aria-selected="false">🫥 Verschwinde-Text</button>
+    <button type="button" class="tab" data-tab="exam" aria-selected="false">⏱️ Prüfung simulieren</button>
+    <button type="button" class="tab" data-tab="own" aria-selected="false">➕ Eigener Text</button>
+  </div>
+  <div id="view"></div>
+  <p class="muted" style="text-align:center;">Musterübersetzungen und Tamil KI-unterstützt erstellt 🤖 und geprüft · Mehrere richtige Versionen werden akzeptiert · 🔊 Browser-Stimme</p>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+const say = t => { try { if (typeof speak === 'function') speak(t); else { const u = new SpeechSynthesisUtterance(t); u.lang = 'de-DE'; speechSynthesis.cancel(); speechSynthesis.speak(u); } } catch (e) {} };
+const sayAll = list => { if (typeof speakSequence === 'function') speakSequence(list, 350); else say(list.join(' ')); };
+let OWN = store.get('dc_tt_own', []);
+const TEXTS = () => [...(window.DC_TEXT_DRILLS || []), ...OWN];
+let textId = store.get('dc_tt_text', 'familie'), tab = 'read';
+const cur = () => TEXTS().find(t => t.id === textId) || TEXTS()[0];
+let WRONG = store.get('dc_tt_wrong', {});                         // "textId|index" → times wrong
+
+/* ---------- compare the learner's German with the model answers ---------- */
+const fold = w => w.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+const toks = s => (String(s).match(/[A-Za-zÄÖÜäöüß0-9-]+/g) || []);
+function lcs(a, b) {                                              // a,b: folded token arrays → pairs of matched indices
+  const n = a.length, m = b.length, dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const pairs = []; for (let i = 0, j = 0; i < n && j < m;) { if (a[i] === b[j]) { pairs.push([i, j]); i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
+  return pairs;
+}
+function compare(user, s) {
+  const ut = toks(user), uf = ut.map(fold);
+  let best = null;
+  [s.de, ...(s.alts || [])].forEach(ref => {                      // best model = highest score, then fewest spelling notes
+    const rt = toks(ref), pairs = lcs(rt.map(fold), uf);
+    const score = rt.length ? Math.round(100 * pairs.length / Math.max(rt.length, ut.length)) : 0;
+    const matchedR = new Map(pairs), matchedU = new Set(pairs.map(p => p[1])), notes = [];
+    const html = rt.map((w, i) => {
+      if (!matchedR.has(i)) return `<span class="miss" title="fehlt">${esc(w)}</span>`;
+      const u = ut[matchedR.get(i)];
+      if (u !== w) {
+        notes.push(u.toLowerCase() === w.toLowerCase() ? `Großschreibung: <b>${esc(w)}</b>` : `Umlaut / ß: <b>${esc(w)}</b> (not ${esc(u)})`);
+        return `<span class="case">${esc(w)}</span>`;
+      }
+      return `<span class="ok">${esc(w)}</span>`;
+    }).join(' ');
+    const r = { ref, rt, pairs, score, html, notes, extra: ut.filter((w, j) => !matchedU.has(j)), perfect: pairs.length === rt.length && pairs.length === ut.length && !notes.length };
+    if (!best || r.score > best.score || (r.score === best.score && r.notes.length < best.notes.length)) best = r;
+  });
+  return best;
+}
+function diffHTML(r) {
+  return `<div class="diff">${r.html}</div>${r.extra.length ? `<div class="muted">Zu viel / falsch: <span class="diff"><span class="extra">${r.extra.map(esc).join(' ')}</span></span></div>` : ''}${r.notes.length ? `<div class="muted">✏️ ${r.notes.join(' · ')}</div>` : ''}`;
+}
+/* ---------- views ---------- */
+function renderChips() {
+  $('textChips').innerHTML = TEXTS().map(t => `<button type="button" class="chip" data-text="${esc(t.id)}" aria-pressed="${t.id === cur().id}">${esc(t.title)} <span class="muted">(${t.sentences.length})</span></button>`).join('');
+}
+function renderRead() {
+  const t = cur();
+  $('view').innerHTML = `<div class="box"><div class="row" style="justify-content:space-between;"><div><b>${esc(t.title)}</b> · ${esc(t.en_title)} <span class="muted">${esc(t.level || '')} ${t.note ? '· ' + esc(t.note) : ''}</span></div>
+      <button type="button" class="btn" id="sayAll">🔊 ganzen Text hören</button></div>
+    ${t.sentences.map((s, i) => `<div class="pair"><div class="en">${i + 1}. ${esc(s.en)}${s.ta ? `<div class="ta" lang="ta">${esc(s.ta)}</div>` : ''}</div>
+      <div class="de">${esc(s.de)} <button type="button" class="btn" data-say="${esc(s.de)}" aria-label="anhören">🔊</button>${s.alts && s.alts.length ? `<div class="muted" style="font-weight:400;">auch richtig: ${s.alts.slice(0, 2).map(esc).join(' · ')}</div>` : ''}</div>
+      ${s.focus ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}</div>`).join('')}</div>`;
+  $('sayAll').onclick = () => sayAll(t.sentences.map(s => s.de));
+}
+/* sentence by sentence */
+let S = null;
+function startSent(onlyWrong) {
+  const t = cur(); let idx = t.sentences.map((_, i) => i);
+  if (onlyWrong) idx = idx.filter(i => WRONG[t.id + '|' + i]);
+  S = { t, idx, k: 0, right: 0, wrongNow: [], hint: 0 };
+  drawSent();
+}
+function drawSent() {
+  const t = S.t;
+  if (S.k >= S.idx.length) {
+    const again = S.wrongNow.length;
+    $('view').innerHTML = `<div class="box" style="text-align:center;"><div class="score">${S.right} / ${S.idx.length}</div><div>${again ? `${again} Sätze noch üben.` : '🌟 Alle Sätze richtig!'}</div>
+      <div class="row" style="justify-content:center;">${again ? `<button type="button" class="btn primary" id="redoWrong">🔁 Nur die falschen nochmal</button>` : ''}<button type="button" class="btn" id="restart">↺ Alle Sätze</button><button type="button" class="btn" data-tab="vanish">🫥 Weiter: Verschwinde-Text</button></div></div>`;
+    if (again) $('redoWrong').onclick = () => { S = { t, idx: S.wrongNow.slice(), k: 0, right: 0, wrongNow: [], hint: 0 }; drawSent(); };
+    $('restart').onclick = () => startSent(false); return;
+  }
+  const i = S.idx[S.k], s = t.sentences[i]; S.hint = 0; S.done = false;
+  $('view').innerHTML = `<div class="box">
+    <div class="progress"><i style="width:${100 * S.k / S.idx.length}%"></i></div>
+    <div class="muted">Satz ${S.k + 1} / ${S.idx.length} · ✅ ${S.right}</div>
+    <div class="en-big">🇬🇧 ${esc(s.en)}</div>${s.ta ? `<div class="ta" lang="ta">${esc(s.ta)}</div>` : ''}
+    <textarea class="in" id="ans" placeholder="Auf Deutsch schreiben …" autocapitalize="sentences" spellcheck="false"></textarea>
+    <div id="hintBox"></div>
+    <div class="row"><button type="button" class="btn primary" id="check">Prüfen (Strg+Enter)</button>
+      <button type="button" class="btn" id="h1">💡 Skelett</button><button type="button" class="btn" id="h2">🧩 Wörter</button><button type="button" class="btn" id="h3">👁 Lösung</button>
+      <span class="muted">Hilfen kosten nichts — aber versuch es zuerst allein.</span></div>
+    <div id="res"></div></div>`;
+  $('ans').focus();
+  $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('check').click(); } });
+  $('h1').onclick = () => { S.hint = Math.max(S.hint, 1); $('hintBox').innerHTML = `<div class="skel">💡 ${esc(s.skel)}</div>${s.focus ? `<div class="focus" style="margin-top:6px;">${esc(s.focus)}</div>` : ''}`; };
+  $('h2').onclick = () => { S.hint = Math.max(S.hint, 2); const w = toks(s.de).map((x, k) => [Math.random(), x, k]).sort((a, b) => a[0] - b[0]);
+    $('hintBox').innerHTML = `<div class="muted">Tippe die Wörter in der richtigen Reihenfolge:</div><div class="tiles">${w.map(x => `<button type="button" class="tile" data-w="${esc(x[1])}">${esc(x[1])}</button>`).join('')}</div>`; };
+  $('h3').onclick = () => { S.hint = 3; $('hintBox').innerHTML = `<div class="skel">👁 ${esc(s.de)} <button type="button" class="btn" data-say="${esc(s.de)}">🔊</button></div><div class="muted">Schreib den Satz jetzt selbst ab — das Schreiben hilft dem Gedächtnis.</div>`; };
+  $('check').onclick = () => {
+    const v = $('ans').value.trim(); if (!v) return;
+    const r = compare(v, s), key = t.id + '|' + i;
+    if (!S.done) {
+      S.done = true;
+      if (r.perfect && S.hint < 3) { S.right++; if (WRONG[key]) { WRONG[key]--; if (WRONG[key] <= 0) delete WRONG[key]; } }
+      else { WRONG[key] = (WRONG[key] || 0) + 1; S.wrongNow.push(i); }
+      store.set('dc_tt_wrong', WRONG);
+    }
+    $('res').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : r.score >= 80 ? `🙂 <b>Fast (${r.score} %)</b> — rot = fehlt / anders:` : `✏️ <b>${r.score} %</b> — so heißt es richtig (rot = fehlt bei dir):`}</div>
+      ${diffHTML(r)}<div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div>
+      ${s.focus ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}
+      <div class="row"><button type="button" class="btn primary" id="next">Weiter →</button>${r.perfect ? '' : '<button type="button" class="btn" id="retry">Nochmal versuchen</button>'}</div>`;
+    say(r.ref);
+    $('next').onclick = () => { S.k++; drawSent(); };
+    if ($('retry')) $('retry').onclick = () => { $('ans').focus(); };
+    $('next').focus();
+  };
+}
+/* vanishing text: each level hides more words; read aloud / say it, tap a gap to peek */
+let V = { level: 0 };
+function renderVanish() {
+  const t = cur(), levels = [0, 0.25, 0.5, 0.75, 1];
+  const keep = w => /^(ich|du|er|sie|es|wir|ihr|und|,)$/i.test(w);
+  const html = t.sentences.map((s, si) => s.de.split(' ').map((w, wi) => {
+    const r = ((si * 31 + wi * 17) % 100) / 100;              // stable pseudo-random per word
+    return V.level && r < levels[V.level] && !(V.level < 4 && keep(w)) ? `<span class="gap" data-gap="1" title="antippen zum Aufdecken">${esc(w)}</span>` : esc(w);
+  }).join(' ')).join(' ');
+  $('view').innerHTML = `<div class="box">
+    <div class="row" style="justify-content:space-between;"><b>Stufe ${V.level} / 4</b><span class="muted">Lies den Text laut. Bei jeder Stufe verschwinden mehr Wörter — sprich sie trotzdem. Lücke antippen = spicken.</span></div>
+    <div class="row">${[0, 1, 2, 3, 4].map(l => `<button type="button" class="chip" data-level="${l}" aria-pressed="${V.level === l}">${['alles', '25 %', '50 %', '75 %', 'alles weg'][l]}</button>`).join('')}</div>
+    <details><summary class="muted">🇬🇧 English text anzeigen</summary><p>${t.sentences.map(s => esc(s.en)).join(' ')}</p></details>
+    <div class="vanish">${html}</div>
+    <div class="row"><button type="button" class="btn" id="vSay">🔊 vorlesen</button>${V.level < 4 ? '<button type="button" class="btn primary" id="vNext">Nächste Stufe →</button>' : '<button type="button" class="btn primary" data-tab="exam">⏱️ Jetzt Prüfung simulieren</button>'}</div></div>`;
+  $('vSay').onclick = () => sayAll(t.sentences.map(s => s.de));
+  if ($('vNext')) $('vNext').onclick = () => { V.level++; renderVanish(); };
+}
+/* exam simulation: whole text, timer, then sentence-by-sentence comparison */
+let E = null;
+function renderExam() {
+  const t = cur(); clearInterval(E && E.timer);
+  E = { t, start: Date.now(), timer: null };
+  $('view').innerHTML = `<div class="box">
+    <div class="row" style="justify-content:space-between;"><b>Übersetze den Text ins Deutsche.</b><span>⏱️ <span class="timer" id="clock">00:00</span> <span class="muted">(Ziel: ${Math.max(8, Math.round(t.sentences.length * 1.2))} Min.)</span></span></div>
+    <div style="line-height:1.7;">${t.sentences.map(s => esc(s.en)).join(' ')}</div>
+    <textarea class="in" id="examIn" style="min-height:260px;" placeholder="Schreib hier deinen deutschen Text … (ohne Hilfe, wie in der Prüfung)" spellcheck="false"></textarea>
+    <div class="row"><button type="button" class="btn primary" id="submitExam">✅ Abgeben & vergleichen</button><span class="muted">Tipp: erst jeden Satz planen — Verb auf Position 2, nach weil/dass/ob/obwohl ans Ende.</span></div>
+    <div id="examRes"></div></div>`;
+  E.timer = setInterval(() => { const s = Math.floor((Date.now() - E.start) / 1000); if ($('clock')) $('clock').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); else clearInterval(E.timer); }, 1000);
+  $('submitExam').onclick = gradeExam;
+}
+function gradeExam() {
+  clearInterval(E.timer);
+  const t = E.t, text = $('examIn').value.trim(); if (!text) return;
+  const parts = text.replace(/\n+/g, ' ').match(/[^.!?]+[.!?]?/g).map(x => x.trim()).filter(Boolean);
+  /* align: each model sentence takes the best-matching learner sentence that comes after the previous match */
+  let from = 0, total = 0, perfect = 0; const rows = [];
+  t.sentences.forEach((s, i) => {
+    let best = null;
+    for (let j = from; j < Math.min(parts.length, from + 3); j++) { const r = compare(parts[j], s); if (!best || r.score > best.r.score) best = { r, j }; }
+    if (best && best.r.score >= 25) { from = best.j + 1; total += best.r.score; if (best.r.perfect) perfect++; }
+    else best = null;
+    const key = t.id + '|' + i;
+    if (!best || !best.r.perfect) { WRONG[key] = (WRONG[key] || 0) + 1; }
+    rows.push(`<div class="sent-res"><div class="muted">${i + 1}. ${esc(s.en)}</div>${best ? `<div>Du: ${esc(parts[best.j])}</div>${diffHTML(best.r)}` : '<div class="diff"><span class="miss">— fehlt —</span></div>'}
+      <div class="muted">Muster: ${esc(s.de)} <button type="button" class="btn" data-say="${esc(s.de)}">🔊</button></div>${s.focus && (!best || !best.r.perfect) ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}</div>`);
+  });
+  store.set('dc_tt_wrong', WRONG);
+  const pct = Math.round(total / t.sentences.length), mins = Math.round((Date.now() - E.start) / 60000);
+  const hist = store.get('dc_tt_exams', []); hist.push({ id: t.id, pct, perfect, n: t.sentences.length, mins, d: new Date().toISOString().slice(0, 10) }); store.set('dc_tt_exams', hist.slice(-50));
+  const prev = hist.filter(h => h.id === t.id).slice(-4, -1).map(h => h.pct + ' %').join(' → ');
+  $('examRes').innerHTML = `<div style="text-align:center;"><div class="score">${pct} %</div><div>${perfect} von ${t.sentences.length} Sätzen perfekt · ${mins} Min.${prev ? ` · vorher: ${prev}` : ''}</div>
+    <div class="row" style="justify-content:center; margin-top:8px;"><button type="button" class="btn primary" id="practiceWrong">🧩 Falsche Sätze einzeln üben</button><button type="button" class="btn" id="examAgain">↺ Nochmal schreiben</button></div></div>${rows.join('')}`;
+  $('practiceWrong').onclick = () => { setTab('sent', true); };
+  $('examAgain').onclick = renderExam;
+}
+/* own text: the teacher's English text → German model sentences via the AI key */
+function renderOwn() {
+  const ai = typeof dcAIConfigured === 'function' && dcAIConfigured();
+  $('view').innerHTML = `<div class="box"><b>➕ Eigenen Text üben</b> <span class="muted">Füge den englischen Text deines Lehrers ein. Die KI erstellt eine Musterübersetzung Satz für Satz (mit Skelett und Grammatik-Hinweis) — danach funktionieren alle Übungen damit.</span>
+    <input class="in" id="ownTitle" style="font-size:15px; min-height:0;" placeholder="Titel, z. B. Meine Stadt">
+    <textarea class="in" id="ownText" style="min-height:160px;" placeholder="I live in a small town. When I was a child …"></textarea>
+    <div class="row"><button type="button" class="btn primary" id="ownGo" ${ai ? '' : 'disabled'}>🤖 Musterübersetzung erstellen</button>${ai ? '' : '<span class="muted">🔑 Dafür einen KI-Schlüssel unter <a href="Einstellungen_Setup.html">AI Config & Settings</a> eintragen.</span>'}<span class="muted" id="ownMsg"></span></div>
+    ${OWN.length ? `<div><b>Deine Texte:</b> ${OWN.map(o => `<span class="chip" style="cursor:default;">${esc(o.title)} <button type="button" class="btn" data-del="${esc(o.id)}" aria-label="löschen">🗑</button></span>`).join(' ')}</div>` : ''}
+    <div class="muted">⚠️ KI-Übersetzungen können Fehler enthalten — frag im Zweifel deinen Lehrer.</div></div>`;
+  if (ai) $('ownGo').onclick = async () => {
+    const en = $('ownText').value.trim(); if (!en) return;
+    $('ownMsg').textContent = '⏳ …'; $('ownGo').disabled = true;
+    try {
+      const out = await dcCallAI([{ role: 'system', content: 'You are a careful German teacher. Translate the learner\'s English text into correct, natural German at A2–B1 level, sentence by sentence. Answer ONLY with a JSON array: [{"en":"English sentence","de":"German translation","alts":["other correct translation"],"skel":"German skeleton: keep connectors, verbs, pronouns and punctuation, replace other words with …","focus":"the key grammar point in English, max 15 words"}]' }, { role: 'user', content: en }]);
+      const arr = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1)).filter(x => x && x.en && x.de);
+      if (!arr.length) throw new Error('keine Sätze');
+      const o = { id: 'own' + Date.now(), title: ($('ownTitle').value.trim() || 'Eigener Text') + ' 🤖', en_title: 'your text', level: '', note: 'AI model translation', sentences: arr.map(x => ({ en: x.en, de: x.de, alts: Array.isArray(x.alts) ? x.alts : [], skel: x.skel || '', focus: x.focus || '' })) };
+      OWN.push(o); store.set('dc_tt_own', OWN); textId = o.id; store.set('dc_tt_text', textId); renderChips(); setTab('read');
+    } catch (e) { $('ownMsg').textContent = '⚠️ ' + e.message; $('ownGo').disabled = false; }
+  };
+}
+/* ⚡ Crashkurs: cheat sheets + quick quiz + "join two sentences" on connectors, A1 word order and Akk/Dat */
+let C = { sub: 'cheat', area: 'all' };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const AREAS = { all: 'Alles gemischt', kon: '🔗 Konnektoren', satz: '🧱 Satzbau A1', kasus: '🎯 Akkusativ / Dativ' };
+function renderCrash() {
+  const subs = [['cheat', '📋 Spickzettel'], ['quiz', '🎯 Blitz-Quiz'], ['join', '🔗 Sätze verbinden']];
+  $('view').innerHTML = `<div class="box"><div class="row">${subs.map(([k, l]) => `<button type="button" class="chip" data-sub="${k}" aria-pressed="${C.sub === k}">${l}</button>`).join('')}
+    <span class="muted">Für die Prüfung morgen: Konnektoren · Satzbau A1 · Akkusativ/Dativ</span></div><div id="crashView"></div></div>`;
+  if (C.sub === 'cheat') renderCheat(); else if (C.sub === 'quiz') startQuiz(); else startJoin();
+}
+function renderCheat() {
+  const T = (head, rows) => `<div class="scroll"><table class="ktab"><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+  $('crashView').innerHTML = `
+  <h3 style="margin:4px 0;">🔗 1. Konnektoren — where does the verb go?</h3>
+  <div class="cheat">
+    <div><h4>Position 0 — nothing changes</h4><b>und · aber · oder · denn · sondern</b><br><span class="ex">Ich bin müde, aber ich <span class="v">lerne</span> noch.</span><br><span class="ex">Ich bleibe zu Hause, denn ich <span class="v">bin</span> krank.</span><br><span class="muted">Merke: ADUSO</span></div>
+    <div><h4>Position 1 — verb comes IMMEDIATELY</h4><b>deshalb · deswegen · darum · trotzdem · dann · danach · zuerst · außerdem · leider · heute · am Wochenende …</b><br><span class="ex">…, deshalb <span class="v">lerne</span> ich Deutsch.</span><br><span class="ex">…, trotzdem <span class="v">gehe</span> ich spazieren.</span></div>
+    <div><h4>Verb at the END (Nebensatz)</h4><b>weil · da · dass · ob · obwohl · wenn · als · damit · bevor · nachdem · während</b><br><span class="ex">…, weil ich krank <span class="v">bin</span>.</span><br><span class="ex">…, dass ich morgen kommen <span class="v">kann</span>.</span><br><span class="ex">…, weil ich früh <span class="v">aufstehe</span>.</span><br><span class="ta" lang="ta">🇮🇳 தமிழ் போலவே — வினைச்சொல் கடைசியில்!</span></div>
+  </div>
+  <div class="muted">⭐ Nebensatz FIRST → the whole clause is position 1 → then <b>verb, subject</b>: „Weil meine Familie mir wichtig <span class="v">ist</span>, <span class="v">versuche</span> ich, … zu sprechen.“ · <b>als</b> = one time in the past · <b>wenn</b> = present / every time · <b>ob</b> = whether · <b>um … zu</b> / <b>versuchen … zu</b> → zu + infinitive at the very end.</div>
+  <h3 style="margin:10px 0 4px;">🧱 2. Satzbau A1</h3>
+  <div class="cheat">
+    <div><h4>Verb = position 2</h4>Ich <span class="v">gehe</span> heute ins Kino.<br>Heute <span class="v">gehe</span> ich ins Kino.<br>Am Wochenende <span class="v">spiele</span> ich Fußball.</div>
+    <div><h4>Satzklammer (2 verbs)</h4>Ich <span class="v">kann</span> gut <span class="v">kochen</span>.<br>Ich <span class="v">habe</span> Pizza <span class="v">gegessen</span>.<br>Ich <span class="v">rufe</span> meine Mutter <span class="v">an</span>.<br>Ich <span class="v">werde</span> nach Chennai <span class="v">fahren</span>.</div>
+    <div><h4>Fragen · nicht / kein</h4><b>W-Frage:</b> Wo <span class="v">wohnst</span> du?<br><b>Ja/Nein:</b> <span class="v">Hast</span> du Zeit?<br>Ich habe <b>kein</b> Auto. (no + noun)<br>Ich schlafe <b>nicht</b> gut.<br>Middle: <b>Te-Ka-Mo-Lo</b> (wann · warum · wie · wo)</div>
+  </div>
+  <h3 style="margin:10px 0 4px;">🎯 3. Akkusativ / Dativ</h3>
+  <div class="cheat">
+    <div><h4>Artikel</h4>${T(['', 'm', 'f', 'n', 'Pl'], [['Nom', 'der / ein', 'die / eine', 'das / ein', 'die / –'], ['<span class="a">Akk</span>', '<span class="a">den / einen</span>', 'die / eine', 'das / ein', 'die / –'], ['<span class="d">Dat</span>', '<span class="d">dem / einem</span>', '<span class="d">der / einer</span>', '<span class="d">dem / einem</span>', '<span class="d">den / –n</span>']])}<div class="muted">mein/dein/unser… like ein: meinen (Akk m) · meinem / meiner (Dat) · Plural Dat: meinen Eltern</div></div>
+    <div><h4>Pronomen</h4>${T(['Nom', 'Akk', 'Dat'], [['ich', 'mich', 'mir'], ['du', 'dich', 'dir'], ['er', 'ihn', 'ihm'], ['sie', 'sie', 'ihr'], ['es', 'es', 'ihm'], ['wir', 'uns', 'uns'], ['ihr', 'euch', 'euch'], ['sie / Sie', 'sie / Sie', 'ihnen / Ihnen']])}</div>
+    <div><h4>Which case?</h4><b class="a">Akk:</b> für · ohne · durch · gegen · um<br>+ haben, sehen, brauchen, besuchen, anrufen, es gibt<br><b class="d">Dat:</b> mit · bei · zu · von · aus · nach · seit · gegenüber<br>+ helfen, danken, gefallen, gehören, antworten, gratulieren<br><b>Wechsel</b> (in, an, auf, neben …): <b class="a">Wohin?</b> → Akk (in den Park) · <b class="d">Wo?</b> → Dat (im Park)<br><b>geben/schenken:</b> person <span class="d">Dat</span> + thing <span class="a">Akk</span></div>
+  </div>
+  <div class="row"><button type="button" class="btn primary" data-sub="quiz">🎯 Jetzt testen: Blitz-Quiz →</button><a class="btn" href="Satzbau_Trainer.html">🧱 Satzbau-Trainer (Konnektoren-Themen)</a><a class="btn" href="Grammatik_Regel_Trainer.html">📘 Grammatik-Regeln</a><a class="btn" href="konnektoren_referenz.html">🔗 Konnektoren-Referenz</a></div>`;
+}
+let Q = null;
+function startQuiz() {
+  const pool = DC_CRASH.quiz.filter(q => C.area === 'all' || q.a === C.area);
+  Q = { list: shuffle(pool).slice(0, 15), k: 0, right: 0, wrong: [] }; drawQuiz();
+}
+function drawQuiz() {
+  const areaChips = `<div class="row">${Object.entries(AREAS).map(([k, l]) => `<button type="button" class="chip" data-area="${k}" aria-pressed="${C.area === k}">${l}</button>`).join('')}</div>`;
+  if (Q.k >= Q.list.length) {
+    $('crashView').innerHTML = `${areaChips}<div style="text-align:center;"><div class="score">${Q.right} / ${Q.list.length}</div><div>${Q.wrong.length ? 'Lies die Erklärungen unten noch einmal:' : '🌟 Alles richtig!'}</div></div>
+      ${Q.wrong.map(q => `<div class="sent-res"><div class="muted">${esc(q.p)}</div><div class="diff"><span class="ok">${esc(q.o[0])}</span></div><div class="focus">💡 ${esc(q.exp)}</div></div>`).join('')}
+      <div class="row" style="justify-content:center;">${Q.wrong.length ? '<button type="button" class="btn primary" id="qWrong">🔁 Nur die falschen</button>' : ''}<button type="button" class="btn" id="qNew">↺ Neue 15 Fragen</button><button type="button" class="btn" data-sub="join">🔗 Weiter: Sätze verbinden</button></div>`;
+    if ($('qWrong')) $('qWrong').onclick = () => { Q = { list: shuffle(Q.wrong), k: 0, right: 0, wrong: [] }; drawQuiz(); };
+    $('qNew').onclick = startQuiz; return;
+  }
+  const q = Q.list[Q.k], opts = shuffle(q.o);
+  $('crashView').innerHTML = `${areaChips}<div class="progress"><i style="width:${100 * Q.k / Q.list.length}%"></i></div>
+    <div class="muted">Frage ${Q.k + 1} / ${Q.list.length} · ✅ ${Q.right} · ${AREAS[q.a]}</div>
+    <div class="en-big">${esc(q.p)}</div><div class="muted">${q.p.includes('___') ? 'Was passt in die Lücke?' : 'Welcher Satz ist richtig?'}</div>
+    <div id="opts">${opts.map(o => `<button type="button" class="opt" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div><div id="qRes"></div>`;
+}
+function answerQuiz(btn) {
+  const q = Q.list[Q.k]; if (Q.answered === Q.k) return; Q.answered = Q.k;
+  const ok = btn.dataset.opt === q.o[0];
+  document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === q.o[0]) b.classList.add('right'); });
+  if (ok) Q.right++; else { btn.classList.add('wrong'); Q.wrong.push(q); }
+  $('qRes').innerHTML = `<div style="margin:6px 0;">${ok ? '🌟 <b>Richtig!</b>' : '✏️ <b>Nicht ganz.</b>'} ${esc(q.exp)}</div><button type="button" class="btn primary" id="qNext">Weiter →</button>`;
+  if (q.o[0].includes(' ')) say(q.o[0]);
+  $('qNext').onclick = () => { Q.k++; drawQuiz(); }; $('qNext').focus();
+}
+let J = null;
+function startJoin() { J = { list: DC_CRASH.join.slice(), k: 0, right: 0 }; drawJoin(); }
+function drawJoin() {
+  if (J.k >= J.list.length) {
+    $('crashView').innerHTML = `<div style="text-align:center;"><div class="score">${J.right} / ${J.list.length}</div><div>perfekt verbunden</div><div class="row" style="justify-content:center;"><button type="button" class="btn primary" id="jAgain">↺ Nochmal</button><button type="button" class="btn" data-tab="sent">🧩 Jetzt: dein Prüfungstext Satz für Satz</button></div></div>`;
+    $('jAgain').onclick = startJoin; return;
+  }
+  const j = J.list[J.k]; J.done = false;
+  $('crashView').innerHTML = `<div class="progress"><i style="width:${100 * J.k / J.list.length}%"></i></div>
+    <div class="muted">Satz ${J.k + 1} / ${J.list.length} · ✅ ${J.right} · Verbinde die zwei Sätze mit dem Konnektor.</div>
+    <div class="en-big">${esc(j.a)} ${esc(j.b)}</div><div>➕ <span class="skel" style="display:inline-block; padding:3px 10px;"><b>${esc(j.c)}</b></span></div>
+    <textarea class="in" id="jIn" placeholder="Ein Satz …" spellcheck="false"></textarea>
+    <div class="row"><button type="button" class="btn primary" id="jCheck">Prüfen (Strg+Enter)</button><button type="button" class="btn" id="jHint">💡 Tipp</button></div><div id="jRes"></div>`;
+  $('jIn').focus();
+  $('jIn').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('jCheck').click(); } });
+  $('jHint').onclick = () => { $('jRes').innerHTML = `<div class="focus">💡 ${esc(j.why)}</div>`; };
+  $('jCheck').onclick = () => {
+    const v = $('jIn').value.trim(); if (!v) return;
+    const r = compare(v, j);
+    if (!J.done) { J.done = true; if (r.perfect) J.right++; }
+    $('jRes').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : `✏️ <b>${r.score} %</b> — rot = fehlt / anders:`}</div>${diffHTML(r)}
+      <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div><div class="focus">💡 ${esc(j.why)}</div>
+      <div class="row"><button type="button" class="btn primary" id="jNext">Weiter →</button></div>`;
+    say(r.ref); $('jNext').onclick = () => { J.k++; drawJoin(); }; $('jNext').focus();
+  };
+}
+function setTab(t, onlyWrong) {
+  tab = t; document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  if (E) clearInterval(E.timer);
+  if (t === 'crash') renderCrash(); else if (t === 'read') renderRead(); else if (t === 'sent') startSent(onlyWrong); else if (t === 'vanish') { V.level = 0; renderVanish(); } else if (t === 'exam') renderExam(); else renderOwn();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-sub],[data-area],[data-opt],[data-tab],[data-text],[data-say],[data-w],[data-level],[data-gap],[data-del]'); if (!b) return;
+  if (b.dataset.sub) { C.sub = b.dataset.sub; if (tab !== 'crash') return setTab('crash'); return renderCrash(); }
+  if (b.dataset.area) { C.area = b.dataset.area; return startQuiz(); }
+  if (b.dataset.opt != null) return answerQuiz(b);
+  if (b.dataset.tab) return setTab(b.dataset.tab);
+  if (b.dataset.text) { textId = b.dataset.text; store.set('dc_tt_text', textId); renderChips(); return setTab(tab === 'own' ? 'read' : tab); }
+  if (b.dataset.say) return say(b.dataset.say);
+  if (b.dataset.w) { const a = $('ans'); a.value = (a.value.trim() + ' ' + b.dataset.w).trim(); b.disabled = true; a.focus(); return; }
+  if (b.dataset.level) { V.level = +b.dataset.level; return renderVanish(); }
+  if (b.dataset.gap) { b.classList.add('shown'); return; }
+  if (b.dataset.del) { OWN = OWN.filter(o => o.id !== b.dataset.del); store.set('dc_tt_own', OWN); if (textId === b.dataset.del) textId = 'familie'; renderChips(); return renderOwn(); }
+});
+renderChips(); setTab('read');
+</script>
+</body>
+</html>

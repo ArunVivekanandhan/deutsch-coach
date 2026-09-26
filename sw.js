@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v116';
+const CACHE_NAME = 'deutsch-coach-v118';
 const urlsToCache = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const urlsToCache = [
   './deutsch-coach.html',
   './Geschichte_Trainer.html',
   './Brief_Schreiben_Trainer.html',
+  './Text_Trainer.html',
   './Sprech_Pruefungs_Simulator.html',
   './A1_Sprech_Pruefungs_Simulator.html',
   './Hoerverstehen_Diktat_Trainer.html',
@@ -45,6 +46,7 @@ const urlsToCache = [
   './js/word-pictures.js',
   './js/confusables.js',
   './js/tense-scenarios.js',
+  './js/text-drills.js',
   './js/icon-svgs.js',
   './js/tamil-dict.js',
   './js/tts-engine.js',

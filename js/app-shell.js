@@ -129,6 +129,7 @@ function renderAppShell() {
                     <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i> Tools</a>
                     <a href="Uebersetzer.html" class="nav-link"><i data-lucide="languages" class="nav-icon" aria-hidden="true"></i> Übersetzer</a>
                     <a href="Zeitreise_Trainer.html" class="nav-link"><i data-lucide="history" class="nav-icon" aria-hidden="true"></i> Zeitreise (gestern·heute·morgen)</a>
+                    <a href="Text_Trainer.html" class="nav-link"><i data-lucide="file-pen" class="nav-icon" aria-hidden="true"></i> Text-Trainer (Prüfung EN→DE)</a>
                     <a href="Wort_Zwillinge.html" class="nav-link"><i data-lucide="copy" class="nav-icon" aria-hidden="true"></i> Wort-Zwillinge</a>
                     <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon" aria-hidden="true"></i> AI Config & Settings</a>
                 </div>
