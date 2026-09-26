@@ -379,6 +379,7 @@ html.dark-theme, body.dark {
   <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
   <script src="js/grammar-tamil.js"></script>
+  <script src="js/grammar-rules-extra.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -2554,6 +2555,30 @@ function generateInfiniteQuestion(ruleId) {
   }
 }
 
+/* ---- Task 52: merge the additional rules (js/grammar-rules-extra.js), give every rule a CEFR level and
+   number the list A1 → B2, so beginners start at the top ---- */
+(function mergeExtraRules(){
+  const LV = { r1_wordorder:'A1', r2_cases:'A2', r3_prepositions:'A2', r4_adjectives:'A2', r5_konjunktiv:'A2', r10_reflexiv:'A2',
+    r6_passiv:'B1', r7_relativsatz:'B1', r8_infinitiv:'B1', r9_connectors:'B1', r11_paragraph:'B1', r12_comma:'B1', r13_ndeklination:'B1',
+    r14_pronominaladverb:'B1', r15_temporale:'B1', r16_modalverb:'B1', r17_indirekte_rede:'B2', r18_partizipialattribute:'B2',
+    r19_doppelkonjunktionen:'B2', r20_nominalisierung:'B2', r21_genitivpraepositionen:'B2' };
+  GRAMMAR_RULES.forEach(r => { r.level = r.level || LV[r.id] || 'B1'; r.title = r.title.replace(/\s*—\s*B2$/, ''); });
+  (window.DC_GRAMMAR_EXTRA || []).forEach(x => {
+    if (GRAMMAR_RULES.some(r => r.id === x.id)) return;
+    const qs = x.bank.map(b => ({ prompt: b.p, en: b.en, options: b.o.slice(), correct: 0, explain: b.exp }));
+    GRAMMAR_RULES.push(Object.assign({ drills: qs.slice(0, 4) }, x));
+    DYNAMIC_GENERATORS[x.id] = [() => { const q = qs[Math.floor(Math.random() * qs.length)];
+      return { ruleNum: x.num, ruleTitle: x.title.split('(')[0].trim(), prompt: q.prompt, en: q.en, options: q.options.slice(), correct: 0, explain: q.explain }; }];
+  });
+  const ORDER = ['A1', 'A2', 'B1', 'B2'];
+  GRAMMAR_RULES.sort((a, b) => ORDER.indexOf(a.level) - ORDER.indexOf(b.level));   // stable: keeps the old order inside a level
+  GRAMMAR_RULES.forEach((r, i) => { r.num = String(i + 1); });
+  Object.keys(DYNAMIC_GENERATORS).forEach(id => {                 // drills show the rule's new number
+    const rule = GRAMMAR_RULES.find(r => r.id === id); if (!rule) return;
+    DYNAMIC_GENERATORS[id] = DYNAMIC_GENERATORS[id].map(g => () => Object.assign(g(), { ruleNum: rule.num }));
+  });
+})();
+
 function init(){
   renderRuleChips();
   renderContent();
@@ -2565,9 +2590,11 @@ function renderRuleChips(){
     { id: "alle", num: "🎲", title: "All Rules Mixed (Endless Marathon)", category: "Mixed", color: "var(--purple)" },
     ...GRAMMAR_RULES
   ];
+  let lastLv = '';
   container.innerHTML = allList.map(r=>{
     const active = r.id === selectedRuleId ? "active" : "";
-    return `
+    const head = r.level && r.level !== lastLv ? `<div style="grid-column:1/-1; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; opacity:.75; margin-top:6px;">${(lastLv = r.level)} · ${({A1:'Grundlagen', A2:'Aufbau', B1:'Mittelstufe', B2:'Fortgeschritten'})[r.level] || ''}</div>` : '';
+    return head + `
       <div class="chip ${active}" onclick="selectRule('${r.id}')">
         <span class="dot" style="background:${r.color};"></span>
         <span>${r.id==='alle' ? '🎲 All Rules Mixed' : `Rule ${r.num}: ${r.title.split('(')[0].trim()}`}</span>

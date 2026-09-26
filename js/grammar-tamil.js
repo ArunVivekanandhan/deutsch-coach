@@ -6,6 +6,104 @@
    Drafted with AI assistance and checked against standard Tamil grammar (வேற்றுமை உருபுகள், பெயரெச்சம், -படு passive,
    -கொள் reflexive/self-benefactive); shown with 🤖 in the UI. scripts/check_grammar_tamil.py validates the structure. */
 window.DC_GRAMMAR_TAMIL = {
+  a1_praesens: [
+    { k: 'bridge', t: 'Verb endings per person — Tamil does it too',
+      de: 'ich gehe · du gehst · er geht', ta: 'நான் போகிறேன் · நீ போகிறாய் · அவன் போகிறான்',
+      gloss: 'I go-1sg · you go-2sg · he go-3sg',
+      why: 'English only adds -s for he/she. Tamil and German change the verb ending for every person, so you already think this way: -ேன் ≈ -e, -ாய் ≈ -st, -ான் ≈ -t.',
+      why_ta: 'தமிழ் வினை நபருக்கு ஏற்ப மாறுவது போல ஜெர்மன் வினையும் மாறும்: ich gehe (போகிறேன்), du gehst (போகிறாய்), er geht (போகிறான்).' },
+    { k: 'bridge', t: 'du / Sie = நீ / நீங்கள்',
+      de: 'Kommst du? · Kommen Sie?', ta: 'நீ வருகிறாயா? · நீங்கள் வருகிறீர்களா?',
+      gloss: 'you(informal) come? · you(respectful) come?',
+      why: 'Tamil already separates the familiar நீ and the respectful நீங்கள் — German du and Sie work the same way. Like நீங்கள், Sie is also the plural form.',
+      why_ta: 'நண்பர்கள், குடும்பம், குழந்தைகள் → du (நீ); அலுவலகம், அறிமுகமில்லாதவர்கள், அதிகாரிகள் → Sie (நீங்கள்).' }
+  ],
+  a1_pronomen: [
+    { k: 'bridge', t: 'ich · mich · mir = நான் · என்னை · எனக்கு',
+      table: [['ich · mich · mir', 'நான் · என்னை · எனக்கு', 'I · me · to me'], ['du · dich · dir', 'நீ · உன்னை · உனக்கு', 'you · you · to you'], ['er · ihn · ihm', 'அவன் · அவனை · அவனுக்கு', 'he · him · to him'], ['wir · uns · uns', 'நாம் · நம்மை · நமக்கு', 'we · us · to us']],
+      de: 'Er sieht mich. · Er hilft mir.', ta: 'அவன் என்னைப் பார்க்கிறான். · அவன் எனக்கு உதவுகிறான்.',
+      gloss: 'he me-ACC sees · he me-DAT helps',
+      why: 'Tamil -ஐ (என்னை) = German Akkusativ (mich); Tamil -க்கு (எனக்கு) = German Dativ (mir). If you can say it in Tamil, you know which German form to use.',
+      why_ta: 'என்னை → mich (Akkusativ), எனக்கு → mir (Dativ). தமிழ் உருபே சரியான ஜெர்மன் வடிவத்தைக் காட்டும்.' },
+    { k: 'trap', t: 'Possessive mein changes — Tamil என் never does',
+      de: 'mein Vater · meine Mutter · mit meinem Vater', ta: 'என் அப்பா · என் அம்மா · என் அப்பாவுடன்',
+      gloss: 'my father · my mother · my father-with',
+      why: 'Tamil என் stays the same; German mein takes the endings of ein (meine, meinen, meinem, meiner) depending on gender and case.',
+      why_ta: 'தமிழில் „என்“ மாறாது; ஜெர்மனில் mein → meine / meinen / meinem என மாறும்.' }
+  ],
+  a1_negation: [
+    { k: 'bridge', t: 'nicht goes towards the end — like இல்லை',
+      de: 'Ich komme heute nicht.', ta: 'நான் இன்று வரவில்லை / வரமாட்டேன்.',
+      gloss: 'I today come-not',
+      why: 'Tamil puts the negation at the end (வரவில்லை, இல்லை). German nicht also tends to the end of the sentence — but before adjectives, place phrases and the second verb part.',
+      why_ta: 'தமிழில் „இல்லை“ கடைசியில் வருவது போல „nicht“ பெரும்பாலும் வாக்கியத்தின் இறுதியில் வரும்.' },
+    { k: 'trap', t: 'Doch! = "yes (it is)" to a negative question',
+      de: 'Hast du keinen Hunger? – Doch!', ta: 'உனக்குப் பசிக்கவில்லையா? – பசிக்கிறதே!',
+      gloss: 'to-you hungry-not? – (it) is hungry!',
+      why: 'A Tamil "ஆமாம்" after a negative question can mean "yes, I am not hungry". In German "Ja" is wrong here — say "Doch" when you mean the positive, "Nein" when you agree with the negation.',
+      why_ta: 'எதிர்மறைக் கேள்விக்கு „ஆம், பசிக்கிறது“ என்று சொல்ல ஜெர்மனில் „Doch!“; „Ja“ தவறு.' }
+  ],
+  a1_fragen: [
+    { k: 'trap', t: 'Tamil adds -ஆ, German moves the verb to the front',
+      de: 'Kommst du morgen?', ta: 'நீ நாளை வருகிறாயா?',
+      gloss: 'you tomorrow come-?',
+      why: 'Tamil keeps the word order and adds -ஆ. German yes/no questions start with the verb: "Du kommst morgen?" (only with question intonation) is informal; the standard form is "Kommst du morgen?".',
+      why_ta: 'தமிழில் „-ஆ“ சேர்த்தால் கேள்வி; ஜெர்மனில் வினையை முதலில் வைக்க வேண்டும்: Kommst du …?' }
+  ],
+  a1_zahlen_zeit: [
+    { k: 'trap', t: 'einundzwanzig = "one-and-twenty" — Tamil says இருபத்தொன்று (twenty-one)',
+      de: 'einundzwanzig (21) · siebenundvierzig (47)', ta: 'இருபத்தொன்று · நாற்பத்தேழு',
+      gloss: 'twenty-one · forty-seven',
+      why: 'Tamil and English say the tens first; German says the units first. Write the unit digit first when you hear a number: sieben-und-vierzig → 7 … 4 → 47.',
+      why_ta: 'தமிழில் பத்துகள் முதலில் (நாற்பத்தேழு); ஜெர்மனில் ஒன்றுகள் முதலில்: sieben + und + vierzig = 47.' },
+    { k: 'trap', t: 'halb drei = 2:30, not "two and a half" towards three',
+      de: 'Es ist halb drei.', ta: 'மணி இரண்டரை.',
+      gloss: 'o\'clock two-and-a-half',
+      why: 'Tamil இரண்டரை counts from 2. German "halb drei" counts towards 3 ("half way to three") — it is the same time, 2:30, but the number is ONE HIGHER.',
+      why_ta: '„halb drei“ = இரண்டரை மணி (2:30). ஜெர்மனில் அடுத்த மணியைச் சொல்வார்கள் — „drei“ என்றாலும் நேரம் 2:30!' }
+  ],
+  a1_modalverben: [
+    { k: 'bridge', t: 'kommen kann / fahren muss = வர முடியும் / போக வேண்டும்',
+      de: '…, weil ich morgen arbeiten muss.', ta: 'நான் நாளை வேலை செய்ய வேண்டும்.',
+      gloss: 'I tomorrow work do must',
+      why: 'Tamil puts the main verb before the "modal" (செய்ய வேண்டும் = do must, வர முடியும் = come can). German does the same at the end of the sentence: arbeiten muss, kommen kann.',
+      why_ta: 'வேண்டும் = müssen, முடியும் = können, கூடாது = nicht dürfen — முக்கிய வினை முதலில், modal பின்னால்: „arbeiten muss“.' }
+  ],
+  a1_imperativ: [
+    { k: 'bridge', t: 'Komm! / Kommen Sie! = வா! / வாருங்கள்!',
+      de: 'Komm her! · Kommen Sie bitte herein!', ta: 'இங்கே வா! · தயவுசெய்து உள்ளே வாருங்கள்!',
+      gloss: 'here come! · please inside come(respectful)!',
+      why: 'Tamil has a short command (வா) and a respectful one (வாருங்கள்) — exactly German du-imperative (Komm!) and Sie-imperative (Kommen Sie!).',
+      why_ta: 'நண்பருக்கு → Komm! (வா); மரியாதையாக → Kommen Sie! (வாருங்கள்).' }
+  ],
+  a2_komparation: [
+    { k: 'bridge', t: 'größer als er = அவனை விட உயரம்',
+      de: 'Ich bin größer als mein Bruder.', ta: 'நான் என் அண்ணனை விட உயரம்.',
+      gloss: 'I my brother-ACC than tall',
+      why: 'Tamil marks the person you compare with using -ஐ விட ("than"). German uses als after the comparative: größer als. For "as … as" Tamil uses போல, German so … wie.',
+      why_ta: '„-ஐ விட“ = „als“ (größer als); „போல“ = „so … wie“ (so groß wie).' }
+  ],
+  a2_dativverben: [
+    { k: 'bridge', t: 'Es gefällt mir = எனக்குப் பிடிக்கும் (the person is Dativ in both)',
+      de: 'Das Essen schmeckt mir. · Mir tut der Kopf weh.', ta: 'எனக்கு உணவு ருசிக்கிறது. · எனக்குத் தலை வலிக்கிறது.',
+      gloss: 'to-me food tastes · to-me head aches',
+      why: 'English makes the person the subject ("I like", "I have a headache"). Tamil and German put the person in the dative (எனக்கு = mir) and the thing is the subject.',
+      why_ta: 'எனக்கு பிடிக்கும் / ருசிக்கிறது / வலிக்கிறது → mir gefällt / schmeckt / tut weh.' }
+  ],
+  b1_plusquam_futur: [
+    { k: 'bridge', t: 'war gekommen = வந்திருந்தான்',
+      de: 'Als ich ankam, war er schon gegangen.', ta: 'நான் வந்தபோது, அவன் ஏற்கனவே போயிருந்தான்.',
+      gloss: 'I came-when, he already had-gone',
+      why: 'Tamil has a past-perfect form (-இருந்தான்) for something that happened before another past event — exactly the German Plusquamperfekt (hatte/war + Partizip II).',
+      why_ta: '„போயிருந்தான்“ (கடந்த காலத்துக்கு முன்) = „war gegangen“ — Plusquamperfekt.' }
+  ],
+  b1_lassen: [
+    { k: 'bridge', t: 'reparieren lassen = பழுது பார்க்க வை (-வை = have someone do it)',
+      de: 'Ich lasse mein Auto reparieren.', ta: 'நான் என் காரைப் பழுது பார்க்க வைக்கிறேன்.',
+      gloss: 'I my car-ACC repair make-do',
+      why: 'Tamil uses வை / செய் to say that someone else does the action for you. German uses lassen + infinitive, and the order at the end is the same: reparieren lassen = பழுது பார்க்க வை.',
+      why_ta: 'மற்றவரைச் செய்ய வைப்பது: தமிழில் „-க்க வை“, ஜெர்மனில் „lassen“: Ich lasse … reparieren.' }
+  ],
   r1_wordorder: [
     { k: 'bridge', t: 'Nebensatz & Satzklammer: the verb goes last — like in Tamil',
       de: '…, weil ich morgen nach Chennai fahren muss.', ta: 'நான் நாளை சென்னைக்குப் போக வேண்டும்.',

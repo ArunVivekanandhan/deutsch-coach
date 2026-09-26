@@ -10,6 +10,8 @@ js = open(os.path.join(ROOT, 'js', 'grammar-tamil.js'), encoding='utf-8').read()
 data = json.loads(subprocess.check_output(['node', '-e', 'global.window = {};' + js + ';process.stdout.write(JSON.stringify(window.DC_GRAMMAR_TAMIL))'], text=True))
 page = open(os.path.join(ROOT, 'Grammatik_Regel_Trainer.html'), encoding='utf-8').read()
 rule_ids = set(re.findall(r'^\s*id: "(r\d+_[a-z_]+)"', page, re.M))
+extra = open(os.path.join(ROOT, 'js', 'grammar-rules-extra.js'), encoding='utf-8').read()
+rule_ids |= set(re.findall(r"\{ id: '([a-z0-9_]+)'", extra))
 errs = []
 for key, items in data.items():
     if key not in rule_ids:

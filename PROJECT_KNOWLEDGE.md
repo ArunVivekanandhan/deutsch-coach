@@ -105,7 +105,7 @@ Deutsch_Coach_Project/
 ├── manifest.json                           # PWA manifest (name, icons, colors, start_url)
 ├── sw.js                                   # Service worker (v4) — caches all suite apps offline
 ├── icon-192.png, icon-512.png              # PWA icons
-├── Grammatik_Regel_Trainer.html            # 21 grammar rules (A2–B2): tables, audio, drills, Tamil bridges (js/grammar-tamil.js)
+├── Grammatik_Regel_Trainer.html            # 42 grammar rules A1–B2 (+ js/grammar-rules-extra.js): tables, pictures, audio, drills, Tamil bridges (js/grammar-tamil.js)
 ├── Sprech_Pruefungs_Simulator.html         # Oral Exam Simulator (Teil 1-3), Spoken Redemittel Vault & Letter Builder
 ├── German_A2_Practice_Studio.html          # Interactive 7-module A2 learning studio with Suite Hub
 ├── German_B1_Practice_Studio.html          # Interactive 7-module B1 learning studio with Suite Hub
@@ -758,6 +758,31 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 52) — All missing grammar concepts added (42 rules, A1 → B2)
+
+#### Task
+User: "You have to include all german concept" (after the grammar gap review, Task 50).
+
+#### Done
+- **`js/grammar-rules-extra.js`** (`DC_GRAMMAR_EXTRA`, 21 rules, 184 practice questions): A1 Präsens + du/Sie ·
+  Personalpronomen & Possessivartikel · Negation nicht/kein/doch · Fragen (W-, Ja/Nein, welcher, was für ein) ·
+  Zahlen, Uhrzeit (6 analog clock pictures), Datum · Modalverben · trennbare/untrennbare Verben · Imperativ;
+  A2 Perfekt · Komparativ/Superlativ (spelling-rule table from the class sheet, bar picture) · Dativ-Verben ·
+  Verben/Adjektive mit Präpositionen · Zeit- & Ortsangaben (seit/vor, nach/zu/in/bei/aus) · man/jemand/dieser/es gibt ·
+  Wortbildung; B1 Plusquamperfekt & Futur I · Konjunktiv II Vergangenheit · lassen · Modalpartikeln · Zustandspassiv ·
+  Nomen-Verb-Verbindungen. Each: summary, formula, table, 3 examples (🔊), question bank.
+- Grammatik-Regel-Trainer: `mergeExtraRules()` appends them, registers an endless generator per rule (options
+  shuffled), gives every rule a `level`, sorts A1 → B2 and renumbers (progress is keyed by id, so nothing is lost);
+  rule chips grouped under level headings; drills show the new rule number.
+- Tamil bridges for 11 of the new rules (du/Sie, person endings, என்னை/எனக்கு, இல்லை/Doch trap, -ஆ question trap,
+  einundzwanzig and halb drei traps, போக வேண்டும், வா/வாருங்கள், -ஐ விட, எனக்குப் பிடிக்கும், போயிருந்தான், -க்க வை) →
+  39 items for 30 of 42 rules. check_grammar_tamil.py also reads the extra rule ids.
+
+#### Verified
+42 rules render in study + drill mode at 1100 and 390 px, 8 generated questions per rule all valid, no JS errors.
+
+---
 
 ### 2026-09-26 (Task 51) — Word pictures, Wohin/Wo pictures, preposition contractions
 
