@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Grammatik in Bildern — animiert — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/mistakes.js"></script>
+<script src="js/bild-grammatik.js"></script>
+<style>
+  .bg { max-width: 980px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 14px; }
+  .bg h1 { font-size: 27px; margin: 0; color: var(--color-ink); } .bg h2 { font-size: 20px; margin: 0; color: var(--color-ink); }
+  .bg .sub { margin: 2px 0 0; color: var(--color-ink-soft); font-size: 14.5px; line-height: 1.55; max-width: 72ch; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .muted { color: var(--color-ink-soft); font-size: 13px; }
+  .tab, .chip { font: inherit; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .tab { font-weight: 700; font-size: 14px; padding: 9px 14px; border-radius: 10px; } .tab[aria-selected="true"] { border-color: var(--color-primary); color: var(--color-primary); box-shadow: inset 0 -3px 0 var(--color-primary); }
+  .chip { font-size: 13px; padding: 6px 12px; border-radius: 999px; } .chip[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .btn { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 10px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; font-weight: 700; } .btn:disabled { opacity: .45; cursor: default; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .ccard { text-align: left; font: inherit; cursor: pointer; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-sm); color: var(--color-ink); display: flex; flex-direction: column; gap: 6px; transition: transform .15s, border-color .15s; }
+  .ccard:hover { transform: translateY(-2px); border-color: var(--color-primary); }
+  .ccard .ic { font-size: 40px; line-height: 1; } .ccard b { font-size: 15px; } .ccard .lv { font-size: 11.5px; font-weight: 700; color: var(--color-primary); }
+  .box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; }
+  .rule { border-left: 4px solid var(--color-primary); padding: 8px 12px; background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface)); border-radius: 8px; font-size: 14.5px; line-height: 1.55; }
+  .rule .en { color: var(--color-ink-soft); font-size: 13.5px; margin-top: 4px; } .rule .ta { font-size: 14px; margin-top: 4px; }
+  .stage { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 14px; padding: 12px; min-height: 120px; }
+  .stage-svg { width: 100%; max-width: 560px; display: block; margin: 0 auto; color: var(--color-ink); overflow: visible; }
+  .stage-svg text { user-select: none; }
+  /* picture animations (all end in the final picture, so "animation off" still shows the right scene) */
+  .mv { animation: bgMove 1.4s cubic-bezier(.3, .8, .35, 1) both; }
+  @keyframes bgMove { from { transform: translate(var(--fx), var(--fy)); } to { transform: translate(0, 0); } }
+  .bob { animation: bgBob 2s ease-in-out infinite; } @keyframes bgBob { 50% { transform: translateY(-5px); } }
+  .pop { transform-box: fill-box; transform-origin: center; animation: bgPop .6s .35s both; } @keyframes bgPop { from { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); opacity: 1; } to { transform: scale(1); } }
+  .fall { animation: bgFall 1.2s ease-in infinite; } @keyframes bgFall { from { transform: translateY(-14px); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(26px); opacity: 0; } }
+  .grow { transform-box: fill-box; transform-origin: 50% 100%; animation: bgGrow .9s cubic-bezier(.3, .9, .4, 1.3) both; } @keyframes bgGrow { from { transform: scale(0); } to { transform: scale(1); } }
+  .spin { transform-box: fill-box; transform-origin: center; animation: bgSpin 3s linear infinite; } @keyframes bgSpin { to { transform: rotate(360deg); } }
+  .move { animation: bgSide 1.6s ease-in-out infinite; } @keyframes bgSide { 50% { transform: translateX(8px); } }
+  .fly { animation: bgFlyUp 2s ease-in-out infinite; } @keyframes bgFlyUp { 50% { transform: translate(6px, -8px); } }
+  .dash { animation: bgDash 1s linear infinite; } @keyframes bgDash { to { stroke-dashoffset: -26; } }
+  .hand { transform-box: view-box; transform-origin: 160px 100px; animation: bgHand 1.5s ease-in-out both; } @keyframes bgHand { from { transform: rotate(var(--from)); } to { transform: rotate(var(--to)); } }
+  html.dc-no-anim .stage *, html.dc-no-anim .qpic * { animation-duration: .01s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; }
+  @media (prefers-reduced-motion: reduce) { .stage *, .qpic * { animation-duration: .01s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; } .bchip { transition: none !important; } }
+  /* moving word blocks */
+  .chipstage { position: relative; transition: height .4s; }
+  .bchip { position: absolute; left: 0; top: 0; padding: 8px 13px; border-radius: 10px; font-weight: 800; font-size: 19px; color: #fff; white-space: nowrap; box-shadow: 0 2px 6px rgb(0 0 0 / .15);
+           transition: transform .9s cubic-bezier(.3, .9, .3, 1.15), opacity .5s, background-color .5s; }
+  .r-S { background: #2563eb; } .r-V { background: #dc2626; } .r-T { background: #16a34a; } .r-O { background: #7c3aed; } .r-P { background: #ea580c; } .r-K { background: #334155; } .r-X { background: #64748b; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12.5px; color: var(--color-ink-soft); } .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .cap .de { font-size: 21px; font-weight: 800; color: var(--color-ink); } .cap .en { color: var(--color-ink-soft); font-size: 14.5px; } .cap .note { font-size: 14px; color: #b45309; margin-top: 4px; }
+  .dots { display: flex; gap: 6px; } .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--color-border); } .dots i.on { background: var(--color-primary); }
+  .opt { display: block; width: 100%; text-align: left; font: inherit; font-size: 16.5px; padding: 11px 13px; margin: 6px 0; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); cursor: pointer; }
+  .opt.right { border-color: #15803d; background: color-mix(in srgb, #15803d 12%, var(--color-bg)); } .opt.wrong { border-color: #dc2626; background: color-mix(in srgb, #dc2626 10%, var(--color-bg)); }
+  .qpic { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 14px; padding: 8px; }
+  .score { font-size: 28px; font-weight: 800; }
+  .progress { height: 8px; border-radius: 4px; background: var(--color-bg); overflow: hidden; } .progress i { display: block; height: 100%; background: var(--color-primary); }
+  @media (max-width: 640px) { .bg h1 { font-size: 23px; } .bchip { font-size: 16px; padding: 7px 10px; } .cap .de { font-size: 18px; } }
+</style>
+</head>
+<body>
+<div class="bg">
+  <div>
+    <h1>🎬 Grammatik in Bildern</h1>
+    <p class="sub">Jede Regel als bewegtes Bild: Wörter wandern an ihren Platz, die Katze springt <b>auf den</b> Tisch oder sitzt <b>auf dem</b> Tisch, die Uhr dreht sich zu „halb acht“. Erst ansehen, dann im <b>Bild-Quiz</b> den passenden Satz wählen.</p>
+  </div>
+  <div class="row" role="tablist">
+    <button type="button" class="tab" data-tab="learn" aria-selected="true">🎬 Konzepte</button>
+    <button type="button" class="tab" data-tab="quiz" aria-selected="false">🎯 Bild-Quiz</button>
+    <span style="flex:1"></span>
+    <button type="button" class="chip" id="animBtn" aria-pressed="true"></button>
+  </div>
+  <div id="view"></div>
+  <p class="muted" style="text-align:center;">Tamil-Erklärungen KI-unterstützt 🤖 · Bilder: Emoji + SVG · 🔊 Browser-Stimme · Animation folgt der Einstellung „Bewegung reduzieren“ deines Geräts</p>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const B = window.DC_BILD;
+const say = t => { try { if (typeof speak === 'function') speak(t); } catch (e) {} };
+const ORDER = ['v2', 'fragen', 'trennbar', 'modal', 'perfekt', 'weil', 'wowohin', 'geben', 'reflexiv', 'kein', 'zeit', 'uhr', 'komparativ'];
+const ALL = ORDER.map(id => B.CHIPS.find(s => s.id === id) || B.SCENES.find(s => s.id === id)).filter(Boolean);
+const ROLES = { S: 'Subjekt', V: 'Verb', T: 'Zeit', O: 'Objekt', P: 'Ort / Richtung', K: 'Konnektor / Fragewort', X: 'Rest' };
+let tab = 'learn', cur = null, fi = 0, prevPos = {}, timer = null, prep = { i: 0, mode: 'wohin' };
+
+function paintAnimBtn() { const on = typeof dcAnimOn !== 'function' || dcAnimOn(); $('animBtn').setAttribute('aria-pressed', on); $('animBtn').textContent = on ? '✨ Animation: an' : '⏸ Animation: aus'; }
+$('animBtn').onclick = () => { if (typeof dcSetAnim === 'function') dcSetAnim(!dcAnimOn()); paintAnimBtn(); if (cur) drawFrame(); };
+
+/* ---------- concept list ---------- */
+function renderList() {
+  cur = null; stop();
+  $('view').innerHTML = `<div class="grid">${ALL.map(s => `<button type="button" class="ccard" data-scene="${s.id}"><span class="ic" data-pic="${s.icon === '⏰' ? 'shake' : 'bounce'}">${s.icon}</span><span class="lv">${esc(s.level)}</span><b>${esc(s.title)}</b><span class="muted">${esc(s.en)}</span></button>`).join('')}</div>`;
+  if (location.hash) history.replaceState(null, '', location.pathname);
+}
+/* ---------- one concept ---------- */
+function openScene(id) {
+  cur = ALL.find(s => s.id === id); if (!cur) return renderList();
+  fi = 0; prevPos = {}; stop();
+  if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+  const isChips = !!B.CHIPS.find(s => s.id === id), isPrep = cur.type === 'prep';
+  $('view').innerHTML = `<div class="box">
+    <div class="row" style="justify-content:space-between;"><button type="button" class="btn" id="back">← Alle Konzepte</button><span class="muted">${esc(cur.level)}</span></div>
+    <h2>${cur.icon} ${esc(cur.title)}</h2>
+    <div class="rule"><div>${esc(cur.de)}</div><div class="en">🇬🇧 ${esc(cur.en_rule)}</div><div class="ta" lang="ta">🇮🇳 ${esc(cur.ta)}</div></div>
+    ${isPrep ? `<div class="row" id="prepChips">${B.PREPS.map((p, i) => `<button type="button" class="chip" data-prep="${i}" aria-pressed="${i === prep.i}">${p.p}</button>`).join('')}</div>
+      <div class="row"><button type="button" class="chip" data-mode="wohin" aria-pressed="${prep.mode === 'wohin'}">➡️ Wohin? (Akkusativ)</button><button type="button" class="chip" data-mode="wo" aria-pressed="${prep.mode === 'wo'}">📍 Wo? (Dativ)</button></div>` : ''}
+    <div class="stage">${isChips ? '<div class="chipstage" id="chips"></div>' : '<div id="pic"></div>'}</div>
+    ${isChips ? `<div class="legend">${Object.entries(ROLES).map(([k, l]) => `<span><i class="r-${k}"></i>${l}</span>`).join('')}</div>` : ''}
+    <div class="cap" id="cap"></div>
+    <div class="row"><button type="button" class="btn" id="prev">◀</button><button type="button" class="btn primary" id="play">▶ Abspielen</button><button type="button" class="btn" id="next">▶▶ Weiter</button>
+      <button type="button" class="btn" id="again">🔁 Nochmal</button><button type="button" class="btn" id="sayBtn">🔊 Vorlesen</button><span class="dots" id="dots"></span></div>
+    <div class="row"><button type="button" class="btn" data-tab="quiz">🎯 Jetzt im Bild-Quiz testen</button>${cur.rule ? `<a class="btn" href="Grammatik_Regel_Trainer.html#rule=${cur.rule}" style="text-decoration:none;">📘 Regel üben</a>` : ''}</div></div>`;
+  $('back').onclick = renderList;
+  $('prev').onclick = () => { stop(); go(fi - 1); };
+  $('next').onclick = () => { stop(); go(fi + 1); };
+  $('again').onclick = () => { stop(); prevPos = {}; if ($('chips')) $('chips').innerHTML = ''; go(fi, true); };
+  $('play').onclick = () => (timer ? stop() : play());
+  $('sayBtn').onclick = () => say(frames()[fi].de);
+  drawFrame();
+}
+const frames = () => cur.type === 'prep' ? [0, 1].map(k => { const p = B.PREPS[prep.i], m = k ? 'wo' : 'wohin'; return { de: p[m], en: p[m + 'En'], note: (m === 'wohin' ? 'Movement to a goal → Akkusativ (den/die/das).' : 'Place, no movement → Dativ (dem/der/dem).') + ` · ${p.p} = ${p.en}`, ta: p.ta, mode: m }; }) : cur.frames;
+function go(i, replay) {
+  const n = frames().length;
+  const prev = fi; fi = Math.max(0, Math.min(n - 1, i));
+  if (cur.type === 'prep') prep.mode = frames()[fi].mode;
+  if (fi !== prev || replay) drawFrame(replay ? null : prev);
+}
+function drawFrame(prev) {
+  const F = frames(), f = F[fi];
+  if ($('chips')) layoutChips(f.chips);
+  else if (cur.type === 'prep') {
+    prep.mode = f.mode;                              // picture and sentence always show the same case
+    $('pic').innerHTML = B.prepSVG(B.PREPS[prep.i], prep.mode);
+    document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === prep.mode));
+  } else $('pic').innerHTML = f.svg(prev == null ? null : prev);
+  $('cap').innerHTML = `<div class="de">${esc(f.de)}</div><div class="en">🇬🇧 ${esc(f.en)}</div><div class="note">💡 ${esc(f.note)}${f.ta ? ` <span lang="ta">(${esc(f.ta)})</span>` : ''}</div>`;
+  $('dots').innerHTML = F.map((_, k) => `<i class="${k === fi ? 'on' : ''}"></i>`).join('');
+  $('prev').disabled = fi === 0; $('next').disabled = fi === F.length - 1;
+}
+/* word blocks: every chip keeps its id → it slides from its old place to the new one */
+function layoutChips(list) {
+  const st = $('chips'); if (!st) return;
+  const W = st.clientWidth || 300, gap = 8, old = new Map([...st.querySelectorAll('.bchip')].map(e => [e.dataset.id, e]));
+  const items = list.map(([id, text, role, from]) => {
+    let el = old.get(id); const isNew = !el;
+    if (isNew) { el = document.createElement('span'); el.dataset.id = id; st.appendChild(el); }
+    el.textContent = text; el.className = 'bchip r-' + role; old.delete(id);
+    return { id, el, isNew, from };
+  });
+  let x = 0, y = 0, h = 40; const pos = {};
+  items.forEach(o => { const w = o.el.offsetWidth; h = o.el.offsetHeight; if (x > 0 && x + w > W) { x = 0; y += h + gap; } pos[o.id] = [x, y]; x += w + gap; });
+  st.style.height = (y + h + 6) + 'px';
+  items.forEach(o => {
+    const [tx, ty] = pos[o.id];
+    if (o.isNew) {
+      const src = o.from && prevPos[o.from];
+      o.el.style.transition = 'none';
+      o.el.style.transform = src ? `translate(${src[0]}px, ${src[1]}px)` : `translate(${tx}px, ${ty - 30}px) scale(.3)`;
+      o.el.style.opacity = src ? '1' : '0';
+      void o.el.offsetWidth; o.el.style.transition = '';
+    }
+    o.el.style.transform = `translate(${tx}px, ${ty}px)`; o.el.style.opacity = '1';
+  });
+  old.forEach(el => { el.style.opacity = '0'; el.style.transform += ' scale(.3)'; setTimeout(() => el.remove(), 600); });
+  prevPos = pos;
+}
+function play() {
+  $('play').textContent = '⏸ Pause';
+  if (fi >= frames().length - 1) { prevPos = {}; if ($('chips')) $('chips').innerHTML = ''; fi = 0; drawFrame(); }
+  timer = setInterval(() => { if (fi >= frames().length - 1) return stop(); go(fi + 1); }, 2800);
+}
+function stop() { clearInterval(timer); timer = null; if ($('play')) $('play').textContent = '▶ Abspielen'; }
+
+/* ---------- picture quiz ---------- */
+let Q = null;
+function startQuiz() { cur = null; stop(); Q = { k: 0, n: 10, right: 0, wrong: [] }; nextQ(); }
+function nextQ() {
+  if (Q.k >= Q.n) {
+    $('view').innerHTML = `<div class="box" style="text-align:center;"><div class="score">${Q.right} / ${Q.n}</div><div>${Q.right === Q.n ? '🌟 Alles richtig!' : 'Die falschen stehen jetzt in <a href="Meine_Fehler.html">Meine Fehler</a>.'}</div>
+      <div class="row" style="justify-content:center;"><button type="button" class="btn primary" id="qAgain">🎯 Neue 10 Bilder</button><button type="button" class="btn" data-tab="learn">🎬 Konzepte ansehen</button></div></div>`;
+    $('qAgain').onclick = startQuiz; return;
+  }
+  const q = B.quizItem(); Q.cur = q; Q.done = false;
+  $('view').innerHTML = `<div class="box">
+    <div class="progress"><i style="width:${100 * Q.k / Q.n}%"></i></div>
+    <div class="muted">Bild ${Q.k + 1} / ${Q.n} · ✅ ${Q.right}</div>
+    <div class="qpic">${q.svg}</div>
+    <div style="font-size:17px; font-weight:700;">🇬🇧 ${esc(q.en)}</div>
+    <div class="muted">Welcher deutsche Satz passt zum Bild?</div>
+    <div id="opts">${B.shuffle(q.options).map(o => `<button type="button" class="opt" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+    <div id="qres"></div></div>`;
+}
+function answer(btn) {
+  if (Q.done) return; Q.done = true;
+  const q = Q.cur, ok = btn.dataset.opt === q.answer;
+  document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === q.answer) b.classList.add('right'); });
+  if (ok) Q.right++; else {
+    btn.classList.add('wrong');
+    if (window.DCMistakes) DCMistakes.add({ src: 'bild', href: 'Bild_Grammatik.html', kind: 'choice', q: q.en + ' (Bild)', hint: 'Welcher Satz passt zum Bild?', options: q.options, answer: q.answer, given: btn.dataset.opt, why: q.why });
+  }
+  $('qres').innerHTML = `<div style="margin:6px 0;">${ok ? '🌟 <b>Richtig!</b>' : '✏️ <b>Richtig ist:</b> ' + esc(q.answer)} <button type="button" class="btn" style="padding:2px 8px;" id="qSay">🔊</button></div>
+    <div style="color:#b45309; font-size:14px;">💡 ${esc(q.why)}</div><div class="row" style="margin-top:8px;"><button type="button" class="btn primary" id="qNext">Weiter →</button></div>`;
+  $('qSay').onclick = () => say(q.answer);
+  $('qNext').onclick = () => { Q.k++; nextQ(); }; $('qNext').focus();
+}
+
+function setTab(t) {
+  tab = t; document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  if (t === 'quiz') startQuiz(); else renderList();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-tab],[data-scene],[data-prep],[data-mode],[data-opt]'); if (!b) return;
+  if (b.dataset.tab) return setTab(b.dataset.tab);
+  if (b.dataset.scene) { window.scrollTo(0, 0); return openScene(b.dataset.scene); }
+  if (b.dataset.prep) { prep.i = +b.dataset.prep; prep.mode = 'wohin'; fi = 0; document.querySelectorAll('[data-prep]').forEach(x => x.setAttribute('aria-pressed', x === b)); return drawFrame(); }
+  if (b.dataset.mode) { stop(); return go(b.dataset.mode === 'wo' ? 1 : 0, true); }
+  if (b.dataset.opt != null) return answer(b);
+});
+addEventListener('resize', () => { if (cur && $('chips')) layoutChips(frames()[fi].chips); });
+paintAnimBtn();
+const h = location.hash.slice(1);
+if (h && ALL.some(s => s.id === h)) openScene(h); else renderList();
+</script>
+</body>
+</html>

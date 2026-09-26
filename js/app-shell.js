@@ -82,6 +82,7 @@ window.DC_SITEMAP = [
     { href: 'Uebersetzer.html', icon: 'languages', t: 'Übersetzer & Wort-Explorer', d: 'Wort oder Satz nachschlagen: Formen, Wortaufbau, Tamil.', lvl: 'alle' } ] },
   { id: 'grammatik', icon: 'puzzle', title: 'Grammatik & Satzbau', mod: 'grammar', pages: [
     { href: 'Grammatik_Regel_Trainer.html', icon: 'puzzle', t: 'Grammatik-Regeln', d: 'Alle Regeln A1 → B2 mit Tabellen, Bildern, Tamil-Brücken und Übungen.', lvl: 'A1–B2' },
+    { href: 'Bild_Grammatik.html', icon: 'clapperboard', t: 'Grammatik in Bildern (animiert)', d: 'Jede Regel als bewegtes Bild: Wörter wandern, die Katze springt auf den Tisch, die Uhr dreht sich — plus Bild-Quiz.', lvl: 'A1–B1' },
     { href: 'Satzbau_Trainer.html', icon: 'construction', t: 'Satzbau-Trainer', d: 'Sätze bauen: Verb auf Position 2, Nebensätze, Konnektoren.', lvl: 'A1–B1' },
     { href: 'Zeitreise_Trainer.html', icon: 'history', t: 'Zeitreise: gestern · heute · morgen', d: 'Vergangenheit, Gegenwart, Zukunft im selben Satz üben.', lvl: 'A1–B1' },
     { href: 'konnektoren_referenz.html', icon: 'link', t: 'Konnektoren', d: 'weil, deshalb, obwohl, trotzdem … mit Wortstellung.', lvl: 'A2–B1' },
@@ -146,6 +147,39 @@ function dcBindNavSearch(root) {
     } catch (e) { /* storage blocked */ }
 })();
 window.dcNavHTML = dcNavHTML; window.dcBindNavSearch = dcBindNavSearch;
+// Animated pictures (Task 67): every word picture / icon pops in and then moves in a way that fits what it shows
+// (🏃 runs, 🐦 flies, 🔥 flickers, 💧 drips, ❤️ beats, 😴 breathes …; anything else floats gently). CSS in
+// design-system.css (.dc-anim[data-anim=…]). New pictures are picked up by a MutationObserver. Off: OS "reduce motion",
+// or localStorage dc_anim = 'off' (switch in Einstellungen and on Bild_Grammatik.html) → html.dc-no-anim.
+(function dcAnimatePics() {
+    const MAP = { move: '🏃🚶🚗🚌🚆🚲🚕🚚🛴🏊🚂🚇🛵🏍🚴🧗⛷🏄🚣🚙🚓🚑🚒🚜🛻🚎🚐🧍🤸🐎🐕🐈🐢🐌🦆🐜', fly: '🐦🦋✈🎈🪁🕊🛫🛬🦅🐝🚁🪽🎐📨✉💌🍃',
+        spin: '🌀⚙🎡🔄🔁❄🌍🌎🌏⏳⌛☀🌞🧭💿📀🎠🌻🧶', pulse: '❤💖💗💓💔🫀💯⭐✨🌟💡🔴🔵🟢🟡⚫⚪🟣🟠🟤💎🏆🥇🎯💘❣',
+        shake: '😂😠😡😱🔔📞☎⏰😬🥶🤣😤🤬📢📣🚨🥁😵🤯😨😰', flicker: '🔥🕯⚡🎆🎇💥🌋', bounce: '⚽🏀🎾🐸🦘🐇🎉🥳👍✅🏐🎊🙌👏🤾🏈🎈🧸🐥',
+        fall: '💧🌧☔🍂🍁🌨💦🌦☂🚿💦🩸', breathe: '😴💤🛌🛋🌙🥱🌜🌛😌🧘🛏', wave: '🌊👋🏳🚩🌾🌳🌴🌲🎏🏁🎋🙋' };
+    const KIND = {};
+    Object.entries(MAP).forEach(([k, v]) => Array.from(v).forEach(ch => { if (ch !== '️') KIND[ch] = k; }));
+    const SEL = '.wpic,.wz-pic,.wz-q-pic,.wordicon,.verb-icon,.module-icon,.flash-pic,.card-pic,.pic-big,[data-pic]';
+    function kindOf(el) {
+        if (el.dataset.pic && MAP[el.dataset.pic]) return el.dataset.pic;
+        for (const ch of Array.from((el.textContent || '').trim())) { if (KIND[ch]) return KIND[ch]; if (/\p{L}/u.test(ch)) break; }
+        return el.classList.contains('module-icon') ? 'once' : 'float';
+    }
+    function deco(root) {
+        if (!root || root.nodeType !== 1) return;
+        const list = root.matches && root.matches(SEL) ? [root] : [];
+        root.querySelectorAll && list.push(...root.querySelectorAll(SEL));
+        list.forEach(el => { if (el.classList.contains('dc-anim') || (!el.matches('.wpic,[data-pic]') && el.querySelector('.wpic'))) return; /* the inner picture moves, not its box */ el.dataset.anim = kindOf(el); el.classList.add('dc-anim'); });
+    }
+    try { if (localStorage.getItem('dc_anim') === 'off') document.documentElement.classList.add('dc-no-anim'); } catch (e) {}
+    window.dcSetAnim = on => { try { localStorage.setItem('dc_anim', on ? 'on' : 'off'); } catch (e) {} document.documentElement.classList.toggle('dc-no-anim', !on); };
+    window.dcAnimOn = () => !document.documentElement.classList.contains('dc-no-anim');
+    const start = () => {
+        deco(document.body);
+        new MutationObserver(recs => recs.forEach(r => r.addedNodes.forEach(deco))).observe(document.body, { childList: true, subtree: true });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
 // Interface language German ⇄ English: the dictionary + translator live in js/ui-i18n.js, loaded here for every page.
 (function dcLoadI18n() {
     if (document.querySelector('script[src$="ui-i18n.js"]')) return;

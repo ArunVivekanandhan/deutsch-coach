@@ -650,3 +650,39 @@ body.simple-mode .thinkbtn {
 }
 .dc-audio-toggle.on { border-color: #16a34a; color: #15803d; background: rgba(22, 163, 74, 0.08); }
 [data-theme="dark"] .dc-audio-toggle.on { color: #4ade80; border-color: #4ade80; background: rgba(74, 222, 128, 0.12); }
+
+/* ==========================================================================
+   ANIMATED PICTURES (Task 67) — every word picture / icon pops in and then moves in a way that matches its meaning.
+   js/app-shell.js (dcAnimatePics) sets class .dc-anim and data-anim = move | fly | spin | pulse | shake | flicker |
+   bounce | fall | breathe | wave | float on .wpic, .wz-pic, .wordicon, .verb-icon, .module-icon, [data-pic] …
+   Off for "reduce motion" in the OS, and with the switch in Einstellungen / Bild-Grammatik (html.dc-no-anim).
+   ========================================================================== */
+@keyframes dcPop { 0% { transform: scale(.3) rotate(-8deg); opacity: 0; } 65% { transform: scale(1.14) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+@keyframes dcFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes dcMove { 0%, 100% { transform: translateX(-5px) rotate(-2deg); } 50% { transform: translateX(5px) rotate(2deg); } }
+@keyframes dcFly { 0%, 100% { transform: translate(0, 0) rotate(-4deg); } 25% { transform: translate(4px, -6px) rotate(3deg); } 75% { transform: translate(-4px, -3px) rotate(-2deg); } }
+@keyframes dcSpin { to { transform: rotate(360deg); } }
+@keyframes dcPulse { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(.96); } 45% { transform: scale(1.1); } }
+@keyframes dcShake { 0%, 60%, 100% { transform: rotate(0); } 10%, 30%, 50% { transform: rotate(-9deg); } 20%, 40% { transform: rotate(9deg); } }
+@keyframes dcFlicker { 0%, 100% { transform: scale(1, 1); opacity: 1; } 25% { transform: scale(.94, 1.08); opacity: .85; } 50% { transform: scale(1.05, .95); } 75% { transform: scale(.97, 1.05); opacity: .9; } }
+@keyframes dcBounce { 0%, 100% { transform: translateY(0) scale(1, 1); } 40% { transform: translateY(-9px) scale(.96, 1.04); } 55% { transform: translateY(0) scale(1.08, .92); } 70% { transform: translateY(-3px); } }
+@keyframes dcFall { 0% { transform: translateY(-6px); opacity: .2; } 30% { opacity: 1; } 100% { transform: translateY(6px); opacity: .2; } }
+@keyframes dcBreathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.07); opacity: .8; } }
+@keyframes dcWave { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(12deg); } 75% { transform: rotate(-8deg); } }
+@keyframes dcWiggle { 0%, 100% { transform: rotate(0) scale(1); } 25% { transform: rotate(-10deg) scale(1.15); } 50% { transform: rotate(8deg) scale(1.15); } 75% { transform: rotate(-4deg) scale(1.08); } }
+.dc-anim { display: inline-block; transform-origin: 50% 60%; will-change: transform; animation: dcPop .55s cubic-bezier(.2, .9, .3, 1.3) both; }
+.dc-anim[data-anim="float"]   { animation: dcPop .55s both, dcFloat 3.2s ease-in-out .55s infinite; }
+.dc-anim[data-anim="move"]    { animation: dcPop .55s both, dcMove 1.6s ease-in-out .55s infinite; }
+.dc-anim[data-anim="fly"]     { animation: dcPop .55s both, dcFly 2.6s ease-in-out .55s infinite; }
+.dc-anim[data-anim="spin"]    { animation: dcPop .55s both, dcSpin 6s linear .55s infinite; }
+.dc-anim[data-anim="pulse"]   { animation: dcPop .55s both, dcPulse 1.8s ease-in-out .55s infinite; }
+.dc-anim[data-anim="shake"]   { animation: dcPop .55s both, dcShake 2.4s ease-in-out .55s infinite; }
+.dc-anim[data-anim="flicker"] { animation: dcPop .55s both, dcFlicker .9s ease-in-out .55s infinite; transform-origin: 50% 100%; }
+.dc-anim[data-anim="bounce"]  { animation: dcPop .55s both, dcBounce 1.4s ease-in-out .55s infinite; transform-origin: 50% 100%; }
+.dc-anim[data-anim="fall"]    { animation: dcPop .55s both, dcFall 1.5s ease-in .55s infinite; }
+.dc-anim[data-anim="breathe"] { animation: dcPop .55s both, dcBreathe 3.6s ease-in-out .55s infinite; }
+.dc-anim[data-anim="wave"]    { animation: dcPop .55s both, dcWave 2.2s ease-in-out .55s infinite; transform-origin: 50% 100%; }
+.dc-anim[data-anim="once"]    { animation: dcPop .55s both; }
+.dc-anim:hover, .dc-anim:active, a:hover > .dc-anim, .module-card:hover .dc-anim { animation: dcWiggle .6s ease-in-out; }
+@media (prefers-reduced-motion: reduce) { .dc-anim, .dc-anim:hover, .module-card:hover .dc-anim, a:hover > .dc-anim { animation: none !important; } }
+html.dc-no-anim .dc-anim, html.dc-no-anim .dc-anim:hover, html.dc-no-anim .module-card:hover .dc-anim { animation: none !important; }

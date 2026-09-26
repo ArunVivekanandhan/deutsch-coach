@@ -7,7 +7,7 @@
 (function () {
   const KEY = 'dc_mistakes', MAX = 500, DAYS = [0, 1, 3, 7, 14], DAY = 864e5;
   const SRC = { text: '📝 Text-Trainer', satzbau: '🧱 Satzbau', grammar: '📘 Grammatik', zeitreise: '🕰️ Zeitreise',
-                wz: '👯 Wort-Zwillinge', crash: '⚡ Crashkurs' };
+                wz: '👯 Wort-Zwillinge', crash: '⚡ Crashkurs', bild: '🎬 Bild-Quiz' };
   const load = () => { try { const a = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(a) ? a : []; } catch (e) { return []; } };
   const save = a => { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) { /* storage full / blocked */ } };
   const strip = s => String(s == null ? '' : s).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();

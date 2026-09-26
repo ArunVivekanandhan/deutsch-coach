@@ -113,6 +113,7 @@ Deutsch_Coach_Project/
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Zeitreise_Trainer.html                  # Past / present / future practice + verb time machine (data: js/tense-scenarios.js)
+├── Bild_Grammatik.html                    # Grammar concepts as animated pictures + picture quiz (js/bild-grammatik.js)
 ├── Mein_Fortschritt.html                  # Weekly practice time per skill + results (dc_activity)
 ├── Meine_Fehler.html                      # Shared mistake notebook with spaced review (js/mistakes.js)
 ├── Text_Trainer.html                       # Exam-style EN→DE paragraph translation + ⚡ Crashkurs (data: js/text-drills.js)
@@ -763,6 +764,27 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 67) — Animated pictures everywhere + "Grammatik in Bildern" (learn concepts by picture)
+Request: "all the images need to be animated and also implement image to learn concept".
+- **Animation layer** (css/design-system.css `.dc-anim[data-anim=…]` + js/app-shell.js `dcAnimatePics`): every word
+  picture / icon (.wpic, .wz-pic, .wordicon, .verb-icon, .module-icon, [data-pic]) pops in and then moves by meaning —
+  move (🏃🚗), fly (🐦✈️), spin (🌀☀️), pulse (❤️⭐ colours), shake (😂⏰), flicker (🔥), bounce (⚽🎉), fall (💧🌧️),
+  breathe (😴🛋️), wave (🌊🌳), else float; wiggle on hover/tap. MutationObserver decorates new pictures. Off with OS
+  "reduce motion" or `localStorage dc_anim = 'off'` (switch on Bild_Grammatik.html; `dcSetAnim()` / `dcAnimOn()`).
+  Grammatik-Regel-Trainer: the preposition balls fly to their place (SMIL loop), Wohin arrow runs and a dot travels
+  into the room, Wo dot bobs inside.
+- **`Bild_Grammatik.html`** + **`js/bild-grammatik.js`** (menu: Grammatik & Satzbau): 13 animated concepts —
+  word blocks that slide to their new position between frames (Verb Position 2, Fragen, trennbare Verben (auf flies out
+  of aufstehen), Modalverb, Perfekt, weil / Nebensatz zuerst), picture scenes (9 Wechselpräpositionen with Wohin =
+  moving + arrow → Akk / Wo = resting → Dat, geben: wem? Dativ / was? Akkusativ, sich waschen: das Auto / mich / mir die
+  Hände, nicht vs kein, gestern · heute · morgen timeline, clock with turning hands incl. "halb acht = 7:30",
+  groß · größer · am größten). Each: rule de/en/ta 🤖, frames with sentence + English + one-line rule, ▶ play / step /
+  replay / 🔊. **Bild-Quiz**: 10 pictures → choose the German sentence (case traps, halb-trap, tense, reflexive,
+  kein/nicht); wrong ones go to Meine Fehler (source 🎬 Bild-Quiz).
+- Grammatik-Regel-Trainer: "🎬 Diese Regel als bewegtes Bild ansehen" on 13 rules; deep link `#rule=<id>`.
+- `scripts/check_bild_grammatik.py` (build step 18): rules incl. Tamil, frames, chip roles / "from" ids, Wohin =
+  accusative and Wo = dative article, 300 generated quiz items valid.
 
 ### 2026-09-26 (Task 66) — Interface language German ⇄ English
 Request: "all label to english <-> option".

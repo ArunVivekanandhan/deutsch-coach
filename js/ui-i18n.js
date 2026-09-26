@@ -55,6 +55,12 @@
     'Einen Text übersetzen (Leicht → Schwer) →': 'Translate a text (easy → hard) →', 'Wie in der Prüfung, Satz für Satz.': 'Like in the exam, sentence by sentence.',
     'Ansichten': 'views', 'KI': 'AI', 'KI — Schlüssel nötig': 'AI — key needed', 'alle': 'all',
     'Start Daily Review': 'Start daily review', 'Due Today': 'Due today',
+    'Grammatik in Bildern (animiert)': 'Grammar in pictures (animated)', 'Jede Regel als bewegtes Bild: Wörter wandern, die Katze springt auf den Tisch, die Uhr dreht sich — plus Bild-Quiz.': 'Every rule as a moving picture: words move, the cat jumps onto the table, the clock turns — plus a picture quiz.',
+    '🎬 Grammatik in Bildern': '🎬 Grammar in pictures', 'Konzepte': 'Concepts', 'Bild-Quiz': 'Picture quiz', 'Alle Konzepte': 'All concepts', 'Abspielen': 'Play', 'Pause': 'Pause', 'Vorlesen': 'Read aloud',
+    'Jetzt im Bild-Quiz testen': 'Test yourself in the picture quiz', 'Regel üben': 'Practise the rule', 'Welcher deutsche Satz passt zum Bild?': 'Which German sentence matches the picture?', 'Neue 10 Bilder': 'New 10 pictures',
+    'Konzepte ansehen': 'See the concepts', 'Animation: an': 'Animation: on', 'Animation: aus': 'Animation: off', 'Diese Regel als bewegtes Bild ansehen →': 'See this rule as a moving picture →',
+    'Subjekt': 'Subject', 'Verb': 'Verb', 'Objekt': 'Object', 'Ort / Richtung': 'Place / direction', 'Konnektor / Fragewort': 'Connector / question word', 'Rest': 'Other',
+    'Wohin? (Akkusativ)': 'Where to? (accusative)', 'Wo? (Dativ)': 'Where? (dative)', 'Bilder animieren': 'Animate pictures',
     // ---- common buttons & words in labels ----
     'Alle': 'All', 'Alle anzeigen': 'Show all', 'Alle Themen': 'All topics', 'Alle löschen': 'Delete all', 'Alle vorlesen': 'Read all aloud', 'Alle nacheinander anhören': 'Listen to all in a row',
     'Anhören': 'Listen', 'anhören': 'listen', 'Nochmal hören': 'Listen again', 'Beispiel anhören': 'Listen to the example', 'ganzen Text hören': 'listen to the whole text', 'vorlesen': 'read aloud',
