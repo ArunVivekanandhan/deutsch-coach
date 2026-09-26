@@ -146,6 +146,11 @@ function dcBindNavSearch(root) {
     } catch (e) { /* storage blocked */ }
 })();
 window.dcNavHTML = dcNavHTML; window.dcBindNavSearch = dcBindNavSearch;
+// Interface language German ⇄ English: the dictionary + translator live in js/ui-i18n.js, loaded here for every page.
+(function dcLoadI18n() {
+    if (document.querySelector('script[src$="ui-i18n.js"]')) return;
+    const sc = document.createElement('script'); sc.src = 'js/ui-i18n.js'; (document.head || document.documentElement).appendChild(sc);
+})();
 // Practice time per skill and day (Task 65, shown on Mein_Fortschritt.html): every 15 s the page is visible AND was
 // used in the last 60 s (tap, key, scroll) adds 15 s to dc_activity[YYYY-MM-DD][skill]. Skill = the page's menu group;
 // the flashcards count as "woerter", the mistake notebook as "fehler". Kept for 120 days, only in this browser.
@@ -270,6 +275,7 @@ function renderAppShell() {
                 <button class="ds-btn ds-btn-secondary theme-toggle-btn" id="themeToggleBtn" style="padding: 8px;" title="Toggle Dark Mode" aria-label="Toggle dark mode">
                     <i data-lucide="moon" aria-hidden="true"></i>
                 </button>
+                <button class="ds-btn ds-btn-secondary" id="dcLangBtn" style="padding: 6px 10px; font-size: 13px; font-weight: 700;" type="button" title="Bedienung: Deutsch / English" data-no-i18n>🌐 DE</button>
                 <div class="streakbox" style="margin-left: var(--space-sm);"></div>
             </div>
             <div class="header-title mobile-only">Deutsch Coach</div>

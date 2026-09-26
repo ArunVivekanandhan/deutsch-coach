@@ -764,6 +764,21 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 66) — Interface language German ⇄ English
+Request: "all label to english <-> option".
+- **`js/ui-i18n.js`** (loaded by app-shell on every page) + **🌐 DE / 🌐 EN** button in the header (app-shell and
+  index). Choice in `localStorage dc_ui_lang`. Switching is instant and reversible (original text kept per node in a
+  WeakMap, attributes in `data-i18n-*`).
+- Only interface labels are translated: text in buttons, links, tabs, chips, headings, menu, hints, plus placeholder /
+  title / aria-label — and only by an EXACT match of the whole label (`DICT`, ~330 labels: menu + home + all
+  DC_SITEMAP titles/descriptions, common buttons, Text-Trainer, Meine Fehler, Mein Fortschritt, categories) or a
+  pattern (`PATTERNS`: "X anhören", frequency-rank tooltips, "Satz 3 / 15", counts). A leading emoji and a trailing
+  "(123)" are kept around a known label. Quiz options / word tiles (`.opt`, `button.tile`, `[data-opt]`, `[data-w]`…),
+  textareas, Tamil and `[data-no-i18n]` are skipped, so German learning content never changes.
+- After the first switch a MutationObserver translates only added/changed nodes (fast on big pages). Labels not in the
+  dictionary stay German; add them to DICT when seen. (Bug found in testing: every page is `<html lang="de">`, so a
+  `[lang="de"]` skip rule skipped everything — removed.)
+
 ### 2026-09-26 (Task 65) — Mein Fortschritt: practice time per skill and day
 - **Time tracking** (js/app-shell.js `dcTrackTime`): every 15 s a practice page is visible and was used in the last
   60 s adds 15 s to `localStorage dc_activity[YYYY-MM-DD][skill]` (skill = menu group; flashcards → woerter, notebook →
