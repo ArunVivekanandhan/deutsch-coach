@@ -11,7 +11,7 @@ os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 # 1. Update sw.js automatically
 html_files = glob.glob("*.html")
-assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/word-data.js', './js/lexicon.js', './js/tamil-meanings.js', './js/satzbau-data.js', './js/tutor-scripts.js', './js/grammar-tamil.js', './js/grammar-rules-extra.js', './js/word-pictures.js', './js/confusables.js', './js/tense-scenarios.js', './js/text-drills.js', './js/mistakes.js', './js/ui-i18n.js', './js/bild-grammatik.js', './js/sentence-explain.js', './js/konnektoren-build.js', './js/konnektoren-examples.js', './js/konnektoren-posnote.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
+assets = ['./js/srs-engine.js', './js/german-conjugation.js', './js/memory-tips.js', './js/word-parts.js', './js/word-data.js', './js/lexicon.js', './js/tamil-meanings.js', './js/satzbau-data.js', './js/tutor-scripts.js', './js/grammar-tamil.js', './js/grammar-rules-extra.js', './js/word-pictures.js', './js/confusables.js', './js/tense-scenarios.js', './js/text-drills.js', './js/mistakes.js', './js/ui-i18n.js', './js/bild-grammatik.js', './js/sentence-explain.js', './js/konnektoren-build.js', './js/konnektoren-examples.js', './js/konnektoren-posnote.js', './js/grammar-scenarios.js', './js/icon-svgs.js', './js/tamil-dict.js', './js/tts-engine.js', './js/progress-aggregator.js', "./css/design-system.css", "./js/app-shell.js", "./js/lucide.min.js", "./icon-192.png", "./icon-512.png", "./manifest.json"]
 assets += [f"./js/call/{f}" for f in sorted(os.listdir("js/call")) if f.endswith(".js")]  # video-call engine (Simli bundle is loaded on demand only)
 assets += ["./css/fonts.css"] + [f"./fonts/{f}" for f in sorted(os.listdir("fonts")) if f.endswith(".woff2")]  # self-hosted fonts (offline)
 urls_to_cache = ["./", "./index.html"] + [f"./{f}" for f in html_files if f != "index.html"] + assets
@@ -134,4 +134,9 @@ if bgc.returncode != 0:
 # 19. Konnektoren-Referenz (js/konnektoren-examples.js): >= 3 examples per connector chip, word order per group.
 kxc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_konnektoren_examples.py")])
 if kxc.returncode != 0:
+    sys.exit(1)
+
+# 20. Grammatik-Regeln sentence types (js/grammar-scenarios.js): >= 3 examples per type, each shows its type.
+gsc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_grammar_scenarios.py")])
+if gsc.returncode != 0:
     sys.exit(1)

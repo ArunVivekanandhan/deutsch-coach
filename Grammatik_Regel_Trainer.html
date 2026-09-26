@@ -373,6 +373,15 @@ html.dark-theme, body.dark {
   }
 
   .bild-link { display: inline-block; margin: 10px 0 4px; padding: 8px 14px; border-radius: 10px; background: color-mix(in srgb, #2563eb 10%, transparent); border: 1.5px solid #2563eb; color: #2563eb; font-weight: 700; text-decoration: none; }
+
+  /* Task 80: sentence types */
+  .sc-list{margin-bottom:14px;}
+  .sc-type{border:1px solid var(--line); border-radius:8px; margin:6px 0; padding:4px 10px; background:var(--card);}
+  .sc-type summary{cursor:pointer; padding:6px 0; font-size:14px; list-style-position:outside;}
+  .sc-n{font-size:11px; border:1px solid var(--line); border-radius:10px; padding:0 6px; margin-left:4px; opacity:.8;}
+  .sc-why{font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;}
+  .sc-hl{color:var(--red); }
+  .sc-foot{font-size:12px; color:var(--ink-soft); margin-top:4px;}
 </style>
   <link rel="stylesheet" href="css/design-system.css">
   <script src="./assets/js/gamification.js"></script>
@@ -382,6 +391,7 @@ html.dark-theme, body.dark {
   <script src="js/app-shell.js"></script>
   <script src="js/grammar-tamil.js"></script>
   <script src="js/grammar-rules-extra.js"></script>
+  <script src="js/grammar-scenarios.js"></script>
   <script src="js/mistakes.js"></script>
 </head>
 <body>
@@ -2766,9 +2776,23 @@ ${tamilBridgeHTML(rule.id)}
         `).join("")}
       </div>
 
+${scenariosHTML(rule.id)}
       <button class="bigbtn" onclick="switchMode('drill')">⚡ Start Practice Drill on Rule ${rule.num}</button>
     </div>
   `;
+}
+/* Task 80: every sentence type of the rule with >= 3 examples (js/grammar-scenarios.js); [x] = the part that shows the rule */
+function scenariosHTML(id){
+  const types = (window.DC_GRAMMAR_SC || {})[id]; if(!types) return '';
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const mark = t => esc(t).replace(/\[([^\]]+)\]/g, '<b class="sc-hl">$1</b>');
+  return `<div class="filterlabel">📚 Beispiele nach Satztyp (mind. 3 pro Typ):</div>
+    <div class="sc-list">${types.map((t,i)=>`<details class="sc-type"${i===0?' open':''}><summary><b>${esc(t.t)}</b> <span class="sc-n">${t.ex.length}</span></summary>
+      <div class="sc-why">💡 ${esc(t.d)}</div>
+      ${t.ex.map(x=>{ const plain = x.de.replace(/[\[\]]/g,''); return `<div class="example-item"><div><div class="example-de">${mark(x.de)}</div><div class="example-en">${esc(x.en)}</div></div>
+        <button class="speak-btn" onclick="speakText('${escapeQuotes(plain)}')">🔊</button></div>`; }).join('')}
+    </details>`).join('')}
+    <div class="sc-foot">${types.length} Satztypen · ${types.reduce((n,t)=>n+t.ex.length,0)} Beispiele · <a href="#" onclick="document.querySelectorAll('.sc-type').forEach(d=>d.open=true);return false;">alle öffnen</a></div></div>`;
 }
 
 /* ---------------- 2. DRILL VIEW (INFINITE & INDEFINITE) ---------------- */

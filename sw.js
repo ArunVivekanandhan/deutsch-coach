@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v158';
+const CACHE_NAME = 'deutsch-coach-v159';
 const urlsToCache = [
   './',
   './index.html',
@@ -57,6 +57,7 @@ const urlsToCache = [
   './js/konnektoren-build.js',
   './js/konnektoren-examples.js',
   './js/konnektoren-posnote.js',
+  './js/grammar-scenarios.js',
   './js/icon-svgs.js',
   './js/tamil-dict.js',
   './js/tts-engine.js',

@@ -765,6 +765,18 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 80, phase 1) — Grammatik-Regeln: every sentence type with ≥ 3 examples (all A1 rules)
+User: "After this is complete, make sure all other topics are also made clear with examples."
+- Audit: 42 rules, each with only 3 examples in total and one example per sub-type in its table (≈ 280 sub-types).
+  Done in phases: phase 1 = the 9 A1 rules (r1_wordorder + a1_*): 55 sentence types, 165 examples.
+- `js/grammar-scenarios.js` (DC_GRAMMAR_SC[ruleId] = [{ t, d, must, ex:[{de,en}] }]), [x] = part that shows the rule.
+  Study view: "📚 Beispiele nach Satztyp" — one <details> per type (first open, "alle öffnen"), why-line, 🔊.
+- `scripts/check_grammar_scenarios.py` (build step 20, runs in node): rule exists, ≥ 3 examples per type, markers,
+  final punctuation, `must` pattern (e.g. kein-type contains kein, Doch-type contains Doch), no duplicates, every A1
+  rule covered. Mutation-tested.
+- Next phases: A2 rules (12), then B1 rules (21).
+- Browser-tested 390/1100 px, no overflow, no JS errors.
+
 ### 2026-09-26 (Task 79) — Konnektoren: why "bin" comes first + ≥ 3 examples PER SENTENCE TYPE
 User: "Top says verb goes to the end, but 'Weil der Bus nicht kam, bin ich zu spät zur Arbeit gekommen' — why does
 bin come first? How can you explain it here?" + "And each type scenario 3 examples minimum."
