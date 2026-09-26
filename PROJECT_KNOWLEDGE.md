@@ -761,6 +761,17 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 55) — trotzdem vs. obwohl (nevertheless)
+
+User: "Do we have Nevertheless with connector". trotzdem was covered (Konnektoren page, rule 1 drills, 4 Satzbau
+sentences, Cheat Codes); dennoch only once, nichtsdestotrotz never, and no direct obwohl ↔ trotzdem comparison.
+Added Satzbau topic **`trotzdemobwohl`** (A2, 12 sentences: each idea with obwohl / trotzdem / trotz + Genitiv, plus
+dennoch, nichtsdestotrotz, "aber … trotzdem" in the middle field, obwohl-clause at the end) with rule, Tamil rule
+(-ஆலும் = obwohl → verb at the end; இருந்தாலும் = trotzdem → verb right after) and typical mistakes; Wort-Zwillinge
+group "obwohl / trotzdem / trotz" (40 groups, 97 words).
+
+---
+
 ### 2026-09-26 (Task 54) — Zeitreise-Trainer (past · present · future), 22 missing core verbs, Satzbau "Nebensatz zuerst + zu-Infinitiv"
 
 #### Task
