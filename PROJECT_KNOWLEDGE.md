@@ -765,6 +765,17 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 82) — Konnektoren: which connectors push the verb to the end — overview + Nebensatz box
+User (pasting the Gruppe-1 chip list): "Here we group the things, e.g. some push the verb to the end and some not."
+- Confusion: all 14 Gruppe-1 connectors push the verb to the end, but only the verb of THEIR part (the Nebensatz);
+  the other part is a Hauptsatz with the verb in position 2 ("Weil ich krank bin, gehe ich …").
+- New overview card at the top of Referenz (.kx-ov, bilingual): 🔴 verb to the end (14) · 🟡 verb right after (9) ·
+  🟣 nothing changes (5) · 🔵 two parts (6), each with one colour-coded example, rows link to their group, plus the
+  "only in its own part" note.
+- Gruppe-1 examples: the Nebensatz (connector → comma / end) gets a red box (.kx-ns, markNS()), its verb red and
+  underlined; the main-clause verb stays blue. Legend line in every Gruppe-1 panel.
+- Browser-tested 390/1100 px: every Gruppe-1 example has exactly its Nebensatz boxed, no boxes elsewhere, no errors.
+
 ### 2026-09-26 (Task 81) — 🌐 EN also switches the new explanations (Konnektoren + grammar sentence types)
 User: "Why is the translation in German? I selected English" (weil panel: note, "Nebensatz hinten" …).
 - Cause: the DE/EN switch (js/ui-i18n.js) only translates fixed UI labels by exact match; the new explanation texts

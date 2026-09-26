@@ -424,6 +424,18 @@ h1 {
   .kx-end { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
 
   html:not([data-ui-lang="en"]) .l-en, html[data-ui-lang="en"] .l-de { display: none !important; }   /* Task 81 */
+
+  /* Task 82: overview + Nebensatz box */
+  .kx-ov { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 0 0 16px; background: var(--card); }
+  .kx-ov-h { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .kx-ov-r { display: block; border-left: 5px solid; padding: 6px 10px; margin: 6px 0; background: var(--paper); border-radius: 6px; color: var(--ink); text-decoration: none; }
+  .kx-ov-r b { display: block; font-size: 13.5px; }
+  .kx-ov-c { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--ink-soft); margin: 2px 0; }
+  .kx-ov-e { display: block; font-size: 14.5px; }
+  .kx-ov-n { font-size: 13px; line-height: 1.5; margin-top: 8px; }
+  .kx-ns { background: color-mix(in srgb, var(--red) 13%, transparent); border-bottom: 2px solid var(--red); border-radius: 3px; padding: 0 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .kx-ns .verb { color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
+  .kx-leg { margin: 4px 0 2px; }
 </style>
   <link rel="stylesheet" href="css/design-system.css">
   <script src="./assets/js/gamification.js"></script>
@@ -470,6 +482,28 @@ h1 {
     <span style="background:var(--purple)">🟣 Position 0 (ADUSO: normal S-V-O)</span>
     <span style="background:var(--blue)">🔵 konjugiertes Verb</span>
     <span style="background:var(--green)">🟢 Subjekt</span>
+  </div>
+
+  <!-- Task 82: overview — which connectors push the verb to the end, which don't -->
+  <div class="kx-ov">
+    <div class="kx-ov-h"><span class="l-de">🧭 Überblick: Wohin kommt das Verb nach dem Konnektor?</span><span class="l-en">🧭 Overview: where does the verb go after the connector?</span></div>
+    <a class="kx-ov-r" href="#card-grp1" style="border-left-color:var(--red)">
+      <b><span class="l-de">🔴 Verb ans ENDE — aber nur im eigenen Teil (Nebensatz)</span><span class="l-en">🔴 Verb to the END — but only in its own part (subordinate clause)</span></b>
+      <span class="kx-ov-c">weil · da · dass · wenn · als · obwohl · während · nachdem · bevor · damit · ob · falls · sodass · seitdem (14)</span>
+      <span class="kx-ov-e">Ich bleibe zu Hause, <span class="kx-ns"><span class="conn">weil</span> ich krank <span class="verb">bin</span></span>.</span></a>
+    <a class="kx-ov-r" href="#card-grp2" style="border-left-color:var(--gold)">
+      <b><span class="l-de">🟡 Verb SOFORT danach (Position 2), dann Subjekt</span><span class="l-en">🟡 Verb RIGHT AFTER it (position 2), then the subject</span></b>
+      <span class="kx-ov-c">deshalb · deswegen · daher · trotzdem · außerdem · sonst · dann · folglich · allerdings (9)</span>
+      <span class="kx-ov-e">Ich bin krank, <span class="conn-adv">deshalb</span> <span class="verb">bleibe</span> ich zu Hause.</span></a>
+    <a class="kx-ov-r" href="#card-grp3" style="border-left-color:var(--purple)">
+      <b><span class="l-de">🟣 Nichts ändert sich: Subjekt + Verb wie immer</span><span class="l-en">🟣 Nothing changes: subject + verb as usual</span></b>
+      <span class="kx-ov-c">aber · denn · und · sondern · oder (5)</span>
+      <span class="kx-ov-e">Ich bleibe zu Hause, <span class="conn-coord">denn</span> ich <span class="verb">bin</span> krank.</span></a>
+    <a class="kx-ov-r" href="#card-grp4" style="border-left-color:var(--blue)">
+      <b><span class="l-de">🔵 Zwei Teile — jeder Teil hat seine eigene Regel</span><span class="l-en">🔵 Two parts — each part has its own rule</span></b>
+      <span class="kx-ov-c">nicht nur … sondern auch · sowohl … als auch · weder … noch · zwar … aber · je … desto · einerseits … andererseits (6)</span>
+      <span class="kx-ov-e"><span class="conn">Je</span> mehr ich <span class="verb">übe</span>, <span class="conn">desto</span> besser <span class="verb">spreche</span> ich.</span></a>
+    <div class="kx-ov-n"><span class="l-de">⚠️ Nur die 🔴-Wörter schicken ein Verb ans Ende — und zwar nur das Verb in <b>ihrem</b> Teil (rot hinterlegt). Der andere Teil ist ein Hauptsatz: Verb auf Position 2. Darum steht in <i>„Weil ich krank <b>bin</b>, <b>gehe</b> ich nach Hause“</i> ein Verb am Ende (bin) und eins vorne (gehe).</span><span class="l-en">⚠️ Only the 🔴 words send a verb to the end — and only the verb in <b>their</b> part (red background). The other part is a main clause: verb in position 2. That is why <i>“Weil ich krank <b>bin</b>, <b>gehe</b> ich nach Hause”</i> has one verb at the end (bin) and one in front (gehe).</span></div>
   </div>
 
   <!-- Gruppe 1 -->
@@ -954,6 +988,12 @@ if ('serviceWorker' in navigator) {
   const COL = { grp1: 'var(--red)', grp2: 'var(--gold)', grp3: 'var(--purple)', grp4: 'var(--blue)' };
   const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const plain = t => t.replace(/[\[\]{}|]/g, '');
+  /* group 1: the Nebensatz part (connector → comma / end) gets a red box, its verb is red (Task 82) */
+  const markNS = (t, g) => {
+    const i = t.indexOf('['); if (g !== 'grp1' || i < 0) return mark(t, g);
+    const endP = /[.?!]$/.test(t) ? t.length - 1 : t.length, c = t.indexOf(',', i), j = c < 0 ? endP : c;
+    return mark(t.slice(0, i), g) + `<span class="kx-ns">${mark(t.slice(i, j), g)}</span>` + mark(t.slice(j), g);
+  };
   const mark = (t, g) => esc(t).replace(/\[([^\]]+)\]/g, `<span class="${CLS[g]}">$1</span>`).replace(/\{([^}]+)\}/g, '<span class="verb">$1</span>').replace(/\|([^|]+)\|/g, '<span class="verb kx-end">$1</span>');
   /* sentence types (Task 79): each connector shows ≥ 3 examples per type */
   /* both languages; the 🌐 DE/EN switch shows one of them (Task 81) */
@@ -969,12 +1009,13 @@ if ('serviceWorker' in navigator) {
   };
   const noteHTML = (de, g) => { const d = window.DCKonnNote && DCKonnNote(de, g); return d ? `<span class="pos">${bi(d, DCKonnNote(de, g, 'en'))}</span>` : ''; };
   const exHTML = (x, g) => `<div class="ex"><div class="ex-top"><div><div class="en">${esc(x.en)}</div>${x.ta ? `<div class="ta" lang="ta">${esc(x.ta)}</div>` : ''}
-        <div class="de">${mark(x.de, g)}</div>${noteHTML(x.de, g)}</div><button type="button" class="audio-btn" data-kxsay="${esc(plain(x.de))}" aria-label="vorlesen">🔊</button></div></div>`;
+        <div class="de">${markNS(x.de, g)}</div>${noteHTML(x.de, g)}</div><button type="button" class="audio-btn" data-kxsay="${esc(plain(x.de))}" aria-label="vorlesen">🔊</button></div></div>`;
   function panelHTML(key, label, g) {
     const e = EX[key]; if (!e) return '';
     return `<div class="kx-panel" data-kx="${esc(key)}" style="border-left-color:${COL[g]}">
       <h3><span style="color:${COL[g]}">${esc(label)}</span><span class="kx-lv">${esc(e.lv)}</span></h3>
       <div class="kx-note">💡 ${bi(e.note, e.note_en || e.note)}</div>
+      ${g === 'grp1' ? `<div class="kx-td kx-leg"><span class="kx-ns">${bi('rot hinterlegt', 'red box')}</span> = ${bi('Nebensatz → sein Verb ganz am Ende', 'subordinate clause → its verb at the very end')} · <span class="verb">${bi('blaues Verb', 'blue verb')}</span> = ${bi('Hauptsatz → Verb auf Position 2', 'main clause → verb in position 2')}</div>` : ''}
       ${TYPES[g] ? TYPES[g].map(([id, h, d, f]) => { const xs = e.ex.filter(f); return xs.length ? `<div class="kx-type" data-type="${id}"><div class="kx-th">${bi(h[0], h[1])} <span class="kx-n">(${xs.length})</span></div><div class="kx-td">${bi(d[0], d[1])}</div>${xs.map(x => exHTML(x, g)).join('')}</div>` : ''; }).join('')
         : e.ex.map(x => exHTML(x, g)).join('')}
       ${key === 'sodass' ? `<div class="kx-td">ℹ️ ${bi('sodass steht nie am Satzanfang — darum nur „Nebensatz hinten“.', 'sodass never starts a sentence — so only “subordinate clause second”.')}</div>` : ''}
