@@ -70,7 +70,8 @@ window.DC_SITEMAP = [
   { id: 'start', icon: 'sunrise', title: 'Start', pages: [
     { href: 'index.html', icon: 'home', t: 'Home · Tagesplan', d: 'Dein Plan für heute, zuletzt geübt, alle Bereiche.' },
     { href: 'deutsch-coach.html', icon: 'layers', t: 'Karteikarten (tägliche Wiederholung)', d: 'Wörter mit Wiederholungs-System: fällige Karten, Bilder, Tamil, Audio.', lvl: 'A1–B2' },
-    { href: 'Meine_Fehler.html', icon: 'notebook-pen', t: 'Meine Fehler (Fehlerheft)', d: 'Alle falschen Antworten aus allen Übungen — wiederholen, bis sie sitzen.', lvl: 'alle' } ] },
+    { href: 'Meine_Fehler.html', icon: 'notebook-pen', t: 'Meine Fehler (Fehlerheft)', d: 'Alle falschen Antworten aus allen Übungen — wiederholen, bis sie sitzen.', lvl: 'alle' },
+    { href: 'Mein_Fortschritt.html', icon: 'chart-column', t: 'Mein Fortschritt (Woche)', d: 'Übungszeit pro Bereich an jedem Tag, Ergebnisse und was du als Nächstes üben solltest.', lvl: 'alle' } ] },
   { id: 'woerter', icon: 'library', title: 'Wörter', mod: 'vocab', pages: [
     { href: 'Verb_Transformation_Trainer.html', icon: 'zap', t: 'Verben', d: 'Alle Zeitformen eines Verbs, Karteikarten, Merkhilfen.', lvl: 'A1–B2' },
     { href: 'Nomen_Trainer.html', icon: 'box', t: 'Nomen (der/die/das)', d: 'Artikel und Plural sicher lernen.', lvl: 'A1–B2' },
@@ -145,6 +146,29 @@ function dcBindNavSearch(root) {
     } catch (e) { /* storage blocked */ }
 })();
 window.dcNavHTML = dcNavHTML; window.dcBindNavSearch = dcBindNavSearch;
+// Practice time per skill and day (Task 65, shown on Mein_Fortschritt.html): every 15 s the page is visible AND was
+// used in the last 60 s (tap, key, scroll) adds 15 s to dc_activity[YYYY-MM-DD][skill]. Skill = the page's menu group;
+// the flashcards count as "woerter", the mistake notebook as "fehler". Kept for 120 days, only in this browser.
+(function dcTrackTime() {
+    let skill;
+    try {
+        const cur = dcCurrentPage(), ent = dcPageEntry(cur);
+        skill = { 'deutsch-coach.html': 'woerter', 'Meine_Fehler.html': 'fehler' }[cur] || (ent && !['start', 'setup'].includes(ent.g.id) ? ent.g.id : null);
+    } catch (e) { return; }
+    if (!skill) return;
+    let last = Date.now();
+    ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(ev => addEventListener(ev, () => { last = Date.now(); }, { passive: true, capture: true }));
+    setInterval(() => {
+        if (document.visibilityState !== 'visible' || Date.now() - last > 60000) return;
+        try {
+            const d = new Date(), day = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            const a = JSON.parse(localStorage.getItem('dc_activity') || '{}');
+            a[day] = a[day] || {}; a[day][skill] = (a[day][skill] || 0) + 15;
+            const keys = Object.keys(a).sort(); while (keys.length > 120) delete a[keys.shift()];
+            localStorage.setItem('dc_activity', JSON.stringify(a));
+        } catch (e) { /* storage blocked */ }
+    }, 15000);
+})();
 
 function renderAppShell() {
 

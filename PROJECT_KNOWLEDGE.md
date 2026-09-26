@@ -113,6 +113,7 @@ Deutsch_Coach_Project/
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Zeitreise_Trainer.html                  # Past / present / future practice + verb time machine (data: js/tense-scenarios.js)
+├── Mein_Fortschritt.html                  # Weekly practice time per skill + results (dc_activity)
 ├── Meine_Fehler.html                      # Shared mistake notebook with spaced review (js/mistakes.js)
 ├── Text_Trainer.html                       # Exam-style EN→DE paragraph translation + ⚡ Crashkurs (data: js/text-drills.js)
 ├── Wort_Zwillinge.html                     # Look-alike / sound-alike words (Küche/Kuchen): learn cards + quiz (data: js/confusables.js)
@@ -762,6 +763,17 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 65) — Mein Fortschritt: practice time per skill and day
+- **Time tracking** (js/app-shell.js `dcTrackTime`): every 15 s a practice page is visible and was used in the last
+  60 s adds 15 s to `localStorage dc_activity[YYYY-MM-DD][skill]` (skill = menu group; flashcards → woerter, notebook →
+  fehler; 120 days kept). Counting starts now — no back-filled numbers.
+- **`Mein_Fortschritt.html`** (menu: Start): 4 stat tiles (minutes in 7 days vs previous week, days practised,
+  mistakes learnt, words mastered), advice (least-practised skill with a link, due notebook items), stacked bar chart
+  of minutes per day per skill (7 days / 4 weeks; HTML/CSS bars with 2 px gaps and 4 px rounded tops, recessive
+  gridlines, legend with totals, hover/focus tooltip, table view), per-skill bars and results (Text-Trainer exam
+  history, Zeitreise accuracy, notebook, flashcards). 7 categorical colours validated with the dataviz validator in
+  light (#ffffff) and dark (#1e293b) — contrast warning covered by legend + table view.
 
 ### 2026-09-26 (Task 64) — Overlapping pages merged into one entry with a view switch
 - DC_SITEMAP entries can have `views: [[href, label], …]`: **Wortschatz: Raster & Tabelle** (Wortschatz_Master_Grid |
