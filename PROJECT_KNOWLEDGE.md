@@ -762,6 +762,12 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 59) — Text-Trainer exam: English text on top, answer boxes numbered only
+Request: "Big sentence is fine, only the answer split into multiple sentences."
+- Per-sentence mode no longer repeats the English sentence above each box: the English paragraph (numbered with `<sup>`)
+  is a sticky panel (`.para.stick`, top = app-header height, max 30vh / 22vh on phones, scrolls itself to the current
+  sentence); boxes show only the number. `scrollToStep()` + `scroll-margin-top` keep the active box just below the panel.
+
 ### 2026-09-26 (Task 58) — Text-Trainer exam: Leicht / Mittel / Schwer
 Request: "Option for easy, medium and harder. Easy: word pick and suggestions."
 - Per-sentence exam has 3 levels (`dc_tt_level`, default easy):

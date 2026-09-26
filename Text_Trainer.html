@@ -38,7 +38,11 @@
   .vanish .gap.shown { color: #b45309; border-color: transparent; }
   .score { font-size: 28px; font-weight: 800; }
   .sent-res { padding: 10px 0; border-bottom: 1px solid var(--color-border); }
-  .para { line-height: 1.8; font-size: 15.5px; } .ens { border-radius: 4px; padding: 1px 2px; cursor: pointer; }
+  .para { line-height: 1.8; font-size: 15.5px; }
+  .para.stick { position: sticky; z-index: 5; max-height: 30vh; overflow-y: auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 10px; padding: 6px 10px; box-shadow: var(--shadow-sm); }
+  .para sup { font-size: 10.5px; font-weight: 800; color: var(--color-primary); margin-right: 2px; }
+  .step .num { min-width: 1.6em; padding-top: 10px; color: var(--color-primary); }
+  @media (max-width: 640px) { .para.stick { max-height: 22vh; font-size: 14.5px; line-height: 1.6; } } .ens { border-radius: 4px; padding: 1px 2px; cursor: pointer; }
   .ens.cur { background: color-mix(in srgb, var(--color-primary) 22%, transparent); } .ens.done { color: #15803d; } .ens.bad { color: #b45309; }
   .step { padding: 10px 0; border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 6px; }
   .step textarea.in { min-height: 0; font-size: 16px; flex: 1; min-width: 0; }
@@ -257,11 +261,11 @@ function renderExam() {
   $('view').innerHTML = `<div class="box">
     <div class="row" style="justify-content:space-between;"><b>Übersetze den Text ins Deutsche.</b><span>⏱️ <span class="timer" id="clock">00:00</span> <span class="muted">(Ziel: ${Math.max(8, Math.round(t.sentences.length * 1.2))} Min.)</span></span></div>
     <div class="row"><button type="button" class="chip" data-emode="steps" aria-pressed="${steps}">🧩 Ein Feld pro Satz</button><button type="button" class="chip" data-emode="free" aria-pressed="${!steps}">📄 Ein großes Feld (wie auf Papier)</button></div>
-    <div class="para" id="enPara">${t.sentences.map((s, i) => `<span class="ens" id="en${i}" ${steps ? `data-jump="${i}"` : ''}>${esc(s.en)}</span>`).join(' ')}</div>
+    <div class="para${steps ? ' stick' : ''}" id="enPara">${t.sentences.map((s, i) => `<span class="ens" id="en${i}" ${steps ? `data-jump="${i}"` : ''}>${steps ? `<sup>${i + 1}</sup>` : ''}${esc(s.en)}</span>`).join(' ')}</div>
     ${steps ? `<div class="row">${Object.entries(LVL).map(([k, [l, d]]) => `<button type="button" class="chip" data-lvl="${k}" aria-pressed="${examLvl === k}" title="${d}">${l}</button>`).join('')}<span class="muted">${LVL[examLvl][1]}</span></div>
-      <div class="muted">${examLvl === 'easy' ? 'Tippe die Wörter an' : 'Schreib jeden Satz in sein Feld'} → <b>Prüfen</b>${examLvl === 'easy' ? '' : ' (oder Enter)'}. Du siehst sofort, was fehlt. Tipp: Leicht → Mittel → Schwer, bis Schwer klappt.</div>
-      <div id="steps">${t.sentences.map((s, i) => `<div class="step" id="st${i}"><div class="muted"><b>${i + 1}.</b> ${esc(s.en)}</div>
-        <div class="row" style="flex-wrap:nowrap; align-items:flex-start;"><textarea class="in step-in" id="si${i}" data-i="${i}" rows="2" placeholder="${examLvl === 'easy' ? 'Wörter unten antippen …' : `Satz ${i + 1} auf Deutsch …`}" spellcheck="false" autocapitalize="sentences" ${examLvl === 'easy' ? 'readonly inputmode="none"' : ''}></textarea>
+      <div class="muted">Der englische Text bleibt oben stehen (Nummer = Feld). ${examLvl === 'easy' ? 'Tippe die Wörter an' : 'Schreib jeden Satz in sein Feld'} → <b>Prüfen</b>${examLvl === 'easy' ? '' : ' (oder Enter)'}. Du siehst sofort, was fehlt. Tipp: Leicht → Mittel → Schwer, bis Schwer klappt.</div>
+      <div id="steps">${t.sentences.map((s, i) => `<div class="step" id="st${i}">
+        <div class="row" style="flex-wrap:nowrap; align-items:flex-start;"><b class="num">${i + 1}</b><textarea class="in step-in" id="si${i}" data-i="${i}" rows="2" placeholder="${examLvl === 'easy' ? 'Wörter unten antippen …' : `Satz ${i + 1} auf Deutsch …`}" spellcheck="false" autocapitalize="sentences" ${examLvl === 'easy' ? 'readonly inputmode="none"' : ''}></textarea>
         <button type="button" class="btn primary" data-chk="${i}">Prüfen</button></div>${stepHelp(i, s)}<div id="sr${i}"></div></div>`).join('')}</div>
       <div id="examRes"></div>`
     : `<textarea class="in" id="examIn" style="min-height:260px;" placeholder="Schreib hier deinen deutschen Text … (ohne Hilfe, wie in der Prüfung)" spellcheck="false"></textarea>
@@ -274,10 +278,22 @@ function renderExam() {
     a.addEventListener('input', () => fit(a));
     a.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); checkStep(+a.dataset.i); } });
   });
-  if (examLvl === 'easy') markCur(0); else $('si0').focus();
+  $('enPara').style.top = stickTop() + 'px';
+  const sm = stickTop() + $('enPara').offsetHeight + 16; document.querySelectorAll('.step').forEach(x => { x.style.scrollMarginTop = sm + 'px'; });
+  if (examLvl === 'easy') markCur(0); else $('si0').focus({ preventScroll: true });
 }
 const fit = a => { a.style.height = 'auto'; a.style.height = (a.scrollHeight + 2) + 'px'; };
-function markCur(i) { document.querySelectorAll('.ens').forEach(x => x.classList.toggle('cur', x.id === 'en' + i)); }
+function markCur(i) {
+  document.querySelectorAll('.ens').forEach(x => x.classList.toggle('cur', x.id === 'en' + i));
+  const para = $('enPara'), sp = $('en' + i);
+  if (para && sp && para.classList.contains('stick')) para.scrollTo({ top: Math.max(0, sp.offsetTop - 8), behavior: 'smooth' });
+}
+function scrollToStep(i) {                                        // box just below the sticky header + English text
+  const el = $('st' + i), para = $('enPara'); if (!el || !para) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - para.getBoundingClientRect().height - stickTop() - 12;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
+const stickTop = () => { const h = document.querySelector('.app-header'); return h && getComputedStyle(h).position !== 'static' ? h.getBoundingClientRect().height : 0; };
 function checkStep(i) {
   const t = E.t, s = t.sentences[i], v = $('si' + i).value.trim(); if (!v) return;
   const r = compare(v, s), key = t.id + '|' + i, first = !(i in E.res);
@@ -289,7 +305,7 @@ function checkStep(i) {
        <div class="muted">Korrigiere den Satz oben und drück nochmal Enter (zählt nicht mehr für die Note).</div>`;
   const next = t.sentences.findIndex((_, k) => k > i && !(k in E.res));
   if (Object.keys(E.res).length === t.sentences.length) return finishSteps();
-  if (r.perfect && next >= 0) { if (examLvl === 'easy') markCur(next); else $('si' + next).focus(); $('st' + next).scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  if (r.perfect && next >= 0) { if (examLvl === 'easy') markCur(next); else $('si' + next).focus({ preventScroll: true }); scrollToStep(next); }
 }
 function finishSteps() {
   clearInterval(E.timer);
@@ -453,7 +469,7 @@ document.addEventListener('click', e => {
   if (b.dataset.rule) { const s = E.t.sentences[+b.dataset.rule]; $('ru' + b.dataset.rule).innerHTML = `<span class="focus">${esc(s.focus || '')}</span>`; return; }
   if (b.dataset.emode) { examMode = b.dataset.emode; store.set('dc_tt_exam_mode', examMode); return renderExam(); }
   if (b.dataset.chk) return checkStep(+b.dataset.chk);
-  if (b.dataset.jump) { const a = $('si' + b.dataset.jump); a.focus(); return a.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  if (b.dataset.jump) { const i = +b.dataset.jump; if (examLvl === 'easy') markCur(i); else $('si' + i).focus({ preventScroll: true }); return scrollToStep(i); }
   if (b.dataset.sub) { C.sub = b.dataset.sub; if (tab !== 'crash') return setTab('crash'); return renderCrash(); }
   if (b.dataset.area) { C.area = b.dataset.area; return startQuiz(); }
   if (b.dataset.opt != null) return answerQuiz(b);
