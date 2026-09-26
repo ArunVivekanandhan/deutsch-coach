@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""End-to-end tests of the KI-Sprechpartner video call (Task 48): Tests A–H of the real-time call spec.
+"""End-to-end tests of the KI-Sprechpartner video call (Task 48): Tests A–H of the real-time call spec,
+Test I = microphone trouble + diagnostic log (Task 49).
 
 Runs KI_Sprechpartner.html in headless Chromium with a fake microphone (oscillator stream the test switches on/off),
 a fake Web Speech recogniser and mocked providers (streamed SSE LLM, OpenAI PCM TTS, ElevenLabs NDJSON with character
@@ -50,8 +51,8 @@ def check(test, name, ok, detail=''):
     RESULTS.append((test, name, bool(ok), detail))
     print(('  PASS ' if ok else '  FAIL ') + f'[{test}] {name}' + (f' — {detail}' if detail else ''), flush=True)
 
-def open_page(browser, pre, viewport=None, mobile=False):
-    ctx = browser.new_context(viewport=viewport or {'width': 1280, 'height': 860}, is_mobile=mobile, has_touch=mobile)
+def open_page(browser, pre, viewport=None, mobile=False, ua=None):
+    ctx = browser.new_context(viewport=viewport or {'width': 1280, 'height': 860}, is_mobile=mobile, has_touch=mobile, **({'user_agent': ua} if ua else {}), accept_downloads=True)
     ctx.add_init_script(MOCKS.replace('%PRESET%', json.dumps(json.dumps(pre))))
     pg = ctx.new_page()
     pg.on('console', lambda m: ERRORS.append(f'{m.type}: {m.text}') if m.type == 'error' and 'favicon' not in m.text and 'status of 404' not in m.text else None)
@@ -315,9 +316,81 @@ def test_H(b):
     check('H', 'Simli SDK bundle loaded from the repo (no CDN)', pg.evaluate('!!(window.SimliSDK && SimliSDK.SimliClient && SimliSDK.generateSimliSessionToken)'))
     ctx.close()
 
+def log_text(pg): return pg.evaluate('DCCall.log.text()')
+
+def test_I(b):
+    print('Test I — microphone trouble + diagnostic log', flush=True)
+    ctx, pg = open_page(b, preset())
+    start(pg); wait_listening(pg)
+    speak(pg, 'Ich möchte ein Kaffee bitte'); wait_state(pg, 'AI_SPEAKING', 8000); wait_listening(pg)
+    t = log_text(pg)
+    need = ['session start', 'microphone open', 'start (browser speech recognition)', 'LISTENING → USER_SPEAKING', 'final', 'end of turn', 'learner turn', 'first token', 'first audio', 'Umgebung:']
+    check('I', 'log records mic, recogniser, states, turn decision, AI + voice timing', all(x in t for x in need), ', '.join(x for x in need if x not in t) or f'{t.count(chr(10))} lines')
+    check('I', 'no API keys in the log', 'sk-test-openai' not in t and 'sk-test-llm' not in t and '"openai":true' in t)
+    # mute / unmute: speech while muted is ignored, after unmute the recogniser runs again
+    starts = pg.evaluate('__srStarts'); pg.click('#micBtn'); pg.wait_for_timeout(200)
+    muted_running = pg.evaluate('!!(__sr && __sr.running)')
+    speak(pg, 'Das sollte niemand hören'); pg.wait_for_timeout(1600)
+    check('I', 'mic off: recogniser stopped, nothing is taken as a turn', not muted_running and state(pg) == 'LISTENING' and 'niemand' not in pg.inner_text('#log'))
+    pg.click('#micBtn'); pg.wait_for_timeout(300)
+    check('I', 'mic on again: recogniser restarted', pg.evaluate('__sr.running') and pg.evaluate('__srStarts') > starts)
+    speak(pg, 'Ein Brötchen bitte'); check('I', 'speaking works after unmute', wait_state(pg, 'PROCESSING', 5000)); wait_listening(pg)
+    t = log_text(pg)
+    check('I', 'mute/unmute logged', 'mute (button)' in t and 'unmute (button)' in t)
+    # steady background noise must not block the call in USER_SPEAKING
+    pg.evaluate('window.__micBase = 0.045; __setMic(0.045)'); pg.wait_for_timeout(7500)
+    check('I', 'steady background noise: tutor keeps listening (not stuck in "Du sprichst")', state(pg) == 'LISTENING', state(pg))
+    speak(pg, 'Ich möchte bezahlen'); se = pg.evaluate('window.__speechEnd'); ok = wait_state(pg, 'PROCESSING', 6000); tp = pnow(pg)
+    check('I', 'speech over background noise: turn still ends', ok, f'{round(tp - se)} ms after the learner stopped')
+    pg.evaluate('window.__micBase = 0; __setMic(0)'); wait_listening(pg)
+    # page reload keeps the last call log
+    pg.on('dialog', lambda d: d.accept()); pg.click('#endBtn'); pg.wait_for_timeout(600)
+    saved = pg.evaluate('(() => { const r = DCCall.log.last(); return r && r.entries.length; })()')
+    check('I', 'call log saved for later (localStorage, survives reload)', saved and saved > 20, f'{saved} entries')
+    pg.click('[data-home]'); pg.click('[data-open-settings]'); pg.wait_for_timeout(100)
+    with pg.expect_download() as dl: pg.click('#logDl')
+    path = dl.value.path(); body = open(path, encoding='utf-8').read()
+    check('I', 'download: .txt with the call log', dl.value.suggested_filename.endswith('.txt') and 'Anruf-Protokoll' in body)
+    pg.click('#logShow'); check('I', 'log viewer in ⚙ → 🩺', 'end of turn' in pg.inner_text('#logView'))
+    # microphone test
+    pg.evaluate("""() => { setTimeout(() => __setMic(0.35), 600); setTimeout(() => __setMic(0), 2500);
+        const iv = setInterval(() => { if (__sr && __sr.running && document.getElementById('mtHeard')) { clearInterval(iv); setTimeout(() => __emit('Ich möchte einen Kaffee', true), 400); } }, 100); }""")
+    pg.click('#micTestBtn'); pg.wait_for_function('!document.getElementById("micTestBtn").disabled', timeout=20000)
+    out = pg.inner_text('#micTestOut')
+    check('I', 'mic test: level + recogniser checked separately', '✅ Mikrofon' in out and '✅ Spracherkennung' in out and 'Kaffee' in out, out.replace('\n', ' | ')[:200])
+    check('I', 'mic test log kept separately from the call log', 'Mikrofontest' in log_text(pg) and 'Anruf-Protokoll' in log_text(pg))
+    ctx.close()
+    # recogniser keeps ending at once while our stream holds the mic → release it, keep listening
+    ctx, pg = open_page(b, preset())
+    pg.evaluate('window.__srQuickEnd = 3')
+    start(pg); pg.wait_for_timeout(6000); wait_listening(pg)
+    info = pg.evaluate('({ mode: ENG.micMode, mic: ENG.mic === undefined, sr: __sr.running })')
+    t = log_text(pg)
+    check('I', 'on/off loop detected → our mic released, recogniser keeps running', info['mode'] == 'stt-only' and info['mic'] and info['sr'] and 'trouble: quick-end' in t and 'switched to stt-only' in t, json.dumps(info))
+    speak(pg, 'Ich möchte einen Tee'); check('I', 'after the switch the learner is heard', wait_state(pg, 'PROCESSING', 5000)); wait_listening(pg)
+    ctx.close()
+    # recogniser never works → stop the loop, clear message with retry
+    ctx, pg = open_page(b, preset())
+    pg.evaluate('window.__srQuickEnd = 50')
+    start(pg); pg.wait_for_timeout(16000)
+    n = pg.evaluate('__srStarts'); txt = pg.evaluate('document.getElementById("noticeText").textContent')
+    check('I', 'recogniser never hears anything → loop stops (no endless mic on/off) + help message', n <= 12 and 'startet immer wieder neu' in txt and pg.is_visible('#noticeRetry'), f'{n} starts; {txt[:90]}')
+    ctx.close()
+    # Android: speech recogniser alone (no getUserMedia), barge-in by recognised words
+    ua = 'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36'
+    ctx, pg = open_page(b, preset(), viewport={'width': 412, 'height': 900}, mobile=True, ua=ua)
+    start(pg)
+    check('I', 'Android: mic left to the recogniser (no getUserMedia)', pg.evaluate('ENG.micMode') == 'stt-only' and pg.evaluate('__gumCalls') == 0)
+    wait_listening(pg)
+    speak(pg, 'Erzähl mir etwas über das Café'); wait_state(pg, 'AI_SPEAKING', 8000); pg.wait_for_timeout(900)
+    pg.evaluate("__emit('Moment mal', false)"); ok = wait_state(pg, ['INTERRUPTED', 'USER_SPEAKING'], 2000)
+    check('I', 'Android: interrupting works from the recognised words', ok)
+    pg.evaluate("async () => { __emit('Moment mal, eine Frage', true); }"); check('I', 'Android: turn ends without VAD', wait_state(pg, 'AI_SPEAKING', 8000))
+    ctx.close()
+
 with sync_playwright() as p:
     b = launch(p)
-    for name in (sys.argv[1:] or ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']):
+    for name in (sys.argv[1:] or ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']):
         try: globals()['test_' + name](b)
         except Exception as e: check(name, 'test crashed', False, repr(e)[:300])
     b.close()

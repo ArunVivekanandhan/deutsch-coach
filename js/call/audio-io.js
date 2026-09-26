@@ -2,9 +2,17 @@
    streaming playback of PCM audio (with an analyser for lip-sync), resampling and WAV encoding. Browser APIs only. */
 (function () {
   const DCCall = window.DCCall = window.DCCall || {};
+  const L = (...a) => DCCall.log && DCCall.log(...a);
   let sharedCtx = null;
   DCCall.audioContext = function () {
-    if (!sharedCtx) sharedCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!sharedCtx) {
+      sharedCtx = new (window.AudioContext || window.webkitAudioContext)();
+      L('audio', 'AudioContext ' + sharedCtx.state, { sampleRate: sharedCtx.sampleRate });
+      sharedCtx.onstatechange = () => L('audio', 'AudioContext ' + sharedCtx.state);
+      /* Safari/iOS (and Chrome after a long await) start it suspended: resume on the next tap anywhere */
+      const wake = () => { if (sharedCtx.state !== 'running') sharedCtx.resume().catch(() => {}); };
+      ['pointerdown', 'keydown', 'touchend'].forEach(ev => document.addEventListener(ev, wake, { passive: true }));
+    }
     if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {});
     return sharedCtx;
   };
@@ -50,8 +58,17 @@
       try {
         this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
       } catch (err) {
-        const e = new Error(err && err.name === 'NotAllowedError' ? 'Mikrofon nicht erlaubt.' : 'Kein Mikrofon gefunden.');
-        e.code = err && err.name === 'NotAllowedError' ? 'denied' : 'nomic'; throw e;
+        L('mic', 'getUserMedia failed', { name: err && err.name, message: err && err.message });
+        const e = new Error(err && err.name === 'NotAllowedError' ? 'Mikrofon nicht erlaubt.' : err && err.name === 'NotReadableError' ? 'Mikrofon wird von einer anderen App benutzt.' : 'Kein Mikrofon gefunden.');
+        e.code = err && err.name === 'NotAllowedError' ? 'denied' : err && err.name === 'NotReadableError' ? 'busy' : 'nomic'; throw e;
+      }
+      const track = this.stream.getAudioTracks()[0];
+      if (track) {
+        let st = {}; try { st = track.getSettings(); } catch (x) {}
+        L('mic', 'microphone open', { label: track.label, echoCancellation: st.echoCancellation, noiseSuppression: st.noiseSuppression, autoGainControl: st.autoGainControl, sampleRate: st.sampleRate });
+        track.addEventListener('ended', () => L('mic', 'track ended (device removed or taken by another app)'));
+        track.addEventListener('mute', () => L('mic', 'track muted by the system'));
+        track.addEventListener('unmute', () => L('mic', 'track unmuted by the system'));
       }
       const ctx = DCCall.audioContext();
       this.source = ctx.createMediaStreamSource(this.stream);
@@ -87,8 +104,9 @@
       let s = 0; for (let i = 0; i < this.buf.length; i++) s += this.buf[i] * this.buf[i];
       return 10 * Math.log10(s / this.buf.length + 1e-12);
     }
-    setMuted(m) { this.muted = m; if (this.stream) this.stream.getAudioTracks().forEach(t => { t.enabled = !m; }); }
+    setMuted(m) { this.muted = m; if (this.stream) this.stream.getAudioTracks().forEach(t => { t.enabled = !m; }); L('mic', m ? 'muted (button)' : 'unmuted (button)'); }
     stop() {
+      if (this.stream) L('mic', 'microphone released');
       try { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
       try { if (this.source) this.source.disconnect(); if (this.capture) this.capture.disconnect(); } catch (e) {}
       this.stream = null; this.capture = null;
@@ -102,23 +120,32 @@
     constructor(mic, opts) {
       this.mic = mic; this.opts = Object.assign({ minSpeechMs: 140, bargeInMinMs: 320, gapMs: 90 }, opts || {});
       this.noise = -60; this.speaking = false; this.bargeIn = false; this.aboveSince = 0; this.lastVoice = 0; this.lastDb = -100;
-      this.onStart = null; this.onStop = null; this.onLevel = null; this.timer = null;
+      this.onStart = null; this.onStop = null; this.onLevel = null; this.timer = null; this.hist = []; this.n = 0; this.peak = -100;
     }
     threshold() { return this.bargeIn ? Math.max(this.noise + 18, -38) : Math.max(this.noise + 11, -50); }
     start() {
       this.stopTimer(); const tick = 30;
       this.timer = setInterval(() => {
         const now = performance.now(), db = this.mic.level(); this.lastDb = db;
+        /* noise floor = 15th percentile of the last ~6 s: follows a fan/street/AC hum upwards as well (a floor that only
+           adapted while it was quiet stayed low in a noisy room, so the noise counted as "speaking" forever) */
+        this.hist.push(Math.max(-100, db)); if (this.hist.length > 200) this.hist.shift();
+        if (++this.n % 10 === 0 && this.hist.length >= 20) {
+          const srt = this.hist.slice().sort((a, b) => a - b);
+          this.noise = Math.min(-30, Math.max(-78, srt[Math.floor(srt.length * 0.15)]));
+        }
+        this.peak = Math.max(this.peak, db);
+        if (this.n % 100 === 0) { L('vad', 'level', { peak: Math.round(this.peak), noise: Math.round(this.noise), thr: Math.round(this.threshold()), speaking: this.speaking, bargeIn: this.bargeIn }); this.peak = -100; }
         const thr = this.threshold();
         if (db > thr) {
           if (!this.aboveSince) this.aboveSince = now;
           this.lastVoice = now;
           const need = this.bargeIn ? this.opts.bargeInMinMs : this.opts.minSpeechMs;
-          if (!this.speaking && now - this.aboveSince >= need) { this.speaking = true; if (this.onStart) this.onStart({ bargeIn: this.bargeIn, db }); }
+          if (!this.speaking && now - this.aboveSince >= need) { this.speaking = true; L('vad', 'voice start', { db: Math.round(db), thr: Math.round(thr), bargeIn: this.bargeIn }); if (this.onStart) this.onStart({ bargeIn: this.bargeIn, db }); }
         } else {
           if (this.aboveSince && now - this.lastVoice > this.opts.gapMs) this.aboveSince = 0;
-          if (db < this.noise + 6) this.noise = Math.min(-35, Math.max(-78, this.noise * 0.97 + db * 0.03));
-          if (this.speaking && now - this.lastVoice > 260) { this.speaking = false; if (this.onStop) this.onStop(); }
+          if (db < this.noise) this.noise = Math.max(-78, db);                      // got quieter: follow at once
+          if (this.speaking && now - this.lastVoice > 260) { this.speaking = false; L('vad', 'voice stop'); if (this.onStop) this.onStop(); }
         }
         if (this.onLevel) this.onLevel(Math.max(0, Math.min(1, (db - this.noise) / 30)), this.speaking);
       }, tick);

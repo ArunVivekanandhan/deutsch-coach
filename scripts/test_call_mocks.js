@@ -7,18 +7,26 @@
   /* ---- fake microphone: a sawtooth whose gain the test controls ---- */
   window.__setMic = () => {};
   const md = navigator.mediaDevices || {};
+  window.__gumCalls = 0; window.__micBase = 0;
   md.getUserMedia = async c => {
+    window.__gumCalls++;
     if (PRESET.micDenied) throw new DOMException('Permission denied', 'NotAllowedError');
     const ctx = new AudioContext(); const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = 190;
     const g = ctx.createGain(); g.gain.value = 0; const dst = ctx.createMediaStreamDestination();
     osc.connect(g); g.connect(dst); osc.start(); ctx.resume();
     window.__setMic = v => { g.gain.setTargetAtTime(v, ctx.currentTime, 0.01); };
+    window.__setMic(window.__micBase);
     return dst.stream;
   };
   /* ---- fake Web Speech recogniser ---- */
+  /* __srQuickEnd > 0: the recogniser ends right after start without hearing anything (Android mic conflict) */
+  window.__srQuickEnd = 0; window.__srStarts = 0;
   class FakeSR {
     constructor() { window.__sr = this; this.running = false; }
-    start() { this.running = true; window.__sr = this; }
+    start() {
+      this.running = true; window.__sr = this; window.__srStarts++;
+      if (window.__srQuickEnd > 0) { window.__srQuickEnd--; setTimeout(() => { if (!this.running) return; this.running = false; this.onend && this.onend(); }, 60); }
+    }
     stop() { this.running = false; setTimeout(() => this.onend && this.onend(), 0); }
     abort() { this.stop(); }
   }
@@ -36,7 +44,7 @@
     for (let i = 1; i <= ws.length; i++) { window.__emit(ws.slice(0, i).join(' '), false); await new Promise(r => setTimeout(r, o.wordMs || 180)); }
     if (o.final !== false) window.__emit(text, true);
     await new Promise(r => setTimeout(r, 120));
-    window.__setMic(0); window.__speechEnd = performance.now();
+    window.__setMic(window.__micBase); window.__speechEnd = performance.now();
   };
   /* ---- state history ---- */
   window.__states = [];

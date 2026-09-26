@@ -27,7 +27,7 @@
     /* returns false (and records it) for a transition that is not allowed — callers never end up in an impossible state */
     go(to, info) {
       if (to === this.state) return true;
-      if (!this.can(to)) { this.history.push({ from: this.state, to, rejected: true, t: Date.now() }); return false; }
+      if (!this.can(to)) { this.history.push({ from: this.state, to, rejected: true, t: Date.now() }); if (window.DCCall.log) window.DCCall.log('state', 'rejected ' + this.state + ' → ' + to); return false; }
       const from = this.state;
       this.state = to;
       this.history.push({ from, to, t: Date.now(), info });

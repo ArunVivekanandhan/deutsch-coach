@@ -759,6 +759,48 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 49) — KI-Sprechpartner: microphone fixes + diagnostic call log
+
+#### Task
+User: "KI-Sprechpartner not able to speak microphone enable and disable. Do we have log for tracking" — there was no
+persistent log (only the in-memory state history).
+
+#### Likely causes found in the code (not reproducible in headless Chromium, so fixed + made visible in the log)
+- **Android Chrome:** the Web Speech recogniser cannot share the microphone with our own `getUserMedia` stream (VAD).
+  It ends right after starting (or reports `audio-capture`) → restarted every 120 ms → mic icon flickers on/off,
+  nothing is heard. Now: on Android the call runs **"stt-only"** (no getUserMedia; barge-in and turn end from the
+  recognised words). On other systems `BrowserSTT` counts sessions that end < 1.5 s without a result; after 3 the
+  engine releases its own stream (`ConversationEngine.sttTrouble`, notice) and keeps the recogniser; after 8 more it
+  stops the loop with a help message + retry instead of an endless on/off cycle. Restarts back off (1–1.5 s).
+- **Noisy room:** the VAD noise floor only adapted while it was quiet, so steady noise (fan, street, AC) counted as
+  "speaking" forever → stuck in USER_SPEAKING, turn never ended. Now the floor = 15th percentile of the last ~6 s
+  (follows noise up and down). Turn-end safety: no new recognised words for hang + 1.8 s ends the turn even if the VAD
+  still hears sound; voice without words returns to LISTENING after 6 s.
+- Muting while USER_SPEAKING now returns to LISTENING; `NotReadableError` (mic used by another app) has its own
+  message; the AudioContext is resumed on the next tap (Safari/iOS).
+- ⚙ **Mikrofon: Automatisch | Nur Spracherkennung** (`dc_call_settings_v1.micMode`) — switches live during a call.
+
+#### Diagnostic log (`js/call/call-log.js`, `DCCall.log`)
+Ring buffer (900 events) with time since call start, category and data: `call` (session, providers, pause/end),
+`env` (browser, Android/iOS, secure context, mic permission, number of inputs/outputs, German voices, AudioContext),
+`mic` (open + track settings, released, muted, system mute/ended), `vad` (voice start/stop, level/noise/threshold
+every 3 s), `stt` (every recogniser session: listening, audio start, speech, interim (≤ 1.4/s), final + confidence,
+errors, end + duration, trouble), `turn` (end of turn with hang / quiet times / reason, ignored echo, barge-in, typed),
+`state` (every transition, also rejected ones), `ai` (request, first token, complete, stopped), `tts` (first audio
+latency, failures, browser fallback), `notice`, `ui`. Keys are never logged (whitelisted settings; key-like strings
+masked). Last call → `dc_call_log_last`, last microphone test → `dc_call_log_test` (saved every 2.5 s + on end/pagehide).
+UI: ⚙ → 🩺 Diagnose: **🎙️ Mikrofontest** (1. raw level via getUserMedia, 2. German recogniser — one after the other,
+with verdicts and tips), 👁 Protokoll anzeigen (live), 📋 Kopieren, ⬇️ Herunterladen (.txt with call + test), live
+status line during a call. `localStorage.dc_call_debug = '1'` also echoes all events to the console.
+
+#### Verified
+`scripts/test_call.py` Test I (19 checks): log content + no keys, mute/unmute (recogniser stopped/restarted, speech
+ignored while muted), steady background noise (not stuck, turn still ends), saved log + download + viewer, mic test,
+quick-end loop → stt-only switch and learner heard, never-working recogniser → loop stops with message, Android UA →
+no getUserMedia + barge-in + turn end from words. Full suite 79/79, 0 console errors; build.py + smoke_pages 28/28.
+
+---
+
 ### 2026-09-26 (Task 48) — KI-Sprechpartner v3: real-time conversational video call (existing page upgraded, not a prototype)
 
 #### Task

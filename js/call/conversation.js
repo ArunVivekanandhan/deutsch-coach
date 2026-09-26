@@ -21,6 +21,7 @@
     + 'ein|eine|einen|einem|einer|zu|zum|zur|mit|nach|von|vom|bei|beim|für|auf|in|im|an|am|ich|du|er|sie|wir|ihr|mein|meine|dein|deine|'
     + 'möchte|möchtest|möchten|würde|würdest|hätte|hättest)[\\s.…]*$|,\\s*$|…\\s*$|\\.\\.\\.\\s*$', 'iu');
   const BASE_HANG = { A1: 1150, A2: 1000, B1: 880, B2: 780 };
+  const L = (...a) => DCCall.log && DCCall.log(...a);
   const words = s => String(s || '').toLowerCase().replace(/[^a-zäöüß0-9\s]/gi, ' ').split(/\s+/).filter(Boolean);
   const ABBR = /^(?:z|d|u|o|s|bzw|usw|vgl|Dr|Nr|ca|Str|evtl|ggf|inkl|bspw|Hr|Fr|Mio|Mrd|Jh|etc)\.$/i;
   /* complete sentences in text[from..]; a sentence ends at . ! ? … followed by whitespace (the stream may still grow).
@@ -51,7 +52,9 @@
       this.o = o; this.sm = new DCCall.CallStateMachine();
       this.utter = { finals: [], interim: '', last: 0, alts: [] };
       this.metrics = []; this.turnId = 0; this.speaking = null; this.handlers = [];
-      this.sm.on((to, from) => {
+      this.sm.on((to, from, info) => {
+        L('state', from + ' → ' + to, info && info.reason ? { reason: info.reason } : undefined);
+        if (to === 'USER_SPEAKING') this.userSince = performance.now();
         if (this.avatar) this.avatar.setState(to);
         if (this.vad) this.vad.setBargeIn(to === 'AI_SPEAKING');
         if (this.o.ui.state) this.o.ui.state(to, from);
@@ -62,12 +65,30 @@
 
     /* ---------------- lifecycle ---------------- */
     async start() {
+      const ui = this.o.ui, notice = ui.notice;
+      ui.notice = (msg, kind, retry) => { if (msg) L('notice', msg, { kind }); return notice(msg, kind, retry); };
       this.sm.go('CONNECTING');
       const s = this.settings();
+      L('call', 'providers requested', { voice: s.voice, avatar: s.avatar, stt: s.stt, level: this.o.level() });
       this.tts = this.makeTTS(s.voice);
       this.browserTTS = new DCCall.TTS.browser();
       await this.connectAvatar(s.avatar);
-      // microphone (+ VAD). Without a mic the learner can still type.
+      L('call', 'tts provider: ' + this.tts.id + ', avatar: ' + (this.avatar && this.avatar.id));
+      /* microphone (+ VAD). Android Chrome's speech recogniser cannot share the microphone with our own audio stream
+         (it ends at once / audio-capture error → mic icon flickers, nothing is heard), so there the browser STT runs
+         alone ("stt-only": barge-in and turn-taking from the recognised words, no level meter). */
+      const sttOnly = s.stt !== 'openai' && DCCall.STT.browser.supported() && (/Android/i.test(navigator.userAgent) || s.micMode === 'stt-only');
+      this.micMode = sttOnly ? 'stt-only' : 'full';
+      if (sttOnly) { this.mic = undefined; L('mic', 'mode stt-only: microphone is left to the speech recogniser', { android: /Android/i.test(navigator.userAgent) }); }
+      else await this.openMic();
+      await this.startSTT(s.stt);
+      this.turnTimer = setInterval(() => this.checkTurnEnd(), 90);
+      this.onOffline = () => { if (this.sm.live()) { this.abortCurrent('offline'); this.sm.go('RECONNECTING'); this.o.ui.notice('📡 Verbindung wird wiederhergestellt …', 'reconnect'); } };
+      this.onOnline = () => { if (this.sm.is('RECONNECTING')) { this.o.ui.notice(''); this.sm.go('LISTENING'); if (this.pendingTurn) this.retryTurn(); } };
+      window.addEventListener('offline', this.onOffline); window.addEventListener('online', this.onOnline);
+      this.sm.go('LISTENING');
+    }
+    async openMic() {
       this.mic = new DCCall.MicInput();
       try {
         await this.mic.start();
@@ -75,16 +96,25 @@
         this.vad.onStart = info => this.onVoiceStart(info);
         this.vad.onLevel = (lv, sp) => { if (this.avatar && this.sm.is('USER_SPEAKING', 'LISTENING')) this.avatar.onUserVoice(lv, sp); if (this.o.ui.level) this.o.ui.level(lv, sp); };
         this.vad.start();
+        if (this.muted) this.mic.setMuted(true);
       } catch (e) {
-        this.mic = null;
-        this.o.ui.notice(e.code === 'denied' ? '🎙️ Mikrofon nicht erlaubt — erlaube es in den Browser-Einstellungen oder schreib unten (💬).' : '🎙️ ' + e.message + ' — du kannst schreiben (💬).', 'warn');
+        this.mic = null; this.vad = null;
+        this.o.ui.notice(e.code === 'denied' ? '🎙️ Mikrofon nicht erlaubt — erlaube es in den Browser-Einstellungen (🔒 neben der Adresse) oder schreib unten (💬).' : '🎙️ ' + e.message + ' — du kannst schreiben (💬).', 'warn');
       }
-      await this.startSTT(s.stt);
-      this.turnTimer = setInterval(() => this.checkTurnEnd(), 90);
-      this.onOffline = () => { if (this.sm.live()) { this.abortCurrent('offline'); this.sm.go('RECONNECTING'); this.o.ui.notice('📡 Verbindung wird wiederhergestellt …', 'reconnect'); } };
-      this.onOnline = () => { if (this.sm.is('RECONNECTING')) { this.o.ui.notice(''); this.sm.go('LISTENING'); if (this.pendingTurn) this.retryTurn(); } };
-      window.addEventListener('offline', this.onOffline); window.addEventListener('online', this.onOnline);
-      this.sm.go('LISTENING');
+    }
+    /* the browser recogniser can't get the microphone while our stream holds it → release ours, keep the recogniser */
+    sttTrouble(kind, n) {
+      L('stt', 'trouble: ' + kind, { count: n, micMode: this.micMode });
+      if (this.micMode !== 'full' || !this.mic) return false;
+      this.micMode = 'stt-only';
+      try { this.vad && this.vad.stopTimer(); } catch (e) {}
+      try { this.mic.stop(); } catch (e) {}
+      this.mic = undefined; this.vad = null;
+      if (this.o.ui.level) this.o.ui.level(0, false);
+      L('mic', 'switched to stt-only: released our microphone stream for the speech recogniser');
+      if (kind !== 'setting') this.o.ui.notice('🎙️ Die Spracherkennung bekam das Mikrofon nicht — ich habe umgeschaltet. Sprich einfach weiter.', 'warn');
+      if (this.stt) { this.stt.quick = 0; if (kind === 'audio-capture') setTimeout(() => { if (this.stt && this.stt.active) this.stt.open(); }, 300); }
+      return true;
     }
     makeTTS(id) {
       const T = DCCall.TTS[id] || DCCall.TTS.browser, t = new T();
@@ -116,23 +146,28 @@
     }
     async startSTT(kind) {
       const useOpenAI = kind === 'openai' && DCCall.STT.openai.supported() && this.mic;
-      if (useOpenAI) { this.stt = new DCCall.STT.openai(this.mic); await this.stt.start(); }
+      if (kind === 'openai' && !useOpenAI) L('stt', 'OpenAI transcription not possible (key, AudioWorklet or microphone missing) — using the browser recogniser');
+      if (useOpenAI) { this.stt = new DCCall.STT.openai(this.mic); await this.stt.start(); L('stt', 'provider: OpenAI transcription'); }
       else if (DCCall.STT.browser.supported() && this.mic !== null) {
         this.stt = new DCCall.STT.browser();
         this.stt.onPartial = t => this.onPartial(t);
         this.stt.onFinal = (t, c, alts) => this.onFinal(t, c, alts);
         this.stt.onError = (code, msg) => this.onSTTError(code, msg);
-        this.stt.start();
+        this.stt.onTrouble = (k, n) => this.sttTrouble(k, n);
+        if (!this.muted) this.stt.start();
       } else {
+        L('stt', 'no speech recognition', { supported: DCCall.STT.browser.supported(), mic: this.mic === null ? 'failed' : 'ok' });
         this.stt = null;
         if (this.mic) this.o.ui.notice('🎙️ Dieser Browser hat keine Spracherkennung — nutze Chrome/Edge/Safari, wähle „OpenAI“ als Spracherkennung (⚙) oder schreib (💬).', 'warn');
       }
     }
     onSTTError(code, msg) {
       if (code === 'network') { if (navigator.onLine === false) this.onOffline(); else this.o.ui.notice('🎙️ ' + msg + ' Ich versuche es weiter …', 'warn'); }
-      else if (code === 'denied' || code === 'nomic' || code === 'unsupported') this.o.ui.notice('🎙️ ' + msg + ' Du kannst schreiben (💬).', 'warn');
+      else if (code === 'denied' || code === 'nomic' || code === 'unsupported') this.o.ui.notice('🎙️ ' + msg + ' Du kannst schreiben (💬). Details: ⚙ → 🩺 Diagnose.', 'warn');
+      else if (code === 'stalled') this.o.ui.notice('🎙️ ' + msg + ' Tipp: anderen Browser (Chrome/Edge) oder ⚙ → Spracherkennung „OpenAI“ — oder schreib (💬). Details: ⚙ → 🩺 Diagnose.', 'error', () => { this.stt.quick = 0; this.stt.start(); });
     }
     async end() {
+      L('call', 'end', { metrics: this.metrics.slice(-5) });
       this.abortCurrent('end');
       clearInterval(this.turnTimer);
       window.removeEventListener('offline', this.onOffline); window.removeEventListener('online', this.onOnline);
@@ -144,20 +179,23 @@
     }
     pause() {
       if (this.sm.is('PAUSED', 'SESSION_ENDED')) return;
+      L('call', 'pause');
       this.abortCurrent('pause'); this.resetUtter();
       try { this.stt && this.stt.stop(); } catch (e) {}
       this.sm.go('PAUSED');
     }
     resume() {
       if (!this.sm.is('PAUSED')) return;
+      L('call', 'resume');
       this.sm.go('LISTENING');
       if (this.stt && !this.muted) this.stt.start();
     }
     setMuted(m) {
       this.muted = m;
+      L('mic', m ? 'mute (button)' : 'unmute (button)', { micMode: this.micMode, state: this.state });
       if (this.mic) this.mic.setMuted(m);
       if (this.stt) { if (m) this.stt.stop(); else if (!this.sm.is('PAUSED')) this.stt.start(); }
-      if (m) this.resetUtter();
+      if (m) { this.resetUtter(); if (this.sm.is('USER_SPEAKING')) this.sm.go('LISTENING'); }
     }
     setVolume(v) { this.volume = v; if (this.avatar && this.avatar.setVolume) this.avatar.setVolume(v); }
 
@@ -188,7 +226,7 @@
       if (this.sm.is('AI_SPEAKING', 'PROCESSING')) {
         const n = words(text).length, vadRecent = this.bargeCandidate && performance.now() - this.bargeCandidate < 1500;
         if (!this.echoOf(text) && (n >= 2 || (n >= 1 && vadRecent))) { this.bargeIn('stt'); this.utter.interim = text; }
-        else return;
+        else { if (text !== this.lastIgnored) { this.lastIgnored = text; L('turn', 'ignored while tutor talks (echo or too short)', { text }); } return; }
       }
       if (this.sm.is('LISTENING', 'INTERRUPTED')) this.sm.go('USER_SPEAKING');
       this.utter.interim = text; this.utter.last = performance.now();
@@ -197,7 +235,7 @@
     onFinal(text, conf, alts) {
       if (this.muted || !text || this.sm.is('PAUSED', 'SESSION_ENDED', 'RECONNECTING')) return;
       if (this.sm.is('AI_SPEAKING', 'PROCESSING')) {
-        if (this.echoOf(text)) return;
+        if (this.echoOf(text)) { L('turn', 'final ignored: echo of the tutor', { text }); return; }
         this.bargeIn('stt');
       }
       if (this.sm.is('LISTENING', 'INTERRUPTED')) this.sm.go('USER_SPEAKING');
@@ -234,15 +272,27 @@
           this.finalizing = false;
           if (all) this.finalizeTurn(); else { this.resetUtter(); this.sm.go('LISTENING'); }
         } catch (e) {
+          L('turn', 'OpenAI transcription error', { message: e.message });
           this.finalizing = false; this.resetUtter(); this.sm.go('LISTENING');
           this.o.ui.notice('🎙️ Spracherkennung (OpenAI) fehlgeschlagen: ' + e.message, 'warn');
         }
         return;
       }
       const text = this.utterText();
-      const quietFor = Math.min(this.vad ? this.vad.silenceMs() : Infinity, now - (this.utter.last || now));
-      if (!text) { if (this.vad && this.vad.silenceMs() > 2500) this.sm.go('LISTENING'); return; }
-      if (quietFor >= this.endOfTurnMs(text)) this.finalizeTurn();
+      const vadQuiet = this.vad ? this.vad.silenceMs() : Infinity, textQuiet = now - (this.utter.last || now);
+      if (!text) {
+        /* voice detected but no words: back to listening after 2.5 s of quiet — or after 6 s even if the VAD still
+           "hears" something (steady noise must not block the call in "Du sprichst …") */
+        if (vadQuiet > 2500 || now - (this.userSince || now) > 6000) { L('turn', 'no words recognised — back to listening', { vadQuiet: Math.round(Math.min(vadQuiet, 1e6)) }); this.sm.go('LISTENING'); }
+        return;
+      }
+      const hang = this.endOfTurnMs(text);
+      /* normal: both the VAD and the recogniser are quiet; safety: no new words for hang + 1.8 s even if the VAD
+         still reports sound (background noise) */
+      if (Math.min(vadQuiet, textQuiet) >= hang || textQuiet >= hang + 1800) {
+        L('turn', 'end of turn', { text, hang, textQuiet: Math.round(textQuiet), vadQuiet: vadQuiet === Infinity ? 'n/a' : Math.round(vadQuiet), by: Math.min(vadQuiet, textQuiet) >= hang ? 'silence' : 'no new words' });
+        this.finalizeTurn();
+      }
     }
     finalizeTurn() {
       const text = this.utterText(), conf = this.utter.conf, alts = this.utter.alts;
@@ -253,6 +303,7 @@
     /* typed text uses the same path as speech */
     sendText(text) {
       text = String(text || '').trim(); if (!text) return;
+      L('turn', 'typed', { text });
       if (this.sm.is('AI_SPEAKING', 'PROCESSING')) this.bargeIn('typed');
       if (this.sm.is('PAUSED')) this.resume();
       this.resetUtter();
@@ -260,6 +311,7 @@
     }
     async submitTurn(text, info) {
       const id = ++this.turnId;
+      L('turn', 'learner turn', { text, spoken: info && info.spoken });
       this.pendingTurn = { text, info };
       this.turnT0 = performance.now(); this.cur = { id, t0: this.turnT0 };
       this.sm.go('PROCESSING');
@@ -297,6 +349,7 @@
     }
     handleError(e) {
       const offline = navigator.onLine === false;
+      L('error', 'turn failed', { name: e.name, status: e.status, message: e.message, offline });
       if (offline) { this.sm.go('RECONNECTING'); this.o.ui.notice('📡 Verbindung wird wiederhergestellt …', 'reconnect', () => this.retryTurn()); return; }
       const auth = e.status === 401 || e.status === 403;
       this.sm.go('ERROR');
@@ -317,6 +370,7 @@
       opts = opts || {};
       for (let attempt = 0; ; attempt++) {
         const ctrl = new AbortController(); this.llmCtrl = ctrl; this.abortReason = null;
+        L('ai', attempt ? 'request (retry ' + attempt + ')' : 'request', { messages: messages.length });
         const sp = this.newSpeech(opts);
         let spokenUpTo = 0, full = '', metaAt = -1, firstTok = 0, moodSent = false;
         /* "[happy] Super, …" → mood for the face, the tag is not spoken */
@@ -328,7 +382,7 @@
         const firstTokenTimer = setTimeout(() => ctrl.abort(new DOMException('timeout', 'TimeoutError')), 20000);
         try {
           await dcStreamAI(messages, { signal: ctrl.signal, temperature: opts.temperature, onDelta: (piece, all) => {
-            if (!firstTok) { firstTok = performance.now(); clearTimeout(firstTokenTimer); this.mark('firstToken'); }
+            if (!firstTok) { firstTok = performance.now(); clearTimeout(firstTokenTimer); this.mark('firstToken'); L('ai', 'first token'); }
             full = all;
             if (metaAt < 0) { const m = all.indexOf('###'); if (m >= 0 && /###\s*M?E?T?A?/.test(all.slice(m, m + 7))) metaAt = m; }
             const speakable = body(metaAt >= 0 ? all.slice(0, metaAt) : all);
@@ -341,6 +395,7 @@
           } });
           clearTimeout(firstTokenTimer);
           const speakable = body(metaAt >= 0 ? full.slice(0, metaAt) : full);
+          L('ai', 'reply complete', { chars: full.length, meta: metaAt >= 0 });
           const rest = speakable.slice(spokenUpTo).trim();
           if (rest) sp.push(rest);
           sp.close();
@@ -350,6 +405,7 @@
           return { text: speakable.trim(), meta, interrupted: r.interrupted, spoken: r.spoken };
         } catch (e) {
           clearTimeout(firstTokenTimer); sp.cancel();
+          L('ai', 'reply stopped', { reason: this.abortReason || e.name, status: e.status, message: e.message });
           if (this.abortReason === 'offline') { const x = new Error('offline'); x.name = 'OfflineError'; throw x; }
           if (this.interruptedTurn === this.turnId || ['barge', 'pause', 'end'].includes(this.abortReason)) {
             return { text: '', meta: null, interrupted: true, spoken: sp.spokenText() };
@@ -370,6 +426,7 @@
       this.cur[name] = performance.now();
       if (name === 'firstAudio') {
         const m = { endToFirstToken: this.cur.firstToken ? Math.round(this.cur.firstToken - this.cur.t0) : null, endToFirstAudio: Math.round(this.cur.firstAudio - this.cur.t0) };
+        L('tts', 'first audio', m);
         this.metrics.push(m); if (this.o.ui.metrics) this.o.ui.metrics(m, this.metrics);
       }
     }
@@ -429,7 +486,7 @@
                 clearTimeout(to); it.chunks.push(ch); it.waiters.splice(0).forEach(w => w());
               }
               clearTimeout(to);
-            } catch (e) { it.error = e; }
+            } catch (e) { it.error = e; if (e.name !== 'AbortError') L('tts', 'voice request failed', { provider: tts.id, status: e.status, message: e.message }); }
             it.done = true; it.waiters.splice(0).forEach(w => w());
           })();
         } };
@@ -453,6 +510,7 @@
       if (it.error && n === 0) return this.playNative(it.text, onFirstAudio, true);
     }
     playNative(text, onFirstAudio, fallback) {
+      if (fallback) L('tts', 'browser voice fallback for one sentence');
       if (fallback && !this.warnedTTS) { this.warnedTTS = true; this.o.ui.notice('🔊 KI-Stimme nicht erreichbar — Browser-Stimme übernimmt.', 'warn'); }
       if (this.avatar.id === 'simli') { this.avatarFailed(new Error('no audio')); }
       return new Promise(res => {
@@ -482,6 +540,7 @@
       this.sm.go('INTERRUPTED', { reason, partial });
       this.bargeCandidate = 0;
       this.lastInterruption = { reason, partial, stopMs: Math.round(performance.now() - t) + 50 };
+      L('turn', 'barge-in: learner interrupted the tutor', { by: reason, during: partial });
       if (this.o.ui.interrupted) this.o.ui.interrupted(this.lastInterruption);
       this.sm.go('USER_SPEAKING');
       if (this.stt && this.stt.begin) this.stt.begin();

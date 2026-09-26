@@ -13,6 +13,7 @@
 <script src="js/progress-aggregator.js"></script>
 <script src="js/app-shell.js"></script>
 <script src="js/tutor-scripts.js"></script>
+<script src="js/call/call-log.js"></script>
 <script src="js/call/call-state.js"></script>
 <script src="js/call/audio-io.js"></script>
 <script src="js/call/tts.js"></script>
@@ -151,6 +152,8 @@
   .seg button { font: inherit; font-size: 13px; padding: 7px 11px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
   .seg button.active { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); font-weight: 700; }
   .caps { font-size: 12px; color: var(--color-ink-soft); }
+  .diag pre { max-height: 260px; overflow: auto; font-size: 11px; line-height: 1.35; background: var(--color-bg, #f1f5f9); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; white-space: pre-wrap; word-break: break-word; }
+  .diag .lvl { display: inline-block; height: 8px; border-radius: 4px; background: #16a34a; vertical-align: middle; transition: width .08s; }
   .ok-w { color: #16a34a; font-weight: 700; } .no-w { color: #dc2626; font-weight: 700; text-decoration: underline dotted; }
 </style>
 </head>
@@ -232,6 +235,7 @@
   <div class="set-row"><label>Avatar</label><div class="seg" id="setAvatar"></div><div class="caps" id="avatarCaps"></div></div>
   <div class="set-row" id="rowSimli"><label for="keySimli">Simli-Schlüssel &amp; Face-ID</label><input type="password" id="keySimli" autocomplete="off"><input type="text" id="faceSimli" placeholder="Face-ID aus dem Simli-Dashboard"></div>
   <div class="set-row"><label>Spracherkennung</label><div class="seg" id="setSTT"></div><div class="caps" id="sttCaps"></div></div>
+  <div class="set-row"><label>Mikrofon</label><div class="seg" id="setMicMode"></div><div class="caps">Automatisch: Mikrofon für Pegel + Unterbrechen und Spracherkennung gleichzeitig (auf Android nur Spracherkennung — dort geht beides zusammen nicht). „Nur Spracherkennung“ hilft, wenn der Tutor dich nicht hört oder das Mikrofon-Symbol ständig an/aus geht.</div></div>
   <div class="set-row"><label>Weiteres</label><div class="row">
     <label class="chip"><input type="checkbox" id="optSelf"> 📷 Mich selbst sehen</label>
     <label class="chip"><input type="checkbox" id="optTa" checked> 🇮🇳 Tamil-Hilfen</label>
@@ -239,6 +243,13 @@
     <div class="caps">🎧 Mit Kopfhörern klappt das Unterbrechen am besten (kein Echo). Schlüssel werden nur in diesem Browser gespeichert und direkt an den jeweiligen Anbieter gesendet.</div></div>
   <div class="row" style="margin-top:12px;"><button type="button" class="btn" id="setTest">🔍 Verbindungen testen</button><span class="note" id="testOut"></span></div>
   <div class="note" id="latencyOut" style="margin-top:8px;"></div>
+  <div class="set-row diag"><label>🩺 Diagnose</label>
+    <div class="caps">Hört der Tutor dich nicht? Mach den Mikrofontest, dann „Protokoll herunterladen“ und schick die Datei mit. Das Protokoll enthält Ereignisse (Mikrofon, Spracherkennung, Zustände, erkannter Text) — keine Schlüssel, keine Aufnahmen.</div>
+    <div class="row" style="margin-top:6px;"><button type="button" class="btn grey" id="micTestBtn">🎙️ Mikrofontest</button>
+      <button type="button" class="mini" id="logShow">👁 Protokoll anzeigen</button><button type="button" class="mini" id="logCopy">📋 Kopieren</button><button type="button" class="mini" id="logDl">⬇️ Herunterladen</button></div>
+    <div id="micTestOut" class="note" aria-live="polite"></div>
+    <div id="diagLive" class="note" hidden></div>
+    <pre id="logView" hidden></pre></div>
 </div></div>
 
 <script>
@@ -319,7 +330,7 @@ const $ = id => document.getElementById(id);
 let ST = Object.assign({ tutor: 'lena', level: 'A1', mode: 'guided', done: {}, sessions: 0, minutes: 0, days: {}, profile: null }, store.get('dc_tutor_v1', {}));
 if (ST.mode === 'ai') ST.mode = 'learning';
 if (!TUTORS.some(t => t.id === ST.tutor)) ST.tutor = 'lena';
-let CS = Object.assign({ conv: 'learning', voice: 'auto', avatar: 'illustrated', stt: 'browser', selfView: false, tamil: true, captions: true, simliFace: '' }, store.get('dc_call_settings_v1', {}));
+let CS = Object.assign({ conv: 'learning', voice: 'auto', avatar: 'illustrated', stt: 'browser', micMode: 'auto', selfView: false, tamil: true, captions: true, simliFace: '' }, store.get('dc_call_settings_v1', {}));
 const saveST = () => store.set('dc_tutor_v1', ST), saveCS = () => store.set('dc_call_settings_v1', CS);
 const tutorOf = id => TUTORS.find(t => t.id === id) || TUTORS[0];
 const thumb = t => DCCall.avatarThumb(t);
@@ -395,6 +406,7 @@ function renderSettings() {
   seg('setVoice', [['auto', 'Automatisch'], ['openai', 'OpenAI'], ['elevenlabs', 'ElevenLabs'], ['browser', 'Browser']], CS.voice, 'voice');
   seg('setAvatar', [['illustrated', 'Illustriert'], ['simli', 'Fotorealistisch (Simli)']], CS.avatar, 'avatar');
   seg('setSTT', [['browser', 'Browser (Echtzeit)', !DCCall.STT.browser.supported()], ['openai', 'OpenAI']], CS.stt, 'stt');
+  seg('setMicMode', [['auto', 'Automatisch'], ['stt-only', 'Nur Spracherkennung']], CS.micMode, 'micMode');
   const b = new DCCall.TTS.browser();
   $('voiceCaps').textContent = `Aktiv: ${({ openai: 'OpenAI', elevenlabs: 'ElevenLabs', browser: 'Browser-Stimme' })[voiceChoice()]}. OpenAI/ElevenLabs = natürliche, gestreamte KI-Stimme; Browser = ${b.voice ? b.voice.name : 'keine deutsche Stimme'}${b.isNatural() ? ' (neuronal)' : ' (klingt maschinell)'}. Tempo passt sich dem Niveau an.`;
   $('avatarCaps').textContent = CS.avatar === 'simli'
@@ -431,6 +443,64 @@ async function testConnections() {
   if (aiOn()) { try { await dcCallAI([{ role: 'user', content: 'Antworte nur mit: ok' }], { signal: AbortSignal.timeout(12000) }); r.push('🤖 KI ✓'); } catch (e) { r.push('🤖 KI ✗ (' + e.message.slice(0, 60) + ')'); } }
   out.textContent = r.join(' · ');
 }
+
+/* ---------------- diagnostics (Task 49) ---------------- */
+/* standalone check outside a call: 1) raw microphone level (getUserMedia), 2) the browser's German speech recogniser.
+   Run one after the other on purpose — on Android the two cannot share the microphone. */
+async function micTest() {
+  const out = $('micTestOut'), btn = $('micTestBtn'), L = DCCall.log;
+  if (S && !S.ended) { out.innerHTML = 'Während eines Anrufs siehst du den Live-Status unten. Für den Test den Anruf beenden.'; return; }
+  btn.disabled = true; const res = [];
+  L.begin({ test: 'microphone', stt: CS.stt, micMode: CS.micMode, page: location.pathname }, 'test');
+  const env = await L.env();
+  if (!window.isSecureContext) res.push('❌ Seite nicht über https geöffnet — Browser erlauben dann kein Mikrofon.');
+  out.innerHTML = '1/2 · 🎙️ Mikrofon-Pegel: sag „Hallo, wie geht es dir?“ … <span class="lvl" id="mtLvl" style="width:0"></span> <span id="mtDb"></span>';
+  const mic = new DCCall.MicInput(); let peak = -100, floor = 0;
+  try {
+    await mic.start();
+    const t0 = performance.now(), vals = [];
+    await new Promise(r => { const iv = setInterval(() => {
+      const db = mic.level(); vals.push(db); peak = Math.max(peak, db);
+      const w = Math.max(0, Math.min(160, (db + 70) * 3)); const el = $('mtLvl'); if (el) el.style.width = w + 'px'; const d = $('mtDb'); if (d) d.textContent = Math.round(db) + ' dB';
+      if (performance.now() - t0 > 3500) { clearInterval(iv); r(); } }, 50); });
+    floor = vals.slice().sort((a, b) => a - b)[Math.floor(vals.length * 0.15)];
+    L('test', 'microphone level', { peak: Math.round(peak), floor: Math.round(floor) });
+    res.push(peak > -45 && peak - floor > 12 ? `✅ Mikrofon: Stimme gut hörbar (Spitze ${Math.round(peak)} dB, Rauschen ${Math.round(floor)} dB).`
+      : peak > -45 ? `⚠️ Mikrofon: viel Hintergrundgeräusch (Spitze ${Math.round(peak)} dB, Rauschen ${Math.round(floor)} dB) — ruhiger Ort oder Headset hilft.`
+      : `❌ Mikrofon: fast nichts zu hören (Spitze ${Math.round(peak)} dB). Richtiges Mikrofon gewählt? Stummschalter am Gerät/Headset?`);
+  } catch (e) { res.push('❌ Mikrofon: ' + e.message + (e.code === 'denied' ? ' Erlaube es über das 🔒 neben der Adresse.' : '')); }
+  mic.stop();
+  if (DCCall.STT.browser.supported()) {
+    out.innerHTML = '2/2 · 🗣️ Spracherkennung: sag jetzt „Ich möchte einen Kaffee.“ … <b id="mtHeard"></b>';
+    const stt = new DCCall.STT.browser(); let heard = '', err = null;
+    stt.onPartial = t => { heard = t; const h = $('mtHeard'); if (h) h.textContent = '„' + t + '“'; };
+    stt.onFinal = t => { heard = t; const h = $('mtHeard'); if (h) h.textContent = '„' + t + '“ ✓'; };
+    stt.onError = (c, m) => { err = m; };
+    stt.onTrouble = () => false;
+    stt.start();
+    await new Promise(r => { const t0 = Date.now(); const iv = setInterval(() => { if (Date.now() - t0 > 8000 || err || (heard && /kaffee/i.test(heard) && Date.now() - t0 > 2500)) { clearInterval(iv); r(); } }, 200); });
+    stt.stop();
+    L('test', 'speech recognition', { heard, error: err, sessions: stt.sessions, quickEnds: stt.quick });
+    res.push(heard ? `✅ Spracherkennung (Browser): „${esc(heard)}“` : err ? `❌ Spracherkennung: ${esc(err)}` :
+      `❌ Spracherkennung hat nichts erkannt${stt.quick >= 3 ? ' (sie startet immer wieder neu)' : ''}. Tipp: Chrome oder Edge verwenden, Mikrofon in den Website-Einstellungen erlauben, oder ⚙ Spracherkennung „OpenAI“.`);
+  } else res.push('ℹ️ Dieser Browser hat keine eingebaute Spracherkennung — wähle „OpenAI“ oder schreib im Anruf.');
+  if (env.micPermission === 'denied') res.push('❌ Mikrofon ist für diese Seite gesperrt (Browser-Einstellungen).');
+  L.end();
+  out.innerHTML = res.map(x => `<div>${x}</div>`).join('') + '<div class="note">Details: 👁 Protokoll anzeigen / ⬇️ Herunterladen.</div>';
+  btn.disabled = false;
+}
+function showLog(toggle) {
+  const v = $('logView'); if (toggle) v.hidden = !v.hidden; if (v.hidden) return;
+  v.textContent = DCCall.log.text().split('\n').slice(-250).join('\n'); v.scrollTop = v.scrollHeight;
+}
+/* live line in ⚙ during a call: what the microphone / recogniser is doing right now */
+DCCall.log.on(e => {
+  if (!$('settingsSheet').hidden && !$('logView').hidden) showLog(false);
+  if (!S || S.ended || $('settingsSheet').hidden) return;
+  if (!['mic', 'stt', 'vad', 'state', 'turn'].includes(e.c)) return;
+  const d = $('diagLive'); d.hidden = false;
+  d.textContent = `Live: Zustand ${ENG ? ENG.state : '—'} · Mikrofon-Modus ${ENG && ENG.micMode || '—'} · letztes Ereignis: ${e.c} ${e.m}${e.d && e.d.text ? ' „' + e.d.text + '“' : ''}`;
+});
 
 /* ---------------- call UI helpers ---------------- */
 const STATUS = { IDLE: 'Bereit', CONNECTING: 'Verbinde …', LISTENING: 'Hört zu', USER_SPEAKING: 'Du sprichst …', PROCESSING: 'Denkt nach …', AI_SPEAKING: 'Spricht',
@@ -491,9 +561,12 @@ async function startCall(id, mode) {
   startCall.timer = setInterval(() => { const s = Math.floor((Date.now() - S.start) / 1000); $('callTimer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }, 1000);
   if (CS.selfView) startSelfView();
   loadLexicon();                                           // for word look-ups + pronunciation hints (in the background)
+  if (ENG && ENG.state !== 'SESSION_ENDED') try { ENG.end(); } catch (e) {}
+  DCCall.log.begin({ mission: mission.id, mode, level: ST.level, tutor: t.id, voice: voiceChoice(), avatar: CS.avatar, stt: CS.stt, micMode: CS.micMode,
+    keys: { openai: !!DCCall.keys.openai(), elevenlabs: !!DCCall.keys.elevenlabs(), simli: !!DCCall.keys.simli(), ai: aiOn() }, page: location.pathname });
   ENG = new DCCall.ConversationEngine({
     tutor: t, host: $('avatarHost'), level: () => ST.level,
-    settings: () => ({ voice: voiceChoice(), avatar: CS.avatar === 'simli' && DCCall.keys.simli() && CS.simliFace ? 'simli' : 'illustrated', stt: CS.stt, simliFace: CS.simliFace }),
+    settings: () => ({ voice: voiceChoice(), avatar: CS.avatar === 'simli' && DCCall.keys.simli() && CS.simliFace ? 'simli' : 'illustrated', stt: CS.stt, micMode: CS.micMode, simliFace: CS.simliFace }),
     sttPrompt: () => [mission.de, ...(S.script ? S.script.words.map(w => w.de) : [])].join(', '),
     ui: { state: uiState, level: uiLevel, notice: uiNotice, captionUser: (t2) => { $('capUser').textContent = t2 ? 'Du: ' + t2 : ''; },
       captionAI: aiCaption, metrics: (m, all) => store.set('dc_call_latency', all.slice(-20)),
@@ -715,6 +788,7 @@ async function endCall() {
   if (!S || S.ended) return; S.ended = true;
   clearInterval(startCall.timer);
   try { await ENG.end(); } catch (e) {}
+  DCCall.log.end();
   stopSelfView();
   $('callView').hidden = true; document.body.style.overflow = ''; $('wordPop').hidden = true;
   const mins = (Date.now() - S.start) / 60000;
@@ -792,7 +866,9 @@ document.addEventListener('click', async ev => {
   if (d.again) return startCall(S.mission.id, S.mode);
   if (d.home) { show('homeView'); return renderHome(); }
   if (d.openSettings) return openSettings();
-  if (d.set) { if (d.set === 'level') ST.level = d.val, saveST(); else CS[d.set] = d.val; saveKeys(); saveCS(); renderSettings(); if (S && d.set === 'conv' && S.mode !== 'guided') S.mode = d.val; return; }
+  if (d.set) { if (d.set === 'level') ST.level = d.val, saveST(); else CS[d.set] = d.val; saveKeys(); saveCS(); renderSettings(); if (S && d.set === 'conv' && S.mode !== 'guided') S.mode = d.val;
+    if (d.set === 'micMode' && d.val === 'stt-only' && ENG && S && !S.ended) ENG.sttTrouble('setting', 0);
+    return; }
   if (d.say) return sayText(d.say);
   if (d.slow) return sayText(d.slow, true);
   if (d.tr) {
@@ -812,14 +888,18 @@ document.addEventListener('click', async ev => {
 $('onbDone').onclick = () => { ST.profile = { goal: ONB.goal, min: ONB.min }; ST.level = ONB.level; saveST(); show('homeView'); renderHome(); };
 $('editProfile').onclick = () => { ONB = Object.assign({ goal: 'alltag', min: 10 }, ST.profile || {}, { level: ST.level }); renderOnb(); show('onbView'); };
 $('micBtn').onclick = () => { if (!ENG) return; const m = $('micBtn').getAttribute('aria-pressed') !== 'true'; ENG.setMuted(m); $('micBtn').setAttribute('aria-pressed', m); $('micBtn').setAttribute('aria-label', m ? 'Mikrofon einschalten' : 'Mikrofon stummschalten'); $('micBtn').firstChild.textContent = m ? '🔇' : '🎙️'; };
-$('spkBtn').onclick = () => { if (!ENG) return; const m = $('spkBtn').getAttribute('aria-pressed') !== 'true'; ENG.setVolume(m ? 0 : 1); $('spkBtn').setAttribute('aria-pressed', m); $('spkBtn').firstChild.textContent = m ? '🔈' : '🔊'; };
-$('pauseBtn').onclick = () => { if (!ENG) return; if (ENG.state === 'PAUSED') ENG.resume(); else ENG.pause(); };
+$('spkBtn').onclick = () => { if (!ENG) return; DCCall.log('ui', 'speaker button'); const m = $('spkBtn').getAttribute('aria-pressed') !== 'true'; ENG.setVolume(m ? 0 : 1); $('spkBtn').setAttribute('aria-pressed', m); $('spkBtn').firstChild.textContent = m ? '🔈' : '🔊'; };
+$('pauseBtn').onclick = () => { if (!ENG) return; DCCall.log('ui', 'pause button'); if (ENG.state === 'PAUSED') ENG.resume(); else ENG.pause(); };
 $('logBtn').onclick = () => openDrawer($('drawer').hidden);
 $('drawerClose').onclick = () => openDrawer(false);
 $('setBtn').onclick = openSettings;
 $('setClose').onclick = closeSettings;
 $('settingsSheet').addEventListener('click', e => { if (e.target === $('settingsSheet')) closeSettings(); });
 $('setTest').onclick = testConnections;
+$('micTestBtn').onclick = micTest;
+$('logShow').onclick = () => showLog(true);
+$('logCopy').onclick = async () => { try { await navigator.clipboard.writeText(DCCall.log.text()); $('logCopy').textContent = '✓ kopiert'; } catch (e) { showLog(true); $('logCopy').textContent = 'markieren + kopieren'; } setTimeout(() => { $('logCopy').textContent = '📋 Kopieren'; }, 2500); };
+$('logDl').onclick = () => DCCall.log.download();
 ['optSelf', 'optTa', 'optCaps'].forEach(id => $(id).onchange = () => { CS.selfView = $('optSelf').checked; CS.tamil = $('optTa').checked; CS.captions = $('optCaps').checked; saveCS();
   if (id === 'optSelf' && S && !S.ended) { if (CS.selfView) startSelfView(); else stopSelfView(); } });
 $('helpBtn').onclick = () => {

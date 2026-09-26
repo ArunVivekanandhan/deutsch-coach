@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v101';
+const CACHE_NAME = 'deutsch-coach-v102';
 const urlsToCache = [
   './',
   './index.html',
@@ -50,6 +50,7 @@ const urlsToCache = [
   './manifest.json',
   './js/call/audio-io.js',
   './js/call/avatar.js',
+  './js/call/call-log.js',
   './js/call/call-state.js',
   './js/call/conversation.js',
   './js/call/pcm-capture-worklet.js',
