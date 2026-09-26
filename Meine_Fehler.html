@@ -110,13 +110,14 @@ function drawItem() {
     ${it.kind === 'choice'
       ? `<div id="opts">${shuffle(it.options.length ? it.options : [it.answer]).map(o => `<button type="button" class="opt" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>`
       : `${M.inputHTML(it.answer, 'ans')}
-         <div class="row"><button type="button" class="btn primary" id="chk">Prüfen</button><button type="button" class="btn" id="show">👁 Weiß ich nicht</button></div>`}
+         <div class="row"><button type="button" class="btn primary" id="chk">Prüfen</button><button type="button" class="btn" id="show">👁 Weiß ich nicht</button><button type="button" class="btn" id="skipI">⏭ Anderer Satz</button></div>`}
     <div id="res"></div></div>`;
   if (it.kind !== 'choice') {
     if (!$('ans').readOnly) $('ans').focus();
     $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chk').click(); } });
     $('chk').onclick = () => { const v = $('ans').value.trim(); if (v) result(it, M.check(v, it), v); };
     $('show').onclick = () => result(it, { ok: false, note: '' }, '');
+    $('skipI').onclick = () => { const x = R.list.splice(R.k, 1)[0]; if (!x.skipped) R.list.push(Object.assign({}, x, { skipped: true })); drawItem(); };   // later, not graded
   }
 }
 function result(it, r, given) {

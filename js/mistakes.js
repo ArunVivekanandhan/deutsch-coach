@@ -183,7 +183,7 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
       <div class="q">${escH(it.q)}</div>
       ${opts ? `<div>${opts.map(o => `<button type="button" class="o" data-mfo="${escH(o)}">${escH(o)}</button>`).join('')}</div>`
              : `${inputHTML(it.answer, 'dcMfIn')}
-                <div class="r"><button type="button" class="dcmf-b p" data-mf="chk">Prüfen</button><button type="button" class="dcmf-b" data-mf="dunno">👁 Weiß ich nicht</button><button type="button" class="dcmf-b" data-mf="close">Schließen</button></div>`}
+                <div class="r"><button type="button" class="dcmf-b p" data-mf="chk">Prüfen</button><button type="button" class="dcmf-b" data-mf="dunno">👁 Weiß ich nicht</button><button type="button" class="dcmf-b" data-mf="skip">⏭ Anderer Satz</button><button type="button" class="dcmf-b" data-mf="close">Schließen</button></div>`}
       <div id="dcMfRes"></div>`;
     const ta = document.getElementById('dcMfIn');
     if (ta) { if (!ta.readOnly) ta.focus(); ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); result(check(ta.value, it), ta.value); } }); }
@@ -224,6 +224,7 @@ textarea.dcmf-in{font:inherit;font-size:17px;width:100%;min-height:60px;padding:
       if (a === 'chk') { const ta = document.getElementById('dcMfIn'); if (ta && ta.value.trim()) result(check(ta.value, P.q[P.k]), ta.value); return; }
       if (a === 'dunno') return result({ ok: false, note: '' }, '');
       if (a === 'next') { P.k++; P.shown = -1; return draw(); }
+      if (a === 'skip') { if (P.shown === P.k) return; const it = P.q.splice(P.k, 1)[0]; if (!it.skipped) P.q.push(Object.assign({}, it, { skipped: true })); P.shown = -1; return draw(); }
     });
     document.addEventListener('change', e => { if (e.target && e.target.name === 'dcmfmode') { try { localStorage.setItem(MODE_KEY, e.target.value); } catch (x) {} if (e.target.value === 'off') setTimeout(hideSheet, 400); } });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (document.getElementById('dcMfOv')) close(); else hideSheet(); } });

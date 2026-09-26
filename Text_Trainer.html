@@ -189,9 +189,11 @@ function drawSent() {
     <textarea class="in" id="ans" placeholder="Auf Deutsch schreiben …" autocapitalize="sentences" spellcheck="false"></textarea>
     <div id="hintBox"></div>
     <div class="row"><button type="button" class="btn primary" id="check">Prüfen (Strg+Enter)</button>
+      <button type="button" class="btn" id="skipS" title="Diesen Satz später — kommt am Ende noch einmal">⏭ Anderer Satz</button>
       <button type="button" class="btn" id="h1">💡 Skelett</button><button type="button" class="btn" id="h2">🧩 Wörter</button><button type="button" class="btn" id="h3">👁 Lösung</button>
       <span class="muted">Hilfen kosten nichts — aber versuch es zuerst allein.</span></div>
     <div id="res"></div></div>`;
+  $('skipS').onclick = () => { if (S.done) return; const i2 = S.idx.splice(S.k, 1)[0]; if (!S.skipped) S.skipped = new Set(); if (!S.skipped.has(i2)) { S.skipped.add(i2); S.idx.push(i2); } drawSent(); };
   $('ans').focus();
   $('ans').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('check').click(); } });
   $('h1').onclick = () => { S.hint = Math.max(S.hint, 1); $('hintBox').innerHTML = `<div class="skel">💡 ${esc(s.skel)}</div>${s.focus ? `<div class="focus" style="margin-top:6px;">${esc(s.focus)}</div>` : ''}`; };
@@ -453,9 +455,10 @@ function drawJoin() {
     <div class="muted">Satz ${J.k + 1} / ${J.list.length} · ✅ ${J.right} · Verbinde die zwei Sätze mit dem Konnektor.</div>
     <div class="en-big">${esc(j.a)} ${esc(j.b)}</div><div>➕ <span class="skel" style="display:inline-block; padding:3px 10px;"><b>${esc(j.c)}</b></span></div>
     <textarea class="in" id="jIn" placeholder="Ein Satz …" spellcheck="false"></textarea>
-    <div class="row"><button type="button" class="btn primary" id="jCheck">Prüfen (Strg+Enter)</button><button type="button" class="btn" id="jHint">💡 Tipp</button></div><div id="jRes"></div>`;
+    <div class="row"><button type="button" class="btn primary" id="jCheck">Prüfen (Strg+Enter)</button><button type="button" class="btn" id="jHint">💡 Tipp</button><button type="button" class="btn" id="jSkip">⏭ Anderer Satz</button></div><div id="jRes"></div>`;
   $('jIn').focus();
   $('jIn').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('jCheck').click(); } });
+  $('jSkip').onclick = () => { if (J.done) return; const it = J.list.splice(J.k, 1)[0]; if (!it.skipped) J.list.push(Object.assign({}, it, { skipped: true })); drawJoin(); };
   $('jHint').onclick = () => { $('jRes').innerHTML = `<div class="focus">💡 ${esc(j.why)}</div>`; };
   $('jCheck').onclick = () => {
     const v = $('jIn').value.trim(); if (!v) return;

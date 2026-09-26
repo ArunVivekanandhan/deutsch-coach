@@ -193,11 +193,13 @@ function nextQ() {
     <div style="font-size:17px; font-weight:700;">🇬🇧 ${esc(q.en)}</div>
     <div class="muted">Welcher deutsche Satz passt zum Bild?</div>
     <div id="opts">${B.shuffle(q.options).map(o => `<button type="button" class="opt" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+    <div class="row" style="margin-top:4px;"><button type="button" class="btn" id="qSkip">⏭ Anderes Bild</button></div>
     <div id="qres"></div></div>`;
+  $('qSkip').onclick = () => { if (!Q.done) nextQ(); };   // a different picture, not counted (Task 74)
 }
 function answer(btn) {
   if (Q.done) return; Q.done = true;
-  const q = Q.cur, ok = btn.dataset.opt === q.answer;
+  const q = Q.cur, ok = btn.dataset.opt === q.answer; if ($('qSkip')) $('qSkip').hidden = true;
   document.querySelectorAll('#opts .opt').forEach(b => { b.disabled = true; if (b.dataset.opt === q.answer) b.classList.add('right'); });
   if (ok) Q.right++; else {
     btn.classList.add('wrong');

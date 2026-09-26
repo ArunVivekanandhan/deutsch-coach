@@ -211,6 +211,7 @@
   }
   .bigbtn:active{transform:translateY(2px); box-shadow:0 2px 0 #0d1525;}
   .bigbtn.secondary{background:var(--red); box-shadow:0 4px 0 var(--red-dark);}
+  .bigbtn.quiet{background:var(--card); color:var(--ink); border:1.5px solid var(--line); box-shadow:none; font-size:14px;}
 
   .stats-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px; text-align:center; } @media (max-width: 480px) { .stats-row { grid-template-columns:repeat(2,1fr); } }
   .stat-card{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:8px 4px;}
@@ -2858,6 +2859,7 @@ function renderDrillView(container){
 
         <div style="display:flex; gap:8px; margin-top:14px;">
           <button class="bigbtn" id="nextDrillBtn" style="display:none; flex:2;" onclick="advanceDrill()">Next Question ➡️</button>
+          <button class="bigbtn quiet" id="skipDrillBtn" style="flex:1;" onclick="skipDrill()" title="Eine andere Frage — zählt nicht">⏭ Andere Frage</button>
           <button class="bigbtn secondary" id="finishDrillBtn" style="display:none; flex:1;" onclick="showSessionSummary()">🏁 Finish Session</button>
         </div>
       </div>
@@ -2894,6 +2896,7 @@ function renderDrillView(container){
 
       <div style="display:flex; gap:8px; margin-top:14px;">
         <button class="bigbtn" id="nextDrillBtn" style="display:none; flex:2;" onclick="advanceDrill()">Next Question (Generate New) ➡️</button>
+          <button class="bigbtn quiet" id="skipDrillBtn" style="flex:1;" onclick="skipDrill()" title="Eine andere Frage — zählt nicht">⏭ Andere Frage</button>
         <button class="bigbtn secondary" id="finishDrillBtn" style="display:none; flex:1;" onclick="showSessionSummary()">🏁 Finish Session</button>
       </div>
     </div>
@@ -3004,7 +3007,7 @@ function checkBuildAnswer(){
     <div id="aiExplainBox" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:12px;"></div>
   ${!isCorrect && window.DCExplain ? DCExplain.feedback(userSentence, correctSentence) : ''}`;
 
-  document.getElementById("nextDrillBtn").style.display = "block";
+  document.getElementById("nextDrillBtn").style.display = "block"; { const sk = document.getElementById("skipDrillBtn"); if (sk) sk.style.display = "none"; }
   document.getElementById("finishDrillBtn").style.display = "block";
 }
 
@@ -3061,7 +3064,7 @@ function checkAnswer(chosenIdx){
     <div id="aiGenStatus" style="display:none; margin-top:8px; padding:8px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:11.5px; color:var(--ink-soft);"></div>
   `;
 
-  document.getElementById("nextDrillBtn").style.display = "block";
+  document.getElementById("nextDrillBtn").style.display = "block"; { const sk = document.getElementById("skipDrillBtn"); if (sk) sk.style.display = "none"; }
   document.getElementById("finishDrillBtn").style.display = "block";
 }
 
@@ -3071,6 +3074,13 @@ function retryCurrentQuestion(){
   renderContent();
 }
 
+/* a different question without answering (not counted) — Task 74 */
+function skipDrill(){
+  if(drillAnswered) return;
+  currentQuestion = generateInfiniteQuestion(selectedRuleId);
+  buildSlots = [];
+  renderContent();
+}
 function advanceDrill(){
   if(!endlessMode && drillStats.total >= 10){
     showSessionSummary();

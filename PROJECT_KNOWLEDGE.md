@@ -765,6 +765,17 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 74) — "⏭ Anderer Satz" in every sentence exercise
+User: "Need option for new sentence."
+- New skip button (not counted as wrong; the skipped item comes back once at the end where the page has a fixed list):
+  Zeitreise "Sätze üben" (#skipQ), Text-Trainer "Satz für Satz" (#skipS) and Crashkurs "Sätze verbinden" (#jSkip),
+  Bild-Quiz "⏭ Anderes Bild" (#qSkip), quick-practice popup (data-mf="skip", typed items), Meine Fehler (#skipI),
+  Grammatik-Regel-Trainer drill "⏭ Andere Frage" (skipDrill(), quiet outline style `.bigbtn.quiet`).
+- Every skip button is hidden once the item is answered (then "Weiter" leads on). Satzbau had it since Task 73;
+  Hörverstehen already had "Weiter (Next)".
+- Bug found while testing: Zeitreise's click delegation selector did not list #skipQ; added.
+- Browser-tested at 390/1100 px (22 checks), smoke 34 pages, build OK.
+
 ### 2026-09-26 (Task 73) — Satzbau: "Neu" did not give a new sentence
 User: "In Satzbau-Trainer, 🧩 Bauen → I clicked Neu, it does not change to a new sentence."
 - Cause: the build mode's "↺ Neu" only put the blocks back and reshuffled them (and did nothing after checking).
