@@ -765,6 +765,21 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 81) — 🌐 EN also switches the new explanations (Konnektoren + grammar sentence types)
+User: "Why is the translation in German? I selected English" (weil panel: note, "Nebensatz hinten" …).
+- Cause: the DE/EN switch (js/ui-i18n.js) only translates fixed UI labels by exact match; the new explanation texts
+  from Tasks 76–80 were German only.
+- Mechanism: `<html data-ui-lang="de|en">` (set synchronously in app-shell.js and by ui-i18n markLang(); setLang()
+  also fires a `dc-lang` event). Bilingual content = `<span class="l-de">…</span><span class="l-en">…</span>`, CSS
+  hides the other language — instant, also for panels that are already open. CSS lives in ui-i18n.js (injected) and
+  in the two pages.
+- English added: 34 connector notes (note_en), type headings/descriptions, generated position notes
+  (DCKonnNote(de, g, 'en') — phrase table P.de / P.en), the "bin" box, Sätze-bauen rule line / hint / intro /
+  messages (RULE_EN, GRP_EN), grammar sentence types (t_en, d_en for all 55; checker now requires them).
+- Also fixed: in a question after oder ("…, oder hat sie … vergessen?") the note said "Hilfsverb auf Position 2";
+  now "Hilfsverb vorne / auxiliary in front".
+- German example sentences stay German (they are the learning content). Browser-tested DE ↔ EN both ways, 390/1100 px.
+
 ### 2026-09-26 (Task 80, phase 1) — Grammatik-Regeln: every sentence type with ≥ 3 examples (all A1 rules)
 User: "After this is complete, make sure all other topics are also made clear with examples."
 - Audit: 42 rules, each with only 3 examples in total and one example per sub-type in its table (≈ 280 sub-types).

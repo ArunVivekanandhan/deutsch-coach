@@ -1,3 +1,4 @@
+try { document.documentElement.setAttribute('data-ui-lang', localStorage.getItem('dc_ui_lang') === 'en' ? 'en' : 'de'); } catch (e) {}   // bilingual blocks (Task 81)
 // =========================================================================
 // DEUTSCH COACH - GLOBAL APP SHELL (New Design Migration)
 // Dynamically renders the sidebar, header, and drawer across legacy pages

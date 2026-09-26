@@ -422,6 +422,8 @@ h1 {
   .kx-th { font-weight: 700; font-size: 14px; }
   .kx-td { font-size: 12px; color: var(--ink-soft); margin: 2px 0 2px; }
   .kx-end { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+
+  html:not([data-ui-lang="en"]) .l-en, html[data-ui-lang="en"] .l-de { display: none !important; }   /* Task 81 */
 </style>
   <link rel="stylesheet" href="css/design-system.css">
   <script src="./assets/js/gamification.js"></script>
@@ -474,10 +476,11 @@ h1 {
   <div class="grp" id="card-grp1" data-cat="grp1">
     <h2><span>Gruppe 1: Subordinierend (Nebensatz)</span> <span style="font-size:12px; color:var(--red); font-family:'IBM Plex Mono',monospace;">Verb ganz ans ENDE</span></h2>
     <div class="rule">💡 <b>RULE / REGEL:</b> After subordinating connectors, the conjugated verb moves to the <b>very end</b> of the subordinate clause (Verb am Ende). If the subordinate clause comes first, the main clause verb follows immediately after the comma (V2 inversion)!
-      <div class="kx-two">⚠️ <b>„Verb ans Ende“ gilt NUR im Nebensatz.</b> Der Hauptsatz behält seine eigene Regel (Verb auf Position 2).
-        Steht der Nebensatz <b>vorne</b>, ist er komplett <b>Position 1</b> → das Hauptsatz-Verb kommt <b>direkt nach dem Komma</b>:<br>
+      <div class="kx-two"><span class="l-de">⚠️ <b>„Verb ans Ende“ gilt NUR im Nebensatz.</b> Der Hauptsatz behält seine eigene Regel (Verb auf Position 2).
+        Steht der Nebensatz <b>vorne</b>, ist er komplett <b>Position 1</b> → das Hauptsatz-Verb kommt <b>direkt nach dem Komma</b>:</span><span class="l-en">⚠️ <b>“Verb to the end” applies ONLY inside the subordinate clause.</b> The main clause keeps its own rule (verb in position 2).
+        If the subordinate clause comes <b>first</b>, the whole clause is <b>position 1</b> → the main-clause verb comes <b>right after the comma</b>:</span><br>
         <span class="kx-slot">① <span class="conn">Weil</span> der Bus nicht <span class="verb">kam</span>,</span> <span class="kx-slot">② <span class="verb">bin</span></span> <span class="kx-slot">③ ich</span> <span class="kx-slot">… zu spät zur Arbeit <b>gekommen</b>.</span><br>
-        <small>„kam“ = Verb des weil-Satzes → am Ende. „bin … gekommen“ = Perfekt des Hauptsatzes: <b>bin</b> auf Position 2, <b>gekommen</b> ganz am Ende (Satzklammer).</small></div></div>
+        <small><span class="l-de">„kam“ = Verb des weil-Satzes → am Ende. „bin … gekommen“ = Perfekt des Hauptsatzes: <b>bin</b> auf Position 2, <b>gekommen</b> ganz am Ende (Satzklammer).</span><span class="l-en">“kam” = verb of the weil clause → at its end. “bin … gekommen” = Perfekt of the main clause: <b>bin</b> in position 2, <b>gekommen</b> at the very end (sentence bracket).</span></small></div></div>
     <div class="conn-chips">
       <span class="conn-chip" style="color:var(--red)">weil (because)</span>
       <span class="conn-chip" style="color:var(--red)">da (since/as)</span>
@@ -687,7 +690,7 @@ h1 {
 
 <!-- 🧩 Sätze bauen (Task 76) — logic in js/konnektoren-build.js -->
 <div id="viewBuild" style="display:none;">
-  <div class="kb-intro">Bau ganze Sätze mit Konnektoren: 🇬🇧 → 🇩🇪 oder zwei Sätze verbinden. Wähle 🟢 Leicht (Wörter antippen), 🟡 Mittel oder 🔴 Schwer.</div>
+  <div class="kb-intro"><span class="l-de">Bau ganze Sätze mit Konnektoren: 🇬🇧 → 🇩🇪 oder zwei Sätze verbinden. Wähle 🟢 Leicht (Wörter antippen), 🟡 Mittel oder 🔴 Schwer.</span><span class="l-en">Build whole sentences with connectors: 🇬🇧 → 🇩🇪 or join two sentences. Choose 🟢 Easy (tap words), 🟡 Medium or 🔴 Hard.</span></div>
   <div id="kbBar"></div>
   <div class="quiz-card" id="kbCard"></div>
 </div>
@@ -953,25 +956,29 @@ if ('serviceWorker' in navigator) {
   const plain = t => t.replace(/[\[\]{}|]/g, '');
   const mark = (t, g) => esc(t).replace(/\[([^\]]+)\]/g, `<span class="${CLS[g]}">$1</span>`).replace(/\{([^}]+)\}/g, '<span class="verb">$1</span>').replace(/\|([^|]+)\|/g, '<span class="verb kx-end">$1</span>');
   /* sentence types (Task 79): each connector shows ≥ 3 examples per type */
+  /* both languages; the 🌐 DE/EN switch shows one of them (Task 81) */
+  const bi = (de, en) => `<span class="l-de">${esc(de)}</span><span class="l-en">${esc(en)}</span>`;
+  const KL = ['Hilfsverb / Modalverb auf Position 2, zweiter Verbteil ganz am Ende', 'Auxiliary / modal verb in position 2, second verb part at the very end'];
   const TYPES = {
-    grp1: [['hinten', '↪ Nebensatz hinten', 'Hauptsatz normal → im Nebensatz steht das Verb ganz am Ende', x => !x.de.startsWith('[')],
-           ['vorne', '↩ Nebensatz vorne', 'Der ganze Nebensatz ist Position 1 → das Hauptsatz-Verb kommt direkt nach dem Komma', x => x.de.startsWith('[')]],
-    grp2: [['einfach', '① Einfach', 'Konnektor (Pos. 1) → Verb (Pos. 2) → Subjekt', x => !x.de.includes('|')],
-           ['klammer', '② Mit Satzklammer', 'Hilfsverb / Modalverb auf Position 2, zweiter Verbteil ganz am Ende', x => x.de.includes('|')]],
-    grp3: [['einfach', '① Einfach', 'Konnektor (Pos. 0) → Subjekt → Verb — wie ein normaler Satz', x => !x.de.includes('|')],
-           ['klammer', '② Mit Satzklammer', 'Hilfsverb / Modalverb auf Position 2, zweiter Verbteil ganz am Ende', x => x.de.includes('|')]]
+    grp1: [['hinten', ['↪ Nebensatz hinten', '↪ Subordinate clause second'], ['Hauptsatz normal → im Nebensatz steht das Verb ganz am Ende', 'Normal main clause → in the subordinate clause the verb goes to the very end'], x => !x.de.startsWith('[')],
+           ['vorne', ['↩ Nebensatz vorne', '↩ Subordinate clause first'], ['Der ganze Nebensatz ist Position 1 → das Hauptsatz-Verb kommt direkt nach dem Komma', 'The whole subordinate clause is position 1 → the main-clause verb comes right after the comma'], x => x.de.startsWith('[')]],
+    grp2: [['einfach', ['① Einfach', '① Simple'], ['Konnektor (Pos. 1) → Verb (Pos. 2) → Subjekt', 'Connector (pos. 1) → verb (pos. 2) → subject'], x => !x.de.includes('|')],
+           ['klammer', ['② Mit Satzklammer', '② With sentence bracket'], KL, x => x.de.includes('|')]],
+    grp3: [['einfach', ['① Einfach', '① Simple'], ['Konnektor (Pos. 0) → Subjekt → Verb — wie ein normaler Satz', 'Connector (pos. 0) → subject → verb — like a normal sentence'], x => !x.de.includes('|')],
+           ['klammer', ['② Mit Satzklammer', '② With sentence bracket'], KL, x => x.de.includes('|')]]
   };
+  const noteHTML = (de, g) => { const d = window.DCKonnNote && DCKonnNote(de, g); return d ? `<span class="pos">${bi(d, DCKonnNote(de, g, 'en'))}</span>` : ''; };
   const exHTML = (x, g) => `<div class="ex"><div class="ex-top"><div><div class="en">${esc(x.en)}</div>${x.ta ? `<div class="ta" lang="ta">${esc(x.ta)}</div>` : ''}
-        <div class="de">${mark(x.de, g)}</div>${window.DCKonnNote && DCKonnNote(x.de, g) ? `<span class="pos">${esc(DCKonnNote(x.de, g))}</span>` : ''}</div><button type="button" class="audio-btn" data-kxsay="${esc(plain(x.de))}" aria-label="vorlesen">🔊</button></div></div>`;
+        <div class="de">${mark(x.de, g)}</div>${noteHTML(x.de, g)}</div><button type="button" class="audio-btn" data-kxsay="${esc(plain(x.de))}" aria-label="vorlesen">🔊</button></div></div>`;
   function panelHTML(key, label, g) {
     const e = EX[key]; if (!e) return '';
     return `<div class="kx-panel" data-kx="${esc(key)}" style="border-left-color:${COL[g]}">
       <h3><span style="color:${COL[g]}">${esc(label)}</span><span class="kx-lv">${esc(e.lv)}</span></h3>
-      <div class="kx-note">💡 ${esc(e.note)}</div>
-      ${TYPES[g] ? TYPES[g].map(([id, h, d, f]) => { const xs = e.ex.filter(f); return xs.length ? `<div class="kx-type" data-type="${id}"><div class="kx-th">${h} <span class="kx-n">(${xs.length})</span></div><div class="kx-td">${d}</div>${xs.map(x => exHTML(x, g)).join('')}</div>` : ''; }).join('')
+      <div class="kx-note">💡 ${bi(e.note, e.note_en || e.note)}</div>
+      ${TYPES[g] ? TYPES[g].map(([id, h, d, f]) => { const xs = e.ex.filter(f); return xs.length ? `<div class="kx-type" data-type="${id}"><div class="kx-th">${bi(h[0], h[1])} <span class="kx-n">(${xs.length})</span></div><div class="kx-td">${bi(d[0], d[1])}</div>${xs.map(x => exHTML(x, g)).join('')}</div>` : ''; }).join('')
         : e.ex.map(x => exHTML(x, g)).join('')}
-      ${key === 'sodass' ? '<div class="kx-td">ℹ️ sodass steht nie am Satzanfang — darum nur „Nebensatz hinten“.</div>' : ''}
-      <div class="kx-ai">Tamil KI-unterstützt 🤖 · Wortstellung automatisch geprüft</div></div>`;
+      ${key === 'sodass' ? `<div class="kx-td">ℹ️ ${bi('sodass steht nie am Satzanfang — darum nur „Nebensatz hinten“.', 'sodass never starts a sentence — so only “subordinate clause second”.')}</div>` : ''}
+      <div class="kx-ai">${bi('Tamil KI-unterstützt 🤖 · Wortstellung automatisch geprüft', 'Tamil AI-assisted 🤖 · word order checked automatically')}</div></div>`;
   }
   document.querySelectorAll('.grp').forEach(grp => {
     const g = grp.dataset.cat, row = grp.querySelector('.conn-chips'); if (!row) return;

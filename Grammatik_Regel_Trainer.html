@@ -382,6 +382,8 @@ html.dark-theme, body.dark {
   .sc-why{font-size:12.5px; color:var(--ink-soft); margin:0 0 6px;}
   .sc-hl{color:var(--red); }
   .sc-foot{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+
+  html:not([data-ui-lang="en"]) .l-en, html[data-ui-lang="en"] .l-de { display: none !important; }   /* Task 81 */
 </style>
   <link rel="stylesheet" href="css/design-system.css">
   <script src="./assets/js/gamification.js"></script>
@@ -2786,13 +2788,14 @@ function scenariosHTML(id){
   const types = (window.DC_GRAMMAR_SC || {})[id]; if(!types) return '';
   const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const mark = t => esc(t).replace(/\[([^\]]+)\]/g, '<b class="sc-hl">$1</b>');
+  const bi = (de, en) => `<span class="l-de">${esc(de)}</span><span class="l-en">${esc(en || de)}</span>`;   // 🌐 DE/EN (Task 81)
   return `<div class="filterlabel">📚 Beispiele nach Satztyp (mind. 3 pro Typ):</div>
-    <div class="sc-list">${types.map((t,i)=>`<details class="sc-type"${i===0?' open':''}><summary><b>${esc(t.t)}</b> <span class="sc-n">${t.ex.length}</span></summary>
-      <div class="sc-why">💡 ${esc(t.d)}</div>
+    <div class="sc-list">${types.map((t,i)=>`<details class="sc-type"${i===0?' open':''}><summary><b>${bi(t.t, t.t_en)}</b> <span class="sc-n">${t.ex.length}</span></summary>
+      <div class="sc-why">💡 ${bi(t.d, t.d_en)}</div>
       ${t.ex.map(x=>{ const plain = x.de.replace(/[\[\]]/g,''); return `<div class="example-item"><div><div class="example-de">${mark(x.de)}</div><div class="example-en">${esc(x.en)}</div></div>
         <button class="speak-btn" onclick="speakText('${escapeQuotes(plain)}')">🔊</button></div>`; }).join('')}
     </details>`).join('')}
-    <div class="sc-foot">${types.length} Satztypen · ${types.reduce((n,t)=>n+t.ex.length,0)} Beispiele · <a href="#" onclick="document.querySelectorAll('.sc-type').forEach(d=>d.open=true);return false;">alle öffnen</a></div></div>`;
+    <div class="sc-foot">${types.length} ${bi('Satztypen', 'sentence types')} · ${types.reduce((n,t)=>n+t.ex.length,0)} ${bi('Beispiele', 'examples')} · <a href="#" onclick="document.querySelectorAll('.sc-type').forEach(d=>d.open=true);return false;">${bi('alle öffnen', 'open all')}</a></div></div>`;
 }
 
 /* ---------------- 2. DRILL VIEW (INFINITE & INDEFINITE) ---------------- */

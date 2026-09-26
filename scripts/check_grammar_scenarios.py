@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Check js/grammar-scenarios.js (Grammatik-Regeln: sentence types with examples): every rule id exists in
-Grammatik_Regel_Trainer.html or js/grammar-rules-extra.js; every type has a title, a why-line and >= 3 examples;
+Grammatik_Regel_Trainer.html or js/grammar-rules-extra.js; every type has a title, a why-line (German + English)
+and >= 3 examples;
 each example has de + en, balanced [ ] markers, final punctuation (. ! ?), matches the type's `must` pattern (JS regex,
 flag u) and is not repeated within the rule; every A1 rule of the page has types (phase 1 of Task 80).
 Run: python3 scripts/check_grammar_scenarios.py"""
@@ -19,6 +20,7 @@ for (const [rid, types] of Object.entries(DC_GRAMMAR_SC)) {
   types.forEach((t, i) => {
     nt++; const tag = `${rid} / ${t.t || '#' + (i + 1)}`;
     if (!t.t || !t.d) errs.push(`${tag}: title or why-line missing`);
+    if (!t.t_en || !t.d_en) errs.push(`${tag}: English title / why-line missing (t_en, d_en)`);
     if (!Array.isArray(t.ex) || t.ex.length < 3) errs.push(`${tag}: only ${(t.ex || []).length} examples (need 3)`);
     let re = null; try { re = t.must ? new RegExp(t.must, 'u') : null; } catch (e) { errs.push(`${tag}: bad must regex`); }
     (t.ex || []).forEach((x, k) => {

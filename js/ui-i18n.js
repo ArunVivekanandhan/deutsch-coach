@@ -196,9 +196,15 @@
     watch();
   });
   const watch = () => { if (document.body) obs.observe(document.body, { childList: true, subtree: true, characterData: true }); };
-  function setLang(l) { try { localStorage.setItem('dc_ui_lang', l); } catch (e) {} obs.disconnect(); used = true; apply(); paintBtn(); watch(); }
+  /* bilingual content blocks (Task 81): <span class="l-de">…</span><span class="l-en">…</span> — only the chosen one shows */
+  function markLang() {
+    document.documentElement.setAttribute('data-ui-lang', lang());
+    if (!document.getElementById('dcLangCss')) { const st = document.createElement('style'); st.id = 'dcLangCss';
+      st.textContent = 'html:not([data-ui-lang="en"]) .l-en, html[data-ui-lang="en"] .l-de { display: none !important; }'; document.head.appendChild(st); }
+  }
+  function setLang(l) { try { localStorage.setItem('dc_ui_lang', l); } catch (e) {} obs.disconnect(); used = true; markLang(); apply(); paintBtn(); watch(); document.dispatchEvent(new CustomEvent('dc-lang', { detail: l })); }
   document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#dcLangBtn')) setLang(lang() === 'en' ? 'de' : 'en'); });
   window.dcUiLang = { get: lang, set: setLang, tr, apply };
-  const start = () => { apply(); paintBtn(); watch(); };
+  const start = () => { markLang(); apply(); paintBtn(); watch(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(start, 0)); else setTimeout(start, 0);
 })();

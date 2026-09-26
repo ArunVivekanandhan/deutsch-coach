@@ -13,7 +13,24 @@
   const ART = /^(der|die|das|den|dem|ein|eine|mein|meine|dein|deine|sein|seine|ihr|ihre|unser|unsere|niemand)$/i;
   const w = t => t.replace(/[\[\]{}|]/g, '');
   const q = t => `„${t}“`;
-  function note(de, g) {
+  /* phrases in German and English (Task 81) — note(de, g, 'en') for the English UI */
+  const P = {
+    de: { perf: 'Satzklammer {x}: Hilfsverb auf Position 2, Partizip II ans Ende', mod: 'Satzklammer {x}: Modalverb auf Position 2, Infinitiv ans Ende',
+          wer: 'Satzklammer {x}: werden auf Position 2, Infinitiv ans Ende', sep: 'trennbares Verb {x}: Vorsilbe ans Ende',
+          front: '① {sub} = der ganze Nebensatz ist Position 1 (Verb {sv} am Ende) → ② {v} = Verb auf Position 2 → ③ Subjekt {s}',
+          back: 'Hauptsatz zuerst (normale Wortstellung) → {c}-Teil: konjugiertes Verb {sv} ganz am Ende',
+          p1: '{c} = Position 1 → ② Verb {v} sofort danach → ③ Subjekt {s}', q0: '{c} = Position 0 → danach eine Frage: Verb {v} zuerst',
+          p0: '{c} = Position 0 (zählt nicht) → ① {p} → ② Verb {v}' },
+    en: { perf: 'sentence bracket {x}: auxiliary in position 2, past participle at the end', mod: 'sentence bracket {x}: modal verb in position 2, infinitive at the end',
+          wer: 'sentence bracket {x}: werden in position 2, infinitive at the end', sep: 'separable verb {x}: prefix goes to the end',
+          front: '① {sub} = the whole subordinate clause is position 1 (verb {sv} at its end) → ② {v} = verb in position 2 → ③ subject {s}',
+          back: 'Main clause first (normal word order) → {c} clause: conjugated verb {sv} at the very end',
+          p1: '{c} = position 1 → ② verb {v} right after it → ③ subject {s}', q0: '{c} = position 0 → then a question: verb {v} first',
+          p0: '{c} = position 0 (does not count) → ① {p} → ② verb {v}' }
+  };
+  const fill = (t, o) => t.replace(/\{(\w+)\}/g, (_, k) => o[k]);
+  function note(de, g, lang) {
+    const L = P[lang === 'en' ? 'en' : 'de'];
     const T = de.match(/\[[^\]]+\]|\{[^}]+\}|\|[^|]+\||[^\s,.?!|]+|[,.?!]/g) || [];
     const isV = t => t[0] === '{', isC = t => t[0] === '[', isP = t => ',.?!'.includes(t);
     const ci = T.findIndex(isC); if (ci < 0 || g === 'grp4') return '';
@@ -24,9 +41,10 @@
     const klammer = vi => {
       const e = end(vi), last = T[e - 1]; if (!last || last[0] !== '|') return '';
       const v = w(T[vi]), l = w(last), vl = v.toLowerCase();
-      if (PERF.includes(vl) && !PART.includes(l.toLowerCase())) return ` · Satzklammer ${q(v + ' … ' + l)}: Hilfsverb auf Position 2, Partizip II ans Ende`;
-      if (MOD.includes(vl)) return ` · Satzklammer ${q(v + ' … ' + l)}: ${/^(werde|wirst|wird|werden)$/.test(vl) ? 'werden' : 'Modalverb'} auf Position 2, Infinitiv ans Ende`;
-      return ` · trennbares Verb ${q(v + ' … ' + l)}: Vorsilbe ans Ende`;
+      const x = q(v + ' … ' + l);
+      if (PERF.includes(vl) && !PART.includes(l.toLowerCase())) return ' · ' + fill(L.perf, { x });
+      if (MOD.includes(vl)) return ' · ' + fill(/^(werde|wirst|wird|werden)$/.test(vl) ? L.wer : L.mod, { x });
+      return ' · ' + fill(L.sep, { x });
     };
     const C = w(T[ci]);
     if (g === 'grp1') {
@@ -34,15 +52,14 @@
       if (ci === 0) {                                       // Nebensatz first → it IS position 1
         const c = end(ci), vi = T.findIndex((t, i) => i > c && isV(t)); if (vi < 0) return '';
         const sub = T.slice(0, c).map(w).join(' ') + ',';
-        return `① ${q(sub)} = der ganze Nebensatz ist Position 1 (Verb ${q(sv)} am Ende) → ② ${q(w(T[vi]))} = Verb auf Position 2 → ③ Subjekt ${q(subj(vi + 1))}${klammer(vi)}`;
+        return fill(L.front, { sub: q(sub), sv: q(sv), v: q(w(T[vi])), s: q(subj(vi + 1)) }) + klammer(vi);
       }
-      return `Hauptsatz zuerst (normale Wortstellung) → ${q(C)}-Teil: konjugiertes Verb ${q(sv)} ganz am Ende`;
+      return fill(L.back, { c: q(C), sv: q(sv) });
     }
     const vi = T.findIndex((t, i) => i > ci && isV(t)); if (vi < 0) return '';
-    if (g === 'grp2') return `${q(C)} = Position 1 → ② Verb ${q(w(T[vi]))} sofort danach → ③ Subjekt ${q(subj(vi + 1))}${klammer(vi)}`;
-    if (vi === ci + 1) return `${q(C)} = Position 0 → danach eine Frage: Verb ${q(w(T[vi]))} zuerst${klammer(vi)}`;
-    const p1 = T.slice(ci + 1, vi).map(w).join(' ');
-    return `${q(C)} = Position 0 (zählt nicht) → ① ${q(p1)} → ② Verb ${q(w(T[vi]))}${klammer(vi)}`;
+    if (g === 'grp2') return fill(L.p1, { c: q(C), v: q(w(T[vi])), s: q(subj(vi + 1)) }) + klammer(vi);
+    if (vi === ci + 1) return fill(L.q0, { c: q(C), v: q(w(T[vi])) }) + klammer(vi).replace('auf Position 2', 'vorne').replace('in position 2', 'in front');   // question: verb first
+    return fill(L.p0, { c: q(C), p: q(T.slice(ci + 1, vi).map(w).join(' ')), v: q(w(T[vi])) }) + klammer(vi);
   }
   window.DCKonnNote = note;
 })();
