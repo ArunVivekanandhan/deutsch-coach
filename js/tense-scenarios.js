@@ -155,6 +155,7 @@ window.DC_TENSE_SCENARIOS = [
     de: ['Gestern habe ich mich sehr gefreut.', 'Heute freue ich mich sehr.', 'Morgen werde ich mich sehr freuen.'],
     en: ['Yesterday I was very happy.', 'Today I am very happy.', 'Tomorrow I will be very happy.'],
     ta: ['நேற்று நான் மிகவும் மகிழ்ந்தேன்.', 'இன்று நான் மிகவும் மகிழ்கிறேன்.', 'நாளை நான் மிகவும் மகிழ்வேன்.'],
+    alts: [['Gestern war ich sehr glücklich.', 'Gestern war ich sehr froh.'], ['Heute bin ich sehr glücklich.', 'Heute bin ich sehr froh.'], ['Morgen werde ich sehr glücklich sein.', 'Morgen bin ich sehr glücklich.']],
     wrong: 'Gestern bin ich mich sehr gefreut.', why: 'Reflexive verbs take haben: habe mich gefreut.' },
   { id: 'geschenk', verb: 'geben', past: 'perfekt', same: true, time: ['Gestern', 'Heute', 'Morgen'],
     de: ['Gestern hat sie mir ein Geschenk gegeben.', 'Heute gibt sie mir ein Geschenk.', 'Morgen wird sie mir ein Geschenk geben.'],

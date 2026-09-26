@@ -190,7 +190,7 @@ function finish(ok, extra) {
     DCMistakes.add({ src: 'zeitreise', href: 'Zeitreise_Trainer.html', q: s.en[i], hint: 'Übersetze ins Deutsche (' + ['Vergangenheit', 'Gegenwart', 'Zukunft'][i] + ').',
       answer: s.de[i], alts: i === 2 && typeof futAlt === 'function' && futAlt(s) ? [futAlt(s)] : [], why: s.why || '' });
   $('fb').innerHTML = `${ok ? '🌟 Richtig!' : '❌ Nicht ganz.'} ${extra || ''}<div style="margin-top:6px;"><b>${esc(s.de[i])}</b> <button type="button" class="zr-btn" data-say="${esc(s.de[i])}">🔊</button> <span class="tl-en">— ${esc(s.en[i])}</span></div>
-    <div class="tl-en" style="margin-top:4px;">${TENSE.map((t, k) => `${t.ic} ${esc(s.de[k])}`).join(' &nbsp;·&nbsp; ')}</div>`;
+    <div class="tl-en" style="margin-top:4px;">${TENSE.map((t, k) => `${t.ic} ${esc(s.de[k])}`).join(' &nbsp;·&nbsp; ')}</div>${!ok ? (window.DCExplain ? DCExplain.html(s.de[i]) : '') : ''}`;
   $('nextQ').hidden = false; $('nextQ').focus();
   if (ok) say(s.de[i]);
 }
@@ -210,7 +210,7 @@ function answerChoice(k) {
 function checkType() {
   if (cur.done) return;
   const v = norm($('typeIn').value), s = cur.s, alt = cur.i === 2 ? futAlt(s) : null;
-  const ok = v === norm(s.de[cur.i]) || (alt && v === norm(alt));
+  const ok = v === norm(s.de[cur.i]) || (alt && v === norm(alt)) || ((s.alts || [])[cur.i] || []).some(x => v === norm(x));   // other correct sentences (Task 69)
   let hint = '';
   if (!ok) {
     if (v === norm(s.wrong)) hint = esc(s.why);

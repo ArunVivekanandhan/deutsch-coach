@@ -209,7 +209,7 @@ function drawSent() {
     }
     $('res').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : r.score >= 80 ? `🙂 <b>Fast (${r.score} %)</b> — rot = fehlt / anders:` : `✏️ <b>${r.score} %</b> — so heißt es richtig (rot = fehlt bei dir):`}</div>
       ${diffHTML(r)}<div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div>
-      ${s.focus ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}
+      ${s.focus ? `<div class="focus">💡 ${esc(s.focus)}</div>` : ''}${r.perfect ? '' : (window.DCExplain ? DCExplain.html(r.ref) : '')}
       <div class="row"><button type="button" class="btn primary" id="next">Weiter →</button>${r.perfect ? '' : '<button type="button" class="btn" id="retry">Nochmal versuchen</button>'}</div>`;
     sayAuto(r.ref);
     $('next').onclick = () => { S.k++; drawSent(); };
@@ -308,7 +308,7 @@ function checkStep(i) {
   $('en' + i).classList.add(r.perfect ? 'done' : 'bad'); if (r.perfect) $('en' + i).classList.remove('bad');
   $('sr' + i).innerHTML = r.perfect ? `<div class="ok-line">🌟 <b>Perfekt!</b> ${esc(r.ref)}</div>`
     : `<div style="margin-top:4px;">✏️ <b>${r.score} %</b> — so heißt es richtig (rot = fehlt bei dir):</div>${diffHTML(r)}
-       <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div>${s.focus ? `<div class="focus">💡 Regel: ${esc(s.focus)}</div>` : ''}
+       <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div>${s.focus ? `<div class="focus">💡 Regel: ${esc(s.focus)}</div>` : ''}${(window.DCExplain ? DCExplain.html(r.ref) : '')}
        <div class="muted">Korrigiere den Satz oben und drück nochmal Enter (zählt nicht mehr für die Note).</div>`;
   const next = t.sentences.findIndex((_, k) => k > i && !(k in E.res));
   if (Object.keys(E.res).length === t.sentences.length) return finishSteps();
@@ -462,7 +462,7 @@ function drawJoin() {
     const r = compare(v, j);
     if (!J.done) { J.done = true; if (r.perfect) J.right++; else if (window.DCMistakes) DCMistakes.add({ src: 'crash', href: 'Text_Trainer.html', q: `${j.a} ${j.b} (${j.c})`, hint: 'Verbinde die zwei Sätze zu einem Satz.', answer: j.de, alts: j.alts, given: v, why: j.why }); }
     $('jRes').innerHTML = `<div style="margin-top:6px;">${r.perfect ? '🌟 <b>Perfekt!</b>' : `✏️ <b>${r.score} %</b> — rot = fehlt / anders:`}</div>${diffHTML(r)}
-      <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div><div class="focus">💡 ${esc(j.why)}</div>
+      <div class="muted">Muster: ${esc(r.ref)} <button type="button" class="btn" data-say="${esc(r.ref)}">🔊</button></div><div class="focus">💡 ${esc(j.why)}</div>${r.perfect ? '' : (window.DCExplain ? DCExplain.html(r.ref) : '')}
       <div class="row"><button type="button" class="btn primary" id="jNext">Weiter →</button></div>`;
     sayAuto(r.ref); $('jNext').onclick = () => { J.k++; drawJoin(); }; $('jNext').focus();
   };

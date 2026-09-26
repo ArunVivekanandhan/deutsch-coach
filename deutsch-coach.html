@@ -932,6 +932,7 @@
   <script src="js/tts-engine.js"></script>
     <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+<script src="js/mistakes.js"></script>
   <script src="js/german-conjugation.js"></script>
   <script src="js/memory-tips.js"></script>
   <script src="js/word-parts.js"></script>
@@ -2588,6 +2589,7 @@ function recordAnswer(uid, correct, qType) {
     p.box = 1;
     p.timesWrong = (p.timesWrong||0)+1;
     p.lastResult = "wrong";
+    if (window.DCMistakes) DCMistakes.addWord(ALL_CARDS.find(c => c.uid === uid), 'deutsch-coach.html');   // → Meine Fehler + "Jetzt üben?" (Task 69)
   }
   const days = BOX_SCHEDULE[p.box] !== undefined ? BOX_SCHEDULE[p.box] : 30;
   p.nextDue = addDaysISO(days === 0 ? 0 : days);

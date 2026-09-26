@@ -288,6 +288,7 @@ html.dark-theme, body.dark {
   <script src="js/tts-engine.js"></script>
     <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+<script src="js/mistakes.js"></script>
   <script src="js/memory-tips.js"></script>
   <script src="js/word-parts.js"></script>
 </head>
@@ -430,7 +431,9 @@ const COMPOUND_ROOTS_DB = {
 };
 
 
-function recordAnswer(uid, correct){ dcEngine.recordResult(uid, correct); }
+function recordAnswer(uid, correct){ dcEngine.recordResult(uid, correct);
+  if (!correct && window.DCMistakes) DCMistakes.addWord((NOUNS.find(x => x.uid === uid) || ADJS.find(x => x.uid === uid)), 'Adjektiv_Adverb_Trainer.html');   // → Meine Fehler + "Jetzt üben?" (Task 69)
+}
 function escapeQuotes(s){ return String(s||'').replace(/'/g, "\\'"); }
 
 document.getElementById('startBtn')?.addEventListener('click', startPractice);

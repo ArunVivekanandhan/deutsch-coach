@@ -184,6 +184,8 @@ window.dcNavHTML = dcNavHTML; window.dcBindNavSearch = dcBindNavSearch;
 (function dcLoadI18n() {
     if (document.querySelector('script[src$="ui-i18n.js"]')) return;
     const sc = document.createElement('script'); sc.src = 'js/ui-i18n.js'; (document.head || document.documentElement).appendChild(sc);
+    // "Satz erklärt" (grammar + word by word after a mistake) — js/sentence-explain.js loads the word list only when used
+    if (!document.querySelector('script[src$="sentence-explain.js"]')) { const se = document.createElement('script'); se.src = 'js/sentence-explain.js'; (document.head || document.documentElement).appendChild(se); }
 })();
 // Practice time per skill and day (Task 65, shown on Mein_Fortschritt.html): every 15 s the page is visible AND was
 // used in the last 60 s (tap, key, scroll) adds 15 s to dc_activity[YYYY-MM-DD][skill]. Skill = the page's menu group;

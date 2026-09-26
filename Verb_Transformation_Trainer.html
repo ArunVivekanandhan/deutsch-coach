@@ -383,6 +383,7 @@ html.dark-theme, body.dark {
   <script src="js/tts-engine.js"></script>
     <script src="js/progress-aggregator.js"></script>
   <script src="js/app-shell.js"></script>
+<script src="js/mistakes.js"></script>
   <script src="js/german-conjugation.js"></script>
   <script src="js/memory-tips.js"></script>
   <script src="js/word-parts.js"></script>
@@ -504,7 +505,9 @@ function testPronunciation(word){
   speak(word);
 }
 
-function recordAnswer(uid, correct){ dcEngine.recordResult(uid, correct); }
+function recordAnswer(uid, correct){ dcEngine.recordResult(uid, correct);
+  if (!correct && window.DCMistakes) DCMistakes.addWord(VERBS.find(x => x.uid === uid), 'Verb_Transformation_Trainer.html');   // → Meine Fehler + "Jetzt üben?" (Task 69)
+}
 function getProg(uid){ return dcEngine.getProg(uid); }
 const VERBS = DC_WORDS.VERBS;
 VERBS.forEach(v=> v.uid = v.level+'|'+v.inf);

@@ -765,6 +765,30 @@ a new feature to design, not an extension of this pattern.
 
 ## 28. AI Change History
 
+### 2026-09-26 (Task 69) — After every mistake: "Jetzt üben?" + the sentence explained (grammar + word by word)
+Requests: "In any page if I make a mistake, immediately a pop-up or mode asking to practise where I made the mistake"
++ "explain the sentence I got wrong — vocabulary breakdown (Gestern habe ich mich sehr gefreut) and which grammar it
+follows".
+- **Pop-up after a mistake** (js/mistakes.js, every page that records mistakes): a bottom panel "✏️ Fehler gemerkt ·
+  Richtig: … · 💡 rule" with **🔁 Jetzt üben (n)** / Später / 📒 Fehlerheft / ⚙️. "Jetzt üben" opens a quick practice
+  on the same page with this round's mistakes (type the sentence or pick the option; wrong ones come back once at the
+  end; does not change the spaced-review boxes). ⚙️ setting `dc_mf_mode`: fragen (default) · sofort üben (practice
+  opens by itself 1.6 s after the mistake) · nur speichern. Esc closes.
+- **Now also recording word mistakes**: Verben-, Nomen-, Adjektiv-Trainer (`recordAnswer(uid, false)`) and the home
+  flashcards → notebook item "English → German word (with article)" + forms (`DCMistakes.addWord`, source 🃏 Wörter).
+- **`js/sentence-explain.js`** (`DCExplain.into / html / analyse`, loaded by app-shell; loads js/lexicon.js and
+  js/german-conjugation.js only on first use): "🔎 Satz erklärt" box with the grammar points it detects — statement /
+  inversion (what is on position 1, verb on 2, subject after), yes/no and W-questions, Nebensatz (verb at the end) and
+  Nebensatz first, Perfekt with haben/sein + Partizip II at the end, Futur I, modal + infinitive, Präteritum of
+  sein/haben, separable verb, reflexive pronoun matching the subject, nicht/kein, prepositions with fixed case, two-way
+  prepositions (Wo/Wohin by the article), verbs with a fixed preposition (sprechen über + Akk …), zu + infinitive,
+  zu Hause, contractions — and a word-by-word table (meaning from the word lists / function words, form label such as
+  "Partizip II von sich freuen", position, Tamil 🤖 where known). Rule-based, no AI; unknown words show "–".
+- Shown under every wrong sentence: Zeitreise, Text-Trainer (Satz für Satz, Prüfung, Sätze verbinden), Satzbau,
+  Grammatik sentence building, Meine Fehler and the quick practice.
+- Zeitreise accepted only one answer: tense scenarios can now have `alts` per tense; "freuen" accepts
+  "Gestern war ich sehr glücklich/froh." etc. (the user's correct sentence had been marked wrong).
+
 ### 2026-09-26 (Task 68) — Satzbau: complete level test (A1 / A2 / B1, all topics together)
 Request: "complete test of grammar for sentence making … not only one topic, complete A1 together".
 - Satzbau-Trainer home: **📝 Level-Test** panel with A1-, A2-, B1-Test and a format choice (🧩 Bauen · ✍️ Schreiben

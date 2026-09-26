@@ -131,7 +131,7 @@ function result(it, r, given) {
       ${r.note ? `<div class="muted">✏️ ${esc(r.note)}</div>` : ''}
       ${it.why ? `<div class="why">💡 ${esc(it.why)}</div>` : ''}
       ${it.given ? `<div class="muted">Damals hattest du: „${esc(it.given)}“ · ${it.wrong}× falsch</div>` : ''}
-    </div><div class="row"><button type="button" class="btn primary" id="nx">Weiter →</button>${it.href ? `<a class="btn" href="${esc(it.href)}">Zur Übung</a>` : ''}</div>`;
+    </div>${!r.ok && / /.test(it.answer) && window.DCExplain ? DCExplain.html(it.answer) : ''}<div class="row"><button type="button" class="btn primary" id="nx">Weiter →</button>${it.href ? `<a class="btn" href="${esc(it.href)}">Zur Übung</a>` : ''}</div>`;
   $('nx').onclick = () => { R.k++; drawItem(); }; $('nx').focus();
 }
 /* ---------- list ---------- */
