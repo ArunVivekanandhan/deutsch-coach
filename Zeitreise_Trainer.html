@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Zeitreise — gestern · heute · morgen — Dein Deutsch-Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/design-system.css">
+<script src="js/tts-engine.js"></script>
+<script src="js/srs-engine.js"></script>
+<script src="js/progress-aggregator.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/word-data.js"></script>
+<script src="js/german-conjugation.js"></script>
+<script src="js/tense-scenarios.js"></script>
+<style>
+  .zr { max-width: 1000px; margin: 0 auto; padding: 8px 0 48px; display: flex; flex-direction: column; gap: 16px; }
+  .zr h1 { font-size: 27px; margin: 0; color: var(--color-ink); }
+  .zr .sub { margin: 2px 0 0; color: var(--color-ink-soft); font-size: 14.5px; line-height: 1.55; max-width: 72ch; }
+  .zr-tabs, .zr-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .zr-tab, .zr-chip { font: inherit; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .zr-tab { font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 10px; }
+  .zr-tab[aria-selected="true"] { border-color: var(--color-primary); color: var(--color-primary); box-shadow: inset 0 -3px 0 var(--color-primary); }
+  .zr-chip { font-size: 13px; padding: 6px 12px; border-radius: 999px; }
+  .zr-chip[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .zr-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); }
+  .zr-bridge { font-size: 14px; line-height: 1.6; }
+  .zr-bridge table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 14px; }
+  .zr-bridge td, .zr-bridge th { border-bottom: 1px solid var(--color-border); padding: 6px 8px; text-align: left; }
+  /* timeline */
+  .tl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; position: relative; }
+  .tl::before { content: ""; position: absolute; left: 4%; right: 2%; top: 17px; height: 3px; background: linear-gradient(90deg, #94a3b8, var(--color-primary), #16a34a); border-radius: 2px; }
+  .tl::after { content: "➤"; position: absolute; right: -2px; top: 6px; color: #16a34a; font-size: 18px; }
+  .tl-col { position: relative; display: flex; flex-direction: column; gap: 6px; padding-top: 34px; }
+  .tl-dot { position: absolute; top: 8px; left: 12px; width: 21px; height: 21px; border-radius: 50%; border: 3px solid var(--color-surface); box-shadow: 0 0 0 2px currentColor; background: currentColor; }
+  .tl-col.past { color: #64748b; } .tl-col.now { color: var(--color-primary); } .tl-col.fut { color: #16a34a; }
+  .tl-lbl { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .tl-de { font-size: 16px; font-weight: 700; color: var(--color-ink); line-height: 1.4; }
+  .tl-de b.v { color: #dc2626; } .tl-en { font-size: 13px; color: var(--color-ink-soft); } .tl-ta { font-size: 14px; color: var(--color-ink); }
+  .tl-alt { font-size: 12.5px; color: var(--color-ink-soft); }
+  .zr-cards { display: grid; gap: 14px; }
+  .zr-btn { font: inherit; font-size: 13px; padding: 4px 9px; border-radius: 999px; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); }
+  .zr-btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 10px; }
+  .zr-quiz { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+  .zr-q { font-size: 19px; font-weight: 700; color: var(--color-ink); line-height: 1.45; max-width: 640px; }
+  .zr-when { font-size: 30px; }
+  .zr-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; width: 100%; max-width: 760px; }
+  .zr-opt { font: inherit; font-size: 16px; font-weight: 600; padding: 12px 14px; border-radius: 12px; cursor: pointer; border: 2px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); text-align: left; line-height: 1.4; }
+  .zr-opt.ok { border-color: #16a34a; background: color-mix(in srgb, #16a34a 14%, var(--color-bg)); }
+  .zr-opt.no { border-color: #dc2626; background: color-mix(in srgb, #dc2626 12%, var(--color-bg)); }
+  .zr-tiles, .zr-built { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 48px; width: 100%; max-width: 760px; }
+  .zr-built { border: 2px dashed var(--color-border); border-radius: 12px; padding: 8px; }
+  .zr-tile { font: inherit; font-size: 16px; font-weight: 600; padding: 8px 12px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); }
+  .zr-input { font: inherit; font-size: 17px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); width: 100%; max-width: 640px; }
+  .zr-fb { font-size: 14.5px; line-height: 1.6; max-width: 700px; }
+  .zr-score { font-size: 13px; color: var(--color-ink-soft); }
+  .vt table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  .vt th, .vt td { border-bottom: 1px solid var(--color-border); padding: 8px; text-align: left; vertical-align: top; }
+  .vt th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--color-ink-soft); }
+  .vt td.form { font-weight: 700; color: var(--color-ink); }
+  .vt .tense { white-space: nowrap; }
+  .zr-select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-surface); color: var(--color-ink); max-width: 100%; }
+  .zr-note { font-size: 12px; color: var(--color-ink-soft); text-align: center; }
+  @media (max-width: 640px) { .tl { grid-template-columns: 1fr; } .tl::before, .tl::after { display: none; } .tl-col { padding-top: 0; padding-left: 34px; } .tl-dot { top: 4px; left: 4px; } .zr h1 { font-size: 23px; } }
+</style>
+</head>
+<body>
+<div class="zr">
+  <div>
+    <h1>⏳ Zeitreise: gestern · heute · morgen</h1>
+    <p class="sub">Derselbe Satz in drei Zeiten: <b>Gestern bin ich nach Chennai gefahren</b> · <b>Jetzt bin ich in Chennai</b> · <b>Nächste Woche werde ich nach Chennai fahren</b>. Dazu die Verb-Zeitmaschine: <i>ich hatte · ich habe · ich werde haben</i> — für jedes Verb und jede Person.</p>
+  </div>
+  <div class="zr-tabs" role="tablist">
+    <button type="button" class="zr-tab" role="tab" data-tab="learn" aria-selected="true">🕰️ Zeitstrahl</button>
+    <button type="button" class="zr-tab" role="tab" data-tab="practice" aria-selected="false">🎯 Sätze üben</button>
+    <button type="button" class="zr-tab" role="tab" data-tab="verbs" aria-selected="false">🔁 Verb-Zeitmaschine</button>
+  </div>
+
+  <div id="view-learn">
+    <div class="zr-box zr-bridge">
+      <b>So baut Deutsch die drei Zeiten</b> — the verb in position 2, the second verb part at the end:
+      <div style="overflow-x:auto;"><table>
+        <tr><th></th><th>Deutsch</th><th>English</th><th>தமிழ்</th></tr>
+        <tr><td>⬅️ Vergangenheit</td><td>Gestern <b>bin</b> ich nach Chennai <b>gefahren</b>. <span class="tl-en">(Perfekt: haben/sein + Partizip II)</span></td><td>I went</td><td lang="ta">போ<b>னே</b>ன்</td></tr>
+        <tr><td>⏺ Gegenwart</td><td>Jetzt <b>fahre</b> ich nach Chennai. <span class="tl-en">(Präsens)</span></td><td>I go / am going</td><td lang="ta">போ<b>கிறே</b>ன்</td></tr>
+        <tr><td>➡️ Zukunft</td><td>Morgen <b>werde</b> ich nach Chennai <b>fahren</b>. <span class="tl-en">(Futur I: werden + Infinitiv)</span> — or simply: Morgen <b>fahre</b> ich nach Chennai.</td><td>I will go</td><td lang="ta">போ<b>வே</b>ன்</td></tr>
+      </table></div>
+      <div style="margin-top:8px;">🇮🇳 Tamil marks the time inside the verb (போனேன் · போகிறேன் · போவேன்). German often needs a helper verb: <b>bin</b> … gefahren, <b>werde</b> … fahren — and the second part always goes to the <b>end</b>, just like the Tamil verb. <span lang="ta">தமிழில் காலம் வினைக்குள்ளேயே; ஜெர்மனில் துணை வினை (bin / werde) 2-ஆம் இடத்தில், முக்கிய வினை கடைசியில்.</span></div>
+      <div style="margin-top:6px;">📌 Spoken past = <b>Perfekt</b> (habe gemacht, bin gefahren). But <b>sein, haben</b> and the <b>modal verbs</b> use the short past even in speech: war, hatte, konnte, musste.</div>
+    </div>
+    <div class="zr-cards" id="cards"></div>
+  </div>
+
+  <div id="view-practice" hidden>
+    <div class="zr-row" id="modeChips"></div>
+    <div class="zr-box zr-quiz" id="quiz"></div>
+  </div>
+
+  <div id="view-verbs" hidden>
+    <div class="zr-box vt">
+      <div class="zr-row">
+        <label for="verbPick"><b>Verb:</b></label>
+        <input class="zr-select" id="verbPick" list="verbList" placeholder="z. B. haben, gehen, anrufen …" value="haben" style="flex:1 1 200px;">
+        <datalist id="verbList"></datalist>
+        <select class="zr-select" id="personPick" aria-label="Person"></select>
+        <button type="button" class="zr-btn" id="randVerb">🎲 Zufall</button>
+      </div>
+      <div id="verbTable" style="margin-top:12px;"></div>
+    </div>
+    <div class="zr-box zr-quiz" id="vquiz"></div>
+  </div>
+  <p class="zr-note">🔊 = Browser-Stimme · Sätze und Tamil KI-unterstützt erstellt 🤖 und geprüft · Verbformen aus der App-Wortliste (742 Verben).</p>
+</div>
+<script>
+const SC = window.DC_TENSE_SCENARIOS || [], EN = window.DC_TENSE_EN || {};
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = id => document.getElementById(id);
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+const store = { get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+const say = t => { try { if (typeof speak === 'function') speak(t); else { const u = new SpeechSynthesisUtterance(t); u.lang = 'de-DE'; speechSynthesis.cancel(); speechSynthesis.speak(u); } } catch (e) {} };
+const TENSE = [{ k: 'past', ic: '⬅️', de: 'Vergangenheit', en: 'past' }, { k: 'now', ic: '⏺', de: 'Gegenwart', en: 'present' }, { k: 'fut', ic: '➡️', de: 'Zukunft', en: 'future' }];
+const HELPERS = /^(bin|bist|ist|sind|seid|habe|hast|hat|haben|habt|werde|wirst|wird|werden|werdet|war|warst|waren|wart|hatte|hattest|hatten|hattet)$/i;
+/* the future can also be said with Präsens + a future time word (Morgen fahre ich …) */
+function futAlt(s) { if (!s.same) return null; const pres = s.de[1]; if (!pres.startsWith(s.time[1] + ' ')) return null; return s.time[2] + ' ' + pres.slice(s.time[1].length + 1); }
+/* mark the verb parts: 2nd position + last word when it is a participle / infinitive */
+function markVerbs(sentence, s, i) {
+  const t = s.time[i], rest = sentence.slice(t.length + 1).replace(/[.!?]$/, ''), end = sentence.match(/[.!?]$/) ? sentence.slice(-1) : '';
+  const w = rest.split(' '); const out = w.map(esc);
+  out[0] = `<b class="v">${out[0]}</b>`;
+  const last = w[w.length - 1], verbEnd = /^[a-zäöü]/.test(last) && /(en|ern|eln|t|sein)$/.test(last);   // participle / infinitive, never a noun
+  if (w.length > 2 && verbEnd && (HELPERS.test(w[0]) || /^(kann|kannst|können|konnte|musst|muss|musstest|wirst|wird|werde|werden|werdet)$/i.test(w[0]))) out[out.length - 1] = `<b class="v">${out[out.length - 1]}</b>`;
+  else if (w.length > 2 && /^(an|auf|ein|aus|mit|zu|zurück|vor|weg|fern)$/.test(w[w.length - 1])) out[out.length - 1] = `<b class="v">${out[out.length - 1]}</b>`;
+  return esc(t) + ' ' + out.join(' ') + end;
+}
+function renderCards() {
+  $('cards').innerHTML = SC.map(s => `<div class="zr-box"><div class="tl">${[0, 1, 2].map(i => `<div class="tl-col ${TENSE[i].k}"><span class="tl-dot" aria-hidden="true"></span>
+      <span class="tl-lbl">${TENSE[i].ic} ${TENSE[i].de}${i === 0 ? (s.past === 'praet' ? ' · Präteritum' : ' · Perfekt') : i === 1 ? ' · Präsens' : ' · Futur I'}</span>
+      <div class="tl-de">${markVerbs(s.de[i], s, i)} <button type="button" class="zr-btn" data-say="${esc(s.de[i])}" aria-label="anhören">🔊</button></div>
+      <div class="tl-en">🇬🇧 ${esc(s.en[i])}</div><div class="tl-ta" lang="ta">${esc(s.ta[i])}</div>
+      ${i === 2 && futAlt(s) ? `<div class="tl-alt">Auch richtig: ${esc(futAlt(s))}</div>` : ''}</div>`).join('')}</div>
+    <div class="zr-row" style="margin-top:8px; justify-content:space-between;"><span class="tl-en">⚠️ Typischer Fehler: <s>${esc(s.wrong)}</s> — ${esc(s.why)}</span>
+      <button type="button" class="zr-btn" data-seq="${esc(s.id)}">🔊 alle drei</button></div></div>`).join('');
+}
+/* ---------------- sentence practice ---------------- */
+const MODES = { mix: '🎲 Gemischt', when: '🕰️ Welche Zeit?', choose: '✅ Richtigen Satz wählen', build: '🧩 Satz bauen', type: '⌨️ Umformen (tippen)' };
+let pmode = 'mix', stat = store.get('dc_zr_stat', { right: 0, total: 0 }), cur = null;
+function renderModeChips() { $('modeChips').innerHTML = Object.entries(MODES).map(([k, v]) => `<button type="button" class="zr-chip" data-mode="${k}" aria-pressed="${pmode === k}">${v}</button>`).join(''); }
+const norm = x => String(x).toLowerCase().replace(/[.,!?;:„“"']/g, '').replace(/\s+/g, ' ').trim();
+function nextQ() {
+  const s = rnd(SC), i = Math.floor(Math.random() * 3), m = pmode === 'mix' ? rnd(['when', 'choose', 'choose', 'build', 'type']) : pmode;
+  cur = { s, i, m, done: false };
+  const head = `<div class="zr-score">✅ ${stat.right} / ${stat.total}</div>`;
+  if (m === 'when') {
+    cur.opts = [0, 1, 2];
+    $('quiz').innerHTML = head + `<div class="zr-q">${esc(s.de[i])} <button type="button" class="zr-btn" data-say="${esc(s.de[i])}">🔊</button></div><div class="tl-en">Wann passiert das?</div>
+      <div class="zr-opts">${TENSE.map((t, k) => `<button type="button" class="zr-opt" data-a="${k}" style="text-align:center;">${t.ic} ${t.de} <span class="tl-en">(${t.en})</span></button>`).join('')}</div>`;
+  } else if (m === 'choose') {
+    const alts = [...s.de, s.wrong]; cur.opts = shuffle(alts.map((x, k) => ({ x, k })));
+    $('quiz').innerHTML = head + `<div class="zr-when">${TENSE[i].ic}</div><div class="zr-q">🇬🇧 ${esc(s.en[i])}<div class="tl-ta" lang="ta" style="font-weight:400; margin-top:4px;">${esc(s.ta[i])}</div></div>
+      <div class="zr-opts">${cur.opts.map((o, k) => `<button type="button" class="zr-opt" data-a="${k}">${esc(o.x)}</button>`).join('')}</div>`;
+  } else if (m === 'build') {
+    const words = s.de[i].replace(/[.!?]$/, '').split(' ');
+    cur.target = words; cur.built = []; cur.tiles = shuffle(words.map((w, k) => ({ w, k })));
+    $('quiz').innerHTML = head + `<div class="zr-when">${TENSE[i].ic}</div><div class="zr-q">🇬🇧 ${esc(s.en[i])}<div class="tl-ta" lang="ta" style="font-weight:400; margin-top:4px;">${esc(s.ta[i])}</div></div>
+      <div class="tl-en">Tippe die Wörter in der richtigen Reihenfolge an (Zeitwort zuerst → Verb auf Position 2).</div>
+      <div class="zr-built" id="built" aria-live="polite"></div><div class="zr-tiles" id="tiles"></div>
+      <div class="zr-row" style="justify-content:center;"><button type="button" class="zr-btn" id="undo">↩️ zurück</button><button type="button" class="zr-btn primary" id="checkBuild">Prüfen</button></div>`;
+    drawTiles();
+  } else {
+    const from = i === 1 ? rnd([0, 2]) : 1;          // transform present → past/future, or past/future → present
+    cur.from = from;
+    $('quiz').innerHTML = head + `<div class="zr-q">${esc(s.de[from])} <button type="button" class="zr-btn" data-say="${esc(s.de[from])}">🔊</button></div>
+      <div class="zr-q" style="font-size:16px;">➜ ${TENSE[i].ic} ${TENSE[i].de}: beginne mit „<b>${esc(s.time[i])}</b>“ <span class="tl-en">(${esc(s.en[i])})</span></div>
+      <input class="zr-input" id="typeIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${esc(s.time[i])} …" aria-label="Deine Antwort">
+      <button type="button" class="zr-btn primary" id="checkType">Prüfen</button>`;
+    $('typeIn').focus(); $('typeIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('checkType').click(); });
+  }
+  $('quiz').insertAdjacentHTML('beforeend', `<div class="zr-fb" id="fb" aria-live="polite"></div><button type="button" class="zr-btn primary" id="nextQ" hidden>Weiter →</button>`);
+}
+function drawTiles() {
+  $('built').innerHTML = cur.built.map(t => `<span class="zr-tile" style="cursor:default;">${esc(t.w)}</span>`).join('');
+  $('tiles').innerHTML = cur.tiles.filter(t => !cur.built.includes(t)).map(t => `<button type="button" class="zr-tile" data-tile="${t.k}">${esc(t.w)}</button>`).join('');
+}
+function finish(ok, extra) {
+  cur.done = true; stat.total++; if (ok) stat.right++; store.set('dc_zr_stat', stat);
+  const s = cur.s, i = cur.i;
+  $('fb').innerHTML = `${ok ? '🌟 Richtig!' : '❌ Nicht ganz.'} ${extra || ''}<div style="margin-top:6px;"><b>${esc(s.de[i])}</b> <button type="button" class="zr-btn" data-say="${esc(s.de[i])}">🔊</button> <span class="tl-en">— ${esc(s.en[i])}</span></div>
+    <div class="tl-en" style="margin-top:4px;">${TENSE.map((t, k) => `${t.ic} ${esc(s.de[k])}`).join(' &nbsp;·&nbsp; ')}</div>`;
+  $('nextQ').hidden = false; $('nextQ').focus();
+  if (ok) say(s.de[i]);
+}
+function answerChoice(k) {
+  if (!cur || cur.done) return;
+  const btns = [...document.querySelectorAll('.zr-opt')]; btns.forEach(b => b.disabled = true);
+  if (cur.m === 'when') {
+    const ok = k === cur.i; btns[cur.i].classList.add('ok'); if (!ok) btns[k].classList.add('no');
+    finish(ok, ok ? '' : `Look at the time word „${esc(cur.s.time[cur.i])}“ and the verb.`);
+  } else {
+    const o = cur.opts[k], ok = o.k === cur.i;
+    btns.forEach((b, j) => { if (cur.opts[j].k === cur.i) b.classList.add('ok'); });
+    if (!ok) btns[k].classList.add('no');
+    finish(ok, ok ? '' : o.k === 3 ? `That sentence has a typical mistake: ${esc(cur.s.why)}` : `That is the ${TENSE[o.k].de} (${TENSE[o.k].en}) — we need the ${TENSE[cur.i].de}.`);
+  }
+}
+function checkType() {
+  if (cur.done) return;
+  const v = norm($('typeIn').value), s = cur.s, alt = cur.i === 2 ? futAlt(s) : null;
+  const ok = v === norm(s.de[cur.i]) || (alt && v === norm(alt));
+  let hint = '';
+  if (!ok) {
+    if (v === norm(s.wrong)) hint = esc(s.why);
+    else { const a = v.split(' '), b = norm(s.de[cur.i]).split(' '); const k = a.findIndex((w, j) => w !== b[j]); hint = k >= 0 ? `First difference at word ${k + 1}: you wrote „${esc(a[k] || '—')}“, expected „${esc(b[k] || '—')}“.` : 'Something is missing at the end.'; }
+  } else if (alt && v === norm(alt)) hint = 'Also correct (Präsens + future time word). With werden: ' + esc(s.de[2]);
+  $('typeIn').disabled = true; finish(ok, hint);
+}
+/* ---------------- verb time machine ---------------- */
+const P = typeof PERSONS !== 'undefined' ? PERSONS : ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie (Pl.)'];
+const EN_P = { 'ich': 'I', 'du': 'you', 'er/sie/es': 'he', 'wir': 'we', 'ihr': 'you (all)', 'sie (Pl.)': 'they' };
+const WERDEN = { 'ich': 'werde', 'du': 'wirst', 'er/sie/es': 'wird', 'wir': 'werden', 'ihr': 'werdet', 'sie (Pl.)': 'werden' };
+const HATTE = { 'ich': 'hatte', 'du': 'hattest', 'er/sie/es': 'hatte', 'wir': 'hatten', 'ihr': 'hattet', 'sie (Pl.)': 'hatten' };
+const WAR = { 'ich': 'war', 'du': 'warst', 'er/sie/es': 'war', 'wir': 'waren', 'ihr': 'wart', 'sie (Pl.)': 'waren' };
+const HAB = { 'ich': 'habe', 'du': 'hast', 'er/sie/es': 'hat', 'wir': 'haben', 'ihr': 'habt', 'sie (Pl.)': 'haben' };
+const SEI = { 'ich': 'bin', 'du': 'bist', 'er/sie/es': 'ist', 'wir': 'sind', 'ihr': 'seid', 'sie (Pl.)': 'sind' };
+const REFL = { 'ich': 'mich', 'du': 'dich', 'er/sie/es': 'sich', 'wir': 'uns', 'ihr': 'euch', 'sie (Pl.)': 'sich' };
+const VERBS = ((window.DC_WORDS || {}).VERBS || []).filter(v => v.inf && v.perfekt && v.praeteritum && !/\//.test(v.perfekt) && !/ sein$/.test(v.inf) && !/ /.test(v.inf.replace(/^sich /, '')));
+const findVerb = inf => VERBS.find(v => v.inf === inf) || VERBS.find(v => v.inf.replace(/^sich /, '') === inf);
+function forms(v, p) {
+  const reflexive = /^sich /.test(v.inf), core = v.inf.replace(/^sich /, '');
+  const pw = v.praeteritum.split(' '), pf = v.perfekt.split(' ');
+  const rp = w => w.map(x => x === 'sich' ? REFL[p] : x);
+  const aux = pf[0] === 'ist' ? 'sein' : 'haben';
+  const pres = praesensPhrase(v.inf, v.praeteritum, p);
+  const praet = [praeteritumWordForm(pw[0], p), ...substituteReflexive(pw.slice(1), p)].join(' ');
+  const perf = [(aux === 'sein' ? SEI : HAB)[p], ...rp(pf.slice(1))].join(' ');
+  const plq = [(aux === 'sein' ? WAR : HATTE)[p], ...rp(pf.slice(1))].join(' ');
+  const fut = [WERDEN[p], ...(reflexive ? [REFL[p]] : []), core].join(' ');
+  return { praet, perf, plq, pres, fut };
+}
+const third = w => w === 'have' ? 'has' : w === 'do' ? 'does' : w === 'go' ? 'goes' : /^(can|must|will)$/.test(w) ? w : /(s|sh|ch|x|o)$/.test(w) ? w + 'es' : /[^aeiou]y$/.test(w) ? w.slice(0, -1) + 'ies' : w + 's';
+function enForm(inf, t, p) {                                 // t: 0 past · 1 present · 2 future
+  const e = EN[inf.replace(/^sich /, '')]; if (!e) return '';
+  let f = e[t];
+  if (inf === 'sein') f = t === 0 ? (p === 'ich' || p === 'er/sie/es' ? 'was' : 'were') : t === 1 ? (p === 'ich' ? 'am' : p === 'er/sie/es' ? 'is' : 'are') : f;
+  else if (t === 1 && p === 'er/sie/es') f = f.split(' / ').map(x => { const w = x.split(' '); w[0] = third(w[0]); return w.join(' '); }).join(' / ');
+  return EN_P[p] + ' ' + f;
+}
+function renderVerbTable() {
+  const v = findVerb($('verbPick').value.trim()), p = $('personPick').value;
+  if (!v) { $('verbTable').innerHTML = '<p class="tl-en">Verb nicht in der Wortliste — wähle eines aus der Liste.</p>'; return; }
+  const f = forms(v, p), subj = p === 'er/sie/es' ? 'er' : p === 'sie (Pl.)' ? 'sie' : p;
+  const row = (ic, name, form, en, note) => `<tr><td class="tense">${ic} ${name}</td><td class="form">${esc(subj)} ${esc(form)} <button type="button" class="zr-btn" data-say="${esc(subj + ' ' + form)}">🔊</button></td><td class="tl-en">${esc(en)}${note ? `<div>${note}</div>` : ''}</td></tr>`;
+  $('verbTable').innerHTML = `<div class="tl-en" style="margin-bottom:6px;"><b>${esc(v.inf)}</b> = ${esc(v.en)}${v.ta ? ` · <span lang="ta">${esc(v.ta)}</span>` : ''} · Perfekt mit <b>${v.perfekt.split(' ')[0] === 'ist' ? 'sein' : 'haben'}</b></div>
+    <table><tr><th>Zeit</th><th>Deutsch</th><th>English</th></tr>
+    ${row('⬅️⬅️', 'Plusquamperfekt', f.plq, '', 'past before the past — "I had gone / had done" (Nachdem ich gegessen hatte, …)')}
+    ${row('⬅️', 'Präteritum', f.praet, enForm(v.inf, 0, p), 'written past; spoken for sein / haben / modals')}
+    ${row('⬅️', 'Perfekt', f.perf, enForm(v.inf, 0, p), 'spoken past')}
+    ${row('⏺', 'Präsens', f.pres, enForm(v.inf, 1, p), '')}
+    ${row('➡️', 'Futur I', f.fut, enForm(v.inf, 2, p), 'or Präsens + morgen / nächste Woche')}</table>`;
+}
+let vstat = { right: 0, total: 0 }, vcur = null;
+const VT = [{ k: 'praet', name: 'Präteritum', t: 0 }, { k: 'perf', name: 'Perfekt', t: 0 }, { k: 'pres', name: 'Präsens', t: 1 }, { k: 'fut', name: 'Futur I', t: 2 }];
+function nextVQ() {
+  const pool = Object.keys(EN).map(findVerb).filter(Boolean);
+  const v = rnd(pool), p = rnd(P), target = rnd(VT), f = forms(v, p), subj = p === 'er/sie/es' ? 'er' : p === 'sie (Pl.)' ? 'sie' : p;
+  const opts = shuffle(VT.map(t => ({ t, x: subj + ' ' + f[t.k] })).filter((o, i, a) => a.findIndex(q => q.x === o.x) === i));
+  vcur = { v, p, target, opts, done: false };
+  const en = enForm(v.inf, target.t, p);
+  $('vquiz').innerHTML = `<div class="zr-score">✅ ${vstat.right} / ${vstat.total}</div><div class="zr-when">${['⬅️', '⏺', '➡️'][target.t]}</div>
+    <div class="zr-q">🇬🇧 ${esc(en)} <span class="tl-en">(${esc(v.inf)} · ${target.name})</span></div>
+    <div class="zr-opts">${opts.map((o, k) => `<button type="button" class="zr-opt" data-va="${k}" style="text-align:center;">${esc(o.x)}</button>`).join('')}</div>
+    <div class="zr-fb" id="vfb" aria-live="polite"></div><button type="button" class="zr-btn primary" id="nextVQ" hidden>Weiter →</button>`;
+}
+function answerV(k) {
+  if (!vcur || vcur.done) return; vcur.done = true;
+  const o = vcur.opts[k], ok = o.t.k === vcur.target.k || (o.x === vcur.opts.find(q => q.t.k === vcur.target.k).x);
+  vstat.total++; if (ok) vstat.right++;
+  document.querySelectorAll('[data-va]').forEach((b, j) => { b.disabled = true; if (vcur.opts[j].t.k === vcur.target.k) b.classList.add('ok'); else if (j === k) b.classList.add('no'); });
+  const right = vcur.opts.find(q => q.t.k === vcur.target.k).x;
+  $('vfb').innerHTML = (ok ? '🌟 Richtig! ' : `❌ That is the ${o.t.name}. `) + `<b>${esc(right)}</b> <button type="button" class="zr-btn" data-say="${esc(right)}">🔊</button>`;
+  say(right); $('nextVQ').hidden = false; $('nextVQ').focus();
+}
+/* ---------------- wiring ---------------- */
+function setTab(t) {
+  document.querySelectorAll('.zr-tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  ['learn', 'practice', 'verbs'].forEach(x => { $('view-' + x).hidden = x !== t; });
+  if (t === 'practice' && !cur) nextQ();
+  if (t === 'verbs' && !vcur) { renderVerbTable(); nextVQ(); }
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-tab],[data-say],[data-seq],[data-mode],[data-a],[data-tile],[data-va],#nextQ,#checkBuild,#undo,#checkType,#nextVQ,#randVerb'); if (!b) return;
+  if (b.dataset.tab) return setTab(b.dataset.tab);
+  if (b.dataset.say) return say(b.dataset.say);
+  if (b.dataset.seq) { const s = SC.find(x => x.id === b.dataset.seq); if (typeof speakSequence === 'function') speakSequence(s.de, 500); else say(s.de.join(' ')); return; }
+  if (b.dataset.mode) { pmode = b.dataset.mode; renderModeChips(); return nextQ(); }
+  if (b.dataset.a) return answerChoice(+b.dataset.a);
+  if (b.dataset.va) return answerV(+b.dataset.va);
+  if (b.dataset.tile) { if (cur.done) return; cur.built.push(cur.tiles.find(t => t.k === +b.dataset.tile)); return drawTiles(); }
+  if (b.id === 'undo') { if (!cur.done) { cur.built.pop(); drawTiles(); } return; }
+  if (b.id === 'checkBuild') { if (cur.done) return; const got = cur.built.map(t => t.w); const ok = got.join(' ') === cur.target.join(' ');
+    return finish(ok, ok ? '' : got.length < cur.target.length ? 'Some words are still missing.' : 'Word order: time word → verb (position 2) → subject → … → second verb part at the end.'); }
+  if (b.id === 'checkType') return checkType();
+  if (b.id === 'nextQ') return nextQ();
+  if (b.id === 'nextVQ') return nextVQ();
+  if (b.id === 'randVerb') { $('verbPick').value = rnd(VERBS.filter(v => /A1|A2/.test(v.level || ''))).inf; return renderVerbTable(); }
+});
+document.addEventListener('keydown', e => { if (e.target.closest('input')) return; if (/^[1-4]$/.test(e.key)) { const b = document.querySelector(`#view-practice:not([hidden]) [data-a="${+e.key - 1}"], #view-verbs:not([hidden]) [data-va="${+e.key - 1}"]`); if (b) b.click(); } });
+$('verbList').innerHTML = VERBS.map(v => `<option value="${esc(v.inf)}">${esc(v.en)}</option>`).join('');
+$('personPick').innerHTML = P.map(p => `<option value="${esc(p)}">${esc(p === 'sie (Pl.)' ? 'sie (they) / Sie' : p)}</option>`).join('');
+$('verbPick').addEventListener('change', renderVerbTable); $('verbPick').addEventListener('input', () => { if (findVerb($('verbPick').value.trim())) renderVerbTable(); });
+$('personPick').addEventListener('change', renderVerbTable);
+renderCards(); renderModeChips();
+</script>
+</body>
+</html>

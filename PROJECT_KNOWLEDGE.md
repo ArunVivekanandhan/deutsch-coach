@@ -112,6 +112,7 @@ Deutsch_Coach_Project/
 ├── Verb_Transformation_Trainer.html        # Standalone verb Präsens→Vergangenheit trainer with Suite Hub
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
+├── Zeitreise_Trainer.html                  # Past / present / future practice + verb time machine (data: js/tense-scenarios.js)
 ├── Wort_Zwillinge.html                     # Look-alike / sound-alike words (Küche/Kuchen): learn cards + quiz (data: js/confusables.js)
 ├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
 ├── KI_Sprechpartner.html                   # Real-time AI video-call tutor (Task 48; engine in js/call/*, Simli SDK in js/vendor/)
@@ -759,6 +760,37 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 54) — Zeitreise-Trainer (past · present · future), 22 missing core verbs, Satzbau "Nebensatz zuerst + zu-Infinitiv"
+
+#### Task
+User: "Need one type of practice which contains past, present, future. Eg i went to Chennai, i am in Chennai and i
+will go Chennai next week. Also I had, have etc" + class sentence "Weil meine Familie für mich sehr wichtig ist,
+versuche ich jeden Tag mit ihnen zu sprechen" ("Do you have this kind of question also?").
+
+#### Done
+- **`Zeitreise_Trainer.html`** (sidebar + home Tools) + **`js/tense-scenarios.js`**: 32 situations, each as three
+  sentences that start with their time word (Gestern / Jetzt / Nächste Woche → verb in position 2), English + Tamil,
+  past = Perfekt (or Präteritum for sein/haben/modals), a typical mistake with explanation, `same` flag → "Morgen fahre
+  ich …" (Präsens + future time word) also accepted. Tabs: 🕰️ Zeitstrahl (timeline cards, verb parts in red, 🔊, Tamil
+  bridge: போனேன் / போகிறேன் / போவேன் vs bin gefahren / fahre / werde fahren) · 🎯 Sätze üben (Welche Zeit? · choose the
+  right sentence incl. the typical mistake · build from word tiles · transform by typing, with first-difference hint;
+  score in `dc_zr_stat`) · 🔁 Verb-Zeitmaschine (any of ~740 verbs, any person: Plusquamperfekt, Präteritum, Perfekt,
+  Präsens, Futur I built with js/german-conjugation.js + the Perfekt field; English "I had / have / will have" for 40
+  frequent verbs incl. he-forms; quiz English → German form).
+- **22 core verbs were missing from js/word-data.js** (anrufen, anfangen, einladen, abholen, ausgehen, aufräumen,
+  mitbringen, vorbereiten, ausfüllen, einsteigen, aussteigen, anziehen, sitzen, passieren, rennen, springen, setzen,
+  ziehen, schieben, zählen, lehren, korrigieren) — added with forms, Tamil 🤖, examples, pictures; home cards, lexicon,
+  word parts regenerated (+ root "Pass"); fill_home_forms.py filled the existing "sitzen" lesson card.
+- Satzbau: new topic **`nebensatzzu`** (B1, 10 sentences) — "Weil meine Familie für mich sehr wichtig ist, versuche ich
+  jeden Tag mit ihnen zu sprechen" and similar: subordinate clause first → verb + subject → zu-infinitive at the end.
+- `scripts/check_tense_scenarios.py` in build.py.
+
+#### Verified
+All 4 practice types answered correctly 12/12, alternative future accepted, verb quiz 12/12, forms for all verbs × 6
+persons without gaps, verb highlighting checked for all 96 sentences, 1100 + 390 px without horizontal scroll, no JS errors.
+
+---
 
 ### 2026-09-26 (Task 53) — Wort-Zwillinge: page for confusing words
 

@@ -1115,7 +1115,29 @@ window.DC_WORD_PICS = {
 "v|quietschen": "🐭",
 "v|wegräumen": "🧹",
 "v|einparken": "🅿️",
-"v|ausparken": "🚗"
+"v|ausparken": "🚗",
+"v|anrufen": "📞",
+"v|anfangen": "▶️",
+"v|einladen": "💌",
+"v|abholen": "🚗",
+"v|ausgehen": "🎉",
+"v|aufräumen": "🧹",
+"v|mitbringen": "🎁",
+"v|vorbereiten": "📋",
+"v|ausfüllen": "📝",
+"v|einsteigen": "🚌",
+"v|aussteigen": "🚏",
+"v|anziehen": "🧥",
+"v|sitzen": "🪑",
+"v|passieren": "❗",
+"v|rennen": "🏃",
+"v|springen": "🤸",
+"v|setzen": "🪑",
+"v|ziehen": "🪢",
+"v|schieben": "🛒",
+"v|zählen": "🔢",
+"v|lehren": "🧑‍🏫",
+"v|korrigieren": "✏️"
 };
 window.dcWordPic = function (cat, word) {
   const m = window.DC_WORD_PICS || {}; const c = cat === 'adj' ? 'a' : cat;
