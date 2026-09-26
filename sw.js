@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutsch-coach-v111';
+const CACHE_NAME = 'deutsch-coach-v112';
 const urlsToCache = [
   './',
   './index.html',
@@ -26,6 +26,7 @@ const urlsToCache = [
   './German_B1_Practice_Studio.html',
   './Uebersetzer.html',
   './Nomen_Trainer.html',
+  './Wort_Zwillinge.html',
   './German_A2_Practice_Studio.html',
   './Wortfamilien_Explorer.html',
   './KI_Sprechpartner.html',
@@ -41,6 +42,7 @@ const urlsToCache = [
   './js/grammar-tamil.js',
   './js/grammar-rules-extra.js',
   './js/word-pictures.js',
+  './js/confusables.js',
   './js/icon-svgs.js',
   './js/tamil-dict.js',
   './js/tts-engine.js',

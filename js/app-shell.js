@@ -128,6 +128,7 @@ function renderAppShell() {
                     <a href="index.html#coach" class="nav-link"><i data-lucide="bot" class="nav-icon" aria-hidden="true"></i> AI Coach</a>
                     <a href="index.html#tools" class="nav-link"><i data-lucide="wrench" class="nav-icon" aria-hidden="true"></i> Tools</a>
                     <a href="Uebersetzer.html" class="nav-link"><i data-lucide="languages" class="nav-icon" aria-hidden="true"></i> Übersetzer</a>
+                    <a href="Wort_Zwillinge.html" class="nav-link"><i data-lucide="copy" class="nav-icon" aria-hidden="true"></i> Wort-Zwillinge</a>
                     <a href="Einstellungen_Setup.html" class="nav-link"><i data-lucide="settings" class="nav-icon" aria-hidden="true"></i> AI Config & Settings</a>
                 </div>
                 <div class="nav-group" aria-labelledby="level-nav-title">

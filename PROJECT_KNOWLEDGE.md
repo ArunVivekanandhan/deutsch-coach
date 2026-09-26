@@ -112,6 +112,7 @@ Deutsch_Coach_Project/
 ├── Verb_Transformation_Trainer.html        # Standalone verb Präsens→Vergangenheit trainer with Suite Hub
 ├── Nomen_Trainer.html                      # Standalone noun-plural trainer with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
 ├── Adjektiv_Adverb_Trainer.html            # Standalone adjective-comparison trainer, grouped by semantic category, with Suite Hub (split from Nomen_Adjektiv_Trainer.html)
+├── Wort_Zwillinge.html                     # Look-alike / sound-alike words (Küche/Kuchen): learn cards + quiz (data: js/confusables.js)
 ├── Satzbau_Trainer.html                    # Word-order trainer (data: js/satzbau-data.js, check: scripts/check_satzbau.py)
 ├── KI_Sprechpartner.html                   # Real-time AI video-call tutor (Task 48; engine in js/call/*, Simli SDK in js/vendor/)
 ├── Continuous_Verb_Speaker.html            # Standalone audio loop verb speaker with Suite Hub
@@ -758,6 +759,26 @@ a new feature to design, not an extension of this pattern.
    contains several such flags; add more rather than silently guessing.
 
 ## 28. AI Change History
+
+### 2026-09-26 (Task 53) — Wort-Zwillinge: page for confusing words
+
+#### Task
+User: "Need one page to get comfort on confusing word. Example Kitchen and Cake similar in german".
+
+#### Done
+- **`Wort_Zwillinge.html`** (linked in the sidebar and home Tools) + **`js/confusables.js`** (`DC_CONFUSABLES`,
+  39 groups, 94 words): look alike (Küche/Kuchen/kochen, Kirche/Kirsche, schön/schon, zahlen/zählen/erzählen,
+  drücken/drucken, Tasche/Tasse/Taste …), sound alike (Stadt/Staat/statt, Rat/Rad, mehr/Meer/Mehl, vier/für,
+  Tür/Tier …), same word other article (der/die See, der/die Leiter, das/die/der Band, der/das Teil), English false
+  friends (bekommen, Gift, wer/wo, also, Handy, Chef), similar meaning (kennen/wissen/können, lernen/lehren,
+  leihen/mieten, stellen/stehen/legen/liegen …). Each word: picture, article colour, English, Tamil, example (🔊);
+  each group: "🔊 Unterschied hören" (all words one after the other) and a tip in English + Tamil.
+- Quiz: picture + English/Tamil → pick the word, or (35 %) listen → pick the written word; options = the group's
+  words; mistakes stored in `dc_wz_hard` (group → count; a right answer lowers it), half of the questions come from
+  the difficult groups, filter "🔥 Schwierig"; keys 1–4 answer.
+- `scripts/check_confusables.py` (build.py): ids, types, ≥ 2 words, all fields, Tamil script.
+
+---
 
 ### 2026-09-26 (Task 52) — All missing grammar concepts added (42 rules, A1 → B2)
 
